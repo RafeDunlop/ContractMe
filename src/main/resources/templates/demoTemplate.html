@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+        <title>Form Demo</title>
+        <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    </head>
+    <body>
+    <div class="container mt-5">
+        <div class="jumbotron text-center">
+            <h4 class="display-4">Welcome to SENG302</h4>
+            <p class="lead" th:text="'Hello, ' + ${name} + '!'"></p>
+        </div>
+
+        <div class="d-flex justify-content-center">
+            <div class="btn-group-vertical">
+                <a th:href="@{form}" class="btn btn-primary mb-2">View an Interactive Form Example</a>
+                <a th:href="@{fragments/main}" class="btn btn-secondary mb-2">View a Fragment Example</a>
+                <a th:href="@{todo}" class="btn btn-outline-secondary mb-2">View the Note Exercise</a>
+            </div>
+        </div>
+    </div>
+    </body>
+</html>

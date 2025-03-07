@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+    <title>Thymeleaf Spring Boot Demo</title>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="card p-4 shadow-sm">
+        <h4 class="card-title mb-4">Please fill out the form</h4>
+        <form th:action="@{form}" method="post">
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label>
+                <input type="text" class="form-control" id="name" placeholder="Name"
+                       th:name="name" th:value="*{name}" data-cy="name" required autofocus>
+            </div>
+            <div class="mb-3">
+                <label for="favouriteLanguage" class="form-label">Your favourite programming language:</label>
+                <input type="text" class="form-control" id="favouriteLanguage" placeholder="Java?"
+                       th:name="favouriteLanguage" th:value="*{favouriteLanguage}" data-cy="favouriteLanguage" required autofocus>
+            </div>
+            <!-- Error Messages -->
+            <div th:if="${errorMessage != null and #strings.trim(errorMessage) != ''}" class="alert alert-danger mt-3" role="alert">
+                <span th:text="${errorMessage}"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit!</button>
+        </form>
+    </div>
+
+    <div th:if="${errorMessage == null and displayName != null and #strings.trim(displayName) != ''}" class="mt-4">
+        <h4 class="text-success" th:text="'Welcome ' + ${displayName} +', ' + ${displayFavouriteLanguage} + ' is a pretty good language.'"></h4>
+        <h4 th:if="${isJava}" class="text-primary">Looks like Java is both our favourite language!</h4>
+    </div>
+
+    <div class="mt-4">
+        <a th:href="@{form/responses}" class="btn btn-link">View responses</a>
+        <a th:href="@{demo}" class="btn btn-link">Back to home</a>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+    <title>Form Demo - Responses</title>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+</head>
+<body>
+<div>
+    <div class="container mt-5">
+        <div class="card p-4 shadow-sm">
+            <h4 class="card-title mb-4">Form Responses:</h4>
+
+            <form method="get" th:action="@{/form/responses}" class="mb-3">
+                <div class="input-group">
+                    <input type="text" name="name" th:value="${searchQuery}" class="form-control" placeholder="Search by Name">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+
+            <table class="table table-striped table-bordered">
+                <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Language</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${responses.empty}">
+                    <td colspan="2" class="text-center">No responses have been made yet.</td>
+                </tr>
+                <tr th:each="response : ${responses}">
+                    <td><span th:text="${response.name}">Name</span></td>
+                    <td><span th:text="${response.language}">Language</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4">
+            <a th:href="@{/form}" class="btn btn-secondary">Back to Form</a>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

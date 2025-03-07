@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="headerfiles">
+    <meta charset="UTF-8"/>
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container mt-5">
+    <div th:fragment="header" class="text-center">
+        <h1 class="display-4">Thymeleaf Fragments Sample</h1>
+    </div>
+
+    <p class="intro lead text-center mt-4">Go to the next page to see fragments in action</p>
+
+    <footer th:fragment="footer" class="mt-5 text-center">
+        <a th:href="@{main}" class="btn btn-link">Fragments Index</a> |
+        <a th:href="@{params}" class="btn btn-link">Fragment Params</a> |
+        <a th:href="@{../demo}" class="btn btn-link">Back to Home</a>
+    </footer>
+</div>
+</body>
+</html>
