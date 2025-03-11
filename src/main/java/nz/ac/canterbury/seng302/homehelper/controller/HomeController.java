@@ -22,5 +22,13 @@ public class HomeController {
         return "homeTemplate";
     }
 
-
+    /**
+     * Gets the thymeleaf homepage
+     * @return thymeleaf homepageTemplate
+     */
+    @GetMapping("/home")
+    public String getHomepage() {
+        logger.info("GET /home");
+        return "homeTemplate";
+    }
 }

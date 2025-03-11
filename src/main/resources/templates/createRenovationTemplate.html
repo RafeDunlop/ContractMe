@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
+<head>
+    <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+    <title>Create renovation</title>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+
+</head>
+<body>
+<div th:replace="fragments/navbar.html :: nav-bar"></div>
+<div class="container mt-5">
+
+    <div class="card p-4 shadow-sm">
+        <h4 class="card-title mb-4">Start a new renovation!</h4>
+        <form th:action="@{create}" method="post" id="renovation-form">
+
+            <input type="hidden" id="roomListEdit" th:name="roomListEdit" th:value="${#strings.arrayJoin(roomList, ',')}">
+
+            <input type="hidden" id="existingName" th:name="existingName" th:value="${existingName}">
+
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label>
+                <input type="text" class="form-control" id="name" placeholder="Enter a name for your renovation"
+                       th:name="name" th:value="${name}" data-cy="name" required autofocus>
+                <div class="error-label-div">
+                    <label class="form-label" id="name-error-message"></label>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label>
+                <span id="description-length-counter" class="counter">0/512</span>
+                <textarea class="form-control" id="description" placeholder="Enter a description for your new renovation"
+                          th:name = "description" th:text="${description}"
+                          autofocus></textarea>
+                <div class="error-label-div">
+                    <label class="form-label" hidden id="description-error-message">Text gets updated based off error</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="roomList" placeholder="Enter a room name"
+                           th:name="roomList" data-cy="roomList" autofocus>
+                    <button type="button" class="btn btn-primary" id="create-room-button">Add</button>
+                </div>
+                <div class="error-label-div">
+                    <label class="form-label" id="room-error-message"></label>
+                </div>
+                <table id="room-list" class="table table-bordered"></table>
+            </div>
+
+            <button type="submit" disabled="disabled" id="submit-record" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+    <div class="mt-4">
+        <a th:href="@{/renovations}" class="btn  btn-primary">Cancel</a>
+    </div>
+</div>
+</body>
+<script type="module" th:src="@{/js/createRecordValidations.js}"></script>
+<script type="module" th:src="@{/js/renovation.js}"></script>
+</html>

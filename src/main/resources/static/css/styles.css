@@ -1,0 +1,32 @@
+#room-list {
+    max-width: 500px;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: white;
+
+}
+
+#room-list td {
+    white-space: nowrap;
+    background-color: inherit;
+}
+
+#room-list td button {
+    max-width: 50px;
+    overflow: hidden;
+}
+
+#name-error-message {
+    color: red;
+}
+#description-error-message {
+    color: red;
+}
+.error-label-div {
+    min-height: 30px;
+    display: inline-block;
+}
+
+#room-error-message {
+    color: red;
+}

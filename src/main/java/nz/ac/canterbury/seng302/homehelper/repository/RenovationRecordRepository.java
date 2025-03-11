@@ -1,0 +1,45 @@
+package nz.ac.canterbury.seng302.homehelper.repository;
+
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Repository interface for managing {@link RenovationRecord} entities.
+ * Extends {@link CrudRepository} to provide basic CRUD operations.
+ * @author Jake Connolly
+ */
+public interface RenovationRecordRepository extends CrudRepository<RenovationRecord, Long> {
+    /**
+     *  Finds a record from the repository by id
+     * @param id of the record to find
+     * @return an Optional containing the renovation record if it exists
+     */
+    Optional<RenovationRecord> findById(long id);
+
+    /**
+     * Retrieves all renovation records
+     * @return list of all renovation records
+     */
+    List<RenovationRecord> findAll();
+
+    /**
+     * Gets all renovation records not case-sensitive that are like the given string
+     * @param name to search for records like it
+     * @return list off all records containing the string in its name
+     */
+    @Query("SELECT f FROM RenovationRecord f WHERE LOWER(f.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    List<RenovationRecord> findByNameContainingIgnoreCase(@Param("name") String name);
+
+    /**
+     * Finds a renovation record with a matching name not case-sensitive if it exists
+     * @param name of the record being searched for
+     * @return an Optional that is the matching record if it exists
+     */
+    @Query("SELECT f FROM RenovationRecord f WHERE (f.name) = (:name)")
+    Optional<RenovationRecord> findExactMatch(@Param("name") String name);
+}
