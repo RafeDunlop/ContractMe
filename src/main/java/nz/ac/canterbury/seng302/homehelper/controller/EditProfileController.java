@@ -41,10 +41,10 @@ public class EditProfileController {
     }
 
     /**
-     * Displays the editUserTemplate page under the path "/user/edit" where id
+     * Displays the editProfileTemplate page under the path "/user/edit" where id
      * is the ID of the user. Sets the current user to the page.
      * @param model Model interface
-     * @return editUserTemplate page
+     * @return editProfileTemplate page
      */
     @GetMapping("user/edit")
     public String editProfile(Model model) {
@@ -56,7 +56,7 @@ public class EditProfileController {
             model.addAttribute("firstName", user.getFirstName());
             model.addAttribute("lastName", user.getLastName());
             model.addAttribute("email", user.getEmail());
-            return "editUserTemplate";
+            return "editProfileTemplate";
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
@@ -67,7 +67,7 @@ public class EditProfileController {
      * user is updated; otherwise, the error messages are set and stays on same page.
      * @param updatedUser User object with the updated user details
      * @param model Model interface
-     * @return editUserTemplate page or redirect to user page
+     * @return editProfileTemplate page or redirect to user page
      */
     @PostMapping("user/edit")
     public String updateProfile(@ModelAttribute User updatedUser, Model model) {
@@ -97,7 +97,7 @@ public class EditProfileController {
             model.addAttribute("firstName", newUser.getFirstName());
             model.addAttribute("lastName", newUser.getLastName());
             model.addAttribute("email", newUser.getEmail());
-            return "editUserTemplate";
+            return "editProfileTemplate";
         }
     }
 }

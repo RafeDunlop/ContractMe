@@ -52,7 +52,7 @@ public class EditProfileControllerIntegrationTest {
         Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser.getEmail())).thenReturn(Optional.of(expectedUser));
         mockMvc.perform(get("/user/edit"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("editUserTemplate"))
+                .andExpect(view().name("editProfileTemplate"))
                 .andExpect(model().attributeExists("user"))
                 .andExpect(model().attribute("firstName", expectedUser.getFirstName()))
                 .andExpect(model().attribute("lastName", expectedUser.getLastName()))

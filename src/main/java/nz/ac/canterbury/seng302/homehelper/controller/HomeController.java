@@ -19,7 +19,7 @@ public class HomeController {
     @GetMapping("/")
     public String home() {
         logger.info("GET /");
-        return "home";
+        return "homeTemplate";
     }
 
 

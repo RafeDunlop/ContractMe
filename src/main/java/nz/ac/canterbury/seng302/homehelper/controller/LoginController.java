@@ -27,6 +27,6 @@ public class LoginController {
             List<String> errorsList = List.of(error.split("(?<=\\.) "));
             model.addAttribute("errorMessage", errorsList);
         }
-        return "login";
+        return "loginTemplate";
     }
 }

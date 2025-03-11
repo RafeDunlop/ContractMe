@@ -36,7 +36,7 @@ public class ProfileController {
 			model.addAttribute("lastName", user.getLastName());
 			model.addAttribute("email", user.getEmail());
 			model.addAttribute("dateAdded", user.getCreatedTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-			return "userTemplate";
+			return "profileTemplate";
 		} catch (IllegalArgumentException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}

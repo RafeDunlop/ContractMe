@@ -51,7 +51,7 @@ public class ProfileControllerIntegrationTest {
 
         mockMvc.perform(get("/user/"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("userTemplate"))
+                .andExpect(view().name("profileTemplate"))
                 .andExpect(model().attribute("firstName", expectedUser.getFirstName()))
                 .andExpect(model().attribute("lastName", expectedUser.getLastName()))
                 .andExpect(model().attribute("email", expectedUser.getEmail()))

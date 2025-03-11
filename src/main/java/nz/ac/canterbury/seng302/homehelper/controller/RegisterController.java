@@ -44,7 +44,7 @@ public class RegisterController {
     public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO,
                                Model model) {
         logger.info("GET /register");
-        return "registration";
+        return "registrationTemplate";
     }
 
     /**
@@ -72,7 +72,7 @@ public class RegisterController {
             model.addAttribute("lastName", userRegisterDTO.getLastName().trim());
             model.addAttribute("email", userRegisterDTO.getEmail().trim());
         }
-        return "registration";
+        return "registrationTemplate";
     }
 
 

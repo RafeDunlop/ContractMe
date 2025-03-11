@@ -97,7 +97,7 @@ public class RegisterControllerIntegrationTest {
                         .param("confirmPassword", "password")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(view().name("registration"))
+                .andExpect(view().name("registrationTemplate"))
                 .andExpect(model().attribute("errorMessages", expectedErrorList))
                 .andExpect(model().attribute("firstName", "Jane"))
                 .andExpect(model().attribute("lastName", "Doe"))
