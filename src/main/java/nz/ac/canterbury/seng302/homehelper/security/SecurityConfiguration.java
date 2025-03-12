@@ -4,12 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  * Custom security configuration based on the spring security handout.
@@ -42,6 +42,20 @@ public class SecurityConfiguration {
         return authenticationManagerBuilder.build();
     }
 
+    /**
+     * Security filter chain.
+     *
+     * @param http http security configuration object from spring
+     * @return Custom SecurityFilterChain
+     * @throws Exception if building the object fails
+     */
+    @Bean
+    @Order(1)
+    public SecurityFilterChain h2AccessFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/h2/**")
+                .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
+        return http.build();
+    }
 
     /**
      * Security filter chain.
@@ -51,28 +65,46 @@ public class SecurityConfiguration {
      * @throws Exception if building the object fails
      */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth.requestMatchers(AntPathRequestMatcher.antMatcher("/h2/**")).permitAll())
-                // Permit access to the h2 console
-                .headers(headers -> headers.frameOptions().disable())
-                .csrf(csrf -> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2/**")))
-                .authorizeHttpRequests()
-                // Allow "/", "/register", "login", "/main", and "/webjars" to anyone (need webjars for bootstrap css)
-                .requestMatchers("/", "/register", "/login", "/main", "/webjars/**")
-                .permitAll()
-                // Only allow admins to reach the "/admin" page
-                .requestMatchers("/admin")
-                .hasRole("ADMIN")
-                .requestMatchers("/user", "user/edit")
-                .hasRole("USER")
-                .anyRequest()
-                .authenticated()
-                .and()
-                // Define logging in, a POST "/login" endpoint now exists under the hood, after login redirect to main page
-                // Errors are handled by CustomAuthFailHandler and displayed by the LoginController
-                .formLogin().loginPage("/login").loginProcessingUrl("/login").defaultSuccessUrl("/main").failureHandler(authFailHandler)
-                .and()
-                .logout().logoutUrl("/logout").logoutSuccessUrl("/login").invalidateHttpSession(true).deleteCookies("JSESSIONID");
+    @Order(2)
+    public SecurityFilterChain userFilterChain(HttpSecurity http) throws Exception {
+        String[] paths = {"/user", "/renovations/**", "/delete-renovation", "/admin", "/admin/**"};
+        String[] userPaths = {"/user", "/renovations/**", "/delete-renovation"};
+        String[] adminPaths = {"/admin", "/admin/**"};
+        http.securityMatcher(paths)
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(userPaths).hasRole("USER")
+                        .requestMatchers(adminPaths).hasRole("ADMIN")
+                );
+        return http.build();
+    }
+
+    /**
+     * Security filter chain.
+     *
+     * @param http http security configuration object from spring
+     * @return Custom SecurityFilterChain
+     * @throws Exception if building the object fails
+     */
+    @Bean
+    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
+        String[] allowedPaths = {"/", "/login", "/register", "/main", "/webjars/**", "/favicon.ico"};
+        http
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(allowedPaths).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(formLogin -> formLogin
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/main")
+                        .failureHandler(authFailHandler)
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                );
         return http.build();
     }
 }
