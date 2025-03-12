@@ -43,7 +43,8 @@ public class SecurityConfiguration {
     }
 
     /**
-     * Security filter chain.
+     * H2 Security filter chain.
+     * For development purposes only.
      *
      * @param http http security configuration object from spring
      * @return Custom SecurityFilterChain
@@ -58,7 +59,8 @@ public class SecurityConfiguration {
     }
 
     /**
-     * Security filter chain.
+     * User Security filter chain.
+     * This filter chain applies to admins and users and enforces the roles ADMIN, and USER respectively.
      *
      * @param http http security configuration object from spring
      * @return Custom SecurityFilterChain
@@ -79,7 +81,7 @@ public class SecurityConfiguration {
     }
 
     /**
-     * Security filter chain.
+     * Default Security filter chain.
      *
      * @param http http security configuration object from spring
      * @return Custom SecurityFilterChain
