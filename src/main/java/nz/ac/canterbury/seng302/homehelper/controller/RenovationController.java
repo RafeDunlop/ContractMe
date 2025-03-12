@@ -115,7 +115,7 @@ public class RenovationController {
      * @param id of the record to be deleted
      * @return redirect to my records page
      */
-    @PostMapping("/delete-renovation")
+    @GetMapping("/delete-renovation")
     public String deleteRecord(@RequestParam("id") Long id) {
         renovationRecordService.removeRenovationRecord(id);
         return "redirect:/renovations";
