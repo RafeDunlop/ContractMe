@@ -2,12 +2,13 @@ package nz.ac.canterbury.seng302.homehelper;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
 /**
  * Home Helper web app entry-point
  * Note @link{SpringBootApplication} annotation
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 public class HomeHelperApplication {
 
 	/**
