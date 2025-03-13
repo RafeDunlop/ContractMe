@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +29,17 @@ public class RenovationController {
 
     private final RenovationRecordService renovationRecordService;
 
+    private final LoginService loginService;
+
     /**
      * induces spring to automatically sets up the {@code RenovationRecordService}
      * @param renovationRecordService The renovation service which provides non-UI functionality
+     * @param loginService The login service provides the function to get the current user
      */
     @Autowired
-    public RenovationController(RenovationRecordService renovationRecordService) {
+    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService) {
         this.renovationRecordService = renovationRecordService;
+        this.loginService = loginService;
     }
 
     /**
@@ -44,10 +50,15 @@ public class RenovationController {
      */
     @GetMapping
     public String renovations(@RequestParam(value = "searchQuery", required = false, defaultValue="") String searchQuery, Model model) {
-        logger.info("GET /renovations");
-        model.addAttribute("renovations", renovationRecordService.getRecordResult(searchQuery));
-        model.addAttribute("searchQuery", searchQuery);
-        return "renovationsTemplate";
+        logger.info("GET renovations");
+        try {
+            User user = loginService.getUserByEmail();
+            model.addAttribute("renovations", renovationRecordService.getRecordResultByName(user, searchQuery));
+            model.addAttribute("searchQuery", searchQuery);
+            return "renovationsTemplate";
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     /**

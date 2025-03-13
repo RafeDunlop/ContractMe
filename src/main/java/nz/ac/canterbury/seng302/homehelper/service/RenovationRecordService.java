@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,14 +59,25 @@ public class RenovationRecordService {
 
     /**
      * Retrieves a list of renovation records that are like the given name
+     * @param user The current user
      * @param name the name to search for, not case-sensitive
      * @return a list of renovation records that match the name
      */
-    public List<RenovationRecord> getRecordResult(String name) {
+    public List<RenovationRecord> getRecordResultByName(User user, String name) {
         if (name == null || name.trim().isEmpty()) {
-            return renovationRecordRepository.findAll();
+            getRecordResultByUser(user);
         }
-        return renovationRecordRepository.findByNameContainingIgnoreCase(name);
+        return renovationRecordRepository.findByNameContainingIgnoreCase(user, name);
+
+    }
+
+    /**
+     * Retrieves a list of renovations associated with the current user
+     * @param user The current user
+     * @return A list of renovation records from the user
+     */
+    private List<RenovationRecord> getRecordResultByUser(User user) {
+        return renovationRecordRepository.findByUser(user);
     }
 
     /**

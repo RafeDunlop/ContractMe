@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
  * Home Helper web app entry-point
  * Note @link{SpringBootApplication} annotation
  */
-@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
+@SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
 public class HomeHelperApplication {
 
 	/**
