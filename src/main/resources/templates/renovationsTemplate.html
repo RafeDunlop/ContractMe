@@ -50,10 +50,10 @@
                 <tr th:each="renovation : ${renovations}">
                     <td class="d-flex justify-content-between align-items-center">
                         <a th:text="${renovation.name}" th:href="@{/renovations/view(id=${renovation.id})}">Name</a>
-                        <button type="button" class="btn btn-danger"
+                        <button type="button" class="btn btn-outline-danger custom-light-border"
                                 th:attr="data-id=${renovation.id}, data-searchQuery=${searchQuery}, data-csrf=${_csrf.token}"
                                 th:onclick="|confirmDelete(this)|">
-                            Delete
+                            ❌
                         </button>
                     </td>
                 </tr>
