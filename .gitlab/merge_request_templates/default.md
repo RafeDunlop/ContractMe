@@ -18,5 +18,5 @@
 - [ ] No debugging code
 - [ ] Code is readable
 - [ ] All automated tests pass
-- [ ] (Manual Testing)[https://eng-git.canterbury.ac.nz/seng302-2025/team-200/-/wikis/Manual%20Testing] is complete and
+- [ ] [Manual Testing](https://eng-git.canterbury.ac.nz/seng302-2025/team-200/-/wikis/Manual%20Testing) is complete and
   covers all testable ACs
