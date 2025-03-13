@@ -1,4 +1,8 @@
-# Merge Request Template
+# Merge %{source_branch} to %{target_branch}
+
+%{all_commits}
+
+%{co_authored_by}
 
 ## Before Request Checklist
 - [ ] Have you merged into the source branch and resolved all conflicts?
