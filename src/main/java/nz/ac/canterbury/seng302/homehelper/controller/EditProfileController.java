@@ -100,4 +100,21 @@ public class EditProfileController {
             return "editProfileTemplate";
         }
     }
+
+    /**
+     * Displays the editProfileTemplate page under the path "/user/edit" where id
+     * is the ID of the user. Sets the current user to the page.
+     * @param model Model interface
+     * @return editProfileTemplate page
+     * MOVE THIS ONCE THE UPDATE PASSWORD CONTROLLER IS DONE BEING MADE
+     */
+    @GetMapping("user/edit/updatePassword")
+    public String updatePassword(Model model) {
+        logger.info("GET /user/edit");
+        try {
+            return "updatePasswordTemplate";
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
 }
