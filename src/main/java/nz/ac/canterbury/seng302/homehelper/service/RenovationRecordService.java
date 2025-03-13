@@ -37,24 +37,6 @@ public class RenovationRecordService {
     @Autowired
     public RenovationRecordService(RenovationRecordRepository renovationRecordRepository) {
         this.renovationRecordRepository = renovationRecordRepository;
-        addStartingRenovationRecords();
-    }
-
-    private void addStartingRenovationRecords() {
-        RenovationRecord startingRecord1 = new RenovationRecord(
-                "My First Renovation",
-                "exciting!",
-                List.of("bathroom", "kitchen",  "billiards room")
-        );
-        addRenovationRecord(startingRecord1);
-
-        ArrayList<String> rooms2 = new ArrayList<>(Arrays.asList("I L O V E S E N G 3 0 2".split(" ")));
-        RenovationRecord startingRecord2 = new RenovationRecord(
-                "My Second Renovation",
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
-                rooms2
-        );
-        addRenovationRecord(startingRecord2);
     }
 
     /**

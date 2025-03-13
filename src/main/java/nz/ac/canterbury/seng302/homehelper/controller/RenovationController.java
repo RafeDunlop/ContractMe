@@ -108,17 +108,22 @@ public class RenovationController {
         }
 
         try { // save the record and go to the view page
-            RenovationRecord renovationRecord = new RenovationRecord(name, description, roomList);
-            renovationRecordService.addRenovationRecord(renovationRecord);
-            model.addAttribute("renovation", renovationRecord);
-            return "viewRenovation";
+            User user = loginService.getUserByEmail();
+            try {
+                RenovationRecord renovationRecord = new RenovationRecord(user, name, description, roomList);
+                renovationRecordService.addRenovationRecord(renovationRecord);
+                model.addAttribute("renovation", renovationRecord);
+                return "viewRenovation";
+            } catch (IllegalArgumentException e) {
+                logger.warn("Form submission error", e);
+                model.addAttribute("name", name);
+                model.addAttribute("description", description);
+                model.addAttribute("roomList", roomList);
+                model.addAttribute("errorMessage", "Invalid input: " + e.getMessage());
+                return "createRenovationTemplate";
+            }
         } catch (IllegalArgumentException e) {
-            logger.warn("Form submission error", e);
-            model.addAttribute("name", name);
-            model.addAttribute("description", description);
-            model.addAttribute("roomList", roomList);
-            model.addAttribute("errorMessage", "Invalid input: " + e.getMessage());
-            return "createRenovationTemplate";
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
