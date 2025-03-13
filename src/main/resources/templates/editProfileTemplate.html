@@ -9,6 +9,15 @@
 <div class="container mt-5">
     <div class="card p-4 shadow">
         <h4 class="card-title mb-5">Edit profile</h4>
+            <div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
+                <form action="/api/users/{id}/uploadProfilePicture" method="POST" enctype="multipart/form-data">
+                    <div class="input-group">
+                        <label class="input-group-text btn btn-outline-secondary" for="formFile">Edit Profile Picture</label>
+                        <input class="form-control d-none" type="file" id="formFile">
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </div>
+                </form>
+            </div>
         <form th:action="@{/user/edit}" method="post">
             <div class="form-group mb-3">
                 <div class="mb-3">
