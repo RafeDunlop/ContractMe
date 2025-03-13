@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +29,17 @@ public class RenovationController {
 
     private final RenovationRecordService renovationRecordService;
 
+    private final LoginService loginService;
+
     /**
      * induces spring to automatically sets up the {@code RenovationRecordService}
      * @param renovationRecordService The renovation service which provides non-UI functionality
+     * @param loginService The login service provides the function to get the current user
      */
     @Autowired
-    public RenovationController(RenovationRecordService renovationRecordService) {
+    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService) {
         this.renovationRecordService = renovationRecordService;
+        this.loginService = loginService;
     }
 
     /**
@@ -45,8 +51,20 @@ public class RenovationController {
     @GetMapping("/renovations")
     public String renovations(@RequestParam(value = "name", required = false) String name, Model model) {
         logger.info("GET renovations");
-        model.addAttribute("renovations", renovationRecordService.getRecordResult(name));
-        return "renovationsTemplate";
+        //TODO change cases
+        try {
+            User user = loginService.getUserByEmail();
+            if (name == null) {
+                model.addAttribute("renovations", renovationRecordService.getRecordResultByUser(user));
+            } else if (name.trim().isEmpty()) {
+                model.addAttribute("renovations", renovationRecordService.getRecordResultByUser(user));
+            } else {
+                model.addAttribute("renovations", renovationRecordService.getRecordResultByName(user, name));
+            }
+            return "renovationsTemplate";
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     /**
