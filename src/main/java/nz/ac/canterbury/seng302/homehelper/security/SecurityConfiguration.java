@@ -69,8 +69,8 @@ public class SecurityConfiguration {
     @Bean
     @Order(2)
     public SecurityFilterChain userFilterChain(HttpSecurity http) throws Exception {
-        String[] paths = {"/user", "/renovations/**", "/delete-renovation", "/admin", "/admin/**"};
-        String[] userPaths = {"/user", "/renovations/**", "/delete-renovation"};
+        String[] paths = {"/user", "/renovations/**", "/admin", "/admin/**"};
+        String[] userPaths = {"/user", "/renovations/**"};
         String[] adminPaths = {"/admin", "/admin/**"};
         http.securityMatcher(paths)
                 .authorizeHttpRequests(authorize -> authorize

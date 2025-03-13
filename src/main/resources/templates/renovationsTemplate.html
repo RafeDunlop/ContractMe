@@ -28,7 +28,7 @@
 
             <form method="get" th:action="@{renovations}" class="mb-3 mt-2">
                 <div class="input-group">
-                    <input type="text" name="name" th:value="${searchQuery}" class="form-control" placeholder="Search by Name">
+                    <input type="text" name="searchQuery" th:value="${searchQuery}" class="form-control" placeholder="Search by Name">
                     <button type="submit" class="btn btn-primary">Search</button>
                 </div>
             </form>
@@ -40,14 +40,18 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:if="${renovations.empty}">
+                <tr th:if="${renovations.empty} and ${#strings.isEmpty(searchQuery)}">
                     <td colspan="1" class="text">No Renovations have been made yet.</td>
+                </tr>
+                <tr th:if="${renovations.empty} and !${#strings.isEmpty(searchQuery)}">
+                    <td colspan="1" class="text">No Renovations found.</td>
                 </tr>
                 <tr th:each="renovation : ${renovations}">
                     <td class="d-flex justify-content-between align-items-center">
                         <a th:text="${renovation.name}" th:href="@{/renovations/view(id=${renovation.id})}">Name</a>
-                        <button type="button" class="btn btn-danger" th:attr="data-id=${renovation.id}"
-                                onclick="confirmDelete(this)">
+                        <button type="button" class="btn btn-danger"
+                                th:attr="data-id=${renovation.id}, data-searchQuery=${searchQuery}, data-csrf=${_csrf.token}"
+                                th:onclick="|confirmDelete(this)|">
                             Delete
                         </button>
                     </td>

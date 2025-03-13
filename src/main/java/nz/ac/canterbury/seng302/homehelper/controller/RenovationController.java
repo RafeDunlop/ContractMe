@@ -6,11 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -21,6 +20,7 @@ import java.util.List;
  * @author Abhisekh Chand
  */
 @Controller
+@RequestMapping("/renovations")
 public class RenovationController {
 
     private static final Logger logger = LoggerFactory.getLogger(RenovationController.class);
@@ -38,14 +38,15 @@ public class RenovationController {
 
     /**
      * Gets all renovations
-     * @param name optional string to search on renovation name (partial matching)
+     * @param searchQuery optional string to search on renovation name (partial matching)
      * @param model (map-like) representation of results to be used by thymeleaf
      * @return thymeleaf renovationsTemplate
      */
-    @GetMapping("/renovations")
-    public String renovations(@RequestParam(value = "name", required = false) String name, Model model) {
-        logger.info("GET renovations");
-        model.addAttribute("renovations", renovationRecordService.getRecordResult(name));
+    @GetMapping
+    public String renovations(@RequestParam(value = "searchQuery", required = false, defaultValue="") String searchQuery, Model model) {
+        logger.info("GET /renovations");
+        model.addAttribute("renovations", renovationRecordService.getRecordResult(searchQuery));
+        model.addAttribute("searchQuery", searchQuery);
         return "renovationsTemplate";
     }
 
@@ -53,7 +54,7 @@ public class RenovationController {
      * Gets the renovation creation form
      * @return thymeleaf createRenovationTemplate
      */
-    @GetMapping("/renovations/create")
+    @GetMapping("/create")
     public String record() {
         logger.info("GET /renovations/create");
         return "createRenovationTemplate";
@@ -78,7 +79,7 @@ public class RenovationController {
      *              with values being set to relevant parameters provided
      * @return thymeleaf createRenovationTemplate OR viewRenovationTemplate
      */
-    @PostMapping("/renovations/create")
+    @PostMapping("/create")
     public String submitRecord(@RequestParam(name="name") String name,
             @RequestParam(name = "description", required=false, defaultValue = "") String description,
             @RequestParam(name = "roomList", required = false) List <String> roomList,
@@ -115,10 +116,11 @@ public class RenovationController {
      * @param id of the record to be deleted
      * @return redirect to my records page
      */
-    @GetMapping("/delete-renovation")
-    public String deleteRecord(@RequestParam("id") Long id) {
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteRecord(@PathVariable Long id) {
+        logger.info("DELETE /renovations/");
         renovationRecordService.removeRenovationRecord(id);
-        return "redirect:/renovations";
+        return ResponseEntity.noContent().build();
     }
 
     /**
@@ -128,7 +130,7 @@ public class RenovationController {
      * with values being set to relevant parameters provided
      * @return Thymeleaf editRenovationTemplate
      */
-    @GetMapping("/renovations/edit")
+    @GetMapping("/edit")
     public String editRenovation(@RequestParam(name = "id") Long id, Model model) {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -165,7 +167,7 @@ public class RenovationController {
      * @param model (map-like) representation of results to be used by thymeleaf
      * @return redirect to the view page for the edited record
      */
-    @PostMapping("/renovations/edit")
+    @PostMapping("/edit")
     public String submitRenovationEdit(@RequestParam(name = "id") Long id,
                                        @RequestParam(name="name", required = false) String name,
                                        @RequestParam(name = "description", required = false) String description,
@@ -197,7 +199,7 @@ public class RenovationController {
      * @param model (map-like) representation of results to be used by thymeleaf
      * @return redirect to viewRenovation page
      */
-    @GetMapping("/renovations/view")
+    @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id, Model model) {
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
