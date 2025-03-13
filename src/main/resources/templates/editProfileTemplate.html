@@ -5,19 +5,38 @@
     <title>Edit Profile</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
 </head>
+
+<script>
+    function updateFileName() {
+        let fileInput = document.getElementById('formFile');
+        let fileLabel = document.getElementById('fileLabel');
+        let maxLength = 30; // Available space
+
+        if (fileInput.files.length > 0) {
+            let fileName = fileInput.files[0].name;
+
+            // If filename is too long, reset to "Edit Profile Picture"
+            fileLabel.textContent = fileName.length > maxLength ? "Edit Profile Picture" : fileName;
+        } else {
+            fileLabel.textContent = "Edit Profile Picture";
+        }
+    }
+</script>
+
 <body>
 <div class="container mt-5">
     <div class="card p-4 shadow">
         <h4 class="card-title mb-5">Edit profile</h4>
-            <div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
-                <form action="/api/users/{id}/uploadProfilePicture" method="POST" enctype="multipart/form-data">
-                    <div class="input-group">
-                        <label class="input-group-text btn btn-outline-secondary" for="formFile">Edit Profile Picture</label>
-                        <input class="form-control d-none" type="file" id="formFile">
-                        <button type="submit" class="btn btn-primary">Upload</button>
-                    </div>
-                </form>
-            </div>
+        <div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
+            <form action="/api/users/{id}/uploadProfilePicture" method="POST" enctype="multipart/form-data">
+                <div class="input-group">
+                    <input class="form-control d-none" type="file" id="formFile" onchange="updateFileName()">
+                    <label class="btn btn-outline-secondary" for="formFile" id="fileLabel">Edit Profile Picture</label>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </div>
+            </form>
+        </div>
+
         <form th:action="@{/user/edit}" method="post">
             <div class="form-group mb-3">
                 <div class="mb-3">
