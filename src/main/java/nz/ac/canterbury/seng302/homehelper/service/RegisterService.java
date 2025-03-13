@@ -80,7 +80,12 @@ public class RegisterService {
     }
 
     /**
-     * Authenticate the user once registered
+     * Authenticate the user once registered.
+     * Sets the authentication token and saves the session.
+     *
+     * @param user the user object which has already been registered
+     * @param password the user's plaintext password
+     * @param request, the HttpServletRequest object from upper layer (spring)
      */
     public void authenticateUser(User user, String password, HttpServletRequest request) {
         Authentication authToken = new UsernamePasswordAuthenticationToken(user.getEmail(), password);
