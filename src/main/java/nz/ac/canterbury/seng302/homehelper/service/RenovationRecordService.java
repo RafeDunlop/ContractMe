@@ -37,24 +37,6 @@ public class RenovationRecordService {
     @Autowired
     public RenovationRecordService(RenovationRecordRepository renovationRecordRepository) {
         this.renovationRecordRepository = renovationRecordRepository;
-        addStartingRenovationRecords();
-    }
-
-    private void addStartingRenovationRecords() {
-        RenovationRecord startingRecord1 = new RenovationRecord(
-                "My First Renovation",
-                "exciting!",
-                List.of("bathroom", "kitchen",  "billiards room")
-        );
-        addRenovationRecord(startingRecord1);
-
-        ArrayList<String> rooms2 = new ArrayList<>(Arrays.asList("I L O V E S E N G 3 0 2".split(" ")));
-        RenovationRecord startingRecord2 = new RenovationRecord(
-                "My Second Renovation",
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
-                rooms2
-        );
-        addRenovationRecord(startingRecord2);
     }
 
     /**
@@ -64,7 +46,11 @@ public class RenovationRecordService {
      * @return a list of renovation records that match the name
      */
     public List<RenovationRecord> getRecordResultByName(User user, String name) {
+        if (name == null || name.trim().isEmpty()) {
+            getRecordResultByUser(user);
+        }
         return renovationRecordRepository.findByNameContainingIgnoreCase(user, name);
+
     }
 
     /**
@@ -72,7 +58,7 @@ public class RenovationRecordService {
      * @param user The current user
      * @return A list of renovation records from the user
      */
-    public List<RenovationRecord> getRecordResultByUser(User user) {
+    private List<RenovationRecord> getRecordResultByUser(User user) {
         return renovationRecordRepository.findByUser(user);
     }
 
