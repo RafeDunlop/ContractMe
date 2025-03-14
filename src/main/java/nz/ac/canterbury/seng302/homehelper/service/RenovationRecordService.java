@@ -40,26 +40,16 @@ public class RenovationRecordService {
     }
 
     /**
-     * Retrieves a list of renovation records that are like the given name
+     * Retrieves a list of renovation records associated with the current user that are like the given name
      * @param user The current user
-     * @param name the name to search for, not case-sensitive
-     * @return a list of renovation records that match the name
+     * @param name The name to search for, not case-sensitive
+     * @return a list of renovation records from the user that match the name
      */
     public List<RenovationRecord> getRecordResultByName(User user, String name) {
         if (name == null || name.trim().isEmpty()) {
-            getRecordResultByUser(user);
+            return renovationRecordRepository.findByUser(user);
         }
         return renovationRecordRepository.findByNameContainingIgnoreCase(user, name);
-
-    }
-
-    /**
-     * Retrieves a list of renovations associated with the current user
-     * @param user The current user
-     * @return A list of renovation records from the user
-     */
-    private List<RenovationRecord> getRecordResultByUser(User user) {
-        return renovationRecordRepository.findByUser(user);
     }
 
     /**
