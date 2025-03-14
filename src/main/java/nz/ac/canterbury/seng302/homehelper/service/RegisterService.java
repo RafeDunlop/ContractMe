@@ -64,7 +64,7 @@ public class RegisterService {
         errors.addAll(userValidation.validateNameString(firstName, "First"));
         errors.addAll(userValidation.validateNameString(lastName, "Last"));
         errors.addAll(validateEmail(email));
-        errors.addAll(userValidation.validatePasswordString(password, confirmPassword));
+        errors.addAll(userValidation.validatePasswordString(password, confirmPassword,"registerPassword"));
 
         // Throw IllegalArgumentException if any errors occurred in validating the data
         if (!errors.isEmpty()) {

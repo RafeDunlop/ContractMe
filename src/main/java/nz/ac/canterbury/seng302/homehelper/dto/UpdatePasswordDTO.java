@@ -4,6 +4,7 @@ public class UpdatePasswordDTO {
 
     private String currentPassword;
     private String newPassword;
+    private String retypePassword;
 
     public String getCurrentPassword() {
         return currentPassword;
@@ -21,13 +22,11 @@ public class UpdatePasswordDTO {
         this.newPassword = newPassword;
     }
 
-    public String getRepeatedNewPassword() {
-        return repeatedNewPassword;
+    public String getRetypePassword() {
+        return retypePassword;
     }
 
-    public void setRepeatedNewPassword(String repeatedNewPassword) {
-        this.repeatedNewPassword = repeatedNewPassword;
+    public void setRetypePassword(String repeatedNewPassword) {
+        this.retypePassword = retypePassword;
     }
-
-    private String repeatedNewPassword;
 }
