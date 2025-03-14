@@ -9,8 +9,13 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
+/**
+ * Basic listener for the {@link OnRegistrationCompleteEvent} based on
+ * <a href=https://www.baeldung.com/registration-verify-user-by-email>this tutorial.</a>
+ *
+ * @author Sean
+ * @author Baeldung (tutorial)
+ */
 @Component
 public class RegistrationListener implements ApplicationListener<OnRegistrationCompleteEvent> {
     @Autowired
@@ -22,19 +27,25 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
     @Autowired
     private JavaMailSender mailSender;
 
+    /**
+     * Event callback function. Calls the private confirmRegistration function
+     * which sends the email.
+     * @param event the event to respond to
+     */
     @Override
     public void onApplicationEvent(OnRegistrationCompleteEvent event) {
         this.confirmRegistration(event);
     }
 
+    /**
+     * Confirm registration by sending the confirmation email message.
+     * @param event the event to respond to
+     */
     private void confirmRegistration(OnRegistrationCompleteEvent event) {
         User user = event.getUser();
-//        String token = UUID.randomUUID().toString();
-//        registerService.createVerificationToken(user, token);
 
         String recipient = user.getEmail();
         String subject = "Registration Confirmation";
-//        String code = token;
         String message = "Verify your email address";
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(recipient);

@@ -9,7 +9,8 @@ import java.util.Date;
 /**
  * Verification token entity, based on the example given <a href="https://www.baeldung.com/registration-verify-user-by-email">here</a>
  *
- * @author Sean, Baeldung
+ * @author Sean
+ * @author Baeldung (tutorial)
  */
 @Entity
 public class VerificationToken {
