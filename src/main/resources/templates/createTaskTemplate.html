@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
+    <title>Create renovation</title>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+<div th:replace="fragments/navbar.html :: nav-bar"></div>
+<div class="container mt-5">
+    <div class="card p-4 shadow-sm">
+        <h4 class="card-title mb-4">Add Task to Renovation</h4>
+        <form th:action="@{create}" method="post" id="create-task--form">
+
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label>
+                <input type="text" class="form-control" id="name" placeholder="Enter a name for your task"
+                       th:name="name" th:value="${name}" data-cy="name" required autofocus>
+                <div class="error-label-div">
+                    <label class="form-label" id="name-error-message"></label>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label>
+                <span id="description-length-counter" class="counter">0/512</span>
+                <textarea class="form-control" id="description" placeholder="Enter a description for your new renovation"
+                          th:name = "description" th:text="${description}"
+                          autofocus></textarea>
+                <div class="error-label-div">
+                    <label class="form-label" hidden id="description-error-message">Text gets updated based off error</label>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="roomList" placeholder="Enter a room name"
+                           th:name="roomList" data-cy="roomList" autofocus>
+                    <button type="button" class="btn btn-primary" id="create-room-button">Add</button>
+                </div>
+                <div class="error-label-div">
+                    <label class="form-label" id="room-error-message"></label>
+                </div>
+                <table id="room-list" class="table table-bordered"></table>
+            </div>
+            <div class="mb-3">
+                <label for="duedate" class="form-label">Due Date (optional):</label>
+                <input type="text" class="form-control" id="duedate" placeholder="Enter a due date for your task"
+                       th:name="duedate" th:value="${duedate}" data-cy="duedate" required autofocus>
+                <div class="error-label-div">
+                    <label class="form-label" id="due-date-error-message"></label>
+                </div>
+                <div class="mt-4">
+                    <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn  btn-primary">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+</body>
+</html>
