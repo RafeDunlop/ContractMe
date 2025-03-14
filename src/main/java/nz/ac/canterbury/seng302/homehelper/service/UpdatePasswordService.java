@@ -1,9 +1,13 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.UpdatePasswordDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,18 +15,28 @@ import java.util.List;
 @Service
 public class UpdatePasswordService {
     private final UserValidation userValidation;
+    private final LoginService loginService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UpdatePasswordService(UserValidation userValidation) {
+    public UpdatePasswordService(UserValidation userValidation, LoginService loginService) {
         this.userValidation = userValidation;
+        this.loginService = loginService;
+        this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
 
     public List<String> validatePassword(UpdatePasswordDTO updatePasswordDTO) {
         List<String> errors = new ArrayList<>();
+        User user = loginService.getUserByEmail();
 
+        if (!passwordEncoder.matches(updatePasswordDTO.getCurrentPassword(), user.getPassword())){
+            errors.add(String.format("Old Password does not match. Please try again."));
+        }
         //Checks second two fields are the same and that the passwords match the patterns
         errors.addAll(userValidation.validatePasswordString(updatePasswordDTO.getNewPassword(), updatePasswordDTO.getRetypePassword(),"updatePassword"));
         return errors;
     }
+
+
 }
