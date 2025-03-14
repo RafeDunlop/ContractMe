@@ -40,6 +40,9 @@ public class User {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdTimestamp;
 
+    @Column
+    private String profilePicture;
+
     @Column()
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
@@ -58,6 +61,7 @@ public class User {
         this.email = email;
         this.password = password;
         this.createdTimestamp = LocalDateTime.now();
+        this.profilePicture = null;
     }
 
     /**
@@ -125,6 +129,11 @@ public class User {
     public LocalDateTime getCreatedTimestamp() {
         return createdTimestamp;
     }
+
+    public String getProfilePicture() { return profilePicture; }
+
+    public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }
+
 
     @Override
     public boolean equals(Object o) {

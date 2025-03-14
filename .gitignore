@@ -38,3 +38,6 @@ out/
 
 ### Mac
 .DS_Store
+
+### Local Profile Picture Storage ###
+/profile_pictures

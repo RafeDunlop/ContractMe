@@ -63,7 +63,7 @@ public class SecurityConfiguration {
                 // Only allow admins to reach the "/admin" page
                 .requestMatchers("/admin")
                 .hasRole("ADMIN")
-                .requestMatchers("/user", "user/edit")
+                .requestMatchers("/user", "user/edit", "/user/uploadProfilePicture")
                 .hasRole("USER")
                 .anyRequest()
                 .authenticated()

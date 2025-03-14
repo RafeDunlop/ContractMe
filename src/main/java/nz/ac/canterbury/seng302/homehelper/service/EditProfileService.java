@@ -7,9 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service for the edit profile page.
@@ -19,6 +26,7 @@ public class EditProfileService {
 
     private final UserRepository userRepository;
     private final UserValidation userValidation;
+    private final String UPLOAD_DIR = "profile_pictures/";
 
     /**
      * Constructor for the service and links the repository and validator to the
@@ -91,5 +99,37 @@ public class EditProfileService {
         }
 
         return errors;
+    }
+
+    /**
+     * Updates the user Profile Picture
+     * The raw data of the profile picture is stored locally in the profile_picture directory
+     * path the path of the newly uploaded profile picture is stored under the users profilePicture in the repository
+     *
+     * @param user The user that changing their profile picture
+     * @param profilePicture raw data of profile picture
+     */
+    public void updateProfilePicture(User user, MultipartFile profilePicture) {
+        try {
+            // Generate unique filename
+            String fileName = UUID.randomUUID() + "_" + profilePicture.getOriginalFilename().replaceAll("[^a-zA-Z0-9.]", "_");
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+
+            // Ensure the directory exists
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // Save file to 'profile_pictures'
+            Path filePath = uploadPath.resolve(fileName);
+            Files.write(filePath, profilePicture.getBytes(), StandardOpenOption.CREATE_NEW);
+
+            // Store only the relative path in the database
+            user.setProfilePicture(fileName);
+            userRepository.save(user);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store file", e);
+        }
     }
 }

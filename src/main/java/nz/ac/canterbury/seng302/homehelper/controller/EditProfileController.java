@@ -12,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -99,5 +101,29 @@ public class EditProfileController {
             model.addAttribute("email", newUser.getEmail());
             return "editProfileTemplate";
         }
+    }
+
+    /**
+     * Handles the upload of a profile picture for the currently logged-in user.
+     * This method retrieves the currently logged-in user,
+     * Stores the profile picture locally,
+     * updates their profile picture using the generated address for the provided file,
+     *
+     * @param file  The MultipartFile representing the uploaded profile picture.
+     * @param model The Model object used to pass attributes to the view.
+     * @return The name of the view template to be rendered ("editProfileTemplate").
+     */
+
+    @PostMapping("/user/uploadProfilePicture")
+    public String uploadProfilePicture(@RequestParam("file") MultipartFile file, Model model) {
+        logger.info("POST /user/uploadProfilePicture");
+        try {
+            User user = loginService.getUserByEmail();
+            editProfileService.updateProfilePicture(user, file);
+        } catch (IllegalArgumentException e) {
+            List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
+            model.addAttribute("errorMessages", errorsList);
+        }
+        return "redirect:/user";
     }
 }
