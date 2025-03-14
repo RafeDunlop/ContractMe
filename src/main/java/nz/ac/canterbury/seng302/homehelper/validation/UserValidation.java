@@ -75,4 +75,21 @@ public class UserValidation {
 
         return errors;
     }
+
+    /**
+     * Compare Two Strings of password
+     * @param firstPassword the First password
+     * @param secondPassword the entered old password
+     */
+    public List<String> comparePassword(String firstPassword, String secondPassword, String type) {
+        List<String> errors = new ArrayList<>();
+
+        if (!firstPassword.equals(secondPassword) && type.equals("OldPasswords")) {
+            errors.add("Old Password is Incorrect.");
+        }
+        if (!firstPassword.equals(secondPassword) && type.equals("NewPasswords")) {
+            errors.add("New Passwords do not match.");
+        }
+        return errors;
+    }
 }
