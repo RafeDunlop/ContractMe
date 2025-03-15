@@ -2,7 +2,7 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="Content-Type" context="text/html; charset=UTF-8">
-    <title>Create renovation</title>
+    <title>Create New Task</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
 </head>
@@ -31,17 +31,19 @@
                     <label class="form-label" hidden id="description-error-message">Text gets updated based off error</label>
                 </div>
             </div>
+
             <div class="mb-3">
                 <div class="input-group">
                     <input type="text" class="form-control" id="roomList" placeholder="Enter a room name"
-                           th:name="roomList" data-cy="roomList" autofocus>
+                           th:name="roomList" autofocus>
                     <button type="button" class="btn btn-primary" id="create-room-button">Add</button>
                 </div>
                 <div class="error-label-div">
                     <label class="form-label" id="room-error-message"></label>
                 </div>
-                <table id="room-list" class="table table-bordered"></table>
+                <table id="room-list" class="table table-striped table-bordered"></table>
             </div>
+
             <div class="mb-3">
                 <label for="duedate" class="form-label">Due Date (optional):</label>
                 <input type="text" class="form-control" id="duedate" placeholder="Enter a due date for your task"
@@ -50,20 +52,15 @@
                     <label class="form-label" id="due-date-error-message"></label>
                 </div>
                 <div class="mt-4">
-                    <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn  btn-primary">Cancel</a>
+                    <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn  btn-primary">Create</a>
                 </div>
             </div>
         </form>
     </div>
-
+    <div class="mt-4">
+        <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn  btn-primary">Cancel</a>
+    </div>
 </div>
-
-
-
-
-
-
-
-
 </body>
+
 </html>
