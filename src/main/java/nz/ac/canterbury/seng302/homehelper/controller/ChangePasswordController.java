@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,8 +42,12 @@ public class ChangePasswordController {
         }
     }
 
-    @PostMapping("/change-password")
-    public String tryChangePassword(@ModelAttribute("userDTO") UpdatePasswordDTO updatePasswordDTO, Model model) {
+    @PostMapping("user/edit/updatePassword")
+    public String tryChangePassword(@ModelAttribute("userDTO") UpdatePasswordDTO updatePasswordDTO, BindingResult bindingResult, Model model) {
+
+        if (bindingResult.hasErrors()) {
+            bindingResult.getAllErrors().forEach(error -> logger.info(error.getDefaultMessage()));
+        }
 
         updatePasswordService.validatePassword(updatePasswordDTO);
 
