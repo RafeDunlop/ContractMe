@@ -18,6 +18,9 @@ public class RenovationRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @OneToMany(mappedBy = "RenovationRecord")
+    private RenovationTask renovationTask;
+
     @Column(nullable = false)
     private String name;
 

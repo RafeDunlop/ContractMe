@@ -8,11 +8,12 @@ import java.util.List;
 @Entity
 public class RenovationTask {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @EmbeddedId
+
+    private long renovationTaskId;
 
     @ManyToOne
+    @MapsId("renovationRecordId")
     @JoinColumn(name = "renovationRecordId", nullable=false)
     private RenovationRecord renovationRecord;
 
