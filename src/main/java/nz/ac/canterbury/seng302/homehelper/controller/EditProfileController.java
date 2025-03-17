@@ -111,9 +111,8 @@ public class EditProfileController {
      *
      * @param file  The MultipartFile representing the uploaded profile picture.
      * @param model The Model object used to pass attributes to the view.
-     * @return The name of the view template to be rendered ("editProfileTemplate").
+     * @return Redirect users back to the user profile page
      */
-
     @PostMapping("/user/uploadProfilePicture")
     public String uploadProfilePicture(@RequestParam("file") MultipartFile file, Model model) {
         logger.info("POST /user/uploadProfilePicture");
