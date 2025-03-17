@@ -5,6 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -123,8 +125,8 @@ public class RenovationControllerIntegrationTest {
      */
     @Test
     public void getRenovationRecord_searchByName_showNoRecordWithName() throws Exception {
-        RenovationRecord existingRecord1 = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
-        renovationRecordRepository.save(existingRecord1);
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
 
         String matchingName = "Two";
 
@@ -137,5 +139,61 @@ public class RenovationControllerIntegrationTest {
                         hasProperty("name", is("Renovation One"))))))
                 .andExpect(content().string(containsString("No Renovations found.")))
                 .andExpect(content().string(not(containsString("No Renovations have been made yet."))));
+    }
+
+    @Test
+    public void postCreateRecord_validRecordDetails_createRecord() throws Exception {
+        mockMvc.perform(post("/renovations/create")
+                .param("name", "Renovation One")
+                .param("description", "Some words")
+                .param("roomList", "Room 1", "Room 2")
+                .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"))
+                .andExpect(model().attributeExists("renovation"))
+                .andExpect(model().attribute("renovation",
+                        hasProperty("name", is("Renovation One"))));
+    }
+
+    @Test
+    public void deleteRecord_validRecordId_deletionSuccess() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        Assertions.assertFalse(userRecords.isEmpty());
+
+        mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+
+        userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        Assertions.assertTrue(userRecords.isEmpty());
+    }
+
+    @Test
+    public void getEditRecord_validRecordId_returnForm() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        mockMvc.perform(get("/renovations/edit")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("editRenovationTemplate"))
+                .andExpect(model().attribute("renovation", existingRecord));
+    }
+
+    @Test
+    public void getViewRecord_validRecordId_returnForm() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"))
+                .andExpect(model().attribute("renovation", existingRecord));
     }
 }
