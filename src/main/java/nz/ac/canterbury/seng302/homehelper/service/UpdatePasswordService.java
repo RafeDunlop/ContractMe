@@ -26,16 +26,19 @@ public class UpdatePasswordService {
     }
 
 
-    public List<String> validatePassword(UpdatePasswordDTO updatePasswordDTO) {
+    public void validatePassword(UpdatePasswordDTO updatePasswordDTO) {
         List<String> errors = new ArrayList<>();
         User user = loginService.getUserByEmail();
 
         if (!passwordEncoder.matches(updatePasswordDTO.getCurrentPassword(), user.getPassword())){
             errors.add(String.format("Old Password does not match. Please try again."));
         }
+
         //Checks second two fields are the same and that the passwords match the patterns
         errors.addAll(userValidation.validatePasswordString(updatePasswordDTO.getNewPassword(), updatePasswordDTO.getRetypePassword(),"updatePassword"));
-        return errors;
+        if (!errors.isEmpty()) {
+            throw new IllegalArgumentException(String.join(" ", errors));
+        }
     }
 
 

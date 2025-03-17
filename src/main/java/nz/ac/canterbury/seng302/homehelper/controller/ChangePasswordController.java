@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Controller
@@ -43,15 +44,20 @@ public class ChangePasswordController {
     }
 
     @PostMapping("user/edit/updatePassword")
-    public String tryChangePassword(@ModelAttribute("userDTO") UpdatePasswordDTO updatePasswordDTO, BindingResult bindingResult, Model model) {
-
+    public String tryChangePassword(@ModelAttribute("updatePasswordDTO") UpdatePasswordDTO updatePasswordDTO, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(error -> logger.info(error.getDefaultMessage()));
         }
+        try {
+            updatePasswordService.validatePassword(updatePasswordDTO);
+            return "redirect:/user";
+        } catch (IllegalArgumentException e) {
+            logger.warn("Form submission error: " + e.getMessage());
 
-        updatePasswordService.validatePassword(updatePasswordDTO);
+            List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
 
-        return "mainTemplate";
+            model.addAttribute("errorMessages", errorsList);
+        }
+        return "updatePasswordTemplate";
     }
-
 }
