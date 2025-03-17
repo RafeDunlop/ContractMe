@@ -143,16 +143,67 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     public void postCreateRecord_validRecordDetails_createRecord() throws Exception {
+        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        Assertions.assertTrue(userRecords.isEmpty());
+
         mockMvc.perform(post("/renovations/create")
-                .param("name", "Renovation One")
-                .param("description", "Some words")
-                .param("roomList", "Room 1", "Room 2")
-                .with(csrf()))
+                        .param("name", "Rénövatiôn Onē")
+                        .param("description", "A".repeat(512))
+                        .param("roomList", "Room 1", "Room 2")
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("viewRenovation"))
                 .andExpect(model().attributeExists("renovation"))
                 .andExpect(model().attribute("renovation",
-                        hasProperty("name", is("Renovation One"))));
+                        hasProperty("name", is("Rénövatiôn Onē"))));
+
+        userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
+        Assertions.assertFalse(userRecords.isEmpty());
+    }
+
+    @Test
+    public void postCreateRecord_invalidNameInput_stayOnForm() throws Exception {
+        mockMvc.perform(post("/renovations/create")
+                        .param("name", "Fail!")
+                        .param("description", "")
+                        .param("roomList", "Room", "Room")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("createRenovationTemplate"))
+                .andExpect(model().attribute("name", "Fail!"))
+                .andExpect(model().attribute("description", ""))
+                .andExpect(model().attribute("roomList", hasSize(2)));
+    }
+
+    @Test
+    public void postCreateRecord_invalidDescriptionInput_stayOnForm() throws Exception {
+        mockMvc.perform(post("/renovations/create")
+                        .param("name", "Renovation One")
+                        .param("description", "a".repeat(513))
+                        .param("roomList", "Room", "Room")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("createRenovationTemplate"))
+                .andExpect(model().attribute("name", "Renovation One"))
+                .andExpect(model().attribute("description", "a".repeat(513)))
+                .andExpect(model().attribute("roomList", hasSize(2)));
+    }
+
+    @Test
+    public void postCreateRecord_recordNameExists_stayOnForm() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        mockMvc.perform(post("/renovations/create")
+                        .param("name", "Renovation One")
+                        .param("description", "")
+                        .param("roomList", "Room", "Room")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("createRenovationTemplate"))
+                .andExpect(model().attribute("name", "Renovation One"))
+                .andExpect(model().attribute("description", ""))
+                .andExpect(model().attribute("roomList", hasSize(2)));
     }
 
     @Test
