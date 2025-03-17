@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,22 +17,26 @@ import java.util.List;
 public class UpdatePasswordService {
     private final UserValidation userValidation;
     private final LoginService loginService;
+
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UpdatePasswordService(UserValidation userValidation, LoginService loginService) {
+    public UpdatePasswordService(UserValidation userValidation, LoginService loginService,UserRepository userRepository) {
         this.userValidation = userValidation;
         this.loginService = loginService;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        this.userRepository = userRepository;
     }
 
 
-    public void validatePassword(UpdatePasswordDTO updatePasswordDTO) {
+    public void updatePassword(UpdatePasswordDTO updatePasswordDTO) {
         List<String> errors = new ArrayList<>();
         User user = loginService.getUserByEmail();
+        String password = updatePasswordDTO.getNewPassword();
 
         if (!passwordEncoder.matches(updatePasswordDTO.getCurrentPassword(), user.getPassword())){
-            errors.add(String.format("Old Password does not match. Please try again."));
+            errors.add(String.format("Old Password does not match."));
         }
 
         //Checks second two fields are the same and that the passwords match the patterns
@@ -39,6 +44,12 @@ public class UpdatePasswordService {
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException(String.join(" ", errors));
         }
+        // Updates the Users password to the new Password.
+        user.setPassword(passwordEncoder.encode(password));
+
+        //Save Users New Password
+        userRepository.save(user);
+
     }
 
 

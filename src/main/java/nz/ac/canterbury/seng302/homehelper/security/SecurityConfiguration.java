@@ -51,6 +51,7 @@ public class SecurityConfiguration {
      * @throws Exception if building the object fails
      */
     @Bean
+
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth.requestMatchers(AntPathRequestMatcher.antMatcher("/h2/**")).permitAll())
                 // Permit access to the h2 console
