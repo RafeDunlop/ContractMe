@@ -27,6 +27,6 @@ public class UpdatePasswordDTO {
     }
 
     public void setRetypePassword(String repeatedNewPassword) {
-        this.retypePassword = retypePassword;
+        this.retypePassword = repeatedNewPassword;
     }
 }

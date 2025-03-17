@@ -50,13 +50,14 @@ public class ChangePasswordController {
         }
         try {
             updatePasswordService.validatePassword(updatePasswordDTO);
-            return "redirect:/user";
+
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error: " + e.getMessage());
 
             List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
 
             model.addAttribute("errorMessages", errorsList);
+
         }
         return "updatePasswordTemplate";
     }
