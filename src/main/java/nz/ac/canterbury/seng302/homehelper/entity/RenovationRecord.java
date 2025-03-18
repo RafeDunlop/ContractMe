@@ -18,9 +18,6 @@ public class RenovationRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "RenovationRecord")
-    private RenovationTask renovationTask;
-
     @Column(nullable = false)
     private String name;
 
@@ -37,8 +34,8 @@ public class RenovationRecord {
     @LastModifiedDate
     private LocalDateTime editedDate;
 
-    @ElementCollection
-    private List<RenovationTask> renovationTasks;
+    @OneToMany(mappedBy = "renovationRecord")
+    private List<RenovationTask> renovationTasks = new ArrayList<>();
 
 
     protected RenovationRecord() {}

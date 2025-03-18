@@ -41,21 +41,19 @@ public class CreateTaskController {
         this.renovationTaskService = renovationTaskService;
     }
 
-
     /**
      * Gets the renovation task creation form
-     * @param recordId Renovation record id
+     * @param id Renovation record id
      * @param model Representations of params for use in thymeleaf
      * @return
      */
     @GetMapping("renovations/view/create")
-    public String createTask(@RequestParam(name = "recordId") Long recordId, Model model) {
+    public String createTask(@RequestParam(name = "id") Long id, Model model) {
         logger.info("GET renovations/view/create");
-        RenovationRecord renovationRecord = renovationRecordService.getRecordById(recordId);
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
         model.addAttribute("renovation", renovationRecord);
         return "createTaskTemplate";
-
     }
 
     /**
@@ -69,7 +67,7 @@ public class CreateTaskController {
      */
     @PostMapping("renovations/view/create")
     public String submitNewTask(@RequestParam(name = "name") String name,
-                                @RequestParam(name = "Description") String description,
+                                @RequestParam(name = "description") String description,
                                 @RequestParam(name = "roomList", required=false) List<String> roomList,
                                 @RequestParam(name = "dueDate", required=false) LocalDateTime dueDate,
                                 Model model) {

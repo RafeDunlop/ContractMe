@@ -8,7 +8,7 @@ import java.io.Serializable;
 public class RenovationTaskId implements Serializable {
 
 
-    private Long renovationRecordId;
-    private Long RenovationTaskId;
+    private Long id;
+    private Long renovationTaskId;
 
 }

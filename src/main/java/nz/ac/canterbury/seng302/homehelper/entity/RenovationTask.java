@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.entity;
 
 import jakarta.persistence.*;
+import nz.ac.canterbury.seng302.homehelper.entity.auxiliary.RenovationTaskId;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,11 +10,11 @@ import java.util.List;
 public class RenovationTask {
 
     @EmbeddedId
-    private long renovationTaskId;
+    private RenovationTaskId renovationTaskId;
 
     @ManyToOne
-    @MapsId("renovationRecordId")
-    @JoinColumn(name = "renovationRecordId", nullable=false)
+    @MapsId("id")
+    @JoinColumn(name = "id", nullable=false)
     private RenovationRecord renovationRecord;
 
     @Column(nullable=false)
