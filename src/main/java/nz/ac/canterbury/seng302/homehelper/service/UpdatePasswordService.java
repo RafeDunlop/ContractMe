@@ -34,11 +34,14 @@ public class UpdatePasswordService {
         List<String> errors = new ArrayList<>();
         User user = loginService.getUserByEmail();
         String password = updatePasswordDTO.getNewPassword();
+        String firstName = user.getFirstName();
+        String lastName = user.getLastName();
+        String email = user.getEmail();
 
         if (!passwordEncoder.matches(updatePasswordDTO.getCurrentPassword(), user.getPassword())){
             errors.add(String.format("Old Password does not match."));
         }
-
+        errors.addAll(userValidation.validateUpdatePasswordString(password, updatePasswordDTO.getRetypePassword(),"registerPassword",firstName,lastName,email));
         //Checks second two fields are the same and that the passwords match the patterns
         errors.addAll(userValidation.validatePasswordString(updatePasswordDTO.getNewPassword(), updatePasswordDTO.getRetypePassword(),"updatePassword"));
         if (!errors.isEmpty()) {

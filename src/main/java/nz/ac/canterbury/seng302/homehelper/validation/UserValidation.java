@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
+import nz.ac.canterbury.seng302.homehelper.entity.User;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -81,6 +82,16 @@ public class UserValidation {
             errors.add("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.");
         }
 
+        return errors;
+    }
+    // Note this function checks if the new password contains the user's name or email.
+    public List<String> validateUpdatePasswordString(String password, String confirmPassword, String type,
+            String firstName,String lastName,String email) {
+        List<String> errors = new ArrayList<>();
+
+        if (password != null && (password.contains( firstName) || (password.contains( lastName) || (password.contains( email))))){
+            errors.add("Your password should not contain your name or email address.");
+        }
         return errors;
     }
 
