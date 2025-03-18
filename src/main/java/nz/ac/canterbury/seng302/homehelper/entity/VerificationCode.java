@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-public class verificationCode {
+public class VerificationCode {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,7 +12,7 @@ public class verificationCode {
     private long id;
 
     @Column(nullable = false, updatable = false)
-    private byte[] code;
+    private String code;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime expiryTime;
@@ -21,7 +21,7 @@ public class verificationCode {
     @JoinColumn(name = "user_id")
     User user;
 
-    public verificationCode(byte[] code, User user, LocalDateTime expiryTime) {
+    public VerificationCode(String code, User user, LocalDateTime expiryTime) {
         this.user = user;
         this.code = code;
         this.expiryTime = expiryTime;
@@ -30,13 +30,13 @@ public class verificationCode {
     /**
      * JPA required no-args constructor
      */
-    public verificationCode() {}
+    public VerificationCode() {}
 
     public long getId() {
         return id;
     }
 
-    public byte[] getCode() {
+    public String getCode() {
         return code;
     }
 

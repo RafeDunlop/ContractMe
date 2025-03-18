@@ -1,14 +1,14 @@
 package nz.ac.canterbury.seng302.homehelper.repository;
 
-import nz.ac.canterbury.seng302.homehelper.entity.verificationCode;
+import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import org.springframework.data.repository.CrudRepository;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-public interface VerificationCodeRepository extends CrudRepository<verificationCode, Long> {
+public interface VerificationCodeRepository extends CrudRepository<VerificationCode, Long> {
 
-    Optional<verificationCode> findByCode(byte[] code);
+    Optional<VerificationCode> findByCode(String code);
 
     void deleteByExpiryTimeBefore(LocalDateTime time);
 }

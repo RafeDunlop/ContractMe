@@ -1,51 +1,70 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
-import nz.ac.canterbury.seng302.homehelper.entity.verificationCode;
+import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
-import nz.ac.canterbury.seng302.homehelper.validation.ValidationCodeValidation;
+import nz.ac.canterbury.seng302.homehelper.validation.VerificationCodeValidation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class VerificationCodeService {
 
+    private static final long verificationCodeClearRateMS = 60000;
+
     private VerificationCodeRepository verificationCodeRepository;
 
-    private ValidationCodeValidation validationCodeValidation;
+    private VerificationCodeValidation verificationCodeValidation;
 
     private LoginService loginService;
 
-    private static final SecureRandom random = new SecureRandom();
-
     @Autowired
-    public VerificationCodeService(VerificationCodeRepository verificationCodeRepository, ValidationCodeValidation validationCodeValidation, LoginService loginService) {
+    public VerificationCodeService(VerificationCodeRepository verificationCodeRepository,
+                                   VerificationCodeValidation verificationCodeValidation,
+                                   LoginService loginService) {
         this.verificationCodeRepository = verificationCodeRepository;
-        this.validationCodeValidation = validationCodeValidation;
+        this.verificationCodeValidation = verificationCodeValidation;
         this.loginService = loginService;
     }
 
 
-    public boolean consumeCode(Long signupCode) throws IllegalArgumentException {
+    public boolean consumeCode(String verificationCode) throws IllegalArgumentException {
+        Optional<VerificationCode> retrievedFromDb = verificationCodeRepository.findByCode(verificationCode);
+        if (retrievedFromDb.isEmpty()) return false;
+        if (verificationCodeValidation.isValid(retrievedFromDb.get(), verificationCode, loginService.getUserByEmail())) {
+            verificationCodeRepository.delete(retrievedFromDb.get());
+            return true;
+        }
         return false;
     }
 
-    public void issueVerificationCode() {
+    public String issueVerificationCode() {
         User currentUser = loginService.getUserByEmail();
-        byte[] randomCodeBytes = new byte[32];
-        random.nextBytes(randomCodeBytes);
-        verificationCode verificationCode = new verificationCode(
-                randomCodeBytes,
+        String code = generateCode();
+        VerificationCode verificationCode = new VerificationCode(
+                code,
                 currentUser,
                 LocalDateTime.now().plusMinutes(10)
         );
         verificationCodeRepository.save(verificationCode);
+        return code;
     }
 
-    public static void setRandomSeed(long seed) {
-        random.setSeed(seed);
+    @Scheduled(fixedRate = verificationCodeClearRateMS)
+    @Transactional
+    public void removeExpiredCodes() {
+        verificationCodeRepository.deleteByExpiryTimeBefore(LocalDateTime.now());
+    }
+
+    private String generateCode() {
+        // generate code
+        // to consider: make sure the code is not already in use
+        // ensure that the domain includes only characters that are easy to enter as a user
+        return "";
     }
 }
