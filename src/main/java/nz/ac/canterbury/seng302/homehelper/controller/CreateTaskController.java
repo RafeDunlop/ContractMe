@@ -29,6 +29,12 @@ public class CreateTaskController {
     private final RenovationTaskService renovationTaskService;
     private final RenovationRecordService renovationRecordService;
 
+    /**
+     * Induces spring to automatically sets up the {@code RenovationRecordService}
+     * @param renovationRecordService The service associated with renovation records
+     * @param renovationTaskService the service layer responsible for renovation tasks
+     *
+     */
     @Autowired
     public CreateTaskController(RenovationRecordService renovationRecordService, RenovationTaskService renovationTaskService) {
         this.renovationRecordService = renovationRecordService;
@@ -36,16 +42,31 @@ public class CreateTaskController {
     }
 
 
+    /**
+     * Gets the renovation task creation form
+     * @param recordId Renovation record id
+     * @param model Representations of params for use in thymeleaf
+     * @return
+     */
     @GetMapping("renovations/view/create")
-    public String createTask(@RequestParam(name = "id") Long id, Model model) {
+    public String createTask(@RequestParam(name = "recordId") Long recordId, Model model) {
         logger.info("GET renovations/view/create");
-        RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(recordId);
         if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
         model.addAttribute("renovation", renovationRecord);
         return "createTaskTemplate";
 
     }
 
+    /**
+     * Submits the create task form
+     * @param name Submitted renovation record name
+     * @param description Submitted renovation record description
+     * @param roomList Submitted list of rooms associated with renovation task
+     * @param dueDate Submitted task due date
+     * @param model Representations of params for use in thymeleaf
+     * @return
+     */
     @PostMapping("renovations/view/create")
     public String submitNewTask(@RequestParam(name = "name") String name,
                                 @RequestParam(name = "Description") String description,
