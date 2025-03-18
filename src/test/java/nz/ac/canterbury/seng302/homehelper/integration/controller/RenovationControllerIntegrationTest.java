@@ -5,7 +5,6 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +12,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -83,7 +85,7 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(view().name("renovationsTemplate"))
                 .andExpect(model().attributeExists("renovations"))
                 .andExpect(content().string(containsString("No Renovations have been made yet.")))
-                .andExpect(content().string(not(containsString("No Renovations found."))));;
+                .andExpect(content().string(not(containsString("No Renovations found."))));
 
     }
 
@@ -144,7 +146,7 @@ public class RenovationControllerIntegrationTest {
     @Test
     public void postCreateRecord_validRecordDetails_createRecord() throws Exception {
         List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
-        Assertions.assertTrue(userRecords.isEmpty());
+        assertTrue(userRecords.isEmpty());
 
         mockMvc.perform(post("/renovations/create")
                         .param("name", "Rénövatiôn Onē")
@@ -158,7 +160,7 @@ public class RenovationControllerIntegrationTest {
                         hasProperty("name", is("Rénövatiôn Onē"))));
 
         userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
-        Assertions.assertFalse(userRecords.isEmpty());
+        assertFalse(userRecords.isEmpty());
     }
 
     @Test
@@ -212,14 +214,14 @@ public class RenovationControllerIntegrationTest {
         renovationRecordRepository.save(existingRecord);
 
         List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
-        Assertions.assertFalse(userRecords.isEmpty());
+        assertFalse(userRecords.isEmpty());
 
         mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 
         userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
-        Assertions.assertTrue(userRecords.isEmpty());
+        assertTrue(userRecords.isEmpty());
     }
 
     @Test
@@ -236,6 +238,81 @@ public class RenovationControllerIntegrationTest {
     }
 
     @Test
+    public void postEditRecord_validNewRecordDetails_updateRecord() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        mockMvc.perform(post("/renovations/edit")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .param("name", "Rénövatiôn Onē")
+                        .param("description", "A".repeat(512))
+                        .param("roomList", "Room 3", "Room 4")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"))
+                .andExpect(model().attribute("renovation", allOf(
+                        hasProperty("name", is("Rénövatiôn Onē")),
+                        hasProperty("description", is("A".repeat(512))),
+                        hasProperty("rooms", contains("Room 3", "Room 4")))));
+
+        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        assertTrue(userRecords.isEmpty());
+
+        userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
+        assertFalse(userRecords.isEmpty());
+    }
+
+    @Test
+    public void postEditRecord_invalidNewRecordDetails_stayOnForm() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        mockMvc.perform(post("/renovations/edit")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .param("name", "Renovation One!")
+                        .param("description", "A".repeat(513))
+                        .param("roomList", "Room 1", "Room 2")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("editRenovationTemplate"))
+                .andExpect(model().attribute("renovation", allOf(
+                        hasProperty("name", is("Renovation One")),
+                        hasProperty("description", is("A".repeat(513))),
+                        hasProperty("rooms", contains("Room 1", "Room 2")))));
+
+        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        assertFalse(userRecords.isEmpty());
+
+        userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One!");
+        assertTrue(userRecords.isEmpty());
+    }
+
+    @Test
+    public void postEditRecord_recordNameExists_stayOnForm() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        RenovationRecord nameExistsRecord = new RenovationRecord(currentUser, "Renovation Two", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(nameExistsRecord);
+
+        mockMvc.perform(post("/renovations/edit")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .param("name", "Renovation Two")
+                        .param("description", "Some words")
+                        .param("roomList", "Room 1", "Room 2")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("editRenovationTemplate"))
+                .andExpect(model().attribute("renovation", allOf(
+                        hasProperty("name", is("Renovation One")),
+                        hasProperty("description", is("Some words")),
+                        hasProperty("rooms", contains("Room 1", "Room 2")))));
+
+        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        assertFalse(userRecords.isEmpty());
+    }
+
+    @Test
     public void getViewRecord_validRecordId_returnForm() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
@@ -246,5 +323,18 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("viewRenovation"))
                 .andExpect(model().attribute("renovation", existingRecord));
+    }
+
+    @Test
+    public void getViewRecord_invalidRecordId_throwException() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId() + 1))
+                        .with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
+                .andExpect(result -> assertEquals("400 BAD_REQUEST \"This renovation does not exist\"", Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
 }
