@@ -1,7 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
 import nz.ac.canterbury.seng302.homehelper.dto.UpdatePasswordDTO;
-import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
 import nz.ac.canterbury.seng302.homehelper.service.UpdatePasswordService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,22 +23,19 @@ public class ChangePasswordController {
     Logger logger = LoggerFactory.getLogger(RegisterController.class);
     private UpdatePasswordService updatePasswordService;
 
-    private EditProfileService editProfileService;
     @Autowired
-    public ChangePasswordController(UpdatePasswordService updatePasswordService,EditProfileService editProfileService) {
+    public ChangePasswordController(UpdatePasswordService updatePasswordService) {
         this.updatePasswordService = updatePasswordService;
-        this.editProfileService = editProfileService;
     }
 
     /**
-     * Displays the editProfileTemplate page under the path "/user/edit" where id
-     * is the ID of the user. Sets the current user to the page.
+     * Displays the UpdatePasswordTemplate page under the path "/user/edit/updatePassword"
      * @param model Model interface
-     * @return editProfileTemplate page
+     * @return updatePassword page
      */
     @GetMapping("user/edit/updatePassword")
     public String updatePassword(Model model) {
-        model.addAttribute("updatePasswordDTO", new UpdatePasswordDTO());
+        model.addAttribute("updatePasswordDTO", new UpdatePasswordDTO("","",""));
         logger.info("GET /user/edit/updatePassword");
         try {
             return "updatePasswordTemplate";
@@ -48,6 +44,15 @@ public class ChangePasswordController {
         }
     }
 
+    /**
+     * Posts a form with the updated user password. Goes back to "/user" if the
+     * user password is updated; otherwise, the error messages are set and stays on same page.
+     * @param updatePasswordDTO User object with the updated user details
+     * @param model Model interface
+     * @param bindingResult for binding error messages
+     * @param redirectAttributes to redirect the success message to /user page.
+     * @return updatePasswordTemplate page or redirect to user page
+     */
     @PostMapping("user/edit/updatePassword")
     public String tryChangePassword(@ModelAttribute("updatePasswordDTO") UpdatePasswordDTO updatePasswordDTO, BindingResult bindingResult, Model model,
             RedirectAttributes redirectAttributes) {
@@ -64,8 +69,8 @@ public class ChangePasswordController {
             List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
 
             model.addAttribute("errorMessages", errorsList);
+            return "updatePasswordTemplate";
 
         }
-        return "updatePasswordTemplate";
     }
 }

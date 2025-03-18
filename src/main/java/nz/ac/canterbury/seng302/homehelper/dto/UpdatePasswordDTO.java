@@ -6,6 +6,11 @@ public class UpdatePasswordDTO {
     private String newPassword;
     private String retypePassword;
 
+    public UpdatePasswordDTO(String currentPassword, String newPassword, String retypePassword) {
+        this.currentPassword = currentPassword;
+        this.newPassword = newPassword;
+        this.retypePassword = retypePassword;
+    }
     public String getCurrentPassword() {
         return currentPassword;
     }
