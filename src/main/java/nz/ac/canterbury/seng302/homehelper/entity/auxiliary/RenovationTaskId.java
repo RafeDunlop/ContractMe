@@ -4,8 +4,6 @@ import jakarta.persistence.Embeddable;
 
 import java.io.Serializable;
 
-
-
 @Embeddable
 public class RenovationTaskId implements Serializable {
 
