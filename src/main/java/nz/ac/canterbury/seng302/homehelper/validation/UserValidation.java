@@ -55,6 +55,8 @@ public class UserValidation {
     /**
      * Validates password strength
      * @param password the inputted password
+     * @param confirmPassword the retyped password
+     * @param type the method the validation was called from
      */
     // Note this function is for validating passwords for registration, not logging in
     public List<String> validatePasswordString(String password, String confirmPassword, String type) {
