@@ -109,7 +109,13 @@ public class EditProfileService {
      * @param user The user that changing their profile picture
      * @param profilePicture raw data of profile picture
      */
-    public void updateProfilePicture(User user, MultipartFile profilePicture) {
+    public List<String> updateProfilePicture(User user, MultipartFile profilePicture) {
+        List<String> errors = userValidation.validateProfilePicture(profilePicture);
+
+        if (!errors.isEmpty()) {
+            return errors;
+        }
+
         try {
             // Generate unique filename
             String fileName = UUID.randomUUID() + "_" + profilePicture.getOriginalFilename().replaceAll("[^a-zA-Z0-9.]", "_");
@@ -131,5 +137,7 @@ public class EditProfileService {
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file", e);
         }
+
+        return errors;
     }
 }

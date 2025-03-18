@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ public class UserValidation {
      * Validates the first and last names
      * @param name     the inputted name
      * @param nameType the type of name inputted, either first name or last name
+     * @return A list of errors that the inputted name generated
      */
     public List<String> validateNameString(String name, String nameType) {
         List<String> errors = new ArrayList<>();
@@ -54,6 +56,7 @@ public class UserValidation {
     /**
      * Validates password strength
      * @param password the inputted password
+     * @return A list of errors that the inputted password generated
      */
     // Note this function is for validating passwords for registration, not logging in
     public List<String> validatePasswordString(String password, String confirmPassword) {
@@ -71,6 +74,33 @@ public class UserValidation {
                 !password.matches(".*\\d.*") ||    // At least one number
                 !password.matches(".*[^a-zA-Z0-9].*")) { // At least one special char
             errors.add("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.");
+        }
+
+        return errors;
+    }
+
+    /**
+     * checks if the provided file is of an allowed image type (PNG, JPG, SVG)
+     * and ensures that its size does not exceed the limit (10MB).
+     *
+     * @param profilePicture Uploaded profile picture raw data file
+     * @return A list of errors that the inputted profile picture generated
+     */
+    public List<String> validateProfilePicture(MultipartFile profilePicture) {
+        List<String> errors = new ArrayList<>();
+
+        List<String> allowedTypes = List.of("image/png", "image/jpeg", "image/svg+xml");
+
+        // Get file content type
+        String contentType = profilePicture.getContentType();
+
+        // Validate MIME type
+        if (contentType == null || !allowedTypes.contains(contentType)) {
+            errors.add("Image must be of type png, jpg or svg.");
+        }
+
+        if (profilePicture.getSize() > 10000000) {
+            errors.add("Image must be less than 10MB.");
         }
 
         return errors;
