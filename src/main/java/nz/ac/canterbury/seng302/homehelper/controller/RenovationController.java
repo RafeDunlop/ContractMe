@@ -149,7 +149,7 @@ public class RenovationController {
     @GetMapping("/edit")
     public String editRenovation(@RequestParam(name = "id") Long id, Model model) {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
-        if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("name", renovationRecord.getName());
         return "editRenovationTemplate";
