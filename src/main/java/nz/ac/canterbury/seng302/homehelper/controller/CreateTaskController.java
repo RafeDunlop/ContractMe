@@ -53,6 +53,7 @@ public class CreateTaskController {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
         model.addAttribute("renovation", renovationRecord);
+        model.addAttribute("roomList", renovationRecord.getRooms());
         return "createTaskTemplate";
     }
 

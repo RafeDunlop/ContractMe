@@ -2,7 +2,22 @@
 let roomList = [];
 let roomId = 0;
 let roomFieldValid = false;
-const form = document.getElementById("renovation-form");
+const form = document.getElementById("create-task-form");
+
+form.addEventListener("submit", function(event) {
+    let input;
+    event.preventDefault();
+    form.querySelectorAll("input[name='roomList']").forEach(room => room.remove());
+    roomList.forEach(room => {
+        input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "roomList";
+        input.value = room[1];
+        form.appendChild(input);
+    });
+    form.submit();
+});
+
 
 
 function setRoomList(previousRoomList) {
@@ -13,6 +28,9 @@ function setRoomList(previousRoomList) {
         });
         renderRooms();
     }
+}
+
+function populationRoomSelection() {
 }
 
 function renderRooms() {
