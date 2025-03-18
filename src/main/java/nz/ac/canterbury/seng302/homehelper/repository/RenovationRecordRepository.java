@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.repository;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -29,11 +30,12 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
 
     /**
      * Gets all renovation records not case-sensitive that are like the given string
+     * @param user The current user
      * @param name to search for records like it
      * @return list off all records containing the string in its name
      */
-    @Query("SELECT f FROM RenovationRecord f WHERE LOWER(f.name) LIKE LOWER(CONCAT('%', :name, '%'))")
-    List<RenovationRecord> findByNameContainingIgnoreCase(@Param("name") String name);
+    @Query("SELECT f FROM RenovationRecord f WHERE (f.user) = (:user) AND LOWER(f.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    List<RenovationRecord> findByNameContainingIgnoreCase(@Param("user") User user, @Param("name") String name);
 
     /**
      * Finds a renovation record with a matching name not case-sensitive if it exists
@@ -42,4 +44,12 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
      */
     @Query("SELECT f FROM RenovationRecord f WHERE (f.name) = (:name)")
     Optional<RenovationRecord> findExactMatch(@Param("name") String name);
+
+    /**
+     * Finds all renovation records where the current user on the application matches the owner of the renovation.
+     * @param user The current user
+     * @return A list of all the renovation records from the user
+     */
+    @Query("SELECT f FROM RenovationRecord f WHERE (f.user) = (:user)")
+    List<RenovationRecord> findByUser(@Param("user") User user);
 }

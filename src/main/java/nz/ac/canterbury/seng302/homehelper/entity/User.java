@@ -21,6 +21,10 @@ public class User {
     @Column(name = "user_id")
     private Long id;
 
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private List<RenovationRecord> renovationRecords;
+
     @Column(nullable = false, length = 64)
     private String firstName;
 
