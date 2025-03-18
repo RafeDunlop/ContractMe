@@ -157,6 +157,45 @@ public class UserValidationTest {
     }
 
     /**
+     * Test to see if the correct error message is displayed when email is contained in password
+     * Expects: "Your password should not contain your name or email address." error
+     */
+    @Test
+    public void PasswordValidation_ContainsEmail_RejectInputs() {
+        UserValidation userValidation = new UserValidation();
+        List<String> expectedErrorList = List.of(
+                "Your password should not contain your name or email address."
+        );
+        Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Abhisekh123!#", "Abhisekh123!#","registerPassword","Abhisekh","Chand","Abhisekh23@gmail.com"));
+    }
+
+    /**
+     * Test to see if the correct error message is displayed when First Name of user  is contained in password
+     * Expects: "Your password should not contain your name or email address." error
+     */
+    @Test
+    public void PasswordValidation_ContainsFirstName_RejectInputs() {
+        UserValidation userValidation = new UserValidation();
+        List<String> expectedErrorList = List.of(
+                "Your password should not contain your name or email address."
+        );
+        Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Abhisekh123!#", "Abhisekh123!#","registerPassword","Abhisekh","Chand","Donald23@gmail.com"));
+    }
+
+    /**
+     * Test to see if the correct error message is displayed when Last Name of user  is contained in password
+     * Expects: "Your password should not contain your name or email address." error
+     */
+    @Test
+    public void PasswordValidation_ContainsLasttName_RejectInputs() {
+        UserValidation userValidation = new UserValidation();
+        List<String> expectedErrorList = List.of(
+                "Your password should not contain your name or email address."
+        );
+        Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Chand123!#", "Chand123!#","registerPassword","Abhisekh","Chand","Donald23@gmail.com"));
+    }
+
+    /**
      * Test to see if no error message is displayed when a valid password that matches the confirmPassword is entered
      * Expects: empty List
      */
