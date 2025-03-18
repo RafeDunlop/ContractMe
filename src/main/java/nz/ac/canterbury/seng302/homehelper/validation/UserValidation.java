@@ -99,6 +99,7 @@ public class UserValidation {
             errors.add("Image must be of type png, jpg or svg.");
         }
 
+        // Validate Profile Picture Size is no greater than 10MB
         if (profilePicture.getSize() > 10000000) {
             errors.add("Image must be less than 10MB.");
         }
