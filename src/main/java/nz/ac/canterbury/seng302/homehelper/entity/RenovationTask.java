@@ -9,7 +9,6 @@ import java.util.List;
 public class RenovationTask {
 
     @EmbeddedId
-
     private long renovationTaskId;
 
     @ManyToOne
@@ -25,7 +24,7 @@ public class RenovationTask {
     private String description;
 
     @ElementCollection
-    private List<String> rooms;
+    private List<String> roomList;
 
     @Column
     private LocalDateTime dueDate;
@@ -35,4 +34,18 @@ public class RenovationTask {
      * JPA required no-args constructor
      */
     public RenovationTask() {}
+
+    /**
+     * Constructor for RenovationTask object
+     * @param name
+     * @param description
+     * @param roomList
+     * @param dueDate
+     */
+    public RenovationTask(String name, String description, List<String> roomList, LocalDateTime dueDate) {
+        this.name = name.trim();
+        this.description = (description != null) ? description.trim() : "";
+        this.roomList = roomList;
+        this.dueDate = dueDate;
+    }
 }

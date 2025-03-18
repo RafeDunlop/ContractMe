@@ -37,6 +37,9 @@ public class RenovationRecord {
     @LastModifiedDate
     private LocalDateTime editedDate;
 
+    @ElementCollection
+    private List<RenovationTask> renovationTasks;
+
 
     protected RenovationRecord() {}
 
@@ -93,6 +96,11 @@ public class RenovationRecord {
         return createdDate;
     }
 
+    /**
+     * Gets the list of all tasks made under a record
+     * @return list of renovation tasks
+     */
+    public List<RenovationTask> getRenovationTasks() {return renovationTasks; }
     /**
      * Gets created date of the renovation record
      */
