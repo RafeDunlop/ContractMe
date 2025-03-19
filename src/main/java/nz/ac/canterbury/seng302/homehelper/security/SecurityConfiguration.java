@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -45,72 +44,39 @@ public class SecurityConfiguration {
     }
 
     /**
-     * H2 Security filter chain.
-     * For development purposes only.
-     *
+     * Security filter chain. Provides authentication for pages, defines logging in/out, and
+     * allows access to database.
      * @param http http security configuration object from spring
      * @return Custom SecurityFilterChain
      * @throws Exception if building the object fails
      */
     @Bean
-    @Order(1)
-    public SecurityFilterChain h2AccessFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth.requestMatchers(AntPathRequestMatcher.antMatcher("/h2/**")).permitAll())
-                .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(auth -> auth
+                        // Give access to database and allow all users to go on the matching pages.
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/h2/**")).permitAll()
+                        .requestMatchers("/", "/register", "/login", "/webjars/**").permitAll()
+
+                        // Only the specified roles can reach the matching pages
+                        .requestMatchers("/admin").hasRole("ADMIN")
+                        .requestMatchers("/main", "/user/**", "/renovations/**").hasRole("USER")
+                        .anyRequest().authenticated())
+
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
-                .csrf(csrf -> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2/**")));
-        return http.build();
-    }
+                .csrf(csrf -> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2/**")))
 
-    /**
-     * User Security filter chain.
-     * This filter chain applies to admins and users and enforces the roles ADMIN, and USER respectively.
-     *
-     * @param http http security configuration object from spring
-     * @return Custom SecurityFilterChain
-     * @throws Exception if building the object fails
-     */
-    @Bean
-    @Order(2)
-    public SecurityFilterChain userFilterChain(HttpSecurity http) throws Exception {
-        String[] paths = {"/user", "/renovations/**", "/admin", "/admin/**"};
-        String[] userPaths = {"/user", "/renovations/**"};
-        String[] adminPaths = {"/admin", "/admin/**"};
-        http.securityMatcher(paths)
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(userPaths).hasRole("USER")
-                        .requestMatchers(adminPaths).hasRole("ADMIN")
-                );
-        return http.build();
-    }
-
-    /**
-     * Default Security filter chain.
-     *
-     * @param http http security configuration object from spring
-     * @return Custom SecurityFilterChain
-     * @throws Exception if building the object fails
-     */
-    @Bean
-    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
-        String[] allowedPaths = {"/", "/login", "/register", "/main", "/webjars/**", "/favicon.ico"};
-        http
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(allowedPaths).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .formLogin(formLogin -> formLogin
+                // Define logging in, a POST "/login" endpoint now exists under the hood, after login redirect to main page.
+                // Errors are handled by CustomAuthFailHandler and displayed by the LoginController.
+                .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/main")
-                        .failureHandler(authFailHandler)
-                )
+                        .defaultSuccessUrl("/main", true)
+                        .failureHandler(authFailHandler))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login")
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                );
+                        .deleteCookies("JSESSIONID"));
         return http.build();
     }
 }
