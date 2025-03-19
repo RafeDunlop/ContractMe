@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +29,17 @@ public class RenovationController {
 
     private final RenovationRecordService renovationRecordService;
 
+    private final LoginService loginService;
+
     /**
      * induces spring to automatically sets up the {@code RenovationRecordService}
      * @param renovationRecordService The renovation service which provides non-UI functionality
+     * @param loginService The login service provides the function to get the current user
      */
     @Autowired
-    public RenovationController(RenovationRecordService renovationRecordService) {
+    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService) {
         this.renovationRecordService = renovationRecordService;
+        this.loginService = loginService;
     }
 
     /**
@@ -44,10 +50,15 @@ public class RenovationController {
      */
     @GetMapping
     public String renovations(@RequestParam(value = "searchQuery", required = false, defaultValue="") String searchQuery, Model model) {
-        logger.info("GET /renovations");
-        model.addAttribute("renovations", renovationRecordService.getRecordResult(searchQuery));
-        model.addAttribute("searchQuery", searchQuery);
-        return "renovationsTemplate";
+        logger.info("GET renovations");
+        try {
+            User user = loginService.getUserByEmail();
+            model.addAttribute("renovations", renovationRecordService.getRecordResultByName(user, searchQuery));
+            model.addAttribute("searchQuery", searchQuery);
+            return "renovationsTemplate";
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     /**
@@ -97,17 +108,22 @@ public class RenovationController {
         }
 
         try { // save the record and go to the view page
-            RenovationRecord renovationRecord = new RenovationRecord(name, description, roomList);
-            renovationRecordService.addRenovationRecord(renovationRecord);
-            model.addAttribute("renovation", renovationRecord);
-            return "viewRenovation";
+            User user = loginService.getUserByEmail();
+            try {
+                RenovationRecord renovationRecord = new RenovationRecord(user, name, description, roomList);
+                renovationRecordService.addRenovationRecord(renovationRecord);
+                model.addAttribute("renovation", renovationRecord);
+                return "viewRenovation";
+            } catch (IllegalArgumentException e) {
+                logger.warn("Form submission error", e);
+                model.addAttribute("name", name);
+                model.addAttribute("description", description);
+                model.addAttribute("roomList", roomList);
+                model.addAttribute("errorMessage", "Invalid input: " + e.getMessage());
+                return "createRenovationTemplate";
+            }
         } catch (IllegalArgumentException e) {
-            logger.warn("Form submission error", e);
-            model.addAttribute("name", name);
-            model.addAttribute("description", description);
-            model.addAttribute("roomList", roomList);
-            model.addAttribute("errorMessage", "Invalid input: " + e.getMessage());
-            return "createRenovationTemplate";
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
@@ -133,7 +149,7 @@ public class RenovationController {
     @GetMapping("/edit")
     public String editRenovation(@RequestParam(name = "id") Long id, Model model) {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
-        if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("name", renovationRecord.getName());
         return "editRenovationTemplate";

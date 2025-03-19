@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,36 +37,19 @@ public class RenovationRecordService {
     @Autowired
     public RenovationRecordService(RenovationRecordRepository renovationRecordRepository) {
         this.renovationRecordRepository = renovationRecordRepository;
-        addStartingRenovationRecords();
-    }
-
-    private void addStartingRenovationRecords() {
-        RenovationRecord startingRecord1 = new RenovationRecord(
-                "My First Renovation",
-                "exciting!",
-                List.of("bathroom", "kitchen",  "billiards room")
-        );
-        addRenovationRecord(startingRecord1);
-
-        ArrayList<String> rooms2 = new ArrayList<>(Arrays.asList("I L O V E S E N G 3 0 2".split(" ")));
-        RenovationRecord startingRecord2 = new RenovationRecord(
-                "My Second Renovation",
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
-                rooms2
-        );
-        addRenovationRecord(startingRecord2);
     }
 
     /**
-     * Retrieves a list of renovation records that are like the given name
-     * @param name the name to search for, not case-sensitive
-     * @return a list of renovation records that match the name
+     * Retrieves a list of renovation records associated with the current user that are like the given name
+     * @param user The current user
+     * @param name The name to search for, not case-sensitive
+     * @return a list of renovation records from the user that match the name
      */
-    public List<RenovationRecord> getRecordResult(String name) {
+    public List<RenovationRecord> getRecordResultByName(User user, String name) {
         if (name == null || name.trim().isEmpty()) {
-            return renovationRecordRepository.findAll();
+            return renovationRecordRepository.findByUser(user);
         }
-        return renovationRecordRepository.findByNameContainingIgnoreCase(name);
+        return renovationRecordRepository.findByNameContainingIgnoreCase(user, name);
     }
 
     /**
