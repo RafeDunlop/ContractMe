@@ -20,7 +20,7 @@ public class VerificationCode {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String token;
+    private String code;
 
     @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "user_id")
@@ -36,7 +36,7 @@ public class VerificationCode {
      */
     public VerificationCode(User user, String token) {
         this.user = user;
-        this.token = token;
+        this.code = token;
         expiryDate = calculateExpiryDate();
     }
 
@@ -54,5 +54,13 @@ public class VerificationCode {
 
     public Date getExpiryDate() {
         return expiryDate;
+    }
+
+    public User getUser() {
+        return user;
+    }
+    
+    public String getCode() {
+        return code;
     }
 }

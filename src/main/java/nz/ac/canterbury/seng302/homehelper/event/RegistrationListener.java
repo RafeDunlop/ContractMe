@@ -13,8 +13,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
-import net.bytebuddy.utility.RandomString;
-
 /**
  * Basic listener for the {@link OnRegistrationCompleteEvent} based on
  * <a href=https://www.baeldung.com/registration-verify-user-by-email>this tutorial.</a>

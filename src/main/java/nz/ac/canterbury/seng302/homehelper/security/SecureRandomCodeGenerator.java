@@ -15,7 +15,7 @@ public class SecureRandomCodeGenerator {
     private static final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String LOWER = UPPER.toLowerCase();
     private static final String DIGITS = "0123456789";
-    private static final String ALPHANUM = UPPER + LOWER + DIGITS;
+    public static final String ALPHANUM = UPPER + LOWER + DIGITS;
     private final char[] symbols;
     private final char[] buf;
     
@@ -29,7 +29,10 @@ public class SecureRandomCodeGenerator {
         if (length < 1) {
             throw new IllegalArgumentException();
         }
-        this.secureRandom = new SecureRandom();
+        if (symbols.length() < 2) {
+            throw new IllegalArgumentException();
+        }
+        this.secureRandom = secureRandom;
         this.buf = new char[length];
         this.symbols = symbols.toCharArray();
     }
