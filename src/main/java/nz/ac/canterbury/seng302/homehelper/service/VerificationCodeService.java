@@ -2,9 +2,12 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import nz.ac.canterbury.seng302.homehelper.security.SecureRandomCodeGenerator;
 import nz.ac.canterbury.seng302.homehelper.validation.VerificationCodeValidation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -20,7 +23,9 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class VerificationCodeService {
 
-    private static final long verificationCodeBaseClearRateInMS = 60000;
+    private static final long verificationCodeBaseClearRateInMS = 3600000; // one hour in ms
+
+    private static final Logger logger = LoggerFactory.getLogger(VerificationCodeService.class);
 
     private final VerificationCodeRepository verificationCodeRepository;
 
@@ -28,26 +33,31 @@ public class VerificationCodeService {
 
     private final LoginService loginService;
 
+    private final UserRepository userRepository;
+
     private Long randomSeed;
 
     @Autowired
     public VerificationCodeService(VerificationCodeRepository verificationCodeRepository,
                                    VerificationCodeValidation verificationCodeValidation,
-                                   LoginService loginService) {
+                                   LoginService loginService, UserRepository userRepository) {
         this.verificationCodeRepository = verificationCodeRepository;
         this.verificationCodeValidation = verificationCodeValidation;
         this.loginService = loginService;
+        this.userRepository = userRepository;
     }
 
 
-    public boolean consumeCode(String verificationCode) throws IllegalArgumentException {
-        Optional<VerificationCode> retrievedFromDb = verificationCodeRepository.findByCode(verificationCode);
-        if (retrievedFromDb.isEmpty()) return false;
-        if (verificationCodeValidation.isValid(retrievedFromDb.get(), verificationCode, loginService.getUserByEmail())) {
-            verificationCodeRepository.delete(retrievedFromDb.get());
-            return true;
+    public void consumeSignupCode(String signupCode) throws IllegalArgumentException {
+        Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(signupCode);
+        if (verificationCodeOptional.isPresent() &&
+                verificationCodeValidation.isValid(verificationCodeOptional.get(), signupCode, loginService.getUserByEmail())) {
+            VerificationCode verificationCode = verificationCodeOptional.get();
+            verificationCode.getUser().activate();
+            verificationCodeRepository.delete(verificationCode);
+            return;
         }
-        return false;
+        throw new IllegalArgumentException("Signup code invalid");
     }
 
     public String issueVerificationCode(GenerationStrategy generationStrategy, User user, Locale locale) {
@@ -60,7 +70,7 @@ public class VerificationCodeService {
         );
         verificationCodeRepository.save(verificationCode);
         ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-        scheduledExecutorService.schedule(this::removeExpiredCodes, 10, TimeUnit.MINUTES);
+        scheduledExecutorService.schedule(() -> deleteSignupCodeAndAccount(code), 10, TimeUnit.MINUTES);
         return code;
     }
 
@@ -74,9 +84,35 @@ public class VerificationCodeService {
         return code;
     }
 
+    /**
+     * removes ALL expired codes
+     * /todo deprecated
+     */
     @Scheduled(fixedRate = verificationCodeBaseClearRateInMS)
     @Transactional
     public void removeExpiredCodes() {
+
+    }
+
+    public void deleteSignupCodeAndAccount(String code) {
+        Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(code);
+        if (verificationCodeOptional.isPresent()) {
+            VerificationCode verificationCode = verificationCodeOptional.get();
+            if (verificationCode.isExpired()) {
+                User user = verificationCode.getUser();
+                if (user.isActivated()) {
+                    throw new IllegalStateException("An expired signup code exists whose associated user is activated");
+                }
+                logger.info("deleting user whose signup code expired. User: {}, code: {}", user, code);
+                userRepository.delete(user);
+                verificationCodeRepository.delete(verificationCode);
+            } else {
+                logger.warn("The verification code {} claims not to have expired. {}",
+                        code,
+                        "This should only happen if the same code is re-issued after being consumed within 10 minutes"
+                );
+            }
+        }
     }
 
     public void setSeed(long seed) {
