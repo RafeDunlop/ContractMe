@@ -10,12 +10,9 @@ import java.security.SecureRandom;
  * @author stack overflow
  */
 public class SecureRandomCodeGenerator {
-    private SecureRandom secureRandom;
 
-    private static final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private static final String LOWER = UPPER.toLowerCase();
-    private static final String DIGITS = "0123456789";
-    public static final String ALPHANUM = UPPER + LOWER + DIGITS;
+    private final SecureRandom secureRandom;
+
     private final char[] symbols;
     private final char[] buf;
     
@@ -35,16 +32,6 @@ public class SecureRandomCodeGenerator {
         this.secureRandom = secureRandom;
         this.buf = new char[length];
         this.symbols = symbols.toCharArray();
-    }
-
-    /**
-     * Initialise a secure random generator to generate alphanumeric strings
-     * of a given length.
-     *
-     * @param length the length of characters each random code should be
-     */
-    public SecureRandomCodeGenerator(int length) {
-        this(new SecureRandom(), length, ALPHANUM);
     }
 
     /**
