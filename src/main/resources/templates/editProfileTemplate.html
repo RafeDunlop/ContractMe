@@ -37,6 +37,8 @@
             </form>
         </div>
 
+        <img th:src="@{'/profile_pictures/' + ${profilePictureFileName}}" alt="Profile Picture">
+
         <form th:action="@{/user/edit}" method="post">
             <div class="form-group mb-3">
                 <div class="mb-3">

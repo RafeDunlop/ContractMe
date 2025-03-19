@@ -61,7 +61,7 @@ public class User {
         this.email = email;
         this.password = password;
         this.createdTimestamp = LocalDateTime.now();
-        this.profilePicture = null;
+        this.profilePicture = "default/default.jpg";
     }
 
     /**

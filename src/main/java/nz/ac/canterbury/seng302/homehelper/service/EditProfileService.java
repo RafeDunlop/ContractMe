@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -110,32 +111,33 @@ public class EditProfileService {
      * @param profilePicture raw data of profile picture
      */
     public List<String> updateProfilePicture(User user, MultipartFile profilePicture) {
-        List<String> errors = userValidation.validateProfilePicture(profilePicture);
-
-        if (!errors.isEmpty()) {
+        List<String> errors = new ArrayList<>();
+        if (profilePicture.isEmpty()) {
+            errors.add("No file selected.");
             return errors;
         }
 
         try {
-            // Generate unique filename
-            String fileName = UUID.randomUUID() + "_" + profilePicture.getOriginalFilename().replaceAll("[^a-zA-Z0-9.]", "_");
+            // Ensure directory exists
             Path uploadPath = Paths.get(UPLOAD_DIR);
-
-            // Ensure the directory exists
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
 
-            // Save file to 'profile_pictures'
-            Path filePath = uploadPath.resolve(fileName);
-            Files.write(filePath, profilePicture.getBytes(), StandardOpenOption.CREATE_NEW);
+            // Generate a unique filename
+            String filename = UUID.randomUUID() + "_" + profilePicture.getOriginalFilename();
+            Path filePath = uploadPath.resolve(filename);
 
-            // Store only the relative path in the database
-            user.setProfilePicture(fileName);
+            // Save the file
+            try (OutputStream os = Files.newOutputStream(filePath, StandardOpenOption.CREATE)) {
+                os.write(profilePicture.getBytes());
+            }
+
+            // Update the user’s profile picture path
+            user.setProfilePicture(filename);
             userRepository.save(user);
-
         } catch (IOException e) {
-            throw new RuntimeException("Failed to store file", e);
+            errors.add("Error saving file: " + e.getMessage());
         }
 
         return errors;

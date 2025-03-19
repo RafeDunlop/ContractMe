@@ -5,12 +5,21 @@ import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -36,11 +45,38 @@ public class ProfileController {
 			model.addAttribute("lastName", user.getLastName());
 			model.addAttribute("email", user.getEmail());
 			model.addAttribute("dateAdded", user.getCreatedTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+			model.addAttribute("profilePictureFileName", user.getProfilePicture());
+
 			return "profileTemplate";
 		} catch (IllegalArgumentException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 	}
 
+	@GetMapping({"/profile_pictures/{filename}", "/profile_pictures/default/{filename}"})
+	@ResponseBody
+	public ResponseEntity<Resource> getProfilePicture(@PathVariable String filename) {
+		try {
 
+			Path file;
+			if (filename.equals("default.jpg")) {
+				file = Paths.get("profile_pictures/default/").resolve("default.jpg").normalize();
+			} else {
+				file = Paths.get("profile_pictures/").resolve(filename).normalize();
+			}
+
+			Resource resource = new UrlResource(file.toUri());
+
+			String imageType = Files.probeContentType(file);
+
+			// Return the Image
+			return ResponseEntity.ok()
+					.contentType(MediaType.parseMediaType(imageType))
+					.body(resource);
+
+		} catch (Exception e) {
+			// Return 404 not found error
+			return ResponseEntity.notFound().build();
+		}
+	}
 }

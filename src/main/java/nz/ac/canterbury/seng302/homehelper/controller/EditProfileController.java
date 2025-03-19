@@ -28,6 +28,7 @@ public class EditProfileController {
 
     private final EditProfileService editProfileService;
     private final LoginService loginService;
+    private final String UPLOAD_DIR = "profile_pictures/";
 
 
     /**
@@ -52,17 +53,20 @@ public class EditProfileController {
     public String editProfile(Model model) {
         logger.info("GET /user/edit");
         try {
-            // Sets current user to page
             User user = loginService.getUserByEmail();
             model.addAttribute("user", user);
             model.addAttribute("firstName", user.getFirstName());
             model.addAttribute("lastName", user.getLastName());
             model.addAttribute("email", user.getEmail());
+            model.addAttribute("profilePictureFileName", user.getProfilePicture());
+
             return "editProfileTemplate";
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
+
+
 
     /**
      * Posts a form with the updated user details. Goes back to "/user" if the
@@ -115,13 +119,11 @@ public class EditProfileController {
      */
     @PostMapping("/user/uploadProfilePicture")
     public String uploadProfilePicture(@RequestParam("file") MultipartFile file, Model model) {
-        logger.info("POST /user/uploadProfilePicture");
-        try {
-            User user = loginService.getUserByEmail();
-            editProfileService.updateProfilePicture(user, file);
-        } catch (IllegalArgumentException e) {
-            List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
-            model.addAttribute("errorMessages", errorsList);
+        User user = loginService.getUserByEmail();
+        List<String> errors = editProfileService.updateProfilePicture(user, file);
+
+        if (!errors.isEmpty()) {
+            model.addAttribute("errorMessages", errors);
         }
         return "redirect:/user";
     }
