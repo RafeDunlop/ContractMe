@@ -47,9 +47,8 @@ public class VerificationCodeService {
         User currentUser = loginService.getUserByEmail();
         String code = generateCode();
         VerificationCode verificationCode = new VerificationCode(
-                code,
                 currentUser,
-                LocalDateTime.now().plusMinutes(10)
+                code
         );
         verificationCodeRepository.save(verificationCode);
         return code;
@@ -58,7 +57,6 @@ public class VerificationCodeService {
     @Scheduled(fixedRate = verificationCodeClearRateMS)
     @Transactional
     public void removeExpiredCodes() {
-        verificationCodeRepository.deleteByExpiryTimeBefore(LocalDateTime.now());
     }
 
     private String generateCode() {

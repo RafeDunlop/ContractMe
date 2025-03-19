@@ -4,7 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,17 +30,20 @@ public class RegisterService {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterService.class);
     private final UserRepository userRepository;
+    private final VerificationCodeRepository verificationCodeRepository;
     private final UserValidation userValidation;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public RegisterService(UserRepository userRepository, UserValidation userValidation,
-                           AuthenticationManager authenticationManager) {
+                           AuthenticationManager authenticationManager,
+                           VerificationCodeRepository verificationCodeRepository) {
         this.userRepository = userRepository;
         this.userValidation = userValidation;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        this.verificationCodeRepository = verificationCodeRepository;
     }
 
     /**
@@ -80,7 +85,12 @@ public class RegisterService {
     }
 
     /**
-     * Authenticate the user once registered
+     * Authenticate the user once registered.
+     * Sets the authentication token and saves the session.
+     *
+     * @param user the user object which has already been registered
+     * @param password the user's plaintext password
+     * @param request, the HttpServletRequest object from upper layer (spring)
      */
     public void authenticateUser(User user, String password, HttpServletRequest request) {
         Authentication authToken = new UsernamePasswordAuthenticationToken(user.getEmail(), password);
@@ -89,6 +99,17 @@ public class RegisterService {
         securityContext.setAuthentication(auth);
         HttpSession session = request.getSession(true);
         session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
+    }
+
+    /**
+     * Create the validation code and save it to the database.
+     *
+     * @param user the user to associate with the code
+     * @param code the validation code
+     */
+    public void createValidationCode(User user, String code) {
+        VerificationCode verificationToken = new VerificationCode(user, code);
+        verificationCodeRepository.save(verificationToken);
     }
 
     /**

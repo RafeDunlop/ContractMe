@@ -8,6 +8,7 @@ import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.ui.Model;
 
 public class RegisterControllerTest {
@@ -21,7 +22,8 @@ public class RegisterControllerTest {
     void testValidPathway_FromRegistrationPage_ToUserProfilePage() {
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         RegisterService registerServiceSpy = Mockito.mock(RegisterService.class);
-        RegisterController registerController = new RegisterController(registerServiceSpy);
+        ApplicationEventPublisher applicationEventPublisher = Mockito.mock(ApplicationEventPublisher.class);
+        RegisterController registerController = new RegisterController(registerServiceSpy, applicationEventPublisher);
 
         Model model = Mockito.mock(Model.class);
         UserRegisterDTO mockedUser = new UserRegisterDTO("","","","","");
