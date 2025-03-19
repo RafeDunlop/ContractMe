@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.event;
 
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.security.SecureRandomCodeGenerator;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 
@@ -49,6 +50,7 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
         User user = event.getUser();
         SecureRandomCodeGenerator secureRandomCodeGenerator = new SecureRandomCodeGenerator(6);
         String code = secureRandomCodeGenerator.nextString();
+        registerService.createValidationCode(user, code);
 
         String recipient = user.getEmail();
         String subject = "Registration Confirmation";

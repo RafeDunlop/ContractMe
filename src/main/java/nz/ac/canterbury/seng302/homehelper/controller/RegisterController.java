@@ -4,11 +4,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.event.OnRegistrationCompleteEvent;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.mail.MailException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,14 +29,16 @@ public class RegisterController {
     Logger logger = LoggerFactory.getLogger(RegisterController.class);
 
     private final RegisterService registerService;
+    private final LoginService loginService;
     private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Constructor for the register class, links controller and service layers
      */
     @Autowired
-    public RegisterController(RegisterService registerService, ApplicationEventPublisher eventPublisher) {
+    public RegisterController(RegisterService registerService, ApplicationEventPublisher eventPublisher, LoginService loginService) {
         this.registerService = registerService;
+        this.loginService = loginService;
         this.eventPublisher = eventPublisher;
     }
 
@@ -65,7 +70,7 @@ public class RegisterController {
             User user = registerService.registerUser(userRegisterDTO);
             registerService.authenticateUser(user, userRegisterDTO.getPassword(), request);
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
-            return "redirect:/user";
+            return "redirect:/confirm-registration";
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error: " + e.getMessage());
 
@@ -76,7 +81,7 @@ public class RegisterController {
             model.addAttribute("firstName", userRegisterDTO.getFirstName().trim());
             model.addAttribute("lastName", userRegisterDTO.getLastName().trim());
             model.addAttribute("email", userRegisterDTO.getEmail().trim());
-        } catch (RuntimeException ex) {
+        } catch (MailException ex) {
             logger.warn("Email send error: " + ex.getMessage());
             List<String> errorsList = List.of(ex.getMessage().split("(?<=\\.) "));
             model.addAttribute("errorMessages", errorsList);
@@ -87,5 +92,27 @@ public class RegisterController {
         return "registrationTemplate";
     }
 
+    /**
+     * Get mapping for the email verification code form.
+     */
+    @GetMapping("/confirm-registration")
+    public String confirmRegistration() {
+        logger.info("GET /confirm-registration");
+        return "emailVerificationForm";
+    }
+
+    /**
+     * Post mapping to verify the code and grant the user the "USER" role.
+     *
+     * @param code the verification code
+     */
+    @PostMapping("/confirm-registration")
+    public String verifyRegistration(@ModelAttribute String code) {
+        logger.info("POST /confirm-registration code: {}", code);
+        User user = loginService.getUserByEmail();
+        // TODO: add verification call here, probably handle in registerService
+        registerService.grantUserAuthority(user);
+        return "redirect:/user";
+    }
 
 }

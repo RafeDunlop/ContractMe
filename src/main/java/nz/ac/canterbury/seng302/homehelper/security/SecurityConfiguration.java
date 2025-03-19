@@ -59,7 +59,7 @@ public class SecurityConfiguration {
 
                         // Only the specified roles can reach the matching pages
                         .requestMatchers("/admin").hasRole("ADMIN")
-                        .requestMatchers("/main", "/user/**", "/renovations/**").hasRole("USER")
+                        .requestMatchers("/main", "/user/**", "/renovations/**").hasRole("VERIFIED")
                         .anyRequest().authenticated())
 
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))

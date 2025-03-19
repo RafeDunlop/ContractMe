@@ -29,6 +29,7 @@ import java.util.Optional;
 public class RegisterService {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterService.class);
+    private static final String ROLE_VERIFIED = "ROLE_VERIFIED";
     private final UserRepository userRepository;
     private final VerificationCodeRepository verificationCodeRepository;
     private final UserValidation userValidation;
@@ -128,4 +129,14 @@ public class RegisterService {
         return errors;
     }
 
+    /**
+     * Grant the user the USER role and save the update user to the database.
+     *
+     * @param user the user to update
+     * @param authority the authority string to add to the user
+     */
+    public void grantUserAuthority(User user) {
+        user.grantAuthority(ROLE_VERIFIED);
+        userRepository.save(user);
+    }
 }
