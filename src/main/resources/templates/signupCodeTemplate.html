@@ -13,7 +13,7 @@
         </h2>
         <form th:action="@{activate}" method="post">
             <label class="form-label fs-5" for="signup-code-input">
-                Please enter the XXX-digit signup code sent to
+                Please enter the 6-digit signup code sent to
                 <a th:href="@{'mailto:' + ${email}}" th:text=" ${email} " class="text-decoration-none"></a>
             </label>
             <input type="text" id="signup-code-input" class="form-control form-control-lg text-center" autofocus>
