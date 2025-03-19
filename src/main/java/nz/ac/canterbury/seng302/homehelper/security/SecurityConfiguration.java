@@ -89,7 +89,7 @@ public class SecurityConfiguration {
      */
     @Bean
     public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
-        String[] allowedPaths = {"/", "/login", "/register", "/main", "/webjars/**", "/favicon.ico"};
+        String[] allowedPaths = {"/", "/login", "/register", "user/activate", "/main", "/webjars/**", "/favicon.ico"};
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(allowedPaths).permitAll()
