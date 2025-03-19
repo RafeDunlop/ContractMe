@@ -25,6 +25,9 @@ public class VerificationCode {
     @Column(nullable = false, updatable = false)
     private String code;
 
+    @Column(nullable = false, updatable = false)
+    private Locale locale;
+
     @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "user_id")
     private User user;
@@ -40,6 +43,7 @@ public class VerificationCode {
     public VerificationCode(User user, String code, Locale locale) {
         this.user = user;
         this.code = code;
+        this.locale = locale;
         expiryDate = calculateExpiryDate(locale);
     }
 
@@ -64,8 +68,8 @@ public class VerificationCode {
         return new Date(calendar.getTime().getTime());
     }
 
-    public Date getExpiryDate() {
-        return expiryDate;
+    public boolean isExpired() {
+        return Calendar.getInstance(locale).after(expiryDate);
     }
 
     public User getUser() {

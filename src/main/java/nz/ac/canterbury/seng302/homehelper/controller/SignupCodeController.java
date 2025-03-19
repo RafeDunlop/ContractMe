@@ -39,7 +39,7 @@ public class SignupCodeController {
     @PostMapping
     public String activateAccount(@RequestParam(name = "code") String code, Model model) {
         try {
-            verificationCodeService.consumeCode(code);
+            verificationCodeService.consumeSignupCode(code);
             //todo: add handling for the message indicated in U6 AC5
             return "loginTemplate";
         } catch (IllegalArgumentException e) {

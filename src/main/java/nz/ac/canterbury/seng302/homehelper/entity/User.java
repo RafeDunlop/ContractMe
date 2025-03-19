@@ -40,8 +40,8 @@ public class User {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdTimestamp;
 
-    @Column(name = "enabled")
-    private boolean enabled;
+    @Column(name = "activated")
+    private boolean activated;
 
     @Column()
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -61,7 +61,7 @@ public class User {
         this.email = email;
         this.password = password;
         this.createdTimestamp = LocalDateTime.now();
-        this.enabled = false;
+        this.activated = false;
     }
 
     /**
@@ -128,6 +128,14 @@ public class User {
 
     public LocalDateTime getCreatedTimestamp() {
         return createdTimestamp;
+    }
+
+    public void activate() {
+        this.activated = true;
+    }
+
+    public boolean isActivated() {
+        return activated;
     }
 
     @Override
