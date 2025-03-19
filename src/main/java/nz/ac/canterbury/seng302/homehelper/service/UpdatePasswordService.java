@@ -42,17 +42,18 @@ public class UpdatePasswordService {
             errors.add(String.format("Old Password does not match."));
         }
         errors.addAll(userValidation.validateUpdatePasswordString(password, updatePasswordDTO.getRetypePassword(),"registerPassword",firstName,lastName,email));
+
         //Checks second two fields are the same and that the passwords match the patterns
         errors.addAll(userValidation.validatePasswordString(updatePasswordDTO.getNewPassword(), updatePasswordDTO.getRetypePassword(),"updatePassword"));
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException(String.join(" ", errors));
         }
+
         // Updates the Users password to the new Password.
         user.setPassword(passwordEncoder.encode(password));
 
         //Save Users New Password
         userRepository.save(user);
-
     }
 
 
