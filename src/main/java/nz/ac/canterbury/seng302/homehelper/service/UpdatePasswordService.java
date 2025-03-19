@@ -13,6 +13,11 @@ import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Handles calling the validation for updating the password
+ * Checks database to compare current password
+ * Checks that the new and retyped passwords are the same
+ */
 @Service
 public class UpdatePasswordService {
     private final UserValidation userValidation;
@@ -21,6 +26,9 @@ public class UpdatePasswordService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Constructor for the UpdatePasswordService class
+     */
     @Autowired
     public UpdatePasswordService(UserValidation userValidation, LoginService loginService,UserRepository userRepository) {
         this.userValidation = userValidation;
@@ -29,7 +37,12 @@ public class UpdatePasswordService {
         this.userRepository = userRepository;
     }
 
-
+    /**
+     *  Handles validation the DTO to check the retyped passwords match and the current password is correct
+     *  Saves the users password in the database if there are no errors
+     *  Throws an IllegalArgumentException containing a list of errors to display on the webpage.
+     * @param updatePasswordDTO Data transfer object for updating the password
+     */
     public void updatePassword(UpdatePasswordDTO updatePasswordDTO) {
         List<String> errors = new ArrayList<>();
         User user = loginService.getUserByEmail();
@@ -55,6 +68,4 @@ public class UpdatePasswordService {
         //Save Users New Password
         userRepository.save(user);
     }
-
-
 }
