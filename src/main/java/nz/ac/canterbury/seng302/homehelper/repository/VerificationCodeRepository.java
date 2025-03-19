@@ -3,7 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.repository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import nz.ac.canterbury.seng302.homehelper.entity.VerificationToken;
+import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 
 /**
  * Repository interface for accessing verfication tokens.
@@ -11,7 +11,8 @@ import nz.ac.canterbury.seng302.homehelper.entity.VerificationToken;
  * for the {@link VerificationToken} entity.
  */
 @Repository
-public interface VerificationTokenRepository extends CrudRepository<VerificationToken, Long> {
+public interface VerificationCodeRepository extends CrudRepository<VerificationCode, Long> {
+    VerificationCode findByCode(String code);
 
 }
 

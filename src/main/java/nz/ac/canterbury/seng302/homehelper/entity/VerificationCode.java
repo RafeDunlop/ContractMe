@@ -13,7 +13,7 @@ import java.util.Date;
  * @author Baeldung (tutorial)
  */
 @Entity
-public class VerificationToken {
+public class VerificationCode {
     private static final int EXPIRATION = 10;
 
     @Id
@@ -29,6 +29,18 @@ public class VerificationToken {
     private Date expiryDate;
 
     /**
+     * Creates a VerificationCode instance and sets the expiry date.
+     *
+     * @param user the user to associate with the token
+     * @param token the code string
+     */
+    public VerificationCode(User user, String token) {
+        this.user = user;
+        this.token = token;
+        expiryDate = calculateExpiryDate();
+    }
+
+    /**
      * Calculate the expiry date based on the current time and the constant expiry time in minutes.
      *
      * @return the specific calendar Date timestamp when the token will expire and the user will be deleted
@@ -36,12 +48,8 @@ public class VerificationToken {
     private Date calculateExpiryDate() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Timestamp(calendar.getTime().getTime()));
-        calendar.add(Calendar.MINUTE, VerificationToken.EXPIRATION);
+        calendar.add(Calendar.MINUTE, VerificationCode.EXPIRATION);
         return new Date(calendar.getTime().getTime());
-    }
-
-    public VerificationToken() {
-        expiryDate = calculateExpiryDate();
     }
 
     public Date getExpiryDate() {

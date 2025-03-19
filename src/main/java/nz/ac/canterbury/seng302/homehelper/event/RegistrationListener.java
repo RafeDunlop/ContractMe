@@ -1,13 +1,19 @@
 package nz.ac.canterbury.seng302.homehelper.event;
 
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.security.SecureRandomCodeGenerator;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
+
+import java.security.SecureRandom;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.MessageSource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
+
+import net.bytebuddy.utility.RandomString;
 
 /**
  * Basic listener for the {@link OnRegistrationCompleteEvent} based on
@@ -43,10 +49,12 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
      */
     private void confirmRegistration(OnRegistrationCompleteEvent event) {
         User user = event.getUser();
+        SecureRandomCodeGenerator secureRandomCodeGenerator = new SecureRandomCodeGenerator(6);
+        String code = secureRandomCodeGenerator.nextString();
 
         String recipient = user.getEmail();
         String subject = "Registration Confirmation";
-        String message = "Verify your email address";
+        String message = "Your email verification code is: " + code;
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(recipient);
         mailMessage.setSubject(subject);
