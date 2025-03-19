@@ -130,11 +130,19 @@ public class RenovationController {
     /**
      * Deletes renovation record by its id, redirects back to my records page
      * @param id of the record to be deleted
-     * @return redirect to my records page
+     * @return response based on whether the record id exists, if the user doesn't have permission to delete the record, or
+     * if the deletion was successful
      */
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteRecord(@PathVariable Long id) {
         logger.info("DELETE /renovations/");
+        RenovationRecord record = renovationRecordService.getRecordById(id);
+        if (record == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!loginService.getUserByEmail().equals(record.getUser())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         renovationRecordService.removeRenovationRecord(id);
         return ResponseEntity.noContent().build();
     }

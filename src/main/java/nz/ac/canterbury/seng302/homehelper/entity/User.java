@@ -21,7 +21,7 @@ public class User {
     @Column(name = "user_id")
     private Long id;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private List<RenovationRecord> renovationRecords;
 

@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
+import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
@@ -8,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -64,11 +63,11 @@ public class RenovationRecordService {
      * Removes a renovation record by its id, but first checks it exists.
      * @param id of the record to remove
      */
+    @Transactional
     public void removeRenovationRecord(Long id){
         Optional<RenovationRecord> recordToRemove = renovationRecordRepository.findById(id);
         if (recordToRemove.isPresent()) {
-            RenovationRecord record = recordToRemove.get();
-            renovationRecordRepository.delete(record);
+            renovationRecordRepository.deleteById(id);
         }
     }
     /**

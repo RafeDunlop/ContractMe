@@ -19,7 +19,7 @@ public class RenovationRecord {
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(nullable = false)
@@ -62,6 +62,14 @@ public class RenovationRecord {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Gets user of the renovation record
+     * @return user of record
+     */
+    public User getUser(){
+        return user;
     }
 
     /**
@@ -109,6 +117,14 @@ public class RenovationRecord {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Sets the user of the renovation record
+     * @param user of the record
+     */
+    public void setUser(User user) {
+        this.user = user;
     }
 
     /**
