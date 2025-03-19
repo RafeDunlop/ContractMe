@@ -6,7 +6,6 @@ import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository
 import nz.ac.canterbury.seng302.homehelper.security.SecureRandomCodeGenerator;
 import nz.ac.canterbury.seng302.homehelper.validation.VerificationCodeValidation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,21 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class VerificationCodeService {
 
-    private static final long verificationCodeClearRateMS = 60000;
-
-    private static final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-    private static final String LOWER = UPPER.toLowerCase();
-
-    private static final String DIGITS = "0123456789";
-
-    static final String ALPHANUM = UPPER + LOWER + DIGITS;
-
-    static final String BASE64URLDOMAIN = ALPHANUM + "-_";
+    private static final long verificationCodeBaseClearRateInMS = 60000;
 
     private final VerificationCodeRepository verificationCodeRepository;
 
@@ -60,17 +52,29 @@ public class VerificationCodeService {
 
     public String issueVerificationCode(GenerationStrategy generationStrategy, User user, Locale locale) {
         SecureRandomCodeGenerator secureRandomCodeGenerator = generationStrategy.getGenerator(randomSeed);
-        String code = secureRandomCodeGenerator.nextString();
+        String code = generateUniqueCode(secureRandomCodeGenerator);
         VerificationCode verificationCode = new VerificationCode(
                 user,
                 code,
                 locale
         );
         verificationCodeRepository.save(verificationCode);
+        ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        scheduledExecutorService.schedule(this::removeExpiredCodes, 10, TimeUnit.MINUTES);
         return code;
     }
 
-    @Scheduled(fixedRate = verificationCodeClearRateMS)
+    private String generateUniqueCode(SecureRandomCodeGenerator secureRandomCodeGenerator) {
+        String code;
+        boolean unique;
+        do  {
+            code = secureRandomCodeGenerator.nextString();
+            unique = verificationCodeRepository.findByCode(code).isEmpty();
+        } while (!unique);
+        return code;
+    }
+
+    @Scheduled(fixedRate = verificationCodeBaseClearRateInMS)
     @Transactional
     public void removeExpiredCodes() {
     }
@@ -90,13 +94,13 @@ public class VerificationCodeService {
          * easy-to-copy characters. Uses Alphanumeric characters omitting one, zero and uppercase i and o,
          * as these can be ambiguous depending on font
          */
-        READABLE(6, ALPHANUM.replaceAll("10IO", "")),
+        READABLE(6, SecureRandomCodeGenerator.ALPHANUM.replaceAll("10IO", "")),
 
         /**
          * used for when the token doesn't need to be readable and does need to coem from a large domain i.e.
          * password reset
          */
-        SECURE(32, BASE64URLDOMAIN);
+        SECURE(32, SecureRandomCodeGenerator.BASE64URLDOMAIN);
 
         private final int codeLength;
 

@@ -11,9 +11,20 @@ import java.security.SecureRandom;
  */
 public class SecureRandomCodeGenerator {
 
+    private static final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    private static final String LOWER = UPPER.toLowerCase();
+
+    private static final String DIGITS = "0123456789";
+
+    public static final String ALPHANUM = UPPER + LOWER + DIGITS;
+
+    public static final String BASE64URLDOMAIN = ALPHANUM + "-_";
+
     private final SecureRandom secureRandom;
 
     private final char[] symbols;
+
     private final char[] buf;
     
     /**
