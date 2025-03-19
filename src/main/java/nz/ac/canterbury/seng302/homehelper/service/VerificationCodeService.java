@@ -31,31 +31,34 @@ public class VerificationCodeService {
 
     private final VerificationCodeValidation verificationCodeValidation;
 
-    private final LoginService loginService;
-
     private final UserRepository userRepository;
 
     private Long randomSeed;
 
+    private TimeUnit timeUnit = TimeUnit.MINUTES;
+
+    private int timeQuantity = 10;
+
     @Autowired
     public VerificationCodeService(VerificationCodeRepository verificationCodeRepository,
                                    VerificationCodeValidation verificationCodeValidation,
-                                   LoginService loginService, UserRepository userRepository) {
+                                   UserRepository userRepository) {
         this.verificationCodeRepository = verificationCodeRepository;
         this.verificationCodeValidation = verificationCodeValidation;
-        this.loginService = loginService;
         this.userRepository = userRepository;
     }
 
 
     public void consumeSignupCode(String signupCode) throws IllegalArgumentException {
         Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(signupCode);
-        if (verificationCodeOptional.isPresent() &&
-                verificationCodeValidation.isValid(verificationCodeOptional.get(), signupCode, loginService.getUserByEmail())) {
+        if (verificationCodeOptional.isPresent()) {
             VerificationCode verificationCode = verificationCodeOptional.get();
-            verificationCode.getUser().activate();
-            verificationCodeRepository.delete(verificationCode);
-            return;
+            User user = verificationCode.getUser();
+            if (verificationCodeValidation.isValid(verificationCode, signupCode, user)) {
+                verificationCode.getUser().activate();
+                verificationCodeRepository.delete(verificationCode);
+                return;
+            }
         }
         throw new IllegalArgumentException("Signup code invalid");
     }
@@ -70,7 +73,7 @@ public class VerificationCodeService {
         );
         verificationCodeRepository.save(verificationCode);
         ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-        scheduledExecutorService.schedule(() -> deleteSignupCodeAndAccount(code), 10, TimeUnit.MINUTES);
+        scheduledExecutorService.schedule(() -> deleteSignupCodeAndAccount(code), timeQuantity, timeUnit);
         return code;
     }
 
@@ -117,6 +120,11 @@ public class VerificationCodeService {
 
     public void setSeed(long seed) {
         randomSeed = seed;
+    }
+
+    public void setTiming(int timeQuantity, TimeUnit timeUnit) {
+        this.timeQuantity = timeQuantity;
+        this.timeUnit = timeUnit;
     }
 
     /**
