@@ -50,7 +50,6 @@ public class UpdatePasswordService {
         String firstName = user.getFirstName();
         String lastName = user.getLastName();
         String email = user.getEmail();
-
         if (!passwordEncoder.matches(updatePasswordDTO.getCurrentPassword(), user.getPassword())){
             errors.add(String.format("Old Password does not match."));
         }

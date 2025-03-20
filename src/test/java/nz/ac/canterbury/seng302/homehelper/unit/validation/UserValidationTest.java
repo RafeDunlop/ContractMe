@@ -187,7 +187,7 @@ public class UserValidationTest {
      * Expects: "Your password should not contain your name or email address." error
      */
     @Test
-    public void PasswordValidation_ContainsLasttName_RejectInputs() {
+    public void PasswordValidation_ContainsLastName_RejectInputs() {
         UserValidation userValidation = new UserValidation();
         List<String> expectedErrorList = List.of(
                 "Your password should not contain your name or email address."
