@@ -100,12 +100,14 @@ public class VerificationCodeService {
                 verificationCode.getUser().activate();
                 verificationCodeRepository.delete(verificationCode);
                 return;
+            } else {
+                verificationCodeRepository.delete(verificationCode);
             }
         }
         throw new IllegalArgumentException("Signup code invalid");
     }
 
-    public void deleteSignupCodeAndAccount(String code) {
+    public void deleteSignupCodeAndAccount(String code) throws IllegalArgumentException {
         Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(code);
         if (verificationCodeOptional.isPresent()) {
             VerificationCode verificationCode = verificationCodeOptional.get();
