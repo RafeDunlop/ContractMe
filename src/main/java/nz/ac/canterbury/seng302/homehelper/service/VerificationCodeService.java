@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
+import jakarta.annotation.PreDestroy;
 import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
@@ -14,11 +15,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -40,6 +42,10 @@ public class VerificationCodeService {
 
     private int timeQuantity = 10;
 
+    private final HashMap<String, ScheduledFuture<?>> deletionContractMap;
+
+    private final ScheduledExecutorService deletionExecutor;
+
     @Autowired
     public VerificationCodeService(VerificationCodeRepository verificationCodeRepository,
                                    VerificationCodeValidation verificationCodeValidation,
@@ -47,8 +53,43 @@ public class VerificationCodeService {
         this.verificationCodeRepository = verificationCodeRepository;
         this.verificationCodeValidation = verificationCodeValidation;
         this.userRepository = userRepository;
+        deletionContractMap = new HashMap<>();
+        deletionExecutor = Executors.newSingleThreadScheduledExecutor(threadTask -> {
+            Thread thread = new Thread(threadTask);
+            thread.setDaemon(true); //ensures that threads do not block JVM shutdown
+            return thread;
+        });
     }
 
+    public ScheduledFuture<?> getDeletionContract(String code) {
+        return deletionContractMap.get(code);
+    }
+
+    public void setSeed(long seed) {
+        randomSeed = seed;
+    }
+
+    public void setTiming(int timeQuantity, TimeUnit timeUnit) {
+        this.timeQuantity = timeQuantity;
+        this.timeUnit = timeUnit;
+    }
+
+    public String issueVerificationCode(GenerationStrategy generationStrategy, User user, Locale locale) {
+        SecureRandomCodeGenerator secureRandomCodeGenerator = generationStrategy.getGenerator(randomSeed);
+        String code = generateUniqueCode(secureRandomCodeGenerator);
+        VerificationCode verificationCode = verificationCodeRepository.save(new VerificationCode(
+                user,
+                code,
+                locale
+        ));
+        ScheduledFuture<?> scheduledDeletion = deletionExecutor.schedule(
+                () -> deleteSignupCodeAndAccount(code),
+                timeQuantity,
+                timeUnit
+        );
+        deletionContractMap.put(code, scheduledDeletion);
+        return code;
+    }
 
     public void consumeSignupCode(String signupCode) throws IllegalArgumentException {
         Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(signupCode);
@@ -62,40 +103,6 @@ public class VerificationCodeService {
             }
         }
         throw new IllegalArgumentException("Signup code invalid");
-    }
-
-    public String issueVerificationCode(GenerationStrategy generationStrategy, User user, Locale locale) {
-        SecureRandomCodeGenerator secureRandomCodeGenerator = generationStrategy.getGenerator(randomSeed);
-        String code = generateUniqueCode(secureRandomCodeGenerator);
-        VerificationCode verificationCode = new VerificationCode(
-                user,
-                code,
-                locale
-        );
-        verificationCodeRepository.save(verificationCode);
-        ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-        scheduledExecutorService.schedule(() -> deleteSignupCodeAndAccount(code), timeQuantity, timeUnit);
-        return code;
-    }
-
-    private String generateUniqueCode(SecureRandomCodeGenerator secureRandomCodeGenerator) {
-        String code;
-        boolean unique;
-        do  {
-            code = secureRandomCodeGenerator.nextString();
-            unique = verificationCodeRepository.findByCode(code).isEmpty();
-        } while (!unique);
-        return code;
-    }
-
-    /**
-     * removes ALL expired codes
-     * /todo deprecated
-     */
-    @Scheduled(fixedRate = verificationCodeBaseClearRateInMS)
-    @Transactional
-    public void removeExpiredCodes() {
-
     }
 
     public void deleteSignupCodeAndAccount(String code) {
@@ -119,13 +126,13 @@ public class VerificationCodeService {
         }
     }
 
-    public void setSeed(long seed) {
-        randomSeed = seed;
+    private String generateUniqueCode(SecureRandomCodeGenerator secureRandomCodeGenerator) {
+        String code;
+        boolean unique;
+        do  {
+            code = secureRandomCodeGenerator.nextString();
+            unique = verificationCodeRepository.findByCode(code).isEmpty();
+        } while (!unique);
+        return code;
     }
-
-    public void setTiming(int timeQuantity, TimeUnit timeUnit) {
-        this.timeQuantity = timeQuantity;
-        this.timeUnit = timeUnit;
-    }
-
 }

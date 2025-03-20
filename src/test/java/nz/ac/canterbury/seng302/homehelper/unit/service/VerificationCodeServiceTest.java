@@ -14,8 +14,8 @@ import org.mockito.Mockito;
 
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
@@ -27,9 +27,9 @@ public class VerificationCodeServiceTest {
 
     private static final String firstCode = "YbSxa3";
 
-    private static final TimeUnit timeUnit = TimeUnit.SECONDS;
+    private static final TimeUnit timeUnit = TimeUnit.MINUTES;
 
-    private static final int timeQuantity = 5;
+    private static final int timeQuantity = 10;
 
     private VerificationCodeService toTest;
 
@@ -92,5 +92,14 @@ public class VerificationCodeServiceTest {
     public void issueVerificationCode_dontWait_stillExists() {
         toTest.issueVerificationCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
         verify(verificationCodeRepository, Mockito.never()).delete(verificationCode);
+    }
+
+    @Test
+    public void issueVerificationCode_waitAndPresentAndExpired_hasBeenDeleted() throws InterruptedException, ExecutionException {
+        String code = toTest.issueVerificationCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
+        Mockito.when(verificationCodeRepository.findByCode(Mockito.any())).thenReturn(Optional.of(verificationCode));
+        Mockito.when(verificationCode.isExpired()).thenReturn(true);
+        toTest.getDeletionContract(code).get(); //waits for the scheduled service to finish
+        verify(verificationCodeRepository, times(1)).delete(verificationCode);
     }
 }
