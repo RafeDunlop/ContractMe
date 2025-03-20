@@ -9,6 +9,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -118,7 +122,10 @@ public class EditProfileService {
             return errors;
         }
 
-        if (profilePicture.isEmpty()) errors.add("No file selected.");
+        if (profilePicture.isEmpty()) {
+            errors.add("No file selected.");
+            return errors;
+        }
 
         try {
             // Ensure directory exists
@@ -131,10 +138,26 @@ public class EditProfileService {
             String filename = UUID.randomUUID() + "_" + profilePicture.getOriginalFilename();
             Path filePath = uploadPath.resolve(filename);
 
-            // Save the file
-            try (OutputStream os = Files.newOutputStream(filePath, StandardOpenOption.CREATE)) {
-                os.write(profilePicture.getBytes());
-            }
+
+            BufferedImage originalImage = ImageIO.read(profilePicture.getInputStream());
+
+            // Determine square crop dimensions
+            int minSize = Math.min(originalImage.getWidth(), originalImage.getHeight());
+            int x = (originalImage.getWidth() - minSize) / 2;
+            int y = (originalImage.getHeight() - minSize) / 2;
+
+            // Crop the image to a square
+            BufferedImage croppedImage = originalImage.getSubimage(x, y, minSize, minSize);
+
+            // Resize the image to 200x200
+            BufferedImage resizedImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = resizedImage.createGraphics();
+            g2d.drawImage(croppedImage.getScaledInstance(200, 200, Image.SCALE_SMOOTH), 0, 0, null);
+            g2d.dispose();
+
+            // Save the resized image
+            File outputFile = filePath.toFile();
+            ImageIO.write(resizedImage, "jpg", outputFile);
 
             // Update the user’s profile picture path
             user.setProfilePicture(filename);
