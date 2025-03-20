@@ -89,18 +89,23 @@ public class UserValidation {
     public List<String> validateProfilePicture(MultipartFile profilePicture) {
         List<String> errors = new ArrayList<>();
 
-        List<String> allowedTypes = List.of("image/png", "image/jpeg", "image/svg+xml");
-
-        // Get file content type
-        String contentType = profilePicture.getContentType();
-
-        // Validate MIME type
-        if (contentType == null || !allowedTypes.contains(contentType)) {
-            errors.add("Image must be of type png, jpg or svg.");
+        // Check if the file is empty
+        if (profilePicture.isEmpty()) {
+            errors.add("No file selected.");
+            return errors;
         }
 
-        // Validate Profile Picture Size is no greater than 10MB
-        if (profilePicture.getSize() > 10000000) {
+        // Allowed MIME types
+        List<String> allowedMimeTypes = List.of("image/jpeg", "image/png", "image/svg+xml");
+
+        // Check file type
+        if (!allowedMimeTypes.contains(profilePicture.getContentType())) {
+            errors.add("Image must be of type png, jpg or svg");
+        }
+
+        // Check file size
+        long maxSize = 10 * 1024 * 1024; // 10MB
+        if (profilePicture.getSize() > maxSize) {
             errors.add("Image must be less than 10MB.");
         }
 

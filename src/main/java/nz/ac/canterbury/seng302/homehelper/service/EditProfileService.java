@@ -112,10 +112,13 @@ public class EditProfileService {
      */
     public List<String> updateProfilePicture(User user, MultipartFile profilePicture) {
         List<String> errors = new ArrayList<>();
-        if (profilePicture.isEmpty()) {
-            errors.add("No file selected.");
+
+        errors.addAll(userValidation.validateProfilePicture(profilePicture));
+        if (!errors.isEmpty()) {
             return errors;
         }
+
+        if (profilePicture.isEmpty()) errors.add("No file selected.");
 
         try {
             // Ensure directory exists

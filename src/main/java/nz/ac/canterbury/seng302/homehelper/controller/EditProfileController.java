@@ -9,12 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -28,7 +26,6 @@ public class EditProfileController {
 
     private final EditProfileService editProfileService;
     private final LoginService loginService;
-    private final String UPLOAD_DIR = "profile_pictures/";
 
 
     /**
@@ -103,6 +100,7 @@ public class EditProfileController {
             model.addAttribute("firstName", newUser.getFirstName());
             model.addAttribute("lastName", newUser.getLastName());
             model.addAttribute("email", newUser.getEmail());
+            model.addAttribute("profilePictureFileName", newUser.getProfilePicture());
             return "editProfileTemplate";
         }
     }
@@ -114,17 +112,19 @@ public class EditProfileController {
      * updates their profile picture using the generated address for the provided file,
      *
      * @param file  The MultipartFile representing the uploaded profile picture.
-     * @param model The Model object used to pass attributes to the view.
+     * @param redirectAttributes used to pass errors to the view on the user/edit page.
      * @return Redirect users back to the user profile page
      */
     @PostMapping("/user/uploadProfilePicture")
-    public String uploadProfilePicture(@RequestParam("file") MultipartFile file, Model model) {
+    public String uploadProfilePicture(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
         User user = loginService.getUserByEmail();
         List<String> errors = editProfileService.updateProfilePicture(user, file);
 
         if (!errors.isEmpty()) {
-            model.addAttribute("errorMessages", errors);
+            redirectAttributes.addFlashAttribute("errorMessages", errors);
+            return "redirect:/user/edit"; // Stay on the edit page with errors
         }
-        return "redirect:/user";
+
+        return "redirect:/user"; // Redirect to /user on success
     }
 }
