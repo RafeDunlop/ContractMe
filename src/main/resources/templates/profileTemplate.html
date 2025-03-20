@@ -1,45 +1,60 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-	<head>
-		<meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
-		<title th:text="|User ${firstName}|">User Details</title>
-		<link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
-	</head>
+<head>
+	<meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+	<title th:text="|User ${firstName}|">User Details</title>
+	<link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+</head>
+<body>
 
-	<img th:src="@{'/profile_pictures/' + ${profilePictureFileName}}" alt="Profile Picture">
+<style>
+	.col-md-25 {
+		flex: 0 0 18%;
+		max-width: 22%;
+	}
+</style>
 
-	<body>
-		<div class="container mt-5">
-			<div class="card p-4 shadow position-relative">
-				<div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
-					<a th:href="@{/main}" class="btn btn-secondary">
-						Main
-					</a>
-					<a th:href="@{/user/edit}" class="btn btn-primary ">
-						Edit
-					</a>
-				</div>
+<div class="container mt-5">
+	<div class="card p-4 shadow position-relative">
+		<div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
+			<a th:href="@{/main}" class="btn btn-secondary">Main</a>
+			<a th:href="@{/user/edit}" class="btn btn-primary">Edit</a>
+		</div>
 
-				<h4 class="card-title mb-5">User details for <span th:text="${firstName}">Name</span></h4>
+		<!-- Use Bootstrap Grid for Layout -->
+		<div class="row align-items-center">
+			<!-- Profile Picture Column -->
+			<div class="col-md-25  text-center">
+				<img th:src="@{'/profile_pictures/' + ${profilePictureFileName}}"
+					 alt="Profile Picture"
+					 class="img-fluid rounded-circle"
+					 style="width: 200px; height: 200px; object-fit: cover;">
+			</div>
+
+			<!-- User Details Column -->
+			<div class="col-md-5">
+				<h4 class="card-title mb-5 ms-2">User details for <span th:text="${firstName}">Name</span></h4>
 				<div class="card-body">
-					<table class="border border-0">
+					<table class="table table-borderless">
 						<tbody>
-							<tr>
-								<th class="p-2">Name</th>
-								<td class="p-2" th:text="|${firstName} ${lastName}|">Name</td>
-							</tr>
-							<tr>
-								<th class="p-2">Email</th>
-								<td class="p-2" th:text="${email}">email</td>
-							</tr>
-							<tr>
-								<th class="p-2">Account created</th>
-								<td class="p-2" th:text="${dateAdded}">date</td>
-							</tr>
+						<tr>
+							<th class="p-2">Name</th>
+							<td class="p-2" th:text="|${firstName} ${lastName}|">Name</td>
+						</tr>
+						<tr>
+							<th class="p-2">Email</th>
+							<td class="p-2" th:text="${email}">email</td>
+						</tr>
+						<tr>
+							<th class="p-2">Account created</th>
+							<td class="p-2" th:text="${dateAdded}">date</td>
+						</tr>
 						</tbody>
 					</table>
 				</div>
 			</div>
-		</div>
-	</body>
+		</div> <!-- End Row -->
+	</div>
+</div>
+</body>
 </html>

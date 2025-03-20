@@ -15,8 +15,8 @@
         if (fileInput.files.length > 0) {
             let fileName = fileInput.files[0].name;
 
-            // If filename is too long, reset to "Edit Profile Picture"
-            fileLabel.textContent = fileName.length > maxLength ? "Edit Profile Picture" : fileName;
+            // If filename is too long, reset to "File selected"
+            fileLabel.textContent = fileName.length > maxLength ? "File selected" : fileName;
         } else {
             fileLabel.textContent = "Edit Profile Picture";
         }
@@ -37,7 +37,12 @@
             </form>
         </div>
 
-        <img th:src="@{'/profile_pictures/' + ${profilePictureFileName}}" alt="Profile Picture">
+        <div class="col-md-2 mb-4 text-center">
+            <img th:src="@{'/profile_pictures/' + ${profilePictureFileName}}"
+                 alt="Profile Picture"
+                 class="img-fluid rounded-circle"
+                 style="width: 200px; height: 200px; object-fit: cover;">
+        </div>
 
         <form th:action="@{/user/edit}" method="post">
             <div class="form-group mb-3">
