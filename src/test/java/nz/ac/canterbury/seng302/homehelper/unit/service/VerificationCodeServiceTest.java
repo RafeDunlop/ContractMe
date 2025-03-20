@@ -27,9 +27,9 @@ public class VerificationCodeServiceTest {
 
     private static final String firstCode = "YbSxa3";
 
-    private static final TimeUnit timeUnit = TimeUnit.MINUTES;
+    private static final TimeUnit timeUnit = TimeUnit.MILLISECONDS;
 
-    private static final int timeQuantity = 10;
+    private static final int timeQuantity = 100;
 
     private VerificationCodeService toTest;
 
@@ -63,15 +63,17 @@ public class VerificationCodeServiceTest {
     }
 
     @Test
-    public void consumeSignupCode_validCode_doesntThrow() {
+    public void consumeSignupCode_validCode_doesntThrowAndCodeDeleted() {
         Mockito.when(verificationCodeValidation.isValid(verificationCode, firstCode, user)).thenReturn(true);
         assertDoesNotThrow(() -> toTest.consumeSignupCode(firstCode));
+        verify(verificationCodeRepository, times(1)).delete(verificationCode);
     }
 
     @Test
-    public void consumeSignupCode_invalidCode_throwsException() {
+    public void consumeSignupCode_invalidCode_throwsExceptionAndCodeDeleted() {
         Mockito.when(verificationCodeValidation.isValid(verificationCode, firstCode, user)).thenReturn(false);
         assertThrows(IllegalArgumentException.class, () -> toTest.consumeSignupCode(firstCode));
+        verify(verificationCodeRepository, times(1)).delete(verificationCode);
     }
 
     @Test
