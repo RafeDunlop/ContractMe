@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.event;
 
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,21 +21,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class RegistrationListener implements ApplicationListener<OnRegistrationCompleteEvent> {
 
-    private final RegisterService registerService;
-
-    private final MessageSource messages;
-
     private final JavaMailSender mailSender;
 
     private final VerificationCodeService verificationCodeService;
 
     @Autowired
-    public RegistrationListener(RegisterService registerService,
-                                MessageSource messages,
-                                JavaMailSender mailSender,
+    public RegistrationListener(JavaMailSender mailSender,
                                 VerificationCodeService verificationCodeService) {
-        this.registerService = registerService;
-        this.messages = messages;
         this.mailSender = mailSender;
         this.verificationCodeService = verificationCodeService;
     }
@@ -56,7 +49,7 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
     private void confirmRegistration(OnRegistrationCompleteEvent event) {
         User user = event.getUser();
         String code = verificationCodeService.issueVerificationCode(
-                VerificationCodeService.GenerationStrategy.READABLE,
+                GenerationStrategy.READABLE,
                 user,
                 event.getLocale()
         );
