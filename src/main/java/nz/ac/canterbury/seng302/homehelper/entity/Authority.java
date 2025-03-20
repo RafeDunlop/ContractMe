@@ -18,9 +18,10 @@ public class Authority {
     @Column()
     private String role;
 
-    protected Authority() {
-        // JPA empty constructor
-    }
+    /**
+     * JPA required no-args constructor
+     */
+    protected Authority() {}
 
     /**
      * Authority constructor.
@@ -38,6 +39,11 @@ public class Authority {
         return role;
     }
 
+    /**
+     *
+     * @param o The object the authority is being compared to
+     * @return A boolean whether the two objects are the same (have the same values)
+     */
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

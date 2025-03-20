@@ -116,6 +116,16 @@ public class RenovationRecordService {
         );
     }
 
+    /**
+     * Calls other functions to validate all renovation fields, returning false if any do not pass their validity checks. Predicate for
+     * name is tested which calls the checkForExactMatch and validateName functions.
+     * @param name Name of the record
+     * @param description Description for the record
+     * @param roomList List of rooms for the record
+     * @param nameChecker A predicate which checks if the name doesn't exist and if it follows the correct string pattern
+     * @param pattern The string pattern the list of rooms must follow
+     * @return A boolean whether all the details are in the correct format and are valid
+     */
     private boolean validateAllInputs(String name, String description, List<String> roomList, Predicate<String> nameChecker, Pattern pattern) {
         return (validateAllRoomNames(roomList, pattern) &&
                 validateDescriptionLength(description) &&
