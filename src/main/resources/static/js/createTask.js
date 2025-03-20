@@ -1,22 +1,10 @@
 
-let roomList = [];
+
+let roomList = document.getElementById("roomList");
 let roomId = 0;
 let roomFieldValid = false;
+let roomSelection = document.getElementById("roomSelection");
 const form = document.getElementById("create-task-form");
-
-form.addEventListener("submit", function(event) {
-    let input;
-    event.preventDefault();
-    form.querySelectorAll("input[name='roomList']").forEach(room => room.remove());
-    roomList.forEach(room => {
-        input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "roomList";
-        input.value = room[1];
-        form.appendChild(input);
-    });
-    form.submit();
-});
 
 
 
@@ -30,7 +18,29 @@ function setRoomList(previousRoomList) {
     }
 }
 
-function populationRoomSelection() {
+document.addEventListener("DOMContentLoaded", () => {
+    let previousRoomList, previousRoomListString;
+
+    console.log(roomList);
+
+    //updateCharCounter("description", "description-length-counter");
+});
+
+
+function populateRoomSelection() {
+
+    roomSelection.innerHTML = "";
+
+    if (roomList.length > 0) {
+    for (let i = 0; i < roomList.length; i++) {
+        let option = document.createElement("option");
+        option.value = roomList[i];
+        option.textContent = roomList[i];
+        roomSelection.appendChild(option);
+    }
+
+}   else {
+
 }
 
 function renderRooms() {
@@ -59,3 +69,11 @@ function renderRooms() {
         buttonCell.appendChild(button);
     }
 }
+
+
+
+
+
+}
+
+
