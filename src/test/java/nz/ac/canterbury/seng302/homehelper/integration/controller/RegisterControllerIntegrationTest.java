@@ -3,7 +3,10 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 import jakarta.annotation.PostConstruct;
 import nz.ac.canterbury.seng302.homehelper.controller.RegisterController;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +45,8 @@ public class RegisterControllerIntegrationTest {
      */
     @MockBean
     private UserRepository userRepository;
+    @MockBean
+    private VerificationCodeRepository verificationCodeRepository;
 
     /**
      * Initializes the {@link MockMvc} instance with a new setup of the {@link RegisterController}.
@@ -64,6 +69,7 @@ public class RegisterControllerIntegrationTest {
         User expectedUser = Mockito.spy(new User("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
         expectedUser.grantAuthority("ROLE_USER");
         Mockito.when(expectedUser.getId()).thenReturn(1L);
+        Mockito.when(verificationCodeRepository.save(Mockito.any(VerificationCode.class))).thenAnswer((InvocationOnMock) -> null);
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(expectedUser);
         Mockito.when(userRepository.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(expectedUser));;
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
@@ -75,7 +81,7 @@ public class RegisterControllerIntegrationTest {
             .param("confirmPassword", "Test123!")
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-            .andExpect(view().name("redirect:/user"));
+            .andExpect(view().name("redirect:/confirm-registration"));
     }
 
     /**

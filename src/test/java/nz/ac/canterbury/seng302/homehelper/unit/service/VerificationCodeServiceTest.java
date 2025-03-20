@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
+import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
 import nz.ac.canterbury.seng302.homehelper.validation.VerificationCodeValidation;
 import org.junit.jupiter.api.BeforeEach;
@@ -106,7 +107,7 @@ public class VerificationCodeServiceTest {
 
     @Test
     public void issueVerificationCode_dontWait_stillExists() {
-        toTest.issueVerificationCode(VerificationCodeService.GenerationStrategy.READABLE, user, Locale.ENGLISH);
+        toTest.issueVerificationCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
         assertNotNull(generated.get());
     }
 

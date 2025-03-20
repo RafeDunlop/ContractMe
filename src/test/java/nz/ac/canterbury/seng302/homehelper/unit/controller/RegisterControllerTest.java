@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.controller.RegisterController;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -22,8 +23,10 @@ public class RegisterControllerTest {
     void testValidPathway_FromRegistrationPage_ToUserProfilePage() {
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         RegisterService registerServiceSpy = Mockito.mock(RegisterService.class);
+        LoginService loginServiceMock = Mockito.mock(LoginService.class);
         ApplicationEventPublisher applicationEventPublisher = Mockito.mock(ApplicationEventPublisher.class);
-        RegisterController registerController = new RegisterController(registerServiceSpy, applicationEventPublisher);
+        RegisterController registerController = new RegisterController(
+                registerServiceSpy, applicationEventPublisher, loginServiceMock);
 
         Model model = Mockito.mock(Model.class);
         UserRegisterDTO mockedUser = new UserRegisterDTO("","","","","");
