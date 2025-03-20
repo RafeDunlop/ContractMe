@@ -3,12 +3,15 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 /**
  * Service for sending emails.
  *
  * @author Sean
  */
+@Service
 public class EmailService {
 
     private JavaMailSender mailSender;
@@ -31,6 +34,7 @@ public class EmailService {
      * address
      * @param code the verification code string
      */
+    @Async
     public void sendVerificationEmail(String recipient, String code) {
         String subject = "Registration Confirmation";
         String message = "Your email verification code is: " + code;
