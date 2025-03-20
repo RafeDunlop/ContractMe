@@ -103,17 +103,6 @@ public class RegisterService {
     }
 
     /**
-     * Create the validation code and save it to the database.
-     *
-     * @param user the user to associate with the code
-     * @param code the validation code
-     */
-    public void createValidationCode(User user, String code) {
-        VerificationCode verificationToken = new VerificationCode(user, code);
-        verificationCodeRepository.save(verificationToken);
-    }
-
-    /**
      * Validates if the email is already in use
      * @param email the email inputted by the user
      */

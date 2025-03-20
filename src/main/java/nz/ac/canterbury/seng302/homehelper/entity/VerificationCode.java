@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Verification token entity, based on the example given <a href="https://www.baeldung.com/registration-verify-user-by-email">here</a>
@@ -17,10 +18,15 @@ public class VerificationCode {
     private static final int EXPIRATION = 10;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
+    private long id;
 
+    @Column(nullable = false, updatable = false)
     private String code;
+
+    @Column(nullable = false, updatable = false)
+    private Locale locale;
 
     @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "user_id")
@@ -31,13 +37,23 @@ public class VerificationCode {
     /**
      * Creates a VerificationCode instance and sets the expiry date.
      *
-     * @param user the user to associate with the token
-     * @param token the code string
+     * @param user the user to associate with the code
+     * @param code the code string
      */
-    public VerificationCode(User user, String token) {
+    public VerificationCode(User user, String code, Locale locale) {
         this.user = user;
-        this.code = token;
-        expiryDate = calculateExpiryDate();
+        this.code = code;
+        this.locale = locale;
+        expiryDate = calculateExpiryDate(locale);
+    }
+
+    /**
+     * JPA required no-args constructor
+     */
+    public VerificationCode() {}
+
+    public long getId() {
+        return id;
     }
 
     /**
@@ -45,21 +61,21 @@ public class VerificationCode {
      *
      * @return the specific calendar Date timestamp when the token will expire and the user will be deleted
      */
-    private Date calculateExpiryDate() {
-        Calendar calendar = Calendar.getInstance();
+    private Date calculateExpiryDate(Locale locale) {
+        Calendar calendar = Calendar.getInstance(locale);
         calendar.setTime(new Timestamp(calendar.getTime().getTime()));
         calendar.add(Calendar.MINUTE, VerificationCode.EXPIRATION);
         return new Date(calendar.getTime().getTime());
     }
 
-    public Date getExpiryDate() {
-        return expiryDate;
+    public boolean isExpired() {
+        return Calendar.getInstance(locale).after(expiryDate);
     }
 
     public User getUser() {
         return user;
     }
-    
+
     public String getCode() {
         return code;
     }
