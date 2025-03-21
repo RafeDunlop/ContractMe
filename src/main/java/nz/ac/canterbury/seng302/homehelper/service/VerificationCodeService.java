@@ -47,9 +47,9 @@ public class VerificationCodeService {
     /**
      * Constructs repositories and validation classes as required.
      * Makes a single deletion executor thread to delete expired codes with a daemon thread
-     * @param verificationCodeRepository The repository for {@link VerificationCode} objects
-     * @param verificationCodeValidation The validation class for {@link VerificationCode} objects
-     * @param userRepository The repository for {@link User} objects
+     * @param verificationCodeRepository The repository for {@link VerificationCode} entities
+     * @param verificationCodeValidation The validation class for {@link VerificationCode} entities
+     * @param userRepository The repository for {@link User} entities
      */
     @Autowired
     public VerificationCodeService(VerificationCodeRepository verificationCodeRepository,
