@@ -17,6 +17,10 @@ const roomNameErrorMessage =
     "Renovation record room names must only include letters, numbers, spaces, " +
     "dots, hyphens or apostrophes"
 
+/**
+ * Runs when the document loads.
+ * Adds event listeners on html elements and extracts the roomList
+ */
 document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("submit", function (event) { injectRoomsIntoSubmission(form, event, roomList) });
     roomNameField.addEventListener("input", function() { checkRoomName(roomNameField.value) });
@@ -64,6 +68,7 @@ function setRoomList(previousRoomList, roomTableId) {
         renderRooms(roomList, roomTableId);
     }
 }
+
 function getRoomNameError(toAdd) {
     let error = null;
     const validCharactersPattern = /^[\p{L}\d .,\-']*$/u;
