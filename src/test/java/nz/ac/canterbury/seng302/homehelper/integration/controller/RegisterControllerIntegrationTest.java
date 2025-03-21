@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -85,7 +86,7 @@ public class RegisterControllerIntegrationTest {
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
             .andExpect(view().name("redirect:/confirm-registration"));
-        Mockito.verify(emailService, Mockito.times(1)).sendVerificationEmail(Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(emailService, Mockito.times(1)).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 
     /**
@@ -112,7 +113,7 @@ public class RegisterControllerIntegrationTest {
                 .andExpect(model().attribute("firstName", "Jane"))
                 .andExpect(model().attribute("lastName", "Doe"))
                 .andExpect(model().attribute("email", "jane@doe.nz"));
-        Mockito.verify(emailService, Mockito.never()).sendVerificationEmail(Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(emailService, Mockito.never()).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 
 }

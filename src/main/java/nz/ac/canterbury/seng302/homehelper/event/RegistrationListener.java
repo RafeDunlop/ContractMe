@@ -54,6 +54,7 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
                 user,
                 event.getLocale());
         String recipient = user.getEmail();
-        emailService.sendVerificationEmail(recipient, code);
+        String name = user.getFirstName();
+        emailService.sendVerificationEmail(recipient, name, code, event.getLocale());
     }
 }
