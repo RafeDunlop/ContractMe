@@ -1,6 +1,12 @@
-import {setRoomList, addRoom, updateCharCounter, checkRoomName, addRoomsToSubmission} from "./validations.js";
+import {
+    updateCharCounter,
+    addRoomsToSubmission,
+    validateField,
+    renderRooms
+} from "./validations.js";
 
-
+let roomFieldValid = false;
+let roomList = [];
 
 
 let roomErrorLabel = document.getElementById("room-error-message")
@@ -9,19 +15,20 @@ let createRoomButton = document.getElementById("create-room-button")
 let descriptionTextField = document.getElementById("description")
 
 
-addRoomsToSubmission("renovation-form")
 
 
-const roomNameErrorMessage = "Renovation record room names must only include letters, numbers, spaces, " +
+
+const roomNameErrorMessage =
+    "Renovation record room names must only include letters, numbers, spaces, " +
     "dots, hyphens or apostrophes"
-roomNameField.addEventListener("input", function() {checkRoomName(roomNameField.value)});
-
-createRoomButton.addEventListener("click", function() {addRoom('roomList')});
-descriptionTextField.addEventListener("input", function() {
-    updateCharCounter("description", "description-length-counter")
-});
 
 document.addEventListener("DOMContentLoaded", () => {
+    addRoomsToSubmission("renovation-form")
+    roomNameField.addEventListener("input", function() { checkRoomName(roomNameField.value) });
+    createRoomButton.addEventListener("click", function() { addRoom('roomList', 'room-list'     ) });
+    descriptionTextField.addEventListener("input", function() {
+        updateCharCounter("description", "description-length-counter")
+    });
     let previousRoomList, previousRoomListString;
     previousRoomListString = document.getElementById('roomListEdit').value;
     if (previousRoomListString === "") {
@@ -30,6 +37,43 @@ document.addEventListener("DOMContentLoaded", () => {
         previousRoomList = previousRoomListString.split(',');
     }
     console.log(previousRoomList.type);
-    setRoomList(previousRoomList);
+    setRoomList(previousRoomList, "room-list");
     updateCharCounter("description", "description-length-counter");
 });
+
+function checkRoomName(input) {
+    roomFieldValid = validateField(input, /^[\p{L}\d .,\-']*$/u, roomErrorLabel, roomNameErrorMessage);
+}
+
+function addRoom(inputId, roomTableId) {
+    let input = document.getElementById(inputId);
+    let room = input.value.trim();
+    if (room === "") {
+        // If the room is empty, don't add it to the list, just return.
+        console.log("No room entered.");
+        return;
+    }
+    let roomError = getRoomNameError(room)
+    if (roomError == null) {
+        input.value = "";
+        roomList.push(room);
+        renderRooms(roomList, roomTableId);
+    } else {
+        //error text becomes room error
+    }
+}
+
+function setRoomList(previousRoomList, roomTableId) {
+    if (previousRoomList !== null) {
+        roomList = previousRoomList;
+        renderRooms(roomList, roomTableId);
+    }
+}
+function getRoomNameError(toAdd) {
+    let error = null;
+    const validCharactersPattern = /^[\p{L}\d .,\-']*$/u;
+    if (!validCharactersPattern.test(toAdd)) {
+        error = "Renovation record room names must only contain letters, numbers, spaces, dots, hyphens or apostrophes";
+    }
+    return error;
+}
