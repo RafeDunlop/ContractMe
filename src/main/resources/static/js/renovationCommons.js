@@ -44,6 +44,7 @@ export function updateCharCounter(textAreaId, counterId, maxLimit = 512) {
 }
 
 export function renderRooms(roomList, roomTableId) {
+    console.log("renderRooms");
     let i, room, roomTable, tableRow, roomCell, buttonCell, button;
     roomTable = document.getElementById(roomTableId);
     roomTable.innerHTML = "";

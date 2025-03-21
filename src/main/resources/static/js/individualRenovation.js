@@ -7,16 +7,10 @@ import {
 
 let roomFieldValid = false;
 let roomList = [];
-
-
 let roomErrorLabel = document.getElementById("room-error-message")
 let roomNameField = document.getElementById("roomList")
 let createRoomButton = document.getElementById("create-room-button")
 let descriptionTextField = document.getElementById("description")
-
-
-
-
 
 const roomNameErrorMessage =
     "Renovation record room names must only include letters, numbers, spaces, " +
