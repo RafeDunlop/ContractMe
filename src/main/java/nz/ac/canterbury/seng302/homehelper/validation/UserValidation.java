@@ -100,7 +100,7 @@ public class UserValidation {
 
         // Check file type
         if (!allowedMimeTypes.contains(profilePicture.getContentType())) {
-            errors.add("Image must be of type png, jpg or svg");
+            errors.add("Image must be of type png, jpg or svg.");
         }
 
         // Check file size

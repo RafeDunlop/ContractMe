@@ -45,7 +45,7 @@ public class ProfileController {
 			model.addAttribute("lastName", user.getLastName());
 			model.addAttribute("email", user.getEmail());
 			model.addAttribute("dateAdded", user.getCreatedTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-			model.addAttribute("profilePictureFileName", user.getProfilePicture());
+			model.addAttribute("profilePicture", user.getProfilePicture());
 
 			return "profileTemplate";
 		} catch (IllegalArgumentException e) {

@@ -28,7 +28,7 @@
     <div class="card p-4 shadow">
         <h4 class="card-title mb-5">Edit profile</h4>
         <div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
-            <form th:action="@{/user/uploadProfilePicture}" method="POST" enctype="multipart/form-data">
+            <form th:action="@{/user/edit/profile-picture}" method="POST" enctype="multipart/form-data">
                 <div class="input-group">
                     <input class="form-control d-none" type="file" id="formFile" name="file" onchange="updateFileName()">
                     <label class="btn btn-outline-secondary" for="formFile" id="fileLabel">Edit Profile Picture</label>
@@ -38,7 +38,7 @@
         </div>
 
         <div class="col-md-2 mb-4 text-center">
-            <img th:src="@{'/profile_pictures/' + ${profilePictureFileName}}"
+            <img th:src="@{'/profile_pictures/' + ${profilePicture}}"
                  alt="Profile Picture"
                  class="img-fluid rounded-circle"
                  style="width: 200px; height: 200px; object-fit: cover;">

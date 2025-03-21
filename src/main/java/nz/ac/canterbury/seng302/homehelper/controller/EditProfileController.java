@@ -55,7 +55,7 @@ public class EditProfileController {
             model.addAttribute("firstName", user.getFirstName());
             model.addAttribute("lastName", user.getLastName());
             model.addAttribute("email", user.getEmail());
-            model.addAttribute("profilePictureFileName", user.getProfilePicture());
+            model.addAttribute("profilePicture", user.getProfilePicture());
 
             return "editProfileTemplate";
         } catch (NoSuchElementException e) {
@@ -100,7 +100,7 @@ public class EditProfileController {
             model.addAttribute("firstName", newUser.getFirstName());
             model.addAttribute("lastName", newUser.getLastName());
             model.addAttribute("email", newUser.getEmail());
-            model.addAttribute("profilePictureFileName", newUser.getProfilePicture());
+            model.addAttribute("profilePicture", newUser.getProfilePicture());
             return "editProfileTemplate";
         }
     }
@@ -115,7 +115,7 @@ public class EditProfileController {
      * @param redirectAttributes used to pass errors to the view on the user/edit page.
      * @return Redirect users back to the user profile page
      */
-    @PostMapping("/user/uploadProfilePicture")
+    @PostMapping("/user/edit/profile-picture")
     public String uploadProfilePicture(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
         User user = loginService.getUserByEmail();
         List<String> errors = editProfileService.updateProfilePicture(user, file);

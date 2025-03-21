@@ -194,7 +194,7 @@ public class UserValidationTest {
         UserValidation userValidation = new UserValidation();
         MultipartFile profilePicture = Mockito.mock(MultipartFile.class);
         when(profilePicture.getContentType()).thenReturn("image/png");
-        when(profilePicture.getSize()).thenReturn(10000001L);
+        when(profilePicture.getSize()).thenReturn((10 * 1024 * 1024) + 1L);
         List<String> expectedErrorList = List.of("Image must be less than 10MB.");
 
         Assertions.assertEquals(expectedErrorList, userValidation.validateProfilePicture(profilePicture));

@@ -117,18 +117,17 @@ public class EditProfileService {
     public List<String> updateProfilePicture(User user, MultipartFile profilePicture) {
         List<String> errors = new ArrayList<>();
 
-        errors.addAll(userValidation.validateProfilePicture(profilePicture));
-        if (!errors.isEmpty()) {
-            return errors;
-        }
-
         if (profilePicture.isEmpty()) {
             errors.add("No file selected.");
             return errors;
         }
 
+        errors.addAll(userValidation.validateProfilePicture(profilePicture));
+        if (!errors.isEmpty()) {
+            return errors;
+        }
+
         try {
-            // Ensure directory exists
             Path uploadPath = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
@@ -138,32 +137,25 @@ public class EditProfileService {
             String filename = UUID.randomUUID() + "_" + profilePicture.getOriginalFilename();
             Path filePath = uploadPath.resolve(filename);
 
-
             BufferedImage originalImage = ImageIO.read(profilePicture.getInputStream());
 
-            // Determine square crop dimensions
+            // Resize the image to 200x200
             int minSize = Math.min(originalImage.getWidth(), originalImage.getHeight());
             int x = (originalImage.getWidth() - minSize) / 2;
             int y = (originalImage.getHeight() - minSize) / 2;
-
-            // Crop the image to a square
             BufferedImage croppedImage = originalImage.getSubimage(x, y, minSize, minSize);
-
-            // Resize the image to 200x200
             BufferedImage resizedImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
             Graphics2D g2d = resizedImage.createGraphics();
             g2d.drawImage(croppedImage.getScaledInstance(200, 200, Image.SCALE_SMOOTH), 0, 0, null);
             g2d.dispose();
 
-            // Save the resized image
             File outputFile = filePath.toFile();
             ImageIO.write(resizedImage, "jpg", outputFile);
 
-            // Update the user’s profile picture path
             user.setProfilePicture(filename);
             userRepository.save(user);
         } catch (IOException e) {
-            errors.add("Error saving file: " + e.getMessage());
+            throw new RuntimeException("Failed to store file.");
         }
 
         return errors;
