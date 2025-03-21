@@ -40,8 +40,15 @@ function populateRoomSelection() {
             option.textContent = unselected[i];
             roomSelection.appendChild(option);
         }
-    } else {
-
+    }
+    else {
+        console.log("Creating new default option");
+        const emptyListOption = document.createElement("option");
+        emptyListOption.value = "";
+        emptyListOption.textContent = "There are no available rooms to select";
+        emptyListOption.disabled = true;
+        emptyListOption.selected = true;
+        roomSelection.appendChild(emptyListOption);
     }
 }
 
