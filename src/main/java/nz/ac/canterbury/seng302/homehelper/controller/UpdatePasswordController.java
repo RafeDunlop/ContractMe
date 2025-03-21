@@ -19,12 +19,12 @@ import java.util.NoSuchElementException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-public class ChangePasswordController {
+public class UpdatePasswordController {
     Logger logger = LoggerFactory.getLogger(RegisterController.class);
     private UpdatePasswordService updatePasswordService;
 
     @Autowired
-    public ChangePasswordController(UpdatePasswordService updatePasswordService) {
+    public UpdatePasswordController(UpdatePasswordService updatePasswordService) {
         this.updatePasswordService = updatePasswordService;
     }
 

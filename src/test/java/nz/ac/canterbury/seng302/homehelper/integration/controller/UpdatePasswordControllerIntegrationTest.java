@@ -2,15 +2,12 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
 import jakarta.annotation.PostConstruct;
 import java.util.List;
-import java.util.Optional;
-import nz.ac.canterbury.seng302.homehelper.controller.ChangePasswordController;
-import nz.ac.canterbury.seng302.homehelper.controller.RegisterController;
+
+import nz.ac.canterbury.seng302.homehelper.controller.UpdatePasswordController;
 import nz.ac.canterbury.seng302.homehelper.dto.UpdatePasswordDTO;
 
 import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
-import nz.ac.canterbury.seng302.homehelper.service.UpdatePasswordService;
 import org.junit.jupiter.api.Test;
 
 import org.mockito.Mockito;
@@ -27,26 +24,22 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ChangePasswordControllerIntegrationTest {
+public class UpdatePasswordControllerIntegrationTest {
 
     @Autowired
-    private ChangePasswordController changePasswordController;
+    private UpdatePasswordController updatePasswordController;
 
     /**
      * MockMvc instance used for simulating HTTP requests.
@@ -59,11 +52,11 @@ public class ChangePasswordControllerIntegrationTest {
 
     /**
      * Initializes the {@link MockMvc} instance with a new setup of the
-     * {@link ChangePasswordController}.
+     * {@link UpdatePasswordController}.
      */
     @PostConstruct
     public void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(changePasswordController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(updatePasswordController).build();
     }
 
     /**
