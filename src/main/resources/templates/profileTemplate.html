@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+		<title th:text="|User ${firstName}|">User Details</title>
+		<link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+	</head>
+	<body>
+		<div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+		<div class="container mt-5">
+			<div class="card p-4 shadow position-relative">
+				<div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
+					<a th:href="@{/user/edit}" class="btn btn-primary ">
+						Edit
+					</a>
+				</div>
+
+				<h4 class="card-title mb-5">User details for <span th:text="${firstName}">Name</span></h4>
+				<div class="card-body">
+					<table class="border border-0">
+						<tbody>
+							<tr>
+								<th class="p-2">Name</th>
+								<td class="p-2" th:text="|${firstName} ${lastName}|">Name</td>
+							</tr>
+							<tr>
+								<th class="p-2">Email</th>
+								<td class="p-2" th:text="${email}">email</td>
+							</tr>
+							<tr>
+								<th class="p-2">Account created</th>
+								<td class="p-2" th:text="${dateAdded}">date</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

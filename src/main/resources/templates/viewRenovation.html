@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+    <title>View renovation</title>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+</head>
+<body>
+<div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+<div class="container mt-5">
+
+    <div class="card p-4 shadow-sm">
+        <h4 th:text="'Viewing Renovation: ' + ${renovation.name}" class="card-title mb-4"></h4>
+        <div th:if="${description} != ''" class="card p-3 bg-light mb-3">
+            <p class="mb-0" th:text="${renovation.description}"></p>
+        </div>
+
+        <div th:if="!${renovation.rooms.isEmpty()}" class="mb-3">
+            <h6 class="fw-bold">Rooms:</h6>
+            <ul class="list-group">
+                <li th:each="room : ${renovation.rooms}" class="list-group-item">
+                    🛠️ <span th:text="${room}" class="ms-2"></span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn  btn-primary">Edit</a>
+        <a th:href="@{/renovations}" class="btn  btn-primary">Back To Renovations</a>
+    </div>
+</div>
+
+
+</body>
+</html>

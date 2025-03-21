@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+    <title>Home Helper Registration</title>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="card p-4 shadow">
+        <h4 class="card-title mb-5">Sign up</h4>
+        <form th:action="@{register}" method="post">
+            <div class="form-group mb-3">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="first-name" name="firstName" placeholder="First Name" aria-label="first-name" th:value="${firstName}">
+                </div>
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="last-name" name="lastName" placeholder="Last Name" aria-label="last-name" th:value="${lastName}">
+                </div>
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="email" name="email" placeholder="Email" aria-label="email" th:value="${email}">
+                </div>
+                <div class="mb-3">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password" aria-label="password">
+                </div>
+                <div class="mb-5">
+                    <input type="password" class="form-control" id="confirm-password" name="confirmPassword" placeholder="Confirm Password" aria-label="confirm-password">
+                </div>
+                <div th:if="${errorMessages}" class="alert alert-danger mb-4" role="alert">
+                    <ul>
+                        <li th:each="error : ${errorMessages}" th:text="${error}"></li>
+                    </ul>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign up</button>
+                <a th:href="@{/}" class="btn btn-outline-secondary m-4">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

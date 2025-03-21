@@ -1,0 +1,172 @@
+package nz.ac.canterbury.seng302.homehelper.integration.controller;
+
+import jakarta.annotation.PostConstruct;
+import nz.ac.canterbury.seng302.homehelper.controller.EditProfileController;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+
+@SpringBootTest
+public class EditProfileControllerIntegrationTest {
+
+    @Autowired
+    private EditProfileController editProfileController;
+
+    private MockMvc mockMvc;
+
+    @MockBean
+    private UserRepository userRepository;
+
+    @PostConstruct
+    public void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(editProfileController).build();
+    }
+
+    /**
+     * Tests the edit profile page with a valid id in the URL path.
+     * Test simulates a user clicking the edit button from the profile page to edit their details.
+     * Expects to get the edit profile page with their current details added to it.
+     * @throws Exception if the request processing fails
+     */
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void getForm_validUserId_returnForm() throws Exception {
+        User expectedUser = new User("Jane", "Doe", "jane@doe.com", "password");
+        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser.getEmail())).thenReturn(Optional.of(expectedUser));
+        mockMvc.perform(get("/user/edit"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("editProfileTemplate"))
+                .andExpect(model().attributeExists("user"))
+                .andExpect(model().attribute("firstName", expectedUser.getFirstName()))
+                .andExpect(model().attribute("lastName", expectedUser.getLastName()))
+                .andExpect(model().attribute("email", expectedUser.getEmail()));
+    }
+
+    /**
+     * Tests the edit function on the page when the updated details are in the correct format.
+     * Test simulates a user making an edit to the user details so that all of them are in the correct format.
+     * Expects the edit to be approved and to go back to the profile page.
+     * @throws Exception if the request processing fails
+     */
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void postForm_validUserDetails_exitEditor() throws Exception {
+        User expectedUser = new User("Jane", "Doe", "jane@doe.com", "password");
+        User updatedUser = new User("John", "Doe", "john@doe.com", "password");
+        expectedUser.grantAuthority("ROLE_USER");
+        updatedUser.grantAuthority("ROLE_USER");
+        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser.getEmail())).thenReturn(Optional.of(expectedUser));
+
+        mockMvc.perform(post("/user/edit")
+                        .param("firstName", updatedUser.getFirstName())
+                        .param("lastName", updatedUser.getLastName())
+                        .param("email", updatedUser.getEmail())
+                        .param("password", updatedUser.getPassword()))
+                .andExpect(status().isFound())
+                .andExpect(header().exists("Location"))
+                .andExpect(header().string("Location", "/user"));
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        Mockito.verify(userRepository).save(userCaptor.capture());
+        User capturedUser = userCaptor.getValue();
+        Assertions.assertEquals(updatedUser.getFirstName(), capturedUser.getFirstName());
+        Assertions.assertEquals(updatedUser.getLastName(), capturedUser.getLastName());
+        Assertions.assertEquals(updatedUser.getEmail(), capturedUser.getEmail());
+    }
+
+    /**
+     * Tests the edit function on the page when the name details are missing/invalid.
+     * Test simulates a user making an edit to the user details but the names are missing.
+     * Expects to get "First name cannot be empty." error messages.
+     * @throws Exception if the request processing fails
+     */
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void postForm_missingNames_returnNameFormatError() throws Exception {
+        User expectedUser = new User("Jane", "Doe", "jane@doe.com", "password");
+        User updatedUser = new User("", "", "jane@doe.com", "password");
+        List<String> expectedErrors = List.of("First name cannot be empty.");
+        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser.getEmail())).thenReturn(Optional.of(expectedUser));
+        mockMvc.perform(post("/user/edit")
+                        .param("firstName", updatedUser.getFirstName())
+                        .param("lastName", updatedUser.getLastName())
+                        .param("email", updatedUser.getEmail())
+                        .param("password", updatedUser.getPassword()))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("errorMessages", expectedErrors))
+                .andExpect(model().attributeExists("user"))
+                .andExpect(model().attribute("firstName", updatedUser.getFirstName()))
+                .andExpect(model().attribute("lastName", updatedUser.getLastName()))
+                .andExpect(model().attribute("email", updatedUser.getEmail()));
+    }
+
+    /**
+     * Tests the edit function on the page when the email details are incorrect (email can't exist).
+     * Test simulates a user making an edit to the user details but the email is formatted incorrectly.
+     * Expects to get "Email address must be in the form ‘jane@doe.nz’." error message.
+     * @throws Exception if the request processing fails
+     */
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void postForm_invalidEmailFormat_returnEmailFormatError() throws Exception {
+        User expectedUser = new User("Jane", "Doe", "jane@doe.com", "password");
+        User updatedUser = new User("Jane", "Doe", "jane@", "password");
+        List<String> expectedErrors = List.of("Email address must be in the form ‘jane@doe.nz’.");
+        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser.getEmail())).thenReturn(Optional.of(expectedUser));
+        mockMvc.perform(post("/user/edit")
+                        .param("firstName", updatedUser.getFirstName())
+                        .param("lastName", updatedUser.getLastName())
+                        .param("email", updatedUser.getEmail())
+                        .param("password", updatedUser.getPassword()))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("errorMessages", expectedErrors))
+                .andExpect(model().attributeExists("user"))
+                .andExpect(model().attribute("firstName", updatedUser.getFirstName()))
+                .andExpect(model().attribute("lastName", updatedUser.getLastName()))
+                .andExpect(model().attribute("email", updatedUser.getEmail()));
+    }
+
+    /**
+     * Tests the edit function on the page when the email details already exist with another user.
+     * Test simulates a user making an edit to the user details but the email is already associates with another account.
+     * Expects to get "This email address is already in use." error message.
+     * @throws Exception if the request processing fails
+     */
+    @Test
+    @WithMockUser(username = "doe@jane.com")
+    public void postForm_emailAlreadyExists_returnEmailExistsError() throws Exception {
+        User expectedUser1 = new User("Jane", "Doe", "jane@doe.com", "password");
+        User expectedUser2 = new User("Jane", "Doe", "doe@jane.com", "password");
+        List<String> expectedErrors = List.of("This email address is already in use.");
+        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser1.getEmail())).thenReturn(Optional.of(expectedUser1));
+        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser2.getEmail())).thenReturn(Optional.of(expectedUser2));
+        mockMvc.perform(post("/user/edit")
+                        .param("firstName", expectedUser1.getFirstName())
+                        .param("lastName", expectedUser1.getLastName())
+                        .param("email", expectedUser1.getEmail())
+                        .param("password", expectedUser1.getPassword()))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("errorMessages", expectedErrors))
+                .andExpect(model().attributeExists("user"))
+                .andExpect(model().attribute("firstName", expectedUser1.getFirstName()))
+                .andExpect(model().attribute("lastName", expectedUser1.getLastName()))
+                .andExpect(model().attribute("email", expectedUser1.getEmail()));
+    }
+}

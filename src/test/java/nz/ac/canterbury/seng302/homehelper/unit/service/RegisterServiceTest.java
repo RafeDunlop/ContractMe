@@ -1,0 +1,53 @@
+package nz.ac.canterbury.seng302.homehelper.unit.service;
+
+import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
+import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.security.authentication.AuthenticationManager;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+public class RegisterServiceTest {
+    /**
+     * Tests the validation of an unused email.
+     * This test simulates checking if an email exists in the database and expects:
+     * A empty list (no errors)
+     */
+    @Test
+    public void testValidateEmail_emailNotUsed_returnEmptyList() {
+        UserRepository userRepositoryMock = Mockito.mock(UserRepository.class);
+        UserValidation userValidationMock = Mockito.mock(UserValidation.class);
+        AuthenticationManager authenticationManagerMock = Mockito.mock(AuthenticationManager.class);
+        RegisterService registerService = new RegisterService(userRepositoryMock, userValidationMock, authenticationManagerMock);
+        Mockito.when(userRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty());
+        Mockito.when(userValidationMock.validateEmailString(Mockito.anyString())).thenReturn( new ArrayList<>());
+        List<String> returnValue = registerService.validateEmail("jane@doe.nz");
+        Assertions.assertEquals(0, returnValue.size());
+        Assertions.assertTrue(returnValue.isEmpty());
+    }
+
+    /**
+     * Tests the validation of a used email.
+     * This test simulates checking if an email exists in the database and expects:
+     * An error message in a list
+     */
+    @Test
+    public void testValidateEmail_emailUsed_returnError() {
+        UserRepository userRepositoryMock = Mockito.mock(UserRepository.class);
+        UserValidation userValidationMock = Mockito.mock(UserValidation.class);
+        AuthenticationManager authenticationManagerMock = Mockito.mock(AuthenticationManager.class);
+        RegisterService registerService = new RegisterService(userRepositoryMock, userValidationMock, authenticationManagerMock);
+        Mockito.when(userRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(new User("Jane", "Doe", "jane@doe.nz", "password")));
+        Mockito.when(userValidationMock.validateEmailString(Mockito.anyString())).thenReturn( new ArrayList<>());
+        List<String> returnValue = registerService.validateEmail("jane@doe.nz");
+        List<String> expectedErrorList = List.of("This email address is already in use.");
+        Assertions.assertEquals(1, returnValue.size());
+        Assertions.assertLinesMatch(expectedErrorList, returnValue);
+    }
+}
