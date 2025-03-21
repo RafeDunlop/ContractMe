@@ -1,6 +1,14 @@
-import {setRoomList, addRoom, updateCharCounter, checkRoomName, addRoomsToSubmission} from "./validations.js";
+import {
+    setRoomList,
+    addRoom,
+    updateCharCounter,
+    checkRoomName,
+    addRoomsToSubmission,
+    renderRooms
+} from "./validations.js";
 
 let roomList;
+let selectedList = []
 let roomId = 0;
 let roomSelection = document.getElementById("roomSelection");
 const form = document.getElementById("create-task-form");
@@ -18,22 +26,52 @@ document.addEventListener("DOMContentLoaded", () => {
     roomList = previousRoomList
     updateCharCounter("description", "description-length-counter");
     populateRoomSelection();
+    document.getElementById("roomSelection").onclick = () => populateRoomSelection();
 });
 
-function populateRoomSelection() {
+function selectRoom(room) {
+    selectedList.push(room);
+    renderRooms(selectedList);
+}
 
-    if (roomList.length > 0) {
+function populateRoomSelection() {
+    console.log("all: " + roomList);
+    console.log("selected: " + selectedList);
+    let i, length;
+    length = roomSelection.options.length - 1
+    for (i = length; i >= 0; i--) {
+        roomSelection.options.remove(i);
+    }
+    let unselected = unselectedList();
+    console.log("unselected: " + unselected);
+    if (unselected.length > 0) {
     for (let i = 0; i < roomList.length; i++) {
         let option = document.createElement("option");
-        option.value = roomList[i];
-        option.textContent = roomList[i];
+        option.value = unselected[i];
+        option.textContent = unselected[i];
+        option.onclick = () => selectRoom(unselected[i]);
         roomSelection.appendChild(option);
-
     }
 
 }   else {
 
 
 }}
+
+function unselectedList() {
+    let i, withoutSelected, selectedRoom;
+    withoutSelected = [];
+    roomList.forEach(room => withoutSelected.push(room));
+    for (i = 0; i < selectedList.length; i++) {
+        selectedRoom = selectedList[i];
+        withoutSelected = withoutSelected.filter(thisRoom => thisRoom !== selectedRoom);
+    }
+    return withoutSelected;
+
+}
+
+function renderSelectedRooms() {
+
+}
 
 

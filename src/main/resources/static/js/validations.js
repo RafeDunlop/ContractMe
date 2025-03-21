@@ -40,7 +40,7 @@ export function addRoomsToSubmission(formId) {
     });
 }
 
-export function renderRooms(roomList) {
+export function renderRoomsBase(roomList, onclick) {
     let i, room, roomTable, tableRow, roomCell, buttonCell, button;
     roomTable = document.getElementById("room-list");
     roomTable.innerHTML = "";
@@ -59,12 +59,17 @@ export function renderRooms(roomList) {
         button.style.border = "1px solid #ccc";
         button.style.cursor = "pointer";
         button.background = "white";
-        button.onclick = function () {
-            roomList = roomList.filter(thisRoom => thisRoom[0] !== room[0]);
-            renderRooms(roomList);
-        };
+        button.onclick = onclick(room);
         buttonCell.appendChild(button);
     }
+}
+
+export function renderRooms (roomList) {
+    renderRoomsBase(roomList, function (room) {
+        roomList = roomList.filter(thisRoom => thisRoom[0] !== room[0]);
+        renderRooms(roomList);
+    })
+
 }
 
 export function setRoomList(previousRoomList) {
