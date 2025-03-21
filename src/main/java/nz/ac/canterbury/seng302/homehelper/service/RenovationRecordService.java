@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
+import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
@@ -8,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -64,11 +63,11 @@ public class RenovationRecordService {
      * Removes a renovation record by its id, but first checks it exists.
      * @param id of the record to remove
      */
+    @Transactional
     public void removeRenovationRecord(Long id){
         Optional<RenovationRecord> recordToRemove = renovationRecordRepository.findById(id);
         if (recordToRemove.isPresent()) {
-            RenovationRecord record = recordToRemove.get();
-            renovationRecordRepository.delete(record);
+            renovationRecordRepository.deleteById(id);
         }
     }
     /**
@@ -117,6 +116,16 @@ public class RenovationRecordService {
         );
     }
 
+    /**
+     * Calls other functions to validate all renovation fields, returning false if any do not pass their validity checks. Predicate for
+     * name is tested which calls the checkForExactMatch and validateName functions.
+     * @param name Name of the record
+     * @param description Description for the record
+     * @param roomList List of rooms for the record
+     * @param nameChecker A predicate which checks if the name doesn't exist and if it follows the correct string pattern
+     * @param pattern The string pattern the list of rooms must follow
+     * @return A boolean whether all the details are in the correct format and are valid
+     */
     private boolean validateAllInputs(String name, String description, List<String> roomList, Predicate<String> nameChecker, Pattern pattern) {
         return (validateAllRoomNames(roomList, pattern) &&
                 validateDescriptionLength(description) &&
