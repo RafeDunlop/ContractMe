@@ -19,23 +19,36 @@ export function validateField(input, pattern, errorLabel, errorMessage) {
     }
 }
 
-export function addRoomsToSubmission(formId, roomList) {
-    const form = document.getElementById(formId);
-    form.addEventListener("submit", function (event) {
-        let input;
-        event.preventDefault();
-        form.querySelectorAll("input[name='roomList']").forEach(room => room.remove());
-        roomList.forEach(room => {
-            input = document.createElement("input");
-            input.type = "hidden";
-            input.name = "roomList";
-            input.value = room;
-            form.appendChild(input);
-        });
-        form.submit();
+/**
+ * intercepts a form upon submission and injects the specified roomList into the submission
+ * @param form The form being submitted
+ * @param event The submission event
+ * @param roomList The array whose entries will be added to the form's submission at the time of submission
+ */
+export function injectRoomsIntoSubmission(form, event, roomList) {
+    let input;
+    event.preventDefault();
+    form.querySelectorAll("input[name='roomList']").forEach(room => room.remove());
+    console.log("room list upon form submission:");
+    console.log(roomList);
+    roomList.forEach(room => {
+        input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "roomList";
+        input.value = room;
+        form.appendChild(input);
     });
+    form.submit();
 }
 
+/**
+ * updates the specified counter to display the length of the specified textArea relative to a specified or default maximum
+ * format is <strong>textArea.length/maxLimit</strong>
+ * maximum is based on storage space, so Unicode symbols encoded with 2 characters count as 2 characters
+ * @param textAreaId The id of the TextArea whose length is checked
+ * @param counterId The id of the counter whose text content is set
+ * @param maxLimit The maximum to display. Default is 512
+ */
 export function updateCharCounter(textAreaId, counterId, maxLimit = 512) {
     let textArea = document.getElementById(textAreaId);
     let counter = document.getElementById(counterId);
@@ -43,6 +56,12 @@ export function updateCharCounter(textAreaId, counterId, maxLimit = 512) {
     counter.textContent = `${length}/${maxLimit}`;
 }
 
+/**
+ * Clears the specified table and fills it with the specified roomList
+ * Each room has a "delete" button which removes the associated room from the specified list
+ * @param roomList The list to be rendered
+ * @param roomTableId The id of the table to render the list into
+ */
 export function renderRooms(roomList, roomTableId) {
     console.log("renderRooms");
     let i, room, roomTable, tableRow, roomCell, buttonCell, button;

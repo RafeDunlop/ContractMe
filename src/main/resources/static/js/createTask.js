@@ -1,12 +1,13 @@
 import {
     updateCharCounter,
-    addRoomsToSubmission,
+    injectRoomsIntoSubmission,
     renderRooms
 } from "./renovationCommons.js";
 
 let roomList;
 let selectedList = []
 let roomSelection = document.getElementById("roomSelection");
+let form = document.getElementById("create-task-form");
 
 /**
  * Event listener that runs when the create task page is loaded.
@@ -23,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     roomList = previousRoomList
     updateCharCounter("description", "description-length-counter");
     populateRoomSelection();
-    addRoomsToSubmission("create-task-form", selectedList);
+    form.addEventListener("submit", function (event) { injectRoomsIntoSubmission(form, event, roomList) })
     document.getElementById("roomSelection").onclick = () => populateRoomSelection();
     roomSelection.addEventListener("change", function () { selectRoom(this.value) });
 });

@@ -1,6 +1,6 @@
 import {
     updateCharCounter,
-    addRoomsToSubmission,
+    injectRoomsIntoSubmission,
     validateField,
     renderRooms
 } from "./renovationCommons.js";
@@ -11,13 +11,14 @@ let roomErrorLabel = document.getElementById("room-error-message")
 let roomNameField = document.getElementById("roomList")
 let createRoomButton = document.getElementById("create-room-button")
 let descriptionTextField = document.getElementById("description")
+let form = document.getElementById("renovation-form");
 
 const roomNameErrorMessage =
     "Renovation record room names must only include letters, numbers, spaces, " +
     "dots, hyphens or apostrophes"
 
 document.addEventListener("DOMContentLoaded", () => {
-    addRoomsToSubmission("renovation-form")
+    form.addEventListener("submit", function (event) { injectRoomsIntoSubmission(form, event, roomList) });
     roomNameField.addEventListener("input", function() { checkRoomName(roomNameField.value) });
     createRoomButton.addEventListener("click", function() { addRoom('roomList', 'room-list'     ) });
     descriptionTextField.addEventListener("input", function() {
