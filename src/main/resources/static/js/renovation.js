@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
         previousRoomList = previousRoomListString.split(',');
     }
+    console.log(previousRoomList.type);
     setRoomList(previousRoomList);
     updateCharCounter("description", "description-length-counter");
 });

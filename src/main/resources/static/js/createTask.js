@@ -1,6 +1,6 @@
 import {setRoomList, addRoom, updateCharCounter, checkRoomName, addRoomsToSubmission} from "./validations.js";
 
-let roomList = document.getElementById("roomList").value;
+let roomList;
 let roomId = 0;
 let roomSelection = document.getElementById("roomSelection");
 const form = document.getElementById("create-task-form");
@@ -15,30 +15,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     console.log(previousRoomList.type);
     setRoomList(previousRoomList);
+    roomList = previousRoomList
     updateCharCounter("description", "description-length-counter");
+    populateRoomSelection();
 });
 
 function populateRoomSelection() {
-    console.log("b");
-    console.log(roomList);
-    console.log(roomList[0]);
-    console.log(typeof roomList);
-    console.log(roomList.length)
-
-
-    roomSelection.innerHTML = "";
 
     if (roomList.length > 0) {
     for (let i = 0; i < roomList.length; i++) {
         let option = document.createElement("option");
         option.value = roomList[i];
         option.textContent = roomList[i];
-        console.log(option.textContent);
         roomSelection.appendChild(option);
-        console.log("d")
+
     }
 
 }   else {
+
 
 }}
 
