@@ -21,7 +21,7 @@ public class User {
     @Column(name = "user_id")
     private Long id;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private List<RenovationRecord> renovationRecords;
 
@@ -90,42 +90,82 @@ public class User {
         return authorities;
     }
 
+    /**
+     * Gets id of the user
+     * @return ID of the user as a long integer
+     */
     public Long getId() {
         return id;
     }
 
+    /**
+     * Gets the first name of the user
+     * @return First name of user
+     */
     public String getFirstName() {
         return firstName;
     }
 
+    /**
+     * Sets the first name of the user
+     * @param firstName Inputted first name
+     */
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
+    /**
+     * Gets the last name of the user
+     * @return Last name of user
+     */
     public  String getLastName() {
         return lastName;
     }
 
+    /**
+     * Sets the last name of the user
+     * @param lastName Inputted last name
+     */
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
 
+    /**
+     * Gets the email of the user
+     * @return Email of user
+     */
     public String getEmail() {
         return email;
     }
 
+    /**
+     * Sets the email of the user
+     * @param email Inputted email
+     */
     public void setEmail(String email) {
         this.email = email;
     }
 
+    /**
+     * Gets password of user
+     * @return Password of user
+     */
     public String getPassword() {
         return password;
     }
 
+    /**
+     * Set password of user
+     * @param password Inputted password
+     */
     public void setPassword(String password) {
         this.password = password;
     }
 
+    /**
+     * Gets the timestamp of when the user was registered
+     * @return Timestamp of user registration
+     */
     public LocalDateTime getCreatedTimestamp() {
         return createdTimestamp;
     }
@@ -138,6 +178,12 @@ public class User {
         return activated;
     }
 
+    /**
+     * Overrides the existing equals method for the User object. When a User is compared to another object, it checks if the
+     * other object is of a User and that the all the parameters from both objects are equal.
+     * @param o The object the User is being compared to
+     * @return A boolean whether the two objects are the same
+     */
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

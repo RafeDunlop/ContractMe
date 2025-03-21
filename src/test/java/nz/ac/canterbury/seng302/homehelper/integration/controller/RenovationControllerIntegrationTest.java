@@ -256,6 +256,40 @@ public class RenovationControllerIntegrationTest {
     }
 
     /**
+     * Tests deleting a renovation when the id is not inputted. Returns a not found error to let the
+     * user know they there has to be an id inputted when deleting.
+     * @throws Exception if the request processing fails
+     */
+    @Test
+    public void deleteRecord_nullRecordId_notFoundError() throws Exception {
+        mockMvc.perform(delete("/renovations/delete/")
+                        .with(csrf()))
+                .andExpect(status().isNotFound());
+    }
+
+    /**
+     * Tests deleting a renovation when the id in the link is associated with a current record but a user who didn't
+     * create the record tries deleting it. Returns a forbidden error to let the user know they can't delete records
+     * not associated with their account.
+     * @throws Exception if the request processing fails
+     */
+    @Test
+    public void deleteRecord_invalidUserForDelete_forbiddenError() throws Exception {
+        User anotherUser = new User("John", "Doe", "john@doe.com", "password");
+        userRepository.save(anotherUser);
+
+        RenovationRecord existingRecord = new RenovationRecord(anotherUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        assertTrue(userRecords.isEmpty());
+
+        mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    /**
      * Tests getting the edit renovation form with an id that is associated with an existing record. If the id is valid, the user is taken
      * to the edit page for that renovation with the input fields filled out with that renovation's details.
      * @throws Exception if the request processing fails
