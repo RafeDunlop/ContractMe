@@ -3,7 +3,7 @@ import {
     addRoomsToSubmission,
     validateField,
     renderRooms
-} from "./validations.js";
+} from "./renovationCommons.js";
 
 let roomFieldValid = false;
 let roomList = [];

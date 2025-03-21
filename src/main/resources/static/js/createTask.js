@@ -5,7 +5,7 @@ import {
     checkRoomName,
     addRoomsToSubmission,
     renderRooms
-} from "./validations.js";
+} from "./renovationCommons.js";
 
 let roomList;
 let selectedList = []
