@@ -40,9 +40,10 @@ public class Authority {
     }
 
     /**
-     *
-     * @param o The object the authority is being compared to
-     * @return A boolean whether the two objects are the same (have the same values)
+     * Overrides the existing equals method for the Authority object. When an Authority is compared to another object, it checks
+     * if the other object is an Authority and that the all the parameters from both objects are equal.
+     * @param o The object the Authority is being compared to
+     * @return A boolean whether the two objects are the same
      */
     @Override
     public boolean equals(Object o) {
