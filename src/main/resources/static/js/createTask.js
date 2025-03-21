@@ -8,6 +8,10 @@ let roomList;
 let selectedList = []
 let roomSelection = document.getElementById("roomSelection");
 
+/**
+ * Event listener that runs when the create task page is loaded.
+ * Initialises the live page elements.
+ */
 document.addEventListener("DOMContentLoaded", () => {
     let previousRoomList, previousRoomListString;
     previousRoomListString = document.getElementById('availableRoomList').value;
@@ -16,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
         previousRoomList = previousRoomListString.split(',');
     }
-    console.log(previousRoomList.type);
     roomList = previousRoomList
     updateCharCounter("description", "description-length-counter");
     populateRoomSelection();
@@ -25,10 +28,19 @@ document.addEventListener("DOMContentLoaded", () => {
     roomSelection.addEventListener("change", function () { selectRoom(this.value) });
 });
 
+/**
+ * Renders a display element for a room that's been selected.
+ * @param room
+ */
 function selectRoom(room) {
     selectedList.push(room);
     renderRooms(selectedList, "room-table");
 }
+
+/**
+ * Populates the drop-down box with the rooms available for selection.
+ * Is run every time an option is clicked.
+ */
 
 function populateRoomSelection() {
     roomSelection.length = 0;
@@ -42,7 +54,6 @@ function populateRoomSelection() {
         }
     }
     else {
-        console.log("Creating new default option");
         const emptyListOption = document.createElement("option");
         emptyListOption.value = "";
         emptyListOption.textContent = "There are no available rooms to select";
@@ -52,6 +63,10 @@ function populateRoomSelection() {
     }
 }
 
+/**
+ * Populates the list that displays the options in the drop-down box
+ * @returns {*[]}
+ */
 function unselectedList() {
     let i, withoutSelected, selectedRoom;
     withoutSelected = [];
