@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -42,37 +43,40 @@ public class SecurityConfiguration {
         return authenticationManagerBuilder.build();
     }
 
-
     /**
-     * Security filter chain.
-     *
+     * Security filter chain. Provides authentication for pages, defines logging in/out, and
+     * allows access to database.
      * @param http http security configuration object from spring
      * @return Custom SecurityFilterChain
      * @throws Exception if building the object fails
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth.requestMatchers(AntPathRequestMatcher.antMatcher("/h2/**")).permitAll())
-                // Permit access to the h2 console
-                .headers(headers -> headers.frameOptions().disable())
+        http.authorizeHttpRequests(auth -> auth
+                        // Give access to database and allow all users to go on the matching pages.
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/h2/**")).permitAll()
+                        .requestMatchers("/", "/register", "/login", "/webjars/**").permitAll()
+
+                        // Only the specified roles can reach the matching pages
+                        .requestMatchers("/admin").hasRole("ADMIN")
+                        .requestMatchers("/main", "/user/**", "/renovations/**").hasRole("USER")
+                        .anyRequest().authenticated())
+
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .csrf(csrf -> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2/**")))
-                .authorizeHttpRequests()
-                // Allow "/", "/register", "login", "/main", and "/webjars" to anyone (need webjars for bootstrap css)
-                .requestMatchers("/", "/register", "/login", "/main", "/webjars/**")
-                .permitAll()
-                // Only allow admins to reach the "/admin" page
-                .requestMatchers("/admin")
-                .hasRole("ADMIN")
-                .requestMatchers("/user", "user/edit")
-                .hasRole("USER")
-                .anyRequest()
-                .authenticated()
-                .and()
-                // Define logging in, a POST "/login" endpoint now exists under the hood, after login redirect to main page
-                // Errors are handled by CustomAuthFailHandler and displayed by the LoginController
-                .formLogin().loginPage("/login").loginProcessingUrl("/login").defaultSuccessUrl("/main").failureHandler(authFailHandler)
-                .and()
-                .logout().logoutUrl("/logout").logoutSuccessUrl("/login").invalidateHttpSession(true).deleteCookies("JSESSIONID");
+
+                // Define logging in, a POST "/login" endpoint now exists under the hood, after login redirect to main page.
+                // Errors are handled by CustomAuthFailHandler and displayed by the LoginController.
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/main", true)
+                        .failureHandler(authFailHandler))
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID"));
         return http.build();
     }
 }

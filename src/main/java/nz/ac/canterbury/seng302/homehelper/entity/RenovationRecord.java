@@ -18,6 +18,10 @@ public class RenovationRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Column(nullable = false)
     private String name;
 
@@ -42,11 +46,13 @@ public class RenovationRecord {
 
     /**
      * Constructor for RenovationRecord
+     * @param user The owner of this record
      * @param name of the record, unique
      * @param description of the record, not required
      * @param rooms a list of rooms for the renovation, not required
      */
-    public RenovationRecord(String name, String description, List<String> rooms) {
+    public RenovationRecord(User user, String name, String description, List<String> rooms) {
+        this.user = user;
         this.name = name.trim(); //should not be possible to call constructor with empty string
         this.description = (description != null) ? description.trim() : "";
         this.rooms = new ArrayList<>();
@@ -59,6 +65,14 @@ public class RenovationRecord {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Gets user of the renovation record
+     * @return user of record
+     */
+    public User getUser(){
+        return user;
     }
 
     /**
@@ -111,6 +125,14 @@ public class RenovationRecord {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Sets the user of the renovation record
+     * @param user of the record
+     */
+    public void setUser(User user) {
+        this.user = user;
     }
 
     /**

@@ -69,7 +69,9 @@ public class EditProfileControllerIntegrationTest {
     @WithMockUser(username = "jane@doe.com")
     public void postForm_validUserDetails_exitEditor() throws Exception {
         User expectedUser = new User("Jane", "Doe", "jane@doe.com", "password");
-        User updatedUser = new User("John", "Doe", "jane@doe.com", "password");
+        User updatedUser = new User("John", "Doe", "john@doe.com", "password");
+        expectedUser.grantAuthority("ROLE_USER");
+        updatedUser.grantAuthority("ROLE_USER");
         Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser.getEmail())).thenReturn(Optional.of(expectedUser));
 
         mockMvc.perform(post("/user/edit")

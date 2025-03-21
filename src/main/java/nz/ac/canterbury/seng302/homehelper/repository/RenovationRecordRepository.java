@@ -1,9 +1,13 @@
 package nz.ac.canterbury.seng302.homehelper.repository;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +17,7 @@ import java.util.Optional;
  * Extends {@link CrudRepository} to provide basic CRUD operations.
  * @author Jake Connolly
  */
+@Repository
 public interface RenovationRecordRepository extends CrudRepository<RenovationRecord, Long> {
     /**
      *  Finds a record from the repository by id
@@ -29,11 +34,12 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
 
     /**
      * Gets all renovation records not case-sensitive that are like the given string
+     * @param user The current user
      * @param name to search for records like it
      * @return list off all records containing the string in its name
      */
-    @Query("SELECT f FROM RenovationRecord f WHERE LOWER(f.name) LIKE LOWER(CONCAT('%', :name, '%'))")
-    List<RenovationRecord> findByNameContainingIgnoreCase(@Param("name") String name);
+    @Query("SELECT f FROM RenovationRecord f WHERE (f.user) = (:user) AND LOWER(f.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    List<RenovationRecord> findByNameContainingIgnoreCase(@Param("user") User user, @Param("name") String name);
 
     /**
      * Finds a renovation record with a matching name not case-sensitive if it exists
@@ -42,4 +48,20 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
      */
     @Query("SELECT f FROM RenovationRecord f WHERE (f.name) = (:name)")
     Optional<RenovationRecord> findExactMatch(@Param("name") String name);
+
+    /**
+     * Finds all renovation records where the current user on the application matches the owner of the renovation.
+     * @param user The current user
+     * @return A list of all the renovation records from the user
+     */
+    @Query("SELECT f FROM RenovationRecord f WHERE (f.user) = (:user)")
+    List<RenovationRecord> findByUser(@Param("user") User user);
+
+    /**
+     * Deletes a record from the renovations record table by its id. The id cannot be null/
+     * @param id The record id
+     */
+    @Modifying
+    @Query("DELETE FROM RenovationRecord f WHERE f.id = :id")
+    void deleteById(@Param("id") @Nullable Long id);
 }
