@@ -59,7 +59,7 @@ public class VerificationCodeServiceTest {
                 userRepository
         );
         toTest.setSeed(seed);
-        toTest.setTiming(timeQuantity, timeUnit);
+        toTest.setDelay(timeQuantity, timeUnit);
     }
 
     @Test
@@ -91,17 +91,17 @@ public class VerificationCodeServiceTest {
     }
 
     @Test
-    public void issueVerificationCode_dontWait_stillExists() {
-        toTest.issueVerificationCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
+    public void issueSignupCode_dontWait_stillExists() {
+        toTest.issueSignupCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
         verify(verificationCodeRepository, Mockito.never()).delete(verificationCode);
     }
 
     @Test
-    public void issueVerificationCode_waitAndPresentAndExpired_hasBeenDeleted() throws InterruptedException, ExecutionException {
-        String code = toTest.issueVerificationCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
+    public void issueSignupCode_waitAndPresentAndExpired_hasBeenDeleted() throws InterruptedException, ExecutionException {
+        String code = toTest.issueSignupCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
         Mockito.when(verificationCodeRepository.findByCode(Mockito.any())).thenReturn(Optional.of(verificationCode));
         Mockito.when(verificationCode.isExpired()).thenReturn(true);
-        toTest.getDeletionContract(code).get(); //waits for the scheduled service to finish
+        toTest.getScheduledFutureDeletion(code).get(); //waits for the scheduled service to finish
         verify(verificationCodeRepository, times(1)).delete(verificationCode);
     }
 }
