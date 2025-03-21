@@ -117,15 +117,4 @@ public class RegisterService {
             errors.addAll(userValidation.validateEmailString(email));
         return errors;
     }
-
-    /**
-     * Grant the user the USER role and save the update user to the database.
-     *
-     * @param user the user to update
-     * @param authority the authority string to add to the user
-     */
-    public void grantUserAuthority(User user) {
-        user.grantAuthority(ROLE_VERIFIED);
-        userRepository.save(user);
-    }
 }

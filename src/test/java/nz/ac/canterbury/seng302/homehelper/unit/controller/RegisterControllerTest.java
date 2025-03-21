@@ -6,6 +6,8 @@ import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
+import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,13 +22,13 @@ public class RegisterControllerTest {
      * to the user details page
      * */
     @Test
-    void testValidPathway_FromRegistrationPage_ToUserProfilePage() {
+    void testValidPathway_FromRegistrationPage_ToConfirmRegistrationPage() {
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         RegisterService registerServiceSpy = Mockito.mock(RegisterService.class);
-        LoginService loginServiceMock = Mockito.mock(LoginService.class);
+        VerificationCodeService verificationCodeServiceMock = Mockito.mock(VerificationCodeService.class);
         ApplicationEventPublisher applicationEventPublisher = Mockito.mock(ApplicationEventPublisher.class);
         RegisterController registerController = new RegisterController(
-                registerServiceSpy, applicationEventPublisher, loginServiceMock);
+                registerServiceSpy, applicationEventPublisher, verificationCodeServiceMock);
 
         Model model = Mockito.mock(Model.class);
         UserRegisterDTO mockedUser = new UserRegisterDTO("","","","","");
@@ -37,7 +39,7 @@ public class RegisterControllerTest {
         Mockito.when(trialUser.getId()).thenReturn(1L);
         String viewName = (registerController.submitRegistration(mockedUser, model, request));
 
-        Assertions.assertEquals("redirect:/user", viewName);
+        Assertions.assertEquals("redirect:/confirm-registration", viewName);
 
     }
 

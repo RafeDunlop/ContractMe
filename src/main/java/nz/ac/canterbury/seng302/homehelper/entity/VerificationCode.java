@@ -15,6 +15,9 @@ import java.util.Locale;
  */
 @Entity
 public class VerificationCode {
+    /**
+     * Expiration time for verification codes in <em>minutes</em>.
+     */
     private static final int EXPIRATION = 10;
 
     @Id

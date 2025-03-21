@@ -38,6 +38,10 @@ out/
 
 ### VIm ###
 *.swp
+*.orig
 
 ### Mac
 .DS_Store
+
+### Environment
+.env

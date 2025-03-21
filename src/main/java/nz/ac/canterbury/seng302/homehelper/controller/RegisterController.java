@@ -1,24 +1,24 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.event.OnRegistrationCompleteEvent;
-import nz.ac.canterbury.seng302.homehelper.service.LoginService;
-import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mail.MailException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.List;
+import jakarta.servlet.http.HttpServletRequest;
+import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.event.OnRegistrationCompleteEvent;
+import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
+import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
 
 
 /**
@@ -29,16 +29,18 @@ public class RegisterController {
     Logger logger = LoggerFactory.getLogger(RegisterController.class);
 
     private final RegisterService registerService;
-    private final LoginService loginService;
+    private final VerificationCodeService verificationCodeService;
     private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Constructor for the register class, links controller and service layers
      */
     @Autowired
-    public RegisterController(RegisterService registerService, ApplicationEventPublisher eventPublisher, LoginService loginService) {
+    public RegisterController(RegisterService registerService,
+            ApplicationEventPublisher eventPublisher,
+            VerificationCodeService verificationCodeService) {
         this.registerService = registerService;
-        this.loginService = loginService;
+        this.verificationCodeService = verificationCodeService;
         this.eventPublisher = eventPublisher;
     }
 
@@ -68,7 +70,6 @@ public class RegisterController {
         logger.info("POST /register");
         try {
             User user = registerService.registerUser(userRegisterDTO);
-            registerService.authenticateUser(user, userRegisterDTO.getPassword(), request);
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
             return "redirect:/confirm-registration";
         } catch (IllegalArgumentException e) {
@@ -109,10 +110,8 @@ public class RegisterController {
     @PostMapping("/confirm-registration")
     public String verifyRegistration(@ModelAttribute String code) {
         logger.info("POST /confirm-registration code: {}", code);
-        User user = loginService.getUserByEmail();
-        // TODO: add verification call here, probably handle in registerService
-        registerService.grantUserAuthority(user);
-        return "redirect:/user";
+        verificationCodeService.consumeSignupCode(code);
+        return "redirect:/login";
     }
 
 }
