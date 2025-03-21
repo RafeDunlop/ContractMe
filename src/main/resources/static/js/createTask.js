@@ -1,33 +1,54 @@
 
 
-let roomList = document.getElementById("roomList");
+let roomList = document.getElementById("roomList").value;
 let roomId = 0;
-let roomFieldValid = false;
 let roomSelection = document.getElementById("roomSelection");
 const form = document.getElementById("create-task-form");
 
 
 
-function setRoomList(previousRoomList) {
-    console.log(previousRoomList);
-    if (previousRoomList !== null) {
-        previousRoomList.forEach(room => {
-            roomList.push([roomId++, room]);
-        });
-        renderRooms();
-    }
-}
 
 document.addEventListener("DOMContentLoaded", () => {
-    let previousRoomList, previousRoomListString;
-
+    let input;
+    //event.preventDefault();
     console.log(roomList);
-
-    //updateCharCounter("description", "description-length-counter");
+    form.querySelectorAll("input[name='roomList']").forEach(room => room.remove());
+        console.log(roomList);
+        roomList.forEach(room => {
+        console.log("a4");
+            input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "roomList";
+            input.value = room[1];
+            form.appendChild(input);
+    populateRoomSelection();
+    renderRooms();
 });
+
+});
+    //updateCharCounter("description", "description-length-counter");
+
 
 
 function populateRoomSelection() {
+    console.log("b");
+    console.log(roomList);
+    console.log(roomList[0]);
+    console.log(typeof roomList);
+    console.log(roomList.length)
+
+    if (roomList === null) {
+        console.log("myList is null");
+    } else if (roomList === undefined) {
+        console.log("myList is undefined");
+    } else if (!Array.isArray(roomList)) {
+        console.log("myList is not an array");
+        console.log(Object.prototype.toString.call(roomList));
+    } else if (roomList.length === 0) {
+        console.log("myList is an empty array");
+    } else {
+        console.log("myList is populated:", roomList);
+    }
 
     roomSelection.innerHTML = "";
 
@@ -36,12 +57,14 @@ function populateRoomSelection() {
         let option = document.createElement("option");
         option.value = roomList[i];
         option.textContent = roomList[i];
+        console.log(option.textContent);
         roomSelection.appendChild(option);
+        console.log("d")
     }
 
 }   else {
 
-}
+}}
 
 function renderRooms() {
     let i, room, roomTable, tableRow, roomCell, buttonCell, button;
@@ -70,10 +93,5 @@ function renderRooms() {
     }
 }
 
-
-
-
-
-}
 
 

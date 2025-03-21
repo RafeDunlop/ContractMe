@@ -13,7 +13,8 @@
         <h4 class="card-title mb-4">Add Task to Renovation</h4>
         <form th:action="@{create}" method="post" id="create-task-form">
 
-            <input type="hidden" th:name="roomList" th:value="${roomList}">
+            <input type="hidden" id="roomList" th:name="roomList" th:value="${#strings.arrayJoin(roomList, ',')}">
+
 
             <div class="mb-3">
                 <label for="name" class="form-label">Name:</label>
@@ -62,13 +63,14 @@
                     <label class="form-label" id="due-date-error-message"></label>
                 </div>
                 <div class="mt-4">
-                    <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn  btn-primary">Create</a>
+                    <button type="submit" class="btn btn-primary">Create</button>
                 </div>
             </div>
         </form>
     </div>
     <div class="mt-4">
         <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn  btn-primary">Cancel</a>
+
     </div>
 </div>
 </body>

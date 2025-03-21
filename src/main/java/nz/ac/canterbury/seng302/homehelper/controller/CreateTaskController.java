@@ -45,7 +45,7 @@ public class CreateTaskController {
      * Gets the renovation task creation form
      * @param id Renovation record id
      * @param model Representations of params for use in thymeleaf
-     * @return
+     * @return the create task HTML page
      */
     @GetMapping("renovations/view/create")
     public String createTask(@RequestParam(name = "id") Long id, Model model) {
@@ -64,7 +64,7 @@ public class CreateTaskController {
      * @param roomList Submitted list of rooms associated with renovation task
      * @param dueDate Submitted task due date
      * @param model Representations of params for use in thymeleaf
-     * @return
+     * @return either view renovation or create task pages
      */
     @PostMapping("renovations/view/create")
     public String submitNewTask(@RequestParam(name = "name") String name,
