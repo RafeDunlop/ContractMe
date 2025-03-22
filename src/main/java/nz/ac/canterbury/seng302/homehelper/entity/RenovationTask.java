@@ -42,7 +42,8 @@ public class RenovationTask {
      * @param roomList
      * @param dueDate
      */
-    public RenovationTask(String name, String description, List<String> roomList, LocalDateTime dueDate) {
+    public RenovationTask(String name, String description, List<String> roomList, LocalDateTime dueDate, RenovationRecord renovationRecord) {
+        this.renovationRecord = renovationRecord;
         this.name = name.trim();
         this.description = (description != null) ? description.trim() : "";
         this.roomList = roomList;

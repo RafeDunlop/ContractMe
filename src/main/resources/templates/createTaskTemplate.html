@@ -15,7 +15,7 @@
         <form th:action="@{create}" method="post" id="create-task-form">
 
             <input type="hidden" id="availableRoomList" th:name="availableRoomList" th:value="${#strings.arrayJoin(roomList, ',')}">
-
+            <input type="hidden" id="renovationId" th:name="renovationId" th:value="${renovation.id}">
 
             <div class="mb-3">
                 <label for="name" class="form-label">Name:</label>
