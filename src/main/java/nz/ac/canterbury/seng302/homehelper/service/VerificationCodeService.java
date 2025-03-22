@@ -140,7 +140,8 @@ public class VerificationCodeService {
             VerificationCode verificationCode = verificationCodeOptional.get();
             User user = verificationCode.getUser();
             if (verificationCodeValidation.isValid(verificationCode, signupCode, user)) {
-                verificationCode.getUser().activate();
+                user.activate();
+                userRepository.save(user);
                 verificationCodeRepository.delete(verificationCode);
                 return;
             } else {
@@ -160,20 +161,13 @@ public class VerificationCodeService {
         Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(code);
         if (verificationCodeOptional.isPresent()) {
             VerificationCode verificationCode = verificationCodeOptional.get();
-            if (verificationCode.isExpired()) {
-                User user = verificationCode.getUser();
-                if (user.isActivated()) {
-                    throw new IllegalStateException("An expired signup code exists whose associated user is activated");
-                }
-                logger.info("deleting user whose signup code expired. User: {}, code: {}", user, code);
-                userRepository.delete(user);
-                verificationCodeRepository.delete(verificationCode);
-            } else {
-                logger.warn("The verification code {} claims not to have expired. {}",
-                        code,
-                        "This should only happen if the same code is re-issued after being consumed within 10 minutes"
-                );
+            User user = verificationCode.getUser();
+            if (user.isActivated()) {
+                throw new IllegalStateException("An expired signup code exists whose associated user is activated");
             }
+            logger.info("deleting user whose signup code expired. User: {}, code: {}", user, code);
+            verificationCodeRepository.delete(verificationCode);
+            userRepository.delete(user);
         }
     }
 
