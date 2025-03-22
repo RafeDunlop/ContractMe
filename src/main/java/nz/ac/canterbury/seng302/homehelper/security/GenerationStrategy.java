@@ -35,6 +35,11 @@ public enum GenerationStrategy {
         this.domain = domain;
     }
 
+    /**
+     * Gets a valid {@link SecureRandomCodeGenerator} using this encoding method
+     * @param seed The seed to use. If null (LIVE environment), the seed is random
+     * @return A valid {@link SecureRandomCodeGenerator} using this encoding method
+     */
     public SecureRandomCodeGenerator getGenerator(Long seed) {
         SecureRandom secureRandom = new SecureRandom();
         if (seed != null) secureRandom.setSeed(seed);
@@ -42,6 +47,6 @@ public enum GenerationStrategy {
                 secureRandom,
                 codeLength,
                 domain
-                );
+        );
     }
 }
