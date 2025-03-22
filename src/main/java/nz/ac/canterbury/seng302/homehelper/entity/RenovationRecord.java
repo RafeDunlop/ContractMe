@@ -39,7 +39,6 @@ public class RenovationRecord {
     private LocalDateTime editedDate;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name="task_id")
     private List<RenovationTask> renovationTasks = new ArrayList<>();
 
 

@@ -84,24 +84,21 @@ public class CreateTaskController {
                                 @RequestParam(name = "renovationId") Long renovationId,
                                 Model model) {
         logger.info("POST renovations/view/create");
-
+        // PROB Should be a dto
         try {
             logger.info("roomList");
-            if (roomList == null) {roomList = new ArrayList<>();}
+            if (roomList == null) {
+                roomList = new ArrayList<>();
+            }
             //renovationValidation.validateTaskDetails(name, description, dueDate);
 
             RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
-            logger.info("AAAA THE reno ID:  " + renovationId);
-            logger.info("AAAA THE renovation ITSELF:  " + renovationRecord);
             RenovationTask renovationTask = new RenovationTask(name, description, roomList, dueDate, renovationRecord);
 
             renovationTaskService.addRenovationTask(renovationTask);
 
             model.addAttribute("renovation", renovationRecord);
-            model.addAttribute("id", renovationId);
             return "viewRenovation";
-
-
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error", e);
             List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
@@ -109,10 +106,7 @@ public class CreateTaskController {
             model.addAttribute("description", description);
             model.addAttribute("roomList", roomList);
             model.addAttribute("dueDate", dueDate);
-
             return "createTaskTemplate";
         }
-
-
     }
 }

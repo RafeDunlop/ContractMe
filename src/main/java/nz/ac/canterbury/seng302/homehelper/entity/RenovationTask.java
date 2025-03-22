@@ -12,8 +12,8 @@ public class RenovationTask {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long task_id;
 
-    @ManyToOne
-    @JoinColumn(name = "id", nullable=false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "renovationId", referencedColumnName = "id", nullable = false)
     private RenovationRecord renovationRecord;
 
     @Column(nullable=false)
