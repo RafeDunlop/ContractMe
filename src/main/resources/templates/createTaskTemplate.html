@@ -50,16 +50,23 @@
                    <table id="room-table" class="table table-striped table-bordered"></table>
             </div>
 
-            <div class="mb-3">
+           <!-- <div class="mb-3">
                 <label for="dueDate" class="form-label">Due Date (optional):</label>
                 <input type="text" class="form-control" id="dueDate" placeholder="Enter a due date for your task"
                        th:name="dueDate" th:value="${dueDate}" data-cy="dueDate" required autofocus>
                 <div class="error-label-div">
                     <label class="form-label" id="due-date-error-message"></label>
                 </div>
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">Create</button>
-                </div>
+            </div>-->
+
+            <div th:if="${errorMessage}" class="alert alert-danger mb-4" role="alert">
+                <ul>
+                    <li th:each="error : ${errorMessage}" th:text="${error}"></li>
+                </ul>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Create</button>
             </div>
         </form>
     </div>

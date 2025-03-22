@@ -4,9 +4,8 @@ import jakarta.persistence.Embeddable;
 
 import java.io.Serializable;
 
-@Embeddable
-public class RenovationTaskId implements Serializable {
 
+public class RenovationTaskId implements Serializable {
 
     private Long id;
     private Long renovationTaskId;

@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 /**
  * Validation class for task details.
  */
+@Service
 public class RenovationValidation {
 
     private static final int maximumDescriptionLength = 512;
@@ -37,7 +39,7 @@ public class RenovationValidation {
         return errors;
     }
 
-    /**
+    /**mappedBy = "renovationRecord"
      * Validates the name of an object and returns an error message if it's invalid.
      * @param name Name of the object being verified
      * @param errorMessageType String added to the start of the error message
@@ -73,9 +75,12 @@ public class RenovationValidation {
      * @return An error from validating the due date
      */
     private String validateDueDate(LocalDateTime dueDate) {
-        if (dueDate.isBefore(LocalDateTime.now())) {
-            return "Due date must be in the future";
+        if (dueDate != null) {
+            if (dueDate.isBefore(LocalDateTime.now())) {
+                return "Due date must be in the future";
+            }
         }
-        return null;
+            return null;
+
     }
 }

@@ -1,9 +1,12 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Service
 public class UserValidation {
 
     /**
