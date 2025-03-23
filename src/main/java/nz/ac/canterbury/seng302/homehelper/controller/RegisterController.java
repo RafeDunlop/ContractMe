@@ -71,21 +71,14 @@ public class RegisterController {
         try {
             User user = registerService.registerUser(userRegisterDTO);
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
-            return "redirect:/confirm-registration";
-        } catch (IllegalArgumentException e) {
+            return "redirect:/user/activate";
+        } catch (IllegalArgumentException|MailException e) {
             logger.warn("Form submission error: " + e.getMessage());
 
             List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
 
             model.addAttribute("errorMessages", errorsList);
 
-            model.addAttribute("firstName", userRegisterDTO.getFirstName().trim());
-            model.addAttribute("lastName", userRegisterDTO.getLastName().trim());
-            model.addAttribute("email", userRegisterDTO.getEmail().trim());
-        } catch (MailException ex) {
-            logger.warn("Email send error: " + ex.getMessage());
-            List<String> errorsList = List.of(ex.getMessage().split("(?<=\\.) "));
-            model.addAttribute("errorMessages", errorsList);
             model.addAttribute("firstName", userRegisterDTO.getFirstName().trim());
             model.addAttribute("lastName", userRegisterDTO.getLastName().trim());
             model.addAttribute("email", userRegisterDTO.getEmail().trim());
