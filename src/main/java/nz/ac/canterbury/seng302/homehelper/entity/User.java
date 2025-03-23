@@ -170,10 +170,20 @@ public class User {
         return createdTimestamp;
     }
 
+    /**
+     * Set the user account active.
+     * This means that they have verified their email address.
+     */
     public void activate() {
         this.activated = true;
     }
 
+    /**
+     * Get the activated status of the user account.
+     *
+     * @return true if the user has verified their email address and therefore
+     * has an active account
+     */
     public boolean isActivated() {
         return activated;
     }
