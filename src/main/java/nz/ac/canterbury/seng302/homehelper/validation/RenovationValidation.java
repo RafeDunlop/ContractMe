@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
+import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -18,22 +19,19 @@ public class RenovationValidation {
     /**
      * Validates the details of the task inputted by the user. Checks to see if all the details are valid and returns a list
      * of error messages for each invalid detail.
-     * @param name Name of the task
-     * @param description Description for the task
-     * @param dueDate Due date of the task
      * @return A list of errors generated from validating the task details
      */
-    public List<String> validateTaskDetails(String name, String description, LocalDateTime dueDate) {
+    public List<String> validateTaskDetails(RenovationTaskDTO renovationTaskDTO) {
         List<String> errors = new ArrayList<>();
         String errorMessageType = "Task";
         String nameErrors, descriptionErrors, dueDateError;
-        if ((nameErrors = validateName(name, errorMessageType)) != null) {
+        if ((nameErrors = validateName(renovationTaskDTO.getName(), errorMessageType)) != null) {
             errors.add(nameErrors);
         }
-        if ((descriptionErrors = validateDescription(description, errorMessageType)) != null) {
+        if ((descriptionErrors = validateDescription(renovationTaskDTO.getDescription(), errorMessageType)) != null) {
             errors.add(descriptionErrors);
         }
-        if ((dueDateError = validateDueDate(dueDate)) != null) {
+        if ((dueDateError = validateDueDate(renovationTaskDTO.getDueDate())) != null) {
             errors.add(dueDateError);
         }
         return errors;

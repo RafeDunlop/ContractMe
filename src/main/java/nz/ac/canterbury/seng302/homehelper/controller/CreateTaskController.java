@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
+import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,7 +33,7 @@ public class CreateTaskController {
 
     private final RenovationTaskService renovationTaskService;
     private final RenovationRecordService renovationRecordService;
-    private final RenovationValidation renovationValidation;
+
 
 
     /**
@@ -41,11 +43,10 @@ public class CreateTaskController {
      *
      */
     @Autowired
-    public CreateTaskController(RenovationRecordService renovationRecordService, RenovationTaskService renovationTaskService,
-                                RenovationValidation renovationValidation) {
+    public CreateTaskController(RenovationRecordService renovationRecordService, RenovationTaskService renovationTaskService) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
-        this.renovationValidation = renovationValidation;
+
 
     }
 
@@ -64,48 +65,45 @@ public class CreateTaskController {
 
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("roomList", renovationRecord.getRooms());
+        model.addAttribute("updatePasswordDTO", new RenovationTaskDTO("","",null));
         return "createTaskTemplate";
     }
 
     /**
      * Submits the create task form
-     * @param name Submitted renovation record name
-     * @param description Submitted renovation record description
-     * @param roomList Submitted list of rooms associated with renovation task
-     * @param dueDate Submitted task due date
      * @param model Representations of params for use in thymeleaf
      * @return either view renovation or create task pages
      */
+
     @PostMapping("renovations/view/create")
-    public String submitNewTask(@RequestParam(name = "name") String name,
-                                @RequestParam(name = "description") String description,
+    public String submitNewTask(@ModelAttribute("updatePasswordDTO") RenovationTaskDTO renovationTaskDTO,
                                 @RequestParam(name = "roomList", required=false) List<String> roomList,
-                                @RequestParam(name = "dueDate", required=false) LocalDateTime dueDate,
                                 @RequestParam(name = "renovationId") Long renovationId,
                                 Model model) {
         logger.info("POST renovations/view/create");
-        // PROB Should be a dto
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
+
         try {
-            logger.info("roomList");
             if (roomList == null) {
                 roomList = new ArrayList<>();
             }
-            //renovationValidation.validateTaskDetails(name, description, dueDate);
 
-            RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
-            RenovationTask renovationTask = new RenovationTask(name, description, roomList, dueDate, renovationRecord);
-
-            renovationTaskService.addRenovationTask(renovationTask);
-
+            renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord, roomList);
             model.addAttribute("renovation", renovationRecord);
+
             return "viewRenovation";
+
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error", e);
+
             List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
-            model.addAttribute("name", name);
-            model.addAttribute("description", description);
+            model.addAttribute("errorMessages", errorsList);
+
+            model.addAttribute("updatePasswordDTO", renovationTaskDTO);
+            model.addAttribute("id", renovationId);
+
+            model.addAttribute("renovation", renovationRecord);
             model.addAttribute("roomList", roomList);
-            model.addAttribute("dueDate", dueDate);
             return "createTaskTemplate";
         }
     }
