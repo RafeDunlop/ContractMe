@@ -71,7 +71,7 @@ public class RegisterController {
         try {
             User user = registerService.registerUser(userRegisterDTO);
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
-            return "redirect:/user/activate";
+            return "redirect:/confirm-registration";
         } catch (IllegalArgumentException|MailException e) {
             logger.warn("Form submission error: " + e.getMessage());
 
