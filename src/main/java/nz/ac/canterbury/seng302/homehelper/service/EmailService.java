@@ -25,8 +25,8 @@ import jakarta.mail.internet.MimeMessage;
 @Service
 public class EmailService {
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
-    private JavaMailSender mailSender;
-    private TemplateEngine htmlTemplateEngine;
+    private final JavaMailSender mailSender;
+    private final TemplateEngine htmlTemplateEngine;
 
     /**
      * EmailService constructor.
@@ -64,7 +64,7 @@ public class EmailService {
             message.setText(htmlContent, true);
             mailSender.send(mimeMessage);
         } catch (MessagingException exception) {
-            log.error("Verification email send failed: {}", exception);
+            log.error("Verification email send failed", exception);
         }
 
     }

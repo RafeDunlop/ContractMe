@@ -14,8 +14,8 @@ import java.util.Locale;
  * @author Baeldung (tutorial)
  */
 public class OnRegistrationCompleteEvent extends ApplicationEvent {
-    private Locale locale;
-    private User user;
+    private final Locale locale;
+    private final User user;
 
     /**
      * An event created when the user registration is complete, after the user has been saved to the database

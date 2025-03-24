@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.Optional;
 
 /**
- * Repository interface for accessing verfication tokens.
+ * Repository interface for accessing verification tokens.
  * Extends Spring Data JPA's {@link CrudRepository} to provide basic CRUD operations
  * for the {@link VerificationCode} entity.
  */
@@ -16,6 +16,4 @@ import java.util.Optional;
 public interface VerificationCodeRepository extends CrudRepository<VerificationCode, Long> {
 
     Optional<VerificationCode> findByCode(String code);
-
-    void deleteByExpiryDateBefore(Date date);
 }

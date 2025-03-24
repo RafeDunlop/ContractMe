@@ -90,7 +90,7 @@ public class RegisterControllerIntegrationTest {
     }
 
     /**
-     * Tests the registration of an invalid user..sendVerificationEmail(Mockito.anyString(), Mockito.anyString()),
+     * Tests the registration of an invalid user.sendVerificationEmail(Mockito.anyString(), Mockito.anyString()),
      * This test simulates a user submitting an invalid registration form and expects:
      * A return to the page (200 status) with an error message.
      * First name, Last name and Email should be remembered

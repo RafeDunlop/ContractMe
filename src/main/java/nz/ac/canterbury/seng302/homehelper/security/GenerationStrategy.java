@@ -16,7 +16,7 @@ public enum GenerationStrategy {
     READABLE(6, SecureRandomCodeGenerator.ALPHANUM.replaceAll("10IO", "")),
 
     /**
-     * used for when the token doesn't need to be readable and does need to coem from a large domain i.e.
+     * used for when the token doesn't need to be readable and does need to come from a large domain i.e.
      * password reset
      */
     SECURE(32, SecureRandomCodeGenerator.BASE64URLDOMAIN);
@@ -35,6 +35,11 @@ public enum GenerationStrategy {
         this.domain = domain;
     }
 
+    /**
+     * Get a generator instance according to this GenerationStrategy's settings.
+     *
+     * @param seed the random seed to use for SecureRandom
+     */
     public SecureRandomCodeGenerator getGenerator(Long seed) {
         SecureRandom secureRandom = new SecureRandom();
         if (seed != null) secureRandom.setSeed(seed);

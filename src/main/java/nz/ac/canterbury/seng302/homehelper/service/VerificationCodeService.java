@@ -50,6 +50,12 @@ public class VerificationCodeService {
     }
 
 
+    /**
+     * Verify the sign up code, consume it, and set the user active.
+     *
+     * @param signupCode the code the user was emailed
+     * @throws IllegalArgumentException if the code is invalid
+     */
     public void consumeSignupCode(String signupCode) throws IllegalArgumentException {
         Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(signupCode);
         if (verificationCodeOptional.isPresent()) {
