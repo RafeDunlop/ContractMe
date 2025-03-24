@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,9 +73,9 @@ public class RenovationValidation {
      * @param dueDate Due date of the object being verified
      * @return An error from validating the due date
      */
-    private String validateDueDate(LocalDateTime dueDate) {
+    private String validateDueDate(LocalDate dueDate) {
         if (dueDate != null) {
-            if (dueDate.isBefore(LocalDateTime.now())) {
+            if (dueDate.isBefore(LocalDate.now())) {
                 return "Due date must be in the future.";
             }
         }

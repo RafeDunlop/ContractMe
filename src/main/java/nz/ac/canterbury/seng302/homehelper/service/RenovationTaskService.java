@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +46,7 @@ public class RenovationTaskService {
 
         String name = renovationTaskDTO.getName();
         String description = renovationTaskDTO.getDescription();
-        LocalDateTime dueDate = renovationTaskDTO.getDueDate();
+        LocalDate dueDate = renovationTaskDTO.getDueDate();
         RenovationTask renovationTask = new RenovationTask(name, description, roomList, dueDate, renovationRecord);
 
         renovationTaskRepository.save(renovationTask);
