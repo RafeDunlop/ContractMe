@@ -30,7 +30,6 @@ public class UpdatePasswordServiceTest {
     @BeforeAll
     static void Setup() {
         LoginService loginServiceMock = Mockito.mock(LoginService.class);
-        UserValidation userValidationMock = Mockito.mock(UserValidation.class);
         UserValidation userValidation = new UserValidation();
         UserRepository userRepositoryMock = Mockito.mock(UserRepository.class);
 
@@ -64,7 +63,6 @@ public class UpdatePasswordServiceTest {
             updatePasswordService.updatePassword(updatePasswordDTO);
         });
 
-        // Maybe remove if only allowed one assert
         assertTrue(exception.getMessage().contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."));
     }
 
@@ -87,7 +85,6 @@ public class UpdatePasswordServiceTest {
             updatePasswordService.updatePassword(updatePasswordDTO);
         });
 
-        // Maybe remove if only allowed one assert
         assertTrue(exception.getMessage().contains("Old Password does not match."));
     }
 
@@ -103,7 +100,6 @@ public class UpdatePasswordServiceTest {
             updatePasswordService.updatePassword(updatePasswordDTO);
         });
 
-        // Maybe remove if only allowed one assert
         assertTrue(exception.getMessage().contains("New Passwords do not match."));
     }
 
@@ -119,7 +115,6 @@ public class UpdatePasswordServiceTest {
             updatePasswordService.updatePassword(updatePasswordDTO);
         });
 
-        // Maybe remove if only allowed one assert
         assertTrue(exception.getMessage().contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."));
     }
 
@@ -131,7 +126,7 @@ public class UpdatePasswordServiceTest {
         updatePasswordDTO.setNewPassword(null);
         updatePasswordDTO.setRetypePassword(null);
 
-        NullPointerException exception = assertThrows(NullPointerException.class, () -> {
+        assertThrows(NullPointerException.class, () -> {
             updatePasswordService.updatePassword(updatePasswordDTO);
         });
 
