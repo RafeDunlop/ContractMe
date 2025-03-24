@@ -12,7 +12,7 @@
 <div class="container mt-5">
     <div class="card p-4 shadow-sm">
         <h4 class="card-title mb-4">Add Task to Renovation</h4>
-        <form th:action="@{create}" method="post" id="create-task-form" th:object="${updatePasswordDTO}">
+        <form th:action="@{create}" method="post" id="create-task-form" th:object="${renovationTaskDTO}">
 
             <input type="hidden" id="availableRoomList" th:name="availableRoomList" th:value="${#strings.arrayJoin(roomList, ',')}">
             <input type="hidden" id="renovationId" th:name="renovationId" th:value="${renovation.id}">
@@ -21,7 +21,7 @@
                 <label for="name" class="form-label">Name:</label>
 
                 <input type="text" class="form-control" id="name" placeholder="Enter a name for your task"
-                       th:field="*{name}" data-cy="name" required autofocus>
+                       th:field="*{name}" data-cy="name" autofocus>
 
 
                 <div class="error-label-div">
@@ -37,7 +37,7 @@
 
                 <label for="dueDate" class="form-label">Due Date:</label>
                 <input type="datetime-local" class="form-control" id="dueDate"
-                       th:field="*{dueDate}" required>
+                       th:field="*{dueDate}">
 
                 <div class="error-label-div">
                     <label class="form-label" hidden id="description-error-message">Text gets updated based off error</label>
@@ -47,10 +47,7 @@
 
             <div>
                 <label for="roomSelection">Choose a room/s from selection:</label>
-                <select name="rooms" id="roomSelection">
-                    <!--<option disabled selected value=""></option>
-                    <option value="No available rooms to select" selected disabled hidden></option>-->
-                </select>
+                <select name="rooms" id="roomSelection"></select>
             </div>
 
 
