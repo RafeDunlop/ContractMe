@@ -12,15 +12,18 @@
 <div class="container mt-5">
     <div class="card p-4 shadow-sm">
         <h4 class="card-title mb-4">Add Task to Renovation</h4>
-        <form th:action="@{create}" method="post" id="create-task-form">
+        <form th:action="@{create}" method="post" id="create-task-form" th:object="${renovationTaskDTO}" novalidate>
 
             <input type="hidden" id="availableRoomList" th:name="availableRoomList" th:value="${#strings.arrayJoin(roomList, ',')}">
             <input type="hidden" id="renovationId" th:name="renovationId" th:value="${renovation.id}">
 
             <div class="mb-3">
                 <label for="name" class="form-label">Name:</label>
+
                 <input type="text" class="form-control" id="name" placeholder="Enter a name for your task"
-                       th:name="name" th:value="${name}" data-cy="name" required autofocus>
+                       th:field="*{name}" data-cy="name" autofocus>
+
+
                 <div class="error-label-div">
                     <label class="form-label" id="name-error-message"></label>
                 </div>
@@ -28,9 +31,14 @@
             <div class="mb-3">
                 <label for="description" class="form-label">Description:</label>
                 <span id="description-length-counter" class="counter">0/512</span>
+
                 <textarea class="form-control" id="description" placeholder="Enter a description for your new renovation"
-                          th:name = "description" th:text="${description}"
-                          autofocus></textarea>
+                          th:field="*{description}" autofocus></textarea>
+
+                <label for="dueDate" class="form-label">Due Date:</label>
+                <input type="date" class="form-control" id="dueDate"
+                       th:field="*{dueDate}">
+
                 <div class="error-label-div">
                     <label class="form-label" hidden id="description-error-message">Text gets updated based off error</label>
                 </div>
@@ -39,10 +47,7 @@
 
             <div>
                 <label for="roomSelection">Choose a room/s from selection:</label>
-                <select name="rooms" id="roomSelection">
-                    <!--<option disabled selected value=""></option>
-                    <option value="No available rooms to select" selected disabled hidden></option>-->
-                </select>
+                <select name="rooms" id="roomSelection"></select>
             </div>
 
 
@@ -50,20 +55,13 @@
                    <table id="room-table" class="table table-striped table-bordered"></table>
             </div>
 
-           <!-- <div class="mb-3">
-                <label for="dueDate" class="form-label">Due Date (optional):</label>
-                <input type="text" class="form-control" id="dueDate" placeholder="Enter a due date for your task"
-                       th:name="dueDate" th:value="${dueDate}" data-cy="dueDate" required autofocus>
-                <div class="error-label-div">
-                    <label class="form-label" id="due-date-error-message"></label>
-                </div>
-            </div>-->
 
-            <div th:if="${errorMessage}" class="alert alert-danger mb-4" role="alert">
+            <div th:if="${errorMessages}" class="alert alert-danger mb-4" role="alert">
                 <ul>
-                    <li th:each="error : ${errorMessage}" th:text="${error}"></li>
+                    <li th:each="error : ${errorMessages}" th:text="${error}"></li>
                 </ul>
             </div>
+
 
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary">Create</button>

@@ -1,8 +1,10 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
+import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,22 +20,19 @@ public class RenovationValidation {
     /**
      * Validates the details of the task inputted by the user. Checks to see if all the details are valid and returns a list
      * of error messages for each invalid detail.
-     * @param name Name of the task
-     * @param description Description for the task
-     * @param dueDate Due date of the task
      * @return A list of errors generated from validating the task details
      */
-    public List<String> validateTaskDetails(String name, String description, LocalDateTime dueDate) {
+    public List<String> validateTaskDetails(RenovationTaskDTO renovationTaskDTO) {
         List<String> errors = new ArrayList<>();
         String errorMessageType = "Task";
         String nameErrors, descriptionErrors, dueDateError;
-        if ((nameErrors = validateName(name, errorMessageType)) != null) {
+        if ((nameErrors = validateName(renovationTaskDTO.getName(), errorMessageType)) != null) {
             errors.add(nameErrors);
         }
-        if ((descriptionErrors = validateDescription(description, errorMessageType)) != null) {
+        if ((descriptionErrors = validateDescription(renovationTaskDTO.getDescription(), errorMessageType)) != null) {
             errors.add(descriptionErrors);
         }
-        if ((dueDateError = validateDueDate(dueDate)) != null) {
+        if ((dueDateError = validateDueDate(renovationTaskDTO.getDueDate())) != null) {
             errors.add(dueDateError);
         }
         return errors;
@@ -49,7 +48,7 @@ public class RenovationValidation {
         // Regex specifies that names must only contain letters (from any language), numbers, spaces, dots, hyphens, and/or apostrophes.
         if (name.trim().isEmpty() || !name.matches("^[\\p{L}0-9\\s\\-'.]*$")) {
             return StringUtils.capitalize((errorMessageType +  (" name cannot be empty and must only include letters, numbers, " +
-                    "spaces, dots, hyphens or apostrophes")).trim());
+                    "spaces, dots, hyphens or apostrophes.")).trim());
         }
         return null;
     }
@@ -62,9 +61,9 @@ public class RenovationValidation {
      */
     private String validateDescription(String description, String errorMessageType) {
         if (description.length() > maximumDescriptionLength) {
-            return StringUtils.capitalize((errorMessageType + " description must be 512 characters or less").trim());
+            return StringUtils.capitalize((errorMessageType + " description must be 512 characters or less.").trim());
         } else if (description.trim().isEmpty()) {
-            return StringUtils.capitalize((errorMessageType + " description cannot be empty").trim());
+            return StringUtils.capitalize((errorMessageType + " description cannot be empty.").trim());
         }
         return null;
     }
@@ -74,10 +73,10 @@ public class RenovationValidation {
      * @param dueDate Due date of the object being verified
      * @return An error from validating the due date
      */
-    private String validateDueDate(LocalDateTime dueDate) {
+    private String validateDueDate(LocalDate dueDate) {
         if (dueDate != null) {
-            if (dueDate.isBefore(LocalDateTime.now())) {
-                return "Due date must be in the future";
+            if (dueDate.isBefore(LocalDate.now())) {
+                return "Due date must be in the future.";
             }
         }
             return null;
