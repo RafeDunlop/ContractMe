@@ -4,7 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +66,7 @@ public class RegisterService {
         errors.addAll(userValidation.validateNameString(firstName, "First"));
         errors.addAll(userValidation.validateNameString(lastName, "Last"));
         errors.addAll(validateEmail(email));
-        errors.addAll(userValidation.validatePasswordString(password, confirmPassword));
-
+        errors.addAll(userValidation.validatePasswordString(password, confirmPassword,"registerPassword"));
         // Throw IllegalArgumentException if any errors occurred in validating the data
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException(String.join(" ", errors));
@@ -77,18 +78,6 @@ public class RegisterService {
 
         // Save entity to the user repository
         return userRepository.save(user);
-    }
-
-    /**
-     * Authenticate the user once registered
-     */
-    public void authenticateUser(User user, String password, HttpServletRequest request) {
-        Authentication authToken = new UsernamePasswordAuthenticationToken(user.getEmail(), password);
-        Authentication auth = authenticationManager.authenticate(authToken);
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        securityContext.setAuthentication(auth);
-        HttpSession session = request.getSession(true);
-        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
     }
 
     /**
@@ -106,5 +95,4 @@ public class RegisterService {
             errors.addAll(userValidation.validateEmailString(email));
         return errors;
     }
-
 }

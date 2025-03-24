@@ -31,11 +31,21 @@ public class ProfileController {
 
 	private final LoginService loginService;
 
+	/**
+	 * Induces spring to automatically set up the LoginService
+	 * @param loginService The login service provides the function to get the current user
+	 */
 	@Autowired
 	public ProfileController(LoginService loginService) {
 		this.loginService = loginService;
 	}
 
+	/**
+	 * Takes the user to the profile page when the "/user" URL is entered. Gets the information of the current user and displays
+	 * it on the profileTemplate.html form.
+	 * @param model Representation of results to be used by Thymeleaf
+	 * @return Thymeleaf profileTemplate
+	 */
 	@GetMapping("/user")
 	public String userProfile(Model model) {
 		logger.info("GET /user/");
