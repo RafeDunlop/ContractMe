@@ -49,4 +49,12 @@ public class RenovationTask {
         this.roomList = roomList;
         this.dueDate = dueDate;
     }
+
+    public Long getTask_id() {
+        return task_id;
+    }
+
+    public String getName() {
+        return name;
+    }
 }
