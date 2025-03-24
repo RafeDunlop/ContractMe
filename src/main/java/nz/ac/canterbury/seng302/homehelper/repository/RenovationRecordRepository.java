@@ -2,9 +2,12 @@ package nz.ac.canterbury.seng302.homehelper.repository;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +17,7 @@ import java.util.Optional;
  * Extends {@link CrudRepository} to provide basic CRUD operations.
  * @author Jake Connolly
  */
+@Repository
 public interface RenovationRecordRepository extends CrudRepository<RenovationRecord, Long> {
     /**
      *  Finds a record from the repository by id
@@ -52,4 +56,12 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
      */
     @Query("SELECT f FROM RenovationRecord f WHERE (f.user) = (:user)")
     List<RenovationRecord> findByUser(@Param("user") User user);
+
+    /**
+     * Deletes a record from the renovations record table by its id. The id cannot be null/
+     * @param id The record id
+     */
+    @Modifying
+    @Query("DELETE FROM RenovationRecord f WHERE f.id = :id")
+    void deleteById(@Param("id") @Nullable Long id);
 }

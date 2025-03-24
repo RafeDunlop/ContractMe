@@ -53,6 +53,7 @@ public class EditProfileController {
     public String editProfile(Model model) {
         logger.info("GET /user/edit");
         try {
+            // Sets current user to page
             User user = loginService.getUserByEmail();
             model.addAttribute("user", user);
             model.addAttribute("firstName", user.getFirstName());
@@ -65,8 +66,6 @@ public class EditProfileController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
-
-
 
     /**
      * Posts a form with the updated user details. Goes back to "/user" if the

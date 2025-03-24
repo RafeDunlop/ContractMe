@@ -92,7 +92,7 @@ public class UserValidationTest {
     public void PasswordValidation_PasswordDoesNotMatch_RejectInputs() {
         UserValidation userValidation = new UserValidation();
         List<String> expectedErrorList = List.of("Passwords do not match.");
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Test123!", "Password123!"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Test123!", "Password123!","registerPassword"));
     }
 
     /**
@@ -105,7 +105,7 @@ public class UserValidationTest {
         List<String> expectedErrorList = List.of(
                 "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("password123!", "password123!"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("password123!", "password123!","registerPassword"));
     }
 
     /**
@@ -118,7 +118,7 @@ public class UserValidationTest {
         List<String> expectedErrorList = List.of(
                 "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("PASSWORD123!", "PASSWORD123!"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("PASSWORD123!", "PASSWORD123!","registerPassword"));
     }
 
     /**
@@ -131,7 +131,7 @@ public class UserValidationTest {
         List<String> expectedErrorList = List.of(
                 "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Password!", "Password!"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Password!", "Password!","registerPassword"));
     }
 
     /**
@@ -144,7 +144,7 @@ public class UserValidationTest {
         List<String> expectedErrorList = List.of(
                 "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Password123", "Password123"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Password123", "Password123","registerPassword"));
     }
 
     /**
@@ -157,7 +157,46 @@ public class UserValidationTest {
         List<String> expectedErrorList = List.of(
                 "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Test1!", "Test1!"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Test1!", "Test1!","registerPassword"));
+    }
+
+    /**
+     * Test to see if the correct error message is displayed when email is contained in password
+     * Expects: "Your password should not contain your name or email address." error
+     */
+    @Test
+    public void PasswordValidation_ContainsEmail_RejectInputs() {
+        UserValidation userValidation = new UserValidation();
+        List<String> expectedErrorList = List.of(
+                "Your password should not contain your name or email address."
+        );
+        Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Abhisekh123!#", "Abhisekh123!#","registerPassword","Abhisekh","Chand","Abhisekh23@gmail.com"));
+    }
+
+    /**
+     * Test to see if the correct error message is displayed when First Name of user  is contained in password
+     * Expects: "Your password should not contain your name or email address." error
+     */
+    @Test
+    public void PasswordValidation_ContainsFirstName_RejectInputs() {
+        UserValidation userValidation = new UserValidation();
+        List<String> expectedErrorList = List.of(
+                "Your password should not contain your name or email address."
+        );
+        Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Abhisekh123!#", "Abhisekh123!#","registerPassword","Abhisekh","Chand","Donald23@gmail.com"));
+    }
+
+    /**
+     * Test to see if the correct error message is displayed when Last Name of user  is contained in password
+     * Expects: "Your password should not contain your name or email address." error
+     */
+    @Test
+    public void PasswordValidation_ContainsLastName_RejectInputs() {
+        UserValidation userValidation = new UserValidation();
+        List<String> expectedErrorList = List.of(
+                "Your password should not contain your name or email address."
+        );
+        Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Chand123!#", "Chand123!#","registerPassword","Abhisekh","Chand","Donald23@gmail.com"));
     }
 
     /**
@@ -167,7 +206,7 @@ public class UserValidationTest {
     @Test
     public void PasswordValidation_ValidPasswordThatMatch_RejectInputs() {
         UserValidation userValidation = new UserValidation();
-        Assertions.assertTrue(userValidation.validatePasswordString("Test123!", "Test123!").isEmpty());
+        Assertions.assertTrue(userValidation.validatePasswordString("Test123!", "Test123!","registerPassword").isEmpty());
     }
 
     /**

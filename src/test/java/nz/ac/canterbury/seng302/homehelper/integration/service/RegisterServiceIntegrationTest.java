@@ -1,10 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.integration.service;
 
-import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
-import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +10,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
+import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
+import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 
 public class RegisterServiceIntegrationTest {
     private RegisterService registerService;
