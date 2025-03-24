@@ -19,6 +19,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.event.OnRegistrationCompleteEvent;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
@@ -52,8 +53,7 @@ public class RegisterController {
      * @ModelAttribute userRegisterDTO, contains all params needed for a user object
      */
     @GetMapping("/register")
-    public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO,
-                               Model model) {
+    public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO) {
         logger.info("GET /register");
         return "registrationTemplate";
     }
@@ -101,12 +101,13 @@ public class RegisterController {
      * @param code the verification code
      */
     @PostMapping("/confirm-registration")
-    public String verifyRegistration(@ModelAttribute String code, Model model) {
+    public String verifyRegistration(@RequestParam String code, Model model) {
         logger.info("POST /confirm-registration code: {}", code);
         try {
             verificationCodeService.consumeSignupCode(code);
         } catch (IllegalArgumentException error) {
             model.addAttribute("errorMessage", error.getMessage());
+            return "emailVerificationForm";
         }
         return "redirect:/login";
     }

@@ -72,14 +72,14 @@ public class VerificationCodeServiceTest {
 
     @Test
     public void consumeSignupCode_validCode_doesntThrowAndCodeDeleted() {
-        Mockito.when(verificationCodeValidation.isValid(verificationCodeOne, firstCode, user)).thenReturn(true);
+        Mockito.when(verificationCodeValidation.isValid(verificationCodeOne, firstCode)).thenReturn(true);
         assertDoesNotThrow(() -> toTest.consumeSignupCode(firstCode));
         verify(verificationCodeRepository, times(1)).delete(verificationCodeOne);
     }
 
     @Test
     public void consumeSignupCode_invalidCode_throwsExceptionAndCodeDeleted() {
-        Mockito.when(verificationCodeValidation.isValid(verificationCodeOne, firstCode, user)).thenReturn(false);
+        Mockito.when(verificationCodeValidation.isValid(verificationCodeOne, firstCode)).thenReturn(false);
         assertThrows(IllegalArgumentException.class, () -> toTest.consumeSignupCode(firstCode));
         verify(verificationCodeRepository, times(1)).delete(verificationCodeOne);
     }

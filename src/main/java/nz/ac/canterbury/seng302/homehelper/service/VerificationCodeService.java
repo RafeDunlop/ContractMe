@@ -139,13 +139,14 @@ public class VerificationCodeService {
         if (verificationCodeOptional.isPresent()) {
             VerificationCode verificationCode = verificationCodeOptional.get();
             User user = verificationCode.getUser();
-            if (verificationCodeValidation.isValid(verificationCode, signupCode, user)) {
+            if (verificationCodeValidation.isValid(verificationCode, signupCode)) {
                 user.activate();
                 userRepository.save(user);
                 verificationCodeRepository.delete(verificationCode);
                 return;
             } else {
                 verificationCodeRepository.delete(verificationCode);
+                throw new IllegalArgumentException("Signup code invalid");
             }
         }
         throw new IllegalArgumentException("Signup code invalid");

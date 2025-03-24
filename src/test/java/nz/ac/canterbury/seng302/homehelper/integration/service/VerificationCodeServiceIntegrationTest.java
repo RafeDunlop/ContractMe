@@ -75,7 +75,7 @@ public class VerificationCodeServiceIntegrationTest {
     @Test
     public void issueCodeAndConsume_allValid_userActivated() {
         String code = toTest.issueSignupCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
-        when(verificationCodeValidation.isValid(any(VerificationCode.class), any(String.class), any(User.class))).thenReturn(true);
+        when(verificationCodeValidation.isValid(any(VerificationCode.class), any(String.class))).thenReturn(true);
         toTest.consumeSignupCode(code);
         assertTrue(userRepository.findByEmailIgnoreCase(email).get().isActivated());
     }

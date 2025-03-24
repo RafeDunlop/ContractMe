@@ -7,7 +7,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class VerificationCodeValidation {
 
-    public boolean isValid(VerificationCode verificationCode, String inputCode, User loggedInUser) {
+    public boolean isValid(VerificationCode verificationCode, String inputCode) {
+        if (verificationCode.isExpired() || !verificationCode.getCode().equals(inputCode)) {
+            return false;
+        }
         return true;
     }
 }
