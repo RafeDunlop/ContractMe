@@ -101,9 +101,13 @@ public class RegisterController {
      * @param code the verification code
      */
     @PostMapping("/confirm-registration")
-    public String verifyRegistration(@ModelAttribute String code) {
+    public String verifyRegistration(@ModelAttribute String code, Model model) {
         logger.info("POST /confirm-registration code: {}", code);
-        verificationCodeService.consumeSignupCode(code);
+        try {
+            verificationCodeService.consumeSignupCode(code);
+        } catch (IllegalArgumentException error) {
+            model.addAttribute("errorMessage", error.getMessage());
+        }
         return "redirect:/login";
     }
 
