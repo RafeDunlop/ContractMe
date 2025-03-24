@@ -105,6 +105,7 @@ public class RegisterController {
             verificationCodeService.consumeSignupCode(code);
         } catch (IllegalArgumentException error) {
             model.addAttribute("errorMessage", error.getMessage());
+            return "emailVerificationForm";
         }
         return "redirect:/login";
     }
