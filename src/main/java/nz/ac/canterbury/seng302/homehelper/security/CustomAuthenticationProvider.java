@@ -41,6 +41,10 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
         try {
             User user = loginService.getUserByEmailAndPassword(email, password);
+            if (!user.isActivated()) {
+                throw new IllegalArgumentException("Account not activated.") {
+                };
+            }
             return new UsernamePasswordAuthenticationToken(user.getEmail(), null, user.getAuthorities());
         } catch (IllegalArgumentException | NoSuchElementException e) {
             throw new BadCredentialsException(e.getMessage());

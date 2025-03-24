@@ -51,7 +51,7 @@ public class LoginControllerIntegrationTest {
     public void testLoginUser_userWithSameEmailAndPasswordInRepository_success() throws Exception {
         PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         User expectedUser = Mockito.spy(new User("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
-        expectedUser.grantAuthority("ROLE_USER");
+        expectedUser.activate();
         Mockito.when(userRepository.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(expectedUser));
         mockMvc.perform(formLogin("/login")
                         .user("username", "jane@doe.nz")

@@ -171,11 +171,12 @@ public class User {
     }
 
     /**
-     * Set the user account active.
+     * Set the user account active and grants role user.
      * This means that they have verified their email address.
      */
     public void activate() {
         this.activated = true;
+        this.grantAuthority("ROLE_USER");
     }
 
     /**
