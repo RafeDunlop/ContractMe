@@ -41,13 +41,11 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
         previousRoomList = previousRoomListString.split(',');
     }
-    console.log(previousRoomList.type);
     setRoomList(previousRoomList);
     updateCharCounter("description", "description-length-counter");
 });
 
 function setRoomList(previousRoomList) {
-    console.log(previousRoomList);
     if (previousRoomList !== null) {
         previousRoomList.forEach(room => {
             roomList.push([roomId++, room]);
@@ -68,7 +66,6 @@ function addRoom(inputId) {
     let room = input.value.trim();
     if (room === "") {
         // If the room is empty, don't add it to the list, just return.
-        console.log("No room entered.");
         return;
     }
     let roomError = getRoomError(room)

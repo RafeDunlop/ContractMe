@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
+import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
@@ -8,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -37,43 +36,19 @@ public class RenovationRecordService {
     @Autowired
     public RenovationRecordService(RenovationRecordRepository renovationRecordRepository) {
         this.renovationRecordRepository = renovationRecordRepository;
-        addStartingRenovationRecords();
-    }
-
-    private void addStartingRenovationRecords() {
-        RenovationRecord startingRecord1 = new RenovationRecord(
-                "My First Renovation",
-                "exciting!",
-                List.of("bathroom", "kitchen",  "billiards room")
-        );
-        addRenovationRecord(startingRecord1);
-
-        ArrayList<String> rooms2 = new ArrayList<>(Arrays.asList("I L O V E S E N G 3 0 2".split(" ")));
-        RenovationRecord startingRecord2 = new RenovationRecord(
-                "My Second Renovation",
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
-                rooms2
-        );
-        addRenovationRecord(startingRecord2);
     }
 
     /**
-     * Retrieves a list of renovation records that are like the given name
+     * Retrieves a list of renovation records associated with the current user that are like the given name
      * @param user The current user
-     * @param name the name to search for, not case-sensitive
-     * @return a list of renovation records that match the name
+     * @param name The name to search for, not case-sensitive
+     * @return a list of renovation records from the user that match the name
      */
     public List<RenovationRecord> getRecordResultByName(User user, String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return renovationRecordRepository.findByUser(user);
+        }
         return renovationRecordRepository.findByNameContainingIgnoreCase(user, name);
-    }
-
-    /**
-     * Retrieves a list of renovations associated with the current user
-     * @param user The current user
-     * @return A list of renovation records from the user
-     */
-    public List<RenovationRecord> getRecordResultByUser(User user) {
-        return renovationRecordRepository.findByUser(user);
     }
 
     /**
@@ -88,11 +63,11 @@ public class RenovationRecordService {
      * Removes a renovation record by its id, but first checks it exists.
      * @param id of the record to remove
      */
+    @Transactional
     public void removeRenovationRecord(Long id){
         Optional<RenovationRecord> recordToRemove = renovationRecordRepository.findById(id);
         if (recordToRemove.isPresent()) {
-            RenovationRecord record = recordToRemove.get();
-            renovationRecordRepository.delete(record);
+            renovationRecordRepository.deleteById(id);
         }
     }
     /**
@@ -141,6 +116,16 @@ public class RenovationRecordService {
         );
     }
 
+    /**
+     * Calls other functions to validate all renovation fields, returning false if any do not pass their validity checks. Predicate for
+     * name is tested which calls the checkForExactMatch and validateName functions.
+     * @param name Name of the record
+     * @param description Description for the record
+     * @param roomList List of rooms for the record
+     * @param nameChecker A predicate which checks if the name doesn't exist and if it follows the correct string pattern
+     * @param pattern The string pattern the list of rooms must follow
+     * @return A boolean whether all the details are in the correct format and are valid
+     */
     private boolean validateAllInputs(String name, String description, List<String> roomList, Predicate<String> nameChecker, Pattern pattern) {
         return (validateAllRoomNames(roomList, pattern) &&
                 validateDescriptionLength(description) &&
