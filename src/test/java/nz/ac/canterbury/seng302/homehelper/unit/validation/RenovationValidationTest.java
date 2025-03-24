@@ -50,7 +50,7 @@ public class RenovationValidationTest {
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("  ", "Some description", LocalDate.now().plusDays(1));
 
         List<String> expectedErrors = List.of("Task name cannot be empty and must only include letters, numbers, " +
-                "spaces, dots, hyphens or apostrophes");
+                "spaces, dots, hyphens or apostrophes.");
         List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
         assertIterableEquals(expectedErrors, errors);
     }
@@ -66,7 +66,7 @@ public class RenovationValidationTest {
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One!", "Some description", LocalDate.now().plusDays(1));
 
         List<String> expectedErrors = List.of("Task name cannot be empty and must only include letters, numbers, " +
-                "spaces, dots, hyphens or apostrophes");
+                "spaces, dots, hyphens or apostrophes.");
         List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
         assertIterableEquals(expectedErrors, errors);
     }
@@ -81,7 +81,7 @@ public class RenovationValidationTest {
 //        LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "  ", LocalDate.now().plusDays(1));
 
-        List<String> expectedErrors = List.of("Task description cannot be empty");
+        List<String> expectedErrors = List.of("Task description cannot be empty.");
         List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
         assertIterableEquals(expectedErrors, errors);
     }
@@ -96,7 +96,7 @@ public class RenovationValidationTest {
 //        LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "A".repeat(513), LocalDate.now().plusDays(1));
 
-        List<String> expectedErrors = List.of("Task description must be 512 characters or less");
+        List<String> expectedErrors = List.of("Task description must be 512 characters or less.");
         List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
         assertIterableEquals(expectedErrors, errors);
     }
@@ -111,7 +111,7 @@ public class RenovationValidationTest {
 //        LocalDateTime futureDate = LocalDateTime.now().minusSeconds(1);
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "Some description", LocalDate.now().minusDays(1));
 
-        List<String> expectedErrors = List.of("Due date must be in the future");
+        List<String> expectedErrors = List.of("Due date must be in the future.");
         List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
         assertIterableEquals(expectedErrors, errors);
     }

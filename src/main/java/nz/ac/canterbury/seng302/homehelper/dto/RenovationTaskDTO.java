@@ -9,6 +9,7 @@ public class RenovationTaskDTO {
     String description;
     LocalDate dueDate;
 
+
     public String getDescription() {
         return description;
     }
