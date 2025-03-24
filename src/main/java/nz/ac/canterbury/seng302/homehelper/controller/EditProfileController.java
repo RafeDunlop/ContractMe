@@ -100,4 +100,6 @@ public class EditProfileController {
             return "editProfileTemplate";
         }
     }
+
+
 }

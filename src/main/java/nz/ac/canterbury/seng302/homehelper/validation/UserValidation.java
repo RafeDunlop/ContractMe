@@ -1,10 +1,12 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
+import nz.ac.canterbury.seng302.homehelper.entity.User;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class UserValidation {
@@ -54,14 +56,21 @@ public class UserValidation {
     /**
      * Validates password strength
      * @param password the inputted password
+     * @param confirmPassword the retyped password
+     * @param type the method the validation was called from
      */
     // Note this function is for validating passwords for registration, not logging in
-    public List<String> validatePasswordString(String password, String confirmPassword) {
+    public List<String> validatePasswordString(String password, String confirmPassword, String type) {
         List<String> errors = new ArrayList<>();
 
         // Compares password and confirm password
         if (!password.equals(confirmPassword)) {
-            errors.add("Passwords do not match.");
+            if (type.equals("updatePassword")) {
+                errors.add("New Passwords do not match.");
+            }
+            else if (type.equals("registerPassword")) {
+                errors.add("Passwords do not match.");
+            }
         }
 
         // Check password is at least 8 characters long, includes an uppercase letter, a lowercase letter, a number and a special character
@@ -75,4 +84,15 @@ public class UserValidation {
 
         return errors;
     }
+    // Note this function checks if the new password contains the user's name or email.
+    public List<String> validateUpdatePasswordString(String password, String confirmPassword, String type,
+            String firstName,String lastName,String email) {
+        List<String> errors = new ArrayList<>();
+
+        if (password != null && (password.contains( firstName) || (password.contains( lastName) || (password.contains( email))))){
+            errors.add("Your password should not contain your name or email address.");
+        }
+        return errors;
+    }
+
 }
