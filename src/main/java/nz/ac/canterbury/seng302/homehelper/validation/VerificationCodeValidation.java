@@ -8,6 +8,6 @@ import org.springframework.stereotype.Service;
 public class VerificationCodeValidation {
 
     public boolean isValid(VerificationCode verificationCode, String inputCode, User loggedInUser) {
-        return false;
+        return true;
     }
 }

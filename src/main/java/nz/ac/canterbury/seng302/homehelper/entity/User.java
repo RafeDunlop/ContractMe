@@ -171,15 +171,18 @@ public class User {
     }
 
     /**
-     * Marks this User as "activated"
+     * Set the user account active.
+     * This means that they have verified their email address.
      */
     public void activate() {
         this.activated = true;
     }
 
     /**
-     * Gets the activation status of this User
-     * @return Whether this User is activated
+     * Get the activated status of the user account.
+     *
+     * @return true if the user has verified their email address and therefore
+     * has an active account
      */
     public boolean isActivated() {
         return activated;

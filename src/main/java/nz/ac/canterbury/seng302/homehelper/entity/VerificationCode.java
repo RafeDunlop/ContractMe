@@ -52,14 +52,30 @@ public class VerificationCode {
      */
     public VerificationCode() {}
 
+    /**
+     * Get the unique id of the verification code.
+     * For database purposes.
+     *
+     * @return id
+     */
     public long getId() {
         return id;
     }
 
+    /**
+     * Gets the user this code is associated with.
+     *
+     * @return user
+     */
     public User getUser() {
         return user;
     }
 
+    /**
+     * Get the actual code string.
+     *
+     * @return code
+     */
     public String getCode() {
         return code;
     }
