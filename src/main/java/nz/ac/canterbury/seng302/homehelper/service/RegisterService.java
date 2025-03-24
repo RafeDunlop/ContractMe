@@ -4,7 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,18 +82,6 @@ public class RegisterService {
     }
 
     /**
-     * Authenticate the user once registered
-     */
-    public void authenticateUser(User user, String password, HttpServletRequest request) {
-        Authentication authToken = new UsernamePasswordAuthenticationToken(user.getEmail(), password);
-        Authentication auth = authenticationManager.authenticate(authToken);
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        securityContext.setAuthentication(auth);
-        HttpSession session = request.getSession(true);
-        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
-    }
-
-    /**
      * Validates if the email is already in use
      * @param email the email inputted by the user
      */
@@ -106,5 +96,4 @@ public class RegisterService {
             errors.addAll(userValidation.validateEmailString(email));
         return errors;
     }
-
 }

@@ -3,12 +3,14 @@ package nz.ac.canterbury.seng302.homehelper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * Home Helper web app entry-point
  * Note @link{SpringBootApplication} annotation
  */
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
+@EnableAsync
 public class HomeHelperApplication {
 
 	/**

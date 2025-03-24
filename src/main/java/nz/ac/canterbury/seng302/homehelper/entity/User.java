@@ -40,6 +40,9 @@ public class User {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdTimestamp;
 
+    @Column(name = "activated")
+    private boolean activated;
+
     @Column()
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
@@ -58,6 +61,7 @@ public class User {
         this.email = email;
         this.password = password;
         this.createdTimestamp = LocalDateTime.now();
+        this.activated = false;
     }
 
     /**
@@ -164,6 +168,24 @@ public class User {
      */
     public LocalDateTime getCreatedTimestamp() {
         return createdTimestamp;
+    }
+
+    /**
+     * Set the user account active.
+     * This means that they have verified their email address.
+     */
+    public void activate() {
+        this.activated = true;
+    }
+
+    /**
+     * Get the activated status of the user account.
+     *
+     * @return true if the user has verified their email address and therefore
+     * has an active account
+     */
+    public boolean isActivated() {
+        return activated;
     }
 
     /**
