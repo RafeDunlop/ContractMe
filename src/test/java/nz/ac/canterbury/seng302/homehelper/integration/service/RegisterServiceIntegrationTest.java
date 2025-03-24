@@ -13,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 
@@ -24,10 +23,9 @@ public class RegisterServiceIntegrationTest {
     @BeforeEach
     void setUp() {
         userRepositoryMock = Mockito.mock(UserRepository.class);
-        VerificationCodeRepository verificationCodeRepositoryMock = Mockito.mock(VerificationCodeRepository.class);
         UserValidation userValidation = new UserValidation();
         AuthenticationManager authenticationManagerMock = Mockito.mock(AuthenticationManager.class);
-        registerService = new RegisterService(userRepositoryMock, userValidation, authenticationManagerMock, verificationCodeRepositoryMock);
+        registerService = new RegisterService(userRepositoryMock, userValidation, authenticationManagerMock);
     }
 
     @Test

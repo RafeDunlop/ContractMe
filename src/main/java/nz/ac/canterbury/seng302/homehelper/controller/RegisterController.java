@@ -72,20 +72,13 @@ public class RegisterController {
             User user = registerService.registerUser(userRegisterDTO);
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
             return "redirect:/confirm-registration";
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException|MailException e) {
             logger.warn("Form submission error: " + e.getMessage());
 
             List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
 
             model.addAttribute("errorMessages", errorsList);
 
-            model.addAttribute("firstName", userRegisterDTO.getFirstName().trim());
-            model.addAttribute("lastName", userRegisterDTO.getLastName().trim());
-            model.addAttribute("email", userRegisterDTO.getEmail().trim());
-        } catch (MailException ex) {
-            logger.warn("Email send error: " + ex.getMessage());
-            List<String> errorsList = List.of(ex.getMessage().split("(?<=\\.) "));
-            model.addAttribute("errorMessages", errorsList);
             model.addAttribute("firstName", userRegisterDTO.getFirstName().trim());
             model.addAttribute("lastName", userRegisterDTO.getLastName().trim());
             model.addAttribute("email", userRegisterDTO.getEmail().trim());
@@ -108,9 +101,13 @@ public class RegisterController {
      * @param code the verification code
      */
     @PostMapping("/confirm-registration")
-    public String verifyRegistration(@ModelAttribute String code) {
+    public String verifyRegistration(@ModelAttribute String code, Model model) {
         logger.info("POST /confirm-registration code: {}", code);
-        verificationCodeService.consumeSignupCode(code);
+        try {
+            verificationCodeService.consumeSignupCode(code);
+        } catch (IllegalArgumentException error) {
+            model.addAttribute("errorMessage", error.getMessage());
+        }
         return "redirect:/login";
     }
 

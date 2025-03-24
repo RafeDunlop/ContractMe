@@ -29,22 +29,18 @@ import java.util.Optional;
 public class RegisterService {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterService.class);
-    private static final String ROLE_VERIFIED = "ROLE_VERIFIED";
     private final UserRepository userRepository;
-    private final VerificationCodeRepository verificationCodeRepository;
     private final UserValidation userValidation;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public RegisterService(UserRepository userRepository, UserValidation userValidation,
-                           AuthenticationManager authenticationManager,
-                           VerificationCodeRepository verificationCodeRepository) {
+                           AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.userValidation = userValidation;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        this.verificationCodeRepository = verificationCodeRepository;
     }
 
     /**
@@ -70,8 +66,7 @@ public class RegisterService {
         errors.addAll(userValidation.validateNameString(firstName, "First"));
         errors.addAll(userValidation.validateNameString(lastName, "Last"));
         errors.addAll(validateEmail(email));
-        errors.addAll(userValidation.validatePasswordString(password, confirmPassword));
-
+        errors.addAll(userValidation.validatePasswordString(password, confirmPassword,"registerPassword"));
         // Throw IllegalArgumentException if any errors occurred in validating the data
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException(String.join(" ", errors));
@@ -83,23 +78,6 @@ public class RegisterService {
 
         // Save entity to the user repository
         return userRepository.save(user);
-    }
-
-    /**
-     * Authenticate the user once registered.
-     * Sets the authentication token and saves the session.
-     *
-     * @param user the user object which has already been registered
-     * @param password the user's plaintext password
-     * @param request, the HttpServletRequest object from upper layer (spring)
-     */
-    public void authenticateUser(User user, String password, HttpServletRequest request) {
-        Authentication authToken = new UsernamePasswordAuthenticationToken(user.getEmail(), password);
-        Authentication auth = authenticationManager.authenticate(authToken);
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        securityContext.setAuthentication(auth);
-        HttpSession session = request.getSession(true);
-        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
     }
 
     /**

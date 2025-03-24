@@ -26,11 +26,11 @@ public class SecureRandomCodeGenerator {
     private final char[] symbols;
 
     private final char[] buf;
-    
+
     /**
      * Initialise a secure random generator and set the length and symbols to use.
      *
-     * @param length the lenght of characters each random code should be
+     * @param length the length of characters each random code should be
      * @param symbols a string containing all the allowed characters for the code
      */
     public SecureRandomCodeGenerator(SecureRandom secureRandom, int length, String symbols) {
