@@ -33,14 +33,14 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="renovationTask : ${renovation.getRenovationTasks()}">
+            <tr th:each="task : ${tasks}">
                 <td class="d-flex justify-content-between align-items-center">
-                    <a th:text="${renovationTask.getName()}">Name</a>
-                    <button type="button" class="btn btn-outline-danger custom-light-border"
-                            th:attr="data-id=${renovation.id}, data-searchQuery=${searchQuery}, data-csrf=${_csrf.token}"
-                            th:onclick="|confirmDelete(this)|">
-                        ❌
-                    </button>
+                    <a th:text="${task.getName()}">Name</a>
+<!--                    <button type="button" class="btn btn-outline-danger custom-light-border"-->
+<!--                            th:attr="data-id=${renovation.id}, data-searchQuery=${searchQuery}, data-csrf=${_csrf.token}"-->
+<!--                            th:onclick="|confirmDelete(this)|">-->
+<!--                        ❌-->
+<!--                    </button>-->
                 </td>
             </tr>
             </tbody>

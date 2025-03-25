@@ -1,12 +1,17 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
+import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -28,7 +33,7 @@ public class RenovationController {
     private static final Logger logger = LoggerFactory.getLogger(RenovationController.class);
 
     private final RenovationRecordService renovationRecordService;
-
+    private final RenovationTaskService renovationTaskService;
     private final LoginService loginService;
 
     /**
@@ -37,8 +42,9 @@ public class RenovationController {
      * @param loginService The login service provides the function to get the current user
      */
     @Autowired
-    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService) {
+    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService) {
         this.renovationRecordService = renovationRecordService;
+        this.renovationTaskService = renovationTaskService;
         this.loginService = loginService;
     }
 
@@ -224,9 +230,15 @@ public class RenovationController {
      * @return redirect to viewRenovation page
      */
     @GetMapping("/view")
-    public String viewRenovation(@RequestParam(name = "id") Long id, Model model) {
+    public String viewRenovation(@RequestParam(name = "id") Long id, @RequestParam(defaultValue = "0") int pageNumber, Model model) {
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
+
+        Pageable pageable = PageRequest.of(pageNumber, 3);
+        Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
+
+        model.addAttribute("tasks", paginatedTasks.getContent());
+
         model.addAttribute("renovation", record);
         return "viewRenovation";
     }

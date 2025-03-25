@@ -8,6 +8,9 @@ import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -50,5 +53,24 @@ public class RenovationTaskService {
         RenovationTask renovationTask = new RenovationTask(name, description, roomList, dueDate, renovationRecord);
 
         renovationTaskRepository.save(renovationTask);
+    }
+
+    public Page<RenovationTask> returnTaskPages(RenovationRecord renovationRecord, Pageable pageable ) {
+        List<RenovationTask> taskSubList = new ArrayList<>();
+        List<RenovationTask> tasks = renovationRecord.getRenovationTasks();
+
+        //need to check for negative offset
+
+        int firstTask =(int) pageable.getOffset();
+
+        if (firstTask >= tasks.size()) {
+            firstTask = tasks.size() - pageable.getPageSize();
+        }
+
+        int lastTask = Math.min(firstTask + pageable.getPageSize(), tasks.size());
+
+        taskSubList = tasks.subList(firstTask, lastTask);
+
+        return new PageImpl<>(taskSubList, pageable, tasks.size());
     }
 }
