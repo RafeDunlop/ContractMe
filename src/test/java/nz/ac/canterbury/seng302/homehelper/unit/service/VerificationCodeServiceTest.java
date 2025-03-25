@@ -14,10 +14,12 @@ import org.mockito.Mockito;
 
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class VerificationCodeServiceTest {
 
@@ -25,9 +27,11 @@ public class VerificationCodeServiceTest {
 
     private static final String firstCode = "YbSxa3";
 
-    private static final TimeUnit timeUnit = TimeUnit.SECONDS;
+    private static final String secondCode = firstCode + seed;
 
-    private static final int timeQuantity = 5;
+    private static final TimeUnit timeUnit = TimeUnit.MILLISECONDS;
+
+    private static final int timeQuantity = 100;
 
     private VerificationCodeService toTest;
 
@@ -39,9 +43,9 @@ public class VerificationCodeServiceTest {
 
     private User user;
 
-    private VerificationCode verificationCode;
+    private VerificationCode verificationCodeOne;
 
-    private AtomicReference<VerificationCode> generated;
+    private VerificationCode verificationCodeTwo;
 
     @BeforeEach
     public void setUp() {
@@ -49,37 +53,35 @@ public class VerificationCodeServiceTest {
         verificationCodeRepository = Mockito.mock(VerificationCodeRepository.class);
         userRepository = Mockito.mock(UserRepository.class);
         user = Mockito.mock(User.class);
-        verificationCode = Mockito.mock(VerificationCode.class);
-        Mockito.when(verificationCode.getCode()).thenReturn(firstCode);
-        Mockito.when(verificationCode.getUser()).thenReturn(user);
-        Mockito.when(verificationCodeRepository.findByCode(firstCode)).thenReturn(Optional.of(verificationCode));
-        Mockito.when(verificationCodeRepository.save(Mockito.any(VerificationCode.class)))
-                .thenAnswer(invocation -> {
-                    generated.set(invocation.getArgument(0));
-                    return generated.get();
-                });
-        Mockito.when(verificationCodeRepository.findByCode(firstCode)).thenReturn(Optional.of(verificationCode));
-
+        verificationCodeOne = Mockito.mock(VerificationCode.class);
+        verificationCodeTwo = Mockito.mock(VerificationCode.class);
+        Mockito.when(verificationCodeOne.getCode()).thenReturn(firstCode);
+        Mockito.when(verificationCodeOne.getUser()).thenReturn(user);
+        Mockito.when(verificationCodeRepository.findByCode(firstCode)).thenReturn(Optional.of(verificationCodeOne));
+        Mockito.when(verificationCodeTwo.getCode()).thenReturn(secondCode);
+        Mockito.when(verificationCodeTwo.getUser()).thenReturn(user);
+        Mockito.when(verificationCodeRepository.findByCode(secondCode)).thenReturn(Optional.of(verificationCodeTwo));
         toTest = new VerificationCodeService(
                 verificationCodeRepository,
                 verificationCodeValidation,
                 userRepository
         );
         toTest.setSeed(seed);
-        toTest.setTiming(timeQuantity, timeUnit);
-        generated = new AtomicReference<>();
+        toTest.setDelay(timeQuantity, timeUnit);
     }
 
     @Test
-    public void consumeSignupCode_validCode_doesntThrow() {
-        Mockito.when(verificationCodeValidation.isValid(verificationCode, firstCode, user)).thenReturn(true);
+    public void consumeSignupCode_validCode_doesntThrowAndCodeDeleted() {
+        Mockito.when(verificationCodeValidation.isValid(verificationCodeOne, firstCode, user)).thenReturn(true);
         assertDoesNotThrow(() -> toTest.consumeSignupCode(firstCode));
+        verify(verificationCodeRepository, times(1)).delete(verificationCodeOne);
     }
 
     @Test
-    public void consumeSignupCode_invalidCode_throwsException() {
-        Mockito.when(verificationCodeValidation.isValid(verificationCode, firstCode, user)).thenReturn(false);
+    public void consumeSignupCode_invalidCode_throwsExceptionAndCodeDeleted() {
+        Mockito.when(verificationCodeValidation.isValid(verificationCodeOne, firstCode, user)).thenReturn(false);
         assertThrows(IllegalArgumentException.class, () -> toTest.consumeSignupCode(firstCode));
+        verify(verificationCodeRepository, times(1)).delete(verificationCodeOne);
     }
 
     @Test
@@ -88,27 +90,44 @@ public class VerificationCodeServiceTest {
     }
 
     @Test
-    public void deleteSignupCodeAndAccount_codePresentAndExpired_deletesBoth() {
-        AtomicReference<Boolean> userDeleted = new AtomicReference<>(false);
-        AtomicReference<Boolean> verificationCodeDeleted = new AtomicReference<>(false);
-        Mockito.doAnswer(invocation -> {
-            userDeleted.set(true);
-            return null;
-        }).when(userRepository).delete(user);
-        Mockito.doAnswer(invocation -> {
-            verificationCodeDeleted.set(true);
-            return null;
-        }).when(verificationCodeRepository).delete(verificationCode);
-        Mockito.when(verificationCodeRepository.findByCode(firstCode)).thenReturn(Optional.of(verificationCode));
-        Mockito.when(verificationCode.isExpired()).thenReturn(true);
+    public void deleteSignupCodeAndAccount_codePresent_deletesBoth() {
+        Mockito.when(verificationCodeRepository.findByCode(firstCode)).thenReturn(Optional.of(verificationCodeOne));
         toTest.deleteSignupCodeAndAccount(firstCode);
-        assertTrue(userDeleted.get() && verificationCodeDeleted.get());
+        verify(verificationCodeRepository, times(1)).delete(verificationCodeOne);
+        verify(userRepository, times(1)).delete(user);
     }
 
     @Test
-    public void issueVerificationCode_dontWait_stillExists() {
-        toTest.issueVerificationCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
-        assertNotNull(generated.get());
+    public void issueSignupCode_dontWait_stillExists() {
+        toTest.issueSignupCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
+        verify(verificationCodeRepository, Mockito.never()).delete(verificationCodeOne);
     }
 
+    @Test
+    public void issueSignupCode_waitAndPresent_hasBeenDeleted() throws InterruptedException, ExecutionException {
+        String code = toTest.issueSignupCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
+        Mockito.when(verificationCodeRepository.findByCode(Mockito.any())).thenReturn(Optional.of(verificationCodeOne));
+        toTest.getScheduledFutureDeletion(code).get(); //waits for the scheduled service to finish
+        verify(verificationCodeRepository, times(1)).delete(verificationCodeOne);
+    }
+
+    @Test
+    public void issueSignupCode_multipleAndWaitAndPresent_allHaveBeenDeleted() throws ExecutionException, InterruptedException {
+        String codeOne = toTest.issueSignupCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
+        String codeTwo = toTest.issueSignupCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
+        Mockito.when(verificationCodeRepository.findByCode(codeOne)).thenReturn(Optional.of(verificationCodeOne));
+        Mockito.when(verificationCodeRepository.findByCode(codeTwo)).thenReturn(Optional.of(verificationCodeTwo));
+        toTest.getScheduledFutureDeletion(codeOne).get();
+        toTest.getScheduledFutureDeletion(codeTwo).get();
+        verify(verificationCodeRepository, times(2)).delete(Mockito.any(VerificationCode.class));
+    }
+
+    @Test
+    public void issueSignupCode_waitAndPresentAndUserAlreadyActivated_throwsAndUserNotDeleted() {
+        String code = toTest.issueSignupCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
+        Mockito.when(verificationCodeRepository.findByCode(code)).thenReturn(Optional.of(verificationCodeOne));
+        Mockito.when(user.isActivated()).thenReturn(true);
+        assertThrows(ExecutionException.class, () -> toTest.getScheduledFutureDeletion(code).get());
+        verify(userRepository, Mockito.never()).delete(Mockito.any(User.class));
+    }
 }

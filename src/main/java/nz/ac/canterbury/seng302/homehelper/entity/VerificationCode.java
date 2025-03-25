@@ -35,8 +35,6 @@ public class VerificationCode {
     @JoinColumn(nullable = false, name = "user_id")
     private User user;
 
-    private Date expiryDate;
-
     /**
      * Creates a VerificationCode instance and sets the expiry date.
      *
@@ -47,7 +45,6 @@ public class VerificationCode {
         this.user = user;
         this.code = code;
         this.locale = locale;
-        expiryDate = calculateExpiryDate(locale);
     }
 
     /**
@@ -63,27 +60,6 @@ public class VerificationCode {
      */
     public long getId() {
         return id;
-    }
-
-    /**
-     * Calculate the expiry date based on the current time and the constant expiry time in minutes.
-     *
-     * @return the specific calendar Date timestamp when the token will expire and the user will be deleted
-     */
-    private Date calculateExpiryDate(Locale locale) {
-        Calendar calendar = Calendar.getInstance(locale);
-        calendar.setTime(new Timestamp(calendar.getTime().getTime()));
-        calendar.add(Calendar.MINUTE, VerificationCode.EXPIRATION);
-        return new Date(calendar.getTime().getTime());
-    }
-
-    /**
-     * Checks if the current date time is after the expiry date.
-     *
-     * @return true if the code has expired
-     */
-    public boolean isExpired() {
-        return Calendar.getInstance(locale).after(expiryDate);
     }
 
     /**
