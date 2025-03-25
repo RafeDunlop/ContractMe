@@ -30,21 +30,32 @@
             <thead class="table-dark">
             <tr>
                 <th>Name</th>
+                <th>Description</th>
+                <th>Rooms</th>
+                <th>Due Date</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="task : ${tasks}">
-                <td class="d-flex justify-content-between align-items-center">
-                    <a th:text="${task.getName()}">Name</a>
+                <td><a th:text="${task.getName()}">Name</a></td>
+                <td><a th:text="${task.getDescription()}">Description</a></td>
+                <td><a th:text="${task.getRoomList()}">Rooms</a></td>
+                <td><a th:text="${task.getDueDate()}">Due Date</a></td>
 <!--                    <button type="button" class="btn btn-outline-danger custom-light-border"-->
 <!--                            th:attr="data-id=${renovation.id}, data-searchQuery=${searchQuery}, data-csrf=${_csrf.token}"-->
 <!--                            th:onclick="|confirmDelete(this)|">-->
 <!--                        ❌-->
 <!--                    </button>-->
-                </td>
             </tr>
             </tbody>
         </table>
+        </div>
+        <div class="d-flex justify-content-center">
+            <ul class="pagination">
+                <li class="page-item">
+                    <a class="page-link" href="#" th:href="@{/tasks/view(id=${renovation.id}, page=${currentPage + 1})}">Next</a>
+                </li>
+            </ul>
         </div>
 
 

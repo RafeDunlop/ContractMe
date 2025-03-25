@@ -59,10 +59,13 @@ public class RenovationTaskService {
         List<RenovationTask> taskSubList = new ArrayList<>();
         List<RenovationTask> tasks = renovationRecord.getRenovationTasks();
 
-        //need to check for negative offset
+        // Move validation out
 
         int firstTask =(int) pageable.getOffset();
 
+        if (firstTask < 0) {
+            firstTask = 0;
+        }
         if (firstTask >= tasks.size()) {
             firstTask = tasks.size() - pageable.getPageSize();
         }
