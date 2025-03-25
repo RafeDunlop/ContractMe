@@ -14,5 +14,7 @@ let form = document.getElementById("create-task-form");
  */
 document.addEventListener("DOMContentLoaded", () => {
     updateCharCounter("description", "description-length-counter");
+    document.getElementById("description").
+    addEventListener("input", () => updateCharCounter("description", "description-length-counter"))
 });
 
