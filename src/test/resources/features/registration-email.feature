@@ -41,3 +41,10 @@ Feature: As Sarah, I want to confirm my account by email when I register so that
     When I enter the signup code linked to my account
     Then The system validates the code successfully
     And I am redirected to the login page thast tells me “Your account has been activated, please log in”.
+
+  @AC6
+  Scenario: AC6 - Invalid signup code
+    Given I am on the signup code page
+    When I enter an invalid signup code
+    Then An error message “Signup code invalid” is displayed
+    And My registration is not confirmed
