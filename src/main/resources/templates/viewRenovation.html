@@ -65,12 +65,7 @@
                             <p class="card-text truncate" th:text="${renovationTask.getDescription()}">Task Description</p>
                             <p class="card-text"><strong>Due Date:</strong> <span th:text="${renovationTask.getDueDate()}">Due Date</span></p>
                             <div class="d-flex justify-content-between">
-                                <a class="btn btn-primary">Edit</a>
-                                <button type="button" class="btn btn-outline-danger custom-light-border"
-                                        th:attr="data-id=${renovation.id}, data-searchQuery=${searchQuery}, data-csrf=${_csrf.token}"
-                                        th:onclick="|confirmDelete(this)|">
-                                    ❌
-                                </button>
+                                <a th:href="@{/editTask(taskId=${renovationTask.getTask_id()},renoId=${renovation.getId()})}" class="btn btn-primary">Edit</a>
                             </div>
                         </div>
                     </div>

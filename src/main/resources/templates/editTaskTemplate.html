@@ -19,8 +19,7 @@
 
       <div class="mb-3">
         <label for="name" class="form-label">Name:</label>
-        <input type="text" class="form-control" id="name" placeholder="Enter a name for your task"
-               name="name" data-cy="name" autofocus>
+        <input type="text" class="form-control" id="name" placeholder="Enter a name for your task" data-cy="name" autofocus th:name="name" th:value="${task.getName()}">
         <div class="error-label-div">
           <label class="form-label" id="name-error-message"></label>
         </div>
@@ -29,18 +28,21 @@
         <label for="description" class="form-label">Description:</label>
         <span id="description-length-counter" class="counter">0/512</span>
         <textarea class="form-control" id="description" placeholder="Enter a description for your task"
-                  name="description" autofocus></textarea>
+                  autofocus th:name="description" th:text="${task.getDescription()}"></textarea>
         <div class="error-label-div">
           <label class="form-label" hidden id="description-error-message">Text gets updated based off error</label>
         </div>
+        <label for="dueDate" class="form-label">Due Date:</label>
+        <input type="date" class="form-control" id="dueDate"
+               th:name="dueDate" th:value="*{task.getDueDate()}">
       </div>
 
-      <div>
-        <label for="roomSelection">Choose a room/s from selection:</label>
-        <select name="rooms" id="roomSelection">
-          <!--<option disabled selected value=""></option>
-          <option value="No available rooms to select" selected disabled hidden></option>-->
-        </select>
+      <label class="form-label">Rooms:</label>
+      <div class="form-check mb-1 fs-3" th:each="room, meta : ${roomList}">
+        <input class="form-check-input fs-3" type="checkbox" name="roomList"
+               th:id="'room-' + ${meta.index}" th:value="${room}"
+               th:checked="${roomList != null and #lists.contains(roomList, room)}">
+        <label class="form-check-label fs-3 ml-3" th:for="'room-' + ${meta.index}" th:text="${room}"></label>
       </div>
 
       <div>
@@ -53,7 +55,7 @@
     </form>
   </div>
   <div class="mt-4">
-    <a href="/renovations/view?id=" class="btn  btn-primary">Cancel</a>
+    <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn  btn-primary">Cancel</a>
   </div>
 </div>
 </body>

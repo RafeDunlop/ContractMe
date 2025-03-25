@@ -56,8 +56,6 @@ public class SecurityConfiguration {
                         // Give access to database and allow all users to go on the matching pages.
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/h2/**")).permitAll()
                         .requestMatchers("/", "/register", "/login", "/webjars/**").permitAll()
-                        // TEST FOR HTML
-                        .requestMatchers("/editTask").permitAll()
                         // Only the specified roles can reach the matching pages
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .requestMatchers("/main", "/user/**", "/renovations/**").hasRole("USER")

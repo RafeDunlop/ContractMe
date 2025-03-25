@@ -33,6 +33,10 @@ public class RenovationTaskService {
         this.renovationValidation = renovationValidation;
     }
 
+    public RenovationTask getTaskdById(Long id) {
+        return renovationTaskRepository.findById(id).orElse(null);
+    }
+
     /**
      * Adds a new renovation task to the repository
      */

@@ -66,4 +66,8 @@ public class RenovationTask {
     public String getDescription() {
         return description;
     }
+
+    public  List<String> getRoomList() {
+        return roomList;
+    }
 }

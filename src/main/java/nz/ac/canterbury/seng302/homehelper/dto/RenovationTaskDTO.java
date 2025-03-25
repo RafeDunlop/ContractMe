@@ -3,11 +3,14 @@ package nz.ac.canterbury.seng302.homehelper.dto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 public class RenovationTaskDTO {
     private String name;
     String description;
     LocalDate dueDate;
+
+    List<String> roomList;
 
 
     public String getDescription() {
@@ -18,9 +21,11 @@ public class RenovationTaskDTO {
         return name;
     }
 
+
     public void setName(String name) {
         this.name = name;
     }
+
 
     public void setDescription(String description) {
         this.description = description;
