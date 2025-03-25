@@ -6,7 +6,6 @@ import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
-import nz.ac.canterbury.seng302.homehelper.validation.VerificationCodeValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -39,8 +38,6 @@ public class VerificationCodeServiceTest {
 
     private UserRepository userRepository;
 
-    private VerificationCodeValidation verificationCodeValidation;
-
     private User user;
 
     private VerificationCode verificationCodeOne;
@@ -49,7 +46,6 @@ public class VerificationCodeServiceTest {
 
     @BeforeEach
     public void setUp() {
-        verificationCodeValidation = Mockito.mock(VerificationCodeValidation.class);
         verificationCodeRepository = Mockito.mock(VerificationCodeRepository.class);
         userRepository = Mockito.mock(UserRepository.class);
         user = Mockito.mock(User.class);
@@ -63,7 +59,6 @@ public class VerificationCodeServiceTest {
         Mockito.when(verificationCodeRepository.findByCode(secondCode)).thenReturn(Optional.of(verificationCodeTwo));
         toTest = new VerificationCodeService(
                 verificationCodeRepository,
-                verificationCodeValidation,
                 userRepository
         );
         toTest.setSeed(seed);
@@ -72,14 +67,21 @@ public class VerificationCodeServiceTest {
 
     @Test
     public void consumeSignupCode_validCode_doesntThrowAndCodeDeleted() {
-        Mockito.when(verificationCodeValidation.isValid(verificationCodeOne, firstCode)).thenReturn(true);
         assertDoesNotThrow(() -> toTest.consumeSignupCode(firstCode));
         verify(verificationCodeRepository, times(1)).delete(verificationCodeOne);
     }
 
     @Test
     public void consumeSignupCode_invalidCode_throwsExceptionAndCodeDeleted() {
-        Mockito.when(verificationCodeValidation.isValid(verificationCodeOne, firstCode)).thenReturn(false);
+        Mockito.when(verificationCodeRepository.findByCode(secondCode)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> toTest.consumeSignupCode(secondCode));
+        verify(verificationCodeRepository, Mockito.never()).delete(Mockito.any(VerificationCode.class));
+    }
+
+    @Test
+    public void consumeSignupCode_expiredCode_throwsException() {
+        Mockito.when(verificationCodeOne.isExpired()).thenReturn(true);
+        Mockito.when(verificationCodeRepository.findByCode(firstCode)).thenReturn(Optional.of(verificationCodeOne));
         assertThrows(IllegalArgumentException.class, () -> toTest.consumeSignupCode(firstCode));
         verify(verificationCodeRepository, times(1)).delete(verificationCodeOne);
     }

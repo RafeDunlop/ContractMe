@@ -2,19 +2,16 @@ package nz.ac.canterbury.seng302.homehelper.integration.service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
 
-import nz.ac.canterbury.seng302.homehelper.validation.VerificationCodeValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,8 +22,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
@@ -39,9 +34,6 @@ public class VerificationCodeServiceIntegrationTest {
 
     @Autowired
     private VerificationCodeRepository verificationCodeRepository;
-
-    @Mock
-    private VerificationCodeValidation verificationCodeValidation;
 
     private VerificationCodeService toTest;
 
@@ -57,7 +49,7 @@ public class VerificationCodeServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        toTest = new VerificationCodeService(verificationCodeRepository, verificationCodeValidation, userRepository);
+        toTest = new VerificationCodeService(verificationCodeRepository, userRepository);
         UserRegisterDTO userRegisterDTO = new UserRegisterDTO(
                 "test",
                 "user",
@@ -75,7 +67,6 @@ public class VerificationCodeServiceIntegrationTest {
     @Test
     public void issueCodeAndConsume_allValid_userActivated() {
         String code = toTest.issueSignupCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
-        when(verificationCodeValidation.isValid(any(VerificationCode.class), any(String.class))).thenReturn(true);
         toTest.consumeSignupCode(code);
         assertTrue(userRepository.findByEmailIgnoreCase(email).get().isActivated());
     }
