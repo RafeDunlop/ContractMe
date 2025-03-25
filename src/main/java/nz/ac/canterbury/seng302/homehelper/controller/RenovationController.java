@@ -231,19 +231,17 @@ public class RenovationController {
      * @return redirect to viewRenovation page
      */
     @GetMapping("/view")
-    public String viewRenovation(@RequestParam(name = "id") Long id, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, Model model) {
+    public String viewRenovation(@RequestParam(name = "id") Long id, @RequestParam(defaultValue = "0", name = "page") int pageNumber, Model model) {
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
 
-
         Pageable pageable = PageRequest.of(pageNumber, 3);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
-
         model.addAttribute("tasks", paginatedTasks.getContent());
-        // model.addAttribute("currentPage", pageNumber);
-        //model.addAttribute("numberOfPages", paginatedTasks.getTotalPages());
-
+        model.addAttribute("pageNumber", pageNumber);
+        model.addAttribute("numberOfPages", paginatedTasks.getTotalPages());
         model.addAttribute("renovation", record);
+
         return "viewRenovation";
     }
 }

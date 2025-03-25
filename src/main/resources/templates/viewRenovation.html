@@ -53,7 +53,8 @@
         <div class="d-flex justify-content-center">
             <ul class="pagination">
                 <li class="page-item">
-                    <a class="page-link" href="#" th:href="@{/tasks/view(id=${renovation.id}, page=${currentPage + 1})}">Next</a>
+                    <span th:text="${pageNumber}"></span>
+                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${pageNumber} + 1)}">Next</a>
                 </li>
             </ul>
         </div>

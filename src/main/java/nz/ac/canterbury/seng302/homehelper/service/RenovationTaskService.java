@@ -59,21 +59,16 @@ public class RenovationTaskService {
         List<RenovationTask> taskSubList = new ArrayList<>();
         List<RenovationTask> tasks = renovationRecord.getRenovationTasks();
 
-        // Move validation out
-
-        int firstTask =(int) pageable.getOffset();
-
-        if (firstTask < 0) {
-            firstTask = 0;
+        int startIndex =(int) pageable.getOffset();
+        if (startIndex < 0) {
+            startIndex = 0;
         }
-        if (firstTask >= tasks.size()) {
-            firstTask = tasks.size() - pageable.getPageSize();
+        if (startIndex >= tasks.size()) {
+            startIndex = tasks.size() - pageable.getPageSize();
         }
+        int endIndex = Math.min(startIndex + pageable.getPageSize(), tasks.size());
 
-        int lastTask = Math.min(firstTask + pageable.getPageSize(), tasks.size());
-
-        taskSubList = tasks.subList(firstTask, lastTask);
-
+        taskSubList = tasks.subList(startIndex, endIndex);
         return new PageImpl<>(taskSubList, pageable, tasks.size());
     }
 }
