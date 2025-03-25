@@ -42,9 +42,10 @@
 
             <label class="form-label">Rooms:</label>
             <div class="form-check mb-1 fs-3" th:each="room, meta : ${roomList}">
-                <input class="form-check-input  fs-3" type="checkbox" name="roomList"
-                       th:id="${meta.index}" th:value="${room}">
-                <label class="form-check-label fs-3 ml-3" th:for="${meta.index}" th:text="${room}"></label>
+                <input class="form-check-input fs-3" type="checkbox" name="roomList"
+                       th:id="'room-' + ${meta.index}" th:value="${room}"
+                       th:checked="${renovation.getRooms() != null and #lists.contains(renovation.getRooms(), room)}">
+                <label class="form-check-label fs-3 ml-3" th:for="'room-' + ${meta.index}" th:text="${room}"></label>
             </div>
 
             <div class="mt-4">
