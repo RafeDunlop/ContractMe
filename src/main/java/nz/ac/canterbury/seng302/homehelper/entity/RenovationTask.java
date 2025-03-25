@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class RenovationTask {
     private List<String> roomList;
 
     @Column
-    private LocalDateTime dueDate;
+    private LocalDate dueDate;
 
 
     /**
@@ -42,11 +43,19 @@ public class RenovationTask {
      * @param roomList
      * @param dueDate
      */
-    public RenovationTask(String name, String description, List<String> roomList, LocalDateTime dueDate, RenovationRecord renovationRecord) {
+    public RenovationTask(String name, String description, List<String> roomList, LocalDate dueDate, RenovationRecord renovationRecord) {
         this.renovationRecord = renovationRecord;
         this.name = name.trim();
         this.description = (description != null) ? description.trim() : "";
         this.roomList = roomList;
         this.dueDate = dueDate;
+    }
+
+    public Long getTask_id() {
+        return task_id;
+    }
+
+    public String getName() {
+        return name;
     }
 }

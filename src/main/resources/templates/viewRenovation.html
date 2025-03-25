@@ -23,6 +23,32 @@
                 </li>
             </ul>
         </div>
+
+        <div th:if ="!${renovation.getRenovationTasks().isEmpty()}" class="mb-3">
+            <h6 class = "fw-bold">Tasks:</h6>
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="renovationTask : ${renovation.getRenovationTasks()}">
+                <td class="d-flex justify-content-between align-items-center">
+                    <a th:text="${renovationTask.getName()}">Name</a>
+                    <button type="button" class="btn btn-outline-danger custom-light-border"
+                            th:attr="data-id=${renovation.id}, data-searchQuery=${searchQuery}, data-csrf=${_csrf.token}"
+                            th:onclick="|confirmDelete(this)|">
+                        ❌
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+
+
+
     </div>
 
     <div class="mt-4">

@@ -30,10 +30,8 @@ import java.util.List;
 public class CreateTaskController {
     Logger logger = LoggerFactory.getLogger(EditProfileController.class);
 
-
     private final RenovationTaskService renovationTaskService;
     private final RenovationRecordService renovationRecordService;
-
 
 
     /**
@@ -46,7 +44,6 @@ public class CreateTaskController {
     public CreateTaskController(RenovationRecordService renovationRecordService, RenovationTaskService renovationTaskService) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
-
 
     }
 
@@ -65,7 +62,7 @@ public class CreateTaskController {
 
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("roomList", renovationRecord.getRooms());
-        model.addAttribute("updatePasswordDTO", new RenovationTaskDTO("","",null));
+        model.addAttribute("renovationTaskDTO", new RenovationTaskDTO("","",null));
         return "createTaskTemplate";
     }
 
@@ -76,7 +73,7 @@ public class CreateTaskController {
      */
 
     @PostMapping("renovations/view/create")
-    public String submitNewTask(@ModelAttribute("updatePasswordDTO") RenovationTaskDTO renovationTaskDTO,
+    public String submitNewTask(@ModelAttribute("renovationTaskDTO") RenovationTaskDTO renovationTaskDTO,
                                 @RequestParam(name = "roomList", required=false) List<String> roomList,
                                 @RequestParam(name = "renovationId") Long renovationId,
                                 Model model) {
@@ -89,9 +86,10 @@ public class CreateTaskController {
             }
 
             renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord, roomList);
+
             model.addAttribute("renovation", renovationRecord);
 
-            return "viewRenovation";
+            return "redirect:/renovations/view?id=" + renovationId;
 
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error", e);
@@ -99,7 +97,7 @@ public class CreateTaskController {
             List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
             model.addAttribute("errorMessages", errorsList);
 
-            model.addAttribute("updatePasswordDTO", renovationTaskDTO);
+            model.addAttribute("renovationTaskDTO", renovationTaskDTO);
             model.addAttribute("id", renovationId);
 
             model.addAttribute("renovation", renovationRecord);
