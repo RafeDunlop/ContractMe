@@ -53,12 +53,14 @@ function addRoom(inputId, roomTableId) {
         return;
     }
     let roomError = getRoomNameError(room)
-    if (roomError == null) {
+    const isError = roomError !== null
+    roomErrorLabel.hidden = ! isError
+    if (!isError) {
         input.value = "";
         roomList.push(room);
         renderRooms(roomList, roomTableId);
     } else {
-        //error text becomes room error
+        roomErrorLabel.textContent = roomError
     }
 }
 
@@ -74,6 +76,8 @@ function getRoomNameError(toAdd) {
     const validCharactersPattern = /^[\p{L}\d .,\-']*$/u;
     if (!validCharactersPattern.test(toAdd)) {
         error = "Renovation record room names must only contain letters, numbers, spaces, dots, hyphens or apostrophes";
+    } else if (roomList.indexOf(toAdd, 0) !== -1) {
+        error = "You already have a room with this name"
     }
     return error;
 }
