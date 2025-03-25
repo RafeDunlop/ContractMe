@@ -33,7 +33,8 @@ public class EditTaskController {
      * @return Thymeleaf editRenovationTemplate
      */
     @GetMapping("/editTask")
-    public String editTask() {
+    public String editTask(@RequestParam(name = "id") Long id, Model model) {
+
         return "editTaskTemplate";
     }
 }

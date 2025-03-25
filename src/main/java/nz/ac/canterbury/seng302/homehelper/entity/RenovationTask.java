@@ -58,4 +58,12 @@ public class RenovationTask {
     public String getName() {
         return name;
     }
+
+    public LocalDate getDueDate(){
+        return dueDate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 }
