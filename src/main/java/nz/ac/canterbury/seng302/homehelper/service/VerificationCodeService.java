@@ -67,7 +67,7 @@ public class VerificationCodeService {
     }
 
     /**
-     * Ensures both that all tasks are executed and that the executor thread is returned to the thread pool before this 
+     * Ensures both that all tasks are executed and that the executor thread is returned to the thread pool before this
      * service is destroyed by spring magic
      */
     @PreDestroy
@@ -110,7 +110,7 @@ public class VerificationCodeService {
      * @param locale The locale from which this code was issued
      * @return The issued code as a {@code String}
      */
-    public String issueSignupCode(GenerationStrategy generationStrategy, User user, Locale locale) {
+    public String issueVerificationCode(GenerationStrategy generationStrategy, User user, Locale locale) {
         SecureRandomCodeGenerator secureRandomCodeGenerator = generationStrategy.getGenerator(randomSeed);
         String code = generateUniqueCode(secureRandomCodeGenerator);
         verificationCodeRepository.save(new VerificationCode(
@@ -119,9 +119,12 @@ public class VerificationCodeService {
                 locale
         ));
         ScheduledFuture<?> scheduledDeletion = deletionExecutor.schedule(
-                () -> deleteSignupCodeAndAccount(code),
-                timeQuantity,
-                timeUnit
+                () -> {
+                    switch (generationStrategy) {
+                        case SIGNUP -> deleteSignupCodeAndAccount(code);
+                        case RESET_TOKEN -> deletePaswordResetToken(code);
+                    }
+                }, timeQuantity, timeUnit
         );
         deletionContractMap.put(code, scheduledDeletion);
         logger.info("issuing signup code: {}", code);
@@ -129,7 +132,7 @@ public class VerificationCodeService {
     }
 
     /**
-     * Attempts to consume the specified signup code. If it is valid, the associated user account will be activated and the 
+     * Attempts to consume the specified signup code. If it is valid, the associated user account will be activated and the
      * {@link VerificationCode} will be deleted. If it is not valid or not present (expired), throws an exception.
      * If the code exists but is invalid, it is also deleted.
      * @param signupCode The signup code to be consumed
@@ -147,6 +150,19 @@ public class VerificationCodeService {
                 return;
             } else {
                 verificationCodeRepository.delete(verificationCode);
+            }
+        }
+        throw new IllegalArgumentException("Signup code invalid");
+    }
+
+    public void consumeResetPasswordToken(String resetPasswordToken, String password, String confirmPassword) throws IllegalArgumentException {
+        Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(resetPasswordToken);
+        if (verificationCodeOptional.isPresent()) {
+            VerificationCode verificationCode = verificationCodeOptional.get();
+            User user = verificationCode.getUser();
+            if (verificationCodeValidation.isValid(verificationCode, resetPasswordToken, user)) {
+                verificationCodeRepository.delete(verificationCode);
+                return;
             }
         }
         throw new IllegalArgumentException("Signup code invalid");
@@ -170,6 +186,10 @@ public class VerificationCodeService {
             verificationCodeRepository.delete(verificationCode);
             userRepository.delete(user);
         }
+    }
+
+    public void deletePaswordResetToken(String code) {
+
     }
 
     private String generateUniqueCode(SecureRandomCodeGenerator secureRandomCodeGenerator) {

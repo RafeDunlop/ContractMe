@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -74,7 +73,7 @@ public class VerificationCodeServiceIntegrationTest {
      */
     @Test
     public void issueCodeAndConsume_allValid_userActivated() {
-        String code = toTest.issueSignupCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
+        String code = toTest.issueVerificationCode(GenerationStrategy.SIGNUP, user, Locale.ENGLISH);
         when(verificationCodeValidation.isValid(any(VerificationCode.class), any(String.class), any(User.class))).thenReturn(true);
         toTest.consumeSignupCode(code);
         assertTrue(userRepository.findByEmailIgnoreCase(email).get().isActivated());
@@ -82,7 +81,7 @@ public class VerificationCodeServiceIntegrationTest {
 
     @Test
     public void issueCodeAndConsume_waitToExpire_throwsAndUserDeleted() throws ExecutionException, InterruptedException {
-        String code = toTest.issueSignupCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
+        String code = toTest.issueVerificationCode(GenerationStrategy.SIGNUP, user, Locale.ENGLISH);
         toTest.getScheduledFutureDeletion(code).get();
         assertThrows(IllegalArgumentException.class, () -> toTest.consumeSignupCode(code));
         assertFalse(userRepository.findByEmailIgnoreCase(email).isPresent());

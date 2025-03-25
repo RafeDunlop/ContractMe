@@ -56,6 +56,23 @@ public class EmailService {
         context.setVariable("code", code);
         String subject = "Registration Confirmation";
         final String htmlContent = htmlTemplateEngine.process("html/email-register", context);
+        sendEmail(recipientEmail, subject, htmlContent, "Verification email send failed");
+    }
+
+    @Async
+    public void sendPasswordResetEmail(String recipientEmail,
+                                       String recipientName,
+                                       String token,
+                                       Locale locale) {
+        final Context context = new Context(locale);
+        context.setVariable("name", recipientName);
+        context.setVariable("token", token);
+        String subject = "Password reset link";
+        final String htmlContent = htmlTemplateEngine.process("html/email-forgot-password", context);
+        sendEmail(recipientEmail, subject, htmlContent, "Password reset link send failed");
+    }
+
+    private void sendEmail(String recipientEmail, String subject, String htmlContent, String errorMessage) {
         final MimeMessage mimeMessage = mailSender.createMimeMessage();
         try {
             final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -64,8 +81,7 @@ public class EmailService {
             message.setText(htmlContent, true);
             mailSender.send(mimeMessage);
         } catch (MessagingException exception) {
-            log.error("Verification email send failed", exception);
+            log.error(errorMessage, exception);
         }
-
     }
 }
