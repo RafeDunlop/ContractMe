@@ -49,7 +49,7 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
      */
     private void confirmRegistration(OnRegistrationCompleteEvent event) {
         User user = event.getUser();
-        String code = verificationCodeService.issueVerificationCode(
+        String code = verificationCodeService.issueSignupCode(
                 GenerationStrategy.READABLE,
                 user,
                 event.getLocale());
