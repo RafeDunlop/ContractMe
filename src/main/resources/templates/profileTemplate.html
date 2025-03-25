@@ -31,10 +31,24 @@
 								<th class="p-2">Account created</th>
 								<td class="p-2" th:text="${dateAdded}">date</td>
 							</tr>
+
 						</tbody>
 					</table>
 				</div>
 			</div>
+			<div th:if="${successMessage}" class="alert alert-success" id="successMessage" style="margin-top: 20px;">
+				<p th:text="${successMessage}"></p>
+			</div>
+			<script th:inline="javascript">
+				// If there's a success message, set a timer to hide it after 5 seconds
+				var successMessage = document.getElementById('successMessage');
+
+				if (successMessage) {
+					setTimeout(function() {
+						successMessage.style.display = 'none';
+					}, 3000);
+				}
+			</script>
 		</div>
 	</body>
 </html>

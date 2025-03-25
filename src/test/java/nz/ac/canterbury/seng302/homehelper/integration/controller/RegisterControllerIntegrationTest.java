@@ -3,7 +3,11 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 import jakarta.annotation.PostConstruct;
 import nz.ac.canterbury.seng302.homehelper.controller.RegisterController;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
+import nz.ac.canterbury.seng302.homehelper.service.EmailService;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +23,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -42,6 +47,10 @@ public class RegisterControllerIntegrationTest {
      */
     @MockBean
     private UserRepository userRepository;
+    @MockBean
+    private VerificationCodeRepository verificationCodeRepository;
+    @MockBean
+    private EmailService emailService;
 
     /**
      * Initializes the {@link MockMvc} instance with a new setup of the {@link RegisterController}.
@@ -55,7 +64,7 @@ public class RegisterControllerIntegrationTest {
      * Tests the registration of a valid user.
      * This test simulates a user submitting a valid registration form and expects:
      * A redirection (3xx status) upon successful registration.
-     * A redirection to the user profile page.
+     * A redirection to .sendVerificationEmail(Mockito.anyString(), Mockito.anyString()),the user profile page.
      * @throws Exception if the request processing fails.
      */
     @Test
@@ -64,6 +73,7 @@ public class RegisterControllerIntegrationTest {
         User expectedUser = Mockito.spy(new User("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
         expectedUser.grantAuthority("ROLE_USER");
         Mockito.when(expectedUser.getId()).thenReturn(1L);
+        Mockito.when(verificationCodeRepository.save(Mockito.any(VerificationCode.class))).thenAnswer((InvocationOnMock) -> null);
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(expectedUser);
         Mockito.when(userRepository.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(expectedUser));;
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
@@ -75,11 +85,12 @@ public class RegisterControllerIntegrationTest {
             .param("confirmPassword", "Test123!")
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-            .andExpect(view().name("redirect:/user"));
+            .andExpect(view().name("redirect:/confirm-registration"));
+        Mockito.verify(emailService, Mockito.times(1)).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 
     /**
-     * Tests the registration of an invalid user.
+     * Tests the registration of an invalid user.sendVerificationEmail(Mockito.anyString(), Mockito.anyString()),
      * This test simulates a user submitting an invalid registration form and expects:
      * A return to the page (200 status) with an error message.
      * First name, Last name and Email should be remembered
@@ -102,6 +113,7 @@ public class RegisterControllerIntegrationTest {
                 .andExpect(model().attribute("firstName", "Jane"))
                 .andExpect(model().attribute("lastName", "Doe"))
                 .andExpect(model().attribute("email", "jane@doe.nz"));
+        Mockito.verify(emailService, Mockito.never()).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 
 }
