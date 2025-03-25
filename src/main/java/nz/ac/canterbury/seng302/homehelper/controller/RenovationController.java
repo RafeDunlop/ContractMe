@@ -237,9 +237,13 @@ public class RenovationController {
 
         Pageable pageable = PageRequest.of(pageNumber, 3);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
+
+        logger.info("Current Page Number: " + pageNumber);
+        logger.info("Tasks: " + paginatedTasks.getContent());
+
         model.addAttribute("tasks", paginatedTasks.getContent());
         model.addAttribute("pageNumber", pageNumber);
-        model.addAttribute("numberOfPages", paginatedTasks.getTotalPages());
+        model.addAttribute("totalPages", paginatedTasks.getTotalPages());
         model.addAttribute("renovation", record);
 
         return "viewRenovation";

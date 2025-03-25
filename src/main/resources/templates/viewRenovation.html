@@ -8,7 +8,7 @@
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
 <div class="container mt-5">
-
+    <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
     <div class="card p-4 shadow-sm">
         <h4 th:text="'Viewing Renovation: ' + ${renovation.name}" class="card-title mb-4"></h4>
         <div th:if="${description} != ''" class="card p-3 bg-light mb-3">
@@ -51,16 +51,29 @@
         </table>
         </div>
         <div class="d-flex justify-content-center">
-            <ul class="pagination">
+            <ul class="pagination" id="pagination">
+                <!-- Previous button -->
                 <li class="page-item">
-                    <span th:text="${pageNumber}"></span>
+                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${(pageNumber != null ? pageNumber : 0) - 1})}">Prev</a>
+                </li>
+
+                <!-- Page buttons -->
+                <Li>
+
+                </Li>
+
+                <!-- Next button -->
+                <li class="page-item">
                     <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${pageNumber} + 1)}">Next</a>
+                </li>
+
+                <!-- Search field CHANGE FROM 2 ONCE TESTING IS DONE -->
+                <li class="page-item d-flex align-items-center" th:if="${totalPages > 1}">
+                    <input type="number" class="form-control me-2" id="pageSearch" aria-label="Page Search">
+                    <button class="btn btn-primary" onclick="validatePageSearch()">Search</button>
                 </li>
             </ul>
         </div>
-
-
-
     </div>
 
     <div class="mt-4">
@@ -69,7 +82,6 @@
         <a th:href="@{/renovations}" class="btn  btn-primary">Back To Renovations</a>
     </div>
 </div>
-
-
 </body>
+<script type="text/javascript" th:src="@{/js/pagination.js}"></script>
 </html>
