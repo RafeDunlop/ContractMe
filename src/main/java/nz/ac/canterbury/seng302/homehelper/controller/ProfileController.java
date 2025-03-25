@@ -63,6 +63,11 @@ public class ProfileController {
 		}
 	}
 
+	/**
+	 * Returns the profile picture image
+	 * @param filename profile picture file name
+	 * @return the profile picture file
+	 */
 	@GetMapping({"/profile_pictures/{filename}", "/profile_pictures/default/{filename}"})
 	@ResponseBody
 	public ResponseEntity<Resource> getProfilePicture(@PathVariable String filename) {

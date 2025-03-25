@@ -85,7 +85,6 @@ public class EditProfileServiceTest {
 
         BufferedImage dummyImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
 
-        // Mocking static methods for ImageIO directly here
         try (MockedStatic<ImageIO> mockedImageIO = mockStatic(ImageIO.class)) {
             mockedImageIO.when(() -> ImageIO.read(any(InputStream.class))).thenReturn(dummyImage);
 
@@ -94,7 +93,6 @@ public class EditProfileServiceTest {
                 mockedFiles.when(() -> Files.createDirectories(any(Path.class))).thenReturn(null);
                 mockedFiles.when(() -> Files.write(any(Path.class), any(byte[].class), any())).thenReturn(null);
 
-                // Perform your service logic
                 editProfileService.updateProfilePicture(mockUser, profilePicture);
             }
 

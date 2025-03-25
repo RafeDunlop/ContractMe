@@ -174,8 +174,16 @@ public class User {
         return createdTimestamp;
     }
 
+    /**
+     * Gets the profile picture file name of user
+     * @return profile picture file name
+     */
     public String getProfilePicture() { return profilePicture; }
 
+    /**
+     * Sets the profile picture file name of user
+     * @param profilePicture profile picture file name
+     */
     public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }
 
 

@@ -108,11 +108,11 @@ public class EditProfileService {
 
     /**
      * Updates the user Profile Picture
-     * The raw data of the profile picture is stored locally in the profile_picture directory
-     * path the path of the newly uploaded profile picture is stored under the users profilePicture in the repository
+     * The profile picture file is stored in the profile_picture directory
+     * The profile picture file name is stored in the users repository
      *
      * @param user The user that changing their profile picture
-     * @param profilePicture raw data of profile picture
+     * @param profilePicture profile picture file
      */
     public List<String> updateProfilePicture(User user, MultipartFile profilePicture) {
         List<String> errors = new ArrayList<>();

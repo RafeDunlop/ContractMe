@@ -124,8 +124,8 @@ public class UserValidation {
         }
 
         // Check file size
-        long maxSize = 10 * 1024 * 1024; // 10MB
-        if (profilePicture.getSize() > maxSize) {
+        long maxSizeBytes = 10 * 1024 * 1024; // 10MB
+        if (profilePicture.getSize() > maxSizeBytes) {
             errors.add("Image must be less than 10MB.");
         }
 
