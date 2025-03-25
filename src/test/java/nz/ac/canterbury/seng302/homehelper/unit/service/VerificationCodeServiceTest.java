@@ -79,14 +79,6 @@ public class VerificationCodeServiceTest {
     }
 
     @Test
-    public void consumeSignupCode_expiredCode_throwsException() {
-        Mockito.when(verificationCodeOne.isExpired()).thenReturn(true);
-        Mockito.when(verificationCodeRepository.findByCode(firstCode)).thenReturn(Optional.of(verificationCodeOne));
-        assertThrows(IllegalArgumentException.class, () -> toTest.consumeSignupCode(firstCode));
-        verify(verificationCodeRepository, times(1)).delete(verificationCodeOne);
-    }
-
-    @Test
     public void consumeSignupCode_notInRepository_throwsException() {
         assertThrows(IllegalArgumentException.class, () -> toTest.consumeSignupCode("notInRepository"));
     }

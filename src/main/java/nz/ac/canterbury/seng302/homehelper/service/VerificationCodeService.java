@@ -138,11 +138,6 @@ public class VerificationCodeService {
         VerificationCode verificationCode = verificationCodeOptional.get();
         User user = verificationCode.getUser();
 
-        if (verificationCode.isExpired()) {
-            verificationCodeRepository.delete(verificationCode);
-            throw new IllegalArgumentException("Signup code invalid");
-        }
-
         user.activate();
         userRepository.save(user);
         verificationCodeRepository.delete(verificationCode);

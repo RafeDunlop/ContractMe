@@ -61,9 +61,6 @@ public class VerificationCodeServiceIntegrationTest {
         toTest.setDelay(timeQuantity, timeUnit);
     }
 
-    /**
-     * todo: remove validation mock when implemented
-     */
     @Test
     public void issueCodeAndConsume_allValid_userActivated() {
         String code = toTest.issueSignupCode(GenerationStrategy.READABLE, user, Locale.ENGLISH);
