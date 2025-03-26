@@ -27,8 +27,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @SpringBootTest
@@ -137,7 +136,8 @@ public class RegisterControllerIntegrationTest {
                         .param("code", testCode)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.redirectedUrl("/login"));
+                .andExpect(MockMvcResultMatchers.redirectedUrl("/login"))
+                .andExpect(flash().attribute("loginMessage", "Your account has been activated, please log in"));;
 
 
         verify(mockUser, times(1)).activate();
