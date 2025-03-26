@@ -2,11 +2,11 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import java.util.Locale;
 
+import nz.ac.canterbury.seng302.homehelper.HomeHelperApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -67,9 +67,16 @@ public class EmailService {
         final Context context = new Context(locale);
         context.setVariable("name", recipientName);
         context.setVariable("token", token);
+        context.setVariable("domain", HomeHelperApplication.APPLICATION_CONTEXT);
         String subject = "Password reset link";
         final String htmlContent = htmlTemplateEngine.process("html/email-forgot-password", context);
         sendEmail(recipientEmail, subject, htmlContent, "Password reset link send failed");
+    }
+
+    @Async
+    public void createEmail(String recipientEmail, String subject, String pathToEmailHtml, Context context, String onFailureMessage) {
+        final String htmlContent = htmlTemplateEngine.process(pathToEmailHtml, context);
+        sendEmail(recipientEmail, subject, htmlContent, onFailureMessage);
     }
 
     private void sendEmail(String recipientEmail, String subject, String htmlContent, String errorMessage) {

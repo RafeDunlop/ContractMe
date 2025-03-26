@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.event.OnResetPasswordSubmittedEvent;
 import nz.ac.canterbury.seng302.homehelper.service.ForgotPasswordService;
 import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
 import org.slf4j.Logger;
@@ -41,7 +42,6 @@ public class ForgotPasswordController {
     public String submitEmail(@RequestParam("email") String email, Model model, HttpServletRequest request) {
         logger.info("POST /forgot-password");
         String errorMessage = forgotPasswordService.validateEmail(email, request.getLocale());
-        System.out.println(errorMessage);
         if (errorMessage.isEmpty()) {
             model.addAttribute("emailMessage", "An email was sent to the address if it was recognised");
 
@@ -56,7 +56,7 @@ public class ForgotPasswordController {
         Optional<User> expectedUser = verificationCodeService.getUserByToken(token);
         if (expectedUser.isPresent()) {
             model.addAttribute("token", token);
-            return "forgotPasswordTemplate";
+            return "resetPasswordTemplate";
         }
         redirectAttributes.addAttribute("error", "Reset password link has expired");
         return "redirect:/login";
@@ -64,15 +64,22 @@ public class ForgotPasswordController {
 
     @PostMapping("/password/reset/{token}")
     public String submitEmail(@PathVariable String token, @RequestParam("newPassword") String newPassword,
-                              @RequestParam("newPassword") String retypePassword, RedirectAttributes redirectAttributes, Model model) {
+                              @RequestParam("newPassword") String retypePassword,
+                              RedirectAttributes redirectAttributes,
+                              Model model,
+                              HttpServletRequest request) {
         Optional<User> expectedUser = verificationCodeService.getUserByToken(token);
         if (expectedUser.isPresent()) {
+            User user = expectedUser.get();
             List<String> errors = forgotPasswordService.validatePasswords(newPassword, retypePassword);
             if (!errors.isEmpty()) {
                 model.addAttribute("errorMessages", errors);
                 model.addAttribute("token", token);
-                return "forgotPasswordTemplate";
+                return "resetPasswordTemplate";
             }
+            request.getContextPath();
+            forgotPasswordService.sendNewPasswordEmail(user.getEmail(), user.getFirstName(), request.getLocale());
+            forgotPasswordService.updatePassword(user, newPassword);
             return "redirect:/login";
         }
         redirectAttributes.addAttribute("error", "Reset password link has expired");
