@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -9,8 +10,7 @@ public class RenovationTaskDTO {
     private String name;
     String description;
     LocalDate dueDate;
-
-    List<String> roomList;
+    ArrayList<String> rooms;
 
 
     public String getDescription() {
@@ -26,6 +26,9 @@ public class RenovationTaskDTO {
         this.name = name;
     }
 
+    public ArrayList<String> getRooms() {
+        return rooms;
+    }
 
     public void setDescription(String description) {
         this.description = description;
@@ -39,9 +42,10 @@ public class RenovationTaskDTO {
         this.dueDate = dueDate;
     }
 
-    public RenovationTaskDTO(String name, String description, LocalDate dueDate) {
+    public RenovationTaskDTO(String name, String description, LocalDate dueDate,ArrayList<String> rooms) {
         this.name = name;
         this.description = description;
         this.dueDate = dueDate;
+        this.rooms = rooms;
     }
 }

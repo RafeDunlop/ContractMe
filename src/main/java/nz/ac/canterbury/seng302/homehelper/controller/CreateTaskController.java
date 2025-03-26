@@ -63,7 +63,7 @@ public class CreateTaskController {
 
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("roomList", renovationRecord.getRooms());
-        model.addAttribute("renovationTaskDTO", new RenovationTaskDTO("","",null));
+        model.addAttribute("renovationTaskDTO", new RenovationTaskDTO("","",null, new ArrayList<>()));
         return "createTaskTemplate";
     }
 
@@ -86,7 +86,7 @@ public class CreateTaskController {
                 roomList = new ArrayList<>();
             }
 
-            renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord, roomList);
+            renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
 
             model.addAttribute("renovation", renovationRecord);
 

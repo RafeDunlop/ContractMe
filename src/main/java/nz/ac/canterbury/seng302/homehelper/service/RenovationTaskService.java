@@ -40,7 +40,7 @@ public class RenovationTaskService {
     /**
      * Adds a new renovation task to the repository
      */
-    public void addRenovationTask(RenovationTaskDTO renovationTaskDTO, RenovationRecord renovationRecord, List<String> roomList) {
+    public void addRenovationTask(RenovationTaskDTO renovationTaskDTO, RenovationRecord renovationRecord) {
         List<String> errors = new ArrayList<>();
         errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
 
@@ -51,6 +51,7 @@ public class RenovationTaskService {
         String name = renovationTaskDTO.getName();
         String description = renovationTaskDTO.getDescription();
         LocalDate dueDate = renovationTaskDTO.getDueDate();
+        ArrayList<String> roomList = renovationTaskDTO.getRooms();
         RenovationTask renovationTask = new RenovationTask(name, description, roomList, dueDate, renovationRecord);
 
         renovationTaskRepository.save(renovationTask);

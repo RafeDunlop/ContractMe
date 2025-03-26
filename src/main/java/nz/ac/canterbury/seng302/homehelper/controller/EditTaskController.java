@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -54,7 +55,7 @@ public class EditTaskController {
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("task",renovationTask);
         model.addAttribute("roomList", renovationRecord.getRooms());
-        model.addAttribute("renovationTaskDTO", new RenovationTaskDTO("","",null));
+        model.addAttribute("renovationTaskDTO", new RenovationTaskDTO("","",null,new ArrayList<>()));
         return "editTaskTemplate";
     }
 }

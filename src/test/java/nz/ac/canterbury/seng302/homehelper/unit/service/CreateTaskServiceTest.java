@@ -30,11 +30,11 @@ public class CreateTaskServiceTest {
     @Test
     public void addTask_allDetailsValid_callsSaveTask() {
         RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task 1", "New Task", null);
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task 1", "New Task", null,new ArrayList<>());
         RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
         List<String> roomList = new ArrayList<>();
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(new ArrayList<>());
-        renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord, roomList);
+        renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
         Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(Mockito.any());
 
     }
@@ -43,14 +43,14 @@ public class CreateTaskServiceTest {
     @Test
     public void addTask_detailsInvalid_returnsError() {
         RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("@#$%", "New Task", null);
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("@#$%", "New Task", null,new ArrayList<>());
         RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
         List<String> roomList = new ArrayList<>();
         List<String> errors = new ArrayList<>();
         errors.add("name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.");
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord, roomList);});
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);});
         assertEquals("name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.", exception.getMessage());
 
     }
