@@ -118,6 +118,7 @@ public class VerificationCodeService {
                 timeUnit
         );
         deletionContractMap.put(code, scheduledDeletion);
+        logger.info("issuing signup code: {}", code);
         return code;
     }
 

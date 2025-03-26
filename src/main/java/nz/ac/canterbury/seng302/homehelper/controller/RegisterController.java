@@ -9,9 +9,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mail.MailException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
@@ -54,7 +52,8 @@ public class RegisterController {
      * @ModelAttribute userRegisterDTO, contains all params needed for a user object
      */
     @GetMapping("/register")
-    public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO) {
+    public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO,
+                               Model model) {
         logger.info("GET /register");
         return "registrationTemplate";
     }
@@ -103,7 +102,7 @@ public class RegisterController {
      * @param code the verification code
      */
     @PostMapping("/confirm-registration")
-    public String verifyRegistration(@RequestParam String code, Model model, RedirectAttributes redirectAttributes) {
+    public String verifyRegistration(@RequestParam(name="code") String code, Model model, RedirectAttributes redirectAttributes) {
         logger.info("POST /confirm-registration code: {}", code);
         try {
             verificationCodeService.consumeSignupCode(code);

@@ -40,6 +40,9 @@ public class User {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdTimestamp;
 
+    @Column
+    private String profilePicture;
+
     @Column(name = "activated")
     private boolean activated;
 
@@ -61,6 +64,7 @@ public class User {
         this.email = email;
         this.password = password;
         this.createdTimestamp = LocalDateTime.now();
+        this.profilePicture = "default/default.jpg";
         this.activated = false;
     }
 
@@ -169,6 +173,19 @@ public class User {
     public LocalDateTime getCreatedTimestamp() {
         return createdTimestamp;
     }
+
+    /**
+     * Gets the profile picture file name of user
+     * @return profile picture file name
+     */
+    public String getProfilePicture() { return profilePicture; }
+
+    /**
+     * Sets the profile picture file name of user
+     * @param profilePicture profile picture file name
+     */
+    public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }
+
 
     /**
      * Set the user account active and grants role user.
