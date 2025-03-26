@@ -122,12 +122,12 @@ public class VerificationCodeService {
                 () -> {
                     switch (generationStrategy) {
                         case SIGNUP -> deleteSignupCodeAndAccount(code);
-                        case RESET_TOKEN -> deletePaswordResetToken(code);
+                        case RESET_TOKEN -> deletePasswordResetToken(code);
                     }
                 }, timeQuantity, timeUnit
         );
         deletionContractMap.put(code, scheduledDeletion);
-        logger.info("issuing signup code: {}", code);
+        logger.info("issuing {} code: {}", generationStrategy, code);
         return code;
     }
 
@@ -188,8 +188,14 @@ public class VerificationCodeService {
         }
     }
 
-    public void deletePaswordResetToken(String code) {
-
+    public void deletePasswordResetToken(String code) {
+        Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(code);
+        if (verificationCodeOptional.isPresent()) {
+            VerificationCode verificationCode = verificationCodeOptional.get();
+            User user = verificationCode.getUser();
+            verificationCodeRepository.delete(verificationCode);
+            logger.info("Deleting token {} for reset password for user {}", code, user);
+        }
     }
 
     private String generateUniqueCode(SecureRandomCodeGenerator secureRandomCodeGenerator) {

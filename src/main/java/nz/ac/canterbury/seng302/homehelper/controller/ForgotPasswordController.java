@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.service.ForgotPasswordService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +29,13 @@ public class ForgotPasswordController {
     }
 
     @PostMapping("/password/forgot")
-    public String submitEmail(@RequestParam("email") String email, Model model) {
+    public String submitEmail(@RequestParam("email") String email, Model model, HttpServletRequest request) {
         logger.info("POST /forgot-password");
-        String errorMessage = forgotPasswordService.validateEmail(email);
+        String errorMessage = forgotPasswordService.validateEmail(email, request.getLocale());
         System.out.println(errorMessage);
         if (errorMessage.isEmpty()) {
             model.addAttribute("emailMessage", "An email was sent to the address if it was recognised");
+
         } else {
             model.addAttribute("errorMessage", errorMessage);
         }

@@ -24,17 +24,17 @@ public class ResetPasswordListener implements ApplicationListener<OnResetPasswor
 
     @Override
     public void onApplicationEvent(OnResetPasswordSubmittedEvent event) {
-        this.confirmRegistration(event);
+        this.confirmPasswordResetLink(event);
     }
 
-    private void confirmRegistration(OnResetPasswordSubmittedEvent event) {
+    private void confirmPasswordResetLink(OnResetPasswordSubmittedEvent event) {
         User user = event.getUser();
         String code = verificationCodeService.issueVerificationCode(
-                GenerationStrategy.SIGNUP,
+                GenerationStrategy.RESET_TOKEN,
                 user,
                 event.getLocale());
         String recipient = user.getEmail();
         String name = user.getFirstName();
-        emailService.sendVerificationEmail(recipient, name, code, event.getLocale());
+        emailService.sendPasswordResetEmail(recipient, name, code, event.getLocale());
     }
 }
