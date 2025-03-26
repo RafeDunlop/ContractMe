@@ -3,9 +3,13 @@ package nz.ac.canterbury.seng302.homehelper.unit.validation;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static org.mockito.Mockito.when;
 
 public class UserValidationTest {
 
@@ -203,5 +207,49 @@ public class UserValidationTest {
     public void PasswordValidation_ValidPasswordThatMatch_RejectInputs() {
         UserValidation userValidation = new UserValidation();
         Assertions.assertTrue(userValidation.validatePasswordString("Test123!", "Test123!","registerPassword").isEmpty());
+    }
+
+    /**
+     * Test to see if image type error is displayed, when invalid profile picture file is submitted
+     * Expects: 'Image must be of type png, jpg or svg.'
+     */
+    @Test
+    public void ProfilePictureValidation_InvalidProfilePictureFileType_RejectInputs() {
+        UserValidation userValidation = new UserValidation();
+        MultipartFile profilePicture = Mockito.mock(MultipartFile.class);
+        when(profilePicture.getContentType()).thenReturn("application/pdf");
+        when(profilePicture.getSize()).thenReturn(10000000L);
+        List<String> expectedErrorList = List.of("Image must be of type png, jpg or svg.");
+
+        Assertions.assertEquals(expectedErrorList, userValidation.validateProfilePicture(profilePicture));
+    }
+
+    /**
+     * Test to see if image size error is displayed, when invalid profile picture file is submitted
+     * Expects: 'Image must be less than 10MB.'
+     */
+    @Test
+    public void ProfilePictureValidation_InvalidProfilePictureFileSize_RejectInputs() {
+        UserValidation userValidation = new UserValidation();
+        MultipartFile profilePicture = Mockito.mock(MultipartFile.class);
+        when(profilePicture.getContentType()).thenReturn("image/png");
+        when(profilePicture.getSize()).thenReturn((10 * 1024 * 1024) + 1L);
+        List<String> expectedErrorList = List.of("Image must be less than 10MB.");
+
+        Assertions.assertEquals(expectedErrorList, userValidation.validateProfilePicture(profilePicture));
+    }
+
+    /**
+     * Test success profile picture validation, when valid profile picture file is submitted
+     * Expects: empty List
+     */
+    @Test
+    public void ProfilePictureValidation_ValidProfilePicture_Success() {
+        UserValidation userValidation = new UserValidation();
+        MultipartFile profilePicture = Mockito.mock(MultipartFile.class);
+        when(profilePicture.getContentType()).thenReturn("image/svg+xml");
+        when(profilePicture.getSize()).thenReturn(0L);
+
+        Assertions.assertTrue(userValidation.validateProfilePicture(profilePicture).isEmpty());
     }
 }
