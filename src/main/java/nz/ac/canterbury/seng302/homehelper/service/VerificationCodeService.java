@@ -207,4 +207,14 @@ public class VerificationCodeService {
         } while (!unique);
         return code;
     }
+
+    public Optional<User> getUserByToken(String code) {
+        Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(code);
+        if (verificationCodeOptional.isPresent()) {
+            VerificationCode verificationCode = verificationCodeOptional.get();
+            User user = verificationCode.getUser();
+            return Optional.of(user);
+        }
+        return Optional.empty();
+    }
 }

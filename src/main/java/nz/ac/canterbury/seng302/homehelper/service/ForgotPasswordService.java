@@ -1,7 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.event.OnRegistrationCompleteEvent;
 import nz.ac.canterbury.seng302.homehelper.event.OnResetPasswordSubmittedEvent;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
@@ -9,8 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ForgotPasswordService {
@@ -30,5 +28,9 @@ public class ForgotPasswordService {
         Optional<User> expectedUser = userRepository.findByEmailIgnoreCase(email);
         expectedUser.ifPresent(user -> eventPublisher.publishEvent(new OnResetPasswordSubmittedEvent(user, locale)));
         return String.join("", userValidation.validateEmailString(email));
+    }
+
+    public List<String> validatePasswords(String newPassword, String confirmPassword) {
+        return new ArrayList<>(userValidation.validatePasswordString(newPassword, confirmPassword, "resetPassword"));
     }
 }
