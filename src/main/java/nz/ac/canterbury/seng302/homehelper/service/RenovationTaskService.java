@@ -33,7 +33,7 @@ public class RenovationTaskService {
         this.renovationValidation = renovationValidation;
     }
 
-    public RenovationTask getTaskdById(Long id) {
+    public RenovationTask getTaskById(Long id) {
         return renovationTaskRepository.findById(id).orElse(null);
     }
 
@@ -51,7 +51,7 @@ public class RenovationTaskService {
         String name = renovationTaskDTO.getName();
         String description = renovationTaskDTO.getDescription();
         LocalDate dueDate = renovationTaskDTO.getDueDate();
-        ArrayList<String> roomList = renovationTaskDTO.getRooms();
+        List<String> roomList = renovationTaskDTO.getRooms();
         RenovationTask renovationTask = new RenovationTask(name, description, roomList, dueDate, renovationRecord);
 
         renovationTaskRepository.save(renovationTask);

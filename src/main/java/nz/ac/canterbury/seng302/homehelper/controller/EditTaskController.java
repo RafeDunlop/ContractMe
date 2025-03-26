@@ -3,10 +3,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
-import nz.ac.canterbury.seng302.homehelper.service.LoginService;
-import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
-import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
+import nz.ac.canterbury.seng302.homehelper.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +27,13 @@ import java.util.NoSuchElementException;
 public class EditTaskController {
     Logger logger = LoggerFactory.getLogger(EditProfileController.class);
     private final RenovationTaskService renovationTaskService;
-
+    private final EditTaskService editTaskService;
     private final RenovationRecordService renovationRecordService;
 
-    public EditTaskController(RenovationTaskService renovationTaskService,RenovationRecordService renovationRecordService) {
+    public EditTaskController(RenovationTaskService renovationTaskService,RenovationRecordService renovationRecordService,EditTaskService editTaskService) {
         this.renovationTaskService = renovationTaskService;
         this.renovationRecordService = renovationRecordService;
+        this.editTaskService = editTaskService;
     }
 
     /**
@@ -49,13 +47,52 @@ public class EditTaskController {
     @GetMapping("/editTask")
     public String editTask(@RequestParam(name = "taskId") Long taskId, @RequestParam(name = "renoId") Long renoId,Model model) {
         logger.info("GET renovations/editTask");
-        RenovationTask renovationTask = renovationTaskService.getTaskdById(taskId);
+        RenovationTask renovationTask = renovationTaskService.getTaskById(taskId);
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renoId);
         if (renovationTask == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("task",renovationTask);
         model.addAttribute("roomList", renovationRecord.getRooms());
-        model.addAttribute("renovationTaskDTO", new RenovationTaskDTO("","",null,new ArrayList<>()));
+        logger.info("Due date of task: {}", renovationTask.getDueDate());
+        model.addAttribute("renovationTaskDTO", new RenovationTaskDTO(renovationTask.getName(),renovationTask.getDescription(),renovationTask.getDueDate(),renovationTask.getRoomList()));
         return "editTaskTemplate";
+    }
+
+
+    /**
+     * Submits the create task form
+     * @param model Representations of params for use in thymeleaf
+     * @return either view renovation or create task pages
+     */
+
+    @PostMapping("/editTask")
+    public String submitNewTask(@ModelAttribute("renovationTaskDTO") RenovationTaskDTO renovationTaskDTO,
+                                @RequestParam(name = "taskId") Long taskId,
+                                @RequestParam(name = "renovationId") Long renovationId,
+                                Model model) {
+        logger.info("POST renovations/view/create");
+        RenovationTask renovationTask = renovationTaskService.getTaskById(taskId);
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
+        try {
+
+            editTaskService.updateTask(renovationTaskDTO,renovationTask);
+
+            model.addAttribute("renovation", renovationRecord);
+
+            return "redirect:/renovations/view?id=" + renovationId;
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("Form submission error", e);
+
+            List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
+            model.addAttribute("errorMessages", errorsList);
+
+            model.addAttribute("renovationTaskDTO", renovationTaskDTO);
+            model.addAttribute("id", renovationId);
+            model.addAttribute("task",renovationTask);
+            model.addAttribute("renovation", renovationRecord);
+            model.addAttribute("roomList", renovationRecord.getRooms());
+            return "editTaskTemplate";
+        }
     }
 }

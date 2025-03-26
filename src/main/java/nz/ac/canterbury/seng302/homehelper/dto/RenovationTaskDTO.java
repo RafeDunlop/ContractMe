@@ -10,7 +10,7 @@ public class RenovationTaskDTO {
     private String name;
     String description;
     LocalDate dueDate;
-    ArrayList<String> rooms;
+    List<String> rooms;
 
 
     public String getDescription() {
@@ -26,23 +26,26 @@ public class RenovationTaskDTO {
         this.name = name;
     }
 
-    public ArrayList<String> getRooms() {
+    public List<String> getRooms() {
         return rooms;
     }
 
     public void setDescription(String description) {
+
         this.description = description;
     }
 
     public LocalDate getDueDate() {
+
         return dueDate;
     }
 
-    public void setDueDate(LocalDate dueDate) {
+   public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
-    }
+   }
 
-    public RenovationTaskDTO(String name, String description, LocalDate dueDate,ArrayList<String> rooms) {
+
+    public RenovationTaskDTO(String name, String description, LocalDate dueDate,List<String> rooms) {
         this.name = name;
         this.description = description;
         this.dueDate = dueDate;
