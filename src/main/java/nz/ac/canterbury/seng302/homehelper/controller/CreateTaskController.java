@@ -88,7 +88,7 @@ public class CreateTaskController {
             renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord, roomList);
             model.addAttribute("renovation", renovationRecord);
 
-            return "viewRenovation";
+            return "redirect:/renovations/view";
 
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error", e);
