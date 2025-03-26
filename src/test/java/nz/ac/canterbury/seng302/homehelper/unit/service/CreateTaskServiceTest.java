@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class CreateTaskServiceTest {
 
 
     @Test
-    public void addTask_detailsInvalid_returnsError() {
+    public void addTask_taskNameInvalid_returnsError() {
         RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("@#$%", "New Task", null,new ArrayList<>());
         RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
@@ -55,6 +56,54 @@ public class CreateTaskServiceTest {
 
     }
 
+    @Test
+    public void addTask_taskDescriptionEmpty_returnsError() {
+        RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", "", null);
+        RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
+        List<String> roomList = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+        errors.add("description cannot be empty.");
+        when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord, roomList);});
+        assertEquals("description cannot be empty.", exception.getMessage());
+
+    }
+
+    @Test
+    public void addTask_taskDescriptionOver512Characters_returnsError() {
+        RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", """
+                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa""", null);
+        RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
+        List<String> roomList = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+        errors.add("description must be 512 characters or less.");
+        when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord, roomList);});
+        assertEquals("description must be 512 characters or less.", exception.getMessage());
+
+    }
+
+    @Test
+    public void addTask_dueDateInPast_returnsError() {
+        RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", "New Task", LocalDate.now().minusDays(1));
+        RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
+        List<String> roomList = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+        errors.add("Due date must be in the future.");
+        when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord, roomList);});
+        assertEquals("Due date must be in the future.", exception.getMessage());
+
+    }
 
 
 }
