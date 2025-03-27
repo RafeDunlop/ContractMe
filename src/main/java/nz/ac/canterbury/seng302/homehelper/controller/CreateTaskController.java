@@ -102,10 +102,8 @@ public class CreateTaskController {
 
             model.addAttribute("renovation", renovationRecord);
             model.addAttribute("roomList", roomList);
-            //return "createTaskTemplate";
 
             return "createTaskTemplate";
-            //return "redirect:/renovations/view/create?id=" + renovationId;
         }
     }
 }
