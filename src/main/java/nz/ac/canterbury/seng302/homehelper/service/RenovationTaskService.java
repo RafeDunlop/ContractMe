@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -58,6 +59,10 @@ public class RenovationTaskService {
     public Page<RenovationTask> returnTaskPages(RenovationRecord renovationRecord, Pageable pageable ) {
         List<RenovationTask> taskSubList = new ArrayList<>();
         List<RenovationTask> tasks = renovationRecord.getRenovationTasks();
+
+        if (tasks == null || tasks.isEmpty()) {
+            return new PageImpl<>(taskSubList, pageable, 0); // Return an empty page
+        }
 
         int startIndex =(int) pageable.getOffset();
         if (startIndex < 0) {

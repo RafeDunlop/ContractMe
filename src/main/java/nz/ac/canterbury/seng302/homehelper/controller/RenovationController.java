@@ -235,7 +235,7 @@ public class RenovationController {
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
 
-        Pageable pageable = PageRequest.of(pageNumber, 3);
+        Pageable pageable = PageRequest.of(pageNumber, 1);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
 
         logger.info("Current Page Number: " + pageNumber);
@@ -245,6 +245,13 @@ public class RenovationController {
         model.addAttribute("pageNumber", pageNumber);
         model.addAttribute("totalPages", paginatedTasks.getTotalPages());
         model.addAttribute("renovation", record);
+
+        int paginationLinksStart = Math.max(pageNumber - 2, 0);
+        int paginationLinksEnd = Math.min(pageNumber + 2, paginatedTasks.getTotalPages() - 1);
+        logger.info("STARTTTTTT: " + paginationLinksStart);
+        logger.info("ENDDDDDDDDDDD:  " + paginationLinksEnd);
+        model.addAttribute("paginationLinksStart", paginationLinksStart);
+        model.addAttribute("paginationLinksEnd", paginationLinksEnd);
 
         return "viewRenovation";
     }

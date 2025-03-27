@@ -65,15 +65,19 @@
                     <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=0)}">&laquo;</a>
                 </li>
 
-                <!-- Page buttons -->
-                <Li>
-
-                </Li>
-
-                <!-- Last button (AC more than 10 pages) --> <!-- CHANGE IF TO 10 after testing  CHANGE LOGIC WITH HIDING-->
-                <li class="page-item" th:if="${totalPages > 1}">
-                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${(totalPages != null ? totalPages : 0) - 1})}">&raquo;</a>
+                <!-- Page buttons <= 10 Pages, AC3 -->
+                <li class="page-item" th:if="${totalPages <= 10}" th:each="pageLinkNumber : ${#numbers.sequence(0, (paginationLinksEnd != null ? paginationLinksEnd : 0))}"
+                    th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
+                    <a class="page-link" th:href="@{/renovations/view(id=${renovation.id}, page=${pageLinkNumber})}" th:text="${pageLinkNumber}"></a>
                 </li>
+
+                <!-- Page buttons <<=> 10 Pages, AC3 -->
+                <li class="page-item" th:if="${totalPages > 10}"
+                    th:each="pageLinkNumber : ${#numbers.sequence((paginationLinksStart != null ? paginationLinksStart : 0), (paginationLinksEnd != null ? paginationLinksEnd : 0))}"
+                    th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
+                    <a class="page-link" th:href="@{/renovations/view(id=${renovation.id}, page=${pageLinkNumber})}" th:text="${pageLinkNumber}"></a>
+                </li>
+
 
                 <!-- Next button -->
                 <li class="page-item" th:if="${pageNumber < (totalPages != null ? totalPages : 1) - 1}">
