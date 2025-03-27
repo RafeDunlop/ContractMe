@@ -68,7 +68,7 @@ public class CreateTaskControllerIntegrationTest {
                 .param("renovationId", "1")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-            .andExpect(view().name("redirect:/renovations/view"));
+            .andExpect(view().name("redirect:/renovations/view?id=1"));
         Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(Mockito.any(RenovationTask.class));
     }
 
@@ -90,7 +90,7 @@ public class CreateTaskControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(view().name("forward:/renovations/view/create"))
+                .andExpect(view().name("createTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
@@ -113,7 +113,7 @@ public class CreateTaskControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(view().name("forward:/renovations/view/create"))
+                .andExpect(view().name("createTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Task description cannot be empty.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
@@ -139,7 +139,7 @@ public class CreateTaskControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(view().name("forward:/renovations/view/create"))
+                .andExpect(view().name("createTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Task description must be 512 characters or less.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
@@ -162,7 +162,7 @@ public class CreateTaskControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(view().name("forward:/renovations/view/create"))
+                .andExpect(view().name("createTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Due date must be in the future.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }

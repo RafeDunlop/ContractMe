@@ -88,7 +88,8 @@ public class CreateTaskController {
             renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord, roomList);
             model.addAttribute("renovation", renovationRecord);
 
-            return "redirect:/renovations/view";
+
+            return "redirect:/renovations/view?id=" + renovationId;
 
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error", e);
@@ -101,7 +102,10 @@ public class CreateTaskController {
 
             model.addAttribute("renovation", renovationRecord);
             model.addAttribute("roomList", roomList);
-            return "forward:/renovations/view/create";
+            //return "createTaskTemplate";
+
+            return "createTaskTemplate";
+            //return "redirect:/renovations/view/create?id=" + renovationId;
         }
     }
 }
