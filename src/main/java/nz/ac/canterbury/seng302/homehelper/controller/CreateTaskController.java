@@ -101,7 +101,7 @@ public class CreateTaskController {
 
             model.addAttribute("renovation", renovationRecord);
             model.addAttribute("roomList", roomList);
-            return "createTaskTemplate";
+            return "forward:/renovations/view/create";
         }
     }
 }
