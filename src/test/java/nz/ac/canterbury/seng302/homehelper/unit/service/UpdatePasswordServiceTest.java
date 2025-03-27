@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.unit.service;
 import nz.ac.canterbury.seng302.homehelper.dto.UpdatePasswordDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.UpdatePasswordService;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
@@ -32,8 +33,9 @@ public class UpdatePasswordServiceTest {
         LoginService loginServiceMock = Mockito.mock(LoginService.class);
         UserValidation userValidation = new UserValidation();
         UserRepository userRepositoryMock = Mockito.mock(UserRepository.class);
+        EmailService emailServiceMock = Mockito.mock(EmailService.class);
 
-        updatePasswordService = new UpdatePasswordService(userValidation, loginServiceMock, userRepositoryMock);
+        updatePasswordService = new UpdatePasswordService(userValidation, loginServiceMock, userRepositoryMock, emailServiceMock);
         passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         String encodedPassword = passwordEncoder.encode("Test123!");
 
