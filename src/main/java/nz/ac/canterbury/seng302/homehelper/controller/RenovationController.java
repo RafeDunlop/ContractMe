@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,9 +100,9 @@ public class RenovationController {
      */
     @PostMapping("/create")
     public String submitRecord(@RequestParam(name="name") String name,
-            @RequestParam(name = "description", required=false, defaultValue = "") String description,
-            @RequestParam(name = "roomList", required = false) List <String> roomList,
-            Model model) {
+                               @RequestParam(name = "description", required=false, defaultValue = "") String description,
+                               @RequestParam(name = "roomList", required = false) List <String> roomList,
+                               Model model, RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/create");
         if (roomList == null) roomList = new ArrayList<>(); //cannot be a default value as technically non-constant
         if (!renovationRecordService.validateAllInputsCreate(name, description, roomList)) {
@@ -118,8 +120,9 @@ public class RenovationController {
             try {
                 RenovationRecord renovationRecord = new RenovationRecord(user, name, description, roomList);
                 renovationRecordService.addRenovationRecord(renovationRecord);
-                model.addAttribute("renovation", renovationRecord);
-                return "viewRenovation";
+                redirectAttributes.addFlashAttribute("renovation", renovationRecord);
+                return "redirect:/renovations/view?id=" + renovationRecord.getId();
+
             } catch (IllegalArgumentException e) {
                 logger.warn("Form submission error", e);
                 model.addAttribute("name", name);
@@ -235,21 +238,26 @@ public class RenovationController {
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
 
+        if (pageNumber < 0) return "redirect:/renovations/view?id=" + id + "&page=0";
+
+        int totalTasks = record.getRenovationTasks().size();
+        int tasksPerPage = 1;
+        if (pageNumber > ((totalTasks / tasksPerPage) - 1) && (totalTasks != 0)) return "redirect:/renovations/view?id=" + id + "&page=" + (totalTasks - 1);
+
         Pageable pageable = PageRequest.of(pageNumber, 1);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
 
-        logger.info("Current Page Number: " + pageNumber);
-        logger.info("Total Pages:  " + paginatedTasks.getTotalPages());
+        int totalPages = paginatedTasks.getTotalPages();
+        int paginationLinksStart;
+        int paginationLinksEnd;
+
+        paginationLinksStart = Math.max(pageNumber - 2, 0);
+        paginationLinksEnd = Math.min(pageNumber + 2, totalPages - 1);
 
         model.addAttribute("tasks", paginatedTasks.getContent());
         model.addAttribute("pageNumber", pageNumber);
-        model.addAttribute("totalPages", paginatedTasks.getTotalPages());
+        model.addAttribute("totalPages", totalPages);
         model.addAttribute("renovation", record);
-
-        int paginationLinksStart = Math.max(pageNumber - 2, 0);
-        int paginationLinksEnd = Math.min(pageNumber + 2, paginatedTasks.getTotalPages() - 1);
-        logger.info("STARTTTTTT: " + paginationLinksStart);
-        logger.info("ENDDDDDDDDDDD:  " + paginationLinksEnd);
         model.addAttribute("paginationLinksStart", paginationLinksStart);
         model.addAttribute("paginationLinksEnd", paginationLinksEnd);
 
