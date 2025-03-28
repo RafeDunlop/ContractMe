@@ -34,6 +34,7 @@ public class CreateTaskController {
     private final RenovationRecordService renovationRecordService;
 
 
+
     /**
      * Induces spring to automatically sets up the {@code RenovationRecordService}
      * @param renovationRecordService The service associated with renovation records
@@ -62,7 +63,7 @@ public class CreateTaskController {
 
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("roomList", renovationRecord.getRooms());
-        model.addAttribute("renovationTaskDTO", new RenovationTaskDTO("","",null));
+        model.addAttribute("renovationTaskDTO", new RenovationTaskDTO("","",null, new ArrayList<>()));
         return "createTaskTemplate";
     }
 
@@ -85,7 +86,7 @@ public class CreateTaskController {
                 roomList = new ArrayList<>();
             }
 
-            renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord, roomList);
+            renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
 
             model.addAttribute("renovation", renovationRecord);
 
@@ -101,7 +102,7 @@ public class CreateTaskController {
             model.addAttribute("id", renovationId);
 
             model.addAttribute("renovation", renovationRecord);
-            model.addAttribute("roomList", roomList);
+            model.addAttribute("roomList", renovationRecord.getRooms());
             return "createTaskTemplate";
         }
     }

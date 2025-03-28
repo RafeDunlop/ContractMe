@@ -50,10 +50,24 @@ export function injectRoomsIntoSubmission(form, event, roomList) {
  * @param maxLimit The maximum to display. Default is 512
  */
 export function updateCharCounter(textAreaId, counterId, maxLimit = 512) {
+    console.log("Hello");
     let textArea = document.getElementById(textAreaId);
+    console.log("Text Area ID");
+    console.log(textArea);
     let counter = document.getElementById(counterId);
+    console.log("Counter ID");
+    console.log(counterId);
     let length = textArea.value.length;
+    console.log("Length");
+    console.log(length);
+    console.log("Counter");
+    console.log(counter);
+    console.log("Text Content before update");
+    console.log(counter.textContent);
     counter.textContent = `${length}/${maxLimit}`;
+    console.log("Text Content after update");
+    console.log(counter.textContent);
+
 }
 
 /**

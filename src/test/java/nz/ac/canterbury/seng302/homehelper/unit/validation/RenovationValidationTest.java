@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 
 import java.time.LocalDateTime;
@@ -28,11 +29,9 @@ public class RenovationValidationTest {
      */
     @Test
     public void validateTaskDetails_allDetailsAreValid_returnEmptyList() {
-//        String name = "Tāsk Öné 2-3";
-//        String description = "A".repeat(512);
-//        LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
 
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Tāsk Öné 2-3", "A".repeat(512), LocalDate.now().plusDays(1));
+
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Tāsk Öné 2-3", "A".repeat(512), LocalDate.now().plusDays(1),new ArrayList<>());
 
         List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
         System.out.println(errors);
@@ -44,10 +43,8 @@ public class RenovationValidationTest {
      */
     @Test
     public void validateTaskDetails_nameOnlyHasSpaces_returnNameFormatError() {
-//        String name = "  ";
-//        String description = "Some description";
-//        LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("  ", "Some description", LocalDate.now().plusDays(1));
+
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("  ", "Some description", LocalDate.now().plusDays(1),new ArrayList<>());
 
         List<String> expectedErrors = List.of("Task name cannot be empty and must only include letters, numbers, " +
                 "spaces, dots, hyphens or apostrophes.");
@@ -60,10 +57,8 @@ public class RenovationValidationTest {
      */
     @Test
     public void validateTaskDetails_nameHasInvalidCharacters_returnNameFormatError() {
-//        String name = "Task One!";
-//        String description = "Some description";
-//        LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One!", "Some description", LocalDate.now().plusDays(1));
+
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One!", "Some description", LocalDate.now().plusDays(1),new ArrayList<>());
 
         List<String> expectedErrors = List.of("Task name cannot be empty and must only include letters, numbers, " +
                 "spaces, dots, hyphens or apostrophes.");
@@ -76,10 +71,8 @@ public class RenovationValidationTest {
      */
     @Test
     public void validateTaskDetails_descriptionOnlyHasSpaces_returnDescriptionEmptyList() {
-//        String name = "Task One";
-//        String description = "  ";
-//        LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "  ", LocalDate.now().plusDays(1));
+
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "  ", LocalDate.now().plusDays(1),new ArrayList<>());
 
         List<String> expectedErrors = List.of("Task description cannot be empty.");
         List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
@@ -91,10 +84,8 @@ public class RenovationValidationTest {
      */
     @Test
     public void validateTaskDetails_descriptionIsTooLong_returnDescriptionLengthError() {
-//        String name = "Task One";
-//        String description = "A".repeat(513);
-//        LocalDateTime futureDate = LocalDateTime.now().plusDays(1);
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "A".repeat(513), LocalDate.now().plusDays(1));
+
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "A".repeat(513), LocalDate.now().plusDays(1),new ArrayList<>());
 
         List<String> expectedErrors = List.of("Task description must be 512 characters or less.");
         List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
@@ -106,10 +97,8 @@ public class RenovationValidationTest {
      */
     @Test
     public void validateTaskDetails_dueDateInPast_returnInvalidDueDateError() {
-//        String name = "Task One";
-//        String description = "Some description";
-//        LocalDateTime futureDate = LocalDateTime.now().minusSeconds(1);
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "Some description", LocalDate.now().minusDays(1));
+
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "Some description", LocalDate.now().minusDays(1),new ArrayList<>());
 
         List<String> expectedErrors = List.of("Due date must be in the future.");
         List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
