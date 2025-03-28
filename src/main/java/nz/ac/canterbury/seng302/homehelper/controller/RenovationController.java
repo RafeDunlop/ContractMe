@@ -234,25 +234,25 @@ public class RenovationController {
      * @return redirect to viewRenovation page
      */
     @GetMapping("/view")
-    public String viewRenovation(@RequestParam(name = "id") Long id, @RequestParam(defaultValue = "0", name = "page") int pageNumber, Model model) {
+    public String viewRenovation(@RequestParam(name = "id") Long id, @RequestParam(defaultValue = "1", name = "page") int pageNumber, Model model) {
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
 
-        if (pageNumber < 0) return "redirect:/renovations/view?id=" + id + "&page=0";
+        if (pageNumber < 1) return "redirect:/renovations/view?id=" + id + "&page=1";
 
         int totalTasks = record.getRenovationTasks().size();
         int tasksPerPage = 1;
-        if (pageNumber > ((totalTasks / tasksPerPage) - 1) && (totalTasks != 0)) return "redirect:/renovations/view?id=" + id + "&page=" + (totalTasks - 1);
+        if (pageNumber > (totalTasks / tasksPerPage) && (totalTasks != 0)) return "redirect:/renovations/view?id=" + id + "&page=" + totalTasks;
 
-        Pageable pageable = PageRequest.of(pageNumber, 1);
+        Pageable pageable = PageRequest.of(pageNumber - 1, 1);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
 
         int totalPages = paginatedTasks.getTotalPages();
         int paginationLinksStart;
         int paginationLinksEnd;
 
-        paginationLinksStart = Math.max(pageNumber - 2, 0);
-        paginationLinksEnd = Math.min(pageNumber + 2, totalPages - 1);
+        paginationLinksStart = Math.max(pageNumber - 2, 1);
+        paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
 
         model.addAttribute("tasks", paginatedTasks.getContent());
         model.addAttribute("pageNumber", pageNumber);

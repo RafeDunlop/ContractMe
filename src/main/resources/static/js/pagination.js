@@ -14,7 +14,7 @@ const totalPages = parseInt(document.getElementById('data-total-pages').value, 1
 function validatePageSearch(recordId) {
     let desiredPage = parseInt(document.getElementById("pageSearch").value, 10);
 
-    if (!isNaN(desiredPage) && desiredPage >= 0 && desiredPage <= totalPages - 1) {
+    if (!isNaN(desiredPage) && desiredPage >= 1 && desiredPage <= totalPages) {
         const confirmText= "Are you sure you want to go to page " + desiredPage + "?";
         confirmPrompt(confirmText, "Confirm", "Cancel", false).then((confirm) => {
             if (confirm) {
