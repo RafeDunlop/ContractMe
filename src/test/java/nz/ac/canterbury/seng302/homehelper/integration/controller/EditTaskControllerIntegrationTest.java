@@ -34,6 +34,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @SpringBootTest
 @AutoConfigureMockMvc
 public class EditTaskControllerIntegrationTest {
+
     private MockMvc mockMvc;
 
     @Autowired
@@ -48,13 +49,14 @@ public class EditTaskControllerIntegrationTest {
     @MockBean
     private UserRepository userRepository;
 
+
     @BeforeEach
     public void setup_user() {
         mockMvc = MockMvcBuilders.standaloneSetup(editTaskController).build();
     }
 
     @Test
-    @WithMockUser(username = "jane@doe.com")
+    @WithMockUser(username = "jane@doe.com",roles = {"USER"})
     public void editTask_validTask_editTaskAndRedirect() throws Exception {
         // Mock user
         User user = new User("Jane", "Doe", "jane@doe.com", "Password");
@@ -62,9 +64,8 @@ public class EditTaskControllerIntegrationTest {
         Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
         // Mock renovation record & task
         RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        RenovationTask renovationTask = new RenovationTask("Task 1", "New Task", new ArrayList<>(), null, renovationRecord);
-
         Mockito.when(renovationRecordRepository.findById(1)).thenReturn(Optional.of(renovationRecord));
+        RenovationTask renovationTask = new RenovationTask("Task 1", "New Task", new ArrayList<>(), null, renovationRecord);
         Mockito.when(renovationTaskRepository.findById(1)).thenReturn(Optional.of(renovationTask));
 
         // Perform request

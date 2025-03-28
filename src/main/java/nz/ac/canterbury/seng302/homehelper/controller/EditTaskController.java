@@ -25,7 +25,7 @@ import java.util.NoSuchElementException;
  */
 @Controller
 public class EditTaskController {
-    Logger logger = LoggerFactory.getLogger(EditProfileController.class);
+    Logger logger = LoggerFactory.getLogger(EditTaskController.class);
     private final RenovationTaskService renovationTaskService;
     private final EditTaskService editTaskService;
     private final RenovationRecordService renovationRecordService;
@@ -72,6 +72,7 @@ public class EditTaskController {
                                 @RequestParam(name = "renovationId") Long renovationId,
                                 Model model) {
         logger.info("POST renovations/view/create");
+
         RenovationTask renovationTask = renovationTaskService.getTaskById(taskId);
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
 
