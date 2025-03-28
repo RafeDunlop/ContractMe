@@ -1,24 +1,15 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -74,7 +65,6 @@ public class RegisterService {
 
         // Create a user entity
         User user = new User(firstName, lastName, email, passwordEncoder.encode(password));
-        user.grantAuthority("ROLE_USER");
 
         // Save entity to the user repository
         return userRepository.save(user);

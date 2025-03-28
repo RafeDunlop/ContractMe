@@ -47,6 +47,6 @@ public enum GenerationStrategy {
                 secureRandom,
                 codeLength,
                 domain
-        );
+                );
     }
 }

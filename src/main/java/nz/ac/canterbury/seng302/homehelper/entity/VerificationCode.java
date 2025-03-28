@@ -2,9 +2,6 @@ package nz.ac.canterbury.seng302.homehelper.entity;
 
 import jakarta.persistence.*;
 
-import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 /**
@@ -15,10 +12,6 @@ import java.util.Locale;
  */
 @Entity
 public class VerificationCode {
-    /**
-     * Expiration time for verification codes in <em>minutes</em>.
-     */
-    private static final int EXPIRATION = 10;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
