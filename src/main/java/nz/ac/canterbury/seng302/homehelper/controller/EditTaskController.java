@@ -40,16 +40,16 @@ public class EditTaskController {
     /**
      * Gets the Renovation Task editing form
      * @param taskId The id of the Renovation Task to be edited
-     * @param renoId The id of the Renovation
+     * @param renovationId The id of the Renovation
      * @param model (map-like) representation of name, language and isJava boolean for use in thymeleaf,
      * with values being set to relevant parameters provided
      * @return Thymeleaf editRenovationTemplate
      */
     @GetMapping("/editTask")
-    public String editTask(@RequestParam(name = "taskId") Long taskId, @RequestParam(name = "renoId") Long renoId,Model model) {
+    public String editTask(@RequestParam(name = "taskId") Long taskId, @RequestParam(name = "renovationId") Long renovationId,Model model) {
         logger.info("GET renovations/editTask");
         RenovationTask renovationTask = renovationTaskService.getTaskById(taskId);
-        RenovationRecord renovationRecord = renovationRecordService.getRecordById(renoId);
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
         if (renovationTask == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("task",renovationTask);
@@ -67,7 +67,7 @@ public class EditTaskController {
      */
 
     @PostMapping("/editTask")
-    public String submitNewTask(@ModelAttribute("renovationTaskDTO") RenovationTaskDTO renovationTaskDTO,
+    public String editTask(@ModelAttribute("renovationTaskDTO") RenovationTaskDTO renovationTaskDTO,
                                 @RequestParam(name = "taskId") Long taskId,
                                 @RequestParam(name = "renovationId") Long renovationId,
                                 Model model) {

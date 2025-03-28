@@ -75,7 +75,8 @@ public class EditTaskControllerIntegrationTest {
                         .param("description", "Demolish all the stuff")
                         .param("roomList", "Room 1", "Room 2")
                         .param("taskId", "1")
-                        .param("renovationId", "1"))
+                        .param("renovationId", "1")
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(view().name("redirect:/renovations/view?id=1"));
 
