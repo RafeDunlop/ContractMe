@@ -162,10 +162,9 @@ public class RenovationControllerIntegrationTest {
                         .param("description", "A".repeat(512))
                         .param("roomList", "Room 1", "Room 2")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("viewRenovation"))
-                .andExpect(model().attributeExists("renovation"))
-                .andExpect(model().attribute("renovation",
+                .andExpect(status().is3xxRedirection())
+                .andExpect(view().name("redirect:/renovations/view?id=1"))
+                .andExpect(flash().attribute("renovation",
                         hasProperty("name", is("Rénövatiôn Onē"))));
 
         userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
