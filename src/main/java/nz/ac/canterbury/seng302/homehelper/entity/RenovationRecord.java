@@ -60,6 +60,14 @@ public class RenovationRecord {
     }
 
     /**
+     * Sets task list, for testing
+     * @param renovationTasks the list of tasks on the renovation record
+     */
+    public void setRenovationTasks(List<RenovationTask> renovationTasks) {
+        this.renovationTasks = renovationTasks;
+    }
+
+    /**
      * Gets name of the renovation record
      * @return name of record
      */

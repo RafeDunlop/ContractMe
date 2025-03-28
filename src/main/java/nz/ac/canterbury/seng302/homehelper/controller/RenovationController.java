@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -119,6 +120,29 @@ public class RenovationController {
             User user = loginService.getUserByEmail();
             try {
                 RenovationRecord renovationRecord = new RenovationRecord(user, name, description, roomList);
+
+
+                // Create a list to hold the tasks
+                List<RenovationTask> tasks = new ArrayList<>();
+
+                // Create 60 tasks
+                for (int i = 1; i <= 60; i++) {
+                    String taskName = "Task " + i;
+                    String taskDescription = "Description for task " + i;
+                    List<String> taskRoomList = new ArrayList<>(roomList); // Use the roomList passed or modify it
+                    LocalDate taskDueDate = LocalDate.now().plusDays(i); // Due date incremented by days for uniqueness
+
+                    // Create a new RenovationTask
+                    RenovationTask task = new RenovationTask(taskName, taskDescription, taskRoomList, taskDueDate, renovationRecord);
+
+                    // Add the task to the list
+                    tasks.add(task);
+                }
+
+                // Set the tasks list in the RenovationRecord
+                renovationRecord.setRenovationTasks(tasks);
+
+
                 renovationRecordService.addRenovationRecord(renovationRecord);
                 redirectAttributes.addFlashAttribute("renovation", renovationRecord);
                 return "redirect:/renovations/view?id=" + renovationRecord.getId();
@@ -241,10 +265,10 @@ public class RenovationController {
         if (pageNumber < 1) return "redirect:/renovations/view?id=" + id + "&page=1";
 
         int totalTasks = record.getRenovationTasks().size();
-        int tasksPerPage = 1;
+        int tasksPerPage = 5;
         if (pageNumber > (totalTasks / tasksPerPage) && (totalTasks != 0)) return "redirect:/renovations/view?id=" + id + "&page=" + totalTasks;
 
-        Pageable pageable = PageRequest.of(pageNumber - 1, 1);
+        Pageable pageable = PageRequest.of(pageNumber - 1, tasksPerPage);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
 
         int totalPages = paginatedTasks.getTotalPages();
