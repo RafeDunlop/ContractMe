@@ -30,6 +30,7 @@ public class EditTaskController {
     private final EditTaskService editTaskService;
     private final RenovationRecordService renovationRecordService;
 
+    @Autowired
     public EditTaskController(RenovationTaskService renovationTaskService,RenovationRecordService renovationRecordService,EditTaskService editTaskService) {
         this.renovationTaskService = renovationTaskService;
         this.renovationRecordService = renovationRecordService;
@@ -73,6 +74,7 @@ public class EditTaskController {
         logger.info("POST renovations/view/create");
         RenovationTask renovationTask = renovationTaskService.getTaskById(taskId);
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
+
         try {
 
             editTaskService.updateTask(renovationTaskDTO,renovationTask);
