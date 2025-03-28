@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
@@ -258,15 +259,25 @@ public class RenovationController {
      * @return redirect to viewRenovation page
      */
     @GetMapping("/view")
-    public String viewRenovation(@RequestParam(name = "id") Long id, @RequestParam(defaultValue = "1", name = "page") int pageNumber, Model model) {
+    public String viewRenovation(@RequestParam(name = "id") Long id,
+                                 @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                 @RequestParam(defaultValue = "5", name = "tasksPerPage") int tasksPerPage,
+                                 HttpServletRequest request,
+                                 Model model) {
+
+        // Check if tasksPerPage is passed in the request, otherwise fallback to session value
+        HttpSession session = request.getSession();
+        if (session.getAttribute("tasksPerPage") != null) {
+            tasksPerPage = (int) session.getAttribute("tasksPerPage");
+        }
+
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
 
-        if (pageNumber < 1) return "redirect:/renovations/view?id=" + id + "&page=1";
+        if (pageNumber < 1) return "redirect:/renovations/view?id=" + id + "&page=1&tasksPerPage=" + tasksPerPage;
 
         int totalTasks = record.getRenovationTasks().size();
-        int tasksPerPage = 5;
-        if (pageNumber > (totalTasks / tasksPerPage) && (totalTasks != 0)) return "redirect:/renovations/view?id=" + id + "&page=" + totalTasks;
+        if (pageNumber > (totalTasks / tasksPerPage) && (totalTasks != 0)) return "redirect:/renovations/view?id=" + id + "&page=" + totalTasks + "&tasksPerPage=" + tasksPerPage;
 
         Pageable pageable = PageRequest.of(pageNumber - 1, tasksPerPage);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
@@ -284,6 +295,7 @@ public class RenovationController {
         model.addAttribute("renovation", record);
         model.addAttribute("paginationLinksStart", paginationLinksStart);
         model.addAttribute("paginationLinksEnd", paginationLinksEnd);
+        model.addAttribute("tasksPerPage", tasksPerPage);
 
         return "viewRenovation";
     }

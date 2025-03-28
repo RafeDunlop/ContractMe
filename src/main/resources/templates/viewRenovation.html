@@ -37,6 +37,7 @@
 <div class="container mt-5">
 
     <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
+    <input type="hidden" id="tasksPerPage" name="tasksPerPage" th:value="5"/>
     <div class="card p-4 shadow-sm">
         <h4 th:text="'Viewing Renovation: ' + ${renovation.name}" class="card-title mb-4"></h4>
 
@@ -57,9 +58,9 @@
 
         <div th:if="!${renovation.getRenovationTasks().isEmpty()}" class="mb-3">
             <h6 class="fw-bold">Tasks:</h6>
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3">
-                <div th:each="renovationTask : ${renovation.getRenovationTasks()}" class="col mb-4">
-                    <div class="card" style="width: 18rem;">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+            <div th:each="renovationTask : ${tasks}" class="col mb-4">
+                    <div class="card" style="width: 100%;">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <img th:src="@{/images/task-icon.png}" alt="Task Icon" class="task-icon">
@@ -79,35 +80,35 @@
             <ul class="pagination" id="pagination">
                 <!-- First button (AC more than 10 pages) --> <!-- CHANGE IF TO 10 after testing  CHANGE LOGIC WITH HIDING-->
                 <li class="page-item" th:if="${totalPages > 10}">
-                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=1)}">First</a>
+                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=1, tasksPerPage=${tasksPerPage})}">First</a>
                 </li>
 
                 <!-- Previous button -->
                 <li class="page-item" th:if="${pageNumber > 1}">
-                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${pageNumber - 1})}">Prev</a>
+                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${pageNumber - 1}, tasksPerPage=${tasksPerPage})}">Prev</a>
                 </li>
 
                 <!-- Page buttons <= 10 Pages, AC3 -->
                 <li class="page-item" th:if="${totalPages <= 10}" th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
                     th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
-                    <a class="page-link" th:href="@{/renovations/view(id=${renovation.id}, page=${pageLinkNumber})}" th:text="${pageLinkNumber}"></a>
+                    <a class="page-link" th:href="@{/renovations/view(id=${renovation.id}, page=${pageLinkNumber}, tasksPerPage=${tasksPerPage})}" th:text="${pageLinkNumber}"></a>
                 </li>
 
                 <!-- Page buttons > 10 Pages, AC3 -->
                 <li class="page-item" th:if="${totalPages > 10}"
                     th:each="pageLinkNumber : ${#numbers.sequence(paginationLinksStart, paginationLinksEnd)}"
                     th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
-                    <a class="page-link" th:href="@{/renovations/view(id=${renovation.id}, page=${pageLinkNumber})}" th:text="${pageLinkNumber}"></a>
+                    <a class="page-link" th:href="@{/renovations/view(id=${renovation.id}, page=${pageLinkNumber}, tasksPerPage=${tasksPerPage})}" th:text="${pageLinkNumber}"></a>
                 </li>
 
                 <!-- Next button -->
                 <li class="page-item" th:if="${pageNumber < totalPages}">
-                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${pageNumber} + 1)}">Next</a>
+                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${pageNumber + 1}, tasksPerPage=${tasksPerPage})}">Next</a>
                 </li>
 
                 <!-- Last button (AC more than 10 pages) --> <!-- CHANGE IF TO 10 after testing  CHANGE LOGIC WITH HIDING-->
                 <li class="page-item" th:if="${totalPages > 10}">
-                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${totalPages})}">Last</a>
+                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${totalPages}, tasksPerPage=${tasksPerPage})}">Last</a>
                 </li>
 
 
@@ -135,4 +136,84 @@
 </body>
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
+<script>
+
+    function updateLayout() {
+        let pageWidth = window.innerWidth;
+        let currentTasksPerPage = document.getElementById('tasksPerPage').getAttribute('value');
+        let pageHeight = window.innerHeight;
+
+        let tasksPerPage;
+
+        if (pageWidth < 576) {
+            tasksPerPage = 3; // Phones
+            if (pageHeight > 900) {
+                tasksPerPage = 7;
+            } else if (pageHeight > 600) {
+                tasksPerPage = 5;
+            }
+        } else if (pageWidth < 768) {
+            tasksPerPage = 4; // Tablets
+            if (pageHeight > 900) {
+                tasksPerPage = 12;
+            } else if (pageHeight > 750) {
+                tasksPerPage = 8;
+            }
+        } else if (pageWidth < 992) {
+            tasksPerPage = 3; // Small desktop
+            if (pageHeight > 1250) {
+                tasksPerPage = 12;
+            } else if (pageHeight > 1000) {
+                tasksPerPage = 9;
+            }
+            else if (pageHeight > 700) {
+                tasksPerPage = 6;
+            }
+        } else if (pageWidth < 1200) {
+            tasksPerPage = 4; // Small desktop
+            if (pageHeight > 1000) {
+                tasksPerPage = 12;
+            } else if (pageHeight > 900) {
+                tasksPerPage = 8;
+            } else if (pageHeight > 600) {
+                tasksPerPage = 4;
+            }
+        } else if (pageWidth < 1400) {
+            tasksPerPage = 5; // desktop
+            if (pageHeight > 1200) {
+                tasksPerPage = 15;
+            } else if (pageHeight > 900) {
+                tasksPerPage = 10;
+            } else if (pageHeight > 600) {
+                tasksPerPage = 5;
+            }
+        } else {
+            tasksPerPage = 5; // large desktop
+            if (pageHeight > 1275) {
+                tasksPerPage = 20;
+            } else if (pageHeight > 1000) {
+                tasksPerPage = 15;
+            } else if (pageHeight > 900) {
+                tasksPerPage = 10;
+            }
+        }
+
+        if (currentTasksPerPage !== String(tasksPerPage)) {
+            let url = new URL(window.location.href);
+
+            // Only update the URL if the tasksPerPage parameter is different
+            if (url.searchParams.get('tasksPerPage') !== String(tasksPerPage)) {
+                url.searchParams.set('tasksPerPage', tasksPerPage);
+                window.location.assign(url.toString()); // Redirect to the new URL with updated tasksPerPage
+            }
+        }
+    }
+
+    // Initial layout update
+    updateLayout();
+
+    // Listen for window resize and update the layout
+    window.addEventListener('resize', updateLayout);
+
+</script>
 </html>

@@ -83,4 +83,6 @@ public class RenovationTask {
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
+
+    public Long getTask_id() {return task_id;}
 }
