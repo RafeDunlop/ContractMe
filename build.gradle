@@ -86,8 +86,7 @@ tasks.register("cucumber", Test) {
 }
 
 jacocoTestReport { // Generate a report for all generated test data
-	onlyIf { // Allow the report to be skipped when -PskipTestReport is passed via
-		commandline
+	onlyIf { // Allow the report to be skipped when -PskipTestReport is passed via commandline
 		return !project.hasProperty('skipTestReport')
 	}
 	mustRunAfter test, integration, cucumber
@@ -104,8 +103,7 @@ jacocoTestReport { // Generate a report for all generated test data
 
 tasks.register("unitTestReport", JacocoReport) { // Generate a report for unit tests
 	group = 'verification'
-	onlyIf { // Allow the report to be skipped when -PskipTestReport is passed via
-		commandline
+	onlyIf { // Allow the report to be skipped when -PskipTestReport is passed via commandline
 		return !project.hasProperty('skipTestReport')
 	}
 	dependsOn test
@@ -119,8 +117,7 @@ tasks.register("unitTestReport", JacocoReport) { // Generate a report for unit t
 		xml.destination file("${buildDir}/reports/coverage/test.xml")
 	}
 }
-tasks.register("integrationTestReport", JacocoReport) { // Generate a report for
-	integration tests
+tasks.register("integrationTestReport", JacocoReport) { // Generate a report for integration tests
 	group = 'verification'
 	onlyIf { // Allow the report to be skipped when -PskipTestReport is passed via
 		commandline
@@ -138,8 +135,7 @@ tasks.register("integrationTestReport", JacocoReport) { // Generate a report for
 	}
 	
 }
-tasks.register("cucumberTestReport", JacocoReport) { // Generate a report for cucumber
-	tests
+tasks.register("cucumberTestReport", JacocoReport) { // Generate a report for cucumber tests
 	group = 'verification'
 	onlyIf { // Allow the report to be skipped when -PskipTestReport is passed via
 		commandline
