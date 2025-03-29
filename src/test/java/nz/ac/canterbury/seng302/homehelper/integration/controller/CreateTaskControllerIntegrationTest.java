@@ -7,9 +7,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
+import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -47,9 +50,14 @@ public class CreateTaskControllerIntegrationTest {
     @MockBean
     private RenovationTaskRepository renovationTaskRepository;
 
+    @MockBean
+    private RenovationRecordService renovationRecordService;
+
+
     @BeforeEach
     public void setup_user() {
        mockMvc = MockMvcBuilders.standaloneSetup(createTaskController).build();
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
@@ -80,7 +88,7 @@ public class CreateTaskControllerIntegrationTest {
         user.grantAuthority("ROLE_USER");
         Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
         RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        Mockito.when(renovationRecordRepository.findById(1)).thenReturn(Optional.of(renovationRecord));
+        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("name", "@#$%")
@@ -103,7 +111,7 @@ public class CreateTaskControllerIntegrationTest {
         user.grantAuthority("ROLE_USER");
         Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
         RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        Mockito.when(renovationRecordRepository.findById(1)).thenReturn(Optional.of(renovationRecord));
+        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "Task name")
@@ -125,7 +133,7 @@ public class CreateTaskControllerIntegrationTest {
         user.grantAuthority("ROLE_USER");
         Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
         RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        Mockito.when(renovationRecordRepository.findById(1)).thenReturn(Optional.of(renovationRecord));
+        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "Task name")
@@ -151,7 +159,7 @@ public class CreateTaskControllerIntegrationTest {
         user.grantAuthority("ROLE_USER");
         Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
         RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        Mockito.when(renovationRecordRepository.findById(1)).thenReturn(Optional.of(renovationRecord));
+        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "@#$%")
