@@ -6,7 +6,7 @@ Feature: As Sarah, I want to confirm my account by email when I register so that
     Given I submit a fully valid registration form with first name "Jane", last name "Doe", email "jane@doe.com" and password "Strongpassword123!"
     When I click the register button
     Then A confirmation email is sent to my email address "jane@doe.com"
-    And The email contains a message “if you didn’t register, ignore this email, and your account will be deleted in 10 minutes.”
+    And The email contains a message "if you didn’t register, ignore this email, and your account will be deleted in 10 minutes."
     And I'm presented with a page asking for the signup code.
 
 
@@ -22,7 +22,7 @@ Feature: As Sarah, I want to confirm my account by email when I register so that
     Given I received a signup code at the email "jane@doe.com"
     And The code has expired
     When I try to use the signup code
-    Then An error message "Signup code invalid” is displayed
+    Then An error message "Signup code invalid" is displayed
 
 
   @AC4
@@ -40,11 +40,11 @@ Feature: As Sarah, I want to confirm my account by email when I register so that
     And I navigate to the signup code page
     When I enter the signup code linked to my account
     Then The system validates the code successfully
-    And I am redirected to the login page thast tells me “Your account has been activated, please log in”.
+    And I am redirected to the login page thast tells me "Your account has been activated, please log in".
 
   @AC6
   Scenario: AC6 - Invalid signup code
     Given I am on the signup code page
     When I enter an invalid signup code
-    Then An error message “Signup code invalid” is displayed
+    Then An error message "Signup code invalid" is displayed
     And My registration is not confirmed

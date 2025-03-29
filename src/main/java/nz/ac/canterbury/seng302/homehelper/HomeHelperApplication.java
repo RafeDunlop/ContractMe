@@ -13,12 +13,12 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 public class HomeHelperApplication {
 
-	/**
-	 * Main entry point, runs the Spring application
-	 * @param args command line arguments
-	 */
-	public static void main(String[] args) {
-		SpringApplication.run(HomeHelperApplication.class, args);
-	}
+    /**
+     * Main entry point, runs the Spring application
+     * @param args command line arguments
+     */
+    public static void main(String[] args) {
+        SpringApplication.run(HomeHelperApplication.class, args);
+    }
 
 }
