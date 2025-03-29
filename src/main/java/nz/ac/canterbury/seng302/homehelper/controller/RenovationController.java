@@ -7,7 +7,6 @@ import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,28 +119,6 @@ public class RenovationController {
             User user = loginService.getUserByEmail();
             try {
                 RenovationRecord renovationRecord = new RenovationRecord(user, name, description, roomList);
-
-
-                // Create a list to hold the tasks
-                List<RenovationTask> tasks = new ArrayList<>();
-
-                // Create 60 tasks
-                for (int i = 1; i <= 60; i++) {
-                    String taskName = "Task " + i;
-                    String taskDescription = "Description for task " + i;
-                    List<String> taskRoomList = new ArrayList<>(roomList); // Use the roomList passed or modify it
-                    LocalDate taskDueDate = LocalDate.now().plusDays(i); // Due date incremented by days for uniqueness
-
-                    // Create a new RenovationTask
-                    RenovationTask task = new RenovationTask(taskName, taskDescription, taskRoomList, taskDueDate, renovationRecord);
-
-                    // Add the task to the list
-                    tasks.add(task);
-                }
-
-                // Set the tasks list in the RenovationRecord
-                renovationRecord.setRenovationTasks(tasks);
-
 
                 renovationRecordService.addRenovationRecord(renovationRecord);
                 redirectAttributes.addFlashAttribute("renovation", renovationRecord);
@@ -265,6 +241,10 @@ public class RenovationController {
                                  HttpServletRequest request,
                                  Model model) {
 
+        if (tasksPerPage < 1) {
+            tasksPerPage = 5;
+        }
+
         // Check if tasksPerPage is passed in the request, otherwise fallback to session value
         HttpSession session = request.getSession();
         if (session.getAttribute("tasksPerPage") != null) {
@@ -277,12 +257,13 @@ public class RenovationController {
         if (pageNumber < 1) return "redirect:/renovations/view?id=" + id + "&page=1&tasksPerPage=" + tasksPerPage;
 
         int totalTasks = record.getRenovationTasks().size();
-        if (pageNumber > (totalTasks / tasksPerPage) && (totalTasks != 0)) return "redirect:/renovations/view?id=" + id + "&page=" + totalTasks + "&tasksPerPage=" + tasksPerPage;
+        int totalPages = (totalTasks + tasksPerPage - 1) / tasksPerPage;
+
+        if (pageNumber > (totalTasks / tasksPerPage) && (totalTasks != 0)) return "redirect:/renovations/view?id=" + id + "&page=" + totalPages + "&tasksPerPage=" + tasksPerPage;
 
         Pageable pageable = PageRequest.of(pageNumber - 1, tasksPerPage);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
 
-        int totalPages = paginatedTasks.getTotalPages();
         int paginationLinksStart;
         int paginationLinksEnd;
 

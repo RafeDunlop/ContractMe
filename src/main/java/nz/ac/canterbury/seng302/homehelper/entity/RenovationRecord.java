@@ -42,7 +42,7 @@ public class RenovationRecord {
     private List<RenovationTask> renovationTasks = new ArrayList<>();
 
 
-    protected RenovationRecord() {}
+    public RenovationRecord() {}
 
     /**
      * Constructor for RenovationRecord
