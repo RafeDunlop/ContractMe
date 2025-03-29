@@ -2,11 +2,13 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
 import jakarta.annotation.PostConstruct;
 import java.util.List;
+import java.util.Locale;
 
 import nz.ac.canterbury.seng302.homehelper.controller.UpdatePasswordController;
 import nz.ac.canterbury.seng302.homehelper.dto.UpdatePasswordDTO;
 
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.junit.jupiter.api.Test;
 
@@ -23,11 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -49,6 +47,8 @@ public class UpdatePasswordControllerIntegrationTest {
 
     @MockBean
     private LoginService loginService;
+    @MockBean
+    private EmailService emailService;
 
     /**
      * Initializes the {@link MockMvc} instance with a new setup of the
@@ -84,7 +84,7 @@ public class UpdatePasswordControllerIntegrationTest {
                 .andExpect(header().exists("Location"))
                 .andExpect(header().string("Location", "/user"))
                 .andExpect(flash().attribute("successMessage", "Password updated successfully."));
-
+        Mockito.verify(emailService, Mockito.times(1)).sendUpdatePasswordConfirmation(Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
     /**
      * Tests the updating password of a valid user.
@@ -113,6 +113,7 @@ public class UpdatePasswordControllerIntegrationTest {
                         .param("retypePassword", updatePasswordDTO.getRetypePassword()))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("errorMessages", expectedErrors));
+        Mockito.verify(emailService, Mockito.never()).sendUpdatePasswordConfirmation(Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 
 }

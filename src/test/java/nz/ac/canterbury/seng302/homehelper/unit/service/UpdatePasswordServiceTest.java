@@ -3,10 +3,10 @@ package nz.ac.canterbury.seng302.homehelper.unit.service;
 import nz.ac.canterbury.seng302.homehelper.dto.UpdatePasswordDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.UpdatePasswordService;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 public class UpdatePasswordServiceTest {
     private static UpdatePasswordService updatePasswordService;
+    private static UserRepository userRepositoryMock;
     private static UpdatePasswordDTO updatePasswordDTO;
     private static PasswordEncoder passwordEncoder;
     private static User testUser;
@@ -27,13 +28,14 @@ public class UpdatePasswordServiceTest {
      * Creates a testUser and populates with valid details
      * Mocks getUserByEmail to return the testUser
      */
-    @BeforeAll
-    static void Setup() {
+    @BeforeEach
+    void Setup() {
         LoginService loginServiceMock = Mockito.mock(LoginService.class);
         UserValidation userValidation = new UserValidation();
-        UserRepository userRepositoryMock = Mockito.mock(UserRepository.class);
+        userRepositoryMock = Mockito.mock(UserRepository.class);
+        EmailService emailServiceMock = Mockito.mock(EmailService.class);
 
-        updatePasswordService = new UpdatePasswordService(userValidation, loginServiceMock, userRepositoryMock);
+        updatePasswordService = new UpdatePasswordService(userValidation, loginServiceMock, userRepositoryMock, emailServiceMock);
         passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         String encodedPassword = passwordEncoder.encode("Test123!");
 
@@ -72,6 +74,8 @@ public class UpdatePasswordServiceTest {
     @Test
     void test_update_password_blue_sky() {
         updatePasswordService.updatePassword(updatePasswordDTO);
+        assertTrue(passwordEncoder.matches("Test1234!", testUser.getPassword()));
+        Mockito.verify(userRepositoryMock, Mockito.times(1)).save(testUser);
     }
 
     /**
@@ -86,6 +90,7 @@ public class UpdatePasswordServiceTest {
         });
 
         assertTrue(exception.getMessage().contains("Old Password does not match."));
+        Mockito.verify(userRepositoryMock, Mockito.never()).save(testUser);
     }
 
     /**
@@ -101,6 +106,7 @@ public class UpdatePasswordServiceTest {
         });
 
         assertTrue(exception.getMessage().contains("New Passwords do not match."));
+        Mockito.verify(userRepositoryMock, Mockito.never()).save(testUser);
     }
 
     /**
@@ -116,6 +122,7 @@ public class UpdatePasswordServiceTest {
         });
 
         assertTrue(exception.getMessage().contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."));
+        Mockito.verify(userRepositoryMock, Mockito.never()).save(testUser);
     }
 
     /**
@@ -129,7 +136,7 @@ public class UpdatePasswordServiceTest {
         assertThrows(NullPointerException.class, () -> {
             updatePasswordService.updatePassword(updatePasswordDTO);
         });
-
+        Mockito.verify(userRepositoryMock, Mockito.never()).save(testUser);
     }
 
     /**
@@ -144,8 +151,8 @@ public class UpdatePasswordServiceTest {
             updatePasswordService.updatePassword(updatePasswordDTO);
         });
 
-        // Maybe remove if only allowed one assert
         assertTrue(exception.getMessage().contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."));
+        Mockito.verify(userRepositoryMock, Mockito.never()).save(testUser);
     }
 
     /**
@@ -157,5 +164,6 @@ public class UpdatePasswordServiceTest {
         updatePasswordDTO.setRetypePassword("Test1!@#$%^&*()=+;:.,");
 
         updatePasswordService.updatePassword(updatePasswordDTO);
+        Mockito.verify(userRepositoryMock, Mockito.times(1)).save(testUser);
     }
 }
