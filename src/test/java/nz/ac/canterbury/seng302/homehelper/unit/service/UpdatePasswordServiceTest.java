@@ -151,7 +151,6 @@ public class UpdatePasswordServiceTest {
             updatePasswordService.updatePassword(updatePasswordDTO);
         });
 
-        // Maybe remove if only allowed one assert
         assertTrue(exception.getMessage().contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."));
         Mockito.verify(userRepositoryMock, Mockito.never()).save(testUser);
     }
