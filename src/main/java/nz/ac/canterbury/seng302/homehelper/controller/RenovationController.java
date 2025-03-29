@@ -218,7 +218,7 @@ public class RenovationController {
             renovationRecord.setName(name); // don't set the name until the changes are valid to avoid db divergence
             renovationRecordService.addRenovationRecord(renovationRecord); //updates existing record (identified by id)
             model.addAttribute("renovation", renovationRecord);
-            return "viewRenovation";
+            return "redirect:/renovations/view?id=" + renovationRecord.getId();
         }
         if (renovationRecordService.checkForExactMatch(name, renovationRecord)) {
             model.addAttribute("existingName", name);
