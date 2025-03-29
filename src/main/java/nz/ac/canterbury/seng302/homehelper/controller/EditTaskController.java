@@ -54,6 +54,7 @@ public class EditTaskController {
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("task",renovationTask);
         model.addAttribute("roomList", renovationRecord.getRooms());
+        model.addAttribute("taskRoomList", renovationTask.getRoomList());
         logger.info("Due date of task: {}", renovationTask.getDueDate());
         model.addAttribute("renovationTaskDTO", new RenovationTaskDTO(renovationTask.getName(),renovationTask.getDescription(),renovationTask.getDueDate()));
         return "editTaskTemplate";
@@ -70,7 +71,7 @@ public class EditTaskController {
     public String editTask(@ModelAttribute("renovationTaskDTO") RenovationTaskDTO renovationTaskDTO,
                                 @RequestParam(name = "taskId") Long taskId,
                                 @RequestParam(name = "renovationId") Long renovationId,
-                                @RequestParam(name = "roomList", required=false) List<String> roomList,
+                                @RequestParam(name = "roomList", required=false) List<String> taskRoomList,
                                 Model model) {
         logger.info("POST renovations/view/create");
 
@@ -78,11 +79,11 @@ public class EditTaskController {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
 
         try {
-            if (roomList == null) {
-                roomList = new ArrayList<>();
+            if (taskRoomList == null) {
+                taskRoomList = new ArrayList<>();
             }
 
-            editTaskService.updateTask(renovationTaskDTO,renovationTask, roomList);
+            editTaskService.updateTask(renovationTaskDTO,renovationTask, taskRoomList);
 
             model.addAttribute("renovation", renovationRecord);
 
