@@ -259,7 +259,7 @@ public class RenovationController {
         int totalTasks = record.getRenovationTasks().size();
         int totalPages = (totalTasks + tasksPerPage - 1) / tasksPerPage;
 
-        if (pageNumber > (totalTasks / tasksPerPage) && (totalTasks != 0)) return "redirect:/renovations/view?id=" + id + "&page=" + totalPages + "&tasksPerPage=" + tasksPerPage;
+        if (pageNumber > (totalPages) && (totalTasks != 0)) return "redirect:/renovations/view?id=" + id + "&page=" + totalPages + "&tasksPerPage=" + tasksPerPage;
 
         Pageable pageable = PageRequest.of(pageNumber - 1, tasksPerPage);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
