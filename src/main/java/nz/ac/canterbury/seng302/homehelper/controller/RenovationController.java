@@ -231,9 +231,14 @@ public class RenovationController {
     /**
      * Handles redirecting to the view record page for a given record based on the id
      * @param id of the renovation record to view
+     * @param pageNumber the page of tasks to view, defaults to 1
+     * @param tasksPerPage the number of tasks to display on the page, based off the screen size
+     * @param request request the HTTP servlet request
      * @param model (map-like) representation of results to be used by thymeleaf
-     * @return redirect to viewRenovation page
+     * @return view page of the renovation
+     * @throws ResponseStatusException if the renovation record does not exist
      */
+
     @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id,
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
