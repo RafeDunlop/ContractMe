@@ -36,5 +36,17 @@ out/
 ### VS Code ###
 .vscode/
 
+### VIm ###
+*.swp
+*.orig
+
 ### Mac
 .DS_Store
+
+### Environment
+.env
+
+### Local Profile Picture Storage ###
+/profile_pictures/*
+!profile_pictures/default/
+!profile_pictures/default/*

@@ -1,10 +1,13 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
+import nz.ac.canterbury.seng302.homehelper.entity.User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class UserValidation {
@@ -29,6 +32,7 @@ public class UserValidation {
      * Validates the first and last names
      * @param name     the inputted name
      * @param nameType the type of name inputted, either first name or last name
+     * @return A list of errors that the inputted name generated
      */
     public List<String> validateNameString(String name, String nameType) {
         List<String> errors = new ArrayList<>();
@@ -54,14 +58,22 @@ public class UserValidation {
     /**
      * Validates password strength
      * @param password the inputted password
+     * @return A list of errors that the inputted password generated
+     * @param confirmPassword the retyped password
+     * @param type the method the validation was called from
      */
     // Note this function is for validating passwords for registration, not logging in
-    public List<String> validatePasswordString(String password, String confirmPassword) {
+    public List<String> validatePasswordString(String password, String confirmPassword, String type) {
         List<String> errors = new ArrayList<>();
 
         // Compares password and confirm password
         if (!password.equals(confirmPassword)) {
-            errors.add("Passwords do not match.");
+            if (type.equals("updatePassword")) {
+                errors.add("New Passwords do not match.");
+            }
+            else if (type.equals("registerPassword")) {
+                errors.add("Passwords do not match.");
+            }
         }
 
         // Check password is at least 8 characters long, includes an uppercase letter, a lowercase letter, a number and a special character
@@ -71,6 +83,50 @@ public class UserValidation {
                 !password.matches(".*\\d.*") ||    // At least one number
                 !password.matches(".*[^a-zA-Z0-9].*")) { // At least one special char
             errors.add("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.");
+        }
+
+        return errors;
+    }
+
+    // Note this function checks if the new password contains the user's name or email.
+    public List<String> validateUpdatePasswordString(String password, String confirmPassword, String type,
+            String firstName,String lastName,String email) {
+        List<String> errors = new ArrayList<>();
+
+        if (password != null && (password.contains( firstName) || (password.contains( lastName) || (password.contains( email))))){
+            errors.add("Your password should not contain your name or email address.");
+        }
+        return errors;
+    }
+
+    /**
+     * checks if the provided file is of an allowed image type (PNG, JPG, SVG)
+     * and ensures that its size does not exceed the limit (10MB).
+     *
+     * @param profilePicture Uploaded profile picture raw data file
+     * @return A list of errors that the inputted profile picture generated
+     */
+    public List<String> validateProfilePicture(MultipartFile profilePicture) {
+        List<String> errors = new ArrayList<>();
+
+        // Check if the file is empty
+        if (profilePicture.isEmpty()) {
+            errors.add("No file selected.");
+            return errors;
+        }
+
+        // Allowed MIME types
+        List<String> allowedMimeTypes = List.of("image/jpeg", "image/png", "image/svg+xml");
+
+        // Check file type
+        if (!allowedMimeTypes.contains(profilePicture.getContentType())) {
+            errors.add("Image must be of type png, jpg or svg.");
+        }
+
+        // Check file size
+        long maxSizeBytes = 10 * 1024 * 1024; // 10MB
+        if (profilePicture.getSize() > maxSizeBytes) {
+            errors.add("Image must be less than 10MB.");
         }
 
         return errors;

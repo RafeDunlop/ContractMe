@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
@@ -55,7 +56,8 @@ public class SecurityConfiguration {
         http.authorizeHttpRequests(auth -> auth
                         // Give access to database and allow all users to go on the matching pages.
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/h2/**")).permitAll()
-                        .requestMatchers("/", "/register", "/login", "/webjars/**").permitAll()
+                        .requestMatchers("/", "/register", "/confirm-registration", "/login", "/webjars/**").permitAll()
+
                         // Only the specified roles can reach the matching pages
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .requestMatchers("/main", "/user/**", "/renovations/**").hasRole("USER")

@@ -40,6 +40,12 @@ public class User {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdTimestamp;
 
+    @Column
+    private String profilePicture;
+
+    @Column(name = "activated")
+    private boolean activated;
+
     @Column()
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
@@ -58,6 +64,8 @@ public class User {
         this.email = email;
         this.password = password;
         this.createdTimestamp = LocalDateTime.now();
+        this.profilePicture = "default/default.jpg";
+        this.activated = false;
     }
 
     /**
@@ -164,6 +172,38 @@ public class User {
      */
     public LocalDateTime getCreatedTimestamp() {
         return createdTimestamp;
+    }
+
+    /**
+     * Gets the profile picture file name of user
+     * @return profile picture file name
+     */
+    public String getProfilePicture() { return profilePicture; }
+
+    /**
+     * Sets the profile picture file name of user
+     * @param profilePicture profile picture file name
+     */
+    public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }
+
+
+    /**
+     * Set the user account active and grants role user.
+     * This means that they have verified their email address.
+     */
+    public void activate() {
+        this.activated = true;
+        this.grantAuthority("ROLE_USER");
+    }
+
+    /**
+     * Get the activated status of the user account.
+     *
+     * @return true if the user has verified their email address and therefore
+     * has an active account
+     */
+    public boolean isActivated() {
+        return activated;
     }
 
     /**

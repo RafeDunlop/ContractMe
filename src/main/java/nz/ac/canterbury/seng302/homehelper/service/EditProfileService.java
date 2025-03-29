@@ -7,9 +7,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service for the edit profile page.
@@ -19,6 +31,7 @@ public class EditProfileService {
 
     private final UserRepository userRepository;
     private final UserValidation userValidation;
+    private final String UPLOAD_DIR = "profile_pictures/";
 
     /**
      * Constructor for the service and links the repository and validator to the
@@ -84,6 +97,61 @@ public class EditProfileService {
             if (!sameEmail && userRepository.findByEmailIgnoreCase(email).isPresent()) {
                 errors.add("This email address is already in use.");
             }
+        }
+
+        return errors;
+    }
+
+    /**
+     * Updates the user Profile Picture
+     * The profile picture file is stored in the profile_picture directory
+     * The profile picture file name is stored in the users repository
+     *
+     * @param user The user that changing their profile picture
+     * @param profilePicture profile picture file
+     */
+    public List<String> updateProfilePicture(User user, MultipartFile profilePicture) {
+        List<String> errors = new ArrayList<>();
+
+        if (profilePicture.isEmpty()) {
+            errors.add("No file selected.");
+            return errors;
+        }
+
+        errors.addAll(userValidation.validateProfilePicture(profilePicture));
+        if (!errors.isEmpty()) {
+            return errors;
+        }
+
+        try {
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // Generate a unique filename
+            String filename = UUID.randomUUID() + "_" + profilePicture.getOriginalFilename();
+            Path filePath = uploadPath.resolve(filename);
+
+            BufferedImage originalImage = ImageIO.read(profilePicture.getInputStream());
+
+            // Resize the image to 200x200
+            int minSize = Math.min(originalImage.getWidth(), originalImage.getHeight());
+            int x = (originalImage.getWidth() - minSize) / 2;
+            int y = (originalImage.getHeight() - minSize) / 2;
+            BufferedImage croppedImage = originalImage.getSubimage(x, y, minSize, minSize);
+            BufferedImage resizedImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = resizedImage.createGraphics();
+            g2d.drawImage(croppedImage.getScaledInstance(200, 200, Image.SCALE_SMOOTH), 0, 0, null);
+            g2d.dispose();
+
+            File outputFile = filePath.toFile();
+            ImageIO.write(resizedImage, "jpg", outputFile);
+
+            user.setProfilePicture(filename);
+            userRepository.save(user);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store file.");
         }
 
         return errors;

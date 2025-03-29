@@ -11,13 +11,21 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -56,7 +64,8 @@ public class EditProfileControllerIntegrationTest {
                 .andExpect(model().attributeExists("user"))
                 .andExpect(model().attribute("firstName", expectedUser.getFirstName()))
                 .andExpect(model().attribute("lastName", expectedUser.getLastName()))
-                .andExpect(model().attribute("email", expectedUser.getEmail()));
+                .andExpect(model().attribute("email", expectedUser.getEmail()))
+                .andExpect(model().attribute("profilePicture", expectedUser.getProfilePicture()));
     }
 
     /**
@@ -78,7 +87,8 @@ public class EditProfileControllerIntegrationTest {
                         .param("firstName", updatedUser.getFirstName())
                         .param("lastName", updatedUser.getLastName())
                         .param("email", updatedUser.getEmail())
-                        .param("password", updatedUser.getPassword()))
+                        .param("password", updatedUser.getPassword())
+                        .param("profilePicture", updatedUser.getProfilePicture()))
                 .andExpect(status().isFound())
                 .andExpect(header().exists("Location"))
                 .andExpect(header().string("Location", "/user"));
@@ -89,6 +99,7 @@ public class EditProfileControllerIntegrationTest {
         Assertions.assertEquals(updatedUser.getFirstName(), capturedUser.getFirstName());
         Assertions.assertEquals(updatedUser.getLastName(), capturedUser.getLastName());
         Assertions.assertEquals(updatedUser.getEmail(), capturedUser.getEmail());
+        Assertions.assertEquals(updatedUser.getProfilePicture(), capturedUser.getProfilePicture());
     }
 
     /**
@@ -114,7 +125,8 @@ public class EditProfileControllerIntegrationTest {
                 .andExpect(model().attributeExists("user"))
                 .andExpect(model().attribute("firstName", updatedUser.getFirstName()))
                 .andExpect(model().attribute("lastName", updatedUser.getLastName()))
-                .andExpect(model().attribute("email", updatedUser.getEmail()));
+                .andExpect(model().attribute("email", updatedUser.getEmail()))
+                .andExpect(model().attribute("profilePicture", updatedUser.getProfilePicture()));
     }
 
     /**
@@ -140,7 +152,8 @@ public class EditProfileControllerIntegrationTest {
                 .andExpect(model().attributeExists("user"))
                 .andExpect(model().attribute("firstName", updatedUser.getFirstName()))
                 .andExpect(model().attribute("lastName", updatedUser.getLastName()))
-                .andExpect(model().attribute("email", updatedUser.getEmail()));
+                .andExpect(model().attribute("email", updatedUser.getEmail()))
+                .andExpect(model().attribute("profilePicture", updatedUser.getProfilePicture()));
     }
 
     /**
@@ -167,6 +180,85 @@ public class EditProfileControllerIntegrationTest {
                 .andExpect(model().attributeExists("user"))
                 .andExpect(model().attribute("firstName", expectedUser1.getFirstName()))
                 .andExpect(model().attribute("lastName", expectedUser1.getLastName()))
-                .andExpect(model().attribute("email", expectedUser1.getEmail()));
+                .andExpect(model().attribute("email", expectedUser1.getEmail()))
+                .andExpect(model().attribute("profilePicture", expectedUser1.getProfilePicture()));
+    }
+
+    /**
+     * Tests the upload profile picture function when the user submits a file for invalid format
+     * Expects to get "Image must be of type png, jpg or svg." error and redirect to /user/edit
+     */
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void uploadProfilePicture_invalidFormat_returnError() throws Exception {
+        User testUser = new User("Jane", "Doe", "jane@doe.com", "password");
+        when(userRepository.findByEmailIgnoreCase(testUser.getEmail())).thenReturn(Optional.of(testUser));
+
+        List<String> expectedErrors = List.of("Image must be of type png, jpg or svg.");
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "test.txt",
+                "text/plain",
+                "invalid image".getBytes()
+        );
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/user/edit/profile-picture")
+                        .file(file)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/edit"))
+                .andExpect(flash().attribute("errorMessages", expectedErrors));
+    }
+
+    /**
+     * Tests the upload profile picture function when the user submits a file larger than 10MB
+     * Expects to get "Image must be less than 10MB." error and redirect to /user/edit
+     */
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void uploadProfilePicture_fileTooLarge_returnError() throws Exception {
+        User testUser = new User("Jane", "Doe", "jane@doe.com", "password");
+        when(userRepository.findByEmailIgnoreCase(testUser.getEmail())).thenReturn(Optional.of(testUser));
+
+        List<String> expectedErrors = List.of("Image must be less than 10MB.");
+
+        byte[] largeFileContent = new byte[(10 * 1024 * 1024) + 1];
+        Arrays.fill(largeFileContent, (byte) '0');
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "test.png",
+                "image/png",
+                largeFileContent
+        );
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/user/edit/profile-picture")
+                        .file(file)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/edit"))
+                .andExpect(flash().attribute("errorMessages", expectedErrors));
+    }
+
+    /**
+     * Tests the upload profile picture function when the user submits a valid image file
+     * Expects redirect to /user
+     */
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void uploadProfilePicture_validImageFile_success() throws Exception {
+        User testUser = new User("Jane", "Doe", "jane@doe.com", "password");
+        when(userRepository.findByEmailIgnoreCase(testUser.getEmail())).thenReturn(Optional.of(testUser));
+
+        byte[] imageBytes = Files.readAllBytes(Paths.get("src/test/resources/test_1.jpg"));
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "test_1.jpg",
+                "image/jpeg",
+                imageBytes
+        );
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/user/edit/profile-picture")
+                        .file(file)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user"));
     }
 }

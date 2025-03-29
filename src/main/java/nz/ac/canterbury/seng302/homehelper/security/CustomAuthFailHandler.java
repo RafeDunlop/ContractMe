@@ -22,7 +22,13 @@ public class CustomAuthFailHandler implements AuthenticationFailureHandler {
      */
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
-        String error = exception.getMessage();
-        response.sendRedirect("/login?error=" + URLEncoder.encode(error, StandardCharsets.UTF_8));
+
+        if (exception instanceof AccountNotActivatedException) {
+            String error = "Please confirm your email address before attempting to login.";
+            response.sendRedirect("/confirm-registration?error=" + URLEncoder.encode(error, StandardCharsets.UTF_8));
+        } else {
+            String error = exception.getMessage();
+            response.sendRedirect("/login?error=" + URLEncoder.encode(error, StandardCharsets.UTF_8));
+        }
     }
 }

@@ -32,7 +32,7 @@ public class EditTaskService {
     }
 
 
-    public void updateTask(RenovationTaskDTO renovationTaskDTO, RenovationTask renovationTask) throws IllegalArgumentException {
+    public void updateTask(RenovationTaskDTO renovationTaskDTO, RenovationTask renovationTask, List<String> roomList) throws IllegalArgumentException {
         if (renovationTaskDTO == null) {
             throw new IllegalArgumentException("Data integration error");
         }
@@ -48,7 +48,7 @@ public class EditTaskService {
         renovationTask.setName(renovationTaskDTO.getName());
         renovationTask.setDescription(renovationTaskDTO.getDescription());
         renovationTask.setDueDate(renovationTaskDTO.getDueDate());
-        renovationTask.setRoomList(renovationTaskDTO.getRooms());
+        renovationTask.setRoomList(roomList);
 
         renovationTaskRepository.save(renovationTask);
 
