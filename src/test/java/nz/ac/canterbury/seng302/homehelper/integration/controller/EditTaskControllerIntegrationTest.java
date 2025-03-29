@@ -84,7 +84,7 @@ public class EditTaskControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "Demolish walls")
                         .param("description", "Demolish all the stuff")
-                        .param("rooms", "Room 1", "Room 2")
+                        .param("taskRoomList", "Room 1", "Room 2")
                         .param("taskId", "1")
                         .param("renovationId", "1")
                         .accept(MediaType.APPLICATION_JSON))

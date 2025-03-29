@@ -33,14 +33,15 @@
                >
       </div>
 
+      <input type="hidden" name="taskRoomList" th:value="${task.getRoomList() != null ? task.getRoomList() : ''}">
       <label class="form-label">Rooms:</label>
-      <div class="form-check mb-1 fs-3" th:each="room, meta : ${roomList}">
-        <label>
-          <input class="form-check-input fs-3" type="checkbox" th:field="${roomList}"
-                 th:id="'room-' + ${meta.index}" th:value="${room}"
+      <div th:each="room, meta : ${roomList}">
+        <div class="form-check mb-1 fs-3">
+          <input type="hidden" name="taskRoomList" th:value="${room}" />
+          <input class="form-check-input fs-3" type="checkbox" name="taskRoomList" th:value="${room}"
                  th:checked="${task.getRoomList() != null and #lists.contains(task.getRoomList(), room)}">
-        </label>
-        <label class="form-check-label fs-3 ml-3" th:for="'room-' + ${meta.index}" th:text="${room}"></label>
+          <label class="form-check-label fs-3 ml-3" th:for="'room-' + ${meta.index}" th:text="${room}"></label>
+        </div>
       </div>
 
       <div>

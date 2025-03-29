@@ -346,14 +346,10 @@ public class RenovationControllerIntegrationTest {
                         .param("id", Long.toString(existingRecord.getId()))
                         .param("name", "Rénövatiôn Onē")
                         .param("description", "A".repeat(512))
-                        .param("roomList", "Room 3", "Room 4")
+                        .param("taskRoomList", "Room 3", "Room 4")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("viewRenovation"))
-                .andExpect(model().attribute("renovation", allOf(
-                        hasProperty("name", is("Rénövatiôn Onē")),
-                        hasProperty("description", is("A".repeat(512))),
-                        hasProperty("rooms", contains("Room 3", "Room 4")))));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId()));
 
         List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());

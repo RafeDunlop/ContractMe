@@ -71,7 +71,7 @@ public class EditTaskController {
     public String editTask(@ModelAttribute("renovationTaskDTO") RenovationTaskDTO renovationTaskDTO,
                                 @RequestParam(name = "taskId") Long taskId,
                                 @RequestParam(name = "renovationId") Long renovationId,
-                                @RequestParam(name = "roomList", required=false) List<String> taskRoomList,
+                                @RequestParam(name = "taskRoomList", required=false) List<String> taskRoomList,
                                 Model model) {
         logger.info("POST renovations/view/create");
 
