@@ -45,3 +45,8 @@ out/
 
 ### Environment
 .env
+
+### Local Profile Picture Storage ###
+/profile_pictures/*
+!profile_pictures/default/
+!profile_pictures/default/*

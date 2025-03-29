@@ -38,6 +38,9 @@ public class RenovationRecord {
     @LastModifiedDate
     private LocalDateTime editedDate;
 
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<RenovationTask> renovationTasks = new ArrayList<>();
+
 
     protected RenovationRecord() {}
 
@@ -104,6 +107,11 @@ public class RenovationRecord {
         return createdDate;
     }
 
+    /**
+     * Gets the list of all tasks made under a record
+     * @return list of renovation tasks
+     */
+    public List<RenovationTask> getRenovationTasks() {return renovationTasks; }
     /**
      * Gets created date of the renovation record
      */

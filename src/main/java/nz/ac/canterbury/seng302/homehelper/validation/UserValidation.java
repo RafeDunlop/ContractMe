@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.validation;
 
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ public class UserValidation {
      * Validates the first and last names
      * @param name     the inputted name
      * @param nameType the type of name inputted, either first name or last name
+     * @return A list of errors that the inputted name generated
      */
     public List<String> validateNameString(String name, String nameType) {
         List<String> errors = new ArrayList<>();
@@ -56,6 +58,7 @@ public class UserValidation {
     /**
      * Validates password strength
      * @param password the inputted password
+     * @return A list of errors that the inputted password generated
      * @param confirmPassword the retyped password
      * @param type the method the validation was called from
      */
@@ -84,6 +87,7 @@ public class UserValidation {
 
         return errors;
     }
+
     // Note this function checks if the new password contains the user's name or email.
     public List<String> validateUpdatePasswordString(String password, String confirmPassword, String type,
             String firstName,String lastName,String email) {
@@ -95,4 +99,36 @@ public class UserValidation {
         return errors;
     }
 
+    /**
+     * checks if the provided file is of an allowed image type (PNG, JPG, SVG)
+     * and ensures that its size does not exceed the limit (10MB).
+     *
+     * @param profilePicture Uploaded profile picture raw data file
+     * @return A list of errors that the inputted profile picture generated
+     */
+    public List<String> validateProfilePicture(MultipartFile profilePicture) {
+        List<String> errors = new ArrayList<>();
+
+        // Check if the file is empty
+        if (profilePicture.isEmpty()) {
+            errors.add("No file selected.");
+            return errors;
+        }
+
+        // Allowed MIME types
+        List<String> allowedMimeTypes = List.of("image/jpeg", "image/png", "image/svg+xml");
+
+        // Check file type
+        if (!allowedMimeTypes.contains(profilePicture.getContentType())) {
+            errors.add("Image must be of type png, jpg or svg.");
+        }
+
+        // Check file size
+        long maxSizeBytes = 10 * 1024 * 1024; // 10MB
+        if (profilePicture.getSize() > maxSizeBytes) {
+            errors.add("Image must be less than 10MB.");
+        }
+
+        return errors;
+    }
 }
