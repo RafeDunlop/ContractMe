@@ -119,8 +119,7 @@ tasks.register("unitTestReport", JacocoReport) { // Generate a report for unit t
 }
 tasks.register("integrationTestReport", JacocoReport) { // Generate a report for integration tests
 	group = 'verification'
-	onlyIf { // Allow the report to be skipped when -PskipTestReport is passed via
-		commandline
+	onlyIf { // Allow the report to be skipped when -PskipTestReport is passed via commandline
 		return !project.hasProperty('skipTestReport')
 	}
 	dependsOn integration
