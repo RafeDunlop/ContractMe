@@ -90,6 +90,7 @@ public class CreateTaskController {
 
             model.addAttribute("renovation", renovationRecord);
 
+
             return "redirect:/renovations/view?id=" + renovationId;
 
         } catch (IllegalArgumentException e) {
