@@ -136,8 +136,7 @@ tasks.register("integrationTestReport", JacocoReport) { // Generate a report for
 }
 tasks.register("cucumberTestReport", JacocoReport) { // Generate a report for cucumber tests
 	group = 'verification'
-	onlyIf { // Allow the report to be skipped when -PskipTestReport is passed via
-		commandline
+	onlyIf { // Allow the report to be skipped when -PskipTestReport is passed via commandline
 		return !project.hasProperty('skipTestReport')
 	}
 	dependsOn cucumber
