@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
     <title>View Renovation</title>
@@ -42,7 +42,7 @@
         <h4 th:text="'Viewing Renovation: ' + ${renovation.name}" class="card-title mb-4"></h4>
 
 
-        <div th:if="${description} != ''" class="card p-3 bg-light mb-3">
+        <div th:if="${renovation.description} != ''" class="card p-3 bg-light mb-3">
             <h6 class="fw-bold">Description:</h6>
             <p class="mb-0" th:text="${renovation.description}"></p>
         </div>
