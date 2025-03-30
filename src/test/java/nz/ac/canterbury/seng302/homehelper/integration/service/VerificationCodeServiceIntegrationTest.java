@@ -10,6 +10,7 @@ import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
 
 import nz.ac.canterbury.seng302.homehelper.validation.VerificationCodeValidation;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +35,8 @@ public class VerificationCodeServiceIntegrationTest {
     @Autowired
     private RegisterService registerService;
 
-    @Autowired UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private VerificationCodeRepository verificationCodeRepository;
@@ -68,11 +70,14 @@ public class VerificationCodeServiceIntegrationTest {
         toTest.setDelay(timeQuantity, timeUnit);
     }
 
-    /**
-     * todo: remove validation mock when implemented
-     */
+    @AfterEach
+    void clearRepository() {
+        userRepository.deleteAll();
+        verificationCodeRepository.deleteAll();
+    }
+
     @Test
-    public void issueCodeAndConsume_allValid_userActivated() {
+    public void issueSignupCodeAndConsume_allValid_userActivated() {
         String code = toTest.issueVerificationCode(GenerationStrategy.SIGNUP, user, Locale.ENGLISH);
         when(verificationCodeValidation.isValid(any(VerificationCode.class), any(String.class), any(User.class))).thenReturn(true);
         toTest.consumeSignupCode(code);
@@ -80,10 +85,38 @@ public class VerificationCodeServiceIntegrationTest {
     }
 
     @Test
-    public void issueCodeAndConsume_waitToExpire_throwsAndUserDeleted() throws ExecutionException, InterruptedException {
+    public void issueRestPasswordCodeAndConsume_allValid_codeDeleted() {
+        String code = toTest.issueVerificationCode(GenerationStrategy.RESET_TOKEN, user, Locale.ENGLISH);
+        when(verificationCodeValidation.isValid(any(VerificationCode.class), any(String.class), any(User.class))).thenReturn(true);
+        toTest.consumeResetPasswordToken(code);
+        assertTrue(verificationCodeRepository.findByCode(code).isEmpty());
+    }
+
+    @Test
+    public void issueSignupCodeAndConsume_waitToExpire_throws() throws ExecutionException, InterruptedException {
         String code = toTest.issueVerificationCode(GenerationStrategy.SIGNUP, user, Locale.ENGLISH);
         toTest.getScheduledFutureDeletion(code).get();
         assertThrows(IllegalArgumentException.class, () -> toTest.consumeSignupCode(code));
+    }
+
+    @Test
+    public void issueSignupCodeAndConsume_waitToExpire_userDeleted() throws ExecutionException, InterruptedException {
+        String code = toTest.issueVerificationCode(GenerationStrategy.SIGNUP, user, Locale.ENGLISH);
+        toTest.getScheduledFutureDeletion(code).get();
         assertFalse(userRepository.findByEmailIgnoreCase(email).isPresent());
+    }
+
+    @Test
+    public void issueResetPasswordCodeAndConsume_waitToExpire_throws() throws ExecutionException, InterruptedException {
+        String code = toTest.issueVerificationCode(GenerationStrategy.RESET_TOKEN, user, Locale.ENGLISH);
+        toTest.getScheduledFutureDeletion(code).get();
+        assertThrows(IllegalArgumentException.class, () -> toTest.consumeResetPasswordToken(code));
+    }
+
+    @Test
+    public void issueResetPasswordCodeAndConsume_waitToExpire_codeDeleted() throws ExecutionException, InterruptedException {
+        String code = toTest.issueVerificationCode(GenerationStrategy.RESET_TOKEN, user, Locale.ENGLISH);
+        toTest.getScheduledFutureDeletion(code).get();
+        assertFalse(verificationCodeRepository.findByCode(code).isPresent());
     }
 }
