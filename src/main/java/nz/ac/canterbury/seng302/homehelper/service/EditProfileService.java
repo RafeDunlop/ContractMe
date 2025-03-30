@@ -67,12 +67,8 @@ public class EditProfileService {
             throw new IllegalArgumentException(String.join(" ", errors));
         }
 
-        // Updates user details in database
         userRepository.save(updatedUser);
-        if (!sameEmail) {
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(updatedUser.getEmail(), null, updatedUser.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-        }
+
     }
 
     /**

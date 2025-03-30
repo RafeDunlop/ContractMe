@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -49,5 +50,38 @@ public class RenovationTask {
         this.description = (description != null) ? description.trim() : "";
         this.roomList = roomList;
         this.dueDate = dueDate;
+    }
+
+    public Long getTask_id() {
+        return task_id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public LocalDate getDueDate(){
+        return dueDate;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public  List<String> getRoomList() {
+        return roomList;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    public void setRoomList(List<String> roomList) {
+        this.roomList = roomList;
     }
 }

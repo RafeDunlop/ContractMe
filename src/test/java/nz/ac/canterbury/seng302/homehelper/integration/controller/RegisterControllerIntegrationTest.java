@@ -58,6 +58,7 @@ public class RegisterControllerIntegrationTest {
     @PostConstruct
     public void setup() {
         mockMvc = MockMvcBuilders.standaloneSetup(registerController).build();
+
     }
 
     /**

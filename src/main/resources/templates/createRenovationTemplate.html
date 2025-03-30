@@ -16,7 +16,6 @@
         <form th:action="@{create}" method="post" id="renovation-form">
 
             <input type="hidden" id="roomListEdit" th:name="roomListEdit" th:value="${#strings.arrayJoin(roomList, ',')}">
-
             <input type="hidden" id="existingName" th:name="existingName" th:value="${existingName}">
 
             <div class="mb-3">

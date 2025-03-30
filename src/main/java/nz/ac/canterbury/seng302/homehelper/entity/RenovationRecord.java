@@ -38,7 +38,7 @@ public class RenovationRecord {
     @LastModifiedDate
     private LocalDateTime editedDate;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "renovationRecord",fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<RenovationTask> renovationTasks = new ArrayList<>();
 
 
