@@ -78,6 +78,13 @@ public class VerificationCodeServiceTest {
     }
 
     @Test
+    public void consumeResetPasswordToken_validCode_doesntThrowAndCodeDeleted() {
+        Mockito.when(verificationCodeValidation.isValid(verificationCodeOne, firstCode, user)).thenReturn(true);
+        assertDoesNotThrow(() -> toTest.consumeResetPasswordToken(firstCode));
+        verify(verificationCodeRepository, times(1)).delete(verificationCodeOne);
+    }
+
+    @Test
     public void consumeSignupCode_invalidCode_throwsExceptionAndCodeDeleted() {
         Mockito.when(verificationCodeValidation.isValid(verificationCodeOne, firstCode, user)).thenReturn(false);
         assertThrows(IllegalArgumentException.class, () -> toTest.consumeSignupCode(firstCode));
@@ -90,6 +97,11 @@ public class VerificationCodeServiceTest {
     }
 
     @Test
+    public void consumeResetPasswordToken_notInRepository_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> toTest.consumeResetPasswordToken("notInRepository"));
+    }
+
+    @Test
     public void deleteSignupCodeAndAccount_codePresent_deletesBoth() {
         Mockito.when(verificationCodeRepository.findByCode(firstCode)).thenReturn(Optional.of(verificationCodeOne));
         toTest.deleteSignupCodeAndAccount(firstCode);
@@ -98,13 +110,19 @@ public class VerificationCodeServiceTest {
     }
 
     @Test
-    public void issueVerificationCode_dontWait_stillExists() {
+    public void issueVerificationCode_signupAndDontWait_stillExists() {
         toTest.issueVerificationCode(GenerationStrategy.SIGNUP, user, Locale.ENGLISH);
         verify(verificationCodeRepository, Mockito.never()).delete(verificationCodeOne);
     }
 
     @Test
-    public void issueVerificationCode_waitAndPresent_hasBeenDeleted() throws InterruptedException, ExecutionException {
+    public void issueVerificationCode_restAndDontWait_stillExists() {
+        toTest.issueVerificationCode(GenerationStrategy.RESET_TOKEN, user, Locale.ENGLISH);
+        verify(verificationCodeRepository, Mockito.never()).delete(verificationCodeOne);
+    }
+
+    @Test
+    public void issueVerificationCode_signupAndWaitAndPresent_hasBeenDeleted() throws InterruptedException, ExecutionException {
         String code = toTest.issueVerificationCode(GenerationStrategy.SIGNUP, user, Locale.ENGLISH);
         Mockito.when(verificationCodeRepository.findByCode(Mockito.any())).thenReturn(Optional.of(verificationCodeOne));
         toTest.getScheduledFutureDeletion(code).get(); //waits for the scheduled service to finish
@@ -112,7 +130,15 @@ public class VerificationCodeServiceTest {
     }
 
     @Test
-    public void issueVerificationCode_multipleAndWaitAndPresent_allHaveBeenDeleted() throws ExecutionException, InterruptedException {
+    public void issueVerificationCode_resetAndWaitAndPresent_hasBeenDeleted() throws InterruptedException, ExecutionException {
+        String code = toTest.issueVerificationCode(GenerationStrategy.RESET_TOKEN, user, Locale.ENGLISH);
+        Mockito.when(verificationCodeRepository.findByCode(Mockito.any())).thenReturn(Optional.of(verificationCodeOne));
+        toTest.getScheduledFutureDeletion(code).get(); //waits for the scheduled service to finish
+        verify(verificationCodeRepository, times(1)).delete(verificationCodeOne);
+    }
+
+    @Test
+    public void issueVerificationCode_signupAndMultipleAndWaitAndPresent_allHaveBeenDeleted() throws ExecutionException, InterruptedException {
         String codeOne = toTest.issueVerificationCode(GenerationStrategy.SIGNUP, user, Locale.ENGLISH);
         String codeTwo = toTest.issueVerificationCode(GenerationStrategy.SIGNUP, user, Locale.ENGLISH);
         Mockito.when(verificationCodeRepository.findByCode(codeOne)).thenReturn(Optional.of(verificationCodeOne));
@@ -123,7 +149,18 @@ public class VerificationCodeServiceTest {
     }
 
     @Test
-    public void issueVerificationCode_waitAndPresentAndUserAlreadyActivated_throwsAndUserNotDeleted() {
+    public void issueVerificationCode_resetAndMultipleAndWaitAndPresent_allHaveBeenDeleted() throws ExecutionException, InterruptedException {
+        String codeOne = toTest.issueVerificationCode(GenerationStrategy.RESET_TOKEN, user, Locale.ENGLISH);
+        String codeTwo = toTest.issueVerificationCode(GenerationStrategy.RESET_TOKEN, user, Locale.ENGLISH);
+        Mockito.when(verificationCodeRepository.findByCode(codeOne)).thenReturn(Optional.of(verificationCodeOne));
+        Mockito.when(verificationCodeRepository.findByCode(codeTwo)).thenReturn(Optional.of(verificationCodeTwo));
+        toTest.getScheduledFutureDeletion(codeOne).get();
+        toTest.getScheduledFutureDeletion(codeTwo).get();
+        verify(verificationCodeRepository, times(2)).delete(Mockito.any(VerificationCode.class));
+    }
+
+    @Test
+    public void issueVerificationCode_signupAndWaitAndPresentAndUserAlreadyActivated_throwsAndUserNotDeleted() {
         String code = toTest.issueVerificationCode(GenerationStrategy.SIGNUP, user, Locale.ENGLISH);
         Mockito.when(verificationCodeRepository.findByCode(code)).thenReturn(Optional.of(verificationCodeOne));
         Mockito.when(user.isActivated()).thenReturn(true);
