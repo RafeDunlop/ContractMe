@@ -42,7 +42,7 @@ public class RenovationRecord {
     private List<RenovationTask> renovationTasks = new ArrayList<>();
 
 
-    protected RenovationRecord() {}
+    public RenovationRecord() {}
 
     /**
      * Constructor for RenovationRecord
@@ -57,6 +57,14 @@ public class RenovationRecord {
         this.description = (description != null) ? description.trim() : "";
         this.rooms = new ArrayList<>();
         rooms.forEach(room -> this.rooms.add(room.trim()));
+    }
+
+    /**
+     * Sets task list, for testing
+     * @param renovationTasks the list of tasks on the renovation record
+     */
+    public void setRenovationTasks(List<RenovationTask> renovationTasks) {
+        this.renovationTasks = renovationTasks;
     }
 
     /**

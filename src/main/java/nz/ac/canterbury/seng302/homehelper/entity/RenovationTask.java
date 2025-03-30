@@ -52,36 +52,37 @@ public class RenovationTask {
         this.dueDate = dueDate;
     }
 
-    public Long getTask_id() {
-        return task_id;
-    }
-
     public String getName() {
         return name;
     }
 
-    public LocalDate getDueDate(){
-        return dueDate;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public  List<String> getRoomList() {
-        return roomList;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
-    }
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public List<String> getRoomList() {
+        return roomList;
+    }
+
     public void setRoomList(List<String> roomList) {
         this.roomList = roomList;
     }
+
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public Long getTask_id() {return task_id;}
 }

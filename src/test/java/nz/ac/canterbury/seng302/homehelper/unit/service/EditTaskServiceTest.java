@@ -62,6 +62,7 @@ public class EditTaskServiceTest {
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("@#$%", "", null,new ArrayList<>());
         RenovationTask renovationTask = Mockito.mock(RenovationTask.class);
         List<String> errors = new ArrayList<>();
+        List<String> roomList = new ArrayList<>();
         errors.add("description cannot be empty.");
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
