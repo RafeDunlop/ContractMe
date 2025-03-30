@@ -250,14 +250,17 @@ public class RenovationController {
             tasksPerPage = 5;
         }
 
-        // Check if tasksPerPage is passed in the request, otherwise fallback to session value
         HttpSession session = request.getSession();
         if (session.getAttribute("tasksPerPage") != null) {
+            // If tasksPerPage is not passed in the request, fallback to session value.
             tasksPerPage = (int) session.getAttribute("tasksPerPage");
         }
+        // Scales the number of tasks per page based on screen size.
+        // The client cannot directly set this value.
+
 
         RenovationRecord record = renovationRecordService.getRecordById(id);
-        if (record == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
+        if (record == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("This renovation with ID %d does not exist", id));
 
         if (pageNumber < 1) return "redirect:/renovations/view?id=" + id + "&page=1&tasksPerPage=" + tasksPerPage;
 
@@ -274,6 +277,7 @@ public class RenovationController {
 
         paginationLinksStart = Math.max(pageNumber - 2, 1);
         paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
+        // Tracks two pages ahead and behind the current page for the page number buttons displaying on the page.
 
         model.addAttribute("tasks", paginatedTasks.getContent());
         model.addAttribute("pageNumber", pageNumber);
