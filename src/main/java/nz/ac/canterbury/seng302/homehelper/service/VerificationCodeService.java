@@ -105,7 +105,8 @@ public class VerificationCodeService {
     /**
      * Generates and saves a {@link VerificationCode}, schedules its deletion and puts this scheduled task in the map
      * @param generationStrategy The {@link GenerationStrategy} to be used for code generation.
-     *                           Configures the domain and length of the code generated
+     *                           Configures the domain and length of the code generated as well as which method is used
+     *                           for its scheduled deletion task
      * @param user The user for which this code is issued
      * @param locale The locale from which this code was issued
      * @return The issued code as a {@code String}
@@ -155,6 +156,17 @@ public class VerificationCodeService {
         throw new IllegalArgumentException("Signup code invalid");
     }
 
+    /**
+     * Checks if a token is recognised and deletes the token if it is recognised.
+     * Expected behaviour is that the token is found and deleted and nothing happens from the caller's perspective
+     * @param resetPasswordToken The {@code String} token which references a (possibly deleted) {@link VerificationCode}
+     * @throws IllegalArgumentException Thrown if no {@link VerificationCode} is found for the specified token, i.e. it:
+     * <ul>
+     *     <li>was never issued (invalid); or</li>
+     *     <li>has expired; or</li>
+     *     <li>has already been consumed.</li>
+     * </ul>
+     */
     public void consumeResetPasswordToken(String resetPasswordToken) throws IllegalArgumentException {
         Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(resetPasswordToken);
         if (verificationCodeOptional.isPresent()) {
@@ -188,6 +200,10 @@ public class VerificationCodeService {
         }
     }
 
+    /**
+     * Attempts to retrieve the {@link VerificationCode} that was issued. If it still exists and is expired, deletes it
+     * @param code The issued code as a {@code String}
+     */
     public void deletePasswordResetToken(String code) {
         Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(code);
         if (verificationCodeOptional.isPresent()) {
@@ -198,16 +214,11 @@ public class VerificationCodeService {
         }
     }
 
-    private String generateUniqueCode(SecureRandomCodeGenerator secureRandomCodeGenerator) {
-        String code;
-        boolean unique;
-        do  {
-            code = secureRandomCodeGenerator.nextString();
-            unique = verificationCodeRepository.findByCode(code).isEmpty();
-        } while (!unique);
-        return code;
-    }
-
+    /**
+     * Gets the {@link User} for which the specified {@link VerificationCode} (identified by code) was issued
+     * @param code The key of the related {@link VerificationCode}
+     * @return The {@link User} for which the specified {@link VerificationCode} was issued
+     */
     public Optional<User> getUserByToken(String code) {
         Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(code);
         if (verificationCodeOptional.isPresent()) {
@@ -216,5 +227,15 @@ public class VerificationCodeService {
             return Optional.of(user);
         }
         return Optional.empty();
+    }
+
+    private String generateUniqueCode(SecureRandomCodeGenerator secureRandomCodeGenerator) {
+        String code;
+        boolean unique;
+        do  {
+            code = secureRandomCodeGenerator.nextString();
+            unique = verificationCodeRepository.findByCode(code).isEmpty();
+        } while (!unique);
+        return code;
     }
 }
