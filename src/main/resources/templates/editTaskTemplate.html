@@ -30,18 +30,17 @@
 
         <label for="dueDate" class="form-label">Due Date:</label>
         <input type="date" class="form-control" id="dueDate" th:name="dueDate" th:value="${task.getDueDate()}"
-               >
+        >
       </div>
 
-      <input type="hidden" name="taskRoomList" th:value="${task.getRoomList() != null ? task.getRoomList() : ''}">
       <label class="form-label">Rooms:</label>
-      <div th:each="room, meta : ${roomList}">
-        <div class="form-check mb-1 fs-3">
-          <input type="hidden" name="taskRoomList" th:value="${room}" />
-          <input class="form-check-input fs-3" type="checkbox" name="taskRoomList" th:value="${room}"
+      <div class="form-check mb-1 fs-3" th:each="room, meta : ${roomList}">
+        <label>
+          <input class="form-check-input fs-3" type="checkbox" th:field="*{rooms}"
+                 th:id="'room-' + ${meta.index}" th:value="${room}"
                  th:checked="${task.getRoomList() != null and #lists.contains(task.getRoomList(), room)}">
-          <label class="form-check-label fs-3 ml-3" th:for="'room-' + ${meta.index}" th:text="${room}"></label>
-        </div>
+        </label>
+        <label class="form-check-label fs-3 ml-3" th:for="'room-' + ${meta.index}" th:text="${room}"></label>
       </div>
 
       <div>
