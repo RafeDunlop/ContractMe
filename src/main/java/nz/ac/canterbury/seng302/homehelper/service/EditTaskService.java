@@ -31,8 +31,14 @@ public class EditTaskService {
         this.renovationValidation = renovationValidation;
     }
 
-
-    public void updateTask(RenovationTaskDTO renovationTaskDTO, RenovationTask renovationTask, List<String> roomList) throws IllegalArgumentException {
+    /**
+     * Updates the details of an existing renovation task based on the provided {@link RenovationTaskDTO}.
+     *
+     * @param renovationTaskDTO The data transfer object containing updated task details.
+     * @param renovationTask    The existing renovation task to be updated.
+     * @throws IllegalArgumentException If the provided DTO is null or contains validation errors.
+     */
+    public void updateTask(RenovationTaskDTO renovationTaskDTO, RenovationTask renovationTask) throws IllegalArgumentException {
         if (renovationTaskDTO == null) {
             throw new IllegalArgumentException("Data integration error");
         }
@@ -48,7 +54,7 @@ public class EditTaskService {
         renovationTask.setName(renovationTaskDTO.getName());
         renovationTask.setDescription(renovationTaskDTO.getDescription());
         renovationTask.setDueDate(renovationTaskDTO.getDueDate());
-        renovationTask.setRoomList(roomList);
+        renovationTask.setRoomList(renovationTaskDTO.getRooms());
 
         renovationTaskRepository.save(renovationTask);
 

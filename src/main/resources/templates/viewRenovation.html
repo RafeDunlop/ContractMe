@@ -58,9 +58,9 @@
 
         <div th:if="!${renovation.getRenovationTasks().isEmpty()}" class="mb-3">
             <h6 class="fw-bold">Tasks:</h6>
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
-            <div th:each="renovationTask : ${tasks}" class="col mb-4">
-                    <div class="card" style="width: 100%;">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3">
+                <div th:each="renovationTask : ${renovation.getRenovationTasks()}" class="col mb-4">
+                    <div class="card" style="width: 18rem;">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <img th:src="@{/images/task-icon.png}" alt="Task Icon" class="task-icon">
