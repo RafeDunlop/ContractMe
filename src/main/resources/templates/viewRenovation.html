@@ -59,7 +59,7 @@
         <div th:if="!${renovation.getRenovationTasks().isEmpty()}" class="mb-3">
             <h6 class="fw-bold">Tasks:</h6>
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3">
-                <div th:each="renovationTask : ${renovation.getRenovationTasks()}" class="col mb-4">
+                <div th:each="renovationTask : ${tasks}" class="col mb-4">
                     <div class="card" style="width: 18rem;">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
