@@ -64,7 +64,7 @@ public class ForgotPasswordController {
 
     @PostMapping("/password/reset/{token}")
     public String submitEmail(@PathVariable String token, @RequestParam("newPassword") String newPassword,
-                              @RequestParam("newPassword") String retypePassword,
+                              @RequestParam("retypePassword") String retypePassword,
                               RedirectAttributes redirectAttributes,
                               Model model,
                               HttpServletRequest request) {
@@ -77,6 +77,7 @@ public class ForgotPasswordController {
                 model.addAttribute("token", token);
                 return "resetPasswordTemplate";
             }
+            verificationCodeService.consumeResetPasswordToken(token);
             request.getContextPath();
             forgotPasswordService.sendNewPasswordEmail(user.getEmail(), user.getFirstName(), request.getLocale());
             forgotPasswordService.updatePassword(user, newPassword);

@@ -155,7 +155,7 @@ public class VerificationCodeService {
         throw new IllegalArgumentException("Signup code invalid");
     }
 
-    public void consumeResetPasswordToken(String resetPasswordToken, String password, String confirmPassword) throws IllegalArgumentException {
+    public void consumeResetPasswordToken(String resetPasswordToken) throws IllegalArgumentException {
         Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(resetPasswordToken);
         if (verificationCodeOptional.isPresent()) {
             VerificationCode verificationCode = verificationCodeOptional.get();
