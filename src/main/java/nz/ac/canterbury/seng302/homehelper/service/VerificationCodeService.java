@@ -161,15 +161,11 @@ public class VerificationCodeService {
      */
     public void consumeResetPasswordToken(String resetPasswordToken) throws IllegalArgumentException {
         Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(resetPasswordToken);
-        if (verificationCodeOptional.isPresent()) {
-            VerificationCode verificationCode = verificationCodeOptional.get();
-            User user = verificationCode.getUser();
-            if (verificationCodeValidation.isValid(verificationCode, resetPasswordToken, user)) {
-                verificationCodeRepository.delete(verificationCode);
-                return;
-            }
+        if (verificationCodeOptional.isEmpty()) {
+            throw new IllegalArgumentException("Password token invalid");
         }
-        throw new IllegalArgumentException("Signup code invalid");
+        VerificationCode verificationCode = verificationCodeOptional.get();
+        verificationCodeRepository.delete(verificationCode);
     }
 
     /**
