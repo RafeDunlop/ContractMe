@@ -70,7 +70,7 @@ public class ForgotPasswordService {
         context.setVariable("name", firstName);
         emailService.createEmail(
                 email,
-                "",
+                "Password Updated",
                 "html/email-confirm-new-password",
                 context,
                 "Send confirmation of password change email failed"

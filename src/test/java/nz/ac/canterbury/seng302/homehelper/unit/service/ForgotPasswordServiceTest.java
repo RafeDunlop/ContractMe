@@ -114,7 +114,7 @@ public class ForgotPasswordServiceTest {
         String email = "jane@doe.com";
         String firstName = "Jane";
         Locale locale = Locale.ENGLISH;
-        String subject = "";
+        String subject = "Password Updated";
         String pathToEmailHtml = "html/email-confirm-new-password";
         String onFailureMessage = "Send confirmation of password change email failed";
 
