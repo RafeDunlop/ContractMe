@@ -8,14 +8,18 @@ import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -86,5 +90,15 @@ public class RenovationTaskService {
 
         taskSubList = tasks.subList(startIndex, endIndex);
         return new PageImpl<>(taskSubList, pageable, tasks.size());
+    }
+
+    public List<String> getTaskIconFilenames() {
+        PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
+        try {
+            return Arrays.stream(pathMatchingResourcePatternResolver.getResources("/static/images/*")).map(Resource::getFilename).toList();
+        } catch (IOException e) {
+            logger.error("Error while trying to get icon filenames", e);
+            return Collections.emptyList();
+        }
     }
 }

@@ -1,12 +1,12 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="English">
     <body>
-        <div th:fragment="add-task-icon">
+        <div id="icon-selector" th:fragment="add-task-icon" th:class="shadow-overlay">
             <div th:each="icon : ${icons}">
-                <button class="icon-btn" th:id="${icon}" type="button" th:onclick="|addTaskIcon('${icon}')|">
+                <button class="icon-btn" th:id="${icon}" type="button" th:onclick="|addTaskIcon(this)|">
                     <img th:src="@{${'/images/' + icon}}" alt="Task Icon"> 
                 </button>
             </div>
-            <button type="button" class="submit-button" th:attr="data-csrf=${_csrf.token}" th:onclick="submitIcon">Confirm</button>
+            <button type="button" class="submit-button" th:attr="data-taskid=${renovationTask.getId()}, data-csrf=${_csrf.token}" th:onclick="|submitIcon()|">Confirm</button>
         </div>
     </body>
 </html>

@@ -95,7 +95,7 @@ public class RenovationTask {
         this.dueDate = dueDate;
     }
 
-    public Long getTask_id() {return task_id;}
+    public Long getId() {return task_id;}
 
     public void setIconFileName(String iconFileName) {
         this.iconFileName = iconFileName;
