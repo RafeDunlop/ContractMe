@@ -43,10 +43,6 @@ public class RenovationValidation {
     /**
      * Checks if the icon file exists and is not a directory.
      *
-     * File existence checking code taken from stack overflow answer (CC-BY-SA 4.0):
-     * <a href="https://stackoverflow.com/questions/9380690/how-to-see-if-resource-file-exists-in-java">here</a>,
-     * author <a href="https://stackoverflow.com/users/416564/johan-sj%c3%b6berg">Johan Sjöberg</a>,
-     *
      * @param fileName The file to check.
      * @return true if the file does not exist and is not a directory, false otherwise.
      */
