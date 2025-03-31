@@ -19,25 +19,48 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Controller for forgot password and reset password pages.
+ */
 @Controller
 public class ForgotPasswordController {
 
     Logger logger = LoggerFactory.getLogger(HomeController.class);
+
     ForgotPasswordService forgotPasswordService;
+
     VerificationCodeService verificationCodeService;
 
+    /**
+     * ForgotPasswordController constructor
+     * @param forgotPasswordService Service for ForgotPasswordController
+     * @param verificationCodeService Service to create and delete codes
+     */
     @Autowired
     public ForgotPasswordController(ForgotPasswordService forgotPasswordService, VerificationCodeService verificationCodeService) {
         this.forgotPasswordService = forgotPasswordService;
         this.verificationCodeService = verificationCodeService;
     }
 
+    /**
+     * Get the forgot password form.
+     * @return Template for forgot password page
+     */
     @GetMapping("/password/forgot")
     public String forgotPassword() {
         logger.info("GET /password/forgot");
         return "forgotPasswordTemplate";
     }
 
+    /**
+     * Post request method for forgot password page. Checks whether email is in a valid format and sets error message if there
+     * are any problems. Otherwise, sets an email confirmation message, and if the email is associated to an account, a token
+     * will be created and an email will be sent to that account in order to reset their password.
+     * @param email Email associated with the user to have their password reset.
+     * @param model Model interface
+     * @param request Post request used to get locale
+     * @return Template for forgot password page
+     */
     @PostMapping("/password/forgot")
     public String submitEmail(@RequestParam("email") String email, Model model, HttpServletRequest request) {
         logger.info("POST /password/forgot");
@@ -51,6 +74,14 @@ public class ForgotPasswordController {
         return "forgotPasswordTemplate";
     }
 
+    /**
+     * Get the forgot password form if the token is valid and associated to an account. Otherwise, it redirects the user to
+     * the login page with message.
+     * @param token Reset password token for user
+     * @param redirectAttributes Message for redirect page
+     * @param model Model interface
+     * @return Template for reset password page or redirect to login page
+     */
     @GetMapping("/password/reset/{token}")
     public String resetPassword(@PathVariable String token, RedirectAttributes redirectAttributes, Model model) {
         logger.info("GET /password/forgot/{}", token);
@@ -63,6 +94,18 @@ public class ForgotPasswordController {
         return "redirect:/login";
     }
 
+    /**
+     * Post request method for reset password page. If the token is valid and associated to an account, it checks if the new
+     * and retyped passwords are in the right format and updates user details if true. If the passwords aren't in the right format,
+     * an error message shows up. If the token is invalid, it redirects the user to the login page with message.
+     * @param token Reset password token for user
+     * @param newPassword New password for user
+     * @param retypePassword Retype new password for confirmation
+     * @param redirectAttributes Message for redirect page
+     * @param model Model interface
+     * @param request Post request used to get locale
+     * @return Template for reset password page or redirect to login page
+     */
     @PostMapping("/password/reset/{token}")
     public String submitPassword(@PathVariable String token, @RequestParam("newPassword") String newPassword,
                               @RequestParam("retypePassword") String retypePassword,
