@@ -34,13 +34,13 @@ public class ForgotPasswordController {
 
     @GetMapping("/password/forgot")
     public String forgotPassword() {
-        logger.info("GET /forgot-password");
+        logger.info("GET /password/forgot");
         return "forgotPasswordTemplate";
     }
 
     @PostMapping("/password/forgot")
     public String submitEmail(@RequestParam("email") String email, Model model, HttpServletRequest request) {
-        logger.info("POST /forgot-password");
+        logger.info("POST /password/forgot");
         String errorMessage = forgotPasswordService.validateEmail(email, request.getLocale());
         if (errorMessage.isEmpty()) {
             model.addAttribute("emailMessage", "An email was sent to the address if it was recognised");
@@ -53,6 +53,7 @@ public class ForgotPasswordController {
 
     @GetMapping("/password/reset/{token}")
     public String resetPassword(@PathVariable String token, RedirectAttributes redirectAttributes, Model model) {
+        logger.info("GET /password/forgot/{}", token);
         Optional<User> expectedUser = verificationCodeService.getUserByToken(token);
         if (expectedUser.isPresent()) {
             model.addAttribute("token", token);
@@ -68,6 +69,7 @@ public class ForgotPasswordController {
                               RedirectAttributes redirectAttributes,
                               Model model,
                               HttpServletRequest request) {
+        logger.info("POST /password/forgot/{}", token);
         Optional<User> expectedUser = verificationCodeService.getUserByToken(token);
         if (expectedUser.isPresent()) {
             User user = expectedUser.get();
