@@ -64,7 +64,7 @@ public class ForgotPasswordController {
     }
 
     @PostMapping("/password/reset/{token}")
-    public String submitEmail(@PathVariable String token, @RequestParam("newPassword") String newPassword,
+    public String submitPassword(@PathVariable String token, @RequestParam("newPassword") String newPassword,
                               @RequestParam("retypePassword") String retypePassword,
                               RedirectAttributes redirectAttributes,
                               Model model,
