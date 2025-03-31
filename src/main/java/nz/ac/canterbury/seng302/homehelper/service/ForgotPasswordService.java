@@ -46,7 +46,7 @@ public class ForgotPasswordService {
                 "",
                 "html/email-confirm-new-password",
                 context,
-                "send confirmation of password change email failed"
+                "Send confirmation of password change email failed"
         );
     }
 
