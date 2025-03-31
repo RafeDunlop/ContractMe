@@ -1,17 +1,14 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class EditTaskService {
@@ -61,5 +58,19 @@ public class EditTaskService {
 
     }
 
-
+    /**
+     * Updates the icon of a renovation task with the given file name.
+     *
+     * @param renovationTask The renovation task to be updated.
+     * @param iconFileName The file name of the new icon.
+     * @throws IllegalArgumentException If the file does not exist or is a directory.
+     */
+    public void updateTaskIcon(RenovationTask renovationTask, String iconFileName) throws IllegalArgumentException {
+        if (renovationValidation.validateTaskIconFileName(iconFileName)) {
+            renovationTask.setIconFileName(iconFileName);
+            renovationTaskRepository.save(renovationTask);
+        } else {
+            throw new IllegalArgumentException("File does not exist");
+        }
+    }
 }
