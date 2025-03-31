@@ -17,6 +17,8 @@ import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.event.OnRegistrationCompleteEvent;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 /**
@@ -88,8 +90,9 @@ public class RegisterController {
      * Get mapping for the email verification code form.
      */
     @GetMapping("/confirm-registration")
-    public String confirmRegistration() {
+    public String confirmRegistration(@RequestParam(value="error", required = false) String error, Model model) {
         logger.info("GET /confirm-registration");
+        model.addAttribute("errorMessage", error);
         return "emailVerificationForm";
     }
 
@@ -99,7 +102,7 @@ public class RegisterController {
      * @param code the verification code
      */
     @PostMapping("/confirm-registration")
-    public String verifyRegistration(@RequestParam(name="code") String code, Model model) {
+    public String verifyRegistration(@RequestParam(name="code") String code, Model model, RedirectAttributes redirectAttributes) {
         logger.info("POST /confirm-registration code: {}", code);
         try {
             verificationCodeService.consumeSignupCode(code);
@@ -107,6 +110,7 @@ public class RegisterController {
             model.addAttribute("errorMessage", error.getMessage());
             return "emailVerificationForm";
         }
+        redirectAttributes.addFlashAttribute("loginMessage", "Your account has been activated, please log in");
         return "redirect:/login";
     }
 

@@ -7,7 +7,6 @@ import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.security.SecureRandomCodeGenerator;
-import nz.ac.canterbury.seng302.homehelper.validation.VerificationCodeValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +29,6 @@ public class VerificationCodeService {
 
     private final VerificationCodeRepository verificationCodeRepository;
 
-    private final VerificationCodeValidation verificationCodeValidation;
-
     private final UserRepository userRepository;
 
     private Long randomSeed;
@@ -48,15 +45,12 @@ public class VerificationCodeService {
      * Constructs repositories and validation classes as required.
      * Makes a single deletion executor thread to delete expired codes with a daemon thread
      * @param verificationCodeRepository The repository for {@link VerificationCode} entities
-     * @param verificationCodeValidation The validation class for {@link VerificationCode} entities
      * @param userRepository The repository for {@link User} entities
      */
     @Autowired
     public VerificationCodeService(VerificationCodeRepository verificationCodeRepository,
-                                   VerificationCodeValidation verificationCodeValidation,
                                    UserRepository userRepository) {
         this.verificationCodeRepository = verificationCodeRepository;
-        this.verificationCodeValidation = verificationCodeValidation;
         this.userRepository = userRepository;
         deletionContractMap = new HashMap<>();
         deletionExecutor = Executors.newSingleThreadScheduledExecutor(threadTask -> {
@@ -136,24 +130,22 @@ public class VerificationCodeService {
      * Attempts to consume the specified signup code. If it is valid, the associated user account will be activated and the
      * {@link VerificationCode} will be deleted. If it is not valid or not present (expired), throws an exception.
      * If the code exists but is invalid, it is also deleted.
-     * @param signupCode The signup code to be consumed
+     * @param signupCode inputted sign up code
      * @throws IllegalArgumentException If the code is not valid or does not exist
      */
     public void consumeSignupCode(String signupCode) throws IllegalArgumentException {
         Optional<VerificationCode> verificationCodeOptional = verificationCodeRepository.findByCode(signupCode);
-        if (verificationCodeOptional.isPresent()) {
-            VerificationCode verificationCode = verificationCodeOptional.get();
-            User user = verificationCode.getUser();
-            if (verificationCodeValidation.isValid(verificationCode, signupCode, user)) {
-                user.activate();
-                userRepository.save(user);
-                verificationCodeRepository.delete(verificationCode);
-                return;
-            } else {
-                verificationCodeRepository.delete(verificationCode);
-            }
+
+        if (verificationCodeOptional.isEmpty()) {
+            throw new IllegalArgumentException("Signup code invalid");
         }
-        throw new IllegalArgumentException("Signup code invalid");
+
+        VerificationCode verificationCode = verificationCodeOptional.get();
+        User user = verificationCode.getUser();
+
+        user.activate();
+        userRepository.save(user);
+        verificationCodeRepository.delete(verificationCode);
     }
 
     /**

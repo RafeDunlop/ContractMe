@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
@@ -14,8 +15,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -162,10 +165,9 @@ public class RenovationControllerIntegrationTest {
                         .param("description", "A".repeat(512))
                         .param("roomList", "Room 1", "Room 2")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("viewRenovation"))
-                .andExpect(model().attributeExists("renovation"))
-                .andExpect(model().attribute("renovation",
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=6"))
+                .andExpect(flash().attribute("renovation",
                         hasProperty("name", is("Rénövatiôn Onē"))));
 
         userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
@@ -344,14 +346,10 @@ public class RenovationControllerIntegrationTest {
                         .param("id", Long.toString(existingRecord.getId()))
                         .param("name", "Rénövatiôn Onē")
                         .param("description", "A".repeat(512))
-                        .param("roomList", "Room 3", "Room 4")
+                        .param("taskRoomList", "Room 3", "Room 4")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("viewRenovation"))
-                .andExpect(model().attribute("renovation", allOf(
-                        hasProperty("name", is("Rénövatiôn Onē")),
-                        hasProperty("description", is("A".repeat(512))),
-                        hasProperty("rooms", contains("Room 3", "Room 4")))));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId()));
 
         List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());
@@ -478,5 +476,91 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
                 .andExpect(result -> assertEquals("400 BAD_REQUEST \"This renovation does not exist\"", Objects.requireNonNull(result.getResolvedException()).getMessage()));
+    }
+
+    @Test
+    public void getViewRecord_withPagination_returnPaginatedTasks() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        List<RenovationTask> renovationTasks = IntStream.range(0, 15)
+                .mapToObj(i -> new RenovationTask(
+                        "Task " + i,
+                        "Description for Task " + i,
+                        List.of("Room 1", "Room 2"),
+                        LocalDate.now().plusDays(i),
+                        existingRecord
+                ))
+                .toList();
+        existingRecord.setRenovationTasks(renovationTasks);
+        renovationRecordRepository.save(existingRecord);
+
+        // Test first page
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .param("page", "1")
+                        .param("tasksPerPage", "5")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"))
+                .andExpect(model().attribute("renovation", existingRecord))
+                .andExpect(model().attribute("tasks", hasSize(5)))
+                .andExpect(model().attribute("pageNumber", 1))
+                .andExpect(model().attribute("totalPages", 3));
+
+        // Test second page
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .param("page", "2")
+                        .param("tasksPerPage", "5")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"))
+                .andExpect(model().attribute("tasks", hasSize(5)))
+                .andExpect(model().attribute("pageNumber", 2))
+                .andExpect(model().attribute("totalPages", 3));
+
+        // Test last page
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .param("page", "3")
+                        .param("tasksPerPage", "5")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"))
+                .andExpect(model().attribute("tasks", hasSize(5)))
+                .andExpect(model().attribute("pageNumber", 3))
+                .andExpect(model().attribute("totalPages", 3));
+    }
+
+    @Test
+    public void getViewRecord_invalidPageNumber_returnDefaultPage() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        List<RenovationTask> renovationTasks = IntStream.range(0, 10)
+                .mapToObj(i -> new RenovationTask(
+                        "Task " + i,
+                        "Description for Task " + i,
+                        List.of("Room 1", "Room 2"),
+                        LocalDate.now().plusDays(i),
+                        existingRecord
+                ))
+                .toList();
+        existingRecord.setRenovationTasks(renovationTasks);
+        renovationRecordRepository.save(existingRecord);
+
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .param("page", "34")
+                        .param("tasksPerPage", "5")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=2&tasksPerPage=5"));
+
+
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .param("page", "-1")
+                        .param("tasksPerPage", "5")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=1&tasksPerPage=5"));
     }
 }

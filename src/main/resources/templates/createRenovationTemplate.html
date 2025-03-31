@@ -16,7 +16,6 @@
         <form th:action="@{create}" method="post" id="renovation-form">
 
             <input type="hidden" id="roomListEdit" th:name="roomListEdit" th:value="${#strings.arrayJoin(roomList, ',')}">
-
             <input type="hidden" id="existingName" th:name="existingName" th:value="${existingName}">
 
             <div class="mb-3">
@@ -59,5 +58,5 @@
 </div>
 </body>
 <script type="module" th:src="@{/js/createRecordValidations.js}"></script>
-<script type="module" th:src="@{/js/renovation.js}"></script>
+<script type="module" th:src="@{/js/individualRenovation.js}"></script>
 </html>
