@@ -29,7 +29,7 @@ public class EditTaskServiceIntegrationTest {
     @Test
     public void updateIcon_fileExists_savesTask() {
         RenovationTask renovationTask = new RenovationTask("Task 1", "New Task", null, null, null);
-        // Default task-icon.png should exist
+        // Default task-icon.png should exist in test resources
         assertDoesNotThrow(() -> editTaskService.updateTaskIcon(renovationTask, "task-icon.png"));
         verify(renovationTaskRepository, times(1)).save(Mockito.any(RenovationTask.class));
     }
@@ -37,7 +37,6 @@ public class EditTaskServiceIntegrationTest {
     @Test
     public void updateIcon_fileDoesNotExist_throwsException() {
         RenovationTask renovationTask = new RenovationTask("Task 1", "New Task", null, null, null);
-        // Non-existent file should throw an exception
         assertThrows(IllegalArgumentException.class, () -> editTaskService.updateTaskIcon(renovationTask, "non-existent-file.png"));
         verify(renovationTaskRepository, never()).save(Mockito.any(RenovationTask.class));
     }

@@ -41,10 +41,10 @@ public class RenovationValidation {
     }
 
     /**
-     * Checks if the icon file exists and is not a directory.
+     * Checks if the icon file existsy.
      *
      * @param fileName The file to check.
-     * @return true if the file does not exist and is not a directory, false otherwise.
+     * @return true if the file does not existy, false otherwise.
      */
     public boolean validateTaskIconFileName(String fileName) {
         Resource resource = new ClassPathResource(ICON_DIR + fileName);

@@ -41,7 +41,10 @@
                     <div class="card" style="width: 18rem;">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
-                                <img th:src="@{${'/images/' + renovationTask.getIconFileName()}}" alt="Task Icon" class="task-icon">
+                                <div class="position-relative">
+                                    <img th:src="@{${'/images/' + renovationTask.getIconFileName()}}" alt="Task Icon" class="task-icon">
+                                    <button type="button" class="btn btn-secondary btn-sm rounded-circle opacity-75 top-0 start-100 translate-middle">+</button>
+                                </div>
                                 <h5 class="card-title truncate ms-2 mb-0" th:text="${renovationTask.getName()}">Task Title</h5>
                             </div>
                             <p class="card-text truncate" th:text="${renovationTask.getDescription()}">Task Description</p>
