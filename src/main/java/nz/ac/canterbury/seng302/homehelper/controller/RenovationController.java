@@ -1,18 +1,25 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
+import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +35,7 @@ public class RenovationController {
     private static final Logger logger = LoggerFactory.getLogger(RenovationController.class);
 
     private final RenovationRecordService renovationRecordService;
-
+    private final RenovationTaskService renovationTaskService;
     private final LoginService loginService;
 
     /**
@@ -37,8 +44,9 @@ public class RenovationController {
      * @param loginService The login service provides the function to get the current user
      */
     @Autowired
-    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService) {
+    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService) {
         this.renovationRecordService = renovationRecordService;
+        this.renovationTaskService = renovationTaskService;
         this.loginService = loginService;
     }
 
@@ -92,9 +100,9 @@ public class RenovationController {
      */
     @PostMapping("/create")
     public String submitRecord(@RequestParam(name="name") String name,
-            @RequestParam(name = "description", required=false, defaultValue = "") String description,
-            @RequestParam(name = "roomList", required = false) List <String> roomList,
-            Model model) {
+                               @RequestParam(name = "description", required=false, defaultValue = "") String description,
+                               @RequestParam(name = "roomList", required = false) List <String> roomList,
+                               Model model, RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/create");
         if (roomList == null) roomList = new ArrayList<>(); //cannot be a default value as technically non-constant
         if (!renovationRecordService.validateAllInputsCreate(name, description, roomList)) {
@@ -111,11 +119,13 @@ public class RenovationController {
             User user = loginService.getUserByEmail();
             try {
                 RenovationRecord renovationRecord = new RenovationRecord(user, name, description, roomList);
+
                 renovationRecordService.addRenovationRecord(renovationRecord);
-                model.addAttribute("renovation", renovationRecord);
-                return "viewRenovation";
+                redirectAttributes.addFlashAttribute("renovation", renovationRecord);
+                return "redirect:/renovations/view?id=" + renovationRecord.getId();
+
             } catch (IllegalArgumentException e) {
-                logger.warn("Form submission error", e);
+                logger.warn("Form submission error {}", e.getMessage());
                 model.addAttribute("name", name);
                 model.addAttribute("description", description);
                 model.addAttribute("roomList", roomList);
@@ -207,7 +217,8 @@ public class RenovationController {
         if (changesAreValid) { //go to view page
             renovationRecord.setName(name); // don't set the name until the changes are valid to avoid db divergence
             renovationRecordService.addRenovationRecord(renovationRecord); //updates existing record (identified by id)
-            return "viewRenovation";
+            model.addAttribute("renovation", renovationRecord);
+            return "redirect:/renovations/view?id=" + renovationRecord.getId();
         }
         if (renovationRecordService.checkForExactMatch(name, renovationRecord)) {
             model.addAttribute("existingName", name);
@@ -220,14 +231,64 @@ public class RenovationController {
     /**
      * Handles redirecting to the view record page for a given record based on the id
      * @param id of the renovation record to view
+     * @param pageNumber the page of tasks to view, defaults to 1
+     * @param tasksPerPage the number of tasks to display on the page, based off the screen size
+     * @param request request the HTTP servlet request
      * @param model (map-like) representation of results to be used by thymeleaf
-     * @return redirect to viewRenovation page
+     * @return view page of the renovation
+     * @throws ResponseStatusException if the renovation record does not exist
      */
+
     @GetMapping("/view")
-    public String viewRenovation(@RequestParam(name = "id") Long id, Model model) {
+    public String viewRenovation(@RequestParam(name = "id") Long id,
+                                 @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                 @RequestParam(defaultValue = "5", name = "tasksPerPage") int tasksPerPage,
+                                 HttpServletRequest request,
+                                 Model model) {
+
+        if (tasksPerPage < 1) {
+            tasksPerPage = 5;
+        }
+
+        HttpSession session = request.getSession();
+        if (session.getAttribute("tasksPerPage") != null) {
+            // If tasksPerPage is not passed in the request, fallback to session value.
+            tasksPerPage = (int) session.getAttribute("tasksPerPage");
+        }
+        // Scales the number of tasks per page based on screen size.
+        // The client cannot directly set this value.
+
+
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
+
+        if (pageNumber < 1) return "redirect:/renovations/view?id=" + id + "&page=1&tasksPerPage=" + tasksPerPage;
+
+        int totalTasks = record.getRenovationTasks().size();
+        int totalPages = (totalTasks + tasksPerPage - 1) / tasksPerPage;
+
+        if (pageNumber > (totalPages) && (totalTasks != 0)) return "redirect:/renovations/view?id=" + id + "&page=" + totalPages + "&tasksPerPage=" + tasksPerPage;
+
+        Pageable pageable = PageRequest.of(pageNumber - 1, tasksPerPage);
+        Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
+        List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
+
+        int paginationLinksStart;
+        int paginationLinksEnd;
+
+        paginationLinksStart = Math.max(pageNumber - 2, 1);
+        paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
+        // Tracks two pages ahead and behind the current page for the page number buttons displaying on the page.
+
+        model.addAttribute("tasks", paginatedTasks.getContent());
+        model.addAttribute("pageNumber", pageNumber);
+        model.addAttribute("totalPages", totalPages);
         model.addAttribute("renovation", record);
+        model.addAttribute("paginationLinksStart", paginationLinksStart);
+        model.addAttribute("paginationLinksEnd", paginationLinksEnd);
+        model.addAttribute("tasksPerPage", tasksPerPage);
+        model.addAttribute("icons", iconFileNames);
+
         return "viewRenovation";
     }
 }

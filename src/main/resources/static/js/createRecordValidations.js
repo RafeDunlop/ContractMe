@@ -1,4 +1,4 @@
-import { validateField } from "./validations.js";
+import { validateField } from "./renovationCommons.js";
 
 let recordNameField = document.getElementById("name")
 let nameErrorLabel = document.getElementById("name-error-message")

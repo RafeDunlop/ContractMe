@@ -22,11 +22,12 @@ import java.util.NoSuchElementException;
  */
 @Controller
 public class EditProfileController {
-    Logger logger = LoggerFactory.getLogger(EditProfileController.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(EditProfileController.class);
 
     private final EditProfileService editProfileService;
-    private final LoginService loginService;
 
+    private final LoginService loginService;
 
     /**
      * Constructor for the controller and links the services to the controller.

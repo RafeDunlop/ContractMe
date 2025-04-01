@@ -5,7 +5,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.controller.UpdatePasswordController;
 import nz.ac.canterbury.seng302.homehelper.dto.UpdatePasswordDTO;
 import nz.ac.canterbury.seng302.homehelper.service.UpdatePasswordService;
@@ -63,7 +62,7 @@ public class UpdatePasswordControllerTest {
         UpdatePasswordDTO invalidPasswordDTO = new UpdatePasswordDTO("old", "new", "retype");
 
 
-        doThrow(new IllegalArgumentException("Old Password does not match.")).when(updatePasswordServiceMock).updatePassword(invalidPasswordDTO);
+        doThrow(new IllegalArgumentException("Your old password is incorrect.")).when(updatePasswordServiceMock).updatePassword(invalidPasswordDTO);
 
 
         String result = updatePasswordController.tryChangePassword(invalidPasswordDTO, bindingResultMock, modelMock, redirectAttributesMock);

@@ -38,8 +38,11 @@ public class RenovationRecord {
     @LastModifiedDate
     private LocalDateTime editedDate;
 
+    @OneToMany(mappedBy = "renovationRecord",fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<RenovationTask> renovationTasks = new ArrayList<>();
 
-    protected RenovationRecord() {}
+
+    public RenovationRecord() {}
 
     /**
      * Constructor for RenovationRecord
@@ -54,6 +57,14 @@ public class RenovationRecord {
         this.description = (description != null) ? description.trim() : "";
         this.rooms = new ArrayList<>();
         rooms.forEach(room -> this.rooms.add(room.trim()));
+    }
+
+    /**
+     * Sets task list, for testing
+     * @param renovationTasks the list of tasks on the renovation record
+     */
+    public void setRenovationTasks(List<RenovationTask> renovationTasks) {
+        this.renovationTasks = renovationTasks;
     }
 
     /**
@@ -105,6 +116,11 @@ public class RenovationRecord {
     }
 
     /**
+     * Gets the list of all tasks made under a record
+     * @return list of renovation tasks
+     */
+    public List<RenovationTask> getRenovationTasks() {return renovationTasks; }
+    /**
      * Gets created date of the renovation record
      */
     public void setCreatedTimestamp(LocalDateTime createdTimestamp) {
@@ -149,7 +165,7 @@ public class RenovationRecord {
      */
     @Override
     public String toString() {
-        return "FormResult{" +
+        return "RenovationRecord{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +

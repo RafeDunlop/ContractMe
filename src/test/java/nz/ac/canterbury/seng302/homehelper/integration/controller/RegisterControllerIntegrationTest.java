@@ -17,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -26,12 +27,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class RegisterControllerIntegrationTest {
     @Autowired
     private RegisterController registerController;
@@ -58,6 +60,7 @@ public class RegisterControllerIntegrationTest {
     @PostConstruct
     public void setup() {
         mockMvc = MockMvcBuilders.standaloneSetup(registerController).build();
+
     }
 
     /**
@@ -71,11 +74,10 @@ public class RegisterControllerIntegrationTest {
     public void testRegisterUser_validUser_success() throws Exception {
         PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         User expectedUser = Mockito.spy(new User("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
-        expectedUser.grantAuthority("ROLE_USER");
         Mockito.when(expectedUser.getId()).thenReturn(1L);
         Mockito.when(verificationCodeRepository.save(Mockito.any(VerificationCode.class))).thenAnswer((InvocationOnMock) -> null);
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(expectedUser);
-        Mockito.when(userRepository.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(expectedUser));;
+        Mockito.when(userRepository.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(expectedUser));
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .param("firstName", "Jane")
@@ -86,7 +88,7 @@ public class RegisterControllerIntegrationTest {
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
             .andExpect(view().name("redirect:/confirm-registration"));
-        Mockito.verify(emailService, Mockito.times(1)).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+        verify(emailService, times(1)).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 
     /**
@@ -113,7 +115,58 @@ public class RegisterControllerIntegrationTest {
                 .andExpect(model().attribute("firstName", "Jane"))
                 .andExpect(model().attribute("lastName", "Doe"))
                 .andExpect(model().attribute("email", "jane@doe.nz"));
-        Mockito.verify(emailService, Mockito.never()).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+        verify(emailService, Mockito.never()).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+    }
+
+    /**
+     * Tests the user activation of a valid verification code
+     * This test simulates a user submitting a valid verification code on the confirm registration page and expects:
+     * A redirect to /login (3xx status).
+     * User should be saved
+     * @throws Exception if the request processing fails.
+     */
+    @Test
+    public void testConfirmRegistration_validCode_userActivatedAndVerificationCodeDeleted() throws Exception {
+        User mockUser = mock(User.class);
+        String testCode = "123456";
+        Locale testLocale = Locale.ENGLISH;
+        VerificationCode verificationCode = new VerificationCode(mockUser, testCode, testLocale);
+
+        Mockito.when(verificationCodeRepository.findByCode(testCode)).thenReturn(Optional.of(verificationCode));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/confirm-registration")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("code", testCode)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(MockMvcResultMatchers.redirectedUrl("/login"))
+                .andExpect(flash().attribute("loginMessage", "Your account has been activated, please log in"));
+
+
+        verify(mockUser, times(1)).activate();
+        verify(verificationCodeRepository, times(1)).delete(verificationCode);
+    }
+
+    @Test
+    public void testConfirmRegistration_invalidCode_userNotActivated() throws Exception {
+        User mockUser = mock(User.class);
+        String testCode = "123456";
+        String expectedError = "Signup code invalid";
+
+        Mockito.when(verificationCodeRepository.findByCode(testCode)).thenReturn(Optional.empty());
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/confirm-registration")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("code", testCode)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(view().name("emailVerificationForm"))
+                .andExpect(model().attribute("errorMessage", expectedError));
+
+        verify(verificationCodeRepository, times(1)).findByCode(testCode);
+        verify(mockUser, never()).activate();
+        verify(userRepository, never()).save(mockUser);
+        verify(verificationCodeRepository, never()).delete(Mockito.any(VerificationCode.class));
     }
 
 }

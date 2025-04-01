@@ -21,9 +21,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
@@ -34,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class UpdatePasswordControllerIntegrationTest {
 
     @Autowired
@@ -88,7 +91,7 @@ public class UpdatePasswordControllerIntegrationTest {
     }
     /**
      * Tests the updating password of a valid user.
-     * This test simulates a user submitting a invalid updatePassword form and expects:
+     * This test simulates a user submitting an invalid updatePassword form and expects:
      * A redirection  upon successful change.
      * A redirection to the user profile page.
      *
@@ -98,7 +101,7 @@ public class UpdatePasswordControllerIntegrationTest {
     @Test
     public void testPostChangePassword_invalidCurrentPassword_error() throws Exception {
         PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        List<String> expectedErrors = List.of("Old Password does not match.");
+        List<String> expectedErrors = List.of("Your old password is incorrect.");
         User expectedUser = new User("Jane", "Doe", "jane@doe.nz",
                 passwordEncoder.encode("RightPassword!"));
         UpdatePasswordDTO updatePasswordDTO = new UpdatePasswordDTO("WrongPassword",
