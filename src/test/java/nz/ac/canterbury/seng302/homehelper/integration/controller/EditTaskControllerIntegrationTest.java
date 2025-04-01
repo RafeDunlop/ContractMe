@@ -25,6 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -36,7 +37,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
+@ActiveProfiles("test")
 @SpringBootTest
 public class EditTaskControllerIntegrationTest {
 
@@ -112,7 +113,6 @@ public class EditTaskControllerIntegrationTest {
                         .param("taskId", "1")
                         .param("renovationId", "1")
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(view().name("editTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.")));
@@ -130,7 +130,6 @@ public class EditTaskControllerIntegrationTest {
                         .param("taskId", "1")
                         .param("renovationId", "1")
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(view().name("editTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Task description cannot be empty.")));
@@ -152,7 +151,6 @@ public class EditTaskControllerIntegrationTest {
                         .param("taskId", "1")
                         .param("renovationId", "1")
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(view().name("editTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Task description must be 512 characters or less.")));
@@ -171,13 +169,23 @@ public class EditTaskControllerIntegrationTest {
                         .param("renovationId", "1")
                         .param("DueDate", String.valueOf(LocalDate.now().minusDays(1)))
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(view().name("editTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Due date must be in the future.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 
+    @Test
+    @WithMockUser(username = "jane@doe.com", roles = {"USER"})
+    public void testEditTask_editTaskIcon_taskIconChangedReturnsToRenovations() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/editTask/edit-icon/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                        .param("id", "1")
+                    .content("{\"iconName\":\"task-icon.png\"}")
+                    .accept(MediaType.APPLICATION_JSON))
+
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
 
 
 

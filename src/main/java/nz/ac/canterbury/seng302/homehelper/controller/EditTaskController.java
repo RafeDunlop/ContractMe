@@ -100,11 +100,11 @@ public class EditTaskController {
 
     @PostMapping("editTask/edit-icon/{id}")
     public String editTaskIcon(@PathVariable("id") Long id, @RequestBody Map<String, String> requestBody, Model model) {
-        logger.info("POST renovations/view/edit-icon");
+        logger.info("POST editTask/edit-icon/{id}");
         String iconName = requestBody.get("iconName");
         RenovationTask renovationTask = renovationTaskService.getTaskById(id);
         RenovationRecord renovation = renovationTask.getRenovationRecord();
         editTaskService.updateTaskIcon(renovationTask, iconName);
-        return "redirect:/renovations/view?id=" + renovation.getId();
+        return "";
     }
 }

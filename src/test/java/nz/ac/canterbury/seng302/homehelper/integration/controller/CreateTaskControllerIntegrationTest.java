@@ -96,7 +96,6 @@ public class CreateTaskControllerIntegrationTest {
                 .param("roomList", "Room 1", "Room 2")
                         .param("renovationId", "1")
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(view().name("createTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.")));
@@ -119,7 +118,6 @@ public class CreateTaskControllerIntegrationTest {
                         .param("roomList", "Room 1", "Room 2")
                         .param("renovationId", "1")
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(view().name("createTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Task description cannot be empty.")));
@@ -145,7 +143,6 @@ public class CreateTaskControllerIntegrationTest {
                         .param("roomList", "Room 1", "Room 2")
                         .param("renovationId", "1")
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(view().name("createTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Task description must be 512 characters or less.")));
@@ -168,7 +165,6 @@ public class CreateTaskControllerIntegrationTest {
                         .param("renovationId", "1")
                         .param("DueDate", String.valueOf(LocalDate.now().minusDays(1)))
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(view().name("createTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Due date must be in the future.")));
