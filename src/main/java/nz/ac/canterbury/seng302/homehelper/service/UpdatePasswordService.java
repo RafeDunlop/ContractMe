@@ -51,7 +51,7 @@ public class UpdatePasswordService {
         String lastName = user.getLastName();
         String email = user.getEmail();
         if (!passwordEncoder.matches(updatePasswordDTO.getCurrentPassword(), user.getPassword())){
-            errors.add(String.format("Old Password does not match."));
+            errors.add(String.format("Your old password is incorrect."));
         }
         errors.addAll(userValidation.validateUpdatePasswordString(password, updatePasswordDTO.getRetypePassword(),"registerPassword",firstName,lastName,email));
 
