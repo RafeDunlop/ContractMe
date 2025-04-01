@@ -92,7 +92,7 @@ public class CreateTaskController {
             return "redirect:/renovations/view?id=" + renovationId;
 
         } catch (IllegalArgumentException e) {
-            logger.warn("Form submission error", e);
+            logger.warn("Form submission error {}", e.getMessage());
 
             List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
             model.addAttribute("errorMessages", errorsList);

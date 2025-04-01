@@ -24,7 +24,7 @@ import jakarta.mail.internet.MimeMessage;
  */
 @Service
 public class EmailService {
-    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
     private final JavaMailSender mailSender;
     private final TemplateEngine htmlTemplateEngine;
 
@@ -88,7 +88,7 @@ public class EmailService {
             message.setText(htmlContent, true);
             mailSender.send(mimeMessage);
         } catch (MessagingException exception) {
-            log.error(errorMessage, exception);
+            logger.error(errorMessage, exception);
         }
     }
 }
