@@ -98,7 +98,7 @@ public class UpdatePasswordControllerIntegrationTest {
     @Test
     public void testPostChangePassword_invalidCurrentPassword_error() throws Exception {
         PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        List<String> expectedErrors = List.of("Old Password does not match.");
+        List<String> expectedErrors = List.of("Your old password is incorrect.");
         User expectedUser = new User("Jane", "Doe", "jane@doe.nz",
                 passwordEncoder.encode("RightPassword!"));
         UpdatePasswordDTO updatePasswordDTO = new UpdatePasswordDTO("WrongPassword",
