@@ -85,7 +85,7 @@ public class UpdatePasswordServiceTest {
             updatePasswordService.updatePassword(updatePasswordDTO);
         });
 
-        assertTrue(exception.getMessage().contains("Old Password does not match."));
+        assertTrue(exception.getMessage().contains("Your old password is incorrect."));
     }
 
     /**

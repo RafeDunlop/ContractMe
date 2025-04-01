@@ -62,7 +62,7 @@ public class UpdatePasswordControllerTest {
         UpdatePasswordDTO invalidPasswordDTO = new UpdatePasswordDTO("old", "new", "retype");
 
 
-        doThrow(new IllegalArgumentException("Old Password does not match.")).when(updatePasswordServiceMock).updatePassword(invalidPasswordDTO);
+        doThrow(new IllegalArgumentException("Your old password is incorrect.")).when(updatePasswordServiceMock).updatePassword(invalidPasswordDTO);
 
 
         String result = updatePasswordController.tryChangePassword(invalidPasswordDTO, bindingResultMock, modelMock, redirectAttributesMock);
