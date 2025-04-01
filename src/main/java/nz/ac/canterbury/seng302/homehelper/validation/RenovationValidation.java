@@ -1,20 +1,22 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
-import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
+import org.springframework.core.io.Resource;
+
+import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 
 /**
  * Validation class for task details.
  */
 @Service
 public class RenovationValidation {
-
+    private static final String ICON_DIR = "/static/images/";
     private static final int maximumDescriptionLength = 512;
 
     /**
@@ -36,6 +38,17 @@ public class RenovationValidation {
             errors.add(dueDateError);
         }
         return errors;
+    }
+
+    /**
+     * Checks if the icon file existsy.
+     *
+     * @param fileName The file to check.
+     * @return true if the file does not existy, false otherwise.
+     */
+    public boolean validateTaskIconFileName(String fileName) {
+        Resource resource = new ClassPathResource(ICON_DIR + fileName);
+        return (resource.exists());
     }
 
     /**mappedBy = "renovationRecord"

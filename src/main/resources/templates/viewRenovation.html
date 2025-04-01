@@ -5,6 +5,7 @@
     <title>View Renovation</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <script th:src="@{/js/addTaskIcon.js}"></script>
     <style>
 
     </style>
@@ -41,13 +42,17 @@
                     <div class="card" style="width: 18rem;">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
-                                <img th:src="@{/images/task-icon.png}" alt="Task Icon" class="task-icon">
+                                <div class="position-relative">
+                                    <div th:replace="~{fragments/addTaskIcon.html :: add-task-icon}"></div>
+                                    <img th:src="@{${'/images/' + renovationTask.getIconFileName()}}" alt="Task Icon" class="task-icon">
+                                    <button type="button" class="btn btn-secondary btn-sm rounded-circle opacity-75 top-0 start-100 translate-middle position-absolute" th:onclick="|showIconSelector()|">+</button>
+                                </div>
                                 <h5 class="card-title truncate ms-2 mb-0" th:text="${renovationTask.getName()}">Task Title</h5>
                             </div>
                             <p class="card-text truncate" th:text="${renovationTask.getDescription()}">Task Description</p>
                             <p class="card-text"><strong>Due Date:</strong> <span th:text="${renovationTask.getDueDate()}">Due Date</span></p>
                             <div class="d-flex justify-content-between">
-                                <a th:href="@{/editTask(taskId=${renovationTask.getTask_id()},renovationId=${renovation.getId()})}" class="btn btn-primary">Edit Task</a>
+                                <a th:href="@{/editTask(taskId=${renovationTask.getId()},renovationId=${renovation.getId()})}" class="btn btn-primary">Edit Task</a>
                             </div>
                         </div>
                     </div>
@@ -105,7 +110,7 @@
 
 
     <div class="mt-4 mb-4">
-        <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary">Edit Task</a>
+        <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary">Edit</a>
         <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary">Add New Task</a>
         <a th:href="@{/renovations}" class="btn btn-primary">Back To Renovations</a>
     </div>

@@ -16,9 +16,13 @@
 
 
       <input type="hidden" id="renovationId" th:name="renovationId" th:value="${renovation.id}">
-      <input type="hidden" id="taskId" th:name="taskId" th:value="${task.getTask_id()}">
+      <input type="hidden" id="taskId" th:name="taskId" th:value="${task.getId()}">
 
-      <div class="mb-3">
+      <img th:src="@{${'/images/' + task.getIconFileName()}}"
+           class="img-fluid rounded-circle"
+           style="width: 100px; height: 100px; object-fit: cover"
+           alt="Task Icon">
+      <div class="mt-3 mb-3">
         <label for="name" class="form-label">Name:</label>
         <input type="text" class="form-control" id="name" placeholder="Enter a name for your task" data-cy="name" autofocus th:field="*{name}">
       </div>
