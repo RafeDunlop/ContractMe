@@ -4,7 +4,6 @@ import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
@@ -19,6 +18,11 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Sets up the default data to show the functionality of our stories
+ *
+ * @author Rafe Dunlop
+ */
 @Component
 public class DefaultDataConfigurator {
 
@@ -50,13 +54,13 @@ public class DefaultDataConfigurator {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void onApplicationReady() {
+    private void onApplicationReady() {
         setupDefaultUsers();
         setupDefaultRenovations();
         setupDefaultRenovationTasks();
     }
 
-    public void setupDefaultUsers() {
+    private void setupDefaultUsers() {
         UserRegisterDTO user = new UserRegisterDTO();
         user.setEmail("seng302.team200.test@gmail.com");
         user.setFirstName("Jane");
@@ -68,7 +72,7 @@ public class DefaultDataConfigurator {
         verificationCodeService.consumeSignupCode(code);
     }
 
-    public void setupDefaultRenovations() {
+    private void setupDefaultRenovations() {
         default1Renovation1 = renovationRecordService.addRenovationRecord(
                 new RenovationRecord(default1,
                         "Jack Erskine revamp",
@@ -78,7 +82,7 @@ public class DefaultDataConfigurator {
         );
     }
 
-    public void setupDefaultRenovationTasks() {
+    private void setupDefaultRenovationTasks() {
         RenovationTaskDTO renovationTask = new RenovationTaskDTO(
                 "Build Fabian monument",
                 "at least 100 feet high, pokes out the top of the building",
