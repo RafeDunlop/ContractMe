@@ -36,7 +36,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
+@ActiveProfiles("test")
 @SpringBootTest
 @ActiveProfiles("test")
 public class EditTaskControllerIntegrationTest {
@@ -175,6 +175,17 @@ public class EditTaskControllerIntegrationTest {
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 
+    @Test
+    @WithMockUser(username = "jane@doe.com", roles = {"USER"})
+    public void testEditTask_editTaskIcon_taskIconChangedReturnsToRenovations() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/editTask/edit-icon/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                        .param("id", "1")
+                    .content("{\"iconName\":\"task-icon.png\"}")
+                    .accept(MediaType.APPLICATION_JSON))
+
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
 
 
 

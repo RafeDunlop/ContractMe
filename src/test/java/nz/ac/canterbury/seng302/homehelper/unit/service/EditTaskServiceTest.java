@@ -91,4 +91,20 @@ public class EditTaskServiceTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
         assertEquals("Due date must be in the future.", exception.getMessage());
     }
+
+    @Test
+    public void updateIcon_fileDoesNotExists_throwsException() {
+        when(renovationValidation.validateTaskIconFileName(Mockito.anyString())).thenReturn(false);
+        assertThrows(IllegalArgumentException.class, () -> {
+            editTaskService.updateTaskIcon(Mockito.mock(RenovationTask.class), "nonexistentfile.png");
+        });
+    }
+
+    @Test
+    public void updateIcon_fileExists_savesTask() {
+        when(renovationValidation.validateTaskIconFileName(Mockito.anyString())).thenReturn(true);
+        RenovationTask renovationTask = Mockito.mock(RenovationTask.class);
+        editTaskService.updateTaskIcon(renovationTask, "existingfile.png");
+        Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(renovationTask);
+    }
 }

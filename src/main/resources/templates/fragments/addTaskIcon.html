@@ -1,0 +1,29 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="English">
+    <body>
+    <div id="icon-selector" th:fragment="add-task-icon" th:class="shadow-overlay">
+        <div class="d-flex justify-content-center align-items-center vh-100">
+            <div class="card p-4 shadow">
+                <h4>Select Task Icon</h4>
+                <div class="d-flex flex-row justify-content-start flex-wrap center">
+                    <div th:each="icon : ${icons}">
+                        <button class="icon-btn task-icon-button-colour"
+                                th:id="${icon}"
+                                type="button"
+                                th:attr="data-taskid=${renovationTask.getId()}, data-csrf=${_csrf.token}"
+                                th:onclick="|addTaskIcon(this)|">
+                            <img th:src="@{${'/images/' + icon}}"
+                                 class="img-fluid rounded-circle"
+                                 style="width: 100px; height: 100px; object-fit: cover"
+                                 alt="Task Icon">
+                        </button>
+                    </div>
+                </div>
+                <div class="d-flex flex-row justify-content-start flex-wrap center">
+                    <button type="button" class="submit-button btn btn-primary m-2" th:onclick="|submitIcon()|">Confirm</button>
+                    <button type="button" class="delete-button btn btn-secondary m-2" th:attr="data-taskid=${renovationTask.getId()}, data-csrf=${_csrf.token}" th:onclick="|deleteIcon(this)|">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </body>
+</html>

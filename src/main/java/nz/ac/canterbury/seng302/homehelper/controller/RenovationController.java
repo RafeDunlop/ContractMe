@@ -271,6 +271,7 @@ public class RenovationController {
 
         Pageable pageable = PageRequest.of(pageNumber - 1, tasksPerPage);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
+        List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
 
         int paginationLinksStart;
         int paginationLinksEnd;
@@ -286,6 +287,7 @@ public class RenovationController {
         model.addAttribute("paginationLinksStart", paginationLinksStart);
         model.addAttribute("paginationLinksEnd", paginationLinksEnd);
         model.addAttribute("tasksPerPage", tasksPerPage);
+        model.addAttribute("icons", iconFileNames);
 
         return "viewRenovation";
     }
