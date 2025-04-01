@@ -1,13 +1,11 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
-import nz.ac.canterbury.seng302.homehelper.entity.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class UserValidation {
@@ -22,7 +20,7 @@ public class UserValidation {
 
         // Check if email is empty, null, or not in the form 'jane@doe.nz'
         if (email == null || email.trim().isEmpty() ||
-                !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$")) {
+                !email.matches("^[A-Za-z0-9]+([+_.-][A-Za-z0-9]+)*@[A-Za-z0-9]+([.-][A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")) {
             errors.add("Email address must be in the form ‘jane@doe.nz’.");
         }
         return errors;
