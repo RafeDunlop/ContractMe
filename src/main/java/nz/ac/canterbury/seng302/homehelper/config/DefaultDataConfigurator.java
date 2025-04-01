@@ -79,7 +79,7 @@ public class DefaultDataConfigurator {
 
         user.setEmail("seng302.team200.test1@gmail.com");
         default2 = registerService.registerUser(user);
-        code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, default1, Locale.ENGLISH);
+        code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, default2, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);
     }
 
