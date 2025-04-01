@@ -60,7 +60,7 @@ public class RenovationTask {
         this.description = (description != null) ? description.trim() : "";
         this.roomList = roomList;
         this.dueDate = dueDate;
-        this.iconFileName = "task-icon.png";
+        this.iconFileName = "default-icon.png";
     }
 
     public String getName() {
@@ -104,4 +104,6 @@ public class RenovationTask {
     public String getIconFileName() {
         return iconFileName;
     }
+
+    public RenovationRecord getRenovationRecord() { return renovationRecord; }
 }

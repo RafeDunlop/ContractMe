@@ -29,8 +29,8 @@ public class EditTaskServiceIntegrationTest {
     @Test
     public void updateIcon_fileExists_savesTask() {
         RenovationTask renovationTask = new RenovationTask("Task 1", "New Task", null, null, null);
-        // Default task-icon.png should exist in test resources
-        assertDoesNotThrow(() -> editTaskService.updateTaskIcon(renovationTask, "task-icon.png"));
+        // Default default-icon.png should exist in test resources
+        assertDoesNotThrow(() -> editTaskService.updateTaskIcon(renovationTask, "default-icon.png"));
         verify(renovationTaskRepository, times(1)).save(Mockito.any(RenovationTask.class));
     }
 
