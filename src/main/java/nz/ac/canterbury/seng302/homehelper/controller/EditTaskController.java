@@ -105,6 +105,6 @@ public class EditTaskController {
         RenovationTask renovationTask = renovationTaskService.getTaskById(id);
         RenovationRecord renovation = renovationTask.getRenovationRecord();
         editTaskService.updateTaskIcon(renovationTask, iconName);
-        return "";
+        return "redirect:/renovations/view?id=" + renovation.getId();
     }
 }
