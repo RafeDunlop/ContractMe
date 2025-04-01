@@ -38,7 +38,6 @@ import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @ActiveProfiles("test")
 @SpringBootTest
-@ActiveProfiles("test")
 public class EditTaskControllerIntegrationTest {
 
     private MockMvc mockMvc;
