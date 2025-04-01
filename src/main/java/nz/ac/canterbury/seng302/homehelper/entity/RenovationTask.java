@@ -3,8 +3,6 @@ package nz.ac.canterbury.seng302.homehelper.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -39,10 +37,10 @@ public class RenovationTask {
 
     /**
      * Constructor for RenovationTask object
-     * @param name
-     * @param description
-     * @param roomList
-     * @param dueDate
+     * @param name The name of teh renovation task
+     * @param description the description of the renovation task
+     * @param roomList The rooms associated with this task
+     * @param dueDate The due date of this task
      */
     public RenovationTask(String name, String description, List<String> roomList, LocalDate dueDate, RenovationRecord renovationRecord) {
         this.renovationRecord = renovationRecord;

@@ -4,22 +4,16 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
 import nz.ac.canterbury.seng302.homehelper.service.EditTaskService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
-import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
-import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -62,7 +56,6 @@ public class EditTaskServiceTest {
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("@#$%", "", null,new ArrayList<>());
         RenovationTask renovationTask = Mockito.mock(RenovationTask.class);
         List<String> errors = new ArrayList<>();
-        List<String> roomList = new ArrayList<>();
         errors.add("description cannot be empty.");
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
@@ -97,12 +90,5 @@ public class EditTaskServiceTest {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
         assertEquals("Due date must be in the future.", exception.getMessage());
-
     }
-
-
-
-
-
-
 }

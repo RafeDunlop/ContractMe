@@ -1,9 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.dto;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -58,7 +55,7 @@ public class RenovationTaskDTO {
     }
 
     /**
-     * Stes the description of this renovation task
+     * Sets the description of this renovation task
      * @param description The description of this renovation task
      */
     public void setDescription(String description) {

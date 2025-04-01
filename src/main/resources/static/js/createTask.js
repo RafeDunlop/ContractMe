@@ -1,12 +1,6 @@
 import {
-    updateCharCounter,
-    injectRoomsIntoSubmission,
-    renderRooms
+    updateCharCounter
 } from "./renovationCommons.js";
-
-let roomList;
-let selectedList = []
-let form = document.getElementById("create-task-form");
 
 /**
  * Event listener that runs when the create task page is loaded.

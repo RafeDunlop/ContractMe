@@ -26,10 +26,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
  */
 @Controller
 public class RegisterController {
-    Logger logger = LoggerFactory.getLogger(RegisterController.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(RegisterController.class);
 
     private final RegisterService registerService;
+
     private final VerificationCodeService verificationCodeService;
+
     private final ApplicationEventPublisher eventPublisher;
 
     /**
@@ -73,7 +76,7 @@ public class RegisterController {
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
             return "redirect:/confirm-registration";
         } catch (IllegalArgumentException|MailException e) {
-            logger.warn("Form submission error: " + e.getMessage());
+            logger.warn("Form submission error: {}", e.getMessage());
 
             List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
 

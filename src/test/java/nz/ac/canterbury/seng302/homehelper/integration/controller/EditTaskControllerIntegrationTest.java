@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -78,7 +77,7 @@ public class EditTaskControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "jane@doe.com",roles = {"USER"})
+    @WithMockUser(username = "jane@doe.com")
     public void editTask_validTask_editTaskAndRedirect() throws Exception {
 
         // Perform request
@@ -104,7 +103,7 @@ public class EditTaskControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "jane@doe.com", roles = {"USER"})
+    @WithMockUser(username = "jane@doe.com")
     public void testEditTask_invalidTaskName_TaskNotEditStaysOnCreateEditTask() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -122,7 +121,7 @@ public class EditTaskControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "jane@doe.com", roles = {"USER"})
+    @WithMockUser(username = "jane@doe.com")
     public void testEditTask_noTaskDescription_TaskNotEditedStaysOnEditTask() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -140,7 +139,7 @@ public class EditTaskControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "jane@doe.com", roles = {"USER"})
+    @WithMockUser(username = "jane@doe.com")
     public void testEditTask_taskDescriptionTooLong_TaskNotEditedStaysOnEditTask() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -162,7 +161,7 @@ public class EditTaskControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "jane@doe.com", roles = {"USER"})
+    @WithMockUser(username = "jane@doe.com")
     public void testEditTask_dueDateInPast_TaskNotEditedStaysOnEditTask() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)

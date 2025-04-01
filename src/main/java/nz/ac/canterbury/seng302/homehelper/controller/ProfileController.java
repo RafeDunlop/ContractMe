@@ -27,7 +27,8 @@ import java.time.format.DateTimeFormatter;
  */
 @Controller
 public class ProfileController {
-	Logger logger = LoggerFactory.getLogger(ProfileController.class);
+
+	private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
 
 	private final LoginService loginService;
 

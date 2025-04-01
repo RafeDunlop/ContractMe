@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
  */
 @Controller
 public class HomeController {
-    Logger logger = LoggerFactory.getLogger(HomeController.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     /**
      * Redirects GET default url '/' to '/home'

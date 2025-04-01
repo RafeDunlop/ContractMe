@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
@@ -79,7 +80,7 @@ public class LoginControllerIntegrationTest {
                         .password("password"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("/login?error=*"))
-                .andDo(result -> mockMvc.perform(get(result.getResponse().getRedirectedUrl()))
+                .andDo(result -> mockMvc.perform(get(Objects.requireNonNull(result.getResponse().getRedirectedUrl())))
                         .andExpect(model().attribute("errorMessage", expectedErrorList)));
     }
 

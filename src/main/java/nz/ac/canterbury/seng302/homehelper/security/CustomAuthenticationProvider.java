@@ -48,8 +48,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             return new UsernamePasswordAuthenticationToken(user.getEmail(), null, user.getAuthorities());
         } catch (IllegalArgumentException | NoSuchElementException e) {
             throw new BadCredentialsException(e.getMessage());
-        } catch (AccountNotActivatedException e) {
-            throw e;
         }
     }
 

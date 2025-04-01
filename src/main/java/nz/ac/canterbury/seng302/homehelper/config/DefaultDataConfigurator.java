@@ -70,7 +70,7 @@ public class DefaultDataConfigurator {
         user.setPassword("P4$$word");
         user.setConfirmPassword("P4$$word");
         default1 = registerService.registerUser(user);
-        String code = verificationCodeService.issueSignupCode(GenerationStrategy.READABLE, default1, Locale.ENGLISH);
+        String code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, default1, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);
     }
 

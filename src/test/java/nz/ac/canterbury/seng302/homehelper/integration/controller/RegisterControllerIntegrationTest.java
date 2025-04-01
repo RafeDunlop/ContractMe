@@ -140,7 +140,7 @@ public class RegisterControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(MockMvcResultMatchers.redirectedUrl("/login"))
-                .andExpect(flash().attribute("loginMessage", "Your account has been activated, please log in"));;
+                .andExpect(flash().attribute("loginMessage", "Your account has been activated, please log in"));
 
 
         verify(mockUser, times(1)).activate();

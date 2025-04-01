@@ -23,10 +23,8 @@ import java.util.regex.Pattern;
 @Service
 public class RenovationRecordService {
 
-    Logger logger = LoggerFactory.getLogger(RenovationRecordService.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(RenovationRecordService.class);
     private static final int maximumDescriptionLength = 512;
-
     private final RenovationRecordRepository renovationRecordRepository;
 
     /**

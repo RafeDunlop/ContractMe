@@ -2,11 +2,8 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
-import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
-import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,9 +24,11 @@ import java.util.List;
  */
 @Controller
 public class CreateTaskController {
-    Logger logger = LoggerFactory.getLogger(EditProfileController.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(CreateTaskController.class);
 
     private final RenovationTaskService renovationTaskService;
+
     private final RenovationRecordService renovationRecordService;
 
 
@@ -83,7 +81,7 @@ public class CreateTaskController {
 
         try {
             if (roomList == null) {
-                roomList = new ArrayList<>();
+                roomList = renovationRecord.getRooms();
             }
 
             renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
@@ -103,7 +101,7 @@ public class CreateTaskController {
             model.addAttribute("id", renovationId);
 
             model.addAttribute("renovation", renovationRecord);
-            model.addAttribute("roomList", renovationRecord.getRooms());
+            model.addAttribute("roomList", roomList);
             return "createTaskTemplate";
         }
     }
