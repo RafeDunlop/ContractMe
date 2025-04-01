@@ -1,13 +1,11 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
-import nz.ac.canterbury.seng302.homehelper.entity.User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class UserValidation {
@@ -73,6 +71,9 @@ public class UserValidation {
             }
             else if (type.equals("registerPassword")) {
                 errors.add("Passwords do not match.");
+            }
+            else if (type.equals("resetPassword")) {
+                errors.add("The passwords do not match.");
             }
         }
 
