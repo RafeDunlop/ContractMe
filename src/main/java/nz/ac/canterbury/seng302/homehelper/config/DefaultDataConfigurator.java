@@ -11,6 +11,7 @@ import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,7 @@ import java.util.Locale;
  * @author Rafe Dunlop
  */
 @Component
+@Profile("!test")
 public class DefaultDataConfigurator {
 
     private final RegisterService registerService;
