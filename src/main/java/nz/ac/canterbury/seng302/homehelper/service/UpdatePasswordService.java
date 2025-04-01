@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import nz.ac.canterbury.seng302.homehelper.dto.UpdatePasswordDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
-import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -12,6 +11,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Handles calling the validation for updating the password
@@ -22,19 +22,22 @@ import java.util.List;
 public class UpdatePasswordService {
     private final UserValidation userValidation;
     private final LoginService loginService;
+    private final EmailService emailService;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private Logger logger;
 
     /**
      * Constructor for the UpdatePasswordService class
      */
     @Autowired
-    public UpdatePasswordService(UserValidation userValidation, LoginService loginService,UserRepository userRepository) {
+    public UpdatePasswordService(UserValidation userValidation, LoginService loginService,UserRepository userRepository, EmailService emailService) {
         this.userValidation = userValidation;
         this.loginService = loginService;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
     /**
@@ -66,5 +69,11 @@ public class UpdatePasswordService {
 
         //Save Users New Password
         userRepository.save(user);
+
+        try {
+            emailService.sendUpdatePasswordConfirmation(user.getEmail(), user.getFirstName(), java.util.Locale.getDefault());
+        } catch (Exception e) {
+            logger.warning(e.getMessage());
+        }
     }
 }

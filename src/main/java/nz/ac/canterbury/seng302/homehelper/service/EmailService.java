@@ -91,4 +91,31 @@ public class EmailService {
             logger.error(errorMessage, exception);
         }
     }
+
+    /**
+     * Send an update password confirmation message to the specified email address.
+     *
+     * @param recipientEmail the recipient email address, assumed to be a valid
+     * address
+     */
+    @Async
+    public void sendUpdatePasswordConfirmation(String recipientEmail,
+                                      String recipientName,
+                                      Locale locale) {
+        final Context context = new Context(locale);
+        context.setVariable("name", recipientName);
+        String subject = "Password Updated";
+        final String htmlContent = htmlTemplateEngine.process("html/email-update-password-confirmation", context);
+        final MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            final MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            message.setSubject(subject);
+            message.setTo(recipientEmail);
+            message.setText(htmlContent, true);
+            mailSender.send(mimeMessage);
+        } catch (MessagingException exception) {
+            log.error("Update password confirmation email send failed", exception);
+        }
+
+    }
 }
