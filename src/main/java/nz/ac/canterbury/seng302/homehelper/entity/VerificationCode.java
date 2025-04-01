@@ -24,7 +24,7 @@ public class VerificationCode {
     @Column(nullable = false, updatable = false)
     private Locale locale;
 
-    @OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
+    @ManyToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "user_id")
     private User user;
 

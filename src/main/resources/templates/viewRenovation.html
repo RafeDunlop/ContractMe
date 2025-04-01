@@ -95,7 +95,7 @@
                 </li>
 
                 <!-- Search field (AC more than 10 pages) --> <!-- CHANGE IF TO 10 after testing -->
-                <li class="page-item d-flex align-items-center" th:if="${totalPages > 1}">
+                <li class="page-item d-flex align-items-center" th:if="${totalPages > 10}">
                     <input type="number" class="form-control me-2" id="pageSearch" aria-label="Page Search" style="min-width: 50px;">
                     <button class="btn btn-primary" th:onclick="|validatePageSearch(${renovation.id})|">Search</button>
                 </li>
