@@ -165,7 +165,7 @@ public class RenovationRecord {
      */
     @Override
     public String toString() {
-        return "FormResult{" +
+        return "RenovationRecord{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
