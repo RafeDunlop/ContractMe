@@ -56,8 +56,8 @@ public class RenovationRecordService {
      *
      * @param renovationRecord the record to be added
      */
-    public void addRenovationRecord(RenovationRecord renovationRecord) {
-        renovationRecordRepository.save(renovationRecord);
+    public RenovationRecord addRenovationRecord(RenovationRecord renovationRecord) {
+        return renovationRecordRepository.save(renovationRecord);
     }
     /**
      * Removes a renovation record by its id, but first checks it exists.
