@@ -113,7 +113,6 @@ public class EditTaskControllerIntegrationTest {
                         .param("taskId", "1")
                         .param("renovationId", "1")
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(view().name("editTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.")));
@@ -131,7 +130,6 @@ public class EditTaskControllerIntegrationTest {
                         .param("taskId", "1")
                         .param("renovationId", "1")
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(view().name("editTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Task description cannot be empty.")));
@@ -153,7 +151,6 @@ public class EditTaskControllerIntegrationTest {
                         .param("taskId", "1")
                         .param("renovationId", "1")
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(view().name("editTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Task description must be 512 characters or less.")));
@@ -172,7 +169,6 @@ public class EditTaskControllerIntegrationTest {
                         .param("renovationId", "1")
                         .param("DueDate", String.valueOf(LocalDate.now().minusDays(1)))
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(view().name("editTaskTemplate"))
                 .andExpect(model().attribute("errorMessages", hasItem("Due date must be in the future.")));
