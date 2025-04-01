@@ -95,7 +95,9 @@ public class RenovationTaskService {
     public List<String> getTaskIconFilenames() {
         PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
         try {
-            return Arrays.stream(pathMatchingResourcePatternResolver.getResources("/static/images/*")).map(Resource::getFilename).toList();
+            List<String> taskIconNames = new ArrayList<>(Arrays.stream(pathMatchingResourcePatternResolver.getResources("/static/images/*")).map(Resource::getFilename).toList());
+            taskIconNames.remove("default-icon.png");
+            return taskIconNames;
         } catch (IOException e) {
             logger.error("Error while trying to get icon filenames", e);
             return Collections.emptyList();
