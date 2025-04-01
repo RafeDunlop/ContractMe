@@ -114,7 +114,7 @@ public class EmailService {
             message.setText(htmlContent, true);
             mailSender.send(mimeMessage);
         } catch (MessagingException exception) {
-            log.error("Update password confirmation email send failed", exception);
+            logger.error("Update password confirmation email send failed", exception);
         }
 
     }
