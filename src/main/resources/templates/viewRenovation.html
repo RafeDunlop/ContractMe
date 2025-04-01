@@ -52,7 +52,7 @@
                             <p class="card-text truncate" th:text="${renovationTask.getDescription()}">Task Description</p>
                             <p class="card-text"><strong>Due Date:</strong> <span th:text="${renovationTask.getDueDate()}">Due Date</span></p>
                             <div class="d-flex justify-content-between">
-                                <a th:href="@{/editTask(taskId=${renovationTask.getId()},renovationId=${renovation.getId()})}" class="btn btn-primary">Edit</a>
+                                <a th:href="@{/editTask(taskId=${renovationTask.getId()},renovationId=${renovation.getId()})}" class="btn btn-primary">Edit Task</a>
                             </div>
                         </div>
                     </div>
