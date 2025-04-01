@@ -38,9 +38,13 @@ public class DefaultDataConfigurator {
 
     private User default1;
 
+    private User default2;
+
     private RenovationRecord default1Renovation1;
 
-    private static final int numGenericTasksToAdd = 100;
+    private RenovationRecord default2Renovation1;
+
+    private static final int numGenericTasksToAdd = 101;
 
     private static final List<String> defaultJERooms = List.of("131", "133", "Fabian's office");
 
@@ -72,6 +76,11 @@ public class DefaultDataConfigurator {
         default1 = registerService.registerUser(user);
         String code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, default1, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);
+
+        user.setEmail("seng302.team200.test1@gmail.com");
+        default2 = registerService.registerUser(user);
+        code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, default1, Locale.ENGLISH);
+        verificationCodeService.consumeSignupCode(code);
     }
 
     private void setupDefaultRenovations() {
@@ -79,6 +88,14 @@ public class DefaultDataConfigurator {
                 new RenovationRecord(default1,
                         "Jack Erskine revamp",
                     "CSSE building => palace of slay",
+                        defaultJERooms
+                )
+        );
+
+        default2Renovation1 = renovationRecordService.addRenovationRecord(
+                new RenovationRecord(default2,
+                        "Jack Erskine revamp",
+                        "CSSE building => palace of slay",
                         defaultJERooms
                 )
         );
@@ -91,9 +108,9 @@ public class DefaultDataConfigurator {
                 LocalDate.now().plusYears(5),
                 List.of(defaultJERooms.get(2))
         );
-        renovationTaskService.addRenovationTask(renovationTask, default1Renovation1);
+        renovationTaskService.addRenovationTask(renovationTask, default2Renovation1);
 
-        for (int i = 2; i < numGenericTasksToAdd + 2; i++) {
+        for (int i = 1; i < numGenericTasksToAdd + 1; i++) {
             renovationTask.setName(String.format("Renovation Task %d", i));
             renovationTask.setDescription(String.format("Renovation Task Description %d", i));
             renovationTask.setDueDate(LocalDate.now().plusDays(i));
