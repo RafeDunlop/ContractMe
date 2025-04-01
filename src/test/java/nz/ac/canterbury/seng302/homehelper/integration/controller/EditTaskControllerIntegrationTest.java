@@ -183,10 +183,6 @@ public class EditTaskControllerIntegrationTest {
                     .content("{\"iconName\":\"task-icon.png\"}")
                     .accept(MediaType.APPLICATION_JSON))
 
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection());
     }
-
-
-
-
 }
