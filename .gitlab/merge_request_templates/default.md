@@ -15,6 +15,7 @@
     - [ ] Code has no smells
     - [ ] Docstrings added to all public methods
     - [ ] Meets all relevant ACs listed with the task (if applicable)
+    - [ ] Meets all relevant NFRs
 - [ ] Code is readable
 - [ ] Documentation makes sense and adds value
 - [ ] TODOs removed
