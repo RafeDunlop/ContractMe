@@ -4,10 +4,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,18 +16,14 @@ import java.util.Optional;
 @Service
 public class RegisterService {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterService.class);
     private final UserRepository userRepository;
     private final UserValidation userValidation;
-    private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public RegisterService(UserRepository userRepository, UserValidation userValidation,
-                           AuthenticationManager authenticationManager) {
+    public RegisterService(UserRepository userRepository, UserValidation userValidation) {
         this.userRepository = userRepository;
         this.userValidation = userValidation;
-        this.authenticationManager = authenticationManager;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 

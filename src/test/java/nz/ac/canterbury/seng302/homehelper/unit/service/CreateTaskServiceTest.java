@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.unit.service;
 
-import jakarta.xml.bind.ValidationException;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
@@ -33,7 +32,6 @@ public class CreateTaskServiceTest {
         RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task 1", "New Task", null,new ArrayList<>());
         RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
-        List<String> roomList = new ArrayList<>();
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(new ArrayList<>());
         renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
         Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(Mockito.any());
@@ -46,7 +44,6 @@ public class CreateTaskServiceTest {
         RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("@#$%", "New Task", null,new ArrayList<>());
         RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
-        List<String> roomList = new ArrayList<>();
         List<String> errors = new ArrayList<>();
         errors.add("name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.");
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
@@ -61,7 +58,6 @@ public class CreateTaskServiceTest {
         RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", "", null,new ArrayList<>());
         RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
-        List<String> roomList = new ArrayList<>();
         List<String> errors = new ArrayList<>();
         errors.add("description cannot be empty.");
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
@@ -80,7 +76,6 @@ public class CreateTaskServiceTest {
                 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa""", null,new ArrayList<>());
         RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
-        List<String> roomList = new ArrayList<>();
         List<String> errors = new ArrayList<>();
         errors.add("description must be 512 characters or less.");
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
@@ -95,7 +90,6 @@ public class CreateTaskServiceTest {
         RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", "New Task", LocalDate.now().minusDays(1),new ArrayList<>());
         RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
-        List<String> roomList = new ArrayList<>();
         List<String> errors = new ArrayList<>();
         errors.add("Due date must be in the future.");
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
@@ -104,6 +98,4 @@ public class CreateTaskServiceTest {
         assertEquals("Due date must be in the future.", exception.getMessage());
 
     }
-
-
 }

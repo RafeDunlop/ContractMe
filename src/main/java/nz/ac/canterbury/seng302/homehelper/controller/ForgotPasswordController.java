@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.event.OnResetPasswordSubmittedEvent;
 import nz.ac.canterbury.seng302.homehelper.service.ForgotPasswordService;
 import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
 import org.slf4j.Logger;
@@ -25,11 +24,11 @@ import java.util.Optional;
 @Controller
 public class ForgotPasswordController {
 
-    Logger logger = LoggerFactory.getLogger(HomeController.class);
+    private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
-    ForgotPasswordService forgotPasswordService;
+    private final ForgotPasswordService forgotPasswordService;
 
-    VerificationCodeService verificationCodeService;
+    private final VerificationCodeService verificationCodeService;
 
     /**
      * ForgotPasswordController constructor

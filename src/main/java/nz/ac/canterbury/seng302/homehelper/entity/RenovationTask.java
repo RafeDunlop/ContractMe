@@ -49,10 +49,10 @@ public class RenovationTask {
 
     /**
      * Constructor for RenovationTask object
-     * @param name
-     * @param description
-     * @param roomList
-     * @param dueDate
+     * @param name The name of teh renovation task
+     * @param description the description of the renovation task
+     * @param roomList The rooms associated with this task
+     * @param dueDate The due date of this task
      */
     public RenovationTask(String name, String description, List<String> roomList, LocalDate dueDate, RenovationRecord renovationRecord) {
         this.renovationRecord = renovationRecord;

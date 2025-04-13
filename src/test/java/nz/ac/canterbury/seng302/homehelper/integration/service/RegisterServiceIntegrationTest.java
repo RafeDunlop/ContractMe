@@ -24,8 +24,7 @@ public class RegisterServiceIntegrationTest {
     void setUp() {
         userRepositoryMock = Mockito.mock(UserRepository.class);
         UserValidation userValidation = new UserValidation();
-        AuthenticationManager authenticationManagerMock = Mockito.mock(AuthenticationManager.class);
-        registerService = new RegisterService(userRepositoryMock, userValidation, authenticationManagerMock);
+        registerService = new RegisterService(userRepositoryMock, userValidation);
     }
 
     @Test

@@ -5,7 +5,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.controller.UpdatePasswordController;
 import nz.ac.canterbury.seng302.homehelper.dto.UpdatePasswordDTO;
 import nz.ac.canterbury.seng302.homehelper.service.UpdatePasswordService;

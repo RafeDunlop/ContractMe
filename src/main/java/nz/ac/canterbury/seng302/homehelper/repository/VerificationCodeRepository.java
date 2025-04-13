@@ -1,11 +1,9 @@
 package nz.ac.canterbury.seng302.homehelper.repository;
 
-import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
 import java.util.Optional;
 
 /**

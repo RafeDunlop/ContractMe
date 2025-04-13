@@ -29,9 +29,6 @@ public class LoginIntegrationTest {
     private LoginService loginService;
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private ProfileController profileController;
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);

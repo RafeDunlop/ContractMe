@@ -20,7 +20,7 @@ public class UserValidation {
 
         // Check if email is empty, null, or not in the form 'jane@doe.nz'
         if (email == null || email.trim().isEmpty() ||
-                !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$")) {
+                !email.matches("^[A-Za-z0-9]+([+_.-][A-Za-z0-9]+)*@[A-Za-z0-9]+([.-][A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")) {
             errors.add("Email address must be in the form ‘jane@doe.nz’.");
         }
         return errors;
@@ -66,19 +66,15 @@ public class UserValidation {
 
         // Compares password and confirm password
         if (!password.equals(confirmPassword)) {
-            if (type.equals("updatePassword")) {
-                errors.add("New Passwords do not match.");
-            }
-            else if (type.equals("registerPassword")) {
-                errors.add("Passwords do not match.");
-            }
-            else if (type.equals("resetPassword")) {
-                errors.add("The passwords do not match.");
+            switch (type) {
+                case "updatePassword" -> errors.add("New Passwords do not match.");
+                case "registerPassword" -> errors.add("Passwords do not match.");
+                case "resetPassword" -> errors.add("The passwords do not match.");
             }
         }
 
         // Check password is at least 8 characters long, includes an uppercase letter, a lowercase letter, a number and a special character
-        if (password == null || password.length() < 8 ||
+        if (password.length() < 8 ||
                 !password.matches(".*[A-Z].*") ||  // At least one uppercase
                 !password.matches(".*[a-z].*") ||  // At least one lowercase
                 !password.matches(".*\\d.*") ||    // At least one number
@@ -90,8 +86,7 @@ public class UserValidation {
     }
 
     // Note this function checks if the new password contains the user's name or email.
-    public List<String> validateUpdatePasswordString(String password, String confirmPassword, String type,
-            String firstName,String lastName,String email) {
+    public List<String> validateUpdatePasswordString(String password, String firstName,String lastName,String email) {
         List<String> errors = new ArrayList<>();
 
         if (password != null && (password.contains( firstName) || (password.contains( lastName) || (password.contains( email))))){

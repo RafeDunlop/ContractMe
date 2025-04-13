@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,17 +12,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 /**
  * Controller for the edit task page
  */
 @Controller
 public class EditTaskController {
-    Logger logger = LoggerFactory.getLogger(EditTaskController.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(EditTaskController.class);
     private final RenovationTaskService renovationTaskService;
     private final EditTaskService editTaskService;
     private final RenovationRecordService renovationRecordService;
@@ -84,7 +82,7 @@ public class EditTaskController {
             return "redirect:/renovations/view?id=" + renovationId;
 
         } catch (IllegalArgumentException e) {
-            logger.warn("Form submission error", e);
+            logger.warn("Form submission error {}", e.getMessage());
 
             List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
             model.addAttribute("errorMessages", errorsList);

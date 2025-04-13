@@ -14,7 +14,8 @@ import java.util.List;
  */
 @Controller
 public class LoginController {
-    Logger logger = LoggerFactory.getLogger(LoginController.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     /**
      * Handler for a get request to the login page.

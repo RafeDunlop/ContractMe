@@ -4,7 +4,6 @@ import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -30,7 +29,6 @@ public class EditProfileServiceTest {
     private UserRepository userRepository;
     private UserValidation userValidation;
     private EditProfileService editProfileService;
-    private MockedStatic<ImageIO> mockedImageIO;
 
     @BeforeEach
     void setUp() {

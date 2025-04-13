@@ -170,7 +170,7 @@ public class UserValidationTest {
         List<String> expectedErrorList = List.of(
                 "Your password should not contain your name or email address."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Abhisekh123!#", "Abhisekh123!#","registerPassword","Abhisekh","Chand","Abhisekh23@gmail.com"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Abhisekh123!#","Abhisekh","Chand","Abhisekh23@gmail.com"));
     }
 
     /**
@@ -183,7 +183,7 @@ public class UserValidationTest {
         List<String> expectedErrorList = List.of(
                 "Your password should not contain your name or email address."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Abhisekh123!#", "Abhisekh123!#","registerPassword","Abhisekh","Chand","Donald23@gmail.com"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Abhisekh123!#","Abhisekh","Chand","Donald23@gmail.com"));
     }
 
     /**
@@ -196,7 +196,7 @@ public class UserValidationTest {
         List<String> expectedErrorList = List.of(
                 "Your password should not contain your name or email address."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Chand123!#", "Chand123!#","registerPassword","Abhisekh","Chand","Donald23@gmail.com"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Chand123!#","Abhisekh","Chand","Donald23@gmail.com"));
     }
 
     /**

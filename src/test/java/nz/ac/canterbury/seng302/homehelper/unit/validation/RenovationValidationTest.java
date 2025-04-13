@@ -7,9 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,7 +31,6 @@ public class RenovationValidationTest {
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Tāsk Öné 2-3", "A".repeat(512), LocalDate.now().plusDays(1),new ArrayList<>());
 
         List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
-        System.out.println(errors);
         assertTrue(errors.isEmpty());
     }
 

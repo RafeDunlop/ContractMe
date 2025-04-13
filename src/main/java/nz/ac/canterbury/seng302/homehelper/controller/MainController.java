@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class MainController {
-    Logger logger = LoggerFactory.getLogger(LoginController.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
     /**
      * Handler for a get request to the main page.

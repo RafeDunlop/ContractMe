@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,8 +48,7 @@ public class RenovationTaskService {
      * Adds a new renovation task to the repository
      */
     public void addRenovationTask(RenovationTaskDTO renovationTaskDTO, RenovationRecord renovationRecord) {
-        List<String> errors = new ArrayList<>();
-        errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
+        List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
 
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException(String.join(" ", errors));

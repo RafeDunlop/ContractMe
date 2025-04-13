@@ -125,7 +125,7 @@ public class RenovationController {
                 return "redirect:/renovations/view?id=" + renovationRecord.getId();
 
             } catch (IllegalArgumentException e) {
-                logger.warn("Form submission error", e);
+                logger.warn("Form submission error {}", e.getMessage());
                 model.addAttribute("name", name);
                 model.addAttribute("description", description);
                 model.addAttribute("roomList", roomList);

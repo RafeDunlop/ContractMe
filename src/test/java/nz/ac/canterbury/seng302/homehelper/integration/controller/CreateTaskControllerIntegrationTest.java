@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
-import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -18,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -34,6 +34,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 
 @SpringBootTest
+@ActiveProfiles("test")
 public class CreateTaskControllerIntegrationTest {
 
     private MockMvc mockMvc;
@@ -57,11 +58,11 @@ public class CreateTaskControllerIntegrationTest {
     @BeforeEach
     public void setup_user() {
        mockMvc = MockMvcBuilders.standaloneSetup(createTaskController).build();
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    @WithMockUser(username = "jane@doe.com", roles = {"USER"})
+    @WithMockUser(username = "jane@doe.com")
     public void testAddTask_validTask_TaskAddedAndRedirect() throws Exception {
         User user = new User("Jane", "Doe", "jane@doe.com", "Password");
         user.grantAuthority("ROLE_USER");
@@ -82,7 +83,7 @@ public class CreateTaskControllerIntegrationTest {
 
 
     @Test
-    @WithMockUser(username = "jane@doe.com", roles = {"USER"})
+    @WithMockUser(username = "jane@doe.com")
     public void testAddTask_invalidTaskName_TaskNotAddedStaysOnCreateTask() throws Exception {
         User user = new User("Jane", "Doe", "jane@doe.com", "Password");
         user.grantAuthority("ROLE_USER");
@@ -104,7 +105,7 @@ public class CreateTaskControllerIntegrationTest {
 
 
     @Test
-    @WithMockUser(username = "jane@doe.com", roles = {"USER"})
+    @WithMockUser(username = "jane@doe.com")
     public void testAddTask_noTaskDescription_TaskNotAddedStaysOnCreateTask() throws Exception {
         User user = new User("Jane", "Doe", "jane@doe.com", "Password");
         user.grantAuthority("ROLE_USER");
@@ -125,7 +126,7 @@ public class CreateTaskControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "jane@doe.com", roles = {"USER"})
+    @WithMockUser(username = "jane@doe.com")
     public void testAddTask_taskDescriptionTooLong_TaskNotAddedStaysOnCreateTask() throws Exception {
         User user = new User("Jane", "Doe", "jane@doe.com", "Password");
         user.grantAuthority("ROLE_USER");
@@ -150,7 +151,7 @@ public class CreateTaskControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "jane@doe.com", roles = {"USER"})
+    @WithMockUser(username = "jane@doe.com")
     public void testAddTask_dueDateInPast_TaskNotAddedStaysOnCreateTask() throws Exception {
         User user = new User("Jane", "Doe", "jane@doe.com", "Password");
         user.grantAuthority("ROLE_USER");

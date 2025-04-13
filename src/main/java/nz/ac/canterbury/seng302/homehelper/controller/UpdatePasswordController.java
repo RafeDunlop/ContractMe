@@ -20,8 +20,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class UpdatePasswordController {
-    Logger logger = LoggerFactory.getLogger(RegisterController.class);
-    private UpdatePasswordService updatePasswordService;
+
+    private static final Logger logger = LoggerFactory.getLogger(UpdatePasswordController.class);
+    private final UpdatePasswordService updatePasswordService;
 
     @Autowired
     public UpdatePasswordController(UpdatePasswordService updatePasswordService) {
@@ -64,7 +65,7 @@ public class UpdatePasswordController {
             redirectAttributes.addFlashAttribute("successMessage", "Password updated successfully.");
             return "redirect:/user";
         } catch (IllegalArgumentException e) {
-            logger.warn("Form submission error: " + e.getMessage());
+            logger.warn("Form submission error: {}", e.getMessage());
 
             List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
 

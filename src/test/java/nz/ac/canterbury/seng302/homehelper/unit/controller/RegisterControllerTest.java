@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.controller.RegisterController;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
 
@@ -13,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 public class RegisterControllerTest {
 

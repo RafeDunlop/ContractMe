@@ -23,8 +23,7 @@ public class RegisterServiceTest {
     public void testValidateEmail_emailNotUsed_returnEmptyList() {
         UserRepository userRepositoryMock = Mockito.mock(UserRepository.class);
         UserValidation userValidationMock = Mockito.mock(UserValidation.class);
-        AuthenticationManager authenticationManagerMock = Mockito.mock(AuthenticationManager.class);
-        RegisterService registerService = new RegisterService(userRepositoryMock, userValidationMock, authenticationManagerMock);
+        RegisterService registerService = new RegisterService(userRepositoryMock, userValidationMock);
         Mockito.when(userRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty());
         Mockito.when(userValidationMock.validateEmailString(Mockito.anyString())).thenReturn( new ArrayList<>());
         List<String> returnValue = registerService.validateEmail("jane@doe.nz");
@@ -41,8 +40,7 @@ public class RegisterServiceTest {
     public void testValidateEmail_emailUsed_returnError() {
         UserRepository userRepositoryMock = Mockito.mock(UserRepository.class);
         UserValidation userValidationMock = Mockito.mock(UserValidation.class);
-        AuthenticationManager authenticationManagerMock = Mockito.mock(AuthenticationManager.class);
-        RegisterService registerService = new RegisterService(userRepositoryMock, userValidationMock, authenticationManagerMock);
+        RegisterService registerService = new RegisterService(userRepositoryMock, userValidationMock);
         Mockito.when(userRepositoryMock.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(new User("Jane", "Doe", "jane@doe.nz", "password")));
         Mockito.when(userValidationMock.validateEmailString(Mockito.anyString())).thenReturn( new ArrayList<>());
         List<String> returnValue = registerService.validateEmail("jane@doe.nz");

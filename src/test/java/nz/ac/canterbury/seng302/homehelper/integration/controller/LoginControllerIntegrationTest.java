@@ -10,11 +10,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
@@ -23,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class LoginControllerIntegrationTest {
 
 
@@ -77,7 +80,7 @@ public class LoginControllerIntegrationTest {
                         .password("password"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("/login?error=*"))
-                .andDo(result -> mockMvc.perform(get(result.getResponse().getRedirectedUrl()))
+                .andDo(result -> mockMvc.perform(get(Objects.requireNonNull(result.getResponse().getRedirectedUrl())))
                         .andExpect(model().attribute("errorMessage", expectedErrorList)));
     }
 
