@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.ui.Model;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 public class RegisterControllerTest {
 
@@ -29,14 +30,14 @@ public class RegisterControllerTest {
         RegisterController registerController = new RegisterController(
                 registerServiceSpy, applicationEventPublisher, verificationCodeServiceMock);
 
-        Model model = Mockito.mock(Model.class);
+        RedirectAttributes redirectAttributes = Mockito.mock(RedirectAttributes.class);
         UserRegisterDTO mockedUser = new UserRegisterDTO("","","","","");
 
         User trialUser = Mockito.spy(new User("test", "test", "test", "test"));
         Mockito.when(registerServiceSpy.registerUser(mockedUser)).thenReturn((trialUser));
 
         Mockito.when(trialUser.getId()).thenReturn(1L);
-        String viewName = (registerController.submitRegistration(mockedUser, model, request));
+        String viewName = (registerController.submitRegistration(mockedUser, request, redirectAttributes));
 
         Assertions.assertEquals("redirect:/confirm-registration", viewName);
 

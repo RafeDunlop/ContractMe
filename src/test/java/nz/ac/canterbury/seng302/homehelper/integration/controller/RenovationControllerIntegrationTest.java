@@ -189,11 +189,11 @@ public class RenovationControllerIntegrationTest {
                         .param("description", "")
                         .param("roomList", "Room", "Room")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("createRenovationTemplate"))
-                .andExpect(model().attribute("name", "Fail!"))
-                .andExpect(model().attribute("description", ""))
-                .andExpect(model().attribute("roomList", hasSize(2)));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/create"))
+                .andExpect(flash().attribute("name", "Fail!"))
+                .andExpect(flash().attribute("description", ""))
+                .andExpect(flash().attribute("roomList", hasSize(2)));
     }
 
     /**
@@ -209,11 +209,11 @@ public class RenovationControllerIntegrationTest {
                         .param("description", "a".repeat(513))
                         .param("roomList", "Room", "Room")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("createRenovationTemplate"))
-                .andExpect(model().attribute("name", "Renovation One"))
-                .andExpect(model().attribute("description", "a".repeat(513)))
-                .andExpect(model().attribute("roomList", hasSize(2)));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/create"))
+                .andExpect(flash().attribute("name", "Renovation One"))
+                .andExpect(flash().attribute("description", "a".repeat(513)))
+                .andExpect(flash().attribute("roomList", hasSize(2)));
     }
 
     /**
@@ -231,11 +231,11 @@ public class RenovationControllerIntegrationTest {
                         .param("description", "")
                         .param("roomList", "Room", "Room")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("createRenovationTemplate"))
-                .andExpect(model().attribute("name", "Renovation One"))
-                .andExpect(model().attribute("description", ""))
-                .andExpect(model().attribute("roomList", hasSize(2)));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/create"))
+                .andExpect(flash().attribute("name", "Renovation One"))
+                .andExpect(flash().attribute("description", ""))
+                .andExpect(flash().attribute("roomList", hasSize(2)));
     }
 
     /**

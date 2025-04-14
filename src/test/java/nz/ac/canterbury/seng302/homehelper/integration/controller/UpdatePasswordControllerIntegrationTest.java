@@ -28,10 +28,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @SpringBootTest
@@ -114,8 +111,9 @@ public class UpdatePasswordControllerIntegrationTest {
                         .param("currentPassword", updatePasswordDTO.getCurrentPassword())
                         .param("newPassword", updatePasswordDTO.getNewPassword())
                         .param("retypePassword", updatePasswordDTO.getRetypePassword()))
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("errorMessages", expectedErrors));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/edit/updatePassword"))
+                .andExpect(flash().attribute("errorMessages", expectedErrors));
         Mockito.verify(emailService, Mockito.never()).sendUpdatePasswordConfirmation(Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 

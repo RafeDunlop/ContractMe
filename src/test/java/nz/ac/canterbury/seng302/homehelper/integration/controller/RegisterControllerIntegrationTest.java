@@ -8,6 +8,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,12 +110,12 @@ public class RegisterControllerIntegrationTest {
                         .param("password", "password")
                         .param("confirmPassword", "password")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(view().name("registrationTemplate"))
-                .andExpect(model().attribute("errorMessages", expectedErrorList))
-                .andExpect(model().attribute("firstName", "Jane"))
-                .andExpect(model().attribute("lastName", "Doe"))
-                .andExpect(model().attribute("email", "jane@doe.nz"));
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(redirectedUrl("/register"))
+                .andExpect(flash().attribute("errorMessages", expectedErrorList))
+                .andExpect(flash().attribute("userRegisterDTO", Matchers.hasProperty("firstName", Matchers.equalTo("Jane"))))
+                .andExpect(flash().attribute("userRegisterDTO", Matchers.hasProperty("lastName", Matchers.equalTo("Doe"))))
+                .andExpect(flash().attribute("userRegisterDTO", Matchers.hasProperty("email", Matchers.equalTo("jane@doe.nz"))));
         verify(emailService, Mockito.never()).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 
@@ -159,9 +160,9 @@ public class RegisterControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("code", testCode)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(view().name("emailVerificationForm"))
-                .andExpect(model().attribute("errorMessage", expectedError));
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(redirectedUrl("/confirm-registration"))
+                .andExpect(flash().attribute("errorMessage", expectedError));
 
         verify(verificationCodeRepository, times(1)).findByCode(testCode);
         verify(mockUser, never()).activate();

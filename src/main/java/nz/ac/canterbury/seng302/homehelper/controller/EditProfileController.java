@@ -66,14 +66,18 @@ public class EditProfileController {
     }
 
     /**
-     * Posts a form with the updated user details. Goes back to "/user" if the
-     * user is updated; otherwise, the error messages are set and stays on same page.
-     * @param updatedUser User object with the updated user details
-     * @param model Model interface
-     * @return editProfileTemplate page or redirect to user page
+     * Handles the submission of the edit profile form.
+     * Attempt to edit profile using the provided form data.
+     * If successful, it redirects to the profile view page.
+     * If an error occurs during task creation, it redirects back to the edit profile.
+     * with error messages and previously entered form data.
+     *
+     * @param updatedUser The user containing the edited profile details.
+     * @param redirectAttributes Flash attributes used to pass data across the redirect in case of form submission errors.
+     * @return A redirect string to either the profile view page on success or back to the edit profile page on failure.
      */
     @PostMapping("user/edit")
-    public String updateProfile(@ModelAttribute User updatedUser, Model model) {
+    public String updateProfile(@ModelAttribute User updatedUser, RedirectAttributes redirectAttributes) {
         logger.info("POST /user/edit");
         User newUser = null;
         try {
@@ -93,15 +97,15 @@ public class EditProfileController {
             // Set error messages on page
             logger.warn("Form submission error: {}", detailsInvalidError.getMessage());
             List<String> errorsList = List.of(detailsInvalidError.getMessage().split("(?<=\\.) "));
-            model.addAttribute("errorMessages", errorsList);
 
-            model.addAttribute("user", newUser);
-            assert newUser != null;
-            model.addAttribute("firstName", newUser.getFirstName());
-            model.addAttribute("lastName", newUser.getLastName());
-            model.addAttribute("email", newUser.getEmail());
-            model.addAttribute("profilePicture", newUser.getProfilePicture());
-            return "editProfileTemplate";
+            redirectAttributes.addFlashAttribute("errorMessages", errorsList);
+            redirectAttributes.addFlashAttribute("user", newUser); // for repopulation
+            redirectAttributes.addFlashAttribute("firstName", newUser.getFirstName());
+            redirectAttributes.addFlashAttribute("lastName", newUser.getLastName());
+            redirectAttributes.addFlashAttribute("email", newUser.getEmail());
+            redirectAttributes.addFlashAttribute("profilePicture", newUser.getProfilePicture());
+
+            return "redirect:/user/edit";
         }
     }
 
@@ -122,9 +126,9 @@ public class EditProfileController {
 
         if (!errors.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessages", errors);
-            return "redirect:/user/edit"; // Stay on the edit page with errors
+            return "redirect:/user/edit";
         }
 
-        return "redirect:/user"; // Redirect to /user on success
+        return "redirect:/user";
     }
 }
