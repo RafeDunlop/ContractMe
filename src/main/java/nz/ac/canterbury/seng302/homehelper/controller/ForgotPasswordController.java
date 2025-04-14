@@ -115,7 +115,7 @@ public class ForgotPasswordController {
         Optional<User> expectedUser = verificationCodeService.getUserByToken(token);
         if (expectedUser.isPresent()) {
             User user = expectedUser.get();
-            List<String> errors = forgotPasswordService.validatePasswords(newPassword, retypePassword);
+            List<String> errors = forgotPasswordService.validatePasswords(newPassword, retypePassword, user);
             if (!errors.isEmpty()) {
                 model.addAttribute("errorMessages", errors);
                 model.addAttribute("token", token);

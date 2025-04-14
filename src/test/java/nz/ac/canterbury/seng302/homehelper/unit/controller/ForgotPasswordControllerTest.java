@@ -147,7 +147,7 @@ public class ForgotPasswordControllerTest {
         String retypePassword = "Test123!";
         String expectedRedirect = "redirect:/login";
         Mockito.when(verificationCodeServiceMock.getUserByToken(token)).thenReturn(Optional.of(user));
-        Mockito.when(forgotPasswordServiceMock.validatePasswords(newPassword, retypePassword)).thenReturn(List.of());
+        Mockito.when(forgotPasswordServiceMock.validatePasswords(newPassword, retypePassword, user)).thenReturn(List.of());
         Mockito.when(httpServletRequestMock.getLocale()).thenReturn(Locale.ENGLISH);
 
         String loginPageRedirect = forgotPasswordController.submitPassword(token, newPassword, retypePassword, redirectAttributesMock, modelMock, httpServletRequestMock);
@@ -171,7 +171,7 @@ public class ForgotPasswordControllerTest {
         String expectedForm = "resetPasswordTemplate";
         List<String> expectedErrorMessages = List.of("The passwords do not match.");
         Mockito.when(verificationCodeServiceMock.getUserByToken(token)).thenReturn(Optional.of(user));
-        Mockito.when(forgotPasswordServiceMock.validatePasswords(newPassword, retypePassword)).thenReturn(expectedErrorMessages);
+        Mockito.when(forgotPasswordServiceMock.validatePasswords(newPassword, retypePassword, user)).thenReturn(expectedErrorMessages);
 
         String resetPasswordForm = forgotPasswordController.submitPassword(token, newPassword, retypePassword, redirectAttributesMock, modelMock, httpServletRequestMock);
 

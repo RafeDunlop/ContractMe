@@ -85,7 +85,15 @@ public class UserValidation {
         return errors;
     }
 
-    // Note this function checks if the new password contains the user's name or email.
+    /**
+     * Checks if the new password contains the user's name or email.
+     *
+     * @param password the plaintext password to validate
+     * @param firstName the user's first name
+     * @param lastName the user's last name
+     * @param email the user's email
+     * @return a list of error messages
+     */
     public List<String> validateUpdatePasswordString(String password, String firstName,String lastName,String email) {
         List<String> errors = new ArrayList<>();
 

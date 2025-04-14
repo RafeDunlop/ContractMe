@@ -88,7 +88,8 @@ public class ForgotPasswordServiceTest {
     }
 
     /**
-     * Tests validating the email used to reset an account's password when the email's
+     * Tests validating the email used to reset an account's password when the
+     * email's
      * format is invalid. An event isn't started and an error message is returned.
      */
     @Test
@@ -106,7 +107,8 @@ public class ForgotPasswordServiceTest {
     }
 
     /**
-     * Test sending an email to a user's email account when given a name, email, and locale.
+     * Test sending an email to a user's email account when given a name, email, and
+     * locale.
      * The email sending service will be called once.
      */
     @Test
@@ -126,7 +128,8 @@ public class ForgotPasswordServiceTest {
     }
 
     /**
-     * Test updating a user's password when given a new password and user. The new password
+     * Test updating a user's password when given a new password and user. The new
+     * password
      * will be encoded before replacing the user's old password.
      */
     @Test
