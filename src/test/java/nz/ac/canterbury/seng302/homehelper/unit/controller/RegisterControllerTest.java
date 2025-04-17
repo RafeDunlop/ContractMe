@@ -16,10 +16,6 @@ import org.springframework.ui.Model;
 public class RegisterControllerTest {
 
 
-    /**
-     * Tests if, given the user successfully registers, they are re-routed
-     * to the user details page
-     * */
     @Test
     void testValidPathway_FromRegistrationPage_ToConfirmRegistrationPage() {
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
