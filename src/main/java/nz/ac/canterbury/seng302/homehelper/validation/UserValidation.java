@@ -67,7 +67,7 @@ public class UserValidation {
         // Compares password and confirm password
         if (!password.equals(confirmPassword)) {
             switch (type) {
-                case "updatePassword" -> errors.add("New Passwords do not match.");
+                case "updatePassword" -> errors.add("The new passwords do not match.");
                 case "registerPassword" -> errors.add("Passwords do not match.");
                 case "resetPassword" -> errors.add("The passwords do not match.");
             }
