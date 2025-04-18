@@ -40,7 +40,12 @@ function checkNameField(input) {
         nameFieldValid = false;
         nameErrorLabel.hidden = false;
         nameErrorLabel.textContent = "You already have a renovation with this name";
-    } else {
+    } else if (input.trim().length >= 255) {
+        nameErrorLabel.textContent = "Name must be less than 255 characters";
+        nameErrorLabel.hidden = false;
+        nameFieldValid = false;
+    }
+    else {
         nameErrorLabel.textContent = roomNameErrorMessage;
         nameFieldValid = validateField(input, /^[\p{L}\d .,\-']*$/u, nameErrorLabel, roomNameErrorMessage);
     }
