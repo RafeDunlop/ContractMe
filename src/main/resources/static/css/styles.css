@@ -1,5 +1,5 @@
 #room-list {
-    max-width: 500px;
+    max-width: 1000px;
     max-height: 300px;
     overflow-y: auto;
     background-color: white;
@@ -93,5 +93,5 @@
 .room-cell {
     white-space: normal;
     overflow-wrap: break-word;
-    max-width: 1000px;
+    max-width: 100%;
 }
