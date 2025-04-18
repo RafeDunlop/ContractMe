@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -18,7 +20,7 @@ public class RenovationRecordServiceTest {
 
     private static RenovationRecordService toTest;
 
-    private static final Pattern pattern = Pattern.compile("^[\\p{L}\\d ,.\\-']*$", Pattern.UNICODE_CHARACTER_CLASS);
+    private static final Pattern pattern = Pattern.compile("^[\\p{L}\\d ,.\\-']+$", Pattern.UNICODE_CHARACTER_CLASS);
 
     @BeforeAll
     public static void setUpBeforeClass() {
@@ -79,7 +81,7 @@ public class RenovationRecordServiceTest {
     @Test
     public void validateAllRoomNames_multiPassing() {
         ArrayList<String> rooms = new ArrayList<>();
-        for (int i=0; i<10; i++) rooms.add("a".repeat(i));
+        for (int i=1; i<10; i++) rooms.add("a".repeat(i));
         assertTrue(toTest.validateAllRoomNames(rooms, pattern));
     }
 
@@ -123,19 +125,28 @@ public class RenovationRecordServiceTest {
 
     @Test
     public void validateAllCreate_allValid() {
-        ArrayList<String> rooms = new ArrayList<>();
+        List<String> rooms = new ArrayList<>();
         String name = "name";
         String description = "";
-        assertTrue(toTest.validateAllInputsCreate(name, description, rooms));
+
+        Map<String, List<String>> result = toTest.validateAllInputsCreate(name, description, rooms);
+
+        assertTrue(result.isEmpty(), "Expected no validation errors, but got: " + result);
     }
 
     @Test
     public void validateAllCreate_oneInvalid() {
-        ArrayList<String> rooms = new ArrayList<>();
+        List<String> rooms = new ArrayList<>();
         String name = "name!";
         String description = "";
-        assertFalse(toTest.validateAllInputsCreate(name, description, rooms));
+
+        Map<String, List<String>> result = toTest.validateAllInputsCreate(name, description, rooms);
+
+        assertFalse(result.isEmpty(), "Expected validation errors, but got none.");
+        assertTrue(result.containsKey("nameError"), "Expected an error for the 'name' field.");
+        assertFalse(result.get("nameError").isEmpty(), "Expected at least one error message for the 'name' field.");
     }
+
 
     @Test
     public void validateAllEdit_allValid() {
