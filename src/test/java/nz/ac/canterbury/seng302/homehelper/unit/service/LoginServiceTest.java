@@ -15,7 +15,6 @@ import java.util.Optional;
 
 public class LoginServiceTest {
 
-
     @Test
     public void testGetUserByEmail_correctlyRetrievesRepoQuery() {
         UserRepository userRepositoryMock = Mockito.mock(UserRepository.class);
@@ -33,9 +32,7 @@ public class LoginServiceTest {
 
         User returnedUser = loginService.getUserByEmail();
         Assertions.assertEquals("john.smith@example.com", returnedUser.getEmail());
-
     }
-
 
     @Test
     public void testGetUserByEmail_invalidEmail_throwsException() {

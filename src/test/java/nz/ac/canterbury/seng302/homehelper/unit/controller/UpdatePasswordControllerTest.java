@@ -17,10 +17,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 public class UpdatePasswordControllerTest {
 
-    /**
-     * Tests if, given the user successfully updates password, they are re-routed
-     * to the user details page
-     * */
     @Test
     void testValidPathway_FromUpdatePasswordPage_ToUserProfilePage() {
         UpdatePasswordService updatePasswordServiceSpy = Mockito.mock(UpdatePasswordService.class);
@@ -44,10 +40,6 @@ public class UpdatePasswordControllerTest {
 
     }
 
-    /**
-     * Tests if, given the user doesn't pass the validation check updating password, they are re-routed
-     * to the Update Password Page
-     * */
     @Test
     void testValidationFailure_ThrowException_ReturnsToUpdatePasswordTemplate() {
 

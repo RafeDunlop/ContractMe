@@ -50,11 +50,6 @@ public class ForgotPasswordControllerTest {
         user = new User("Jane", "Doe", "jane@doe.com", "password");
     }
 
-    /**
-     * Tests the getter for the forgot password form. This getter will be used when
-     * the user pressed the forgot password button on the login page.
-     * Expects the form to be returned and opened.
-     */
     @Test
     void getForgotPassword_goToForm_returnForgotPasswordForm() {
         String expectedForm = "forgotPasswordTemplate";
@@ -62,11 +57,6 @@ public class ForgotPasswordControllerTest {
         assertEquals(expectedForm, forgotPasswordForm);
     }
 
-    /**
-     * Tests the post function on the forgot password page with a valid email. When an
-     * email connected to an existing account is posted, the user stays on the same
-     * page and a message shows up.
-     */
     @Test
     void postForgotPassword_enterValidEmail_returnSentMessageAndForm() {
         String expectedRedirect = "redirect:/password/forgot";
@@ -81,11 +71,6 @@ public class ForgotPasswordControllerTest {
         Mockito.verify(redirectAttributesMock).addFlashAttribute("emailMessage", expectedMessage);
     }
 
-    /**
-     * Tests the post function on the forgot password page with an invalid email. When an
-     * invalid email is posted, an error message shows up to tell the user what format the
-     * email should be in.
-     */
     @Test
     void postForgotPassword_enterInvalidEmail_returnErrorMessageAndForm() {
         String expectedRedirect = "redirect:/password/forgot";
@@ -100,11 +85,6 @@ public class ForgotPasswordControllerTest {
         Mockito.verify(redirectAttributesMock).addFlashAttribute("errorMessage", expectedMessage);
     }
 
-    /**
-     * Tests the getter for the on the reset password page with a valid token. When a link
-     * to the page is inputted with a token created by the forgot password form, the user
-     * is taken to the reset password form.
-     */
     @Test
     void getResetPassword_enterValidToken_returnResetPasswordForm() {
         String token = "VaLiDtOkEn";
@@ -117,11 +97,6 @@ public class ForgotPasswordControllerTest {
         assertEquals(expectedForm, resetPasswordForm);
     }
 
-    /**
-     * Tests the getter for the on the reset password page with an invalid token. When a
-     * link to the page is inputted with a token that doesn't exist in the token repository,
-     * the user is redirected to the login page with a message.
-     */
     @Test
     void getResetPassword_enterInvalidToken_returnRedirectLoginPage() {
         String token = "InVaLiDtOkEn";
@@ -135,11 +110,6 @@ public class ForgotPasswordControllerTest {
         assertEquals(expectedRedirect, loginPageRedirect);
     }
 
-    /**
-     * Tests the post function on the reset password page with valid password inputs.
-     * When a valid password is retyped and both are posted, the user is redirected to
-     * the login page, the user's password is reset, and the token is consumed.
-     */
     @Test
     void postResetPassword_enterValidPasswords_returnRedirectLoginPage() {
         String token = "VaLiDtOkEn";
@@ -158,11 +128,6 @@ public class ForgotPasswordControllerTest {
         assertEquals(expectedRedirect, loginPageRedirect);
     }
 
-    /**
-     * Tests the post function on the reset password page with different new password and
-     * retyped password inputs. When the new and retyped passwords are different, the
-     * user stays on the forgot password page with an error message.
-     */
     @Test
     void postResetPassword_enterDifferentPasswords_returnErrorMessageAndForm() {
         String token = "VaLiDtOkEn";
@@ -180,11 +145,6 @@ public class ForgotPasswordControllerTest {
         assertEquals(expectedRedirect, resetPasswordForm);
     }
 
-    /**
-     * Tests the post function on the reset password page with an invalid token.
-     * When a post request is made on the reset password page with a token that doesn't
-     * exist, the user is redirected to the login page with a message.
-     */
     @Test
     void postResetPassword_enterInvalidToken_returnRedirectLoginPage() {
         String token = "VaLiDtOkEn";

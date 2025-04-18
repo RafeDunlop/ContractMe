@@ -20,10 +20,6 @@ public class RenovationValidationTest {
         renovationValidation = new RenovationValidation();
     }
 
-    /**
-     * Test for checking if no error messages are returned if the all the details are valid. Boundaries are tested as the name
-     * has special letters (ā, Ö, é) and the description has length equal to the maximum accepted length.
-     */
     @Test
     public void validateTaskDetails_allDetailsAreValid_returnEmptyList() {
 
@@ -34,9 +30,6 @@ public class RenovationValidationTest {
         assertTrue(errors.isEmpty());
     }
 
-    /**
-     * Test for checking if an error message is returned if the name is empty (has only spaces).
-     */
     @Test
     public void validateTaskDetails_nameOnlyHasSpaces_returnNameFormatError() {
 
@@ -48,9 +41,6 @@ public class RenovationValidationTest {
         assertIterableEquals(expectedErrors, errors);
     }
 
-    /**
-     * Test for checking if an error message is returned if the name has invalid characters.
-     */
     @Test
     public void validateTaskDetails_nameHasInvalidCharacters_returnNameFormatError() {
 
@@ -62,9 +52,6 @@ public class RenovationValidationTest {
         assertIterableEquals(expectedErrors, errors);
     }
 
-    /**
-     * Test for checking if an error message is returned if the description is empty (has only spaces).
-     */
     @Test
     public void validateTaskDetails_descriptionOnlyHasSpaces_returnDescriptionEmptyList() {
 
@@ -75,9 +62,6 @@ public class RenovationValidationTest {
         assertIterableEquals(expectedErrors, errors);
     }
 
-    /**
-     * Test for checking if an error message is returned if the description is too long.
-     */
     @Test
     public void validateTaskDetails_descriptionIsTooLong_returnDescriptionLengthError() {
 
@@ -88,9 +72,6 @@ public class RenovationValidationTest {
         assertIterableEquals(expectedErrors, errors);
     }
 
-    /**
-     * Test for checking if an error message is returned if the date is in the past.
-     */
     @Test
     public void validateTaskDetails_dueDateInPast_returnInvalidDueDateError() {
 
