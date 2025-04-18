@@ -9,9 +9,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class RegisterService {
@@ -27,40 +25,53 @@ public class RegisterService {
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+    public Map<String, List<String>> validateRegistration(UserRegisterDTO dto) {
+        Map<String, List<String>> errors = new HashMap<>();
+
+        putIfNotEmpty(errors, "firstNameError", userValidation.validateNameString(dto.getFirstName(), "First"));
+        putIfNotEmpty(errors, "lastNameError", userValidation.validateNameString(dto.getLastName(), "Last"));
+        putIfNotEmpty(errors, "emailError", validateEmail(dto.getEmail()));
+
+        List<String> passwordErrors = userValidation.validatePasswordString(
+                dto.getPassword(), dto.getConfirmPassword(), "registerPassword"
+        );
+
+        // Separate out confirm password mismatch error
+        List<String> confirmPasswordErrors = new ArrayList<>();
+        passwordErrors.removeIf(err -> {
+            if (err.equals("Passwords do not match.")) {
+                confirmPasswordErrors.add(err);
+                return true;
+            }
+            return false;
+        });
+
+        putIfNotEmpty(errors, "passwordError", passwordErrors);
+        putIfNotEmpty(errors, "confirmPasswordError", confirmPasswordErrors);
+
+        return errors;
+    }
+
     /**
      * Create a user and save it to the database, with validation, first name, last name, email and password must not be null or empty.
      * @param userRegisterDTO Data transfer object for user registration
      * @return the user if it was saved successfully
      * @throws IllegalArgumentException if the firstName, lastName, email or password inputs are invalid
      */
-    public User registerUser(UserRegisterDTO userRegisterDTO) throws IllegalArgumentException {
-        // Throw error if data is not received into the service class correctly
-        if (userRegisterDTO == null) {
-            throw new IllegalArgumentException("Data integration error");
-        }
-
-        String firstName = userRegisterDTO.getFirstName();
-        String lastName = userRegisterDTO.getLastName();
-        String email = userRegisterDTO.getEmail();
-        String password = userRegisterDTO.getPassword();
-        String confirmPassword = userRegisterDTO.getConfirmPassword();
-
-        List<String> errors = new ArrayList<>();
-
-        errors.addAll(userValidation.validateNameString(firstName, "First"));
-        errors.addAll(userValidation.validateNameString(lastName, "Last"));
-        errors.addAll(validateEmail(email));
-        errors.addAll(userValidation.validatePasswordString(password, confirmPassword,"registerPassword"));
-        // Throw IllegalArgumentException if any errors occurred in validating the data
-        if (!errors.isEmpty()) {
-            throw new IllegalArgumentException(String.join(" ", errors));
-        }
-
-        // Create a user entity
-        User user = new User(firstName, lastName, email, passwordEncoder.encode(password));
-
-        // Save entity to the user repository
+    public User registerUser(UserRegisterDTO userRegisterDTO) {
+        User user = new User(
+                userRegisterDTO.getFirstName(),
+                userRegisterDTO.getLastName(),
+                userRegisterDTO.getEmail(),
+                passwordEncoder.encode(userRegisterDTO.getPassword())
+        );
         return userRepository.save(user);
+    }
+
+    private void putIfNotEmpty(Map<String, List<String>> map, String key, List<String> messages) {
+        if (messages != null && !messages.isEmpty()) {
+            map.put(key, messages);
+        }
     }
 
     /**

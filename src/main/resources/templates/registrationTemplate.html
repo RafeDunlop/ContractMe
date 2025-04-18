@@ -1,36 +1,115 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
     <title>Home Helper Registration</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
 </head>
 <body>
 <div class="container mt-5">
     <div class="card p-4 shadow">
         <h4 class="card-title mb-5">Sign up</h4>
-        <form th:action="@{register}" method="post">
+        <form th:action="@{register}" method="post" id="registration-form">
             <div class="form-group mb-3">
+
+                <!-- First Name -->
                 <div class="mb-3">
-                    <input type="text" class="form-control" id="first-name" name="firstName" placeholder="First Name" aria-label="first-name" th:value="${firstName}">
+                    <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First Name"
+                           aria-label="first-name" th:value="${userRegisterDTO.firstName}">
+
+                    <div class="alert alert-danger mt-2" id="firstName-frontend-error" hidden>
+                        <ul>
+                            <li><label class="form-label" id="firstName-frontend-error-message"></label></li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-danger mt-2" id="firstName-backend-error"
+                         th:attr="hidden=${firstNameError == null}">
+                        <ul>
+                            <li th:each="msg : ${firstNameError}" th:text="${msg}"></li>
+                        </ul>
+                    </div>
                 </div>
+
+                <!-- Last Name -->
                 <div class="mb-3">
-                    <input type="text" class="form-control" id="last-name" name="lastName" placeholder="Last Name" aria-label="last-name" th:value="${lastName}">
+                    <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last Name"
+                           aria-label="last-name" th:value="${userRegisterDTO.lastName}">
+
+                    <div class="alert alert-danger mt-2" id="lastName-frontend-error" hidden>
+                        <ul>
+                            <li><label class="form-label" id="lastName-frontend-error-message"></label></li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-danger mt-2" id="lastName-backend-error"
+                         th:attr="hidden=${lastNameError == null}">
+                        <ul>
+                            <li th:each="msg : ${lastNameError}" th:text="${msg}"></li>
+                        </ul>
+                    </div>
                 </div>
+
+                <!-- Email -->
                 <div class="mb-3">
-                    <input type="text" class="form-control" id="email" name="email" placeholder="Email" aria-label="email" th:value="${email}">
+                    <input type="text" class="form-control" id="email" name="email" placeholder="Email"
+                           aria-label="email" th:value="${userRegisterDTO.email}">
+
+                    <div class="alert alert-danger mt-2" id="email-frontend-error" hidden>
+                        <ul>
+                            <li><label class="form-label" id="email-frontend-error-message"></label></li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-danger mt-2" id="email-backend-error"
+                         th:attr="hidden=${emailError == null}">
+                        <ul>
+                            <li th:each="msg : ${emailError}" th:text="${msg}"></li>
+                        </ul>
+                    </div>
                 </div>
+
+                <!-- Password -->
                 <div class="mb-3">
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Password" aria-label="password">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password"
+                           aria-label="password">
+
+                    <div class="alert alert-danger mt-2" id="password-frontend-error" hidden>
+                        <ul>
+                            <li><label class="form-label" id="password-frontend-error-message"></label></li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-danger mt-2" id="password-backend-error"
+                         th:attr="hidden=${passwordError == null}">
+                        <ul>
+                            <li th:each="msg : ${passwordError}" th:text="${msg}"></li>
+                        </ul>
+                    </div>
                 </div>
+
+                <!-- Confirm Password -->
                 <div class="mb-5">
-                    <input type="password" class="form-control" id="confirm-password" name="confirmPassword" placeholder="Confirm Password" aria-label="confirm-password">
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
+                           placeholder="Confirm Password" aria-label="confirm-password">
+
+                    <div class="alert alert-danger mt-2" id="confirmPassword-frontend-error" hidden>
+                        <ul>
+                            <li><label class="form-label" id="confirmPassword-frontend-error-message"></label></li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-danger mt-2" id="confirmPassword-backend-error"
+                         th:attr="hidden=${confirmPasswordlError == null}">
+                        <ul>
+                            <li th:each="msg : ${confirmPasswordError}" th:text="${msg}"></li>
+                        </ul>
+                    </div>
                 </div>
+
+                <!-- General error messages -->
                 <div th:if="${errorMessages}" class="alert alert-danger mb-4" role="alert">
                     <ul>
                         <li th:each="error : ${errorMessages}" th:text="${error}"></li>
                     </ul>
                 </div>
+
                 <button type="submit" class="btn btn-primary">Sign up</button>
                 <a th:href="@{/}" class="btn btn-outline-secondary m-4">Cancel</a>
             </div>
@@ -38,4 +117,5 @@
     </div>
 </div>
 </body>
+<script type="module" th:src="@{/js/registerValidation.js}"></script>
 </html>

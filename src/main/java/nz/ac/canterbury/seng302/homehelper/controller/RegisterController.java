@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,18 +73,22 @@ public class RegisterController {
                                      HttpServletRequest request,
                                      RedirectAttributes redirectAttributes) {
         logger.info("POST /register");
+
+        Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
+
+        if (!errors.isEmpty()) {
+            errors.forEach(redirectAttributes::addFlashAttribute);
+            redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
+            return "redirect:/register";
+        }
+
         try {
             User user = registerService.registerUser(userRegisterDTO);
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
             return "redirect:/confirm-registration";
-        } catch (IllegalArgumentException|MailException e) {
-            logger.warn("Form submission error: {}", e.getMessage());
-
-            List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
-
-            redirectAttributes.addFlashAttribute("errorMessages", errorsList);
+        } catch (MailException e) {
+            redirectAttributes.addFlashAttribute("error", "Error sending confirmation email.");
             redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
-
             return "redirect:/register";
         }
     }
