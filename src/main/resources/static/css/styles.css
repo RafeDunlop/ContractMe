@@ -90,8 +90,15 @@
     vertical-align: middle;
 }
 
+.room-delete-button {
+    background-color: white;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
 .room-cell {
     white-space: normal;
     overflow-wrap: break-word;
-    max-width: 100%;
+
 }

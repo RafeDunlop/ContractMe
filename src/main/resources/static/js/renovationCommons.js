@@ -92,9 +92,10 @@ export function renderRooms(roomList, roomTableId) {
         buttonCell.style.textAlign = "right";
         buttonCell.style.width = "50px";
         button = document.createElement("button");
-        button.className = "btn btn-primary";
+        button.className = "btn btn-primary room-delete-button";
         button.innerText = "❌";
         button.style.backgroundColor = "white";
+        button.style.padding = "4px 8px";
         button.style.border = "1px solid #ccc";
         button.style.cursor = "pointer";
         button.background = "white";
