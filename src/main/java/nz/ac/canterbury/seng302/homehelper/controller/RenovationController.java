@@ -196,7 +196,6 @@ public class RenovationController {
      * @param name of the record to be edited from the form field
      * @param description of the record to be edited from the form field
      * @param roomList list of rooms of the record to be edited from the form
-     * @param model (map-like) representation of results to be used by thymeleaf
      * @return redirect to the view page for the edited record
      */
     @PostMapping("/edit")
@@ -204,26 +203,27 @@ public class RenovationController {
                                        @RequestParam(name="name", required = false) String name,
                                        @RequestParam(name = "description", required = false) String description,
                                        @RequestParam(name = "roomList", required = false) List <String> roomList,
-                                       Model model) {
+                                       RedirectAttributes redirectAttributes) {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
         if (roomList == null) roomList = new ArrayList<>(); //cannot be a default value as technically non-constant
         renovationRecord.setDescription(description);
         renovationRecord.setRooms(roomList);
-        model.addAttribute("renovation", renovationRecord);
         boolean changesAreValid = renovationRecordService.validateAllInputsEdit(renovationRecord, name);
+
         if (changesAreValid) { //go to view page
             renovationRecord.setName(name); // don't set the name until the changes are valid to avoid db divergence
             renovationRecordService.addRenovationRecord(renovationRecord); //updates existing record (identified by id)
-            model.addAttribute("renovation", renovationRecord);
+            redirectAttributes.addFlashAttribute("renovation", renovationRecord);
             return "redirect:/renovations/view?id=" + renovationRecord.getId();
         }
+
         if (renovationRecordService.checkForExactMatch(name, renovationRecord)) {
-            model.addAttribute("existingName", name);
+            redirectAttributes.addFlashAttribute("existingName", name);
         }
-        model.addAttribute("renovation", renovationRecord);
-        model.addAttribute("name", name);
-        return "editRenovationTemplate";
+        redirectAttributes.addFlashAttribute("renovation", renovationRecord);
+        redirectAttributes.addFlashAttribute("name", name);
+        return "redirect:/renovations/edit?id=" + renovationRecord.getId();
     }
 
     /**
