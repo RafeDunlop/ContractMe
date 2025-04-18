@@ -7,7 +7,6 @@
 }
 
 #room-list td {
-    white-space: nowrap;
     background-color: inherit;
 }
 
@@ -89,4 +88,10 @@
     text-overflow: ellipsis;
     display: inline-block;
     vertical-align: middle;
+}
+
+.room-cell {
+    white-space: normal;
+    overflow-wrap: break-word;
+    max-width: 1000px;
 }

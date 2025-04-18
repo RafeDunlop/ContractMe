@@ -23,7 +23,7 @@ public class RenovationRecord {
     private User user;
 
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @Lob

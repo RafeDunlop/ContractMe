@@ -87,6 +87,7 @@ export function renderRooms(roomList, roomTableId) {
         tableRow = roomTable.insertRow();
         roomCell = tableRow.insertCell(0);
         roomCell.innerText = room;
+        roomCell.className = "room-cell";
         buttonCell = tableRow.insertCell(1);
         buttonCell.style.textAlign = "right";
         buttonCell.style.width = "50px";
