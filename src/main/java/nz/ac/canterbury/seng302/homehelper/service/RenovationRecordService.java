@@ -9,8 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,16 +83,34 @@ public class RenovationRecordService {
      * @param roomList The roomList to be validated
      * @return true if and only if all fields are valid
      */
-    public boolean validateAllInputsCreate(String name, String description, List<String> roomList) {
+    public Map<String, List<String>> validateAllInputsCreate(String name, String description, List<String> roomList) {
+        Map<String, List<String>> errors = new HashMap<>();
         Pattern pattern = Pattern.compile("^[\\p{L}\\d ,.\\-']*$", Pattern.UNICODE_CHARACTER_CLASS);
-        return validateAllInputs(
-                name,
-                description,
-                roomList,
-                nameLambda -> !checkForExactMatch(nameLambda) && validateName(nameLambda, pattern),
-                pattern
-        );
+
+        if (checkForExactMatch(name)) {
+            errors.computeIfAbsent("nameError", k -> new ArrayList<>())
+                    .add("A renovation with this name already exists.");
+        }
+        if (name.isEmpty()) {
+            errors.computeIfAbsent("nameError", k -> new ArrayList<>())
+                    .add("Renovation record name cannot by empty.");
+        }
+        if (!validateName(name, pattern)) {
+            errors.computeIfAbsent("nameError", k -> new ArrayList<>())
+                    .add("Renovation record name must only include letters,numbers, spaces, dots, hyphens or apostrophes.");
+        }
+        if (!validateDescriptionLength(description)) {
+            errors.computeIfAbsent("descriptionError", k -> new ArrayList<>())
+                    .add("Renovation description must be 512 characters or less and cannot be empty.");
+        }
+        if (!validateAllRoomNames(roomList, pattern)) {
+            errors.computeIfAbsent("roomError", k -> new ArrayList<>())
+                    .add("Room names must only contain letters, numbers, spaces, commas, dots, hyphens, or apostrophes.");
+        }
+
+        return errors;
     }
+
 
     /**
      * Validates all renovation fields, returning false if any do not pass their validity checks.
@@ -153,7 +170,7 @@ public class RenovationRecordService {
      * @return true if the specified name matches the specified pattern and is non-empty
      */
     public boolean validateName(String name, Pattern pattern) {
-        return pattern.matcher(name).matches() && !name.isEmpty();
+        return pattern.matcher(name).matches();
     }
 
     /**

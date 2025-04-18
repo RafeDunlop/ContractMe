@@ -1,10 +1,14 @@
 import { validateField } from "./renovationCommons.js";
 
 let recordNameField = document.getElementById("name")
-let nameErrorLabel = document.getElementById("name-error-message")
+let nameFrontendError = document.getElementById("name-frontend-error")
+let nameFrontendErrorMessage = document.getElementById("name-frontend-error-message")
+let nameBackendError = document.getElementById("name-backend-error")
 let recordDescriptionField = document.getElementById("description")
-let descriptionErrorLabel = document.getElementById("description-error-message")
-let submitButton = document.getElementById("submit-record")
+let descriptionFrontendError = document.getElementById("description-frontend-error")
+let descriptionFrontendErrorMessage = document.getElementById("description-frontend-error-message")
+let descriptionBackendError = document.getElementById("description-backend-error-message")
+
 
 let nameFieldValid = false;
 let descriptionFieldValid = true;
@@ -21,8 +25,23 @@ document.addEventListener("DOMContentLoaded", function () {
     if (document.title === "Edit renovation") {
         checkNameField(recordNameField.value);
     }
+
     checkDescriptionField(recordDescriptionField.value);
-    if (recordNameField.value !== "") checkNameField(recordNameField.value);
+
+    if (recordNameField.value !== "") {
+        checkNameField(recordNameField.value);
+    }
+
+    const form = document.getElementById("renovation-form");
+    if (form) {
+        form.addEventListener("submit", function () {
+            const roomNames = collectRoomNames();
+            const roomListEditField = document.getElementById("roomListEdit");
+            if (roomListEditField) {
+                roomListEditField.value = roomNames.join(",");
+            }
+        });
+    }
 });
 
 /**
@@ -32,23 +51,33 @@ document.addEventListener("DOMContentLoaded", function () {
  * @param input from the form
  */
 function checkNameField(input) {
-    if (input.trim() === "") {
-        nameErrorLabel.textContent = "Renovation record name cannot be empty";
-        nameErrorLabel.hidden = false;
+    input = input.trim();
+
+    if (input === "") {
+        nameFrontendErrorMessage.textContent = "Renovation record name cannot be empty.";
+        nameFrontendError.hidden = false;
+        nameFrontendErrorMessage.hidden = false;
+        nameBackendError.hidden = true;
         nameFieldValid = false;
-    } else if (input.trim() === document.getElementById("existingName").value) {
+    } else if (input.toLowerCase() === document.getElementById("existingName").value.toLowerCase()) {
+        nameFrontendErrorMessage.textContent = "You already have a renovation with this name.";
+        nameFrontendError.hidden = false;
+        nameFrontendErrorMessage.hidden = false;
+        nameBackendError.hidden = true;
         nameFieldValid = false;
-        nameErrorLabel.hidden = false;
-        nameErrorLabel.textContent = "You already have a renovation with this name";
     } else {
-        nameErrorLabel.textContent = roomNameErrorMessage;
-        nameFieldValid = validateField(input, /^[\p{L}\d .,\-']*$/u, nameErrorLabel, roomNameErrorMessage);
+        const isValid = validateField(input, /^[\p{L}\d .,\-']*$/u, nameFrontendError, roomNameErrorMessage);
+        nameFieldValid = isValid;
+        nameFrontendError.hidden = isValid;
+        nameBackendError.hidden = true;
+
+        if (isValid) {
+            nameFrontendErrorMessage.textContent = "";
+        }
     }
-    if (nameFieldValid) {
-        nameErrorLabel.textContent = "";
-    }
-    toggleSubmitButton();
 }
+
+
 
 /**
  * Checks the validity of the description form field, called by event listener
@@ -57,20 +86,16 @@ function checkNameField(input) {
  */
 function checkDescriptionField(input) {
     if (input.length > 512) {
-        descriptionErrorLabel.textContent = "Renovation record description must be 512 characters or less";
+        descriptionFrontendErrorMessage.textContent = "Renovation record description must be 512 characters or less";
+        descriptionFrontendError.hidden = false;
+        descriptionFrontendErrorMessage.hidden = false;
+        descriptionBackendError.hidden = true;
         descriptionFieldValid = false;
-        descriptionErrorLabel.hidden = false;
     } else {
+        descriptionFrontendErrorMessage.textContent = "";
+        descriptionFrontendError.hidden = true;
+        descriptionFrontendErrorMessage.hidden = true;
+        descriptionBackendError.hidden = true;
         descriptionFieldValid = true;
-        descriptionErrorLabel.textContent = "";
-        descriptionErrorLabel.hidden = true;
     }
-    toggleSubmitButton()
-}
-
-/**
- * Function that toggles the form submission button based on whether both input fields have a valid input
- */
-function toggleSubmitButton() {
-    submitButton.disabled = nameFieldValid === false || descriptionFieldValid === false;
 }

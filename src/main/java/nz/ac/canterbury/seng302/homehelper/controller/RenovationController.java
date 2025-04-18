@@ -22,7 +22,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controller for /renovation and subsidiary endpoints, associated with the consuming of renovations
@@ -99,17 +101,22 @@ public class RenovationController {
     @PostMapping("/create")
     public String submitRecord(@RequestParam(name="name") String name,
                                @RequestParam(name = "description", required=false, defaultValue = "") String description,
-                               @RequestParam(name = "roomList", required = false) List <String> roomList,
+                               @RequestParam(name = "roomList", required = false) List<String> roomList,
                                RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/create");
+
         if (roomList == null) roomList = new ArrayList<>(); //cannot be a default value as technically non-constant
-        if (!renovationRecordService.validateAllInputsCreate(name, description, roomList)) {
-            if (renovationRecordService.checkForExactMatch(name)) {
-                redirectAttributes.addFlashAttribute("existingName", name);
-            }
+        Map<String, List<String>> errors = renovationRecordService.validateAllInputsCreate(name, description, roomList);
+
+
+        if (!errors.isEmpty()) {
+            // Add each error to a flash attribute, categorizing by error type
+            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
+
             redirectAttributes.addFlashAttribute("name", name);
             redirectAttributes.addFlashAttribute("description", description);
             redirectAttributes.addFlashAttribute("roomList", roomList);
+
             return "redirect:/renovations/create";
         }
 
@@ -127,7 +134,7 @@ public class RenovationController {
                 redirectAttributes.addFlashAttribute("name", name);
                 redirectAttributes.addFlashAttribute("description", description);
                 redirectAttributes.addFlashAttribute("roomList", roomList);
-                redirectAttributes.addFlashAttribute("errorMessage", "Invalid input: " + e.getMessage());
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
                 return "redirect:/renovations/create";
             }
         } catch (IllegalArgumentException e) {
