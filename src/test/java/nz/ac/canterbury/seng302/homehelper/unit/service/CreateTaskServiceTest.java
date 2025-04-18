@@ -35,9 +35,7 @@ public class CreateTaskServiceTest {
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(new ArrayList<>());
         renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
         Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(Mockito.any());
-
     }
-
 
     @Test
     public void addTask_taskNameInvalid_returnsError() {
@@ -50,7 +48,6 @@ public class CreateTaskServiceTest {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);});
         assertEquals("name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.", exception.getMessage());
-
     }
 
     @Test
@@ -64,7 +61,6 @@ public class CreateTaskServiceTest {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);});
         assertEquals("description cannot be empty.", exception.getMessage());
-
     }
 
     @Test
@@ -82,7 +78,6 @@ public class CreateTaskServiceTest {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);});
         assertEquals("description must be 512 characters or less.", exception.getMessage());
-
     }
 
     @Test
@@ -96,6 +91,5 @@ public class CreateTaskServiceTest {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);});
         assertEquals("Due date must be in the future.", exception.getMessage());
-
     }
 }
