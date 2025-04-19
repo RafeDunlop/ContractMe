@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
@@ -22,12 +22,16 @@ public class LoginController {
      * @return loginTemplate
      */
     @GetMapping("/login")
-    public String login(@RequestParam(value="error", required = false) String error, Model model) {
+    public String login(HttpServletRequest request, Model model) {
         logger.info("GET /login");
+
+        Object error = request.getSession().getAttribute("errorMessage");
         if (error != null) {
-            List<String> errorsList = List.of(error.split("(?<=\\.) "));
+            List<String> errorsList = List.of(error.toString().split("(?<=\\.) "));
             model.addAttribute("errorMessage", errorsList);
+            request.getSession().removeAttribute("errorMessage");
         }
+
         return "loginTemplate";
     }
 }
