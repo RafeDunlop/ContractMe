@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +29,26 @@ public class LoginController {
         Object error = request.getSession().getAttribute("errorMessage");
         if (error != null) {
             List<String> errorsList = List.of(error.toString().split("(?<=\\.) "));
-            model.addAttribute("errorMessage", errorsList);
+
+            List<String> emailErrors = new ArrayList<>();
+            List<String> generalErrors = new ArrayList<>();
+
+            for (String err : errorsList) {
+                if (err.trim().toLowerCase().contains("email address must be in the form")) {
+                    emailErrors.add(err.trim());
+                } else {
+                    generalErrors.add(err.trim());
+                }
+            }
+
+            if (!emailErrors.isEmpty()) {
+                model.addAttribute("emailError", emailErrors);
+            }
+
+            if (!generalErrors.isEmpty()) {
+                model.addAttribute("errorMessage", generalErrors);
+            }
+
             request.getSession().removeAttribute("errorMessage");
         }
 

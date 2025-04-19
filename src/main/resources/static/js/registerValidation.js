@@ -25,12 +25,6 @@ let confirmPasswordFrontendError = document.getElementById("confirmPassword-fron
 let confirmPasswordFrontendErrorMessage = document.getElementById("confirmPassword-frontend-error-message");
 let confirmPasswordBackendError = document.getElementById("confirmPassword-backend-error");
 
-// Validity flags
-let emailValid = false;
-let firstNameValid = false;
-let lastNameValid = false;
-let passwordValid = false;
-
 // Regex patterns
 const emailPattern = /^[A-Za-z0-9]+([+_.-][A-Za-z0-9]+)*@[A-Za-z0-9]+([.-][A-Za-z0-9]+)*(\.[A-Za-z]{2,})$/;
 const namePattern = /^[\p{L}\-'\s]*$/u;
@@ -51,13 +45,11 @@ function checkEmailField(input) {
         emailFrontendError.hidden = false;
         emailFrontendErrorMessage.hidden = false;
         emailBackendError.hidden = true;
-        emailValid = false;
     } else {
         emailFrontendErrorMessage.textContent = "";
         emailFrontendError.hidden = true;
         emailFrontendErrorMessage.hidden = true;
         emailBackendError.hidden = true;
-        emailValid = true;
     }
 }
 
@@ -73,29 +65,21 @@ function checkNameField(input, nameType) {
         errorElement.hidden = false;
         errorMessageElement.hidden = false;
         backendErrorElement.hidden = true;
-        if (nameType === "First") firstNameValid = false;
-        else lastNameValid = false;
     } else if (!namePattern.test(input)) {
         errorMessageElement.textContent = `${nameType} name must only include letters, spaces, hyphens, or apostrophes.`;
         errorElement.hidden = false;
         errorMessageElement.hidden = false;
         backendErrorElement.hidden = true;
-        if (nameType === "First") firstNameValid = false;
-        else lastNameValid = false;
     } else if (input.length > 64) {
         errorMessageElement.textContent = `${nameType} name must be 64 characters long or less.`;
         errorElement.hidden = false;
         errorMessageElement.hidden = false;
         backendErrorElement.hidden = true;
-        if (nameType === "First") firstNameValid = false;
-        else lastNameValid = false;
     } else {
         errorMessageElement.textContent = "";
         errorElement.hidden = true;
         errorMessageElement.hidden = true;
         backendErrorElement.hidden = true;
-        if (nameType === "First") firstNameValid = true;
-        else lastNameValid = true;
     }
 }
 
@@ -121,13 +105,11 @@ function checkPasswordStrength() {
         passwordFrontendError.hidden = false;
         passwordFrontendErrorMessage.hidden = false;
         passwordBackendError.hidden = true;
-        passwordValid = false;
     } else {
         passwordFrontendErrorMessage.textContent = "";
         passwordFrontendError.hidden = true;
         passwordFrontendErrorMessage.hidden = true;
         passwordBackendError.hidden = true;
-        passwordValid = true;
     }
 }
 

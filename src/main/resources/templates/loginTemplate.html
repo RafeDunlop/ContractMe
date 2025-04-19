@@ -11,11 +11,28 @@
             <h4 class="card-title mb-5">Log in</h4>
             <form th:action="@{/login}" method="post">
                 <div class="form-group mb-3">
+                    <!-- Email -->
                     <div class="mb-3">
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Email" aria-label="Email">
+                        <input type="text" class="form-control" id="email" name="email" placeholder="Email"
+                               aria-label="email">
+
+                        <div class="alert alert-danger mt-2" id="email-frontend-error" hidden>
+                            <ul>
+                                <li><label class="form-label" id="email-frontend-error-message"></label></li>
+                            </ul>
+                        </div>
+                        <div class="alert alert-danger mt-2" id="email-backend-error"
+                             th:attr="hidden=${emailError == null}">
+                            <ul>
+                                <li th:each="msg : ${emailError}" th:text="${msg}"></li>
+                            </ul>
+                        </div>
                     </div>
+
+                    <!-- Password -->
                     <div class="mb-3">
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" aria-label="Password">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Password"
+                               aria-label="password">
                     </div>
 
                     <div th:if="${loginMessage}" class="alert alert-success mb-3" role="alert">
@@ -38,4 +55,5 @@
     </div>
 
 </body>
+<script type="module" th:src="@{/js/loginValidation.js}"></script>
 </html>
