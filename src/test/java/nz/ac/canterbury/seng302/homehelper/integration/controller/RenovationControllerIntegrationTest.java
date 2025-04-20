@@ -378,12 +378,12 @@ public class RenovationControllerIntegrationTest {
                         .param("description", "A".repeat(513))
                         .param("roomList", "Room 1", "Room 2")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("editRenovationTemplate"))
-                .andExpect(model().attribute("renovation", allOf(
-                        hasProperty("name", is("Renovation One")),
-                        hasProperty("description", is("A".repeat(513))),
-                        hasProperty("rooms", contains("Room 1", "Room 2")))));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/edit?id=" + existingRecord.getId()))
+                .andExpect(flash().attribute("name", "Fail!"))
+                .andExpect(flash().attribute("description", "A".repeat(513)))
+                .andExpect(flash().attribute("roomList", List.of("Room 1", "Room 2")));
+
 
         List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
         assertFalse(userRecords.isEmpty());
@@ -412,12 +412,11 @@ public class RenovationControllerIntegrationTest {
                         .param("description", "Some words")
                         .param("roomList", "Room 1", "Room 2")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("editRenovationTemplate"))
-                .andExpect(model().attribute("renovation", allOf(
-                        hasProperty("name", is("Renovation One")),
-                        hasProperty("description", is("Some words")),
-                        hasProperty("rooms", contains("Room 1", "Room 2")))));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/edit?id=" + existingRecord.getId()))
+                .andExpect(flash().attribute("name", "Renovation Two"))
+                .andExpect(flash().attribute("description", "Some words"))
+                .andExpect(flash().attribute("roomList", List.of("Room 1", "Room 2")));
 
         List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
         assertFalse(userRecords.isEmpty());

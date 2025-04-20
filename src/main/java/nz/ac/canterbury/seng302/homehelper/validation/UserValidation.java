@@ -21,7 +21,7 @@ public class UserValidation {
         // Check if email is empty, null, or not in the form 'jane@doe.nz'
         if (email == null || email.trim().isEmpty() ||
                 !email.matches("^[A-Za-z0-9]+([+_.-][A-Za-z0-9]+)*@[A-Za-z0-9]+([.-][A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")) {
-            errors.add("Email address must be in the form ‘jane@doe.nz’.");
+            errors.add("Email address must be in the form 'jane@doe.nz'.");
         }
         return errors;
     }

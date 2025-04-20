@@ -9,7 +9,7 @@ emailField.addEventListener("input", () => checkEmailField(emailField.value));
 function checkEmailField(input) {
     input = input.trim();
     if (input === "" || !emailPattern.test(input)) {
-        emailFrontendErrorMessage.textContent = "Email address must be in the form ‘jane@doe.nz’.";
+        emailFrontendErrorMessage.textContent = "Email address must be in the form 'jane@doe.nz'.";
         emailFrontendError.hidden = false;
         emailFrontendErrorMessage.hidden = false;
         emailBackendError.hidden = true;

@@ -151,7 +151,7 @@ public class EditProfileControllerIntegrationTest {
                         .param("password", updatedUser.getPassword()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user/edit"))
-                .andExpect(flash().attribute("errorMessages", expectedErrors))
+                .andExpect(flash().attribute("emailError", expectedErrors))
                 .andExpect(flash().attributeExists("user"))
                 .andExpect(flash().attribute("firstName", updatedUser.getFirstName()))
                 .andExpect(flash().attribute("lastName", updatedUser.getLastName()))

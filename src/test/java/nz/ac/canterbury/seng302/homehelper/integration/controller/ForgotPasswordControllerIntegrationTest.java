@@ -17,7 +17,6 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 import java.util.Locale;
@@ -137,7 +136,7 @@ public class ForgotPasswordControllerIntegrationTest {
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/password/forgot"))
-                .andExpect(flash().attribute("errorMessage", expectedMessage));
+                .andExpect(flash().attribute("emailError", expectedMessage));
     }
 
     /**

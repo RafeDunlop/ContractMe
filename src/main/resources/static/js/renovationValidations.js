@@ -53,20 +53,33 @@ document.addEventListener("DOMContentLoaded", function () {
 function checkNameField(input) {
     input = input.trim();
 
+    const isEditMode = document.title === "Edit renovation";
+    const existingName = document.getElementById("existingName")?.value;
+
     if (input === "") {
         nameFrontendErrorMessage.textContent = "Renovation record name cannot be empty.";
         nameFrontendError.hidden = false;
         nameFrontendErrorMessage.hidden = false;
         nameBackendError.hidden = true;
         nameFieldValid = false;
-    } else if (input.toLowerCase() === document.getElementById("existingName").value.toLowerCase()) {
+
+    } else if (!isEditMode && existingName && input.toLowerCase() === existingName.toLowerCase()) {
+        // In CREATE mode, block if name matches existing
         nameFrontendErrorMessage.textContent = "You already have a renovation with this name.";
         nameFrontendError.hidden = false;
         nameFrontendErrorMessage.hidden = false;
         nameBackendError.hidden = true;
         nameFieldValid = false;
+
+    } else if (isEditMode && existingName && input.toLowerCase() === existingName.toLowerCase()) {
+        // In EDIT mode and name hasn't changed, it's valid
+        nameFieldValid = true;
+        nameFrontendError.hidden = true;
+        nameFrontendErrorMessage.textContent = "";
+        nameBackendError.hidden = true;
+
     } else {
-        const isValid = validateField(input, /^[\p{L}\d .,\-']*$/u, nameFrontendError, roomNameErrorMessage);
+        const isValid = validateField(input, /^[\p{L}\d .,\-']*$/u, nameFrontendErrorMessage, roomNameErrorMessage);
         nameFieldValid = isValid;
         nameFrontendError.hidden = isValid;
         nameBackendError.hidden = true;
@@ -76,8 +89,6 @@ function checkNameField(input) {
         }
     }
 }
-
-
 
 /**
  * Checks the validity of the description form field, called by event listener
