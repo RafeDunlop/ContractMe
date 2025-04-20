@@ -105,7 +105,7 @@ public class UpdatePasswordServiceTest {
             updatePasswordService.updatePassword(updatePasswordDTO);
         });
 
-        assertTrue(exception.getMessage().contains("New Passwords do not match."));
+        assertTrue(exception.getMessage().contains("The new passwords do not match."));
         Mockito.verify(userRepositoryMock, Mockito.never()).save(testUser);
     }
 
