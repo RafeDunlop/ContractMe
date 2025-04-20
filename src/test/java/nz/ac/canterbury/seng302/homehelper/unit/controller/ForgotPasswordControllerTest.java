@@ -35,13 +35,13 @@ public class ForgotPasswordControllerTest {
     private ForgotPasswordController forgotPasswordController;
 
     @Mock
-    private Model modelMock;
+    private RedirectAttributes redirectAttributesMock;
 
     @Mock
     private HttpServletRequest httpServletRequestMock;
 
     @Mock
-    private RedirectAttributes redirectAttributesMock;
+    private Model modelMock;
 
     static User user;
 
@@ -59,30 +59,30 @@ public class ForgotPasswordControllerTest {
 
     @Test
     void postForgotPassword_enterValidEmail_returnSentMessageAndForm() {
-        String expectedForm = "forgotPasswordTemplate";
+        String expectedRedirect = "redirect:/password/forgot";
         String expectedMessage = "An email was sent to the address if it was recognised";
         String validEmail = "jane@doe.com";
         Mockito.when(httpServletRequestMock.getLocale()).thenReturn(Locale.ENGLISH);
         Mockito.when(forgotPasswordServiceMock.validateEmail(validEmail, Locale.ENGLISH)).thenReturn("");
 
-        String forgotPasswordForm = forgotPasswordController.submitEmail(validEmail, modelMock, httpServletRequestMock);
+        String forgotPasswordForm = forgotPasswordController.submitEmail(validEmail, httpServletRequestMock, redirectAttributesMock);
 
-        assertEquals(expectedForm, forgotPasswordForm);
-        Mockito.verify(modelMock).addAttribute("emailMessage", expectedMessage);
+        assertEquals(expectedRedirect, forgotPasswordForm);
+        Mockito.verify(redirectAttributesMock).addFlashAttribute("emailMessage", expectedMessage);
     }
 
     @Test
     void postForgotPassword_enterInvalidEmail_returnErrorMessageAndForm() {
-        String expectedForm = "forgotPasswordTemplate";
+        String expectedRedirect = "redirect:/password/forgot";
         String expectedMessage = "Email address must be in the form ‘jane@doe.nz’.";
         String validEmail = "jane@@doe.com";
         Mockito.when(httpServletRequestMock.getLocale()).thenReturn(Locale.ENGLISH);
         Mockito.when(forgotPasswordServiceMock.validateEmail(validEmail, Locale.ENGLISH)).thenReturn(expectedMessage);
 
-        String forgotPasswordForm = forgotPasswordController.submitEmail(validEmail, modelMock, httpServletRequestMock);
+        String forgotPasswordForm = forgotPasswordController.submitEmail(validEmail, httpServletRequestMock, redirectAttributesMock);
 
-        assertEquals(expectedForm, forgotPasswordForm);
-        Mockito.verify(modelMock).addAttribute("errorMessage", expectedMessage);
+        assertEquals(expectedRedirect, forgotPasswordForm);
+        Mockito.verify(redirectAttributesMock).addFlashAttribute("errorMessage", expectedMessage);
     }
 
     @Test
@@ -120,7 +120,7 @@ public class ForgotPasswordControllerTest {
         Mockito.when(forgotPasswordServiceMock.validatePasswords(newPassword, retypePassword)).thenReturn(List.of());
         Mockito.when(httpServletRequestMock.getLocale()).thenReturn(Locale.ENGLISH);
 
-        String loginPageRedirect = forgotPasswordController.submitPassword(token, newPassword, retypePassword, redirectAttributesMock, modelMock, httpServletRequestMock);
+        String loginPageRedirect = forgotPasswordController.submitPassword(token, newPassword, retypePassword, redirectAttributesMock, httpServletRequestMock);
 
         Mockito.verify(verificationCodeServiceMock, times(1)).consumeResetPasswordToken(token);
         Mockito.verify(forgotPasswordServiceMock, times(1)).sendNewPasswordEmail(user.getEmail(), user.getFirstName(), httpServletRequestMock.getLocale());
@@ -133,16 +133,16 @@ public class ForgotPasswordControllerTest {
         String token = "VaLiDtOkEn";
         String newPassword = "Test123!";
         String retypePassword = "Test12345?";
-        String expectedForm = "resetPasswordTemplate";
+        String expectedRedirect = "redirect:/password/reset/VaLiDtOkEn";
         List<String> expectedErrorMessages = List.of("The passwords do not match.");
         Mockito.when(verificationCodeServiceMock.getUserByToken(token)).thenReturn(Optional.of(user));
         Mockito.when(forgotPasswordServiceMock.validatePasswords(newPassword, retypePassword)).thenReturn(expectedErrorMessages);
 
-        String resetPasswordForm = forgotPasswordController.submitPassword(token, newPassword, retypePassword, redirectAttributesMock, modelMock, httpServletRequestMock);
+        String resetPasswordForm = forgotPasswordController.submitPassword(token, newPassword, retypePassword, redirectAttributesMock, httpServletRequestMock);
 
-        Mockito.verify(modelMock).addAttribute("errorMessages", expectedErrorMessages);
-        Mockito.verify(modelMock).addAttribute("token", token);
-        assertEquals(expectedForm, resetPasswordForm);
+        Mockito.verify(redirectAttributesMock).addFlashAttribute("errorMessages", expectedErrorMessages);
+        Mockito.verify(redirectAttributesMock).addFlashAttribute("token", token);
+        assertEquals(expectedRedirect, resetPasswordForm);
     }
 
     @Test
@@ -154,7 +154,7 @@ public class ForgotPasswordControllerTest {
         String expectedRedirectMessage = "Reset password link has expired";
         Mockito.when(verificationCodeServiceMock.getUserByToken(token)).thenReturn(Optional.empty());
 
-        String resetPasswordForm = forgotPasswordController.submitPassword(token, newPassword, retypePassword, redirectAttributesMock, modelMock, httpServletRequestMock);
+        String resetPasswordForm = forgotPasswordController.submitPassword(token, newPassword, retypePassword, redirectAttributesMock, httpServletRequestMock);
 
         Mockito.verify(redirectAttributesMock).addAttribute("error", expectedRedirectMessage);
         assertEquals(expectedRedirect, resetPasswordForm);

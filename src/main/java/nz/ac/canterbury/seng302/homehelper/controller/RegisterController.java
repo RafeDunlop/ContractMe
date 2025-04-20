@@ -69,7 +69,8 @@ public class RegisterController {
      */
     @PostMapping("/register")
     public String submitRegistration(@ModelAttribute UserRegisterDTO userRegisterDTO,
-                                     Model model, HttpServletRequest request) {
+                                     HttpServletRequest request,
+                                     RedirectAttributes redirectAttributes) {
         logger.info("POST /register");
         try {
             User user = registerService.registerUser(userRegisterDTO);
@@ -80,13 +81,11 @@ public class RegisterController {
 
             List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
 
-            model.addAttribute("errorMessages", errorsList);
+            redirectAttributes.addFlashAttribute("errorMessages", errorsList);
+            redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
 
-            model.addAttribute("firstName", userRegisterDTO.getFirstName().trim());
-            model.addAttribute("lastName", userRegisterDTO.getLastName().trim());
-            model.addAttribute("email", userRegisterDTO.getEmail().trim());
+            return "redirect:/register";
         }
-        return "registrationTemplate";
     }
 
     /**
@@ -105,13 +104,14 @@ public class RegisterController {
      * @param code the verification code
      */
     @PostMapping("/confirm-registration")
-    public String verifyRegistration(@RequestParam(name="code") String code, Model model, RedirectAttributes redirectAttributes) {
+    public String verifyRegistration(@RequestParam(name="code") String code,
+                                     RedirectAttributes redirectAttributes) {
         logger.info("POST /confirm-registration code: {}", code);
         try {
             verificationCodeService.consumeSignupCode(code);
         } catch (IllegalArgumentException error) {
-            model.addAttribute("errorMessage", error.getMessage());
-            return "emailVerificationForm";
+            redirectAttributes.addFlashAttribute("errorMessage", error.getMessage());
+            return "redirect:/confirm-registration";
         }
         redirectAttributes.addFlashAttribute("loginMessage", "Your account has been activated, please log in");
         return "redirect:/login";

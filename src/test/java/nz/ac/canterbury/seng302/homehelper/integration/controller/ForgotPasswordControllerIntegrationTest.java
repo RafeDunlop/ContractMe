@@ -17,6 +17,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 import java.util.Locale;
@@ -92,10 +93,9 @@ public class ForgotPasswordControllerIntegrationTest {
         mockMvc.perform(post("/password/forgot")
                 .param("email", email)
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("forgotPasswordTemplate"))
-                .andExpect(model().attribute("emailMessage", expectedMessage))
-                .andExpect(model().attributeDoesNotExist("errorMessage"));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/password/forgot"))
+                .andExpect(flash().attribute("emailMessage", expectedMessage));
 
         List<VerificationCode> verificationCode = (List<VerificationCode>) verificationCodeRepository.findAll();
         assertEquals(resetUser, verificationCode.get(0).getUser());
@@ -114,10 +114,9 @@ public class ForgotPasswordControllerIntegrationTest {
         mockMvc.perform(post("/password/forgot")
                         .param("email", email)
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("forgotPasswordTemplate"))
-                .andExpect(model().attribute("emailMessage", expectedMessage))
-                .andExpect(model().attributeDoesNotExist("errorMessage"));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/password/forgot"))
+                .andExpect(flash().attribute("emailMessage", expectedMessage));
 
         List<VerificationCode> verificationCode = (List<VerificationCode>) verificationCodeRepository.findAll();
         assertTrue(verificationCode.isEmpty());
@@ -136,10 +135,9 @@ public class ForgotPasswordControllerIntegrationTest {
         mockMvc.perform(post("/password/forgot")
                         .param("email", email)
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("forgotPasswordTemplate"))
-                .andExpect(model().attribute("errorMessage", expectedMessage))
-                .andExpect(model().attributeDoesNotExist("emailMessage"));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/password/forgot"))
+                .andExpect(flash().attribute("errorMessage", expectedMessage));
     }
 
     /**
@@ -247,9 +245,9 @@ public class ForgotPasswordControllerIntegrationTest {
                         .param("newPassword", newPassword)
                         .param("retypePassword", retypePassword)
                         .with(csrf()))
-                .andExpect(view().name("resetPasswordTemplate"))
-                .andExpect(model().attribute("errorMessages", expectedErrorMessages))
-                .andExpect(model().attribute("token", token));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("errorMessages", expectedErrorMessages))
+                .andExpect(flash().attribute("token", token));
     }
 
     /**

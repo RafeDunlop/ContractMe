@@ -94,25 +94,23 @@ public class RenovationController {
      * </ul>
      * @param name Name of the renovation
      * @param description The description of the renovation
-     * @param model (map-like) representation of name, language and isJava boolean for use in thymeleaf,
-     *              with values being set to relevant parameters provided
      * @return thymeleaf createRenovationTemplate OR viewRenovationTemplate
      */
     @PostMapping("/create")
     public String submitRecord(@RequestParam(name="name") String name,
                                @RequestParam(name = "description", required=false, defaultValue = "") String description,
                                @RequestParam(name = "roomList", required = false) List <String> roomList,
-                               Model model, RedirectAttributes redirectAttributes) {
+                               RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/create");
         if (roomList == null) roomList = new ArrayList<>(); //cannot be a default value as technically non-constant
         if (!renovationRecordService.validateAllInputsCreate(name, description, roomList)) {
             if (renovationRecordService.checkForExactMatch(name)) {
-                model.addAttribute("existingName", name);
+                redirectAttributes.addFlashAttribute("existingName", name);
             }
-            model.addAttribute("name", name); //otherwise the error is displayed automatically on the client side (just stop the submission)
-            model.addAttribute("description", description);
-            model.addAttribute("roomList", roomList);
-            return "createRenovationTemplate";
+            redirectAttributes.addFlashAttribute("name", name);
+            redirectAttributes.addFlashAttribute("description", description);
+            redirectAttributes.addFlashAttribute("roomList", roomList);
+            return "redirect:/renovations/create";
         }
 
         try { // save the record and go to the view page
@@ -126,11 +124,11 @@ public class RenovationController {
 
             } catch (IllegalArgumentException e) {
                 logger.warn("Form submission error {}", e.getMessage());
-                model.addAttribute("name", name);
-                model.addAttribute("description", description);
-                model.addAttribute("roomList", roomList);
-                model.addAttribute("errorMessage", "Invalid input: " + e.getMessage());
-                return "createRenovationTemplate";
+                redirectAttributes.addFlashAttribute("name", name);
+                redirectAttributes.addFlashAttribute("description", description);
+                redirectAttributes.addFlashAttribute("roomList", roomList);
+                redirectAttributes.addFlashAttribute("errorMessage", "Invalid input: " + e.getMessage());
+                return "redirect:/renovations/create";
             }
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
@@ -198,7 +196,6 @@ public class RenovationController {
      * @param name of the record to be edited from the form field
      * @param description of the record to be edited from the form field
      * @param roomList list of rooms of the record to be edited from the form
-     * @param model (map-like) representation of results to be used by thymeleaf
      * @return redirect to the view page for the edited record
      */
     @PostMapping("/edit")
@@ -206,26 +203,27 @@ public class RenovationController {
                                        @RequestParam(name="name", required = false) String name,
                                        @RequestParam(name = "description", required = false) String description,
                                        @RequestParam(name = "roomList", required = false) List <String> roomList,
-                                       Model model) {
+                                       RedirectAttributes redirectAttributes) {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
         if (roomList == null) roomList = new ArrayList<>(); //cannot be a default value as technically non-constant
         renovationRecord.setDescription(description);
         renovationRecord.setRooms(roomList);
-        model.addAttribute("renovation", renovationRecord);
         boolean changesAreValid = renovationRecordService.validateAllInputsEdit(renovationRecord, name);
+
         if (changesAreValid) { //go to view page
             renovationRecord.setName(name); // don't set the name until the changes are valid to avoid db divergence
             renovationRecordService.addRenovationRecord(renovationRecord); //updates existing record (identified by id)
-            model.addAttribute("renovation", renovationRecord);
+            redirectAttributes.addFlashAttribute("renovation", renovationRecord);
             return "redirect:/renovations/view?id=" + renovationRecord.getId();
         }
+
         if (renovationRecordService.checkForExactMatch(name, renovationRecord)) {
-            model.addAttribute("existingName", name);
+            redirectAttributes.addFlashAttribute("existingName", name);
         }
-        model.addAttribute("renovation", renovationRecord);
-        model.addAttribute("name", name);
-        return "editRenovationTemplate";
+        redirectAttributes.addFlashAttribute("renovation", renovationRecord);
+        redirectAttributes.addFlashAttribute("name", name);
+        return "redirect:/renovations/edit?id=" + renovationRecord.getId();
     }
 
     /**
