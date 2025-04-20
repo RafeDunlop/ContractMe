@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -135,7 +134,7 @@ public class RegisterServiceIntegrationTest {
         Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
 
         Assertions.assertFalse(errors.isEmpty());
-        Assertions.assertTrue(errors.get("emailError").contains("Email address must be in the form ‘jane@doe.nz’."));
+        Assertions.assertTrue(errors.get("emailError").contains("Email address must be in the form 'jane@doe.nz'."));
     }
 
     @Test

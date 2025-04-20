@@ -34,7 +34,7 @@ public class UserValidationTest {
     @Test
     public void PasswordValidation_InvalidEmails_RejectInputs() {
         UserValidation userValidation = new UserValidation();
-        List<String> expectedErrorList = List.of("Email address must be in the form ‘jane@doe.nz’.");
+        List<String> expectedErrorList = List.of("Email address must be in the form 'jane@doe.nz'.");
         List<String> invalidEmails = Arrays.asList("@doe.com", "abc@@nz.nz.nz.nz", "abc@gmail..om", "jane@doe.n");
         for (String email : invalidEmails) {
             Assertions.assertLinesMatch(expectedErrorList, userValidation.validateEmailString(email));

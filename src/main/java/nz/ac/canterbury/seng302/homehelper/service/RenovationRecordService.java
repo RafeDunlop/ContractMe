@@ -77,11 +77,13 @@ public class RenovationRecordService {
     }
 
     /**
-     * Validates all renovation fields, returning false if any do not pass their validity checks
-     * @param name The name to be validated
-     * @param description The description to be validated
-     * @param roomList The roomList to be validated
-     * @return true if and only if all fields are valid
+     * Validates all renovation fields for creating a new renovation record.
+     *
+     * @param name The name of the renovation to validate.
+     * @param description The description of the renovation to validate.
+     * @param roomList The list of room names to validate.
+     * @return A map of validation errors, where each key is a field name (e.g., "nameError")
+     *         and the corresponding value is a list of error messages. Returns an empty map if all inputs are valid.
      */
     public Map<String, List<String>> validateAllInputsCreate(String name, String description, List<String> roomList) {
         Map<String, List<String>> errors = new HashMap<>();
@@ -113,23 +115,42 @@ public class RenovationRecordService {
 
 
     /**
-     * Validates all renovation fields, returning false if any do not pass their validity checks.
-     * This method allows names that do not diverge from the specified {@code RenovationRecord}
-     * @param renovationRecord The renovation which contains all fields except the name,
-     *                         which represents the database-saved version
-     * @param newName The name to check
-     * @return true if and only if all fields are valid
+     * Validates all renovation fields for editing an existing renovation record.
+     * Allows the name to match the current name of the provided renovation record.
+     *
+     * @param renovationRecord The existing renovation record, including its original name, description, and rooms.
+     * @param newName The new name to validate.
+     * @return A map of validation errors, where each key is a field name (e.g., "nameError")
+     *         and the corresponding value is a list of error messages. Returns an empty map if all inputs are valid.
      */
-    public boolean validateAllInputsEdit(RenovationRecord renovationRecord, String newName) {
+    public Map<String, List<String>> validateAllInputsEdit(RenovationRecord renovationRecord, String newName) {
+        Map<String, List<String>> errors = new HashMap<>();
         Pattern pattern = Pattern.compile("^[\\p{L}\\d ,.\\-']*$", Pattern.UNICODE_CHARACTER_CLASS);
-        return validateAllInputs(
-                newName,
-                renovationRecord.getDescription(),
-                renovationRecord.getRooms(),
-                name -> !checkForExactMatch(name, renovationRecord) && validateName(name, pattern),
-                pattern
-        );
+
+        if (checkForExactMatch(newName, renovationRecord)) {
+            errors.computeIfAbsent("nameError", k -> new ArrayList<>())
+                    .add("A renovation with this name already exists.");
+        }
+        if (newName.isEmpty()) {
+            errors.computeIfAbsent("nameError", k -> new ArrayList<>())
+                    .add("Renovation record name cannot be empty.");
+        }
+        if (!validateName(newName, pattern)) {
+            errors.computeIfAbsent("nameError", k -> new ArrayList<>())
+                    .add("Renovation record name must only include letters, numbers, spaces, dots, hyphens or apostrophes.");
+        }
+        if (!validateDescriptionLength(renovationRecord.getDescription())) {
+            errors.computeIfAbsent("descriptionError", k -> new ArrayList<>())
+                    .add("Renovation description must be 512 characters or less and cannot be empty.");
+        }
+        if (!validateAllRoomNames(renovationRecord.getRooms(), pattern)) {
+            errors.computeIfAbsent("roomError", k -> new ArrayList<>())
+                    .add("Room names must only contain letters, numbers, spaces, commas, dots, hyphens, or apostrophes.");
+        }
+
+        return errors;
     }
+
 
     /**
      * Calls other functions to validate all renovation fields, returning false if any do not pass their validity checks. Predicate for

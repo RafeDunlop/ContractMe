@@ -95,7 +95,7 @@ public class ForgotPasswordServiceIntegrationTest {
     @Test
     void validateEmail_enterInvalidEmail_returnErrorMessage() {
         String email = "jane@@doe.com";
-        String expectedMessage = "Email address must be in the form ‘jane@doe.nz’.";
+        String expectedMessage = "Email address must be in the form 'jane@doe.nz'.";
 
         String result = forgotPasswordService.validateEmail(email, locale);
         assertEquals(expectedMessage, result);

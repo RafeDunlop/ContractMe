@@ -157,7 +157,7 @@ public class RenovationRecordServiceTest {
         Mockito.when(renovationRecord.getName()).thenReturn(name);
         Mockito.when(renovationRecord.getDescription()).thenReturn(description);
         Mockito.when(renovationRecord.getRooms()).thenReturn(rooms);
-        assertTrue(toTest.validateAllInputsEdit(renovationRecord, "differentName"));
+        assertTrue(toTest.validateAllInputsEdit(renovationRecord, "differentName").isEmpty());
     }
 
     @Test
@@ -169,7 +169,7 @@ public class RenovationRecordServiceTest {
         Mockito.when(renovationRecord.getName()).thenReturn(name);
         Mockito.when(renovationRecord.getDescription()).thenReturn(description);
         Mockito.when(renovationRecord.getRooms()).thenReturn(rooms);
-        assertFalse(toTest.validateAllInputsEdit(renovationRecord, "already exists"));
+        assertFalse(toTest.validateAllInputsEdit(renovationRecord, "already exists").isEmpty());
     }
 
     @Test
@@ -181,7 +181,7 @@ public class RenovationRecordServiceTest {
         Mockito.when(renovationRecord.getName()).thenReturn(name);
         Mockito.when(renovationRecord.getDescription()).thenReturn(description);
         Mockito.when(renovationRecord.getRooms()).thenReturn(rooms);
-        assertTrue(toTest.validateAllInputsEdit(renovationRecord, "already exists"));
+        assertTrue(toTest.validateAllInputsEdit(renovationRecord, "already exists").isEmpty());
     }
 
     @Test
@@ -193,6 +193,6 @@ public class RenovationRecordServiceTest {
         Mockito.when(renovationRecord.getName()).thenReturn(name);
         Mockito.when(renovationRecord.getDescription()).thenReturn(description);
         Mockito.when(renovationRecord.getRooms()).thenReturn(rooms);
-        assertFalse(toTest.validateAllInputsEdit(renovationRecord, "already exists"));
+        assertFalse(toTest.validateAllInputsEdit(renovationRecord, "already exists").isEmpty());
     }
 }
