@@ -47,9 +47,6 @@ public class EditTaskControllerIntegrationTest {
     private RenovationTaskRepository renovationTaskRepository;
 
     @MockBean
-    private RenovationRecordRepository renovationRecordRepository;
-
-    @MockBean
     private UserRepository userRepository;
 
     @MockBean
@@ -112,7 +109,7 @@ public class EditTaskControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/editTask?taskId=1&renovationId=1"))
-                .andExpect(flash().attribute("descriptionError", hasItem("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.")));
+                .andExpect(flash().attribute("nameError", hasItem("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 
@@ -129,7 +126,7 @@ public class EditTaskControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/editTask?taskId=1&renovationId=1"))
-                .andExpect(flash().attribute("errorMessages", hasItem("Task description cannot be empty.")));
+                .andExpect(flash().attribute("descriptionError", hasItem("Task description cannot be empty.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 

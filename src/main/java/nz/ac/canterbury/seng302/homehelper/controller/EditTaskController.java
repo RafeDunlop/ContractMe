@@ -2,7 +2,9 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.*;
+import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 /**
  * Controller for the edit task page
@@ -26,13 +29,18 @@ public class EditTaskController {
     private final RenovationTaskService renovationTaskService;
     private final EditTaskService editTaskService;
     private final RenovationRecordService renovationRecordService;
-    private final String DEFAULT_ICON = "default-icon.png";
+    private final RenovationValidation renovationValidation;
+    private final RenovationTaskRepository renovationTaskRepository;
 
     @Autowired
-    public EditTaskController(RenovationTaskService renovationTaskService,RenovationRecordService renovationRecordService,EditTaskService editTaskService) {
+    public EditTaskController(RenovationTaskService renovationTaskService, RenovationRecordService renovationRecordService,
+                              EditTaskService editTaskService,
+                              RenovationValidation renovationValidation, RenovationTaskRepository renovationTaskRepository) {
         this.renovationTaskService = renovationTaskService;
         this.renovationRecordService = renovationRecordService;
         this.editTaskService = editTaskService;
+        this.renovationValidation = renovationValidation;
+        this.renovationTaskRepository = renovationTaskRepository;
     }
 
     /**
@@ -46,20 +54,27 @@ public class EditTaskController {
     @GetMapping("/editTask")
     public String editTask(@RequestParam(name = "taskId") Long taskId,
                            @RequestParam(name = "renovationId") Long renovationId,
-                           Model model,
-                           @ModelAttribute("renovationTaskDTO") RenovationTaskDTO renovationTaskDTO) {
+                           Model model) {
+
         logger.info("GET renovations/editTask");
-        RenovationTask renovationTask = renovationTaskService.getTaskById(taskId);
+
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
-        if (renovationTask == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
+
+        Optional<RenovationTask> renovationTask = renovationTaskRepository.findById(taskId);
+        if (renovationTask.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
+        }
+
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO(renovationTask.get());
 
         model.addAttribute("renovation", renovationRecord);
-        model.addAttribute("task", renovationTask);
+        model.addAttribute("task", renovationTask.get());
         model.addAttribute("roomList", renovationRecord.getRooms());
-        model.addAttribute("renovationTaskDTO", new RenovationTaskDTO(renovationTask.getName(),renovationTask.getDescription(),renovationTask.getDueDate(),renovationTask.getRoomList()));
+        model.addAttribute("renovationTaskDTO", renovationTaskDTO);
 
         return "editTaskTemplate";
     }
+
 
     /**
      * Handles the submission of the renovation task editing form.
@@ -79,11 +94,26 @@ public class EditTaskController {
                                 @RequestParam(name = "taskId") Long taskId,
                                 @RequestParam(name = "renovationId") Long renovationId,
                                 RedirectAttributes redirectAttributes) {
-        logger.info("POST renovations/view/create");
+        logger.info("POST renovations/editTask");
 
         RenovationTask renovationTask = renovationTaskService.getTaskById(taskId);
 
-        try {
+        if (renovationTaskDTO.getDueDate() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String formattedDueDate = renovationTaskDTO.getDueDate().format(formatter);
+            redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
+        }
+
+        Map<String, List<String>> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
+
+        if (!errors.isEmpty()) {
+            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
+
+            redirectAttributes.addFlashAttribute("renovationTaskDTO", renovationTaskDTO);
+            return "redirect:/editTask?taskId=" + taskId + "&renovationId=" + renovationId;
+        }
+
+            try {
             editTaskService.updateTask(renovationTaskDTO,renovationTask);
             return "redirect:/renovations/view?id=" + renovationId;
         } catch (IllegalArgumentException e) {
@@ -92,6 +122,7 @@ public class EditTaskController {
             List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
             redirectAttributes.addFlashAttribute("errorMessages", errorsList);
             redirectAttributes.addFlashAttribute("renovationTaskDTO", renovationTaskDTO);
+
             return "redirect:/editTask?taskId=" + taskId + "&renovationId=" + renovationId;
         }
     }
@@ -105,7 +136,7 @@ public class EditTaskController {
      * @param requestBody A map containing the new icon name under the key "iconName".
      * @return A redirect string to the renovation view page associated with the updated task.
      */
-    @PostMapping("editTask/edit-icon/{id}")
+    @PostMapping("/editTask/edit-icon/{id}")
     public String editTaskIcon(@PathVariable("id") Long id, @RequestBody Map<String, String> requestBody) {
         logger.info("POST editTask/edit-icon/{id}");
         String iconName = requestBody.get("iconName");
