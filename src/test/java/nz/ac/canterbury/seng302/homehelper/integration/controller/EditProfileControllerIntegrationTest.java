@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -123,12 +124,12 @@ public class EditProfileControllerIntegrationTest {
                         .param("password", updatedUser.getPassword()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user/edit"))
-                .andExpect(flash().attribute("errorMessages", expectedErrors))
+                .andExpect(flash().attribute("firstNameError", expectedErrors))
                 .andExpect(flash().attributeExists("user"))
-                .andExpect(flash().attribute("firstName", updatedUser.getFirstName()))
-                .andExpect(flash().attribute("lastName", updatedUser.getLastName()))
-                .andExpect(flash().attribute("email", updatedUser.getEmail()))
-                .andExpect(flash().attribute("profilePicture", updatedUser.getProfilePicture()));
+                .andExpect(flash().attribute("firstName", expectedUser.getFirstName()))
+                .andExpect(flash().attribute("lastName", expectedUser.getLastName()))
+                .andExpect(flash().attribute("email", expectedUser.getEmail()))
+                .andExpect(flash().attribute("profilePicture", expectedUser.getProfilePicture()));
     }
 
     /**
@@ -142,7 +143,8 @@ public class EditProfileControllerIntegrationTest {
     public void postForm_invalidEmailFormat_returnEmailFormatError() throws Exception {
         User expectedUser = new User("Jane", "Doe", "jane@doe.com", "password");
         User updatedUser = new User("Jane", "Doe", "jane@", "password");
-        String expectedErrors = "Email address must be in the form ‘jane@doe.nz’.";
+        List<String> expectedErrors = new ArrayList<>();
+        expectedErrors.add("Email address must be in the form 'jane@doe.nz'.");
         Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser.getEmail())).thenReturn(Optional.of(expectedUser));
         mockMvc.perform(post("/user/edit")
                         .param("firstName", updatedUser.getFirstName())
@@ -153,10 +155,10 @@ public class EditProfileControllerIntegrationTest {
                 .andExpect(redirectedUrl("/user/edit"))
                 .andExpect(flash().attribute("emailError", expectedErrors))
                 .andExpect(flash().attributeExists("user"))
-                .andExpect(flash().attribute("firstName", updatedUser.getFirstName()))
-                .andExpect(flash().attribute("lastName", updatedUser.getLastName()))
-                .andExpect(flash().attribute("email", updatedUser.getEmail()))
-                .andExpect(flash().attribute("profilePicture", updatedUser.getProfilePicture()));
+                .andExpect(flash().attribute("firstName", expectedUser.getFirstName()))
+                .andExpect(flash().attribute("lastName", expectedUser.getLastName()))
+                .andExpect(flash().attribute("email", expectedUser.getEmail()))
+                .andExpect(flash().attribute("profilePicture", expectedUser.getProfilePicture()));
     }
 
     /**
@@ -166,27 +168,36 @@ public class EditProfileControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    @WithMockUser(username = "doe@jane.com")
+    @WithMockUser(username = "jane@doe.com") // Use the same email as expectedUser1
     public void postForm_emailAlreadyExists_returnEmailExistsError() throws Exception {
+        // Mock users with different emails for the test
         User expectedUser1 = new User("Jane", "Doe", "jane@doe.com", "password");
         User expectedUser2 = new User("Jane", "Doe", "doe@jane.com", "password");
         List<String> expectedErrors = List.of("This email address is already in use.");
-        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser1.getEmail())).thenReturn(Optional.of(expectedUser1));
-        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser2.getEmail())).thenReturn(Optional.of(expectedUser2));
+
+        // Mocking userRepository to return the users with the emails as needed
+        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser1.getEmail()))
+                .thenReturn(Optional.of(expectedUser1));  // for "jane@doe.com"
+        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser2.getEmail()))
+                .thenReturn(Optional.of(expectedUser2));  // for "doe@jane.com"
+
+        // Perform the POST request with updatedUser's details (changing email to 'doe@jane.com')
         mockMvc.perform(post("/user/edit")
                         .param("firstName", expectedUser1.getFirstName())
                         .param("lastName", expectedUser1.getLastName())
-                        .param("email", expectedUser1.getEmail())
+                        .param("email", expectedUser2.getEmail())
                         .param("password", expectedUser1.getPassword()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user/edit"))
-                .andExpect(flash().attribute("errorMessages", expectedErrors))
+                .andExpect(flash().attribute("emailError", expectedErrors))
                 .andExpect(flash().attributeExists("user"))
                 .andExpect(flash().attribute("firstName", expectedUser1.getFirstName()))
                 .andExpect(flash().attribute("lastName", expectedUser1.getLastName()))
                 .andExpect(flash().attribute("email", expectedUser1.getEmail()))
                 .andExpect(flash().attribute("profilePicture", expectedUser1.getProfilePicture()));
     }
+
+
 
     /**
      * Tests the upload profile picture function when the user submits a file for invalid format
@@ -210,7 +221,7 @@ public class EditProfileControllerIntegrationTest {
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user/edit"))
-                .andExpect(flash().attribute("errorMessages", expectedErrors));
+                .andExpect(flash().attribute("profilePictureError", expectedErrors));
     }
 
     /**
@@ -239,7 +250,7 @@ public class EditProfileControllerIntegrationTest {
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user/edit"))
-                .andExpect(flash().attribute("errorMessages", expectedErrors));
+                .andExpect(flash().attribute("profilePictureError", expectedErrors));
     }
 
     /**
