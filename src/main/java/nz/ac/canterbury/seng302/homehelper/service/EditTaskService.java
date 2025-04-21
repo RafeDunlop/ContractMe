@@ -1,7 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,14 +36,6 @@ public class EditTaskService {
     public void updateTask(RenovationTaskDTO renovationTaskDTO, RenovationTask renovationTask) throws IllegalArgumentException {
         if (renovationTaskDTO == null) {
             throw new IllegalArgumentException("Data integration error");
-        }
-
-        // Validates updated user details and returns all errors
-        List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
-
-        // Throws all errors that were found
-        if (!errors.isEmpty()) {
-            throw new IllegalArgumentException(String.join(" ", errors));
         }
 
         renovationTask.setName(renovationTaskDTO.getName());

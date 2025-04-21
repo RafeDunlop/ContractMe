@@ -26,7 +26,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 
@@ -113,7 +112,7 @@ public class EditTaskControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/editTask?taskId=1&renovationId=1"))
-                .andExpect(flash().attribute("errorMessages", hasItem("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.")));
+                .andExpect(flash().attribute("descriptionError", hasItem("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 
@@ -151,7 +150,7 @@ public class EditTaskControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/editTask?taskId=1&renovationId=1"))
-                .andExpect(flash().attribute("errorMessages", hasItem("Task description must be 512 characters or less.")));
+                .andExpect(flash().attribute("descriptionError", hasItem("Task description must be 512 characters or less.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 
@@ -169,7 +168,7 @@ public class EditTaskControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/editTask?taskId=1&renovationId=1"))
-                .andExpect(flash().attribute("errorMessages", hasItem("Due date must be in the future.")));
+                .andExpect(flash().attribute("dueDateError", hasItem("Due date must be in the future.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 

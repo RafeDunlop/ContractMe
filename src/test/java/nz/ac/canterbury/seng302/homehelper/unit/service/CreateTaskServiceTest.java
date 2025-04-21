@@ -13,7 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,73 +31,93 @@ public class CreateTaskServiceTest {
 
     @Test
     public void addTask_allDetailsValid_callsSaveTask() {
-        RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task 1", "New Task", null,new ArrayList<>());
+        RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository);
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task 1", "New Task", LocalDate.now().plusDays(1), new ArrayList<>());
         RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
-        when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(new ArrayList<>());
+
+        when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(Map.of());
+
         renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
+
         Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(Mockito.any());
-
     }
-
 
     @Test
     public void addTask_taskNameInvalid_returnsError() {
-        RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("@#$%", "New Task", null,new ArrayList<>());
+        RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository);
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("@#$%", "Valid description", LocalDate.now().plusDays(1), new ArrayList<>());
         RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
-        List<String> errors = new ArrayList<>();
-        errors.add("name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.");
+
+        Map<String, List<String>> errors = Map.of(
+                "nameError", List.of("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.")
+        );
+
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);});
-        assertEquals("name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.", exception.getMessage());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord)
+        );
 
+        assertEquals("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.", exception.getMessage());
     }
 
     @Test
     public void addTask_taskDescriptionEmpty_returnsError() {
-        RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", "", null,new ArrayList<>());
+        RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository);
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Valid Name", " ", LocalDate.now().plusDays(1), new ArrayList<>());
         RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
-        List<String> errors = new ArrayList<>();
-        errors.add("description cannot be empty.");
+
+        Map<String, List<String>> errors = Map.of(
+                "descriptionError", List.of("Task description cannot be empty.")
+        );
+
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);});
-        assertEquals("description cannot be empty.", exception.getMessage());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord)
+        );
 
+        assertEquals("Task description cannot be empty.", exception.getMessage());
     }
 
     @Test
     public void addTask_taskDescriptionOver512Characters_returnsError() {
-        RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", """
-                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa""", null,new ArrayList<>());
+        RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository);
+        StringBuilder longDescription = new StringBuilder();
+        for (int i = 0; i < 513; i++) {
+            longDescription.append("a");
+        }
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", longDescription.toString(), LocalDate.now().plusDays(1), new ArrayList<>());
         RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
-        List<String> errors = new ArrayList<>();
-        errors.add("description must be 512 characters or less.");
+
+        Map<String, List<String>> errors = Map.of(
+                "descriptionError", List.of("Task description must be 512 characters or less.")
+        );
+
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);});
-        assertEquals("description must be 512 characters or less.", exception.getMessage());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord)
+        );
 
+        assertEquals("Task description must be 512 characters or less.", exception.getMessage());
     }
+
 
     @Test
     public void addTask_dueDateInPast_returnsError() {
-        RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", "New Task", LocalDate.now().minusDays(1),new ArrayList<>());
+        RenovationTaskService renovationTaskService = new RenovationTaskService(renovationTaskRepository);
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", "New Task", LocalDate.now().minusDays(1), new ArrayList<>());
         RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
-        List<String> errors = new ArrayList<>();
-        errors.add("Due date must be in the future.");
+
+        Map<String, List<String>> errors = new HashMap<>();
+        errors.put("dueDateError", List.of("Due date must be in the future."));
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);});
-        assertEquals("Due date must be in the future.", exception.getMessage());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
+        });
 
+        assertEquals("Due date must be in the future.", exception.getMessage());
     }
 }

@@ -13,7 +13,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -41,56 +44,72 @@ public class EditTaskServiceTest {
 
     @Test
     public void addTask_taskNameInvalid_returnsError() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("@#$%", "New Task", null,new ArrayList<>());
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("@#$%", "New Task", null, new ArrayList<>());
         RenovationTask renovationTask = Mockito.mock(RenovationTask.class);
-        List<String> errors = new ArrayList<>();
-        errors.add("name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.");
-        when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
-        assertEquals("name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.", exception.getMessage());
 
+        Map<String, List<String>> errors = new HashMap<>();
+        errors.put("nameError", List.of("name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes."));
+        when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            editTaskService.updateTask(renovationTaskDTO, renovationTask);
+        });
+
+        assertEquals("name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.", exception.getMessage());
     }
 
     @Test
     public void addTask_taskDescriptionEmpty_returnsError() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("@#$%", "", null,new ArrayList<>());
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("@#$%", "", null, new ArrayList<>());
         RenovationTask renovationTask = Mockito.mock(RenovationTask.class);
-        List<String> errors = new ArrayList<>();
-        errors.add("description cannot be empty.");
-        when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
-        assertEquals("description cannot be empty.", exception.getMessage());
 
+        Map<String, List<String>> errors = new HashMap<>();
+        errors.put("descriptionError", List.of("description cannot be empty."));
+        when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            editTaskService.updateTask(renovationTaskDTO, renovationTask);
+        });
+
+        assertEquals("description cannot be empty.", exception.getMessage());
     }
 
     @Test
     public void addTask_taskDescriptionOver512Characters_returnsError() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", """
-                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa""", null,new ArrayList<>());
+        StringBuilder longDescription = new StringBuilder();
+        for (int i = 0; i < 513; i++) {
+            longDescription.append("a");
+        }
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", longDescription.toString(), null, new ArrayList<>());
         RenovationTask renovationTask = Mockito.mock(RenovationTask.class);
-        List<String> errors = new ArrayList<>();
-        errors.add("description must be 512 characters or less.");
+
+        Map<String, List<String>> errors = new HashMap<>();
+        errors.put("descriptionError", List.of("description must be 512 characters or less."));
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
-        assertEquals("description must be 512 characters or less.", exception.getMessage());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            editTaskService.updateTask(renovationTaskDTO, renovationTask);
+        });
 
+        assertEquals("description must be 512 characters or less.", exception.getMessage());
     }
 
     @Test
     public void addTask_dueDateInPast_returnsError() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", "New Task", LocalDate.now().minusDays(1),new ArrayList<>());
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", "New Task", LocalDate.now().minusDays(1), new ArrayList<>());
         RenovationTask renovationTask = Mockito.mock(RenovationTask.class);
-        List<String> errors = new ArrayList<>();
-        errors.add("Due date must be in the future.");
+
+        Map<String, List<String>> errors = new HashMap<>();
+        errors.put("dueDateError", List.of("Due date must be in the future."));
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            editTaskService.updateTask(renovationTaskDTO, renovationTask);
+        });
+
         assertEquals("Due date must be in the future.", exception.getMessage());
     }
+
 
     @Test
     public void updateIcon_fileDoesNotExists_throwsException() {

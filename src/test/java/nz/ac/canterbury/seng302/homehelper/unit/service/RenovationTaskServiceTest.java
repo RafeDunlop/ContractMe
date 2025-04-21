@@ -4,7 +4,6 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
-import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -23,11 +22,10 @@ public class RenovationTaskServiceTest {
     private RenovationTaskService renovationTaskService;
     private RenovationRecord renovationRecord;
     private RenovationTaskRepository renovationTaskRepository;
-    private RenovationValidation renovationValidation;
 
     @BeforeEach
     void setUp() {
-        renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationValidation);
+        renovationTaskService = new RenovationTaskService(renovationTaskRepository);
         renovationRecord = new RenovationRecord();
     }
 

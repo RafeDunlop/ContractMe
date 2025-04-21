@@ -142,7 +142,7 @@ public class EditProfileControllerIntegrationTest {
     public void postForm_invalidEmailFormat_returnEmailFormatError() throws Exception {
         User expectedUser = new User("Jane", "Doe", "jane@doe.com", "password");
         User updatedUser = new User("Jane", "Doe", "jane@", "password");
-        List<String> expectedErrors = List.of("Email address must be in the form ‘jane@doe.nz’.");
+        String expectedErrors = "Email address must be in the form ‘jane@doe.nz’.";
         Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser.getEmail())).thenReturn(Optional.of(expectedUser));
         mockMvc.perform(post("/user/edit")
                         .param("firstName", updatedUser.getFirstName())

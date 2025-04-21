@@ -2,7 +2,9 @@ package nz.ac.canterbury.seng302.homehelper.validation;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
@@ -24,19 +26,25 @@ public class RenovationValidation {
      * of error messages for each invalid detail.
      * @return A list of errors generated from validating the task details
      */
-    public List<String> validateTaskDetails(RenovationTaskDTO renovationTaskDTO) {
-        List<String> errors = new ArrayList<>();
+    public Map<String, List<String>> validateTaskDetails(RenovationTaskDTO renovationTaskDTO) {
+        Map<String, List<String>> errors = new HashMap<>();
         String errorMessageType = "Task";
-        String nameErrors, descriptionErrors, dueDateError;
-        if ((nameErrors = validateName(renovationTaskDTO.getName(), errorMessageType)) != null) {
-            errors.add(nameErrors);
+
+        String nameError = validateName(renovationTaskDTO.getName(), errorMessageType);
+        if (nameError != null) {
+            errors.computeIfAbsent("nameError", k -> new ArrayList<>()).add(nameError);
         }
-        if ((descriptionErrors = validateDescription(renovationTaskDTO.getDescription(), errorMessageType)) != null) {
-            errors.add(descriptionErrors);
+
+        String descriptionError = validateDescription(renovationTaskDTO.getDescription(), errorMessageType);
+        if (descriptionError != null) {
+            errors.computeIfAbsent("descriptionError", k -> new ArrayList<>()).add(descriptionError);
         }
-        if ((dueDateError = validateDueDate(renovationTaskDTO.getDueDate())) != null) {
-            errors.add(dueDateError);
+
+        String dueDateError = validateDueDate(renovationTaskDTO.getDueDate());
+        if (dueDateError != null) {
+            errors.computeIfAbsent("dueDateError", k -> new ArrayList<>()).add(dueDateError);
         }
+
         return errors;
     }
 

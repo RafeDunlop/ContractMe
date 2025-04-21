@@ -17,17 +17,13 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class RenovationTaskService {
 
     Logger logger = LoggerFactory.getLogger(RenovationTaskService.class);
 
-    private final RenovationValidation renovationValidation;
     private final RenovationTaskRepository renovationTaskRepository;
 
     /**
@@ -35,9 +31,8 @@ public class RenovationTaskService {
      * @param renovationTaskRepository initialises the repo for storing tasks
      */
     @Autowired
-    public RenovationTaskService(RenovationTaskRepository renovationTaskRepository, RenovationValidation renovationValidation) {
+    public RenovationTaskService(RenovationTaskRepository renovationTaskRepository) {
         this.renovationTaskRepository = renovationTaskRepository;
-        this.renovationValidation = renovationValidation;
     }
 
     public RenovationTask getTaskById(Long id) {
@@ -48,11 +43,6 @@ public class RenovationTaskService {
      * Adds a new renovation task to the repository
      */
     public void addRenovationTask(RenovationTaskDTO renovationTaskDTO, RenovationRecord renovationRecord) {
-        List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
-
-        if (!errors.isEmpty()) {
-            throw new IllegalArgumentException(String.join(" ", errors));
-        }
 
         String name = renovationTaskDTO.getName();
         String description = renovationTaskDTO.getDescription();
