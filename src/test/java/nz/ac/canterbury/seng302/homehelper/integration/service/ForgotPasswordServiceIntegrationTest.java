@@ -61,10 +61,12 @@ public class ForgotPasswordServiceIntegrationTest {
      * as a link to open the reset password form.
      */
     @Test
+    @Transactional
     void validateEmail_enterValidEmail_returnEmptyMessage() {
         String email = resetUser.getEmail();
         String expectedMessage = "";
         resetUser.activate();
+        userRepository.save(resetUser);
 
         String result = forgotPasswordService.validateEmail(email, locale);
         assertEquals(expectedMessage, result);
