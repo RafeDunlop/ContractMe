@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
+import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
@@ -17,7 +18,6 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 import java.util.Locale;
@@ -87,9 +87,12 @@ public class ForgotPasswordControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
+    @Transactional
     void postForgotPassword_enterValidEmail_returnSentMessageAndForm() throws Exception {
         String email = resetUser.getEmail();
         String expectedMessage = "An email was sent to the address if it was recognised";
+        resetUser.activate();
+        userRepository.save(resetUser);
         mockMvc.perform(post("/password/forgot")
                 .param("email", email)
                         .with(csrf()))
@@ -99,6 +102,27 @@ public class ForgotPasswordControllerIntegrationTest {
 
         List<VerificationCode> verificationCode = (List<VerificationCode>) verificationCodeRepository.findAll();
         assertEquals(resetUser, verificationCode.get(0).getUser());
+    }
+
+    /**
+     * Tests the post function on the forgot password page with an unauthenticated email.
+     * When this email is posted to the forgot password form, a token is not created but
+     * a message shows telling the user that an email is sent if the email is recognised.
+     * @throws Exception if the request processing fails
+     */
+    @Test
+    void postForgotPassword_enterUnauthenticatedEmail_returnSentMessageAndForm() throws Exception {
+        String email = resetUser.getEmail();
+        String expectedMessage = "An email was sent to the address if it was recognised";
+        mockMvc.perform(post("/password/forgot")
+                        .param("email", email)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/password/forgot"))
+                .andExpect(flash().attribute("emailMessage", expectedMessage));
+
+        List<VerificationCode> verificationCode = (List<VerificationCode>) verificationCodeRepository.findAll();
+        assertTrue(verificationCode.isEmpty());
     }
 
     /**
