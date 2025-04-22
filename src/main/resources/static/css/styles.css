@@ -21,6 +21,7 @@
     display: inline-block;
 }
 
+
 .shadow-overlay {
     display: none;
     z-index: 1050;
