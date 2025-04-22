@@ -5,12 +5,15 @@ let lastNameField = document.getElementById("last-name");
 
 let emailFrontendError = document.getElementById("email-frontend-error");
 let emailFrontendErrorMessage = document.getElementById("email-frontend-error-message");
+let emailBackendError = document.getElementById("email-backend-error");
 
 let firstNameFrontendError = document.getElementById("first-name-frontend-error");
 let lastNameFrontendError = document.getElementById("last-name-frontend-error");
+let lastNameBackendError = document.getElementById("last-name-backend-error");
 
 let firstNameFrontendErrorMessage = document.getElementById("first-name-frontend-error-message");
 let lastNameFrontendErrorMessage = document.getElementById("last-name-frontend-error-message");
+let firstNameBackendError = document.getElementById("first-name-backend-error");
 
 // Regex patterns
 const emailPattern = /^[A-Za-z0-9]+([+_.-][A-Za-z0-9]+)*@[A-Za-z0-9]+([.-][A-Za-z0-9]+)*(\.[A-Za-z]{2,})$/;
@@ -25,11 +28,13 @@ function checkEmailField(input) {
     } else {
         emailFrontendError.hidden = true;
     }
+    emailBackendError.hidden = true;
 }
 
 function checkNameField(input, type) {
     const errorDiv = type === "First" ? firstNameFrontendError : lastNameFrontendError;
     const errorMessage = type === "First" ? firstNameFrontendErrorMessage : lastNameFrontendErrorMessage;
+    const backendErrorDiv = type === "First" ? firstNameBackendError : lastNameBackendError;
 
     input = input.trim();
 
@@ -42,6 +47,7 @@ function checkNameField(input, type) {
     } else {
         errorDiv.hidden = true;
     }
+    backendErrorDiv.hidden = true;
 }
 
 // Event listeners

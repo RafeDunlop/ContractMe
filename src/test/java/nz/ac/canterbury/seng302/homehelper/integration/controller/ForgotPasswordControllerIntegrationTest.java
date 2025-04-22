@@ -130,7 +130,7 @@ public class ForgotPasswordControllerIntegrationTest {
     @Test
     void postForgotPassword_enterInvalidEmail_returnErrorMessageAndForm() throws Exception {
         String email = "jane@@doe.com";
-        String expectedMessage = "Email address must be in the form ‘jane@doe.nz’.";
+        String expectedMessage = "Email address must be in the form 'jane@doe.nz'.";
         mockMvc.perform(post("/password/forgot")
                         .param("email", email)
                         .with(csrf()))

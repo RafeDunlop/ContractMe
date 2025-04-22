@@ -68,7 +68,7 @@ public class ForgotPasswordController {
             redirectAttributes.addFlashAttribute("emailMessage",
                     "An email was sent to the address if it was recognised");
         } else {
-            redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
+            redirectAttributes.addFlashAttribute("emailError", errorMessage);
         }
 
         return "redirect:/password/forgot";

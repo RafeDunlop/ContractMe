@@ -89,7 +89,7 @@ public class ForgotPasswordControllerTest {
     @Test
     void postForgotPassword_enterInvalidEmail_returnErrorMessageAndForm() {
         String expectedRedirect = "redirect:/password/forgot";
-        String expectedMessage = "Email address must be in the form ‘jane@doe.nz’.";
+        String expectedMessage = "Email address must be in the form 'jane@doe.nz'.";
         String validEmail = "jane@@doe.com";
         Mockito.when(httpServletRequestMock.getLocale()).thenReturn(Locale.ENGLISH);
         Mockito.when(forgotPasswordServiceMock.validateEmail(validEmail, Locale.ENGLISH)).thenReturn(expectedMessage);
@@ -97,7 +97,7 @@ public class ForgotPasswordControllerTest {
         String forgotPasswordForm = forgotPasswordController.submitEmail(validEmail, httpServletRequestMock, redirectAttributesMock);
 
         assertEquals(expectedRedirect, forgotPasswordForm);
-        Mockito.verify(redirectAttributesMock).addFlashAttribute("errorMessage", expectedMessage);
+        Mockito.verify(redirectAttributesMock).addFlashAttribute("emailError", expectedMessage);
     }
 
     /**
