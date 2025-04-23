@@ -18,11 +18,14 @@
                     <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First Name"
                            aria-label="first-name" th:value="${userRegisterDTO.firstName}">
 
+                    <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="firstName-frontend-error" hidden>
                         <ul>
                             <li><label class="form-label" id="firstName-frontend-error-message"></label></li>
                         </ul>
                     </div>
+
+                    <!-- Backend error -->
                     <div class="alert alert-danger mt-2" id="firstName-backend-error"
                          th:attr="hidden=${firstNameError == null}">
                         <ul>
@@ -36,11 +39,14 @@
                     <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last Name"
                            aria-label="last-name" th:value="${userRegisterDTO.lastName}">
 
+                    <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="lastName-frontend-error" hidden>
                         <ul>
                             <li><label class="form-label" id="lastName-frontend-error-message"></label></li>
                         </ul>
                     </div>
+
+                    <!-- Backend error -->
                     <div class="alert alert-danger mt-2" id="lastName-backend-error"
                          th:attr="hidden=${lastNameError == null}">
                         <ul>
@@ -54,11 +60,14 @@
                     <input type="text" class="form-control" id="email" name="email" placeholder="Email"
                            aria-label="email" th:value="${userRegisterDTO.email}">
 
+                    <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="email-frontend-error" hidden>
                         <ul>
                             <li><label class="form-label" id="email-frontend-error-message"></label></li>
                         </ul>
                     </div>
+
+                    <!-- Backend error -->
                     <div class="alert alert-danger mt-2" id="email-backend-error"
                          th:attr="hidden=${emailError == null}">
                         <ul>
@@ -72,11 +81,14 @@
                     <input type="password" class="form-control" id="password" name="password" placeholder="Password"
                            aria-label="password">
 
+                    <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="password-frontend-error" hidden>
                         <ul>
                             <li><label class="form-label" id="password-frontend-error-message"></label></li>
                         </ul>
                     </div>
+
+                    <!-- Backend error -->
                     <div class="alert alert-danger mt-2" id="password-backend-error"
                          th:attr="hidden=${passwordError == null}">
                         <ul>
@@ -90,13 +102,16 @@
                     <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
                            placeholder="Confirm Password" aria-label="confirm-password">
 
+                    <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="confirmPassword-frontend-error" hidden>
                         <ul>
                             <li><label class="form-label" id="confirmPassword-frontend-error-message"></label></li>
                         </ul>
                     </div>
+
+                    <!-- Backend error -->
                     <div class="alert alert-danger mt-2" id="confirmPassword-backend-error"
-                         th:attr="hidden=${confirmPasswordlError == null}">
+                         th:attr="hidden=${confirmPasswordError == null}">
                         <ul>
                             <li th:each="msg : ${confirmPasswordError}" th:text="${msg}"></li>
                         </ul>

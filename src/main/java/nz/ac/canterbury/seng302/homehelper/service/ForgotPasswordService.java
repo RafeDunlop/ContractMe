@@ -81,10 +81,34 @@ public class ForgotPasswordService {
      * Validate inputted passwords by sending details to UserValidation and return list of errors.
      * @param newPassword New password for user
      * @param confirmPassword Confirm new password
-     * @return List of password errors
+     * @return Mapping of password errors
      */
-    public List<String> validatePasswords(String newPassword, String confirmPassword) {
-        return new ArrayList<>(userValidation.validatePasswordString(newPassword, confirmPassword, "resetPassword"));
+    public Map<String, List<String>> validatePasswords(String newPassword, String confirmPassword) {
+        Map<String, List<String>> errors = new HashMap<>();
+        List<String> passwordErrors = userValidation.validatePasswordString(
+                newPassword, confirmPassword, "resetPassword"
+        );
+
+        // Separate out confirm password mismatch error
+        List<String> confirmPasswordErrors = new ArrayList<>();
+        passwordErrors.removeIf(err -> {
+            if (err.equals("The passwords do not match.")) {
+                confirmPasswordErrors.add(err);
+                return true;
+            }
+            return false;
+        });
+
+        putIfNotEmpty(errors, "newPasswordError", passwordErrors);
+        putIfNotEmpty(errors, "confirmNewPasswordError", confirmPasswordErrors);
+
+        return errors;
+    }
+
+    private void putIfNotEmpty(Map<String, List<String>> map, String key, List<String> messages) {
+        if (messages != null && !messages.isEmpty()) {
+            map.put(key, messages);
+        }
     }
 
     /**

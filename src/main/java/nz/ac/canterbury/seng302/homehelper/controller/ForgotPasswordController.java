@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -100,23 +101,23 @@ public class ForgotPasswordController {
      * an error message shows up. If the token is invalid, it redirects the user to the login page with message.
      * @param token Reset password token for user
      * @param newPassword New password for user
-     * @param retypePassword Retype new password for confirmation
+     * @param confirmNewPassword Retype new password for confirmation
      * @param redirectAttributes Message for redirect page
      * @param request Post request used to get locale
      * @return Template for reset password page or redirect to login page
      */
     @PostMapping("/password/reset/{token}")
     public String submitPassword(@PathVariable String token, @RequestParam("newPassword") String newPassword,
-                              @RequestParam("retypePassword") String retypePassword,
+                              @RequestParam("confirmNewPassword") String confirmNewPassword,
                               RedirectAttributes redirectAttributes,
                               HttpServletRequest request) {
         logger.info("POST /password/forgot/{}", token);
         Optional<User> expectedUser = verificationCodeService.getUserByToken(token);
         if (expectedUser.isPresent()) {
             User user = expectedUser.get();
-            List<String> errors = forgotPasswordService.validatePasswords(newPassword, retypePassword);
+            Map<String, List<String>> errors = forgotPasswordService.validatePasswords(newPassword, confirmNewPassword);
             if (!errors.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessages", errors);
+                errors.forEach(redirectAttributes::addFlashAttribute);
                 redirectAttributes.addFlashAttribute("token", token);
                 return "redirect:/password/reset/" + token;
             }
