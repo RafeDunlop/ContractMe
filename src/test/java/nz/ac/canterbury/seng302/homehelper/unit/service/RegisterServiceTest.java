@@ -14,11 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class RegisterServiceTest {
-    /**
-     * Tests the validation of an unused email.
-     * This test simulates checking if an email exists in the database and expects:
-     * A empty list (no errors)
-     */
+
     @Test
     public void testValidateEmail_emailNotUsed_returnEmptyList() {
         UserRepository userRepositoryMock = Mockito.mock(UserRepository.class);
@@ -31,11 +27,6 @@ public class RegisterServiceTest {
         Assertions.assertTrue(returnValue.isEmpty());
     }
 
-    /**
-     * Tests the validation of a used email.
-     * This test simulates checking if an email exists in the database and expects:
-     * An error message in a list
-     */
     @Test
     public void testValidateEmail_emailUsed_returnError() {
         UserRepository userRepositoryMock = Mockito.mock(UserRepository.class);

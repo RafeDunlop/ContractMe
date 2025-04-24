@@ -25,14 +25,16 @@ public class RenovationRecordService {
     private static final Logger logger = LoggerFactory.getLogger(RenovationRecordService.class);
     private static final int maximumDescriptionLength = 512;
     private final RenovationRecordRepository renovationRecordRepository;
+    private final LoginService loginService;
 
     /**
      * Constructor for the RenovationRecordService class
      * @param renovationRecordRepository initializes with the repository for storing records
      */
     @Autowired
-    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository) {
+    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, LoginService loginService) {
         this.renovationRecordRepository = renovationRecordRepository;
+        this.loginService = loginService;
     }
 
     /**
@@ -223,11 +225,11 @@ public class RenovationRecordService {
     }
 
     /**
-     * Checks if a name has an exact match in the repository
+     * Checks if a name has an exact match in the repository with the logged-in user
      * @param name the name to check to see if its present in the repository
      * @return true if a match for the name is found, otherwise false
      */
     public boolean checkForExactMatch(String name) {
-        return renovationRecordRepository.findExactMatch(name.trim()).isPresent();
+        return renovationRecordRepository.findExactMatch(name.trim(), loginService.getUserByEmail()).isPresent();
     }
 }

@@ -1,7 +1,9 @@
 package nz.ac.canterbury.seng302.homehelper.unit.service;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -25,10 +27,13 @@ public class RenovationRecordServiceTest {
     @BeforeAll
     public static void setUpBeforeClass() {
         RenovationRecordRepository repository = Mockito.mock(RenovationRecordRepository.class);
-        Mockito.when(repository.findExactMatch("already exists")).thenReturn(Optional.of(Mockito.mock(RenovationRecord.class)));
-        Mockito.when(repository.findExactMatch("name")).thenReturn(Optional.empty());
-        Mockito.when(repository.findExactMatch("name!")).thenReturn(Optional.empty());
-        toTest = new RenovationRecordService(repository);
+        User user = Mockito.mock(User.class);
+        LoginService loginService = Mockito.mock(LoginService.class);
+        Mockito.when(loginService.getUserByEmail()).thenReturn(user);
+        Mockito.when(repository.findExactMatch("already exists", user)).thenReturn(Optional.of(Mockito.mock(RenovationRecord.class)));
+        Mockito.when(repository.findExactMatch("name", user)).thenReturn(Optional.empty());
+        Mockito.when(repository.findExactMatch("name!", user)).thenReturn(Optional.empty());
+        toTest = new RenovationRecordService(repository, loginService);
     }
 
     @Test

@@ -34,7 +34,7 @@
                 </div>
             </form>
 
-            <table class="table table-striped table-bordered">
+            <table class="table table-striped table-bordered" style="table-layout: fixed;">
                 <thead class="table-dark">
                 <tr>
                     <th>Name</th>
@@ -49,7 +49,11 @@
                 </tr>
                 <tr th:each="renovation : ${renovations}">
                     <td class="d-flex justify-content-between align-items-center">
-                        <a th:text="${renovation.name}" th:href="@{/renovations/view(id=${renovation.id})}">Name</a>
+                        <a th:text="${renovation.name}"
+                           th:href="@{/renovations/view(id=${renovation.id})}"
+                           th:title="${renovation.name}"
+                           class="truncate-cell">
+                        </a>
                         <button type="button" class="btn btn-outline-danger custom-light-border"
                                 th:attr="data-id=${renovation.id}, data-searchQuery=${searchQuery}, data-csrf=${_csrf.token}"
                                 th:onclick="|confirmDelete(this)|">

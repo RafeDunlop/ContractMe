@@ -207,6 +207,7 @@ public class RenovationController {
      * @param name of the record to be edited from the form field
      * @param description of the record to be edited from the form field
      * @param roomList list of rooms of the record to be edited from the form
+     * @param model (map-like) representation of results to be used by thymeleaf
      * @return redirect to the view page for the edited record
      */
     @PostMapping("/edit")

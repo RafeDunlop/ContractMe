@@ -13,11 +13,6 @@ import static org.mockito.Mockito.when;
 
 public class UserValidationTest {
 
-    /**
-     * Test to see if the regex in the validateEmailString method accepts valid email addresses. All emails contain a
-     * valid username, one '@', and a domain with a gTLD (generic top-level domain) or a ccTLD (country code top-level
-     * domain), all in that order.
-     */
     @Test
     public void PasswordValidation_ValidEmails_AcceptInputs() {
         UserValidation userValidation = new UserValidation();
@@ -27,10 +22,6 @@ public class UserValidationTest {
         }
     }
 
-    /**
-     * Test to see if the regex in the validateEmailString method rejects invalid email addresses. The invalid emails
-     * either contain no username, more than one '@', multiple periods un a row, or an invalid gTLD or ccTLD.
-     */
     @Test
     public void PasswordValidation_InvalidEmails_RejectInputs() {
         UserValidation userValidation = new UserValidation();
@@ -41,10 +32,6 @@ public class UserValidationTest {
         }
     }
 
-    /**
-     * Test to see if the regex in the validateNameString method accepts valid names. Allows any character from
-     * any language along with hyphens, apostrophes, and spaces.
-     */
     @Test
     public void NameValidation_ValidNames_AcceptInputs() {
         UserValidation userValidation = new UserValidation();
@@ -54,10 +41,6 @@ public class UserValidationTest {
         }
     }
 
-    /**
-     * Test to see if the regex in the validateNameString method rejects invalid names. Any characters that aren't letters,
-     * hyphens, apostrophes, or spaces aren't accepted.
-     */
     @Test
     public void NameValidation_MissingNames_RejectInputs() {
         UserValidation userValidation = new UserValidation();
@@ -68,9 +51,6 @@ public class UserValidationTest {
         }
     }
 
-    /**
-     * Test to see if the regex in the validateNameString method rejects missing first names. Missing last names should be accepted.
-     */
     @Test
     public void NameValidation_InvalidNames_RejectFirstNameInputs() {
         UserValidation userValidation = new UserValidation();
@@ -84,10 +64,6 @@ public class UserValidationTest {
         }
     }
 
-    /**
-     * Test to see if correct error message is displayed when password doesn't much confirmPassword
-     * Expects: 'Passwords do not match.' error
-     */
     @Test
     public void PasswordValidation_PasswordDoesNotMatch_RejectInputs() {
         UserValidation userValidation = new UserValidation();
@@ -95,10 +71,6 @@ public class UserValidationTest {
         Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Test123!", "Password123!","registerPassword"));
     }
 
-    /**
-     * Test to see if the correct error message is displayed when there is no uppercase letter in password
-     * Expects: 'Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.' error
-     */
     @Test
     public void PasswordValidation_PasswordsMatchNoUppercaseLetter_RejectInputs() {
         UserValidation userValidation = new UserValidation();
@@ -108,10 +80,6 @@ public class UserValidationTest {
         Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("password123!", "password123!","registerPassword"));
     }
 
-    /**
-     * Test to see if the correct error message is displayed when there is no lowercase letter in password
-     * Expects: 'Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.' error
-     */
     @Test
     public void PasswordValidation_PasswordsMatchNoLowercaseLetter_RejectInputs() {
         UserValidation userValidation = new UserValidation();
@@ -121,10 +89,6 @@ public class UserValidationTest {
         Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("PASSWORD123!", "PASSWORD123!","registerPassword"));
     }
 
-    /**
-     * Test to see if the correct error message is displayed when there is no number in password
-     * Expects: 'Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.' error
-     */
     @Test
     public void PasswordValidation_PasswordsMatchNoNumber_RejectInputs() {
         UserValidation userValidation = new UserValidation();
@@ -134,10 +98,6 @@ public class UserValidationTest {
         Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Password!", "Password!","registerPassword"));
     }
 
-    /**
-     * Test to see if the correct error message is displayed when there is no special character in password
-     * Expects: 'Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.' error
-     */
     @Test
     public void PasswordValidation_PasswordsMatchNoSpecialCharacter_RejectInputs() {
         UserValidation userValidation = new UserValidation();
@@ -147,10 +107,6 @@ public class UserValidationTest {
         Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Password123", "Password123","registerPassword"));
     }
 
-    /**
-     * Test to see if the correct error message is displayed when there is less than 8 characters in password
-     * Expects: 'Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.' error
-     */
     @Test
     public void PasswordValidation_PasswordsMatchLessThanEightCharacters_RejectInputs() {
         UserValidation userValidation = new UserValidation();
@@ -160,10 +116,7 @@ public class UserValidationTest {
         Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Test1!", "Test1!","registerPassword"));
     }
 
-    /**
-     * Test to see if the correct error message is displayed when email is contained in password
-     * Expects: "Your password should not contain your name or email address." error
-     */
+
     @Test
     public void PasswordValidation_ContainsEmail_RejectInputs() {
         UserValidation userValidation = new UserValidation();
@@ -173,10 +126,6 @@ public class UserValidationTest {
         Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Abhisekh123!#","Abhisekh","Chand","Abhisekh23@gmail.com"));
     }
 
-    /**
-     * Test to see if the correct error message is displayed when First Name of user  is contained in password
-     * Expects: "Your password should not contain your name or email address." error
-     */
     @Test
     public void PasswordValidation_ContainsFirstName_RejectInputs() {
         UserValidation userValidation = new UserValidation();
@@ -186,10 +135,6 @@ public class UserValidationTest {
         Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Abhisekh123!#","Abhisekh","Chand","Donald23@gmail.com"));
     }
 
-    /**
-     * Test to see if the correct error message is displayed when Last Name of user  is contained in password
-     * Expects: "Your password should not contain your name or email address." error
-     */
     @Test
     public void PasswordValidation_ContainsLastName_RejectInputs() {
         UserValidation userValidation = new UserValidation();
@@ -199,20 +144,12 @@ public class UserValidationTest {
         Assertions.assertEquals(expectedErrorList, userValidation.validateUpdatePasswordString("Chand123!#","Abhisekh","Chand","Donald23@gmail.com"));
     }
 
-    /**
-     * Test to see if no error message is displayed when a valid password that matches the confirmPassword is entered
-     * Expects: empty List
-     */
     @Test
     public void PasswordValidation_ValidPasswordThatMatch_RejectInputs() {
         UserValidation userValidation = new UserValidation();
         Assertions.assertTrue(userValidation.validatePasswordString("Test123!", "Test123!","registerPassword").isEmpty());
     }
 
-    /**
-     * Test to see if image type error is displayed, when invalid profile picture file is submitted
-     * Expects: 'Image must be of type png, jpg or svg.'
-     */
     @Test
     public void ProfilePictureValidation_InvalidProfilePictureFileType_RejectInputs() {
         UserValidation userValidation = new UserValidation();
@@ -224,10 +161,6 @@ public class UserValidationTest {
         Assertions.assertEquals(expectedErrorList, userValidation.validateProfilePicture(profilePicture));
     }
 
-    /**
-     * Test to see if image size error is displayed, when invalid profile picture file is submitted
-     * Expects: 'Image must be less than 10MB.'
-     */
     @Test
     public void ProfilePictureValidation_InvalidProfilePictureFileSize_RejectInputs() {
         UserValidation userValidation = new UserValidation();
@@ -239,10 +172,6 @@ public class UserValidationTest {
         Assertions.assertEquals(expectedErrorList, userValidation.validateProfilePicture(profilePicture));
     }
 
-    /**
-     * Test success profile picture validation, when valid profile picture file is submitted
-     * Expects: empty List
-     */
     @Test
     public void ProfilePictureValidation_ValidProfilePicture_Success() {
         UserValidation userValidation = new UserValidation();
