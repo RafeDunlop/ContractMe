@@ -24,14 +24,14 @@
             <input type="hidden" name="id"
                    th:value="${renovation != null} ? ${renovation.id} : ${id}" />
 
-
+            <!-- NAME -->
             <div class="mb-3">
                 <label for="name" class="form-label">Name:</label>
                 <input type="text" class="form-control" id="name" placeholder="Enter a name for your renovation"
                        th:name="name"
                        th:value="${name != null} ? ${name} : ${renovation?.name}" data-cy="name" autofocus>
 
-                <!-- Frontend JS error (higher priority) -->
+                <!-- Frontend JS error -->
                 <div class="alert alert-danger mb-4" role="alert" id="name-frontend-error" hidden>
                     <div class="error-box">
                         <ul>
@@ -42,7 +42,7 @@
                     </div>
                 </div>
 
-                <!-- Backend error (only shows if no frontend error) -->
+                <!-- Backend error -->
                 <div class="alert alert-danger mb-4" role="alert" id="name-backend-error"  th:attr="hidden=${roomError == null}">
                     <div class="error-box">
                         <ul>
@@ -52,6 +52,7 @@
                 </div>
             </div>
 
+            <!-- DESCRIPTION -->
             <div class="mb-3">
                 <label for="description" class="form-label">Description:</label>
                 <span id="description-length-counter" class="counter">0/512</span>
@@ -59,7 +60,7 @@
                           th:name="description"
                           th:text="${description != null} ? ${description} : ${renovation?.description}"></textarea>
 
-                <!-- Frontend JS error (higher priority) -->
+                <!-- Frontend JS error -->
                 <div class="alert alert-danger mb-4" role="alert" id="description-frontend-error" hidden>
                     <div class="error-box">
                         <ul>
@@ -70,7 +71,7 @@
                     </div>
                 </div>
 
-                <!-- Backend error (only shows if no frontend error) -->
+                <!-- Backend error -->
                 <div class="alert alert-danger mb-4" role="alert" id="description-backend-error" hidden
                      th:if="${descriptionError}">
                     <div class="error-box">
@@ -81,6 +82,7 @@
                 </div>
             </div>
 
+            <!-- ROOM LIST -->
             <div class="mb-3">
                 <div class="input-group">
                     <input type="text" class="form-control" id="roomList" placeholder="Enter a room name"
@@ -88,7 +90,7 @@
                     <button type="button" class="btn btn-primary" id="create-room-button">Add</button>
                 </div>
 
-                <!-- Frontend JS error (higher priority) -->
+                <!-- Frontend JS error -->
                 <div class="alert alert-danger mb-4" role="alert" id="room-frontend-error" hidden>
                     <div class="error-box">
                         <ul>
@@ -99,7 +101,7 @@
                     </div>
                 </div>
 
-                <!-- Backend error (only shows if no frontend error) -->
+                <!-- Backend error -->
                 <div class="alert alert-danger mb-4" role="alert" id="room-backend-error" th:attr="hidden=${roomError == null}">
                     <div class="error-box">
                         <ul>
@@ -114,6 +116,8 @@
             <button type="submit" class="btn btn-primary" id="submit-record">Submit</button>
         </form>
     </div>
+
+    <!-- CANCEL BUTTON -->
     <div class="mt-4">
         <a th:href="@{/renovations}" class="btn  btn-primary">Cancel</a>
     </div>

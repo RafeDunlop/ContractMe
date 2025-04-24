@@ -13,7 +13,7 @@
         <form th:action="@{register}" method="post" id="registration-form">
             <div class="form-group mb-3">
 
-                <!-- First Name -->
+                <!-- FIRST NAME -->
                 <div class="mb-3">
                     <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First Name"
                            aria-label="first-name" th:value="${userRegisterDTO.firstName}">
@@ -34,7 +34,7 @@
                     </div>
                 </div>
 
-                <!-- Last Name -->
+                <!-- LAST NAME -->
                 <div class="mb-3">
                     <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last Name"
                            aria-label="last-name" th:value="${userRegisterDTO.lastName}">
@@ -55,7 +55,7 @@
                     </div>
                 </div>
 
-                <!-- Email -->
+                <!-- EMAIL -->
                 <div class="mb-3">
                     <input type="text" class="form-control" id="email" name="email" placeholder="Email"
                            aria-label="email" th:value="${userRegisterDTO.email}">
@@ -76,7 +76,7 @@
                     </div>
                 </div>
 
-                <!-- Password -->
+                <!-- PASSWORD -->
                 <div class="mb-3">
                     <input type="password" class="form-control" id="password" name="password" placeholder="Password"
                            aria-label="password">
@@ -97,7 +97,7 @@
                     </div>
                 </div>
 
-                <!-- Confirm Password -->
+                <!-- CONFIRM PASSWORD -->
                 <div class="mb-5">
                     <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
                            placeholder="Confirm Password" aria-label="confirm-password">
@@ -125,12 +125,16 @@
                     </ul>
                 </div>
 
+                <!-- SIGN UP BUTTON -->
                 <button type="submit" class="btn btn-primary">Sign up</button>
+
+                <!-- CANCEL BUTTON -->
                 <a th:href="@{/}" class="btn btn-outline-secondary m-4">Cancel</a>
             </div>
         </form>
     </div>
 </div>
 </body>
-<script type="module" th:src="@{/js/registerValidation.js}"></script>
+<script type="module" src="/js/userValidation.js"></script>
+<script type="module" src="/js/registerValidation.js"></script>
 </html>
