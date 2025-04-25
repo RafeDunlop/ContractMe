@@ -36,7 +36,6 @@ public class EditTaskServiceTest {
         RenovationTask renovationTask = Mockito.mock(RenovationTask.class);
         editTaskService.updateTask(renovationTaskDTO, renovationTask);
         Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(Mockito.any());
-
     }
 
     @Test
@@ -48,7 +47,6 @@ public class EditTaskServiceTest {
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
         assertEquals("name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.", exception.getMessage());
-
     }
 
     @Test
@@ -60,7 +58,6 @@ public class EditTaskServiceTest {
         when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
         assertEquals("description cannot be empty.", exception.getMessage());
-
     }
 
     @Test
@@ -77,7 +74,6 @@ public class EditTaskServiceTest {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
         assertEquals("description must be 512 characters or less.", exception.getMessage());
-
     }
 
     @Test

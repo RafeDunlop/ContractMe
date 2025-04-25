@@ -42,12 +42,22 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
     List<RenovationRecord> findByNameContainingIgnoreCase(@Param("user") User user, @Param("name") String name);
 
     /**
-     * Finds a renovation record with a matching name not case-sensitive if it exists
+     * Finds a renovation record with a matching name not case-sensitive if it exists.
+     * Searches all records
      * @param name of the record being searched for
      * @return an Optional that is the matching record if it exists
      */
     @Query("SELECT f FROM RenovationRecord f WHERE (f.name) = (:name)")
-    Optional<RenovationRecord> findExactMatch(@Param("name") String name);
+    Optional<RenovationRecord> findExactMatchAllUsers(@Param("name") String name);
+
+    /**
+     * Finds a renovation record with a matching name not case-sensitive if it exists. Only searches
+     * {@link RenovationRecord} objects owned by teh specified user
+     * @param name of the record being searched for
+     * @param user  The {@link User} whose {@link RenovationRecord} objects should be searched
+     */
+    @Query("SELECT f FROM RenovationRecord f WHERE (f.name) = (:name) AND (f.user) = (:user)")
+    Optional<RenovationRecord> findExactMatch(@Param("name") String name, @Param("user") User user);
 
     /**
      * Finds all renovation records where the current user on the application matches the owner of the renovation.

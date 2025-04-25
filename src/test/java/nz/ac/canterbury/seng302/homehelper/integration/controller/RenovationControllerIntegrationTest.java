@@ -189,11 +189,11 @@ public class RenovationControllerIntegrationTest {
                         .param("description", "")
                         .param("roomList", "Room", "Room")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("createRenovationTemplate"))
-                .andExpect(model().attribute("name", "Fail!"))
-                .andExpect(model().attribute("description", ""))
-                .andExpect(model().attribute("roomList", hasSize(2)));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/create"))
+                .andExpect(flash().attribute("name", "Fail!"))
+                .andExpect(flash().attribute("description", ""))
+                .andExpect(flash().attribute("roomList", hasSize(2)));
     }
 
     /**
@@ -209,11 +209,11 @@ public class RenovationControllerIntegrationTest {
                         .param("description", "a".repeat(513))
                         .param("roomList", "Room", "Room")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("createRenovationTemplate"))
-                .andExpect(model().attribute("name", "Renovation One"))
-                .andExpect(model().attribute("description", "a".repeat(513)))
-                .andExpect(model().attribute("roomList", hasSize(2)));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/create"))
+                .andExpect(flash().attribute("name", "Renovation One"))
+                .andExpect(flash().attribute("description", "a".repeat(513)))
+                .andExpect(flash().attribute("roomList", hasSize(2)));
     }
 
     /**
@@ -231,11 +231,11 @@ public class RenovationControllerIntegrationTest {
                         .param("description", "")
                         .param("roomList", "Room", "Room")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("createRenovationTemplate"))
-                .andExpect(model().attribute("name", "Renovation One"))
-                .andExpect(model().attribute("description", ""))
-                .andExpect(model().attribute("roomList", hasSize(2)));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/create"))
+                .andExpect(flash().attribute("name", "Renovation One"))
+                .andExpect(flash().attribute("description", ""))
+                .andExpect(flash().attribute("roomList", hasSize(2)));
     }
 
     /**
@@ -378,9 +378,9 @@ public class RenovationControllerIntegrationTest {
                         .param("description", "A".repeat(513))
                         .param("roomList", "Room 1", "Room 2")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("editRenovationTemplate"))
-                .andExpect(model().attribute("renovation", allOf(
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/edit?id=" + existingRecord.getId()))
+                .andExpect(flash().attribute("renovation", allOf(
                         hasProperty("name", is("Renovation One")),
                         hasProperty("description", is("A".repeat(513))),
                         hasProperty("rooms", contains("Room 1", "Room 2")))));
@@ -412,9 +412,9 @@ public class RenovationControllerIntegrationTest {
                         .param("description", "Some words")
                         .param("roomList", "Room 1", "Room 2")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("editRenovationTemplate"))
-                .andExpect(model().attribute("renovation", allOf(
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/edit?id=" + existingRecord.getId()))
+                .andExpect(flash().attribute("renovation", allOf(
                         hasProperty("name", is("Renovation One")),
                         hasProperty("description", is("Some words")),
                         hasProperty("rooms", contains("Room 1", "Room 2")))));

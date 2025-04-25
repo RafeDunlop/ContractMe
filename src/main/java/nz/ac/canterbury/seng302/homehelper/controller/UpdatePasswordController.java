@@ -49,13 +49,13 @@ public class UpdatePasswordController {
      * Posts a form with the updated user password. Goes back to "/user" if the
      * user password is updated; otherwise, the error messages are set and stays on same page.
      * @param updatePasswordDTO User object with the updated user details
-     * @param model Model interface
      * @param bindingResult for binding error messages
      * @param redirectAttributes to redirect the success message to /user page.
      * @return updatePasswordTemplate page or redirect to user page
      */
     @PostMapping("user/edit/updatePassword")
-    public String tryChangePassword(@ModelAttribute("updatePasswordDTO") UpdatePasswordDTO updatePasswordDTO, BindingResult bindingResult, Model model,
+    public String tryChangePassword(@ModelAttribute("updatePasswordDTO") UpdatePasswordDTO updatePasswordDTO,
+            BindingResult bindingResult,
             RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(error -> logger.info(error.getDefaultMessage()));
@@ -69,9 +69,10 @@ public class UpdatePasswordController {
 
             List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
 
-            model.addAttribute("errorMessages", errorsList);
-            return "updatePasswordTemplate";
+            redirectAttributes.addFlashAttribute("errorMessages", errorsList);
+            redirectAttributes.addFlashAttribute("updatePasswordDTO", updatePasswordDTO);
 
+            return "redirect:/user/edit/updatePassword";
         }
     }
 }

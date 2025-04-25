@@ -17,10 +17,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 public class UpdatePasswordControllerTest {
 
-    /**
-     * Tests if, given the user successfully updates password, they are re-routed
-     * to the user details page
-     * */
     @Test
     void testValidPathway_FromUpdatePasswordPage_ToUserProfilePage() {
         UpdatePasswordService updatePasswordServiceSpy = Mockito.mock(UpdatePasswordService.class);
@@ -34,7 +30,7 @@ public class UpdatePasswordControllerTest {
 
         doNothing().when(updatePasswordServiceSpy).updatePassword(validPasswordDTO);
 
-        String result = updatePasswordController.tryChangePassword(validPasswordDTO, bindingResultMock, modelMock, redirectAttributesMock);
+        String result = updatePasswordController.tryChangePassword(validPasswordDTO, bindingResultMock, redirectAttributesMock);
 
         assertEquals("redirect:/user", result);
 
@@ -44,10 +40,6 @@ public class UpdatePasswordControllerTest {
 
     }
 
-    /**
-     * Tests if, given the user doesn't pass the validation check updating password, they are re-routed
-     * to the Update Password Page
-     * */
     @Test
     void testValidationFailure_ThrowException_ReturnsToUpdatePasswordTemplate() {
 
@@ -55,7 +47,6 @@ public class UpdatePasswordControllerTest {
         UpdatePasswordController updatePasswordController = new UpdatePasswordController(updatePasswordServiceMock);
 
         BindingResult bindingResultMock = Mockito.mock(BindingResult.class);
-        Model modelMock = Mockito.mock(Model.class);
         RedirectAttributes redirectAttributesMock = Mockito.mock(RedirectAttributes.class);
 
 
@@ -65,10 +56,9 @@ public class UpdatePasswordControllerTest {
         doThrow(new IllegalArgumentException("Your old password is incorrect.")).when(updatePasswordServiceMock).updatePassword(invalidPasswordDTO);
 
 
-        String result = updatePasswordController.tryChangePassword(invalidPasswordDTO, bindingResultMock, modelMock, redirectAttributesMock);
+        String result = updatePasswordController.tryChangePassword(invalidPasswordDTO, bindingResultMock, redirectAttributesMock);
 
-
-        assertEquals("updatePasswordTemplate", result);
+        assertEquals("redirect:/user/edit/updatePassword", result);
     }
 
 }

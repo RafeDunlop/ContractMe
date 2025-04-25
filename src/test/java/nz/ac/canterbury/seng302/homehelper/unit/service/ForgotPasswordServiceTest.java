@@ -50,11 +50,6 @@ public class ForgotPasswordServiceTest {
         user = new User("Jane", "Doe", "jane@doe.com", "password");
     }
 
-    /**
-     * Tests validating the email used to reset an account's password when the email
-     * is associated with an existing account. An event is started for the creation
-     * of the token and the email.
-     */
     @Test
     void validateEmail_enterValidEmail_returnEmptyMessage() {
         String email = "jane@doe.com";
@@ -69,10 +64,6 @@ public class ForgotPasswordServiceTest {
         assertEquals(expectedMessage, errorMessage);
     }
 
-    /**
-     * Tests validating the email used to reset an account's password when the email
-     * isn't associated with an existing account. An event isn't started.
-     */
     @Test
     void validateEmail_enterNotExistsEmail_returnEmptyMessage() {
         String email = "john@doe.com";
@@ -87,11 +78,6 @@ public class ForgotPasswordServiceTest {
         assertEquals(expectedMessage, errorMessage);
     }
 
-    /**
-     * Tests validating the email used to reset an account's password when the
-     * email's
-     * format is invalid. An event isn't started and an error message is returned.
-     */
     @Test
     void validateEmail_enterInvalidEmail_returnErrorMessage() {
         String email = "jane@@doe.com";
@@ -106,11 +92,6 @@ public class ForgotPasswordServiceTest {
         assertEquals(expectedMessage, errorMessage);
     }
 
-    /**
-     * Test sending an email to a user's email account when given a name, email, and
-     * locale.
-     * The email sending service will be called once.
-     */
     @Test
     void sendNewPasswordEmail_enterDetails_createEmailWithService() {
         String email = "jane@doe.com";
@@ -127,11 +108,6 @@ public class ForgotPasswordServiceTest {
                         Mockito.any(Context.class), Mockito.eq(onFailureMessage));
     }
 
-    /**
-     * Test updating a user's password when given a new password and user. The new
-     * password
-     * will be encoded before replacing the user's old password.
-     */
     @Test
     void updatePasswords_enterUserAndPassword_updateUserPassword() {
         String newPassword = "Test123!";

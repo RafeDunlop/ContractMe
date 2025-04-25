@@ -121,13 +121,14 @@ public class EditProfileControllerIntegrationTest {
                         .param("lastName", updatedUser.getLastName())
                         .param("email", updatedUser.getEmail())
                         .param("password", updatedUser.getPassword()))
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("errorMessages", expectedErrors))
-                .andExpect(model().attributeExists("user"))
-                .andExpect(model().attribute("firstName", updatedUser.getFirstName()))
-                .andExpect(model().attribute("lastName", updatedUser.getLastName()))
-                .andExpect(model().attribute("email", updatedUser.getEmail()))
-                .andExpect(model().attribute("profilePicture", updatedUser.getProfilePicture()));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/edit"))
+                .andExpect(flash().attribute("errorMessages", expectedErrors))
+                .andExpect(flash().attributeExists("user"))
+                .andExpect(flash().attribute("firstName", updatedUser.getFirstName()))
+                .andExpect(flash().attribute("lastName", updatedUser.getLastName()))
+                .andExpect(flash().attribute("email", updatedUser.getEmail()))
+                .andExpect(flash().attribute("profilePicture", updatedUser.getProfilePicture()));
     }
 
     /**
@@ -148,13 +149,14 @@ public class EditProfileControllerIntegrationTest {
                         .param("lastName", updatedUser.getLastName())
                         .param("email", updatedUser.getEmail())
                         .param("password", updatedUser.getPassword()))
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("errorMessages", expectedErrors))
-                .andExpect(model().attributeExists("user"))
-                .andExpect(model().attribute("firstName", updatedUser.getFirstName()))
-                .andExpect(model().attribute("lastName", updatedUser.getLastName()))
-                .andExpect(model().attribute("email", updatedUser.getEmail()))
-                .andExpect(model().attribute("profilePicture", updatedUser.getProfilePicture()));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/edit"))
+                .andExpect(flash().attribute("errorMessages", expectedErrors))
+                .andExpect(flash().attributeExists("user"))
+                .andExpect(flash().attribute("firstName", updatedUser.getFirstName()))
+                .andExpect(flash().attribute("lastName", updatedUser.getLastName()))
+                .andExpect(flash().attribute("email", updatedUser.getEmail()))
+                .andExpect(flash().attribute("profilePicture", updatedUser.getProfilePicture()));
     }
 
     /**
@@ -176,13 +178,14 @@ public class EditProfileControllerIntegrationTest {
                         .param("lastName", expectedUser1.getLastName())
                         .param("email", expectedUser1.getEmail())
                         .param("password", expectedUser1.getPassword()))
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("errorMessages", expectedErrors))
-                .andExpect(model().attributeExists("user"))
-                .andExpect(model().attribute("firstName", expectedUser1.getFirstName()))
-                .andExpect(model().attribute("lastName", expectedUser1.getLastName()))
-                .andExpect(model().attribute("email", expectedUser1.getEmail()))
-                .andExpect(model().attribute("profilePicture", expectedUser1.getProfilePicture()));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/edit"))
+                .andExpect(flash().attribute("errorMessages", expectedErrors))
+                .andExpect(flash().attributeExists("user"))
+                .andExpect(flash().attribute("firstName", expectedUser1.getFirstName()))
+                .andExpect(flash().attribute("lastName", expectedUser1.getLastName()))
+                .andExpect(flash().attribute("email", expectedUser1.getEmail()))
+                .andExpect(flash().attribute("profilePicture", expectedUser1.getProfilePicture()));
     }
 
     /**
