@@ -6,6 +6,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class UserValidation {
@@ -96,8 +98,10 @@ public class UserValidation {
      */
     public List<String> validateUpdatePasswordString(String password, String firstName,String lastName,String email) {
         List<String> errors = new ArrayList<>();
+        Pattern pattern = Pattern.compile(String.format("(%s)|(%s)|(%s)", firstName, lastName, email), Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(password);
 
-        if (password != null && (password.contains( firstName) || (password.contains( lastName) || (password.contains( email))))){
+        if (password != null && matcher.find()){
             errors.add("Your password should not contain your name or email address.");
         }
         return errors;

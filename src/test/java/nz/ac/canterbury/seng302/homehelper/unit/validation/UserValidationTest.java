@@ -145,6 +145,18 @@ public class UserValidationTest {
     }
 
     @Test
+    public void PasswordValidation_ContainsFirstNameDifferentCase_RejectInputs() {
+        UserValidation userValidation = new UserValidation();
+        List<String> expectedErrorList = List.of(
+                "Your password should not contain your name or email address."
+        );
+        Assertions.assertEquals(
+                expectedErrorList,
+                userValidation.validateUpdatePasswordString("Passjohn123", "John", "Smith", "john.smith@example.com"));
+
+    }
+
+    @Test
     public void PasswordValidation_ValidPasswordThatMatch_RejectInputs() {
         UserValidation userValidation = new UserValidation();
         Assertions.assertTrue(userValidation.validatePasswordString("Test123!", "Test123!","registerPassword").isEmpty());
