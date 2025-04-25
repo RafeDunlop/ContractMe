@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -104,7 +103,7 @@ public class RegisterServiceIntegrationTest {
         userRegisterDTO.setPassword("password");
         userRegisterDTO.setConfirmPassword("password");
         Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> registerService.registerUser(userRegisterDTO));
-        Assertions.assertEquals("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.", exception.getMessage());
+        Assertions.assertEquals("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email).", exception.getMessage());
         Mockito.verify(userRepositoryMock, Mockito.never()).save(Mockito.any());
     }
 

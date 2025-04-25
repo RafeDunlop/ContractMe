@@ -144,8 +144,7 @@ public class ForgotPasswordServiceIntegrationTest {
         String newPassword = "Password";
         String retypePassword = "password";
         List<String> expectedErrors = List.of("The passwords do not match.",
-                "Your password must be at least 8 characters long and include at least one " +
-                        "uppercase letter, one lowercase letter, one number, and one special character.");
+                "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email).");
 
         List<String> errors = forgotPasswordService.validatePasswords(newPassword, retypePassword, resetUser);
 
@@ -156,7 +155,7 @@ public class ForgotPasswordServiceIntegrationTest {
     void validatePassword_userNameInPassword_returnsError() {
         String newPassword = "Jane1!2foo";
         String confirmPassword = "Jane1!2foo";
-        String expectedError = "Your password should not contain your name or email address.";
+        String expectedError = "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email).";
         List<String> actualErrors = forgotPasswordService.validatePasswords(
             newPassword, confirmPassword, resetUser
         );

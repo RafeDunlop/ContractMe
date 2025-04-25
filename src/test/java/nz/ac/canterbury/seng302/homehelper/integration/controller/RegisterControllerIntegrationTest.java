@@ -101,7 +101,7 @@ public class RegisterControllerIntegrationTest {
      */
     @Test
     public void testRegisterUser_invalidUser_fail() throws Exception {
-        List<String> expectedErrorList = List.of("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.");
+        List<String> expectedErrorList = List.of("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email).");
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("firstName", "Jane")

@@ -53,7 +53,7 @@ public class UpdatePasswordServiceTest {
             updatePasswordService.updatePassword(updatePasswordDTO);
         });
 
-        assertTrue(exception.getMessage().contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."));
+        assertTrue(exception.getMessage().contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email)."));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class UpdatePasswordServiceTest {
             updatePasswordService.updatePassword(updatePasswordDTO);
         });
 
-        assertTrue(exception.getMessage().contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."));
+        assertTrue(exception.getMessage().contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email)."));
         Mockito.verify(userRepositoryMock, Mockito.never()).save(testUser);
     }
 
@@ -121,7 +121,7 @@ public class UpdatePasswordServiceTest {
             updatePasswordService.updatePassword(updatePasswordDTO);
         });
 
-        assertTrue(exception.getMessage().contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."));
+        assertTrue(exception.getMessage().contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email)."));
         Mockito.verify(userRepositoryMock, Mockito.never()).save(testUser);
     }
 
