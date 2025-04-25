@@ -32,7 +32,8 @@ public class UpdatePasswordService {
      * Constructor for the UpdatePasswordService class
      */
     @Autowired
-    public UpdatePasswordService(UserValidation userValidation, LoginService loginService,UserRepository userRepository, EmailService emailService) {
+    public UpdatePasswordService(UserValidation userValidation, LoginService loginService,
+            UserRepository userRepository, EmailService emailService) {
         this.userValidation = userValidation;
         this.loginService = loginService;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -41,9 +42,12 @@ public class UpdatePasswordService {
     }
 
     /**
-     *  Handles validation the DTO to check the retyped passwords match and the current password is correct
-     *  Saves the users password in the database if there are no errors
-     *  Throws an IllegalArgumentException containing a list of errors to display on the webpage.
+     * Handles validation the DTO to check the retyped passwords match and the
+     * current password is correct
+     * Saves the users password in the database if there are no errors
+     * Throws an IllegalArgumentException containing a list of errors to display on
+     * the webpage.
+     *
      * @param updatePasswordDTO Data transfer object for updating the password
      */
     public void updatePassword(UpdatePasswordDTO updatePasswordDTO) {
@@ -53,13 +57,15 @@ public class UpdatePasswordService {
         String firstName = user.getFirstName();
         String lastName = user.getLastName();
         String email = user.getEmail();
-        if (!passwordEncoder.matches(updatePasswordDTO.getCurrentPassword(), user.getPassword())){
+        if (!passwordEncoder.matches(updatePasswordDTO.getCurrentPassword(), user.getPassword())) {
             errors.add("Your old password is incorrect.");
         }
-        errors.addAll(userValidation.validateUpdatePasswordString(password, firstName, lastName, email));
 
-        //Checks second two fields are the same and that the passwords match the patterns
-        errors.addAll(userValidation.validatePasswordString(updatePasswordDTO.getNewPassword(), updatePasswordDTO.getRetypePassword(),"updatePassword"));
+        // Checks second two fields are the same and that the passwords match the
+        // patterns
+        errors.addAll(userValidation.validatePasswordString(
+                updatePasswordDTO.getNewPassword(), updatePasswordDTO.getRetypePassword(),
+                firstName, lastName, email, "updatePassword"));
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException(String.join(" ", errors));
         }
@@ -67,11 +73,12 @@ public class UpdatePasswordService {
         // Updates the Users password to the new Password.
         user.setPassword(passwordEncoder.encode(password));
 
-        //Save Users New Password
+        // Save Users New Password
         userRepository.save(user);
 
         try {
-            emailService.sendUpdatePasswordConfirmation(user.getEmail(), user.getFirstName(), java.util.Locale.getDefault());
+            emailService.sendUpdatePasswordConfirmation(user.getEmail(), user.getFirstName(),
+                    java.util.Locale.getDefault());
         } catch (Exception e) {
             logger.warning(e.getMessage());
         }

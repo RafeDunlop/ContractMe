@@ -85,8 +85,7 @@ public class ForgotPasswordService {
      */
     public List<String> validatePasswords(String newPassword, String confirmPassword, User user) {
         ArrayList<String> errors = new ArrayList<>();
-        errors.addAll(userValidation.validatePasswordString(newPassword, confirmPassword, "resetPassword"));
-        errors.addAll(userValidation.validateUpdatePasswordString(newPassword, user.getFirstName(), user.getLastName(), user.getEmail()));
+        errors.addAll(userValidation.validatePasswordString(newPassword, confirmPassword, user.getFirstName(), user.getLastName(), user.getEmail(), "resetPassword"));
         return errors;
     }
 
