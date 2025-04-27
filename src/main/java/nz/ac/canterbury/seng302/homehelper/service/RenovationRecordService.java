@@ -4,16 +4,12 @@ import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
+import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Performs all logic to do with renovation records which does not face the UI
@@ -89,10 +85,10 @@ public class RenovationRecordService {
     public Map<String, List<String>> validateAllInputsCreate(String name, String description, List<String> roomList) {
         Map<String, List<String>> errors = new HashMap<>();
 
-        putIfNotEmpty(errors, "nameError", renovationRecordValidation.validateName(name));
-        putIfNotEmpty(errors, "nameError", renovationRecordValidation.checkForExactMatchCreate(name));
-        putIfNotEmpty(errors, "descriptionError", renovationRecordValidation.validateDescription(description));
-        putIfNotEmpty(errors, "roomError", renovationRecordValidation.validateRooms(roomList));
+        MapUtil.putIfNotEmpty(errors, "nameError", renovationRecordValidation.validateName(name));
+        MapUtil.putIfNotEmpty(errors, "nameError", renovationRecordValidation.checkForExactMatchCreate(name));
+        MapUtil.putIfNotEmpty(errors, "descriptionError", renovationRecordValidation.validateDescription(description));
+        MapUtil.putIfNotEmpty(errors, "roomError", renovationRecordValidation.validateRooms(roomList));
         return errors;
     }
 
@@ -108,22 +104,10 @@ public class RenovationRecordService {
     public Map<String, List<String>> validateAllInputsEdit(RenovationRecord renovationRecord, String newName) {
         Map<String, List<String>> errors = new HashMap<>();
 
-        putIfNotEmpty(errors, "nameError", renovationRecordValidation.validateName(newName));
-        putIfNotEmpty(errors, "nameError", renovationRecordValidation.checkForExactMatchEdit(newName, renovationRecord));
-        putIfNotEmpty(errors, "descriptionError", renovationRecordValidation.validateDescription(renovationRecord.getDescription()));
-        putIfNotEmpty(errors, "roomError", renovationRecordValidation.validateRooms(renovationRecord.getRooms()));
+        MapUtil.putIfNotEmpty(errors, "nameError", renovationRecordValidation.validateName(newName));
+        MapUtil.putIfNotEmpty(errors, "nameError", renovationRecordValidation.checkForExactMatchEdit(newName, renovationRecord));
+        MapUtil.putIfNotEmpty(errors, "descriptionError", renovationRecordValidation.validateDescription(renovationRecord.getDescription()));
+        MapUtil.putIfNotEmpty(errors, "roomError", renovationRecordValidation.validateRooms(renovationRecord.getRooms()));
         return errors;
-    }
-
-    /**
-     * Inserts a key-value pair into the provided map if the list of messages is not null or empty.
-     * @param map       the map to insert the key-value pair into
-     * @param key       the key to associate with the messages
-     * @param messages  the list of error messages to insert if not empty
-     */
-    private void putIfNotEmpty(Map<String, List<String>> map, String key, List<String> messages) {
-        if (messages != null && !messages.isEmpty()) {
-            map.put(key, messages);
-        }
     }
 }

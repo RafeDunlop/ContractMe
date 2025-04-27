@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
+import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,26 +105,14 @@ public class RenovationTaskService {
         String errorMessageType = "Task";
 
         String nameError = renovationTaskValidation.validateName(renovationTaskDTO.getName(), errorMessageType);
-        putIfNotEmpty(errors, "nameError", nameError == null ? null : List.of(nameError));
+        MapUtil.putIfNotEmpty(errors, "nameError", nameError == null ? null : List.of(nameError));
 
         String descriptionError = renovationTaskValidation.validateDescription(renovationTaskDTO.getDescription(), errorMessageType);
-        putIfNotEmpty(errors, "descriptionError", descriptionError == null ? null : List.of(descriptionError));
+        MapUtil.putIfNotEmpty(errors, "descriptionError", descriptionError == null ? null : List.of(descriptionError));
 
         String dueDateError = renovationTaskValidation.validateDueDate(renovationTaskDTO.getDueDate());
-        putIfNotEmpty(errors, "dueDateError", dueDateError == null ? null : List.of(dueDateError));
+        MapUtil.putIfNotEmpty(errors, "dueDateError", dueDateError == null ? null : List.of(dueDateError));
 
         return errors;
-    }
-
-    /**
-     * Inserts a key-value pair into the provided map if the list of messages is not null or empty.
-     * @param map       the map to insert the key-value pair into
-     * @param key       the key to associate with the messages
-     * @param messages  the list of error messages to insert if not empty
-     */
-    private void putIfNotEmpty(Map<String, List<String>> map, String key, List<String> messages) {
-        if (messages != null && !messages.isEmpty()) {
-            map.put(key, messages);
-        }
     }
 }

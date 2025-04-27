@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -43,11 +44,11 @@ public class RegisterService {
     public Map<String, List<String>> validateRegistration(UserRegisterDTO dto) {
         Map<String, List<String>> errors = new HashMap<>();
 
-        putIfNotEmpty(errors, "firstNameError", userValidation.validateNameString(dto.getFirstName(), "First"));
-        putIfNotEmpty(errors, "lastNameError", userValidation.validateNameString(dto.getLastName(), "Last"));
-        putIfNotEmpty(errors, "emailError", validateEmail(dto.getEmail()));
-        putIfNotEmpty(errors, "passwordError", userValidation.validatePasswordString(dto.getPassword()));
-        putIfNotEmpty(errors, "confirmPasswordError", userValidation.validateConfirmPasswordString(
+        MapUtil.putIfNotEmpty(errors, "firstNameError", userValidation.validateNameString(dto.getFirstName(), "First"));
+        MapUtil.putIfNotEmpty(errors, "lastNameError", userValidation.validateNameString(dto.getLastName(), "Last"));
+        MapUtil.putIfNotEmpty(errors, "emailError", validateEmail(dto.getEmail()));
+        MapUtil.putIfNotEmpty(errors, "passwordError", userValidation.validatePasswordString(dto.getPassword()));
+        MapUtil.putIfNotEmpty(errors, "confirmPasswordError", userValidation.validateConfirmPasswordString(
                 dto.getPassword(), dto.getConfirmPassword(), "registerPassword"));
         return errors;
     }
@@ -66,18 +67,6 @@ public class RegisterService {
                 passwordEncoder.encode(userRegisterDTO.getPassword())
         );
         return userRepository.save(user);
-    }
-
-    /**
-     * Inserts a key-value pair into the provided map if the list of messages is not null or empty.
-     * @param map       the map to insert the key-value pair into
-     * @param key       the key to associate with the messages
-     * @param messages  the list of error messages to insert if not empty
-     */
-    private void putIfNotEmpty(Map<String, List<String>> map, String key, List<String> messages) {
-        if (messages != null && !messages.isEmpty()) {
-            map.put(key, messages);
-        }
     }
 
     /**
