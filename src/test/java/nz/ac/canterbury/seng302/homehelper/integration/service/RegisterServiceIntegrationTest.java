@@ -1,12 +1,13 @@
 package nz.ac.canterbury.seng302.homehelper.integration.service;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -28,17 +29,20 @@ public class RegisterServiceIntegrationTest {
     }
 
     @Test
-    public void testRegister_missingFirstName_accountNotCreated() {
+    public void testRegister_missingFirstName_notValid() {
         UserRegisterDTO userRegisterDTO = new UserRegisterDTO();
         userRegisterDTO.setEmail("email@email.com");
         userRegisterDTO.setFirstName(" ");
         userRegisterDTO.setLastName("Smith");
         userRegisterDTO.setPassword("Password1!");
         userRegisterDTO.setConfirmPassword("Password1!");
-        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> registerService.registerUser(userRegisterDTO));
-        Assertions.assertEquals("First name cannot be empty.", exception.getMessage());
-        Mockito.verify(userRepositoryMock, Mockito.never()).save(Mockito.any());
+
+        Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
+
+        Assertions.assertFalse(errors.isEmpty());
+        Assertions.assertTrue(errors.get("firstNameError").contains("First name cannot be empty."));
     }
+
 
     @Test
     public void testRegister_longFirstName_accountNotCreated() {
@@ -48,8 +52,11 @@ public class RegisterServiceIntegrationTest {
         userRegisterDTO.setLastName("Smith");
         userRegisterDTO.setPassword("Password1!");
         userRegisterDTO.setConfirmPassword("Password1!");
-        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> registerService.registerUser(userRegisterDTO));
-        Assertions.assertEquals("First name must be 64 characters long or less.", exception.getMessage());
+
+        Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
+
+        Assertions.assertFalse(errors.isEmpty());
+        Assertions.assertTrue(errors.get("firstNameError").contains("First name must be 64 characters long or less."));
     }
 
     @Test
@@ -63,9 +70,10 @@ public class RegisterServiceIntegrationTest {
         userRegisterDTO.setLastName("Smith");
         userRegisterDTO.setPassword("Password1!");
         userRegisterDTO.setConfirmPassword("Password1!");
-        User user = Assertions.assertDoesNotThrow(() -> registerService.registerUser(userRegisterDTO));
-        Mockito.verify(userRepositoryMock, Mockito.times(1)).save(Mockito.isA(User.class));
-        Assertions.assertEquals(expectedUser, user);
+
+        Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
+
+        Assertions.assertTrue(errors.isEmpty());
     }
 
     @Test
@@ -77,9 +85,11 @@ public class RegisterServiceIntegrationTest {
         userRegisterDTO.setLastName("Smith");
         userRegisterDTO.setPassword("Password1!");
         userRegisterDTO.setConfirmPassword("Password1!");
-        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> registerService.registerUser(userRegisterDTO));
-        Assertions.assertEquals("First name must only include letters, spaces, hyphens, or apostrophes.", exception.getMessage());
-        Mockito.verify(userRepositoryMock, Mockito.never()).save(Mockito.any());
+
+        Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
+
+        Assertions.assertFalse(errors.isEmpty());
+        Assertions.assertTrue(errors.get("firstNameError").contains("First name must only include letters, spaces, hyphens, or apostrophes."));
     }
 
     @Test
@@ -90,9 +100,11 @@ public class RegisterServiceIntegrationTest {
         userRegisterDTO.setLastName("#(*^$&*^&(*&^ æ¿©®™");
         userRegisterDTO.setPassword("Password1!");
         userRegisterDTO.setConfirmPassword("Password1!");
-        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> registerService.registerUser(userRegisterDTO));
-        Assertions.assertEquals("Last name must only include letters, spaces, hyphens, or apostrophes.", exception.getMessage());
-        Mockito.verify(userRepositoryMock, Mockito.never()).save(Mockito.any());
+
+        Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
+
+        Assertions.assertFalse(errors.isEmpty());
+        Assertions.assertTrue(errors.get("lastNameError").contains("Last name must only include letters, spaces, hyphens, or apostrophes."));
     }
 
     @Test
@@ -103,9 +115,11 @@ public class RegisterServiceIntegrationTest {
         userRegisterDTO.setLastName("Smith");
         userRegisterDTO.setPassword("password");
         userRegisterDTO.setConfirmPassword("password");
-        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> registerService.registerUser(userRegisterDTO));
-        Assertions.assertEquals("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.", exception.getMessage());
-        Mockito.verify(userRepositoryMock, Mockito.never()).save(Mockito.any());
+
+        Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
+
+        Assertions.assertFalse(errors.isEmpty());
+        Assertions.assertTrue(errors.get("passwordError").contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."));
     }
 
     @Test
@@ -116,24 +130,22 @@ public class RegisterServiceIntegrationTest {
         userRegisterDTO.setLastName("Smith");
         userRegisterDTO.setPassword("Password1!");
         userRegisterDTO.setConfirmPassword("Password1!");
-        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> registerService.registerUser(userRegisterDTO));
-        Assertions.assertEquals("Email address must be in the form ‘jane@doe.nz’.", exception.getMessage());
-        Mockito.verify(userRepositoryMock, Mockito.never()).save(Mockito.any());
+
+        Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
+
+        Assertions.assertFalse(errors.isEmpty());
+        Assertions.assertTrue(errors.get("emailError").contains("Email address must be in the form 'jane@doe.nz'."));
     }
 
     @Test
     public void testRegister_emailInUse_accountNotCreated() {
         User user = new User();
         Mockito.when(userRepositoryMock.findByEmailIgnoreCase("email@email.com")).thenReturn(Optional.of(user));
-        UserRegisterDTO userRegisterDTO = new UserRegisterDTO();
-        userRegisterDTO.setEmail("email@email.com");
-        userRegisterDTO.setFirstName("John");
-        userRegisterDTO.setLastName("Smith");
-        userRegisterDTO.setPassword("Password1!");
-        userRegisterDTO.setConfirmPassword("Password1!");
-        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> registerService.registerUser(userRegisterDTO));
-        Assertions.assertEquals("This email address is already in use.", exception.getMessage());
-        Mockito.verify(userRepositoryMock, Mockito.never()).save(Mockito.any());
+        String email = "email@email.com";
+        List<String> errors = registerService.validateEmail(email);
+
+        Assertions.assertFalse(errors.isEmpty());
+        Assertions.assertTrue(errors.contains("This email address is already in use."));
     }
 
     @Test
@@ -144,8 +156,9 @@ public class RegisterServiceIntegrationTest {
         userRegisterDTO.setLastName("Smith");
         userRegisterDTO.setPassword("Password1!");
         userRegisterDTO.setConfirmPassword("Password2!");
-        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> registerService.registerUser(userRegisterDTO));
-        Assertions.assertEquals("Passwords do not match.", exception.getMessage());
-        Mockito.verify(userRepositoryMock, Mockito.never()).save(Mockito.any());
+        Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
+
+        Assertions.assertFalse(errors.isEmpty());
+        Assertions.assertTrue(errors.get("confirmPasswordError").contains("Passwords do not match."));
     }
 }

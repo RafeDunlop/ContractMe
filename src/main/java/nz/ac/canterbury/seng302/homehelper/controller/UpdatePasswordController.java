@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -60,19 +61,18 @@ public class UpdatePasswordController {
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(error -> logger.info(error.getDefaultMessage()));
         }
-        try {
-            updatePasswordService.updatePassword(updatePasswordDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "Password updated successfully.");
-            return "redirect:/user";
-        } catch (IllegalArgumentException e) {
-            logger.warn("Form submission error: {}", e.getMessage());
 
-            List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
+        Map<String, List<String>> errors = updatePasswordService.updatePasswordValidation(updatePasswordDTO);
 
-            redirectAttributes.addFlashAttribute("errorMessages", errorsList);
+        if (!errors.isEmpty()) {
+            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
+
             redirectAttributes.addFlashAttribute("updatePasswordDTO", updatePasswordDTO);
-
             return "redirect:/user/edit/updatePassword";
         }
+
+        updatePasswordService.updatePassword(updatePasswordDTO);
+        redirectAttributes.addFlashAttribute("successMessage", "Password updated successfully.");
+        return "redirect:/user";
     }
 }

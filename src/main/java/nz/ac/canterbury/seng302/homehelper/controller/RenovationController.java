@@ -23,6 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controller for /renovation and subsidiary endpoints, associated with the consuming of renovations
@@ -99,17 +100,22 @@ public class RenovationController {
     @PostMapping("/create")
     public String submitRecord(@RequestParam(name="name") String name,
                                @RequestParam(name = "description", required=false, defaultValue = "") String description,
-                               @RequestParam(name = "roomList", required = false) List <String> roomList,
+                               @RequestParam(name = "roomList", required = false) List<String> roomList,
                                RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/create");
+
         if (roomList == null) roomList = new ArrayList<>(); //cannot be a default value as technically non-constant
-        if (!renovationRecordService.validateAllInputsCreate(name, description, roomList)) {
-            if (renovationRecordService.checkForExactMatch(name)) {
-                redirectAttributes.addFlashAttribute("existingName", name);
-            }
+        Map<String, List<String>> errors = renovationRecordService.validateAllInputsCreate(name, description, roomList);
+
+
+        if (!errors.isEmpty()) {
+            // Add each error to a flash attribute, categorizing by error type
+            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
+
             redirectAttributes.addFlashAttribute("name", name);
             redirectAttributes.addFlashAttribute("description", description);
             redirectAttributes.addFlashAttribute("roomList", roomList);
+
             return "redirect:/renovations/create";
         }
 
@@ -127,7 +133,7 @@ public class RenovationController {
                 redirectAttributes.addFlashAttribute("name", name);
                 redirectAttributes.addFlashAttribute("description", description);
                 redirectAttributes.addFlashAttribute("roomList", roomList);
-                redirectAttributes.addFlashAttribute("errorMessage", "Invalid input: " + e.getMessage());
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
                 return "redirect:/renovations/create";
             }
         } catch (IllegalArgumentException e) {
@@ -166,10 +172,15 @@ public class RenovationController {
     public String editRenovation(@RequestParam(name = "id") Long id, Model model) {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
-        model.addAttribute("renovation", renovationRecord);
-        model.addAttribute("name", renovationRecord.getName());
+
+        // Only add the renovation object if not already present (e.g. from flash attributes)
+        if (!model.containsAttribute("name")) {
+            model.addAttribute("renovation", renovationRecord);
+        }
+
         return "editRenovationTemplate";
     }
+
 
     /**
      * Posts a form corresponding with an attempt to save changes to an existing renovation record
@@ -196,34 +207,41 @@ public class RenovationController {
      * @param name of the record to be edited from the form field
      * @param description of the record to be edited from the form field
      * @param roomList list of rooms of the record to be edited from the form
+     * @param redirectAttributes (map-like) representation of results to be used by thymeleaf
      * @return redirect to the view page for the edited record
      */
     @PostMapping("/edit")
     public String submitRenovationEdit(@RequestParam(name = "id") Long id,
                                        @RequestParam(name="name", required = false) String name,
                                        @RequestParam(name = "description", required = false) String description,
-                                       @RequestParam(name = "roomList", required = false) List <String> roomList,
+                                       @RequestParam(name = "roomList", required = false) List<String> roomList,
                                        RedirectAttributes redirectAttributes) {
+        logger.info("POST /renovations/edit");
+
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
         if (roomList == null) roomList = new ArrayList<>(); //cannot be a default value as technically non-constant
+
         renovationRecord.setDescription(description);
         renovationRecord.setRooms(roomList);
-        boolean changesAreValid = renovationRecordService.validateAllInputsEdit(renovationRecord, name);
 
-        if (changesAreValid) { //go to view page
-            renovationRecord.setName(name); // don't set the name until the changes are valid to avoid db divergence
-            renovationRecordService.addRenovationRecord(renovationRecord); //updates existing record (identified by id)
-            redirectAttributes.addFlashAttribute("renovation", renovationRecord);
-            return "redirect:/renovations/view?id=" + renovationRecord.getId();
+        Map<String, List<String>> errors = renovationRecordService.validateAllInputsEdit(renovationRecord, name);
+
+        if (!errors.isEmpty()) {
+            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
+
+            redirectAttributes.addFlashAttribute("id", id);
+            redirectAttributes.addFlashAttribute("name", name);
+            redirectAttributes.addFlashAttribute("description", description);
+            redirectAttributes.addFlashAttribute("roomList", roomList);
+            return "redirect:/renovations/edit?id=" + renovationRecord.getId();
         }
 
-        if (renovationRecordService.checkForExactMatch(name, renovationRecord)) {
-            redirectAttributes.addFlashAttribute("existingName", name);
-        }
+        renovationRecord.setName(name); // don't set the name until the changes are valid to avoid db divergence
+        renovationRecordService.addRenovationRecord(renovationRecord); //updates existing record (identified by id)
+
         redirectAttributes.addFlashAttribute("renovation", renovationRecord);
-        redirectAttributes.addFlashAttribute("name", name);
-        return "redirect:/renovations/edit?id=" + renovationRecord.getId();
+        return "redirect:/renovations/view?id=" + renovationRecord.getId();
     }
 
     /**

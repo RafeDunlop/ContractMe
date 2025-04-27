@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
@@ -79,27 +80,16 @@ public class EditProfileController {
     @PostMapping("user/edit")
     public String updateProfile(@ModelAttribute User updatedUser, RedirectAttributes redirectAttributes) {
         logger.info("POST /user/edit");
-        User newUser = null;
-        try {
-            // Get original user and email, then set details to updated user values
-            newUser = loginService.getUserByEmail();
-            boolean sameEmail = newUser.getEmail().equals(updatedUser.getEmail());
-            newUser.setFirstName(updatedUser.getFirstName());
-            newUser.setLastName(updatedUser.getLastName());
-            newUser.setEmail(updatedUser.getEmail());
 
-            // Send updated user details for validation and updating
-            editProfileService.updateUser(newUser, sameEmail);
-            return "redirect:/user";
-        } catch (NoSuchElementException pageNotFoundError) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, pageNotFoundError.getMessage());
-        } catch (IllegalArgumentException detailsInvalidError) {
-            // Set error messages on page
-            logger.warn("Form submission error: {}", detailsInvalidError.getMessage());
-            List<String> errorsList = List.of(detailsInvalidError.getMessage().split("(?<=\\.) "));
+        User newUser = loginService.getUserByEmail();
+        boolean sameEmail = newUser.getEmail().equals(updatedUser.getEmail());
 
-            redirectAttributes.addFlashAttribute("errorMessages", errorsList);
-            redirectAttributes.addFlashAttribute("user", newUser); // for repopulation
+        Map<String, List<String>> errors = editProfileService.validateUpdate(updatedUser, sameEmail);
+
+        if (!errors.isEmpty()) {
+            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
+
+            redirectAttributes.addFlashAttribute("user", newUser);
             redirectAttributes.addFlashAttribute("firstName", newUser.getFirstName());
             redirectAttributes.addFlashAttribute("lastName", newUser.getLastName());
             redirectAttributes.addFlashAttribute("email", newUser.getEmail());
@@ -107,6 +97,13 @@ public class EditProfileController {
 
             return "redirect:/user/edit";
         }
+
+        newUser.setFirstName(updatedUser.getFirstName());
+        newUser.setLastName(updatedUser.getLastName());
+        newUser.setEmail(updatedUser.getEmail());
+
+        editProfileService.updateUser(newUser);
+        return "redirect:/user";
     }
 
     /**
@@ -125,7 +122,7 @@ public class EditProfileController {
         List<String> errors = editProfileService.updateProfilePicture(user, file);
 
         if (!errors.isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessages", errors);
+            redirectAttributes.addFlashAttribute("profilePictureError", errors);
             return "redirect:/user/edit";
         }
 

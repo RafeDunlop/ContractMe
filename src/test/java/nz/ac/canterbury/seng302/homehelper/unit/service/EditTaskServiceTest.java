@@ -1,106 +1,66 @@
 package nz.ac.canterbury.seng302.homehelper.unit.service;
 
-import static org.mockito.Mockito.when;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EditTaskService;
-import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
+import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import java.util.List;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 public class EditTaskServiceTest {
 
     private RenovationTaskRepository renovationTaskRepository;
-    private RenovationValidation renovationValidation;
+    private RenovationTaskValidation renovationTaskValidation;
     private EditTaskService editTaskService;
 
     @BeforeEach
     void setUp() {
-        renovationTaskRepository = Mockito.mock(RenovationTaskRepository.class);
-        renovationValidation = Mockito.mock(RenovationValidation.class);
-        editTaskService = new EditTaskService(renovationTaskRepository, renovationValidation);
+        renovationTaskRepository = mock(RenovationTaskRepository.class);
+        renovationTaskValidation = mock(RenovationTaskValidation.class);
+        editTaskService = new EditTaskService(renovationTaskRepository, renovationTaskValidation);
     }
 
     @Test
-    public void EditTask_allDetailsValid_callsSaveTask() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task 1", "New Task", null,new ArrayList<>());
-        RenovationTask renovationTask = Mockito.mock(RenovationTask.class);
-        editTaskService.updateTask(renovationTaskDTO, renovationTask);
-        Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(Mockito.any());
+    public void updateTask_validDTO_savesTask() {
+        RenovationTaskDTO dto = new RenovationTaskDTO("Task 1", "Desc", LocalDate.now(), new ArrayList<>());
+        RenovationTask task = mock(RenovationTask.class);
+
+        editTaskService.updateTask(dto, task);
+
+        verify(task).setName("Task 1");
+        verify(task).setDescription("Desc");
+        verify(task).setDueDate(dto.getDueDate());
+        verify(task).setRoomList(dto.getRooms());
+        verify(renovationTaskRepository, times(1)).save(task);
     }
 
     @Test
-    public void addTask_taskNameInvalid_returnsError() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("@#$%", "New Task", null,new ArrayList<>());
-        RenovationTask renovationTask = Mockito.mock(RenovationTask.class);
-        List<String> errors = new ArrayList<>();
-        errors.add("name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.");
-        when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
-        assertEquals("name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.", exception.getMessage());
-    }
-
-    @Test
-    public void addTask_taskDescriptionEmpty_returnsError() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("@#$%", "", null,new ArrayList<>());
-        RenovationTask renovationTask = Mockito.mock(RenovationTask.class);
-        List<String> errors = new ArrayList<>();
-        errors.add("description cannot be empty.");
-        when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
-        assertEquals("description cannot be empty.", exception.getMessage());
-    }
-
-    @Test
-    public void addTask_taskDescriptionOver512Characters_returnsError() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", """
-                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa""", null,new ArrayList<>());
-        RenovationTask renovationTask = Mockito.mock(RenovationTask.class);
-        List<String> errors = new ArrayList<>();
-        errors.add("description must be 512 characters or less.");
-        when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
-        assertEquals("description must be 512 characters or less.", exception.getMessage());
-    }
-
-    @Test
-    public void addTask_dueDateInPast_returnsError() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task Name", "New Task", LocalDate.now().minusDays(1),new ArrayList<>());
-        RenovationTask renovationTask = Mockito.mock(RenovationTask.class);
-        List<String> errors = new ArrayList<>();
-        errors.add("Due date must be in the future.");
-        when(renovationValidation.validateTaskDetails(Mockito.any())).thenReturn(errors);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {editTaskService.updateTask(renovationTaskDTO, renovationTask);});
-        assertEquals("Due date must be in the future.", exception.getMessage());
-    }
-
-    @Test
-    public void updateIcon_fileDoesNotExists_throwsException() {
-        when(renovationValidation.validateTaskIconFileName(Mockito.anyString())).thenReturn(false);
+    public void updateTask_nullDTO_throwsException() {
+        RenovationTask task = mock(RenovationTask.class);
         assertThrows(IllegalArgumentException.class, () -> {
-            editTaskService.updateTaskIcon(Mockito.mock(RenovationTask.class), "nonexistentfile.png");
+            editTaskService.updateTask(null, task);
+        });
+    }
+
+    @Test
+    public void updateIcon_fileDoesNotExist_throwsException() {
+        when(renovationTaskValidation.validateTaskIconFileName("badfile.png")).thenReturn(false);
+        assertThrows(IllegalArgumentException.class, () -> {
+            editTaskService.updateTaskIcon(mock(RenovationTask.class), "badfile.png");
         });
     }
 
     @Test
     public void updateIcon_fileExists_savesTask() {
-        when(renovationValidation.validateTaskIconFileName(Mockito.anyString())).thenReturn(true);
-        RenovationTask renovationTask = Mockito.mock(RenovationTask.class);
-        editTaskService.updateTaskIcon(renovationTask, "existingfile.png");
-        Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(renovationTask);
+        when(renovationTaskValidation.validateTaskIconFileName("goodfile.png")).thenReturn(true);
+        RenovationTask task = mock(RenovationTask.class);
+        editTaskService.updateTaskIcon(task, "goodfile.png");
+        verify(renovationTaskRepository, times(1)).save(task);
     }
 }

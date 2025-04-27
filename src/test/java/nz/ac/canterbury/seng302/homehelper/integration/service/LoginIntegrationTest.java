@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.integration.service;
 
-import nz.ac.canterbury.seng302.homehelper.controller.ProfileController;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -63,7 +61,7 @@ public class LoginIntegrationTest {
     public void getUserByEmailPassword_InvalidEmail_ReturnError() {
         IllegalArgumentException errorMessage = Assertions.assertThrows(IllegalArgumentException.class,
                 () -> loginService.getUserByEmailAndPassword("@jane.doe.com", "password"));
-        Assertions.assertTrue(errorMessage.getMessage().contains("Email address must be in the form ‘jane@doe.nz’."));
+        Assertions.assertTrue(errorMessage.getMessage().contains("Email address must be in the form 'jane@doe.nz'."));
     }
 
     /**

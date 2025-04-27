@@ -15,20 +15,11 @@
     overflow: hidden;
 }
 
-#name-error-message {
-    color: red;
-}
-#description-error-message {
-    color: red;
-}
 .error-label-div {
     min-height: 30px;
     display: inline-block;
 }
 
-#room-error-message {
-    color: red;
-}
 
 .shadow-overlay {
     display: none;

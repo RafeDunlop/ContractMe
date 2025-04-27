@@ -17,7 +17,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.hamcrest.Matchers.*;
@@ -97,7 +96,7 @@ public class CreateTaskControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view/create?id=1"))
-                .andExpect(flash().attribute("errorMessages", contains("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.")));
+                .andExpect(flash().attribute("nameError", contains("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 
@@ -119,7 +118,7 @@ public class CreateTaskControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view/create?id=1"))
-                .andExpect(flash().attribute("errorMessages", contains("Task description cannot be empty.")));
+                .andExpect(flash().attribute("descriptionError", contains("Task description cannot be empty.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 
@@ -144,7 +143,7 @@ public class CreateTaskControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view/create?id=1"))
-                .andExpect(flash().attribute("errorMessages", contains("Task description must be 512 characters or less.")));
+                .andExpect(flash().attribute("descriptionError", contains("Task description must be 512 characters or less.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 
@@ -166,7 +165,7 @@ public class CreateTaskControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view/create?id=1"))
-                .andExpect(flash().attribute("errorMessages", contains("Due date must be in the future.")));
+                .andExpect(flash().attribute("dueDateError", contains("Due date must be in the future.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 

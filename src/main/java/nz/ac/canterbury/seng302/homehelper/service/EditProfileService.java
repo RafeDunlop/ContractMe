@@ -8,13 +8,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,25 +50,21 @@ public class EditProfileService {
      * error messages and throws them to controller. If there are no errors, then the
      * user is updated with the new details in the database.
      * @param updatedUser User object with the updated user details
-     * @param sameEmail Boolean on whether the email has been changed (true = same email,
-     *                  false = different email)
-     * @throws IllegalArgumentException Throws an error if there is are invalid updated details
      */
-    public void updateUser(User updatedUser, boolean sameEmail) throws IllegalArgumentException {
+    public void updateUser(User updatedUser)  {
         if (updatedUser == null) {
             throw new IllegalArgumentException("Data integration error");
         }
 
-        // Validates updated user details and returns all errors
-        List<String> errors = validateUpdate(updatedUser, sameEmail);
-
-        // Throws all errors that were found
-        if (!errors.isEmpty()) {
-            throw new IllegalArgumentException(String.join(" ", errors));
-        }
-
         userRepository.save(updatedUser);
 
+        Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication newAuth = new UsernamePasswordAuthenticationToken(
+                updatedUser.getEmail(),
+                currentAuth.getCredentials(),
+                currentAuth.getAuthorities()
+        );
+        SecurityContextHolder.getContext().setAuthentication(newAuth);
     }
 
     /**
@@ -79,27 +76,40 @@ public class EditProfileService {
      *                  false = different email)
      * @return A list of error message strings
      */
-    private List<String> validateUpdate(User updatedUser, boolean sameEmail) {
+    public Map<String, List<String>> validateUpdate(User updatedUser, boolean sameEmail) {
         String firstName = updatedUser.getFirstName();
         String lastName = updatedUser.getLastName();
         String email = updatedUser.getEmail();
-        List<String> errors = new ArrayList<>();
 
-        // Validates user first/last name
-        errors.addAll(userValidation.validateNameString(firstName, "First"));
-        errors.addAll(userValidation.validateNameString(lastName, "Last"));
+        Map<String, List<String>> errors = new HashMap<>();
 
-        // Validates user email format and if valid, checks if email doesn't exist
-        List<String> emailFormatError = userValidation.validateEmailString(email);
-        errors.addAll(emailFormatError);
-        if (emailFormatError.isEmpty()) {
+        // Validate first name
+        List<String> firstNameErrors = userValidation.validateNameString(firstName, "First");
+        if (!firstNameErrors.isEmpty()) {
+            errors.put("firstNameError", firstNameErrors);
+        }
+
+        // Validate last name
+        List<String> lastNameErrors = userValidation.validateNameString(lastName, "Last");
+        if (!lastNameErrors.isEmpty()) {
+            errors.put("lastNameError", lastNameErrors);
+        }
+
+        // Validate email format
+        List<String> emailFormatErrors = userValidation.validateEmailString(email);
+        if (!emailFormatErrors.isEmpty()) {
+            errors.put("emailError", emailFormatErrors);
+        } else {
+            // If format is fine, check uniqueness
             if (!sameEmail && userRepository.findByEmailIgnoreCase(email).isPresent()) {
-                errors.add("This email address is already in use.");
+                errors.computeIfAbsent("emailError", k -> new ArrayList<>())
+                        .add("This email address is already in use.");
             }
         }
 
         return errors;
     }
+
 
     /**
      * Updates the user Profile Picture

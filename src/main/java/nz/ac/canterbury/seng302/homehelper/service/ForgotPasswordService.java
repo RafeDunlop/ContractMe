@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.event.OnResetPasswordSubmittedEvent;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -82,10 +83,16 @@ public class ForgotPasswordService {
      * Validate inputted passwords by sending details to UserValidation and return list of errors.
      * @param newPassword New password for user
      * @param confirmPassword Confirm new password
-     * @return List of password errors
+     * @return Mapping of password errors
      */
-    public List<String> validatePasswords(String newPassword, String confirmPassword) {
-        return new ArrayList<>(userValidation.validatePasswordString(newPassword, confirmPassword, "resetPassword"));
+    public Map<String, List<String>> validatePasswords(String newPassword, String confirmPassword) {
+        Map<String, List<String>> errors = new HashMap<>();
+
+        MapUtil.putIfNotEmpty(errors, "newPasswordError", userValidation.validatePasswordString(newPassword));
+        MapUtil.putIfNotEmpty(errors, "confirmNewPasswordError", userValidation.validateConfirmPasswordString(
+                newPassword, confirmPassword, "resetPassword"));
+
+        return errors;
     }
 
     /**

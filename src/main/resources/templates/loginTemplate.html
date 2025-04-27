@@ -11,25 +11,56 @@
             <h4 class="card-title mb-5">Log in</h4>
             <form th:action="@{/login}" method="post">
                 <div class="form-group mb-3">
+
+                    <!-- EMAIL -->
                     <div class="mb-3">
-                        <input type="text" class="form-control" id="username" name="username" placeholder="Email" aria-label="Email">
-                    </div>
-                    <div class="mb-3">
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" aria-label="Password">
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Email"
+                               aria-label="username" th:value="${email}">
+
+                        <!-- Frontend JS error -->
+                        <div class="alert alert-danger mt-2" id="email-frontend-error" hidden>
+                            <ul>
+                                <li><label class="form-label" id="email-frontend-error-message"></label></li>
+                            </ul>
+                        </div>
+
+                        <!-- Backend error -->
+                        <div class="alert alert-danger mt-2" id="email-backend-error"
+                             th:attr="hidden=${emailError == null}">
+                            <ul>
+                                <li th:each="msg : ${emailError}" th:text="${msg}"></li>
+                            </ul>
+                        </div>
                     </div>
 
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Password"
+                               aria-label="password">
+                    </div>
+
+                    <!-- Backend error -->
                     <div th:if="${loginMessage}" class="alert alert-success mb-3" role="alert">
                         <span th:text="${loginMessage}"></span>
                     </div>
 
+                    <!-- General error -->
                     <div th:if="${errorMessage}"  class="alert alert-danger mb-4" role="alert">
                         <ul>
                             <li th:each="error : ${errorMessage}" th:text="${error}"></li>
                         </ul>
                     </div>
+
+                    <!-- SIGN IN BUTTON -->
                     <button type="submit" class="btn btn-primary">Sign in</button>
+
+                    <!-- CANCEL BUTTON -->
                     <a th:href="@{/}" class="btn btn-outline-secondary m-4">Cancel</a>
+
+                    <!-- REGISTER BUTTON -->
                     <a th:href="@{/register}" class="btn btn-link">Not registered? Create an account</a>
+
+                    <!-- FORGOT PASSWORD BUTTON -->
                     <a th:href="@{/password/forgot}" class="btn btn-link">Forgot your password?</a>
                 </div>
             </form>
@@ -38,4 +69,6 @@
     </div>
 
 </body>
+<script type="module" th:src="@{/js/userValidation.js}"></script>
+<script type="module" th:src="@{/js/loginValidation.js}"></script>
 </html>

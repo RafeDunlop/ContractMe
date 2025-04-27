@@ -6,23 +6,6 @@
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
 </head>
 
-<script>
-    function updateFileName() {
-        let fileInput = document.getElementById('formFile');
-        let fileLabel = document.getElementById('fileLabel');
-        let maxLength = 30; // Available space
-
-        if (fileInput.files.length > 0) {
-            let fileName = fileInput.files[0].name;
-
-            // If filename is too long, reset to "File selected"
-            fileLabel.textContent = fileName.length > maxLength ? "File selected" : fileName;
-        } else {
-            fileLabel.textContent = "Edit Profile Picture";
-        }
-    }
-</script>
-
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
 <div class="container mt-5">
@@ -38,41 +21,92 @@
             </form>
         </div>
 
-        <div class="col-md-2 mb-4 text-center">
-            <img th:src="@{'/profile_pictures/' + ${profilePicture}}"
-                 alt="Profile Picture"
-                 class="img-fluid rounded-circle"
-                 style="width: 200px; height: 200px; object-fit: cover;">
+        <div class="d-flex justify-content-start align-items-center mb-4">
+            <!-- Profile Picture -->
+            <div class="me-4 text-center">
+                <img th:src="@{'/profile_pictures/' + ${profilePicture}}"
+                     alt="Profile Picture"
+                     class="img-fluid rounded-circle"
+                     style="width: 200px; height: 200px; object-fit: cover;">
+            </div>
+
+            <div>
+                <!-- Frontend JS error -->
+                <div class="alert alert-danger" role="alert" id="profile-picture-frontend-error" hidden>
+                    <ul id="profile-picture-error-list" class="mb-0"></ul>
+                </div>
+
+                <!-- Backend error -->
+                <div class="alert alert-danger" role="alert" th:if="${profilePictureError}">
+                    <ul><li th:each="msg : ${profilePictureError}" th:text="${msg}"></li></ul>
+                </div>
+            </div>
         </div>
 
-        <form th:action="@{/user/edit}" method="post">
-            <div class="form-group mb-3">
-                <div class="mb-3">
-                    <input type="text" class="form-control" id="first-name" name="firstName" placeholder="First Name" aria-label="first-name" th:value="${firstName}">
+
+        <form th:action="@{/user/edit}" method="post" id="edit-profile-form" novalidate>
+            <!-- FIRST NAME -->
+            <div class="mb-3">
+                <input type="text" class="form-control" id="first-name" name="firstName"
+                       placeholder="First Name" th:value="${firstName}" aria-label="First name">
+
+                <!-- Frontend JS error -->
+                <div class="alert alert-danger mt-2" role="alert" id="first-name-frontend-error" hidden>
+                    <ul><li><label class="form-label" id="first-name-frontend-error-message"></label></li></ul>
                 </div>
-                <div class="mb-3">
-                    <input type="text" class="form-control" id="last-name" name="lastName" placeholder="Last Name" aria-label="last-name" th:value="${lastName}">
+
+                <!-- Backend error -->
+                <div class="alert alert-danger mt-2" role="alert" id="first-name-backend-error" th:if="${firstNameError}">
+                    <ul><li th:each="msg : ${firstNameError}" th:text="${msg}"></li></ul>
                 </div>
-                <div class="mb-3">
-                    <input type="text" class="form-control" id="email" name="email" placeholder="Email" aria-label="email" th:value="${email}">
+            </div>
+
+            <!-- LAST NAME -->
+            <div class="mb-3">
+                <input type="text" class="form-control" id="last-name" name="lastName"
+                       placeholder="Last Name" th:value="${lastName}" aria-label="Last name">
+
+                <!-- Frontend JS error -->
+                <div class="alert alert-danger mt-2" role="alert" id="last-name-frontend-error" hidden>
+                    <ul><li><label class="form-label" id="last-name-frontend-error-message"></label></li></ul>
                 </div>
-                <div th:if="${errorMessages}" class="alert alert-danger mb-4" role="alert">
-                    <ul>
-                        <li th:each="error : ${errorMessages}" th:text="${error}"></li>
-                    </ul>
+
+                <!-- Backend error -->
+                <div class="alert alert-danger mt-2" role="alert" id="last-name-backend-error" th:if="${lastNameError}">
+                    <ul><li th:each="msg : ${lastNameError}" th:text="${msg}"></li></ul>
                 </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                        <a th:href="@{/user}" class="btn btn-outline-secondary m-2">Cancel</a>
-                    </div>
-                    <div>
-                        <a th:href="@{/user/edit/updatePassword}" class="btn btn-primary">Change Password</a>
-                    </div>
+            </div>
+
+            <!-- EMAIL -->
+            <div class="mb-3">
+                <input type="email" class="form-control" id="email" name="email"
+                       placeholder="Email" th:value="${email}" aria-label="Email">
+
+                <!-- Frontend JS error -->
+                <div class="alert alert-danger mt-2" role="alert" id="email-frontend-error" hidden>
+                    <ul><li><label class="form-label" id="email-frontend-error-message"></label></li></ul>
+                </div>
+
+                <!-- Backend error -->
+                <div class="alert alert-danger mt-2" role="alert" id="email-backend-error" th:if="${emailError}">
+                    <ul><li th:each="msg : ${emailError}" th:text="${msg}"></li></ul>
+                </div>
+            </div>
+
+            <!-- Form submission buttons -->
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <a th:href="@{/user}" class="btn btn-outline-secondary m-2">Cancel</a>
+                </div>
+                <div>
+                    <a th:href="@{/user/edit/updatePassword}" class="btn btn-primary">Change Password</a>
                 </div>
             </div>
         </form>
     </div>
 </div>
 </body>
+<script type="module" th:src="@{/js/userValidation.js}"></script>
+<script type="module" th:src="@{/js/profileValidation.js}"></script>
 </html>

@@ -16,8 +16,10 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -115,7 +117,7 @@ public class ForgotPasswordServiceIntegrationTest {
     @Test
     void validateEmail_enterInvalidEmail_returnErrorMessage() {
         String email = "jane@@doe.com";
-        String expectedMessage = "Email address must be in the form ‘jane@doe.nz’.";
+        String expectedMessage = "Email address must be in the form 'jane@doe.nz'.";
 
         String result = forgotPasswordService.validateEmail(email, locale);
         assertEquals(expectedMessage, result);
@@ -150,7 +152,7 @@ public class ForgotPasswordServiceIntegrationTest {
         String newPassword = "Test123!";
         String retypePassword = "Test123!";
 
-        List<String> errors = forgotPasswordService.validatePasswords(newPassword, retypePassword);
+        Map<String, List<String>> errors = forgotPasswordService.validatePasswords(newPassword, retypePassword);
 
         assertTrue(errors.isEmpty());
     }
@@ -163,12 +165,16 @@ public class ForgotPasswordServiceIntegrationTest {
     void validatePassword_invalidAndDifferentPasswords_returnAllErrorsList() {
         String newPassword = "Password";
         String retypePassword = "password";
-        List<String> expectedErrors = List.of("The passwords do not match.",
+
+        Map<String, List<String>> expectedErrors = new HashMap<>();
+        expectedErrors.put("newPasswordError", List.of(
                 "Your password must be at least 8 characters long and include at least one " +
-                        "uppercase letter, one lowercase letter, one number, and one special character.");
+                        "uppercase letter, one lowercase letter, one number, and one special character."
+        ));
+        expectedErrors.put("confirmNewPasswordError", List.of("The passwords do not match."));
 
-        List<String> errors = forgotPasswordService.validatePasswords(newPassword, retypePassword);
+        Map<String, List<String>> actualErrors = forgotPasswordService.validatePasswords(newPassword, retypePassword);
 
-        assertEquals(expectedErrors, errors);
+        assertEquals(expectedErrors, actualErrors);
     }
 }

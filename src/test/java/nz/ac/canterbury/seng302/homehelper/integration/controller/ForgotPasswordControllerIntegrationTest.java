@@ -155,13 +155,13 @@ public class ForgotPasswordControllerIntegrationTest {
     @Test
     void postForgotPassword_enterInvalidEmail_returnErrorMessageAndForm() throws Exception {
         String email = "jane@@doe.com";
-        String expectedMessage = "Email address must be in the form ‘jane@doe.nz’.";
+        String expectedMessage = "Email address must be in the form 'jane@doe.nz'.";
         mockMvc.perform(post("/password/forgot")
                         .param("email", email)
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/password/forgot"))
-                .andExpect(flash().attribute("errorMessage", expectedMessage));
+                .andExpect(flash().attribute("emailError", expectedMessage));
     }
 
     /**
@@ -238,9 +238,9 @@ public class ForgotPasswordControllerIntegrationTest {
 
         mockMvc.perform(post("/password/reset/" + token)
                         .param("newPassword", newPassword)
-                        .param("retypePassword", retypePassword)
+                        .param("confirmNewPassword", retypePassword)
                         .with(csrf()))
-                .andExpect(status().is3xxRedirection())
+                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
 
         Optional<VerificationCode> verificationCode = verificationCodeRepository.findByCode(token);
@@ -267,10 +267,10 @@ public class ForgotPasswordControllerIntegrationTest {
 
         mockMvc.perform(post("/password/reset/" + token)
                         .param("newPassword", newPassword)
-                        .param("retypePassword", retypePassword)
+                        .param("confirmNewPassword", retypePassword)
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("errorMessages", expectedErrorMessages))
+                .andExpect(flash().attribute("confirmNewPasswordError", expectedErrorMessages))
                 .andExpect(flash().attribute("token", token));
     }
 
@@ -292,7 +292,7 @@ public class ForgotPasswordControllerIntegrationTest {
 
         mockMvc.perform(post("/password/reset/" + token)
                         .param("newPassword", newPassword)
-                        .param("retypePassword", retypePassword)
+                        .param("confirmNewPassword", retypePassword)
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?error=Reset+password+link+has+expired"));

@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mail.MailException;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,43 +47,47 @@ public class RegisterController {
         this.eventPublisher = eventPublisher;
     }
 
-
     /**
      * Method to display the registration page under the path /register
      *
      * @return thymeleaf registration
-     * @ModelAttribute userRegisterDTO, contains all params needed for a user object
+     * @param userRegisterDTO, contains all params needed for a user object
      */
     @GetMapping("/register")
-    public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO,
-                               Model model) {
+    public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO) {
         logger.info("GET /register");
         return "registrationTemplate";
     }
 
     /**
-     * Posts a form response with user details
+     * Handles form submission for user registration.
      *
-     * @return thymeleaf registration
-     * @ModelAttribute userRegisterDTO, contains all params needed for a user object
+     * @param userRegisterDTO the data transfer object containing user registration details
+     * @param request the HTTP servlet request
+     * @param redirectAttributes attributes for a redirect scenario
+     * @return redirect address
      */
     @PostMapping("/register")
     public String submitRegistration(@ModelAttribute UserRegisterDTO userRegisterDTO,
                                      HttpServletRequest request,
                                      RedirectAttributes redirectAttributes) {
         logger.info("POST /register");
+
+        Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
+
+        if (!errors.isEmpty()) {
+            errors.forEach(redirectAttributes::addFlashAttribute);
+            redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
+            return "redirect:/register";
+        }
+
         try {
             User user = registerService.registerUser(userRegisterDTO);
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
             return "redirect:/confirm-registration";
-        } catch (IllegalArgumentException|MailException e) {
-            logger.warn("Form submission error: {}", e.getMessage());
-
-            List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
-
-            redirectAttributes.addFlashAttribute("errorMessages", errorsList);
+        } catch (MailException e) {
+            redirectAttributes.addFlashAttribute("error", "Error sending confirmation email.");
             redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
-
             return "redirect:/register";
         }
     }
@@ -92,9 +96,8 @@ public class RegisterController {
      * Get mapping for the email verification code form.
      */
     @GetMapping("/confirm-registration")
-    public String confirmRegistration(@RequestParam(value="error", required = false) String error, Model model) {
+    public String confirmRegistration() {
         logger.info("GET /confirm-registration");
-        model.addAttribute("errorMessage", error);
         return "emailVerificationForm";
     }
 
@@ -116,5 +119,4 @@ public class RegisterController {
         redirectAttributes.addFlashAttribute("loginMessage", "Your account has been activated, please log in");
         return "redirect:/login";
     }
-
 }
