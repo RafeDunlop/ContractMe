@@ -14,7 +14,7 @@ public class UserValidation {
 
     /**
      * Validates whether the email is in the correct form.
-     * 
+     *
      * @param email The email string inputted by the user
      * @return A list of errors that the inputted email generated
      */
@@ -23,16 +23,15 @@ public class UserValidation {
 
         // Check if email is empty, null, or not in the form 'jane@doe.nz'
         if (email == null || email.trim().isEmpty() ||
-                !email.matches(
-                        "^[A-Za-z0-9]+([+_.-][A-Za-z0-9]+)*@[A-Za-z0-9]+([.-][A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")) {
-            errors.add("Email address must be in the form ‘jane@doe.nz’.");
+                !email.matches("^[A-Za-z0-9]+([+_.-][A-Za-z0-9]+)*@[A-Za-z0-9]+([.-][A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")) {
+            errors.add("Email address must be in the form 'jane@doe.nz'.");
         }
         return errors;
     }
 
     /**
      * Validates the first and last names
-     * 
+     *
      * @param name     the inputted name
      * @param nameType the type of name inputted, either first name or last name
      * @return A list of errors that the inputted name generated
@@ -60,35 +59,20 @@ public class UserValidation {
 
     /**
      * Validates password strength
-     * 
+     *
      * @param password the inputted password
      * @return A list of errors that the inputted password generated
-     * @param confirmPassword the retyped password
-     * @param type            the method the validation was called from
      */
-    // Note this function is for validating passwords for registration, not logging
-    // in
-    public List<String> validatePasswordString(String password, String confirmPassword,
-            String firstName, String lastName,
-            String email, String type) {
+    // Note this function is for validating passwords for registration, not logging in
+    public List<String> validatePasswordString(String password, String firstName, String lastName, String email) {
         List<String> errors = new ArrayList<>();
 
-        // Compares password and confirm password
-        if (!password.equals(confirmPassword)) {
-            switch (type) {
-                case "updatePassword" -> errors.add("New Passwords do not match.");
-                case "registerPassword" -> errors.add("Passwords do not match.");
-                case "resetPassword" -> errors.add("The passwords do not match.");
-            }
-        }
-
-        // Check password is at least 8 characters long, includes an uppercase letter, a
-        // lowercase letter, a number and a special character
+        // Check password is at least 8 characters long, includes an uppercase letter, a lowercase letter, a number and a special character
         if (passwordContainsFields(password, firstName, lastName, email) ||
                 password.length() < 8 ||
-                !password.matches(".*[A-Z].*") || // At least one uppercase
-                !password.matches(".*[a-z].*") || // At least one lowercase
-                !password.matches(".*\\d.*") || // At least one number
+                !password.matches(".*[A-Z].*") ||  // At least one uppercase
+                !password.matches(".*[a-z].*") ||  // At least one lowercase
+                !password.matches(".*\\d.*") ||    // At least one number
                 !password.matches(".*[^a-zA-Z0-9].*")) { // At least one special char
             errors.add(
                     "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email).");
@@ -112,8 +96,27 @@ public class UserValidation {
                 "(" + Pattern.quote(firstName) + ")|(" + Pattern.quote(lastName) + ")|(" + Pattern.quote(email) + ")",
                 Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(password);
-
         return password != null && matcher.find();
+    }
+
+     /** Validates password matches confirm password
+     * @param password the inputted password
+     * @return A list of errors that the inputted password generated
+     * @param confirmPassword the retyped password
+     * @param type the method the validation was called from
+     */
+    public List<String> validateConfirmPasswordString(String password, String confirmPassword, String type) {
+        List<String> errors = new ArrayList<>();
+
+        // Compares password and confirm password
+        if (!password.equals(confirmPassword)) {
+            switch (type) {
+                case "updatePassword" -> errors.add("The new passwords do not match.");
+                case "registerPassword" -> errors.add("Passwords do not match.");
+                case "resetPassword" -> errors.add("The passwords do not match.");
+            }
+        }
+        return errors;
     }
 
     /**

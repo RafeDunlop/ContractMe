@@ -25,7 +25,7 @@ public class UserValidationTest {
     @Test
     public void PasswordValidation_InvalidEmails_RejectInputs() {
         UserValidation userValidation = new UserValidation();
-        List<String> expectedErrorList = List.of("Email address must be in the form ‘jane@doe.nz’.");
+        List<String> expectedErrorList = List.of("Email address must be in the form 'jane@doe.nz'.");
         List<String> invalidEmails = Arrays.asList("@doe.com", "abc@@nz.nz.nz.nz", "abc@gmail..om", "jane@doe.n");
         for (String email : invalidEmails) {
             Assertions.assertLinesMatch(expectedErrorList, userValidation.validateEmailString(email));
@@ -68,25 +68,25 @@ public class UserValidationTest {
     public void PasswordValidation_PasswordDoesNotMatch_RejectInputs() {
         UserValidation userValidation = new UserValidation();
         List<String> expectedErrorList = List.of("Passwords do not match.");
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Test123!", "Password123!", "john", "smith", "john.smith@exmaple.com", "registerPassword"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validateConfirmPasswordString("Test123!", "Password123!","registerPassword"));
     }
 
     @Test
-    public void PasswordValidation_PasswordsMatchNoUppercaseLetter_RejectInputs() {
+    public void PasswordValidation_NoUppercaseLetter_RejectInputs() {
         UserValidation userValidation = new UserValidation();
         List<String> expectedErrorList = List.of(
                 "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email)."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("password123!", "password123!", "john", "smith", "john.smith@example.com", "registerPassword"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("password123!", "john", "smith", "john.smith@example.com"));
     }
 
     @Test
-    public void PasswordValidation_PasswordsMatchNoLowercaseLetter_RejectInputs() {
+    public void PasswordValidation_NoLowercaseLetter_RejectInputs() {
         UserValidation userValidation = new UserValidation();
         List<String> expectedErrorList = List.of(
                 "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email)."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("PASSWORD123!", "PASSWORD123!", "john", "smith", "john.smith@example.com", "registerPassword"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("PASSWORD123!", "john", "smith", "john.smith@example.com"));
     }
 
     @Test
@@ -95,7 +95,7 @@ public class UserValidationTest {
         List<String> expectedErrorList = List.of(
                 "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email)."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Password!", "Password!","John", "Smith", "john.smith@example.com", "registerPassword"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Password!", "John", "Smith", "john.smith@example.com"));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class UserValidationTest {
         List<String> expectedErrorList = List.of(
                 "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email)."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Password123", "Password123", "John", "Smith", "john.smith@example.com", "registerPassword"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Password123", "John", "Smith", "john.smith@example.com"));
     }
 
     @Test
@@ -113,7 +113,7 @@ public class UserValidationTest {
         List<String> expectedErrorList = List.of(
                 "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email)."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Test1!", "Test1!", "John", "Smith", "john.smith@example.com", "registerPassword"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Test1!", "John", "Smith", "john.smith@example.com"));
     }
 
 
@@ -123,7 +123,7 @@ public class UserValidationTest {
         List<String> expectedErrorList = List.of(
                 "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email)."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Abhisekh123!#", "Abhisekh123!#", "Abhisekh","Chand","Abhisekh23@gmail.com", "registerPassword"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Abhisekh123!#", "Abhisekh","Chand","Abhisekh23@gmail.com"));
     }
 
     @Test
@@ -132,7 +132,7 @@ public class UserValidationTest {
         List<String> expectedErrorList = List.of(
                 "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email)."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Abhisekh123!#", "Abhisekh123!#", "Abhisekh","Chand","Donald23@gmail.com", "registerPassword"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Abhisekh123!#", "Abhisekh","Chand","Donald23@gmail.com"));
     }
 
     @Test
@@ -141,7 +141,7 @@ public class UserValidationTest {
         List<String> expectedErrorList = List.of(
                 "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email)."
         );
-        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Chand123!#", "Chand123!#", "Abhisekh","Chand","Donald23@gmail.com", "registerPassword"));
+        Assertions.assertEquals(expectedErrorList, userValidation.validatePasswordString("Chand123!#", "Abhisekh","Chand","Donald23@gmail.com"));
     }
 
     @Test
@@ -152,14 +152,14 @@ public class UserValidationTest {
         );
         Assertions.assertEquals(
                 expectedErrorList,
-                userValidation.validatePasswordString("Passjohn123", "Passjohn123", "John", "Smith", "john.smith@example.com", "registerPassword"));
+                userValidation.validatePasswordString("Passjohn123", "John", "Smith", "john.smith@example.com"));
 
     }
 
     @Test
     public void PasswordValidation_ValidPasswordThatMatch_RejectInputs() {
         UserValidation userValidation = new UserValidation();
-        Assertions.assertTrue(userValidation.validatePasswordString("Test123!", "Test123!", "John", "Smith", "john.smith@example.com", "registerPassword").isEmpty());
+        Assertions.assertTrue(userValidation.validateConfirmPasswordString("Test123!", "Test123!","registerPassword").isEmpty());
     }
 
     @Test

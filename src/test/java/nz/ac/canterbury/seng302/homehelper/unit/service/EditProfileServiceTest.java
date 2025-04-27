@@ -8,6 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -35,40 +38,51 @@ public class EditProfileServiceTest {
         userRepository = Mockito.mock(UserRepository.class);
         userValidation = Mockito.mock(UserValidation.class);
         editProfileService = new EditProfileService(userRepository, userValidation);
+
+        // Set up mock authentication for tests
+        User currentUser = new User("John", "Smith", "john@smith.com", "password");
+        currentUser.grantAuthority("ROLE_USER");
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(currentUser, currentUser.getPassword(), currentUser.getAuthorities());
+        SecurityContext context = Mockito.mock(SecurityContext.class);
+        when(context.getAuthentication()).thenReturn(auth);
+        SecurityContextHolder.setContext(context);
     }
 
     @Test
-    public void updateUser_validDetails_returnNoError() {
+    public void updateUser_validDetails_userSavedSuccessfully() {
         User updatedUser = new User("John", "Smith", "john@smith.com", "password");
         updatedUser.grantAuthority("ROLE_USER");
-        when(userValidation.validateNameString(updatedUser.getFirstName(), "First")).thenReturn(List.of());
-        when(userValidation.validateNameString(updatedUser.getLastName(), "Last")).thenReturn(List.of());
+
         when(userRepository.findByEmailIgnoreCase(updatedUser.getEmail())).thenReturn(Optional.empty());
 
-        assertDoesNotThrow(() -> editProfileService.updateUser(updatedUser, false));
+        assertDoesNotThrow(() -> editProfileService.updateUser(updatedUser));
+        verify(userRepository, times(1)).save(updatedUser);
     }
 
     @Test
-    public void updateUser_namesInvalid_throwSameEmailError() {
-        User updatedUser = new User("John!", "Smith?", "john@smith.com", "password");
-        when(userValidation.validateNameString(updatedUser.getFirstName(), "First")).thenReturn(List.of("First name must only include letters, spaces, hyphens, or apostrophes."));
-        when(userValidation.validateNameString(updatedUser.getLastName(), "Last")).thenReturn(List.of("Last name must only include letters, spaces, hyphens, or apostrophes."));
-        when(userRepository.findByEmailIgnoreCase(updatedUser.getEmail())).thenReturn(Optional.empty());
+    public void validateUser_validName_noErrors() {
+        User user = new User("John", "Smith", "john@smith.com", "password");
 
-        IllegalArgumentException errorMessage = assertThrows(IllegalArgumentException.class, () -> editProfileService.updateUser(updatedUser, false));
-        assertEquals("First name must only include letters, spaces, hyphens, or apostrophes. Last name must only include letters, spaces, hyphens, or apostrophes.", errorMessage.getMessage());
+        List<String> firstNameErrors = userValidation.validateNameString(user.getFirstName(), "First");
+        List<String> lastNameErrors = userValidation.validateNameString(user.getLastName(), "Last");
+
+        assertTrue(firstNameErrors.isEmpty());
+        assertTrue(lastNameErrors.isEmpty());
     }
 
     @Test
-    public void updateUser_sameEmailUsed_throwSameEmailError() {
-        User currentUser = new User("John", "Smith", "john@smith.com", "password");
-        User updatedUser = new User("John", "Smith", "john.smith@example.com", "password");
-        when(userValidation.validateNameString(updatedUser.getFirstName(), "First")).thenReturn(List.of());
-        when(userValidation.validateNameString(updatedUser.getLastName(), "Last")).thenReturn(List.of());
-        when(userRepository.findByEmailIgnoreCase(updatedUser.getEmail())).thenReturn(Optional.of(currentUser));
+    public void validateUser_invalidName_returnsErrors() {
+        User user = new User("J@hn!", "Sm1th#", "john@smith.com", "password");
+        userValidation = new UserValidation();
 
-        IllegalArgumentException errorMessage = assertThrows(IllegalArgumentException.class, () -> editProfileService.updateUser(updatedUser, false));
-        assertEquals("This email address is already in use.", errorMessage.getMessage());
+        List<String> firstNameErrors = userValidation.validateNameString(user.getFirstName(), "First");
+        List<String> lastNameErrors = userValidation.validateNameString(user.getLastName(), "Last");
+
+        assertFalse(firstNameErrors.isEmpty());
+        assertFalse(lastNameErrors.isEmpty());
+
+        assertEquals("First name must only include letters, spaces, hyphens, or apostrophes.", firstNameErrors.get(0));
+        assertEquals("Last name must only include letters, spaces, hyphens, or apostrophes.", lastNameErrors.get(0));
     }
 
     @Test

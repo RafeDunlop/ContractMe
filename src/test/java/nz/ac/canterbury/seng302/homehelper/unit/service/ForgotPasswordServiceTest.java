@@ -55,12 +55,27 @@ public class ForgotPasswordServiceTest {
         String email = "jane@doe.com";
         Locale locale = Locale.ENGLISH;
         String expectedMessage = "";
+        user.activate();
         Mockito.when(userRepositoryMock.findByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
         Mockito.when(userValidationMock.validateEmailString(email)).thenReturn(List.of());
 
         String errorMessage = forgotPasswordService.validateEmail(email, locale);
 
         Mockito.verify(eventPublisherMock, times(1)).publishEvent(Mockito.any());
+        assertEquals(expectedMessage, errorMessage);
+    }
+
+    @Test
+    void validateEmail_enterUnauthenticatedEmail_returnEmptyMessage() {
+        String email = "jane@@doe.com";
+        Locale locale = Locale.ENGLISH;
+        String expectedMessage = "";
+        Mockito.when(userRepositoryMock.findByEmailIgnoreCase(email)).thenReturn(Optional.of(user));
+        Mockito.when(userValidationMock.validateEmailString(email)).thenReturn(List.of());
+
+        String errorMessage = forgotPasswordService.validateEmail(email, locale);
+
+        Mockito.verify(eventPublisherMock, times(0)).publishEvent(Mockito.any());
         assertEquals(expectedMessage, errorMessage);
     }
 

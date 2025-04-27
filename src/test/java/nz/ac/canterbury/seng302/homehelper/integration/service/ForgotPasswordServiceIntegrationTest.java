@@ -16,8 +16,10 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,7 +63,27 @@ public class ForgotPasswordServiceIntegrationTest {
      * as a link to open the reset password form.
      */
     @Test
+    @Transactional
     void validateEmail_enterValidEmail_returnEmptyMessage() {
+        String email = resetUser.getEmail();
+        String expectedMessage = "";
+        resetUser.activate();
+        userRepository.save(resetUser);
+
+        String result = forgotPasswordService.validateEmail(email, locale);
+        assertEquals(expectedMessage, result);
+
+        List<VerificationCode> verificationCode = (List<VerificationCode>) verificationCodeRepository.findAll();
+        assertEquals(resetUser, verificationCode.get(0).getUser());
+    }
+
+    /**
+     * Tests validating the email used to reset an account's password when the email is
+     * associated with an existing account but the account hasn't been authenticated yet.
+     * A token is not created.
+     */
+    @Test
+    void validateEmail_enterUnauthenticatedEmail_returnEmptyMessage() {
         String email = resetUser.getEmail();
         String expectedMessage = "";
 
@@ -69,7 +91,7 @@ public class ForgotPasswordServiceIntegrationTest {
         assertEquals(expectedMessage, result);
 
         List<VerificationCode> verificationCode = (List<VerificationCode>) verificationCodeRepository.findAll();
-        assertEquals(resetUser, verificationCode.get(0).getUser());
+        assertTrue(verificationCode.isEmpty());
     }
 
     /**
@@ -95,7 +117,7 @@ public class ForgotPasswordServiceIntegrationTest {
     @Test
     void validateEmail_enterInvalidEmail_returnErrorMessage() {
         String email = "jane@@doe.com";
-        String expectedMessage = "Email address must be in the form ‘jane@doe.nz’.";
+        String expectedMessage = "Email address must be in the form 'jane@doe.nz'.";
 
         String result = forgotPasswordService.validateEmail(email, locale);
         assertEquals(expectedMessage, result);
@@ -130,7 +152,7 @@ public class ForgotPasswordServiceIntegrationTest {
         String newPassword = "Test123!";
         String retypePassword = "Test123!";
 
-        List<String> errors = forgotPasswordService.validatePasswords(newPassword, retypePassword, resetUser);
+        Map<String, List<String>> errors = forgotPasswordService.validatePasswords(newPassword, retypePassword, resetUser);
 
         assertTrue(errors.isEmpty());
     }
@@ -143,12 +165,15 @@ public class ForgotPasswordServiceIntegrationTest {
     void validatePassword_invalidAndDifferentPasswords_returnAllErrorsList() {
         String newPassword = "Password";
         String retypePassword = "password";
-        List<String> expectedErrors = List.of("The passwords do not match.",
-                "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email).");
+        Map<String, List<String>> expectedErrors = new HashMap<>();
+        expectedErrors.put("newPasswordError", List.of(
+                                "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email)."
+        ));
+        expectedErrors.put("confirmNewPasswordError", List.of("The passwords do not match."));
 
-        List<String> errors = forgotPasswordService.validatePasswords(newPassword, retypePassword, resetUser);
+        Map<String, List<String>> actualErrors = forgotPasswordService.validatePasswords(newPassword, retypePassword, resetUser);
 
-        assertEquals(expectedErrors, errors);
+        assertEquals(expectedErrors, actualErrors);
     }
 
     @Test
@@ -156,10 +181,10 @@ public class ForgotPasswordServiceIntegrationTest {
         String newPassword = "Jane1!2foo";
         String confirmPassword = "Jane1!2foo";
         String expectedError = "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email).";
-        List<String> actualErrors = forgotPasswordService.validatePasswords(
+        Map<String, List<String>> actualErrors = forgotPasswordService.validatePasswords(
             newPassword, confirmPassword, resetUser
         );
         assertEquals(1, actualErrors.size());
-        assertEquals(expectedError, actualErrors.getFirst());
+        assertEquals(expectedError, actualErrors.get("newPasswordError").getFirst());
     }
 }

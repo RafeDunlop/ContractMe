@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.UpdatePasswordDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,7 +11,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -42,33 +45,14 @@ public class UpdatePasswordService {
     }
 
     /**
-     * Handles validation the DTO to check the retyped passwords match and the
-     * current password is correct
-     * Saves the users password in the database if there are no errors
-     * Throws an IllegalArgumentException containing a list of errors to display on
-     * the webpage.
+     * Updates the user's password in the database after successful validation.
+     * Also sends a confirmation email.
      *
-     * @param updatePasswordDTO Data transfer object for updating the password
+     * @param updatePasswordDTO Data transfer object containing the current password, new password, and retyped password.
      */
     public void updatePassword(UpdatePasswordDTO updatePasswordDTO) {
-        List<String> errors = new ArrayList<>();
         User user = loginService.getUserByEmail();
         String password = updatePasswordDTO.getNewPassword();
-        String firstName = user.getFirstName();
-        String lastName = user.getLastName();
-        String email = user.getEmail();
-        if (!passwordEncoder.matches(updatePasswordDTO.getCurrentPassword(), user.getPassword())) {
-            errors.add("Your old password is incorrect.");
-        }
-
-        // Checks second two fields are the same and that the passwords match the
-        // patterns
-        errors.addAll(userValidation.validatePasswordString(
-                updatePasswordDTO.getNewPassword(), updatePasswordDTO.getRetypePassword(),
-                firstName, lastName, email, "updatePassword"));
-        if (!errors.isEmpty()) {
-            throw new IllegalArgumentException(String.join(" ", errors));
-        }
 
         // Updates the Users password to the new Password.
         user.setPassword(passwordEncoder.encode(password));
@@ -82,5 +66,33 @@ public class UpdatePasswordService {
         } catch (Exception e) {
             logger.warning(e.getMessage());
         }
+    }
+
+    /**
+     * Validates the user's password update request.
+     * Checks that the current password is correct, that the new password meets validation rules,
+     * and that the new password matches the retyped password.
+     *
+     * @param updatePasswordDTO Data transfer object containing the current password, new password, and retyped password.
+     * @return a map containing lists of error messages, grouped by field.
+     */
+    public Map<String, List<String>> updatePasswordValidation(UpdatePasswordDTO updatePasswordDTO) {
+        Map<String, List<String>> errors = new HashMap<>();
+        User user = loginService.getUserByEmail();
+        String password = updatePasswordDTO.getNewPassword();
+        String firstName = user.getFirstName();
+        String lastName = user.getLastName();
+        String email = user.getEmail();
+
+        List<String> currentPasswordErrors = new ArrayList<>();
+        if (!passwordEncoder.matches(updatePasswordDTO.getCurrentPassword(), user.getPassword())) {
+            currentPasswordErrors.add("Your old password is incorrect.");
+        }
+        MapUtil.putIfNotEmpty(errors, "oldPasswordError", currentPasswordErrors);
+
+        MapUtil.putIfNotEmpty(errors, "newPasswordError", userValidation.validatePasswordString(password, firstName, lastName, email));
+        MapUtil.putIfNotEmpty(errors, "newPasswordRetypeError", userValidation.validateConfirmPasswordString(updatePasswordDTO.getNewPassword(), updatePasswordDTO.getRetypePassword(), "updatePassword"));
+
+        return errors;
     }
 }

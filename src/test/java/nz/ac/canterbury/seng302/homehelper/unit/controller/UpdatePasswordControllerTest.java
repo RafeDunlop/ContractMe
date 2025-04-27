@@ -14,6 +14,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+import java.util.Map;
+
 
 public class UpdatePasswordControllerTest {
 
@@ -41,24 +44,22 @@ public class UpdatePasswordControllerTest {
     }
 
     @Test
-    void testValidationFailure_ThrowException_ReturnsToUpdatePasswordTemplate() {
-
+    void testValidationFailure_ReturnsToUpdatePasswordTemplate() {
         UpdatePasswordService updatePasswordServiceMock = Mockito.mock(UpdatePasswordService.class);
         UpdatePasswordController updatePasswordController = new UpdatePasswordController(updatePasswordServiceMock);
 
         BindingResult bindingResultMock = Mockito.mock(BindingResult.class);
         RedirectAttributes redirectAttributesMock = Mockito.mock(RedirectAttributes.class);
 
-
         UpdatePasswordDTO invalidPasswordDTO = new UpdatePasswordDTO("old", "new", "retype");
 
-
-        doThrow(new IllegalArgumentException("Your old password is incorrect.")).when(updatePasswordServiceMock).updatePassword(invalidPasswordDTO);
-
+        Map<String, List<String>> errors = Map.of(
+                "passwordError", List.of("Passwords do not match")
+        );
+        Mockito.when(updatePasswordServiceMock.updatePasswordValidation(invalidPasswordDTO)).thenReturn(errors);
 
         String result = updatePasswordController.tryChangePassword(invalidPasswordDTO, bindingResultMock, redirectAttributesMock);
 
         assertEquals("redirect:/user/edit/updatePassword", result);
     }
-
 }

@@ -3,16 +3,19 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+/**
+ * Service class responsible for handling user registration logic,
+ * including validation of registration fields and password encoding.
+ */
 @Service
 public class RegisterService {
 
@@ -20,6 +23,12 @@ public class RegisterService {
     private final UserValidation userValidation;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Constructs a {@code RegisterService} with the given dependencies.
+     *
+     * @param userRepository the repository used to access user data
+     * @param userValidation the utility used to validate user input fields
+     */
     @Autowired
     public RegisterService(UserRepository userRepository, UserValidation userValidation) {
         this.userRepository = userRepository;
@@ -28,54 +37,60 @@ public class RegisterService {
     }
 
     /**
-     * Create a user and save it to the database, with validation, first name, last name, email and password must not be null or empty.
+     * Validates the registration fields provided in the {@code UserRegisterDTO}.
+     *
+     * @param dto the user registration data transfer object containing user input
+     *            fields
+     * @return a map where the key is the field name and the value is a list of
+     *         error messages
+     *         associated with that field; if no errors exist for a field, it is not
+     *         included
+     */
+    public Map<String, List<String>> validateRegistration(UserRegisterDTO dto) {
+        Map<String, List<String>> errors = new HashMap<>();
+
+        MapUtil.putIfNotEmpty(errors, "firstNameError", userValidation.validateNameString(dto.getFirstName(), "First"));
+        MapUtil.putIfNotEmpty(errors, "lastNameError", userValidation.validateNameString(dto.getLastName(), "Last"));
+        MapUtil.putIfNotEmpty(errors, "emailError", validateEmail(dto.getEmail()));
+        MapUtil.putIfNotEmpty(errors, "passwordError", userValidation.validatePasswordString(
+                dto.getPassword(), dto.getFirstName(), dto.getLastName(), dto.getEmail()));
+        MapUtil.putIfNotEmpty(errors, "confirmPasswordError", userValidation.validateConfirmPasswordString(
+                dto.getPassword(), dto.getConfirmPassword(), "registerPassword"));
+        return errors;
+    }
+
+    /**
+     * Create a user and save it to the database, with validation, first name, last
+     * name, email and password must not be null or empty.
+     *
      * @param userRegisterDTO Data transfer object for user registration
      * @return the user if it was saved successfully
-     * @throws IllegalArgumentException if the firstName, lastName, email or password inputs are invalid
+     * @throws IllegalArgumentException if the firstName, lastName, email or
+     *                                  password inputs are invalid
      */
-    public User registerUser(UserRegisterDTO userRegisterDTO) throws IllegalArgumentException {
-        // Throw error if data is not received into the service class correctly
-        if (userRegisterDTO == null) {
-            throw new IllegalArgumentException("Data integration error");
-        }
-
-        String firstName = userRegisterDTO.getFirstName();
-        String lastName = userRegisterDTO.getLastName();
-        String email = userRegisterDTO.getEmail();
-        String password = userRegisterDTO.getPassword();
-        String confirmPassword = userRegisterDTO.getConfirmPassword();
-
-        List<String> errors = new ArrayList<>();
-
-        errors.addAll(userValidation.validateNameString(firstName, "First"));
-        errors.addAll(userValidation.validateNameString(lastName, "Last"));
-        errors.addAll(validateEmail(email));
-        errors.addAll(userValidation.validatePasswordString(password, confirmPassword, firstName, lastName, email, "registerPassword"));
-        // Throw IllegalArgumentException if any errors occurred in validating the data
-        if (!errors.isEmpty()) {
-            throw new IllegalArgumentException(String.join(" ", errors));
-        }
-
-        // Create a user entity
-        User user = new User(firstName, lastName, email, passwordEncoder.encode(password));
-
-        // Save entity to the user repository
+    public User registerUser(UserRegisterDTO userRegisterDTO) {
+        User user = new User(
+                userRegisterDTO.getFirstName(),
+                userRegisterDTO.getLastName(),
+                userRegisterDTO.getEmail(),
+                passwordEncoder.encode(userRegisterDTO.getPassword()));
         return userRepository.save(user);
     }
 
     /**
      * Validates if the email is already in use
+     *
      * @param email the email inputted by the user
      */
     public List<String> validateEmail(String email) {
         List<String> errors = new ArrayList<>();
 
-            Optional<User> existingUser = userRepository.findByEmailIgnoreCase(email);
-            if (existingUser.isPresent()) {
-                errors.add("This email address is already in use.");
-            }
+        Optional<User> existingUser = userRepository.findByEmailIgnoreCase(email);
+        if (existingUser.isPresent()) {
+            errors.add("This email address is already in use.");
+        }
 
-            errors.addAll(userValidation.validateEmailString(email));
+        errors.addAll(userValidation.validateEmailString(email));
         return errors;
     }
 }

@@ -1,31 +1,29 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
+import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 
 @Service
 public class EditTaskService {
 
     private final RenovationTaskRepository renovationTaskRepository;
-    private final RenovationValidation renovationValidation;
+    private final RenovationTaskValidation renovationTaskValidation;
 
     /**
      * Constructor for the service and links the repository and validator to the
      * service.
      * @param renovationTaskRepository for getting and updating user details
-     * @param renovationValidation for validating updated task details
+     * @param renovationTaskValidation for validating updated task details
      */
     @Autowired
-    public EditTaskService(RenovationTaskRepository renovationTaskRepository, RenovationValidation renovationValidation) {
+    public EditTaskService(RenovationTaskRepository renovationTaskRepository, RenovationTaskValidation renovationTaskValidation) {
         this.renovationTaskRepository = renovationTaskRepository;
-        this.renovationValidation = renovationValidation;
+        this.renovationTaskValidation = renovationTaskValidation;
     }
 
     /**
@@ -40,22 +38,12 @@ public class EditTaskService {
             throw new IllegalArgumentException("Data integration error");
         }
 
-        // Validates updated user details and returns all errors
-        List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
-
-        // Throws all errors that were found
-        if (!errors.isEmpty()) {
-            throw new IllegalArgumentException(String.join(" ", errors));
-        }
-
         renovationTask.setName(renovationTaskDTO.getName());
         renovationTask.setDescription(renovationTaskDTO.getDescription());
         renovationTask.setDueDate(renovationTaskDTO.getDueDate());
         renovationTask.setRoomList(renovationTaskDTO.getRooms());
 
         renovationTaskRepository.save(renovationTask);
-
-
     }
 
     /**
@@ -66,7 +54,7 @@ public class EditTaskService {
      * @throws IllegalArgumentException If the file does not exist or is a directory.
      */
     public void updateTaskIcon(RenovationTask renovationTask, String iconFileName) throws IllegalArgumentException {
-        if (renovationValidation.validateTaskIconFileName(iconFileName)) {
+        if (renovationTaskValidation.validateTaskIconFileName(iconFileName)) {
             renovationTask.setIconFileName(iconFileName);
             renovationTaskRepository.save(renovationTask);
         } else {

@@ -13,14 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -73,15 +68,13 @@ public class LoginControllerIntegrationTest {
      */
     @Test
     public void testLoginUser_userWithSameEmailInRepositoryWrongPassword_fail() throws Exception {
-        List<String> expectedErrorList = List.of(URLEncoder.encode("The email address is unknown, or the password is invalid.", StandardCharsets.UTF_8));
+        String expectedError = "The email address is unknown, or the password is invalid.";
         Mockito.when(userRepository.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty());
         mockMvc.perform(formLogin("/login")
                         .user("username", "jane@doe.nz")
                         .password("password"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("/login?error=*"))
-                .andDo(result -> mockMvc.perform(get(Objects.requireNonNull(result.getResponse().getRedirectedUrl())))
-                        .andExpect(model().attribute("errorMessage", expectedErrorList)));
+                .andExpect(redirectedUrl("/login"))
+                .andExpect(request().sessionAttribute("errorMessage",  expectedError));
     }
-
 }

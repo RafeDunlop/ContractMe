@@ -112,7 +112,7 @@ public class RegisterControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/register"))
-                .andExpect(flash().attribute("errorMessages", expectedErrorList))
+                .andExpect(flash().attribute("passwordError", expectedErrorList))
                 .andExpect(flash().attribute("userRegisterDTO", Matchers.hasProperty("firstName", Matchers.equalTo("Jane"))))
                 .andExpect(flash().attribute("userRegisterDTO", Matchers.hasProperty("lastName", Matchers.equalTo("Doe"))))
                 .andExpect(flash().attribute("userRegisterDTO", Matchers.hasProperty("email", Matchers.equalTo("jane@doe.nz"))));
