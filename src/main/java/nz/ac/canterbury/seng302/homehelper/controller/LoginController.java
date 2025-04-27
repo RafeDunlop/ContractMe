@@ -26,6 +26,10 @@ public class LoginController {
     public String login(HttpServletRequest request, Model model) {
         logger.info("GET /login");
 
+        Object email = request.getSession().getAttribute("email");
+        model.addAttribute("email", email);
+        request.getSession().removeAttribute("email");
+
         Object error = request.getSession().getAttribute("errorMessage");
         if (error != null) {
             List<String> errorsList = List.of(error.toString().split("(?<=\\.) "));

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mail.MailException;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,25 +47,25 @@ public class RegisterController {
         this.eventPublisher = eventPublisher;
     }
 
-
     /**
      * Method to display the registration page under the path /register
      *
      * @return thymeleaf registration
-     * @ModelAttribute userRegisterDTO, contains all params needed for a user object
+     * @param userRegisterDTO, contains all params needed for a user object
      */
     @GetMapping("/register")
-    public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO,
-                               Model model) {
+    public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO) {
         logger.info("GET /register");
         return "registrationTemplate";
     }
 
     /**
-     * Posts a form response with user details
+     * Handles form submission for user registration.
      *
-     * @return thymeleaf registration
-     * @ModelAttribute userRegisterDTO, contains all params needed for a user object
+     * @param userRegisterDTO the data transfer object containing user registration details
+     * @param request the HTTP servlet request
+     * @param redirectAttributes attributes for a redirect scenario
+     * @return redirect address
      */
     @PostMapping("/register")
     public String submitRegistration(@ModelAttribute UserRegisterDTO userRegisterDTO,
@@ -97,9 +96,8 @@ public class RegisterController {
      * Get mapping for the email verification code form.
      */
     @GetMapping("/confirm-registration")
-    public String confirmRegistration(@RequestParam(value="error", required = false) String error, Model model) {
+    public String confirmRegistration() {
         logger.info("GET /confirm-registration");
-        model.addAttribute("errorMessage", error);
         return "emailVerificationForm";
     }
 
@@ -121,5 +119,4 @@ public class RegisterController {
         redirectAttributes.addFlashAttribute("loginMessage", "Your account has been activated, please log in");
         return "redirect:/login";
     }
-
 }

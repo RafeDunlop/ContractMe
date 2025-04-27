@@ -13,8 +13,9 @@ public class CustomAuthFailHandler implements AuthenticationFailureHandler {
 
     /**
      * Auth failure handler callback.
-     * @param request the http request
-     * @param response the http response
+     *
+     * @param request   the http request
+     * @param response  the http response
      * @param exception the exception
      * @throws IOException for unexpected IO failure
      */
@@ -24,6 +25,8 @@ public class CustomAuthFailHandler implements AuthenticationFailureHandler {
             request.getSession().setAttribute("errorMessage", "Please confirm your email address before attempting to login.");
             response.sendRedirect("/confirm-registration");
         } else {
+            String email = request.getParameter("username");
+            request.getSession().setAttribute("email", email);
             request.getSession().setAttribute("errorMessage", exception.getMessage());
             response.sendRedirect("/login");
         }
