@@ -10,7 +10,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -41,28 +43,14 @@ public class UpdatePasswordService {
     }
 
     /**
-     *  Handles validation the DTO to check the retyped passwords match and the current password is correct
-     *  Saves the users password in the database if there are no errors
-     *  Throws an IllegalArgumentException containing a list of errors to display on the webpage.
-     * @param updatePasswordDTO Data transfer object for updating the password
+     * Updates the user's password in the database after successful validation.
+     * Also sends a confirmation email.
+     *
+     * @param updatePasswordDTO Data transfer object containing the current password, new password, and retyped password.
      */
     public void updatePassword(UpdatePasswordDTO updatePasswordDTO) {
-        List<String> errors = new ArrayList<>();
         User user = loginService.getUserByEmail();
         String password = updatePasswordDTO.getNewPassword();
-        String firstName = user.getFirstName();
-        String lastName = user.getLastName();
-        String email = user.getEmail();
-        if (!passwordEncoder.matches(updatePasswordDTO.getCurrentPassword(), user.getPassword())){
-            errors.add("Your old password is incorrect.");
-        }
-        errors.addAll(userValidation.validateUpdatePasswordString(password, firstName, lastName, email));
-
-        //Checks second two fields are the same and that the passwords match the patterns
-        errors.addAll(userValidation.validatePasswordString(updatePasswordDTO.getNewPassword(), updatePasswordDTO.getRetypePassword(),"updatePassword"));
-        if (!errors.isEmpty()) {
-            throw new IllegalArgumentException(String.join(" ", errors));
-        }
 
         // Updates the Users password to the new Password.
         user.setPassword(passwordEncoder.encode(password));
@@ -74,6 +62,47 @@ public class UpdatePasswordService {
             emailService.sendUpdatePasswordConfirmation(user.getEmail(), user.getFirstName(), java.util.Locale.getDefault());
         } catch (Exception e) {
             logger.warning(e.getMessage());
+        }
+    }
+
+    /**
+     * Validates the user's password update request.
+     * Checks that the current password is correct, that the new password meets validation rules,
+     * and that the new password matches the retyped password.
+     *
+     * @param updatePasswordDTO Data transfer object containing the current password, new password, and retyped password.
+     * @return a map containing lists of error messages, grouped by field.
+     */
+    public Map<String, List<String>> updatePasswordValidation(UpdatePasswordDTO updatePasswordDTO) {
+        Map<String, List<String>> errors = new HashMap<>();
+        User user = loginService.getUserByEmail();
+        String password = updatePasswordDTO.getNewPassword();
+        String firstName = user.getFirstName();
+        String lastName = user.getLastName();
+        String email = user.getEmail();
+
+        List<String> currentPasswordErrors = new ArrayList<>();
+        if (!passwordEncoder.matches(updatePasswordDTO.getCurrentPassword(), user.getPassword())) {
+            currentPasswordErrors.add("Your old password is incorrect.");
+        }
+        putIfNotEmpty(errors, "oldPasswordError", currentPasswordErrors);
+
+        putIfNotEmpty(errors, "newPasswordError", userValidation.validateUpdatePasswordString(password, firstName, lastName, email));
+        putIfNotEmpty(errors, "newPasswordError", userValidation.validatePasswordString(updatePasswordDTO.getNewPassword()));
+        putIfNotEmpty(errors, "newPasswordRetypeError", userValidation.validateConfirmPasswordString(updatePasswordDTO.getNewPassword(), updatePasswordDTO.getRetypePassword(), "updatePassword"));
+
+        return errors;
+    }
+
+    /**
+     * Inserts a key-value pair into the provided map if the list of messages is not null or empty.
+     * @param map       the map to insert the key-value pair into
+     * @param key       the key to associate with the messages
+     * @param messages  the list of error messages to insert if not empty
+     */
+    private void putIfNotEmpty(Map<String, List<String>> map, String key, List<String> messages) {
+        if (messages != null && !messages.isEmpty()) {
+            map.put(key, messages);
         }
     }
 }

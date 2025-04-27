@@ -85,26 +85,20 @@ public class ForgotPasswordService {
      */
     public Map<String, List<String>> validatePasswords(String newPassword, String confirmPassword) {
         Map<String, List<String>> errors = new HashMap<>();
-        List<String> passwordErrors = userValidation.validatePasswordString(
-                newPassword, confirmPassword, "resetPassword"
-        );
 
-        // Separate out confirm password mismatch error
-        List<String> confirmPasswordErrors = new ArrayList<>();
-        passwordErrors.removeIf(err -> {
-            if (err.equals("The passwords do not match.")) {
-                confirmPasswordErrors.add(err);
-                return true;
-            }
-            return false;
-        });
-
-        putIfNotEmpty(errors, "newPasswordError", passwordErrors);
-        putIfNotEmpty(errors, "confirmNewPasswordError", confirmPasswordErrors);
+        putIfNotEmpty(errors, "newPasswordError", userValidation.validatePasswordString(newPassword));
+        putIfNotEmpty(errors, "confirmNewPasswordError", userValidation.validateConfirmPasswordString(
+                newPassword, confirmPassword, "resetPassword"));
 
         return errors;
     }
 
+    /**
+     * Inserts a key-value pair into the provided map if the list of messages is not null or empty.
+     * @param map       the map to insert the key-value pair into
+     * @param key       the key to associate with the messages
+     * @param messages  the list of error messages to insert if not empty
+     */
     private void putIfNotEmpty(Map<String, List<String>> map, String key, List<String> messages) {
         if (messages != null && !messages.isEmpty()) {
             map.put(key, messages);

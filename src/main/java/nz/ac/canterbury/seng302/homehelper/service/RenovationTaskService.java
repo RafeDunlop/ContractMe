@@ -4,7 +4,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
+import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,14 +25,16 @@ public class RenovationTaskService {
     Logger logger = LoggerFactory.getLogger(RenovationTaskService.class);
 
     private final RenovationTaskRepository renovationTaskRepository;
+    private final RenovationTaskValidation renovationTaskValidation;
 
     /**
      * Constructor for RenovationTaskService class
      * @param renovationTaskRepository initialises the repo for storing tasks
      */
     @Autowired
-    public RenovationTaskService(RenovationTaskRepository renovationTaskRepository) {
+    public RenovationTaskService(RenovationTaskRepository renovationTaskRepository, RenovationTaskValidation renovationTaskValidation) {
         this.renovationTaskRepository = renovationTaskRepository;
+        this.renovationTaskValidation = renovationTaskValidation;
     }
 
     public RenovationTask getTaskById(Long id) {
@@ -89,6 +91,39 @@ public class RenovationTaskService {
         } catch (IOException e) {
             logger.error("Error while trying to get icon filenames", e);
             return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Validates the details of the task inputted by the user. Checks to see if all the details are valid and returns a map
+     * of error messages for each invalid detail.
+     * @return A map of errors generated from validating the task details
+     */
+    public Map<String, List<String>> validateTaskDetails(RenovationTaskDTO renovationTaskDTO) {
+        Map<String, List<String>> errors = new HashMap<>();
+        String errorMessageType = "Task";
+
+        String nameError = renovationTaskValidation.validateName(renovationTaskDTO.getName(), errorMessageType);
+        putIfNotEmpty(errors, "nameError", nameError == null ? null : List.of(nameError));
+
+        String descriptionError = renovationTaskValidation.validateDescription(renovationTaskDTO.getDescription(), errorMessageType);
+        putIfNotEmpty(errors, "descriptionError", descriptionError == null ? null : List.of(descriptionError));
+
+        String dueDateError = renovationTaskValidation.validateDueDate(renovationTaskDTO.getDueDate());
+        putIfNotEmpty(errors, "dueDateError", dueDateError == null ? null : List.of(dueDateError));
+
+        return errors;
+    }
+
+    /**
+     * Inserts a key-value pair into the provided map if the list of messages is not null or empty.
+     * @param map       the map to insert the key-value pair into
+     * @param key       the key to associate with the messages
+     * @param messages  the list of error messages to insert if not empty
+     */
+    private void putIfNotEmpty(Map<String, List<String>> map, String key, List<String> messages) {
+        if (messages != null && !messages.isEmpty()) {
+            map.put(key, messages);
         }
     }
 }

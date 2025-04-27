@@ -98,29 +98,12 @@ public class EditProfileController {
             return "redirect:/user/edit";
         }
 
-        try {
-            newUser.setFirstName(updatedUser.getFirstName());
-            newUser.setLastName(updatedUser.getLastName());
-            newUser.setEmail(updatedUser.getEmail());
+        newUser.setFirstName(updatedUser.getFirstName());
+        newUser.setLastName(updatedUser.getLastName());
+        newUser.setEmail(updatedUser.getEmail());
 
-            editProfileService.updateUser(newUser);
-            return "redirect:/user";
-        } catch (NoSuchElementException pageNotFoundError) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, pageNotFoundError.getMessage());
-        } catch (IllegalArgumentException detailsInvalidError) {
-            // Set error messages on page
-            logger.warn("Form submission error: {}", detailsInvalidError.getMessage());
-            List<String> errorsList = List.of(detailsInvalidError.getMessage().split("(?<=\\.) "));
-
-            redirectAttributes.addFlashAttribute("errorMessages", errorsList);
-            redirectAttributes.addFlashAttribute("user", newUser); // for repopulation
-            redirectAttributes.addFlashAttribute("firstName", newUser.getFirstName());
-            redirectAttributes.addFlashAttribute("lastName", newUser.getLastName());
-            redirectAttributes.addFlashAttribute("email", newUser.getEmail());
-            redirectAttributes.addFlashAttribute("profilePicture", newUser.getProfilePicture());
-
-            return "redirect:/user/edit";
-        }
+        editProfileService.updateUser(newUser);
+        return "redirect:/user";
     }
 
     /**

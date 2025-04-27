@@ -4,7 +4,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
-import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
+import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ public class CreateTaskController {
 
     private final RenovationRecordService renovationRecordService;
 
-    private final RenovationValidation renovationValidation;
+    private final RenovationTaskValidation renovationTaskValidation;
 
 
     /**
@@ -44,12 +44,13 @@ public class CreateTaskController {
      *
      * @param renovationRecordService The service associated with renovation records
      * @param renovationTaskService   the service layer responsible for renovation tasks
+     * @param renovationTaskValidation The validation for validating tasks
      */
     @Autowired
-    public CreateTaskController(RenovationRecordService renovationRecordService, RenovationTaskService renovationTaskService, RenovationValidation renovationValidation) {
+    public CreateTaskController(RenovationRecordService renovationRecordService, RenovationTaskService renovationTaskService, RenovationTaskValidation renovationTaskValidation) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
-        this.renovationValidation = renovationValidation;
+        this.renovationTaskValidation = renovationTaskValidation;
     }
 
     /**
@@ -115,7 +116,7 @@ public class CreateTaskController {
             redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
         }
 
-        Map<String, List<String>> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
+        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO);
 
 
         if (!errors.isEmpty()) {
@@ -128,23 +129,12 @@ public class CreateTaskController {
             return "redirect:/renovations/view/create?id=" + renovationId;
         }
 
-        try {
-            if (roomList == null) {
-                roomList = renovationRecord.getRooms();
-            }
-
-            renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
-
-            return "redirect:/renovations/view?id=" + renovationId;
-
-        } catch (IllegalArgumentException e) {
-            logger.warn("Form submission error {}", e.getMessage());
-
-            redirectAttributes.addFlashAttribute("renovationTaskDTO", renovationTaskDTO);
-            redirectAttributes.addFlashAttribute("roomList", roomList);
-            redirectAttributes.addFlashAttribute("renovationId", renovationId);
-
-            return "redirect:/renovations/view/create?id=" + renovationId;
+        if (roomList == null) {
+            roomList = renovationRecord.getRooms();
         }
+
+        renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
+
+        return "redirect:/renovations/view?id=" + renovationId;
     }
 }

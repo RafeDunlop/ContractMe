@@ -113,7 +113,7 @@ public class UpdatePasswordControllerIntegrationTest {
                         .param("retypePassword", updatePasswordDTO.getRetypePassword()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user/edit/updatePassword"))
-                .andExpect(flash().attribute("errorMessages", expectedErrors));
+                .andExpect(flash().attribute("oldPasswordError", expectedErrors));
         Mockito.verify(emailService, Mockito.never()).sendUpdatePasswordConfirmation(Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 

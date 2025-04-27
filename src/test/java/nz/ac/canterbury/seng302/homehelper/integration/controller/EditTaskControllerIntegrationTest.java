@@ -10,20 +10,24 @@ import java.util.List;
 import java.util.Optional;
 
 import nz.ac.canterbury.seng302.homehelper.controller.EditTaskController;
+import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
+import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -35,6 +39,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @ActiveProfiles("test")
+@AutoConfigureMockMvc
 @SpringBootTest
 public class EditTaskControllerIntegrationTest {
 
@@ -55,20 +60,29 @@ public class EditTaskControllerIntegrationTest {
     @MockBean
     private RenovationRecordService renovationRecordService;
 
-
-
     @BeforeEach
     public void setup_user() {
         mockMvc = MockMvcBuilders.standaloneSetup(editTaskController).build();
+
         User user = new User("Jane", "Doe", "jane@doe.com", "Password");
         user.grantAuthority("ROLE_USER");
         Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
-        // Mock renovation record & task
+
         RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
         Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
+
         RenovationTask renovationTask = new RenovationTask("Task 1", "New Task", new ArrayList<>(), null, renovationRecord);
         Mockito.when(renovationTaskService.getTaskById(1L)).thenReturn(renovationTask);
+
+        // 👇 inject the dependency manually
+        RenovationTaskValidation renovationTaskValidation = new RenovationTaskValidation();
+        ReflectionTestUtils.setField(renovationTaskService, "renovationTaskValidation", renovationTaskValidation);
+
+        // 👇 now real method can be called safely
+        Mockito.doCallRealMethod().when(renovationTaskService).validateTaskDetails(Mockito.any(RenovationTaskDTO.class));
     }
+
+
 
     @Test
     @WithMockUser(username = "jane@doe.com")

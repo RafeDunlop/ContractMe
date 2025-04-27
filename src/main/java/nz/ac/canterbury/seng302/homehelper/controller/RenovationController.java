@@ -207,7 +207,7 @@ public class RenovationController {
      * @param name of the record to be edited from the form field
      * @param description of the record to be edited from the form field
      * @param roomList list of rooms of the record to be edited from the form
-     * @param model (map-like) representation of results to be used by thymeleaf
+     * @param redirectAttributes (map-like) representation of results to be used by thymeleaf
      * @return redirect to the view page for the edited record
      */
     @PostMapping("/edit")
@@ -230,10 +230,6 @@ public class RenovationController {
         if (!errors.isEmpty()) {
             errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
 
-            if (renovationRecordService.checkForExactMatch(name, renovationRecord)) {
-                redirectAttributes.addFlashAttribute("existingName", name);
-            }
-
             redirectAttributes.addFlashAttribute("id", id);
             redirectAttributes.addFlashAttribute("name", name);
             redirectAttributes.addFlashAttribute("description", description);
@@ -241,22 +237,11 @@ public class RenovationController {
             return "redirect:/renovations/edit?id=" + renovationRecord.getId();
         }
 
-        try {
-            renovationRecord.setName(name); // don't set the name until the changes are valid to avoid db divergence
-            renovationRecordService.addRenovationRecord(renovationRecord); //updates existing record (identified by id)
+        renovationRecord.setName(name); // don't set the name until the changes are valid to avoid db divergence
+        renovationRecordService.addRenovationRecord(renovationRecord); //updates existing record (identified by id)
 
-            redirectAttributes.addFlashAttribute("renovation", renovationRecord);
-            return "redirect:/renovations/view?id=" + renovationRecord.getId();
-        } catch (IllegalArgumentException e) {
-            logger.warn("Form submission error {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("id", id);
-            redirectAttributes.addFlashAttribute("name", name);
-            redirectAttributes.addFlashAttribute("description", description);
-            redirectAttributes.addFlashAttribute("roomList", roomList);
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/renovations/view?id=" + renovationRecord.getId();
-        }
-
+        redirectAttributes.addFlashAttribute("renovation", renovationRecord);
+        return "redirect:/renovations/view?id=" + renovationRecord.getId();
     }
 
     /**

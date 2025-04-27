@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EditTaskService;
-import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
+import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,14 +16,14 @@ import static org.mockito.Mockito.*;
 public class EditTaskServiceTest {
 
     private RenovationTaskRepository renovationTaskRepository;
-    private RenovationValidation renovationValidation;
+    private RenovationTaskValidation renovationTaskValidation;
     private EditTaskService editTaskService;
 
     @BeforeEach
     void setUp() {
         renovationTaskRepository = mock(RenovationTaskRepository.class);
-        renovationValidation = mock(RenovationValidation.class);
-        editTaskService = new EditTaskService(renovationTaskRepository, renovationValidation);
+        renovationTaskValidation = mock(RenovationTaskValidation.class);
+        editTaskService = new EditTaskService(renovationTaskRepository, renovationTaskValidation);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class EditTaskServiceTest {
 
     @Test
     public void updateIcon_fileDoesNotExist_throwsException() {
-        when(renovationValidation.validateTaskIconFileName("badfile.png")).thenReturn(false);
+        when(renovationTaskValidation.validateTaskIconFileName("badfile.png")).thenReturn(false);
         assertThrows(IllegalArgumentException.class, () -> {
             editTaskService.updateTaskIcon(mock(RenovationTask.class), "badfile.png");
         });
@@ -58,7 +58,7 @@ public class EditTaskServiceTest {
 
     @Test
     public void updateIcon_fileExists_savesTask() {
-        when(renovationValidation.validateTaskIconFileName("goodfile.png")).thenReturn(true);
+        when(renovationTaskValidation.validateTaskIconFileName("goodfile.png")).thenReturn(true);
         RenovationTask task = mock(RenovationTask.class);
         editTaskService.updateTaskIcon(task, "goodfile.png");
         verify(renovationTaskRepository, times(1)).save(task);

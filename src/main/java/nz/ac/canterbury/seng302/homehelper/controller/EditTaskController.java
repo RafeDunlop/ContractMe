@@ -4,7 +4,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.*;
-import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
+import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -29,17 +28,26 @@ public class EditTaskController {
     private final RenovationTaskService renovationTaskService;
     private final EditTaskService editTaskService;
     private final RenovationRecordService renovationRecordService;
-    private final RenovationValidation renovationValidation;
+    private final RenovationTaskValidation renovationTaskValidation;
     private final RenovationTaskRepository renovationTaskRepository;
 
+    /**
+     * Constructs an {@code EditTaskController} with the specified services and repository.
+     *
+     * @param renovationTaskService       the service for managing renovation tasks
+     * @param renovationRecordService     the service for managing renovation records
+     * @param editTaskService             the service handling logic specific to editing tasks
+     * @param renovationTaskValidation        the validation utility for renovation-related input
+     * @param renovationTaskRepository    the repository for accessing renovation task data
+     */
     @Autowired
     public EditTaskController(RenovationTaskService renovationTaskService, RenovationRecordService renovationRecordService,
                               EditTaskService editTaskService,
-                              RenovationValidation renovationValidation, RenovationTaskRepository renovationTaskRepository) {
+                              RenovationTaskValidation renovationTaskValidation, RenovationTaskRepository renovationTaskRepository) {
         this.renovationTaskService = renovationTaskService;
         this.renovationRecordService = renovationRecordService;
         this.editTaskService = editTaskService;
-        this.renovationValidation = renovationValidation;
+        this.renovationTaskValidation = renovationTaskValidation;
         this.renovationTaskRepository = renovationTaskRepository;
     }
 
@@ -104,7 +112,7 @@ public class EditTaskController {
             redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
         }
 
-        Map<String, List<String>> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
+        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO);
 
         if (!errors.isEmpty()) {
             errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
@@ -113,7 +121,7 @@ public class EditTaskController {
             return "redirect:/editTask?taskId=" + taskId + "&renovationId=" + renovationId;
         }
 
-            try {
+        try {
             editTaskService.updateTask(renovationTaskDTO,renovationTask);
             return "redirect:/renovations/view?id=" + renovationId;
         } catch (IllegalArgumentException e) {

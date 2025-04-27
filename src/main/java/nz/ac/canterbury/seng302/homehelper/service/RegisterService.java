@@ -11,6 +11,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+/**
+ * Service class responsible for handling user registration logic,
+ * including validation of registration fields and password encoding.
+ */
 @Service
 public class RegisterService {
 
@@ -18,6 +22,11 @@ public class RegisterService {
     private final UserValidation userValidation;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Constructs a {@code RegisterService} with the given dependencies.
+     * @param userRepository  the repository used to access user data
+     * @param userValidation  the utility used to validate user input fields
+     */
     @Autowired
     public RegisterService(UserRepository userRepository, UserValidation userValidation) {
         this.userRepository = userRepository;
@@ -25,30 +34,21 @@ public class RegisterService {
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+    /**
+     * Validates the registration fields provided in the {@code UserRegisterDTO}.
+     * @param dto the user registration data transfer object containing user input fields
+     * @return a map where the key is the field name and the value is a list of error messages
+     *         associated with that field; if no errors exist for a field, it is not included
+     */
     public Map<String, List<String>> validateRegistration(UserRegisterDTO dto) {
         Map<String, List<String>> errors = new HashMap<>();
 
         putIfNotEmpty(errors, "firstNameError", userValidation.validateNameString(dto.getFirstName(), "First"));
         putIfNotEmpty(errors, "lastNameError", userValidation.validateNameString(dto.getLastName(), "Last"));
         putIfNotEmpty(errors, "emailError", validateEmail(dto.getEmail()));
-
-        List<String> passwordErrors = userValidation.validatePasswordString(
-                dto.getPassword(), dto.getConfirmPassword(), "registerPassword"
-        );
-
-        // Separate out confirm password mismatch error
-        List<String> confirmPasswordErrors = new ArrayList<>();
-        passwordErrors.removeIf(err -> {
-            if (err.equals("Passwords do not match.")) {
-                confirmPasswordErrors.add(err);
-                return true;
-            }
-            return false;
-        });
-
-        putIfNotEmpty(errors, "passwordError", passwordErrors);
-        putIfNotEmpty(errors, "confirmPasswordError", confirmPasswordErrors);
-
+        putIfNotEmpty(errors, "passwordError", userValidation.validatePasswordString(dto.getPassword()));
+        putIfNotEmpty(errors, "confirmPasswordError", userValidation.validateConfirmPasswordString(
+                dto.getPassword(), dto.getConfirmPassword(), "registerPassword"));
         return errors;
     }
 
@@ -68,6 +68,12 @@ public class RegisterService {
         return userRepository.save(user);
     }
 
+    /**
+     * Inserts a key-value pair into the provided map if the list of messages is not null or empty.
+     * @param map       the map to insert the key-value pair into
+     * @param key       the key to associate with the messages
+     * @param messages  the list of error messages to insert if not empty
+     */
     private void putIfNotEmpty(Map<String, List<String>> map, String key, List<String> messages) {
         if (messages != null && !messages.isEmpty()) {
             map.put(key, messages);
