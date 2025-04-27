@@ -63,7 +63,27 @@ public class ForgotPasswordServiceIntegrationTest {
      * as a link to open the reset password form.
      */
     @Test
+    @Transactional
     void validateEmail_enterValidEmail_returnEmptyMessage() {
+        String email = resetUser.getEmail();
+        String expectedMessage = "";
+        resetUser.activate();
+        userRepository.save(resetUser);
+
+        String result = forgotPasswordService.validateEmail(email, locale);
+        assertEquals(expectedMessage, result);
+
+        List<VerificationCode> verificationCode = (List<VerificationCode>) verificationCodeRepository.findAll();
+        assertEquals(resetUser, verificationCode.get(0).getUser());
+    }
+
+    /**
+     * Tests validating the email used to reset an account's password when the email is
+     * associated with an existing account but the account hasn't been authenticated yet.
+     * A token is not created.
+     */
+    @Test
+    void validateEmail_enterUnauthenticatedEmail_returnEmptyMessage() {
         String email = resetUser.getEmail();
         String expectedMessage = "";
 
@@ -71,7 +91,7 @@ public class ForgotPasswordServiceIntegrationTest {
         assertEquals(expectedMessage, result);
 
         List<VerificationCode> verificationCode = (List<VerificationCode>) verificationCodeRepository.findAll();
-        assertEquals(resetUser, verificationCode.get(0).getUser());
+        assertTrue(verificationCode.isEmpty());
     }
 
     /**

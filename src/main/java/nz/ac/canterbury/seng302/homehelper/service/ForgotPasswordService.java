@@ -46,7 +46,7 @@ public class ForgotPasswordService {
     }
 
     /**
-     * Validate the given email string. Check whether user with the email exists and if it's in the correct format.
+     * Validate the given email string. Check whether user with the email exists, is validated, and if it's in the correct format.
      * Sets an event to generate token and send email if true.
      * @param email Inputted email
      * @param locale Region/Language preference
@@ -55,7 +55,8 @@ public class ForgotPasswordService {
     public String validateEmail(String email, Locale locale) {
         Optional<User> expectedUser = userRepository.findByEmailIgnoreCase(email);
 
-        expectedUser.ifPresent(user -> eventPublisher.publishEvent(new OnResetPasswordSubmittedEvent(user, locale)));
+        expectedUser.filter(User::isActivated)
+                .ifPresent(user -> eventPublisher.publishEvent(new OnResetPasswordSubmittedEvent(user, locale)));
         return String.join("", userValidation.validateEmailString(email));
     }
 
