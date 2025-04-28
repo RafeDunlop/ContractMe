@@ -115,7 +115,7 @@ public class ForgotPasswordController {
         Optional<User> expectedUser = verificationCodeService.getUserByToken(token);
         if (expectedUser.isPresent()) {
             User user = expectedUser.get();
-            Map<String, List<String>> errors = forgotPasswordService.validatePasswords(newPassword, confirmNewPassword);
+            Map<String, List<String>> errors = forgotPasswordService.validatePasswords(newPassword, confirmNewPassword, user);
             if (!errors.isEmpty()) {
                 errors.forEach(redirectAttributes::addFlashAttribute);
                 redirectAttributes.addFlashAttribute("token", token);

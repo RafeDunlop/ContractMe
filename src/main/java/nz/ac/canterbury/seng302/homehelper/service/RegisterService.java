@@ -25,8 +25,9 @@ public class RegisterService {
 
     /**
      * Constructs a {@code RegisterService} with the given dependencies.
-     * @param userRepository  the repository used to access user data
-     * @param userValidation  the utility used to validate user input fields
+     *
+     * @param userRepository the repository used to access user data
+     * @param userValidation the utility used to validate user input fields
      */
     @Autowired
     public RegisterService(UserRepository userRepository, UserValidation userValidation) {
@@ -37,9 +38,13 @@ public class RegisterService {
 
     /**
      * Validates the registration fields provided in the {@code UserRegisterDTO}.
-     * @param dto the user registration data transfer object containing user input fields
-     * @return a map where the key is the field name and the value is a list of error messages
-     *         associated with that field; if no errors exist for a field, it is not included
+     *
+     * @param dto the user registration data transfer object containing user input
+     *            fields
+     * @return a map where the key is the field name and the value is a list of
+     *         error messages
+     *         associated with that field; if no errors exist for a field, it is not
+     *         included
      */
     public Map<String, List<String>> validateRegistration(UserRegisterDTO dto) {
         Map<String, List<String>> errors = new HashMap<>();
@@ -47,41 +52,45 @@ public class RegisterService {
         MapUtil.putIfNotEmpty(errors, "firstNameError", userValidation.validateNameString(dto.getFirstName(), "First"));
         MapUtil.putIfNotEmpty(errors, "lastNameError", userValidation.validateNameString(dto.getLastName(), "Last"));
         MapUtil.putIfNotEmpty(errors, "emailError", validateEmail(dto.getEmail()));
-        MapUtil.putIfNotEmpty(errors, "passwordError", userValidation.validatePasswordString(dto.getPassword()));
+        MapUtil.putIfNotEmpty(errors, "passwordError", userValidation.validatePasswordString(
+                dto.getPassword(), dto.getFirstName(), dto.getLastName(), dto.getEmail()));
         MapUtil.putIfNotEmpty(errors, "confirmPasswordError", userValidation.validateConfirmPasswordString(
                 dto.getPassword(), dto.getConfirmPassword(), "registerPassword"));
         return errors;
     }
 
     /**
-     * Create a user and save it to the database, with validation, first name, last name, email and password must not be null or empty.
+     * Create a user and save it to the database, with validation, first name, last
+     * name, email and password must not be null or empty.
+     *
      * @param userRegisterDTO Data transfer object for user registration
      * @return the user if it was saved successfully
-     * @throws IllegalArgumentException if the firstName, lastName, email or password inputs are invalid
+     * @throws IllegalArgumentException if the firstName, lastName, email or
+     *                                  password inputs are invalid
      */
     public User registerUser(UserRegisterDTO userRegisterDTO) {
         User user = new User(
                 userRegisterDTO.getFirstName(),
                 userRegisterDTO.getLastName(),
                 userRegisterDTO.getEmail(),
-                passwordEncoder.encode(userRegisterDTO.getPassword())
-        );
+                passwordEncoder.encode(userRegisterDTO.getPassword()));
         return userRepository.save(user);
     }
 
     /**
      * Validates if the email is already in use
+     *
      * @param email the email inputted by the user
      */
     public List<String> validateEmail(String email) {
         List<String> errors = new ArrayList<>();
 
-            Optional<User> existingUser = userRepository.findByEmailIgnoreCase(email);
-            if (existingUser.isPresent()) {
-                errors.add("This email address is already in use.");
-            }
+        Optional<User> existingUser = userRepository.findByEmailIgnoreCase(email);
+        if (existingUser.isPresent()) {
+            errors.add("This email address is already in use.");
+        }
 
-            errors.addAll(userValidation.validateEmailString(email));
+        errors.addAll(userValidation.validateEmailString(email));
         return errors;
     }
 }

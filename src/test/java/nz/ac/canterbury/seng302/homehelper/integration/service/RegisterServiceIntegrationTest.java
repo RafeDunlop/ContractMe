@@ -119,7 +119,7 @@ public class RegisterServiceIntegrationTest {
         Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
 
         Assertions.assertFalse(errors.isEmpty());
-        Assertions.assertTrue(errors.get("passwordError").contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."));
+        Assertions.assertTrue(errors.get("passwordError").contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email)."));
     }
 
     @Test

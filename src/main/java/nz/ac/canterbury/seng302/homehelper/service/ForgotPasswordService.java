@@ -83,12 +83,13 @@ public class ForgotPasswordService {
      * Validate inputted passwords by sending details to UserValidation and return list of errors.
      * @param newPassword New password for user
      * @param confirmPassword Confirm new password
+     * @param user The user object to check for profile fields in the password
      * @return Mapping of password errors
      */
-    public Map<String, List<String>> validatePasswords(String newPassword, String confirmPassword) {
+    public Map<String, List<String>> validatePasswords(String newPassword, String confirmPassword, User user) {
         Map<String, List<String>> errors = new HashMap<>();
 
-        MapUtil.putIfNotEmpty(errors, "newPasswordError", userValidation.validatePasswordString(newPassword));
+        MapUtil.putIfNotEmpty(errors, "newPasswordError", userValidation.validatePasswordString(newPassword, user.getFirstName(), user.getLastName(), user.getEmail()));
         MapUtil.putIfNotEmpty(errors, "confirmNewPasswordError", userValidation.validateConfirmPasswordString(
                 newPassword, confirmPassword, "resetPassword"));
 

@@ -152,7 +152,7 @@ public class ForgotPasswordServiceIntegrationTest {
         String newPassword = "Test123!";
         String retypePassword = "Test123!";
 
-        Map<String, List<String>> errors = forgotPasswordService.validatePasswords(newPassword, retypePassword);
+        Map<String, List<String>> errors = forgotPasswordService.validatePasswords(newPassword, retypePassword, resetUser);
 
         assertTrue(errors.isEmpty());
     }
@@ -165,16 +165,26 @@ public class ForgotPasswordServiceIntegrationTest {
     void validatePassword_invalidAndDifferentPasswords_returnAllErrorsList() {
         String newPassword = "Password";
         String retypePassword = "password";
-
         Map<String, List<String>> expectedErrors = new HashMap<>();
         expectedErrors.put("newPasswordError", List.of(
-                "Your password must be at least 8 characters long and include at least one " +
-                        "uppercase letter, one lowercase letter, one number, and one special character."
+                                "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email)."
         ));
         expectedErrors.put("confirmNewPasswordError", List.of("The passwords do not match."));
 
-        Map<String, List<String>> actualErrors = forgotPasswordService.validatePasswords(newPassword, retypePassword);
+        Map<String, List<String>> actualErrors = forgotPasswordService.validatePasswords(newPassword, retypePassword, resetUser);
 
         assertEquals(expectedErrors, actualErrors);
+    }
+
+    @Test
+    void validatePassword_userNameInPassword_returnsError() {
+        String newPassword = "Jane1!2foo";
+        String confirmPassword = "Jane1!2foo";
+        String expectedError = "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email).";
+        Map<String, List<String>> actualErrors = forgotPasswordService.validatePasswords(
+            newPassword, confirmPassword, resetUser
+        );
+        assertEquals(1, actualErrors.size());
+        assertEquals(expectedError, actualErrors.get("newPasswordError").getFirst());
     }
 }

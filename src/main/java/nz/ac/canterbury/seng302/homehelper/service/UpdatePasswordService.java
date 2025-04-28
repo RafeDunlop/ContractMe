@@ -35,7 +35,8 @@ public class UpdatePasswordService {
      * Constructor for the UpdatePasswordService class
      */
     @Autowired
-    public UpdatePasswordService(UserValidation userValidation, LoginService loginService,UserRepository userRepository, EmailService emailService) {
+    public UpdatePasswordService(UserValidation userValidation, LoginService loginService,
+            UserRepository userRepository, EmailService emailService) {
         this.userValidation = userValidation;
         this.loginService = loginService;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -56,11 +57,12 @@ public class UpdatePasswordService {
         // Updates the Users password to the new Password.
         user.setPassword(passwordEncoder.encode(password));
 
-        //Save Users New Password
+        // Save Users New Password
         userRepository.save(user);
 
         try {
-            emailService.sendUpdatePasswordConfirmation(user.getEmail(), user.getFirstName(), java.util.Locale.getDefault());
+            emailService.sendUpdatePasswordConfirmation(user.getEmail(), user.getFirstName(),
+                    java.util.Locale.getDefault());
         } catch (Exception e) {
             logger.warning(e.getMessage());
         }
@@ -88,8 +90,7 @@ public class UpdatePasswordService {
         }
         MapUtil.putIfNotEmpty(errors, "oldPasswordError", currentPasswordErrors);
 
-        MapUtil.putIfNotEmpty(errors, "newPasswordError", userValidation.validateUpdatePasswordString(password, firstName, lastName, email));
-        MapUtil.putIfNotEmpty(errors, "newPasswordError", userValidation.validatePasswordString(updatePasswordDTO.getNewPassword()));
+        MapUtil.putIfNotEmpty(errors, "newPasswordError", userValidation.validatePasswordString(password, firstName, lastName, email));
         MapUtil.putIfNotEmpty(errors, "newPasswordRetypeError", userValidation.validateConfirmPasswordString(updatePasswordDTO.getNewPassword(), updatePasswordDTO.getRetypePassword(), "updatePassword"));
 
         return errors;
