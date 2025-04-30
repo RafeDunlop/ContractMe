@@ -32,78 +32,58 @@ function validatePageSearch(recordId) {
  * This function updates the layout based on the window size and adjusts the number of tasks to be displayed on the page.
  */
 function updateLayout() {
-    let pageWidth = window.innerWidth;
-    let currentTasksPerPage = document.getElementById('tasksPerPage').getAttribute('value');
-    let pageHeight = window.innerHeight;
+    const taskGrid = document.getElementById('taskGrid');
+    const taskCard = taskGrid.querySelector('.task-card');
 
-    let tasksPerPage;
+    const gridWidth = taskGrid.clientWidth;
+    const cardStyles = window.getComputedStyle(taskCard);
+    const cardWidth = taskCard.offsetWidth + parseFloat(cardStyles.marginLeft) + parseFloat(cardStyles.marginRight);
 
-    if (pageWidth < 576) {
-        tasksPerPage = 3; // Phones
-        if (pageHeight > 900) {
-            tasksPerPage = 7;
-        } else if (pageHeight > 600) {
-            tasksPerPage = 5;
-        }
-    } else if (pageWidth < 768) {
-        tasksPerPage = 4; // Tablets
-        if (pageHeight > 900) {
-            tasksPerPage = 12;
-        } else if (pageHeight > 750) {
-            tasksPerPage = 8;
-        }
-    } else if (pageWidth < 992) {
-        tasksPerPage = 3; // Small desktop
-        if (pageHeight > 1250) {
-            tasksPerPage = 12;
-        } else if (pageHeight > 1000) {
-            tasksPerPage = 9;
-        }
-        else if (pageHeight > 700) {
-            tasksPerPage = 6;
-        }
-    } else if (pageWidth < 1200) {
-        tasksPerPage = 4; // Small desktop
-        if (pageHeight > 1000) {
-            tasksPerPage = 12;
-        } else if (pageHeight > 900) {
-            tasksPerPage = 8;
-        } else if (pageHeight > 600) {
-            tasksPerPage = 4;
-        }
-    } else if (pageWidth < 1400) {
-        tasksPerPage = 5; // desktop
-        if (pageHeight > 1200) {
-            tasksPerPage = 15;
-        } else if (pageHeight > 900) {
-            tasksPerPage = 10;
-        } else if (pageHeight > 600) {
-            tasksPerPage = 5;
-        }
-    } else {
-        tasksPerPage = 5; // large desktop
-        if (pageHeight > 1275) {
-            tasksPerPage = 20;
-        } else if (pageHeight > 1000) {
-            tasksPerPage = 15;
-        } else if (pageHeight > 900) {
-            tasksPerPage = 10;
-        }
-    }
+    // Calculate columns and rows based on available space
+    const columns = Math.floor(gridWidth / cardWidth); // Number of columns based on grid width
 
-    if (currentTasksPerPage !== String(tasksPerPage)) {
+
+    // Calculate number of rows that can fit
+
+    const rows = calculateRows()
+    console.log("Rows that can fit: " + rows);
+
+    const tasksPerPage = columns * rows;
+
+    // Update the grid with the number of columns based on available space
+    taskGrid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`; // Dynamically set columns to fit within available width
+
+    // Get the current tasksPerPage from the URL
+    const currentParam = new URL(window.location.href).searchParams.get("tasksPerPage");
+
+    // Only update the URL if tasksPerPage is different
+    if (String(tasksPerPage) !== currentParam) {
         let url = new URL(window.location.href);
-
-        // Only update the URL if the tasksPerPage parameter is different
-        if (url.searchParams.get('tasksPerPage') !== String(tasksPerPage)) {
-            url.searchParams.set('tasksPerPage', tasksPerPage);
-            window.location.assign(url.toString()); // Redirect to the new URL with updated tasksPerPage
-        }
+        url.searchParams.set("tasksPerPage", tasksPerPage);
+        window.location.assign(url.toString()); // Refresh page with updated tasksPerPage value
     }
 }
 
-// Initial layout update
-updateLayout();
+function calculateRows() {
+    const taskGrid = document.getElementById('taskGrid');
+    const taskCard = taskGrid.querySelector('.task-card');
+    const footer = document.getElementById('footer');
 
-// Listen for window resize and update the layout
+    const cardStyles = window.getComputedStyle(taskCard);
+    const cardHeight = taskCard.offsetHeight + parseFloat(cardStyles.marginTop) + parseFloat(cardStyles.marginBottom);
+
+    const gridTop = taskGrid.getBoundingClientRect().top;
+    const footerHeight = footer.offsetHeight;
+    const pageHeight = window.innerHeight;
+
+    const availableHeight = (pageHeight - gridTop) - footerHeight;
+
+    const rows = Math.max(1, Math.floor(availableHeight / cardHeight));
+    console.log("Rows that can fit:", rows);
+
+    return rows;
+}
+
+updateLayout()
+
 window.addEventListener('resize', updateLayout);
