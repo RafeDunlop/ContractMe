@@ -44,9 +44,10 @@
                             <div class="d-flex align-items-center">
                                 <div class="position-relative">
                                     <div th:replace="~{fragments/addTaskIcon.html :: add-task-icon(${renovationTask})}"></div>
-                                    <img th:src="@{${'/images/' + renovationTask.getIconFileName()}}" alt="Task Icon" class="task-icon">
+                                    <img th:src="@{${'/images/' + renovationTask.getIconFileName()}}" alt="Task Icon" class="task-icon" th:onclick="${renovationTask.getIconFileName() != 'default-icon.png'} ? 'showIconSelector(' + ${renovationTask.getId()} + ')' : null">
+
                                     <button type="button" class="btn btn-secondary btn-sm rounded-circle opacity-75 top-0 start-100 translate-middle position-absolute"
-                                            th:onclick="|showIconSelector(${renovationTask.getId()})|">+</button>
+                                            th:if="${renovationTask.getIconFileName() == 'default-icon.png'}" th:onclick="|showIconSelector(${renovationTask.getId()})|">+</button>
                                 </div>
                                 <h5 class="card-title truncate ms-2 mb-0" th:text="${renovationTask.getName()}">Task Title</h5>
                             </div>
