@@ -276,6 +276,10 @@ public class RenovationController {
 
 
         RenovationRecord record = renovationRecordService.getRecordById(id);
+        User user = loginService.getUserByEmail();
+        if (!record.getUser().equals(user)) {
+            return "redirect:/main";
+        }
         if (record == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
 
         if (pageNumber < 1) return "redirect:/renovations/view?id=" + id + "&page=1&tasksPerPage=" + tasksPerPage;
