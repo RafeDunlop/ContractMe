@@ -564,4 +564,20 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=1&tasksPerPage=5"));
     }
+
+    @Test
+    @WithMockUser(username = "not.owner@example.com")
+    // GitHub copilot generated some parts of the following test
+    public void getViewRecord_notOwner_redirectToMain() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "A cool renovation", "Some words", List.of("Room foo", "Room bar"));
+        existingRecord = renovationRecordRepository.save(existingRecord);
+        User loggedInUser = new User("Not", "Owner", "not.owner@example.com", "password");
+        userRepository.save(loggedInUser);
+
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/main"));
+    }
 }
