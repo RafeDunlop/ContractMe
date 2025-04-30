@@ -3,7 +3,7 @@
  * Requires confirmPrompt.js loaded beforehand
  */
 
-const totalPages = parseInt(document.getElementById('data-total-pages').value, 10);
+
 
 /**
  * Onclick function for the task search button on View Renovation
@@ -11,9 +11,16 @@ const totalPages = parseInt(document.getElementById('data-total-pages').value, 1
  * Validates the desired page to visit by checking it's a number and within the bounds of all pages
  * @param recordId the id of renovation being viewed, used to make the url for a successful search
  */
-function validatePageSearch(recordId) {
-    let desiredPage = parseInt(document.getElementById("pageSearch").value, 10);
 
+function validatePageSearch(recordId) {
+    console.log("Validate page search triggered"); // Debug if this is running
+    let desiredPage = document.getElementById("pageSearch").value;
+    console.log("Desired page input value: ", desiredPage); // Check the raw input
+    desiredPage = parseInt(desiredPage, 10);
+    console.log("Parsed desired page: ", desiredPage);
+
+    const totalPages = parseInt(document.getElementById('data-total-pages').value, 10);
+    console.log("TOTAL PAGES SEARCH: " + totalPages)
     const confirmText= "Are you sure you want to go to page " + desiredPage.toString() + "?";
     confirmPrompt(confirmText, "Confirm", "Cancel", false).then((confirm) => {
         if (confirm) {
@@ -32,26 +39,22 @@ function validatePageSearch(recordId) {
  * This function updates the layout based on the window size and adjusts the number of tasks to be displayed on the page.
  */
 function updateLayout() {
+    const totalPages = parseInt(document.getElementById('data-total-pages').value, 10);
+    console.log("TOTAL PAGES UPDATE: " + totalPages)
+    // Getting elements needed for sizing
     const taskGrid = document.getElementById('taskGrid');
-    const taskCard = taskGrid.querySelector('.task-card');
-
-    const gridWidth = taskGrid.clientWidth;
+    const taskCard = taskGrid.querySelector('.card');
     const cardStyles = window.getComputedStyle(taskCard);
-    const cardWidth = taskCard.offsetWidth + parseFloat(cardStyles.marginLeft) + parseFloat(cardStyles.marginRight);
+
+    // Grid and card width used for calculating columns
+    const gridWidth = taskGrid.clientWidth;
+    const cardWidth = taskCard.offsetWidth + parseFloat(cardStyles.marginTop) + parseFloat(cardStyles.marginBottom);
 
     // Calculate columns and rows based on available space
-    const columns = Math.floor(gridWidth / cardWidth); // Number of columns based on grid width
-
-
-    // Calculate number of rows that can fit
-
+    const columns = Math.max(1, Math.floor(gridWidth / cardWidth));  // Number of columns based on grid width
     const rows = calculateRows()
-    console.log("Rows that can fit: " + rows);
 
     const tasksPerPage = columns * rows;
-
-    // Update the grid with the number of columns based on available space
-    taskGrid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`; // Dynamically set columns to fit within available width
 
     // Get the current tasksPerPage from the URL
     const currentParam = new URL(window.location.href).searchParams.get("tasksPerPage");
@@ -64,24 +67,28 @@ function updateLayout() {
     }
 }
 
+/**
+ * This function calculates the number of rows, using the top of task grid minus footer.
+ * Returns the number of rows of tasks to be displayed in the grid
+ */
 function calculateRows() {
+    // Getting elements needed for sizing
     const taskGrid = document.getElementById('taskGrid');
     const taskCard = taskGrid.querySelector('.task-card');
     const footer = document.getElementById('footer');
 
+    // Calculating the height of the task cards
     const cardStyles = window.getComputedStyle(taskCard);
     const cardHeight = taskCard.offsetHeight + parseFloat(cardStyles.marginTop) + parseFloat(cardStyles.marginBottom);
 
+    // Calculating where the grid of tasks starts relative to page height. Then taking away the footer to get available space
     const gridTop = taskGrid.getBoundingClientRect().top;
     const footerHeight = footer.offsetHeight;
     const pageHeight = window.innerHeight;
 
     const availableHeight = (pageHeight - gridTop) - footerHeight;
 
-    const rows = Math.max(1, Math.floor(availableHeight / cardHeight));
-    console.log("Rows that can fit:", rows);
-
-    return rows;
+    return Math.max(1, Math.floor(availableHeight / cardHeight));
 }
 
 updateLayout()
