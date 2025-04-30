@@ -169,6 +169,23 @@ public class CreateTaskControllerIntegrationTest {
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void testViewCreatePage_userNotOwner_redirectToMain() throws Exception {
+        User owner = new User("Owner", "User", "owner@doe.com", "Password");
+        owner.grantAuthority("ROLE_USER");
 
+        User notOwner = new User("Not", "Owner", "not.owner@doe.com", "Password");
+        notOwner.grantAuthority("ROLE_USER");
 
+        Mockito.when(userRepository.findByEmailIgnoreCase(notOwner.getEmail())).thenReturn(Optional.of(notOwner));
+
+        RenovationRecord renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
+        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/renovations/view/create")
+                        .param("id", "1"))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(redirectedUrl("/main"));
+    }
 }

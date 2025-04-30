@@ -185,6 +185,6 @@ public class ForgotPasswordServiceIntegrationTest {
             newPassword, confirmPassword, resetUser
         );
         assertEquals(1, actualErrors.size());
-        assertEquals(expectedError, actualErrors.get("newPasswordError").getFirst());
+        assertEquals(expectedError, actualErrors.get("newPasswordError").get(0));
     }
 }

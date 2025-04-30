@@ -13,6 +13,7 @@ import nz.ac.canterbury.seng302.homehelper.controller.EditTaskController;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
@@ -35,7 +36,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @ActiveProfiles("test")
@@ -58,6 +58,9 @@ public class EditTaskControllerIntegrationTest {
     private RenovationTaskService renovationTaskService;
 
     @MockBean
+    private LoginService loginService;
+
+    @MockBean
     private RenovationRecordService renovationRecordService;
 
     @BeforeEach
@@ -74,11 +77,9 @@ public class EditTaskControllerIntegrationTest {
         RenovationTask renovationTask = new RenovationTask("Task 1", "New Task", new ArrayList<>(), null, renovationRecord);
         Mockito.when(renovationTaskService.getTaskById(1L)).thenReturn(renovationTask);
 
-        // 👇 inject the dependency manually
         RenovationTaskValidation renovationTaskValidation = new RenovationTaskValidation();
         ReflectionTestUtils.setField(renovationTaskService, "renovationTaskValidation", renovationTaskValidation);
 
-        // 👇 now real method can be called safely
         Mockito.doCallRealMethod().when(renovationTaskService).validateTaskDetails(Mockito.any(RenovationTaskDTO.class));
     }
 
@@ -88,7 +89,6 @@ public class EditTaskControllerIntegrationTest {
     @WithMockUser(username = "jane@doe.com")
     public void editTask_validTask_editTaskAndRedirect() throws Exception {
 
-        // Perform request
         mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "Demolish walls")
@@ -100,7 +100,6 @@ public class EditTaskControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(view().name("redirect:/renovations/view?id=1"));
 
-        // Capture the saved task to verify its fields
         ArgumentCaptor<RenovationTask> taskCaptor = ArgumentCaptor.forClass(RenovationTask.class);
         Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(taskCaptor.capture());
 
@@ -193,5 +192,26 @@ public class EditTaskControllerIntegrationTest {
                     .accept(MediaType.APPLICATION_JSON))
 
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection());
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void testEditTask_userNotOwner_redirectToMain() throws Exception {
+        User owner = new User("Owner", "User", "owner@doe.com", "Password");
+        owner.grantAuthority("ROLE_USER");
+
+        User notOwner = new User("Not", "Owner", "not.owner@doe.com", "Password");
+        notOwner.grantAuthority("ROLE_USER");
+
+        Mockito.when(loginService.getUserByEmail()).thenReturn(notOwner);
+
+        RenovationRecord renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
+        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/editTask")
+                        .param("taskId", "1")
+                        .param("renovationId", "1"))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(MockMvcResultMatchers.redirectedUrl("/main"));
     }
 }

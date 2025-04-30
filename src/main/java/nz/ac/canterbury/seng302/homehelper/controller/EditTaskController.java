@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.*;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
@@ -30,6 +31,7 @@ public class EditTaskController {
     private final RenovationRecordService renovationRecordService;
     private final RenovationTaskValidation renovationTaskValidation;
     private final RenovationTaskRepository renovationTaskRepository;
+    private final LoginService loginService;
 
     /**
      * Constructs an {@code EditTaskController} with the specified services and repository.
@@ -39,16 +41,20 @@ public class EditTaskController {
      * @param editTaskService             the service handling logic specific to editing tasks
      * @param renovationTaskValidation        the validation utility for renovation-related input
      * @param renovationTaskRepository    the repository for accessing renovation task data
+     * @param loginService               the service for handling logging users in
      */
     @Autowired
     public EditTaskController(RenovationTaskService renovationTaskService, RenovationRecordService renovationRecordService,
                               EditTaskService editTaskService,
-                              RenovationTaskValidation renovationTaskValidation, RenovationTaskRepository renovationTaskRepository) {
+                              RenovationTaskValidation renovationTaskValidation,
+                              RenovationTaskRepository renovationTaskRepository,
+                              LoginService loginService) {
         this.renovationTaskService = renovationTaskService;
         this.renovationRecordService = renovationRecordService;
         this.editTaskService = editTaskService;
         this.renovationTaskValidation = renovationTaskValidation;
         this.renovationTaskRepository = renovationTaskRepository;
+        this.loginService = loginService;
     }
 
     /**
@@ -67,6 +73,11 @@ public class EditTaskController {
         logger.info("GET renovations/editTask");
 
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
+
+        User user = loginService.getUserByEmail();
+        if (renovationRecord.getUser() != user) {
+            return "redirect:/main";
+        }
 
         Optional<RenovationTask> renovationTask = renovationTaskRepository.findById(taskId);
         if (renovationTask.isEmpty()) {
