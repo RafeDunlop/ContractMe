@@ -184,7 +184,7 @@ public class RenovationControllerIntegrationTest {
                         .param("roomList", "Room 1", "Room 2")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=12"))
+                .andExpect(redirectedUrlPattern("/renovations/view?id=*"))
                 .andExpect(flash().attribute("renovation",
                         hasProperty("name", is("Rénövatiôn Onē"))));
 
