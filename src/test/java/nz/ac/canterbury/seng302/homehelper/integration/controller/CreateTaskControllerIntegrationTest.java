@@ -172,22 +172,17 @@ public class CreateTaskControllerIntegrationTest {
     @Test
     @WithMockUser(username = "not.owner@doe.com")
     public void testViewCreatePage_userNotOwner_redirectToMain() throws Exception {
-        // The user who owns the renovation record
         User owner = new User("Owner", "User", "owner@doe.com", "Password");
         owner.grantAuthority("ROLE_USER");
 
-        // The user currently logged in, who is NOT the owner
         User notOwner = new User("Not", "Owner", "not.owner@doe.com", "Password");
         notOwner.grantAuthority("ROLE_USER");
 
-        // Mock the login service to return the logged-in user (not the owner)
         Mockito.when(userRepository.findByEmailIgnoreCase(notOwner.getEmail())).thenReturn(Optional.of(notOwner));
 
-        // RenovationRecord belongs to 'owner'
         RenovationRecord renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
         Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
 
-        // Perform GET request
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/view/create")
                         .param("id", "1"))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())

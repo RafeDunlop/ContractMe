@@ -77,11 +77,9 @@ public class EditTaskControllerIntegrationTest {
         RenovationTask renovationTask = new RenovationTask("Task 1", "New Task", new ArrayList<>(), null, renovationRecord);
         Mockito.when(renovationTaskService.getTaskById(1L)).thenReturn(renovationTask);
 
-        // 👇 inject the dependency manually
         RenovationTaskValidation renovationTaskValidation = new RenovationTaskValidation();
         ReflectionTestUtils.setField(renovationTaskService, "renovationTaskValidation", renovationTaskValidation);
 
-        // 👇 now real method can be called safely
         Mockito.doCallRealMethod().when(renovationTaskService).validateTaskDetails(Mockito.any(RenovationTaskDTO.class));
     }
 
@@ -91,7 +89,6 @@ public class EditTaskControllerIntegrationTest {
     @WithMockUser(username = "jane@doe.com")
     public void editTask_validTask_editTaskAndRedirect() throws Exception {
 
-        // Perform request
         mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "Demolish walls")
@@ -103,7 +100,6 @@ public class EditTaskControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(view().name("redirect:/renovations/view?id=1"));
 
-        // Capture the saved task to verify its fields
         ArgumentCaptor<RenovationTask> taskCaptor = ArgumentCaptor.forClass(RenovationTask.class);
         Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(taskCaptor.capture());
 
@@ -201,26 +197,21 @@ public class EditTaskControllerIntegrationTest {
     @Test
     @WithMockUser(username = "not.owner@doe.com")
     public void testEditTask_userNotOwner_redirectToMain() throws Exception {
-        // The user who owns the renovation record
         User owner = new User("Owner", "User", "owner@doe.com", "Password");
         owner.grantAuthority("ROLE_USER");
 
-        // The user currently logged in, who is NOT the owner
         User notOwner = new User("Not", "Owner", "not.owner@doe.com", "Password");
         notOwner.grantAuthority("ROLE_USER");
 
-        // Mock the loginService to return the logged-in user (not the owner)
-        Mockito.when(loginService.getUserByEmail()).thenReturn(notOwner); // Mock the loginService directly
+        Mockito.when(loginService.getUserByEmail()).thenReturn(notOwner);
 
-        // RenovationRecord belongs to 'owner'
         RenovationRecord renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
         Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
 
-        // Perform GET request
         mockMvc.perform(MockMvcRequestBuilders.get("/editTask")
                         .param("taskId", "1")
                         .param("renovationId", "1"))
-                .andExpect(MockMvcResultMatchers.status().is3xxRedirection()) // Expect a redirect status
-                .andExpect(MockMvcResultMatchers.redirectedUrl("/main"));  // Expect redirection to '/main'
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(MockMvcResultMatchers.redirectedUrl("/main"));
     }
 }
