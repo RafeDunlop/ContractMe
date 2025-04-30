@@ -13,6 +13,7 @@ import nz.ac.canterbury.seng302.homehelper.controller.EditTaskController;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
@@ -35,7 +36,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @ActiveProfiles("test")
@@ -56,6 +56,9 @@ public class EditTaskControllerIntegrationTest {
 
     @MockBean
     private RenovationTaskService renovationTaskService;
+
+    @MockBean
+    private LoginService loginService;
 
     @MockBean
     private RenovationRecordService renovationRecordService;
@@ -193,5 +196,31 @@ public class EditTaskControllerIntegrationTest {
                     .accept(MediaType.APPLICATION_JSON))
 
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection());
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void testEditTask_userNotOwner_redirectToMain() throws Exception {
+        // The user who owns the renovation record
+        User owner = new User("Owner", "User", "owner@doe.com", "Password");
+        owner.grantAuthority("ROLE_USER");
+
+        // The user currently logged in, who is NOT the owner
+        User notOwner = new User("Not", "Owner", "not.owner@doe.com", "Password");
+        notOwner.grantAuthority("ROLE_USER");
+
+        // Mock the loginService to return the logged-in user (not the owner)
+        Mockito.when(loginService.getUserByEmail()).thenReturn(notOwner); // Mock the loginService directly
+
+        // RenovationRecord belongs to 'owner'
+        RenovationRecord renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
+        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
+
+        // Perform GET request
+        mockMvc.perform(MockMvcRequestBuilders.get("/editTask")
+                        .param("taskId", "1")
+                        .param("renovationId", "1"))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection()) // Expect a redirect status
+                .andExpect(MockMvcResultMatchers.redirectedUrl("/main"));  // Expect redirection to '/main'
     }
 }
