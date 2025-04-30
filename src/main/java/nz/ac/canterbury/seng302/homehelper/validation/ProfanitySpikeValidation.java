@@ -5,4 +5,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProfanitySpikeValidation {
 
+
+    public void validateTagName(String tagName) {
+
+
+
+    }
+
+
 }
