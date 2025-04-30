@@ -92,7 +92,7 @@ public class RenovationTaskServiceTest {
     public void validateTaskDetails_allDetailsAreValid_returnEmptyMap() {
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Tāsk Öné 2-3", "A".repeat(512), LocalDate.now().plusDays(1), new ArrayList<>());
 
-        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO);
+        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
         assertTrue(errors.isEmpty());
     }
 
@@ -103,7 +103,7 @@ public class RenovationTaskServiceTest {
         Map<String, List<String>> expectedErrors = new HashMap<>();
         expectedErrors.put("nameError", List.of("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes."));
 
-        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO);
+        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
         assertEquals(expectedErrors, errors);
     }
 
@@ -114,7 +114,7 @@ public class RenovationTaskServiceTest {
         Map<String, List<String>> expectedErrors = new HashMap<>();
         expectedErrors.put("nameError", List.of("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes."));
 
-        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO);
+        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
         assertEquals(expectedErrors, errors);
     }
 
@@ -125,7 +125,7 @@ public class RenovationTaskServiceTest {
         Map<String, List<String>> expectedErrors = new HashMap<>();
         expectedErrors.put("descriptionError", List.of("Task description cannot be empty."));
 
-        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO);
+        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
         assertEquals(expectedErrors, errors);
     }
 
@@ -136,7 +136,7 @@ public class RenovationTaskServiceTest {
         Map<String, List<String>> expectedErrors = new HashMap<>();
         expectedErrors.put("descriptionError", List.of("Task description must be 512 characters or less."));
 
-        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO);
+        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
         assertEquals(expectedErrors, errors);
     }
 
@@ -147,7 +147,7 @@ public class RenovationTaskServiceTest {
         Map<String, List<String>> expectedErrors = new HashMap<>();
         expectedErrors.put("dueDateError", List.of("Due date must be in the future."));
 
-        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO);
+        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
         assertEquals(expectedErrors, errors);
     }
 }

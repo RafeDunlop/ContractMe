@@ -80,7 +80,7 @@ public class EditTaskControllerIntegrationTest {
         RenovationTaskValidation renovationTaskValidation = new RenovationTaskValidation();
         ReflectionTestUtils.setField(renovationTaskService, "renovationTaskValidation", renovationTaskValidation);
 
-        Mockito.doCallRealMethod().when(renovationTaskService).validateTaskDetails(Mockito.any(RenovationTaskDTO.class));
+        Mockito.doCallRealMethod().when(renovationTaskService).validateTaskDetails(Mockito.any(RenovationTaskDTO.class), Mockito.any(RenovationRecord.class));
     }
 
 
