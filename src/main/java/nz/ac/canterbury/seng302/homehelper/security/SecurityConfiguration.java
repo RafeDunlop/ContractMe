@@ -59,7 +59,7 @@ public class SecurityConfiguration {
 
                         // Only the specified roles can reach the matching pages
                         .requestMatchers("/admin").hasRole("ADMIN")
-                        .requestMatchers("/main", "/user/**", "/renovations/**").hasRole("USER")
+                        .requestMatchers("/main", "/user/**", "/renovations/**", "/logout").hasRole("USER")
                         .anyRequest().authenticated())
 
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
@@ -73,7 +73,7 @@ public class SecurityConfiguration {
                         .defaultSuccessUrl("/main", true)
                         .failureHandler(authFailHandler))
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
                         .logoutSuccessUrl("/login")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID"));

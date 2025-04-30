@@ -21,7 +21,7 @@ import nz.ac.canterbury.seng302.homehelper.HomeHelperApplication;
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "nz.ac.canterbury.seng302.homehelper.cucumber")
 @ContextConfiguration(classes = HomeHelperApplication.class)
 @CucumberContextConfiguration
-@SpringBootTest
+@SpringBootTest(classes = HomeHelperApplication.class)
 @ActiveProfiles("cucumber")
 public class RunCucumberTest {
 }
