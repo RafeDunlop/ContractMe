@@ -127,7 +127,7 @@ public class CreateTaskController {
             redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
         }
 
-        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO);
+        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
 
 
         if (!errors.isEmpty()) {

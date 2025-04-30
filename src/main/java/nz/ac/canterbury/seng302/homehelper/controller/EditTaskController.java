@@ -123,7 +123,8 @@ public class EditTaskController {
             redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
         }
 
-        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO);
+        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(
+                renovationTaskDTO, renovationTask.getRenovationRecord());
 
         if (!errors.isEmpty()) {
             errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));

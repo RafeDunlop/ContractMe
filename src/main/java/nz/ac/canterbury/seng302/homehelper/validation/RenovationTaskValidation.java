@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -58,6 +59,17 @@ public class RenovationTaskValidation {
             return StringUtils.capitalize((errorMessageType + " description must be 512 characters or less.").trim());
         } else if (description.trim().isEmpty()) {
             return StringUtils.capitalize((errorMessageType + " description cannot be empty.").trim());
+        }
+        return null;
+    }
+
+    public String validateRooms(RenovationRecord renovation, List<String> rooms) {
+        for (String room : rooms) {
+            if (!renovation.getRooms().contains(room)) {
+                return StringUtils.capitalize((String.format(
+                        "Whoops, it looks like \"%s\" is not a valid room anymore", room
+                )).trim());
+            }
         }
         return null;
     }
