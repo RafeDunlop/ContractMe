@@ -2,6 +2,8 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
@@ -38,6 +40,8 @@ public class CreateTaskController {
 
     private final RenovationTaskValidation renovationTaskValidation;
 
+    private final LoginService loginService;
+
 
     /**
      * Induces spring to automatically sets up the {@code RenovationRecordService}
@@ -45,12 +49,14 @@ public class CreateTaskController {
      * @param renovationRecordService The service associated with renovation records
      * @param renovationTaskService   the service layer responsible for renovation tasks
      * @param renovationTaskValidation The validation for validating tasks
+     * @param loginService             the service for handling logging users in
      */
     @Autowired
-    public CreateTaskController(RenovationRecordService renovationRecordService, RenovationTaskService renovationTaskService, RenovationTaskValidation renovationTaskValidation) {
+    public CreateTaskController(RenovationRecordService renovationRecordService, RenovationTaskService renovationTaskService, RenovationTaskValidation renovationTaskValidation, LoginService loginService) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.renovationTaskValidation = renovationTaskValidation;
+        this.loginService = loginService;
     }
 
     /**
@@ -67,6 +73,11 @@ public class CreateTaskController {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
+        }
+
+        User user = loginService.getUserByEmail();
+        if (renovationRecord.getUser() != user) {
+            return "redirect:/main";
         }
 
         model.addAttribute("renovation", renovationRecord);
