@@ -13,19 +13,18 @@
  */
 
 function validatePageSearch(recordId) {
-    console.log("Validate page search triggered"); // Debug if this is running
     let desiredPage = document.getElementById("pageSearch").value;
-    console.log("Desired page input value: ", desiredPage); // Check the raw input
     desiredPage = parseInt(desiredPage, 10);
-    console.log("Parsed desired page: ", desiredPage);
 
     const totalPages = parseInt(document.getElementById('data-total-pages').value, 10);
-    console.log("TOTAL PAGES SEARCH: " + totalPages)
     const confirmText= "Are you sure you want to go to page " + desiredPage.toString() + "?";
     confirmPrompt(confirmText, "Confirm", "Cancel", false).then((confirm) => {
         if (confirm) {
             if (!isNaN(desiredPage) && desiredPage >= 1 && desiredPage <= totalPages) {
-                window.location.href = "/renovations/view?id=" + recordId + "&page=" + desiredPage;
+                let url = new URL(window.location.href);
+                url.searchParams.set("page", desiredPage);
+                url.searchParams.set("id", recordId);
+                window.location.href = url.toString();
             } else {
                 const errorText = "The page number is outside the range of available pages.";
                 document.getElementById("errorMessage").style.display = "block";
@@ -41,6 +40,7 @@ function validatePageSearch(recordId) {
 function updateLayout() {
     const totalPages = parseInt(document.getElementById('data-total-pages').value, 10);
     console.log("TOTAL PAGES UPDATE: " + totalPages)
+
     // Getting elements needed for sizing
     const taskGrid = document.getElementById('taskGrid');
     const taskCard = taskGrid.querySelector('.card');
@@ -63,7 +63,7 @@ function updateLayout() {
     if (String(tasksPerPage) !== currentParam) {
         let url = new URL(window.location.href);
         url.searchParams.set("tasksPerPage", tasksPerPage);
-        window.location.assign(url.toString()); // Refresh page with updated tasksPerPage value
+        window.location.assign(url.toString());
     }
 }
 
