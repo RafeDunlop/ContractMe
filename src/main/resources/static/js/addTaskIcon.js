@@ -13,7 +13,7 @@ function addTaskIcon(button) {
 /**
  * Gets the modal corresponding to the renovation task icon selector identified by the specified id
  * @param renovationTaskId The id of the renovation task whose modal is being gotten
- * @returns {HTMLElement} The modal, an icon selector for teh specified renovation task
+ * @returns {HTMLElement} The modal, an icon selector for the specified renovation task
  */
 function getIconSelector(renovationTaskId) {
     const modalId = "icon-selector-" + renovationTaskId;
@@ -25,6 +25,7 @@ function getIconSelector(renovationTaskId) {
  * @param renovationTaskId The identifier of the renovation task whose icon selector is to be made visible
  */
 function showIconSelector(renovationTaskId) {
+    localStorage.setItem("selectedTaskId", renovationTaskId);
     const overlay = getIconSelector(renovationTaskId)
     overlay.style.display = 'block';
 }
@@ -47,6 +48,7 @@ async function submitIcon(taskId) {
         body: JSON.stringify({ iconName: iconFileName })
     });
     if (response.ok) {
+        localStorage.removeItem("selectedTaskId");
         window.location.reload();
     }
 }
@@ -69,6 +71,22 @@ async function deleteIcon(button) {
         body: JSON.stringify({ iconName: "default-icon.png" })
     });
     if (response.ok) {
+        localStorage.removeItem("selectedTaskId");
         window.location.reload();
     }
 }
+
+
+function setSelectedTask(taskId) {
+    localStorage.setItem("selectedTaskId", taskId);
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const savedTaskId = localStorage.getItem("selectedTaskId");
+    if (savedTaskId) {
+        showIconSelector(savedTaskId);
+    }
+});
+
+
+
