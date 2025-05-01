@@ -21,7 +21,7 @@
             <div class="mb-3">
                 <label for="name" class="form-label">Name:</label>
                 <input type="text" class="form-control" id="name" placeholder="Enter a name for your task"
-                       th:field="*{name}" data-cy="name" autofocus>
+                       th:field="*{name}" data-cy="name" maxlength="128" autofocus>
 
                 <!-- Frontend JS error -->
                 <div class="alert alert-danger mt-2" role="alert" id="name-frontend-error" hidden>
