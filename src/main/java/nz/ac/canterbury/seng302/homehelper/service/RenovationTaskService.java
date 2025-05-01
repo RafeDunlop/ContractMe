@@ -104,8 +104,8 @@ public class RenovationTaskService {
         Map<String, List<String>> errors = new HashMap<>();
         String errorMessageType = "Task";
 
-        String nameError = renovationTaskValidation.validateName(renovationTaskDTO.getName(), errorMessageType);
-        MapUtil.putIfNotEmpty(errors, "nameError", nameError == null ? null : List.of(nameError));
+        List<String> nameErrors = renovationTaskValidation.validateName(renovationTaskDTO.getName(), errorMessageType);
+        MapUtil.putIfNotEmpty(errors, "nameError", nameErrors);
 
         String descriptionError = renovationTaskValidation.validateDescription(renovationTaskDTO.getDescription(), errorMessageType);
         MapUtil.putIfNotEmpty(errors, "descriptionError", descriptionError == null ? null : List.of(descriptionError));
