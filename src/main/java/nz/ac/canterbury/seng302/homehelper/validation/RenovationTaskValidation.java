@@ -32,7 +32,7 @@ public class RenovationTaskValidation {
      * Validates the name of an object and returns an error message if it's invalid.
      * @param name Name of the object being verified
      * @param errorMessageType String added to the start of the error message
-     * @return An error from validating the name
+     * @return A list of errors from validating the name
      */
     public List<String> validateName(String name, String errorMessageType) {
         List<String> errors = new ArrayList<>();
