@@ -25,6 +25,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'com.h2database:h2'
+        implementation 'org.mariadb.jdbc:mariadb-java-client'
+    
 
 	implementation 'org.webjars:webjars-locator:0.52'
 	implementation 'org.webjars:bootstrap:5.3.3'
