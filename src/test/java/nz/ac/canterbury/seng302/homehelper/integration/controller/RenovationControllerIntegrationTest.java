@@ -14,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -45,10 +47,24 @@ public class RenovationControllerIntegrationTest {
 
     private User currentUser;
 
+    private RenovationRecord renovationRecord;
+
     @BeforeEach
     public void setupUser() {
         currentUser = new User("Jane", "Doe", "jane@doe.com", "password");
         userRepository.save(currentUser);
+
+
+        User owner = new User("Owner", "User", "owner@doe.com", "Password");
+        owner.grantAuthority("ROLE_USER");
+        userRepository.save(owner);
+
+        User notOwner = new User("Not", "Owner", "not.owner@doe.com", "Password");
+        notOwner.grantAuthority("ROLE_USER");
+        userRepository.save(notOwner);
+
+        renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
+        renovationRecordRepository.save(renovationRecord);
     }
 
     /**
@@ -168,7 +184,7 @@ public class RenovationControllerIntegrationTest {
                         .param("roomList", "Room 1", "Room 2")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=6"))
+                .andExpect(redirectedUrlPattern("/renovations/view?id=*"))
                 .andExpect(flash().attribute("renovation",
                         hasProperty("name", is("Rénövatiôn Onē"))));
 
@@ -563,5 +579,14 @@ public class RenovationControllerIntegrationTest {
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=1&tasksPerPage=5"));
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void editRenovationRecord_userNotOwner_redirectToMain() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/renovations/edit")
+                        .param("id", renovationRecord.getId().toString()))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(MockMvcResultMatchers.redirectedUrl("/main"));
     }
 }
