@@ -1,6 +1,5 @@
 fuser -k 9500/tcp || true
 source staging/.env
-echo "${DB_USERNAME}"
 
 java -jar staging/libs/home-helper-0.0.1-SNAPSHOT.jar \
     --server.port=9500 \
