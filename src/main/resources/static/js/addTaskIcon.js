@@ -77,9 +77,6 @@ async function deleteIcon(button) {
 }
 
 
-function setSelectedTask(taskId) {
-    localStorage.setItem("selectedTaskId", taskId);
-}
 
 document.addEventListener("DOMContentLoaded", function () {
     const savedTaskId = localStorage.getItem("selectedTaskId");
