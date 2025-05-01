@@ -26,6 +26,7 @@ import java.util.stream.IntStream;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -46,6 +47,8 @@ public class RenovationControllerIntegrationTest {
     private RenovationRecordRepository renovationRecordRepository;
 
     private User currentUser;
+    private User owner;
+    private User notOwner;
 
     private RenovationRecord renovationRecord;
 
@@ -55,11 +58,11 @@ public class RenovationControllerIntegrationTest {
         userRepository.save(currentUser);
 
 
-        User owner = new User("Owner", "User", "owner@doe.com", "Password");
+        owner = new User("Owner", "User", "owner@doe.com", "Password");
         owner.grantAuthority("ROLE_USER");
         userRepository.save(owner);
 
-        User notOwner = new User("Not", "Owner", "not.owner@doe.com", "Password");
+        notOwner = new User("Not", "Owner", "not.owner@doe.com", "Password");
         notOwner.grantAuthority("ROLE_USER");
         userRepository.save(notOwner);
 
@@ -588,5 +591,115 @@ public class RenovationControllerIntegrationTest {
                         .param("id", renovationRecord.getId().toString()))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(MockMvcResultMatchers.redirectedUrl("/main"));
+    }
+
+    @Test
+    public void testCreateSameRenovationNameForDifferentUsers() throws Exception {
+        // First request for Jane
+        mockMvc.perform(post("/renovations/create")
+                        .param("name", "Test Renovation")
+                        .param("description", "Test description by Jane")
+                        .param("roomList", "Room A")
+                        .with(user("jane@doe.com").roles("USER"))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/renovations/view?id=*"));
+
+        // Second request for NotOwner
+        mockMvc.perform(post("/renovations/create")
+                        .param("name", "Test Renovation")
+                        .param("description", "Test description by NotOwner")
+                        .param("roomList", "Room B")
+                        .with(user("not.owner@doe.com").roles("USER"))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/renovations/view?id=*"));
+
+        // Check the renovation records
+        List<RenovationRecord> renovationRecords = renovationRecordRepository.findAll();
+        assertNotNull(renovationRecords);
+
+        RenovationRecord janeRecord = renovationRecords.stream()
+                .filter(record -> record.getUser().getEmail().equals("jane@doe.com"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Jane's renovation record not found"));
+
+        RenovationRecord notOwnerRecord = renovationRecords.stream()
+                .filter(record -> record.getUser().getEmail().equals("not.owner@doe.com"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("NotOwner's renovation record not found"));
+
+        assertEquals("Test Renovation", janeRecord.getName());
+        assertEquals("Test Renovation", notOwnerRecord.getName());
+        assertNotEquals(janeRecord.getId(), notOwnerRecord.getId());
+    }
+
+    @Test
+    public void testEditSameRenovationNameForDifferentUsers() throws Exception {
+        mockMvc.perform(post("/renovations/create")
+                        .param("name", "Test Renovation")
+                        .param("description", "Test description by Jane")
+                        .param("roomList", "Room A")
+                        .with(user("jane@doe.com").roles("USER"))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/renovations/view?id=*"));
+
+        mockMvc.perform(post("/renovations/create")
+                        .param("name", "Test Renovation")
+                        .param("description", "Test description by NotOwner")
+                        .param("roomList", "Room B")
+                        .with(user("not.owner@doe.com").roles("USER"))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/renovations/view?id=*"));
+
+        List<RenovationRecord> renovationRecords = renovationRecordRepository.findAll();
+        RenovationRecord janeRecord = renovationRecords.stream()
+                .filter(record -> record.getUser().getEmail().equals("jane@doe.com"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Jane's renovation record not found"));
+
+        RenovationRecord notOwnerRecord = renovationRecords.stream()
+                .filter(record -> record.getUser().getEmail().equals("not.owner@doe.com"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("NotOwner's renovation record not found"));
+
+        mockMvc.perform(post("/renovations/edit")
+                        .param("id", String.valueOf(janeRecord.getId()))
+                        .param("name", "Test Renovation")
+                        .param("description", "Updated description by Jane")
+                        .param("roomList", "Room A", "Room B")
+                        .with(user("jane@doe.com").roles("USER"))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/renovations/view?id=*"));
+
+        mockMvc.perform(post("/renovations/edit")
+                        .param("id", String.valueOf(notOwnerRecord.getId()))
+                        .param("name", "Test Renovation")
+                        .param("description", "Updated description by NotOwner")
+                        .param("roomList", "Room B", "Room C")
+                        .with(user("not.owner@doe.com").roles("USER"))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/renovations/view?id=*"));
+
+        renovationRecords = renovationRecordRepository.findAll();
+        assertNotNull(renovationRecords);
+
+        janeRecord = renovationRecords.stream()
+                .filter(record -> record.getUser().getEmail().equals("jane@doe.com"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Jane's renovation record not found"));
+
+        notOwnerRecord = renovationRecords.stream()
+                .filter(record -> record.getUser().getEmail().equals("not.owner@doe.com"))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("NotOwner's renovation record not found"));
+
+        assertEquals("Test Renovation", janeRecord.getName());
+        assertEquals("Test Renovation", notOwnerRecord.getName());
+        assertNotEquals(janeRecord.getId(), notOwnerRecord.getId());
     }
 }
