@@ -41,6 +41,7 @@ function updateLayout() {
     const totalPages = parseInt(document.getElementById('data-total-pages').value, 10);
     console.log("TOTAL PAGES UPDATE: " + totalPages)
 
+
     // Getting elements needed for sizing
     const taskGrid = document.getElementById('taskGrid');
     const taskCard = taskGrid.querySelector('.card');
@@ -64,6 +65,7 @@ function updateLayout() {
         let url = new URL(window.location.href);
         url.searchParams.set("tasksPerPage", tasksPerPage);
         window.location.assign(url.toString());
+
     }
 }
 
@@ -94,3 +96,5 @@ function calculateRows() {
 updateLayout()
 
 window.addEventListener('resize', updateLayout);
+
+
