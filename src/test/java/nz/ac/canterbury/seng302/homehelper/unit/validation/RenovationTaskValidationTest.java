@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.unit.validation;
 
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -72,5 +74,54 @@ public class RenovationTaskValidationTest {
     void testValidateDueDate_nullDate_noError() {
         String result = renovationTaskValidation.validateDueDate(null);
         assertNull(result);
+    }
+
+
+    @Test
+    void validateRooms_validRooms_noError() {
+        List<String> rooms = List.of("room1", "room2", "room3");
+        RenovationRecord renovation = new RenovationRecord(
+                new User(),
+                "name",
+                "description",
+                rooms
+        );
+        assertNull(renovationTaskValidation.validateRooms(renovation, rooms));
+    }
+
+    @Test
+    void validateRooms_noRooms_noError() {
+        List<String> rooms = new ArrayList<>();
+        RenovationRecord renovation = new RenovationRecord(
+                new User(),
+                "name",
+                "description",
+                rooms
+        );
+        assertNull(renovationTaskValidation.validateRooms(renovation, rooms));
+    }
+
+    @Test
+    void validateRooms_subsetOfRooms_noError() {
+        List<String> rooms = List.of("room1", "room2", "room3");
+        RenovationRecord renovation = new RenovationRecord(
+                new User(),
+                "name",
+                "description",
+                rooms
+        );
+        assertNull(renovationTaskValidation.validateRooms(renovation, rooms.subList(0, 1)));
+    }
+
+    @Test
+    void validateRooms_invalidRoom_correctError() {
+        List<String> rooms = List.of("room1", "room2", "room3");
+        RenovationRecord renovation = new RenovationRecord(
+                new User(),
+                "name",
+                "description",
+                rooms
+        );
+        assertEquals("Whoops, it looks like \"notRoom2\" is not a valid room anymore", renovationTaskValidation.validateRooms(renovation, List.of("room1", "notRoom2", "room3")));
     }
 }

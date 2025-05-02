@@ -150,5 +150,19 @@ public class RenovationTaskServiceTest {
         Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
         assertEquals(expectedErrors, errors);
     }
+
+    @Test
+    public void validateTaskDetails_roomsNotInRenovation_returnRoomError() {
+        renovationRecord.setRooms(List.of("room1", "room2", "room3"));
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO(
+                "Task One",
+                "Some description",
+                LocalDate.now().plusDays(1),
+                List.of("room1", "room2", "notRoom3")
+        );
+        Map<String, List<String>> expectedErrors = new HashMap<>();
+        expectedErrors.put("roomError", List.of("Whoops, it looks like \"notRoom3\" is not a valid room anymore"));
+        assertEquals(expectedErrors, renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord));
+    }
 }
 
