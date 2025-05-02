@@ -48,7 +48,7 @@ form.addEventListener("submit", function (e) {
 function validateName(input) {
     input = input.trim();
     if (input.length > 128) {
-        setError(nameFrontendError, nameFrontendErrorMessage, "Task name cannot be longer than 128 characters");
+        setError(nameFrontendError, nameFrontendErrorMessage, "Task name cannot be greater than 128 characters");
         nameBackendError.hidden = true;
         return false;
     } else if (input === "" || !namePattern.test(input)) {
