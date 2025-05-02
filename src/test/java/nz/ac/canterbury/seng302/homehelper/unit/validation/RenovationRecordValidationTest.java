@@ -43,6 +43,19 @@ public class RenovationRecordValidationTest {
     }
 
     @Test
+    void testValidateName_maxLength255_noError() {
+        String name128 = "a".repeat(255);
+        List<String> result = toTest.validateName(name128);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testValidateName_maxLength255_Error() {
+        String name128 = "a".repeat(256);
+        List<String> result = toTest.validateName(name128);
+        assertEquals(" name cannot be greater than 255 characters.",result.get(0));
+    }
+    @Test
     public void checkForExactMatchCreate_match() {
         List<String> errors = toTest.checkForExactMatchCreate("already exists");
         assertEquals(1, errors.size());
