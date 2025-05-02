@@ -63,6 +63,12 @@ public class RenovationTaskValidation {
         return null;
     }
 
+    /**
+     * Ensures that all the rooms specified belong to the {@link RenovationRecord} specified
+     * @param renovation The {@link RenovationRecord} which should contain all specified rooms
+     * @param rooms The rooms to check
+     * @return null if the parameters comply, otherwise a readable error corresponding to the first room which does not match
+     */
     public String validateRooms(RenovationRecord renovation, List<String> rooms) {
         for (String room : rooms) {
             if (!renovation.getRooms().contains(room)) {
