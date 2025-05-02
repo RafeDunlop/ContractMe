@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.unit.validation;
 
-import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
@@ -24,16 +23,32 @@ public class RenovationTaskValidationTest {
 
     @Test
     void testValidateName_validName_noError() {
-        String result = renovationTaskValidation.validateName("Kitchen Renovation", "Task");
-        assertNull(result);
+        List<String> result = renovationTaskValidation.validateName("Kitchen Renovation", "Task");
+        assertTrue(result.isEmpty());
     }
 
     @Test
     void testValidateName_invalidName_error() {
-        String result = renovationTaskValidation.validateName("Kitchen@Renovation", "Task");
-        assertNotNull(result);
-        assertTrue(result.contains("Task name cannot be empty and must only include"));
+        List<String> result = renovationTaskValidation.validateName("Kitchen@Renovation", "Task");
+        assertFalse(result.isEmpty());
+        assertTrue(result.get(0).contains("Task name cannot be empty and must only include"));
     }
+
+    @Test
+    void testValidateName_maxLength128_noError() {
+        String name128 = "a".repeat(128);
+        List<String> result = renovationTaskValidation.validateName(name128, "Task");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testValidateName_tooLong129_error() {
+        String name129 = "a".repeat(129);
+        List<String> result = renovationTaskValidation.validateName(name129, "Task");
+        assertFalse(result.isEmpty());
+        assertTrue(result.get(0).contains("Task name cannot be greater than 128 characters."));
+    }
+
 
     @Test
     void testValidateDescription_validDescription_noError() {

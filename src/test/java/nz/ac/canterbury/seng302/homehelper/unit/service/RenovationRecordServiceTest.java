@@ -10,10 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,19 +19,25 @@ public class RenovationRecordServiceTest {
 
     private static RenovationRecordService toTest;
 
+    private static RenovationRecordValidation renovationRecordValidation;
+    private static RenovationRecordRepository renovationRecordRepository;
+    private static LoginService loginService;
+
     @BeforeAll
     public static void setUpBeforeClass() {
-        RenovationRecordRepository repository = Mockito.mock(RenovationRecordRepository.class);
-        User user = Mockito.mock(User.class);
-        LoginService loginService = Mockito.mock(LoginService.class);
-        RenovationRecordValidation renovationRecordValidation = new RenovationRecordValidation(repository, loginService);
+        renovationRecordRepository = Mockito.mock(RenovationRecordRepository.class);
+        loginService = Mockito.mock(LoginService.class);
+        renovationRecordValidation = new RenovationRecordValidation(renovationRecordRepository, loginService);
 
-        Mockito.when(loginService.getUserByEmail()).thenReturn(user);
-        Mockito.when(repository.findExactMatch("already exists", user)).thenReturn(Optional.of(Mockito.mock(RenovationRecord.class)));
-        Mockito.when(repository.findExactMatch("name", user)).thenReturn(Optional.empty());
-        Mockito.when(repository.findExactMatch("name!", user)).thenReturn(Optional.empty());
+        User mockUser = Mockito.mock(User.class);
+        Mockito.when(loginService.getUserByEmail()).thenReturn(mockUser);
 
-        toTest = new RenovationRecordService(repository, renovationRecordValidation);
+        Mockito.when(loginService.getUserByEmail()).thenReturn(mockUser);
+        Mockito.when(renovationRecordRepository.findExactMatch("already exists", mockUser)).thenReturn(Optional.of(Mockito.mock(RenovationRecord.class)));
+        Mockito.when(renovationRecordRepository.findExactMatch("name", mockUser)).thenReturn(Optional.empty());
+        Mockito.when(renovationRecordRepository.findExactMatch("name!", mockUser)).thenReturn(Optional.empty());
+
+        toTest = new RenovationRecordService(renovationRecordRepository, renovationRecordValidation);
     }
 
     @Test
@@ -108,5 +111,58 @@ public class RenovationRecordServiceTest {
         Mockito.when(renovationRecord.getDescription()).thenReturn(description);
         Mockito.when(renovationRecord.getRooms()).thenReturn(rooms);
         assertFalse(toTest.validateAllInputsEdit(renovationRecord, "already exists").isEmpty());
+    }
+
+    @Test
+    public void validateAllInputsCreate_sameName_differentUsers() {
+        User userA = Mockito.mock(User.class);
+        User userB = Mockito.mock(User.class);
+
+        String renovationName = "Renovation A";
+
+        RenovationRecord existingRenovation = Mockito.mock(RenovationRecord.class);
+        Mockito.when(existingRenovation.getName()).thenReturn(renovationName);
+
+        Mockito.when(loginService.getUserByEmail()).thenReturn(userA);
+        Mockito.when(renovationRecordRepository.findExactMatch(renovationName, userA)).thenReturn(Optional.of(existingRenovation));
+
+        Mockito.when(loginService.getUserByEmail()).thenReturn(userB);
+        Mockito.when(renovationRecordRepository.findExactMatch(renovationName, userB)).thenReturn(Optional.empty());
+
+        Map<String, List<String>> errorsForUserA = toTest.validateAllInputsCreate(renovationName, "Some description", Arrays.asList("Kitchen", "Living Room"));
+        assertTrue(errorsForUserA.isEmpty(), "User A should not have errors when creating a renovation with an existing name.");
+
+        Map<String, List<String>> errorsForUserB = toTest.validateAllInputsCreate(renovationName, "Another description", Arrays.asList("Bedroom"));
+        assertTrue(errorsForUserB.isEmpty(), "User B should be able to create a renovation with the same name.");
+    }
+
+    @Test
+    public void validateAllInputsCreate_nameConflictSameUser() {
+        User userA = Mockito.mock(User.class);
+
+        String renovationName = "Renovation A";
+
+        RenovationRecord existingRenovation = Mockito.mock(RenovationRecord.class);
+        Mockito.when(existingRenovation.getName()).thenReturn(renovationName);
+
+        Mockito.when(loginService.getUserByEmail()).thenReturn(userA);
+        Mockito.when(renovationRecordRepository.findExactMatch(renovationName, userA)).thenReturn(Optional.of(existingRenovation));
+
+        Map<String, List<String>> errors = toTest.validateAllInputsCreate(renovationName, "Some description", Arrays.asList("Kitchen", "Living Room"));
+        assertFalse(errors.isEmpty(), "User A should get an error when trying to create a renovation with the same name.");
+        assertTrue(errors.get("nameError").contains("A renovation with this name already exists."));
+    }
+
+    @Test
+    public void validateAllInputsCreate_noConflict() {
+        User userA = Mockito.mock(User.class);
+
+        String renovationName = "Renovation B";
+
+        Mockito.when(loginService.getUserByEmail()).thenReturn(userA);
+        Mockito.when(renovationRecordRepository.findExactMatch(renovationName, userA)).thenReturn(Optional.empty());
+
+        Map<String, List<String>> errors = toTest.validateAllInputsCreate(renovationName, "Some description", Arrays.asList("Kitchen"));
+        assertTrue(errors.isEmpty(), "User A should not have any errors when creating a new renovation.");
     }
 }

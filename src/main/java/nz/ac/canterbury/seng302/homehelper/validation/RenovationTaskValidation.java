@@ -2,17 +2,13 @@ package nz.ac.canterbury.seng302.homehelper.validation;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.core.io.Resource;
-
-import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 
 /**
  * Validation class for task details.
@@ -37,15 +33,22 @@ public class RenovationTaskValidation {
      * Validates the name of an object and returns an error message if it's invalid.
      * @param name Name of the object being verified
      * @param errorMessageType String added to the start of the error message
-     * @return An error from validating the name
+     * @return A list of errors from validating the name
      */
-    public String validateName(String name, String errorMessageType) {
-        // Regex specifies that names must only contain letters (from any language), numbers, spaces, dots, hyphens, and/or apostrophes.
-        if (name.trim().isEmpty() || !name.matches("^[\\p{L}0-9\\s\\-'.]*$")) {
-            return StringUtils.capitalize((errorMessageType +  (" name cannot be empty and must only include letters, numbers, " +
-                    "spaces, dots, hyphens or apostrophes.")).trim());
+    public List<String> validateName(String name, String errorMessageType) {
+        List<String> errors = new ArrayList<>();
+
+        String trimmedName = name == null ? "" : name.trim();
+
+        if (trimmedName.isEmpty() || !trimmedName.matches("^[\\p{L}0-9\\s\\-'.]*$")) {
+            errors.add(StringUtils.capitalize(errorMessageType + " name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes."));
         }
-        return null;
+
+        if (trimmedName.length() > 128) {
+            errors.add(StringUtils.capitalize(errorMessageType + " name cannot be greater than 128 characters."));
+        }
+
+        return errors;
     }
 
     /**

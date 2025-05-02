@@ -1,0 +1,30 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+.container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.card.p-4 {
+    display: flex;
+    flex-direction: column;
+    height: auto; /
+}
+
+#taskGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); /* Dynamically adjusts the number of columns */
+    gap: 1rem;
+    padding-bottom: 1rem;
+    overflow-y: auto;
+}
+
+#footer {
+    flex-shrink: 0;
+    padding-top: 1rem;
+    background: white;
+}
