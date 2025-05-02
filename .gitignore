@@ -45,6 +45,7 @@ out/
 
 ### Environment
 .env
+env.properties
 
 ### Local Profile Picture Storage ###
 /profile_pictures/*

@@ -22,6 +22,9 @@ public class RenovationRecord {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "tag_id")
+    private List<Tag> tags;
 
     @Column(nullable = false)
     private String name;
@@ -121,6 +124,7 @@ public class RenovationRecord {
      * @return list of renovation tasks
      */
     public List<RenovationTask> getRenovationTasks() {return renovationTasks; }
+
     /**
      * Gets created date of the renovation record
      */
@@ -158,6 +162,24 @@ public class RenovationRecord {
      */
     public void setRooms(List<String> rooms) {
         this.rooms = rooms;
+    }
+
+    /**
+     * Links the specified {@link Tag} to this entity
+     * @param tag The {@link Tag} entity to be added to this entity's tags
+     * @return The result of the {@link List} add operation; whether it was successful
+     */
+    public boolean addTag(Tag tag) {
+        return tags.add(tag);
+    }
+
+    /**
+     * Removes the specified {@link Tag} from this entity, if present
+     * @param tag The {@link Tag} entity to be removed from this entity's tags
+     * @return The result of the {@link List} remove operation; whether it successfully removed teh {@link Tag}
+     */
+    public boolean removeTag(Tag tag) {
+        return tags.remove(tag);
     }
 
     /**
