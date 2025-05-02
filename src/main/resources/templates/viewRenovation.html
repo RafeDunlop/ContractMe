@@ -39,21 +39,23 @@
             </div>
 
             <!-- Single Tag Add Form -->
-            <form th:action="@{addTag}" method="post" id="add-tag-form" class="mb-3">
-                <label for="tag" class="fw-bold">Add Tags:</label>
-                <input type="text" class="form-control" id="tag" name="tagInput" placeholder="Enter a tag"
+            <form th:action="@{tags/add}" method="post" id="add-tag-form" class="mb-3">
+                <label for="tagName" class="fw-bold">Add Tags:</label>
+                <input type="text" class="form-control" id="tagName" name="tagInput" placeholder="Enter a tag"
                        data-cy="tag" maxlength="129" autocomplete="off" required>
                 <input type="hidden" name="renovationId" th:value="${renovation.id}">
             </form>
 
             <!-- Display added tags -->
             <div id="tagList" class="mb-3">
-                <ul class="list-group">
-                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="tag : ${renovation.tags}">
-                        <span th:text="${tag}"></span>
-                    </li>
-                </ul>
+                <label class="fw-bold">Current Tags:</label>
+                <div class="list-group">
+                    <div th:each="tag : ${renovation.tags}" class="list-group-item">
+                        🛠️ <span th:text="${tag}" class="ms-2"></span>
+                    </div>
+                </div>
             </div>
+
             <!-- Place masons back/front html validation divs -->
 
 

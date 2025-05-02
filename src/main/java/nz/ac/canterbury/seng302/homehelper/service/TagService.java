@@ -7,6 +7,9 @@ import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Access point for domain functionality which concerns renovation record tag entities, {@link Tag}
  * @author Rafe Dunlop
@@ -27,5 +30,10 @@ public class TagService {
     public TagService(TagRepository tagRepository, RenovationRecordRepository renovationRecordRepository) {
         this.tagRepository = tagRepository;
         this.renovationRecordRepository = renovationRecordRepository;
+    }
+
+    public List<String> autocompleteTags(String tagName) {
+        List<Tag> tags = tagRepository.findByNameContainingIgnoreCase(tagName);
+        return tags.stream().map(Tag::get).collect(Collectors.toList());
     }
 }
