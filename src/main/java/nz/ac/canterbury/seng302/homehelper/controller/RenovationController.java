@@ -249,6 +249,15 @@ public class RenovationController {
         return "redirect:/renovations/view?id=" + renovationRecord.getId();
     }
 
+    @PostMapping("/editPublicity/{id}")
+    public String submitPublicity(@PathVariable("id") Long id,@RequestBody Map<String, Boolean> payload) {
+        logger.info("editPublicity/{id}");
+        boolean isPublic = payload.get("isPublic");
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
+        renovationRecordService.changePublicity(isPublic,renovationRecord);
+        return "redirect:/renovations/view?id=" + renovationRecord.getId();
+    }
+
     /**
      * Handles redirecting to the view record page for a given record based on the id
      * @param id of the renovation record to view

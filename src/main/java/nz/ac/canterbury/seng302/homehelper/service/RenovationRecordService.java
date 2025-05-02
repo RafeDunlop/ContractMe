@@ -64,6 +64,11 @@ public class RenovationRecordService {
             renovationRecordRepository.deleteById(id);
         }
     }
+
+    public void changePublicity(Boolean isPublic,RenovationRecord renovationRecord) {
+        renovationRecord.setPublicity(isPublic);
+        renovationRecordRepository.save(renovationRecord);
+    }
     /**
      * Gets a renovation record by its id
      * @param id of the record to get
