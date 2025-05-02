@@ -68,6 +68,26 @@ public class RenovationRecordValidationTest {
     }
 
     @Test
+    public void checkForExactMatchCreate_sameNameDifferentUser_allowed() {
+        User userA = Mockito.mock(User.class);
+        User userB = Mockito.mock(User.class);
+
+        RenovationRecordRepository repo = Mockito.mock(RenovationRecordRepository.class);
+        LoginService login = Mockito.mock(LoginService.class);
+
+        Mockito.when(repo.findExactMatch("duplicate name", userA)).thenReturn(Optional.of(existingRenovation));
+        Mockito.when(repo.findExactMatch("duplicate name", userB)).thenReturn(Optional.empty());
+
+        Mockito.when(login.getUserByEmail()).thenReturn(userB);
+        RenovationRecordValidation validator = new RenovationRecordValidation(repo, login);
+
+        List<String> errors = validator.checkForExactMatchCreate("duplicate name");
+
+        assertTrue(errors.isEmpty());
+    }
+
+
+    @Test
     public void validateDescription_validShort() {
         String description = "Short description.";
         List<String> errors = toTest.validateDescription(description);

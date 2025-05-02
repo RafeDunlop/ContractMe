@@ -47,7 +47,11 @@ form.addEventListener("submit", function (e) {
 
 function validateName(input) {
     input = input.trim();
-    if (input === "" || !namePattern.test(input)) {
+    if (input.length > 128) {
+        setError(nameFrontendError, nameFrontendErrorMessage, "Task name cannot be longer than 128 characters");
+        nameBackendError.hidden = true;
+        return false;
+    } else if (input === "" || !namePattern.test(input)) {
         setError(nameFrontendError, nameFrontendErrorMessage, "Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes");
         nameBackendError.hidden = true;
         return false;

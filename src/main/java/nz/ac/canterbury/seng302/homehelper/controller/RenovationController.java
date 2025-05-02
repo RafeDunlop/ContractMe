@@ -173,6 +173,11 @@ public class RenovationController {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
 
+        User user = loginService.getUserByEmail();
+        if (!renovationRecord.getUser().equals(user)) {
+            return "redirect:/main";
+        }
+
         // Only add the renovation object if not already present (e.g. from flash attributes)
         if (!model.containsAttribute("name")) {
             model.addAttribute("renovation", renovationRecord);
