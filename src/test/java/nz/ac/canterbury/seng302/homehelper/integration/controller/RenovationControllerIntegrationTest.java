@@ -587,7 +587,7 @@ public class RenovationControllerIntegrationTest {
     @Test
     @WithMockUser(username = "not.owner@example.com")
     // GitHub copilot generated some parts of the following test
-    public void getViewRecord_notOwner_redirectToMain() throws Exception {
+    public void getViewRecord_notOwner_notFound() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "A cool renovation", "Some words", List.of("Room foo", "Room bar"));
         existingRecord = renovationRecordRepository.save(existingRecord);
         User loggedInUser = new User("Not", "Owner", "not.owner@example.com", "password");
@@ -596,8 +596,7 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(get("/renovations/view")
                         .param("id", Long.toString(existingRecord.getId()))
                         .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/main"));
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
@@ -694,7 +693,7 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(post("/renovations/edit")
                         .param("id", String.valueOf(notOwnerRecord.getId()))
                         .param("name", "Test Renovation")
-                        .param("description", "Updated description by NotOwner")
+                        .param("description", "Updated description by NotOwn 0er")
                         .param("roomList", "Room B", "Room C")
                         .with(user("not.owner@doe.com").roles("USER"))
                         .with(csrf()))
