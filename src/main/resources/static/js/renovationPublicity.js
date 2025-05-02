@@ -1,3 +1,7 @@
+/**
+ * Sends a POST request to update the publicity of a renovation
+ * when the checkbox is toggled.
+ */
 document.getElementById('publicCheckbox').addEventListener('change', async function () {
   const isPublic = this.checked;
   const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
