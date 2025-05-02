@@ -11,6 +11,9 @@ import okhttp3.Response;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 
+
+import org.apache.tomcat.util.json.JSONParser;
+import org.apache.tomcat.util.json.ParseException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,12 +34,16 @@ public class TagValidation {
         RequestBody body = RequestBody.create(mediaType, word);
 
         Request request = new Request.Builder()
-                .url("https://api.apilayer.com/bad_words?censor_character=censor_character")
+                .url("https://api.apilayer.com/bad_words?censor_character=*")
                 .addHeader("apikey", envVarUtil.retrieveEnvironmentVariable("BAD_FILTER_API"))
                 .method("POST", body)
                 .build();
         Response response = client.newCall(request).execute();
-        System.out.println(response.body().string());
+        response.close();
+
+        JSONParser parser = new JSONParser(response.body().string());
+        //List<Object> = parser.parseArray();
+
 
         return true;
 
@@ -56,6 +63,10 @@ public class TagValidation {
         }
         return errors;
     }
+
+
 }
+
+
 
 
