@@ -312,4 +312,15 @@ public class RenovationController {
 
         return "viewRenovation";
     }
+
+
+    @PostMapping("/addTag")
+    public String addTagToRenovation(@RequestParam Long renovationId,
+                                     @RequestParam("tagInput") String tag,
+                                     Model model, RedirectAttributes redirectAttributes) {
+
+
+
+        return "redirect:/renovations/view?id=" + renovationId;
+    }
 }
