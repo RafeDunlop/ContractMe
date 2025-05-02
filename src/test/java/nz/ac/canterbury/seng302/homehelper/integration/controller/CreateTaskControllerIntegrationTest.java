@@ -170,6 +170,28 @@ public class CreateTaskControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void testAddTask_roomsInvalid_TaskNotAddedStaysOnCreateTask() throws Exception {
+        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
+        user.grantAuthority("ROLE_USER");
+        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
+        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
+        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
+        mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("name", "Testname")
+                        .param("description", "Description")
+                        .param("rooms", "Room 1", "Room 2", "otherRoom")
+                        .param("renovationId", "1")
+                        .param("DueDate", String.valueOf(LocalDate.now().plusDays(1)))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view/create?id=1"))
+                .andExpect(flash().attribute("roomError", contains("Whoops, it looks like \"otherRoom\" is not a valid room anymore")));
+        Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
+    }
+
+    @Test
     @WithMockUser(username = "not.owner@doe.com")
     public void testViewCreatePage_userNotOwner_redirectToMain() throws Exception {
         User owner = new User("Owner", "User", "owner@doe.com", "Password");
