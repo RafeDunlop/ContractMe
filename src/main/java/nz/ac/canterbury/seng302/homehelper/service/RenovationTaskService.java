@@ -108,7 +108,7 @@ public class RenovationTaskService {
         MapUtil.putIfNotEmpty(errors, "nameError", (nameError == null) ? null : List.of(nameError));
 
         String roomError = renovationTaskValidation.validateRooms(renovationRecord, renovationTaskDTO.getRooms());
-        MapUtil.putIfNotEmpty(errors, "nameError", (roomError == null) ? null : List.of(roomError));
+        MapUtil.putIfNotEmpty(errors, "roomError", (roomError == null) ? null : List.of(roomError));
 
         String descriptionError = renovationTaskValidation.validateDescription(renovationTaskDTO.getDescription(), errorMessageType);
         MapUtil.putIfNotEmpty(errors, "descriptionError", (descriptionError == null) ? null : List.of(descriptionError));
