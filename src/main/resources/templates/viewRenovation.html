@@ -21,9 +21,21 @@
         <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
         <input type="hidden" id="tasksPerPage" name="tasksPerPage" th:value="5"/>
         <div id="content-container" class="card p-4 shadow-sm">
-            <h4 th:text="'Viewing Renovation: ' + ${renovation.name}" class="card-title mb-4"></h4>
-
-
+            <div style="display: flex; justify-content: space-between;">
+                <h4 th:text="'Viewing Renovation: ' + ${renovation.name}" class="card-title mb-4"></h4>
+                <form id="publicForm" th:action="@{/renovations/42/set-public}" method="post">
+                    <input type="hidden" name="isPublic" id="isPublicInput" value="false">
+                    <div style="display: flex;">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="publicCheckbox">
+                            <label class="form-check-label" for="publicCheckbox">Public Renovation</label>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary" style="margin-left:10%;font-size: 14px; padding: 3px 8px;">Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
             <div th:if="${renovation.description} != ''" class="card p-3 bg-light mb-3">
                 <h6 class="fw-bold">Description:</h6>
                 <p class="mb-0" th:text="${renovation.description}"></p>
