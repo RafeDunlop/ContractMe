@@ -145,6 +145,23 @@ public class EditTaskControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "jane@doe.com")
+    public void testEditTask_invalidRooms_TaskNotEditedStaysOnEditTask() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("name", "Task name")
+                        .param("description", "Description")
+                        .param("rooms", "Room 1", "Room 2", "otherRoom")
+                        .param("taskId", "1")
+                        .param("renovationId", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(redirectedUrl("/editTask?taskId=1&renovationId=1"))
+                .andExpect(flash().attribute("roomError", hasItem("Whoops, it looks like \"otherRoom\" is not a valid room anymore")));
+        Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
     public void testEditTask_taskDescriptionTooLong_TaskNotEditedStaysOnEditTask() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
