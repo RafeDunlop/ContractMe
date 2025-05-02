@@ -44,14 +44,14 @@ public class RenovationRecordValidationTest {
 
     @Test
     void testValidateName_maxLength255_noError() {
-        String name128 = "a".repeat(255);
+        String name128 = "a".repeat(128);
         List<String> result = toTest.validateName(name128);
         assertTrue(result.isEmpty());
     }
 
     @Test
     void testValidateName_maxLength255_Error() {
-        String name128 = "a".repeat(256);
+        String name128 = "a".repeat(129);
         List<String> result = toTest.validateName(name128);
         assertEquals(" name cannot be greater than 255 characters.",result.get(0));
     }

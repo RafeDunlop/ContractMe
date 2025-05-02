@@ -77,8 +77,8 @@ public class RenovationRecordValidation {
     public List<String> validateName(String name) {
         List<String> errors = new ArrayList<>();
         Pattern pattern = Pattern.compile("^[\\p{L}\\d ,.\\-']*$", Pattern.UNICODE_CHARACTER_CLASS);
-        if (name.trim().length() > 255) {
-            errors.add(StringUtils.capitalize(" name cannot be greater than 255 characters."));
+        if (name.trim().length() > 128) {
+            errors.add(StringUtils.capitalize(" Name cannot be greater than 128 characters."));
         }
 
         if (!pattern.matcher(name).matches()) {
