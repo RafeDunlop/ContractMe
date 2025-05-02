@@ -7,6 +7,7 @@ import org.junit.platform.suite.api.ConfigurationParameter;
 import org.junit.platform.suite.api.IncludeEngines;
 import org.junit.platform.suite.api.SelectClasspathResource;
 import org.junit.platform.suite.api.Suite;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -21,7 +22,8 @@ import nz.ac.canterbury.seng302.homehelper.HomeHelperApplication;
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "nz.ac.canterbury.seng302.homehelper.cucumber")
 @ContextConfiguration(classes = HomeHelperApplication.class)
 @CucumberContextConfiguration
-@SpringBootTest(classes = HomeHelperApplication.class)
+@SpringBootTest
 @ActiveProfiles("cucumber")
+@AutoConfigureMockMvc
 public class RunCucumberTest {
 }
