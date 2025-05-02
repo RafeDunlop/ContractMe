@@ -45,7 +45,7 @@
                     <td colspan="1" class="text">No Renovations have been made yet.</td>
                 </tr>
                 <tr th:if="${renovations.empty} and !${#strings.isEmpty(searchQuery)}">
-                    <td colspan="1" class="text">No Renovations found.</td>
+                    <td colspan="1" class="text">No renovations match your search.</td>
                 </tr>
                 <tr th:each="renovation : ${renovations}">
                     <td class="d-flex justify-content-between align-items-center">
