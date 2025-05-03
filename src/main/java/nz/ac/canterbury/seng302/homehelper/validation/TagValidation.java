@@ -1,8 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
+import nz.ac.canterbury.seng302.homehelper.util.TextFileReader;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,10 +21,14 @@ public class TagValidation {
      * @return A list of errors that the inputted tag name generated
      */
     public List<String> validateTagName(String tagName) {
-        List<String> errors = new ArrayList<>();
+        List[] textFileReturn = TextFileReader.readTextFileReturnStringList("resources/third-party-cc-4.0/Profane-Words-English");
 
-        List<String> profaneList = new ArrayList<>(); //Will be replaced with call to 3rd party wordlist
+        List<String> profaneList = textFileReturn[0];
+        List<String> errors = textFileReturn[1];
 
+        if (!errors.isEmpty()) {
+            return errors;
+        }
 
         String[] tagNameWords = tagName.split(" ");
         for (String word : tagNameWords) {
