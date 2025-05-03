@@ -6,11 +6,13 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.TagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,12 +21,15 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -45,6 +50,9 @@ public class RenovationControllerIntegrationTest {
 
     @Autowired
     private RenovationRecordRepository renovationRecordRepository;
+
+    @MockBean
+    private TagService tagService;
 
     private User currentUser;
     private User owner;
@@ -701,5 +709,26 @@ public class RenovationControllerIntegrationTest {
         assertEquals("Test Renovation", janeRecord.getName());
         assertEquals("Test Renovation", notOwnerRecord.getName());
         assertNotEquals(janeRecord.getId(), notOwnerRecord.getId());
+    }
+
+    @Test
+    public void testAutocompleteTags() throws Exception {
+        when(tagService.autocompleteTags("his")).thenReturn(Arrays.asList("history", "historic"));
+
+        mockMvc.perform(get("/renovations/tags/autocomplete")
+                .param("partialTag", "his"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]").value("history"))
+                .andExpect(jsonPath("$[1]").value("historic"));
+    }
+
+    @Test
+    public void testEmptyAutocompleteTags() throws Exception {
+        when(tagService.autocompleteTags("his")).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/renovations/tags/autocomplete")
+                        .param("partialTag", "his"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
     }
 }
