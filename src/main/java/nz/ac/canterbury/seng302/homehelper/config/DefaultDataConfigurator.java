@@ -124,6 +124,6 @@ public class DefaultDataConfigurator {
         tagService.addTag("Historic");
         tagService.addTag("History");
         tagService.addTag("His");
-        tagService.addTag("Histeee");
+        tagService.addTag("histrionic");
     }
 }

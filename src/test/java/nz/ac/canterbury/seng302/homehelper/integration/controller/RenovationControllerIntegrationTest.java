@@ -51,7 +51,7 @@ public class RenovationControllerIntegrationTest {
     @Autowired
     private RenovationRecordRepository renovationRecordRepository;
 
-    @MockBean
+    @Autowired
     private TagService tagService;
 
     private User currentUser;
@@ -713,7 +713,8 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     public void testAutocompleteTags() throws Exception {
-        when(tagService.autocompleteTags("his")).thenReturn(Arrays.asList("history", "historic"));
+        tagService.addTag("historic");
+        tagService.addTag("history");
 
         mockMvc.perform(get("/renovations/tags/autocomplete")
                 .param("partialTag", "his"))
@@ -724,8 +725,6 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     public void testEmptyAutocompleteTags() throws Exception {
-        when(tagService.autocompleteTags("his")).thenReturn(Collections.emptyList());
-
         mockMvc.perform(get("/renovations/tags/autocomplete")
                         .param("partialTag", "his"))
                 .andExpect(status().isOk())

@@ -43,7 +43,7 @@
                 <label for="tagName" class="fw-bold">Add Tags:</label>
                 <input type="text" class="form-control" id="tagName" name="tagName" placeholder="Enter a tag"
                        data-cy="tag" maxlength="129" autocomplete="off" required>
-                <ul id="autocomplete-list" class="list-group position-absolute"></ul>
+                <ul id="autocomplete-list" class="list-group position-absolute" style="z-index: 1000;"></ul>
                 <input type="hidden" name="renovationId" th:value="${renovation.id}">
             </form>
 

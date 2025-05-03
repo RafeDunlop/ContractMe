@@ -50,7 +50,7 @@ public class TagService {
      * @param name of the tag to be saved
      */
     public void addTag(String name) {
-        Tag tag = new Tag(name);
+        Tag tag = new Tag(name.toLowerCase());
         tagRepository.save(tag);
     }
 }
