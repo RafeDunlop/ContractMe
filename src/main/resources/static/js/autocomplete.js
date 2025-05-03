@@ -59,5 +59,3 @@ function setAutoCompleteList(tags) {
 function resetAutocomplete() {
     document.getElementById("autocomplete-list").innerHTML = "";
 }
-
-updateAutocomplete()
