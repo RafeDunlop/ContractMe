@@ -33,8 +33,7 @@ public class RenovationRecord {
     @Column(nullable = false)
     private String name;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, length = 513)
     private String description;
 
     @ElementCollection

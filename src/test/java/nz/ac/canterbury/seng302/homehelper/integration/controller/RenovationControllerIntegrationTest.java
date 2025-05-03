@@ -173,7 +173,7 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(model().attributeExists("renovations"))
                 .andExpect(model().attribute("renovations", not(hasItem(
                         hasProperty("name", is("Renovation One"))))))
-                .andExpect(content().string(containsString("No Renovations found.")))
+                .andExpect(content().string(containsString("No renovations match your search.")))
                 .andExpect(content().string(not(containsString("No Renovations have been made yet."))));
     }
 
@@ -185,7 +185,7 @@ public class RenovationControllerIntegrationTest {
      */
     @Test
     public void postCreateRecord_validRecordDetails_createRecord() throws Exception {
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());
 
         // New record has a name with diacritic letters and a description of length 512 to test regex and boundaries.
@@ -199,7 +199,7 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("renovation",
                         hasProperty("name", is("Rénövatiôn Onē"))));
 
-        userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
+        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
         assertFalse(userRecords.isEmpty());
     }
 
@@ -275,14 +275,14 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertFalse(userRecords.isEmpty());
 
         mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 
-        userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());
     }
 
@@ -312,7 +312,7 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord existingRecord = new RenovationRecord(anotherUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());
 
         mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
@@ -380,10 +380,10 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId()));
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());
 
-        userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
+        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
         assertFalse(userRecords.isEmpty());
     }
 
@@ -412,10 +412,10 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("roomList", List.of("Room 1", "Room 2")));
 
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertFalse(userRecords.isEmpty());
 
-        userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One!");
+        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One!");
         assertTrue(userRecords.isEmpty());
     }
 
@@ -445,7 +445,7 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("description", "Some words"))
                 .andExpect(flash().attribute("roomList", List.of("Room 1", "Room 2")));
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertFalse(userRecords.isEmpty());
     }
 
