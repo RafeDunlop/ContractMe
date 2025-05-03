@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import nz.ac.canterbury.seng302.homehelper.controller.EditTaskController;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
@@ -69,7 +68,7 @@ public class EditTaskControllerIntegrationTest {
 
         User user = new User("Jane", "Doe", "jane@doe.com", "Password");
         user.grantAuthority("ROLE_USER");
-        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
+        Mockito.when(loginService.getUserByEmail()).thenReturn(user);
 
         RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
         Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
