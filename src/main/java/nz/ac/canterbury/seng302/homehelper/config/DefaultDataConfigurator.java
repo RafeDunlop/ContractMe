@@ -5,10 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
-import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
-import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
-import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
-import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
+import nz.ac.canterbury.seng302.homehelper.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
@@ -35,6 +32,7 @@ public class DefaultDataConfigurator {
     private final RenovationTaskService renovationTaskService;
 
     private final VerificationCodeService verificationCodeService;
+    private final TagService tagService;
 
     private User default1;
 
@@ -52,11 +50,13 @@ public class DefaultDataConfigurator {
     public DefaultDataConfigurator(RegisterService registerService,
                                    RenovationRecordService renovationRecordService,
                                    RenovationTaskService renovationTaskService,
-                                   VerificationCodeService verificationCodeService) {
+                                   VerificationCodeService verificationCodeService,
+                                   TagService tagService) {
         this.registerService = registerService;
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.verificationCodeService = verificationCodeService;
+        this.tagService = tagService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -64,6 +64,7 @@ public class DefaultDataConfigurator {
         setupDefaultUsers();
         setupDefaultRenovations();
         setupDefaultRenovationTasks();
+        setupDefaultTags();
     }
 
     private void setupDefaultUsers() {
@@ -117,5 +118,12 @@ public class DefaultDataConfigurator {
             renovationTask.setRooms(defaultJERooms);
             renovationTaskService.addRenovationTask(renovationTask, default1Renovation1);
         }
+    }
+
+    private void setupDefaultTags() {
+        tagService.addTag("Historic");
+        tagService.addTag("History");
+        tagService.addTag("His");
+        tagService.addTag("histrionic");
     }
 }

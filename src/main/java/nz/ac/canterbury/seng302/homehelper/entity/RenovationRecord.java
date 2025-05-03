@@ -22,8 +22,12 @@ public class RenovationRecord {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "tag_id")
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "renovation_tags",
+            joinColumns = @JoinColumn(name = "renovation_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
     private List<Tag> tags;
 
     @Column(nullable = false)
@@ -59,6 +63,7 @@ public class RenovationRecord {
         this.name = name.trim(); //should not be possible to call constructor with empty string
         this.description = (description != null) ? description.trim() : "";
         this.rooms = new ArrayList<>();
+        this.tags = new ArrayList<>();
         rooms.forEach(room -> this.rooms.add(room.trim()));
     }
 
@@ -76,6 +81,14 @@ public class RenovationRecord {
      */
     public String getName() {
         return name;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
     }
 
     /**
