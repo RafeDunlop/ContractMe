@@ -10,10 +10,7 @@ import java.util.regex.Pattern;
 @Service
 public class TagValidation {
 
-    //Please note that the below is only the core of the profanity checker
-    //that would be built if custom implementation is selected;
-    //leetspeak checking, safelist confirmation and miscellaneous 'similar words'
-    //checking will all be added to ensure full compliance with ACs
+
 
     /**
      * @param tagName the string the user entered in the tag submission box,

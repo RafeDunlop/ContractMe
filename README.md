@@ -70,3 +70,18 @@ gradlew cucumber
 - [Spring JPA docs](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
 - [Thymeleaf Docs](https://www.thymeleaf.org/documentation.html)
 - [Learn resources](https://learn.canterbury.ac.nz/course/view.php?id=17797&section=8)
+
+##Copyright Declarations
+
+
+#Disclaimer: the english profane wordlist found in resources/third-party-cc-4.0 is licensed under cc-by-4.0, as 
+specified below
+
+Author/s:                     Github user cesine and 50+ other contributors, as outlined in:
+                              https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/graphs/contributors
+Copyright Notice:             © CC-By-4.0 license
+Title:                        LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words
+License/Disclaimer Notice:    "Licensed under CC BY 4.0 – No warranties provided"
+Source URI:                   https://github.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words
+Adaptation Notice:            No modifications made to original material
+Public License URI:           https://creativecommons.org/licenses/by/4.0/
