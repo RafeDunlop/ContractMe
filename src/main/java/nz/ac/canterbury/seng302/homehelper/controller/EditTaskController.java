@@ -75,7 +75,7 @@ public class EditTaskController {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
 
         User user = loginService.getUserByEmail();
-        if (renovationRecord.getUser() != user) {
+        if (renovationRecord == null || renovationRecord.getUser() != user) {
             return "redirect:/main";
         }
 
@@ -83,9 +83,11 @@ public class EditTaskController {
         if (renovationTask.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
         }
+        if (renovationTask.get().getRenovationRecord() != renovationRecord) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation task does not exist.");
+        }
 
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO(renovationTask.get());
-
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("task", renovationTask.get());
         model.addAttribute("roomList", renovationRecord.getRooms());
@@ -114,9 +116,14 @@ public class EditTaskController {
                                 @RequestParam(name = "renovationId") Long renovationId,
                                 RedirectAttributes redirectAttributes) {
         logger.info("POST renovations/editTask");
-
         RenovationTask renovationTask = renovationTaskService.getTaskById(taskId);
-
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
+        if (renovationRecord == null || renovationRecord.getUser() != loginService.getUserByEmail()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation record was not found.");
+        }
+        if (renovationTask == null || renovationTask.getRenovationRecord() != renovationRecord) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation task does not exist.");
+        }
         if (renovationTaskDTO.getDueDate() != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             String formattedDueDate = renovationTaskDTO.getDueDate().format(formatter);
