@@ -64,7 +64,11 @@ public class RenovationRecordService {
             renovationRecordRepository.deleteById(id);
         }
     }
-
+    /**
+     * Changes publicity flag of the renovation record.
+     * @param isPublic publicity flag of renovation
+     * @param renovationRecord to edit the publicity
+     */
     public void changePublicity(Boolean isPublic,RenovationRecord renovationRecord) {
         renovationRecord.setPublicity(isPublic);
         renovationRecordRepository.save(renovationRecord);

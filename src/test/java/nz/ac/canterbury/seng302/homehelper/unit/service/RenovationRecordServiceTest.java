@@ -14,6 +14,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 public class RenovationRecordServiceTest {
 
@@ -25,15 +26,16 @@ public class RenovationRecordServiceTest {
 
     @BeforeAll
     public static void setUpBeforeClass() {
-        renovationRecordRepository = Mockito.mock(RenovationRecordRepository.class);
-        loginService = Mockito.mock(LoginService.class);
+        renovationRecordRepository = mock(RenovationRecordRepository.class);
+        loginService = mock(LoginService.class);
         renovationRecordValidation = new RenovationRecordValidation(renovationRecordRepository, loginService);
 
-        User mockUser = Mockito.mock(User.class);
+        User mockUser = mock(User.class);
         Mockito.when(loginService.getUserByEmail()).thenReturn(mockUser);
 
         Mockito.when(loginService.getUserByEmail()).thenReturn(mockUser);
-        Mockito.when(renovationRecordRepository.findExactMatch("already exists", mockUser)).thenReturn(Optional.of(Mockito.mock(RenovationRecord.class)));
+        Mockito.when(renovationRecordRepository.findExactMatch("already exists", mockUser)).thenReturn(Optional.of(
+                mock(RenovationRecord.class)));
         Mockito.when(renovationRecordRepository.findExactMatch("name", mockUser)).thenReturn(Optional.empty());
         Mockito.when(renovationRecordRepository.findExactMatch("name!", mockUser)).thenReturn(Optional.empty());
 
@@ -49,6 +51,30 @@ public class RenovationRecordServiceTest {
         Map<String, List<String>> result = toTest.validateAllInputsCreate(name, description, rooms);
 
         assertTrue(result.isEmpty(), "Expected no validation errors, but got: " + result);
+    }
+
+    @Test
+    public void setRenovationPublic_isPublic() {
+
+        User mockUser = mock(User.class);
+
+        RenovationRecord renovationRecord = new RenovationRecord(mockUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+
+        toTest.changePublicity(true, renovationRecord);
+
+        assertTrue(renovationRecord.isPublic(), "Publicity flag should be set to true");
+    }
+
+    @Test
+    public void setRenovationNotPublic_isNotPublic() {
+
+        User mockUser = mock(User.class);
+
+        RenovationRecord renovationRecord = new RenovationRecord(mockUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+
+        toTest.changePublicity(false, renovationRecord);
+
+        assertFalse(renovationRecord.isPublic(), "Publicity flag should be set to true");
     }
 
     @Test
@@ -70,7 +96,7 @@ public class RenovationRecordServiceTest {
         ArrayList<String> rooms = new ArrayList<>();
         String name = "name";
         String description = "";
-        RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
+        RenovationRecord renovationRecord = mock(RenovationRecord.class);
         Mockito.when(renovationRecord.getName()).thenReturn(name);
         Mockito.when(renovationRecord.getDescription()).thenReturn(description);
         Mockito.when(renovationRecord.getRooms()).thenReturn(rooms);
@@ -82,7 +108,7 @@ public class RenovationRecordServiceTest {
         ArrayList<String> rooms = new ArrayList<>();
         String name = "name";
         String description = "";
-        RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
+        RenovationRecord renovationRecord = mock(RenovationRecord.class);
         Mockito.when(renovationRecord.getName()).thenReturn(name);
         Mockito.when(renovationRecord.getDescription()).thenReturn(description);
         Mockito.when(renovationRecord.getRooms()).thenReturn(rooms);
@@ -94,7 +120,7 @@ public class RenovationRecordServiceTest {
         ArrayList<String> rooms = new ArrayList<>();
         String name = "already exists";
         String description = "";
-        RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
+        RenovationRecord renovationRecord = mock(RenovationRecord.class);
         Mockito.when(renovationRecord.getName()).thenReturn(name);
         Mockito.when(renovationRecord.getDescription()).thenReturn(description);
         Mockito.when(renovationRecord.getRooms()).thenReturn(rooms);
@@ -106,7 +132,7 @@ public class RenovationRecordServiceTest {
         ArrayList<String> rooms = new ArrayList<>();
         String name = "already exists";
         String description = "a".repeat(513);
-        RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
+        RenovationRecord renovationRecord = mock(RenovationRecord.class);
         Mockito.when(renovationRecord.getName()).thenReturn(name);
         Mockito.when(renovationRecord.getDescription()).thenReturn(description);
         Mockito.when(renovationRecord.getRooms()).thenReturn(rooms);
@@ -115,12 +141,12 @@ public class RenovationRecordServiceTest {
 
     @Test
     public void validateAllInputsCreate_sameName_differentUsers() {
-        User userA = Mockito.mock(User.class);
-        User userB = Mockito.mock(User.class);
+        User userA = mock(User.class);
+        User userB = mock(User.class);
 
         String renovationName = "Renovation A";
 
-        RenovationRecord existingRenovation = Mockito.mock(RenovationRecord.class);
+        RenovationRecord existingRenovation = mock(RenovationRecord.class);
         Mockito.when(existingRenovation.getName()).thenReturn(renovationName);
 
         Mockito.when(loginService.getUserByEmail()).thenReturn(userA);
@@ -138,11 +164,11 @@ public class RenovationRecordServiceTest {
 
     @Test
     public void validateAllInputsCreate_nameConflictSameUser() {
-        User userA = Mockito.mock(User.class);
+        User userA = mock(User.class);
 
         String renovationName = "Renovation A";
 
-        RenovationRecord existingRenovation = Mockito.mock(RenovationRecord.class);
+        RenovationRecord existingRenovation = mock(RenovationRecord.class);
         Mockito.when(existingRenovation.getName()).thenReturn(renovationName);
 
         Mockito.when(loginService.getUserByEmail()).thenReturn(userA);
@@ -155,7 +181,7 @@ public class RenovationRecordServiceTest {
 
     @Test
     public void validateAllInputsCreate_noConflict() {
-        User userA = Mockito.mock(User.class);
+        User userA = mock(User.class);
 
         String renovationName = "Renovation B";
 

@@ -6,11 +6,13 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -380,6 +382,58 @@ public class RenovationControllerIntegrationTest {
     }
 
     /**
+     * Test that the publicity flag of a renovation record is updated correctly.
+     * <p>
+     * This test creates a renovation record, sends a request to set its publicity flag to true, and checks that the
+     * record is updated in the repository. It also verifies the correct redirection to the renovation details page.
+     * </p>
+     *
+     * @throws Exception if an error occurs during the test execution
+     */
+    @Test
+    public void changePublicFlag_setTrue_renovationIsPublic() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+        Long id = existingRecord.getId();
+
+        mockMvc.perform(post("/renovations/editPublicity/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"isPublic\": true}")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + id));
+
+        RenovationRecord updated = renovationRecordRepository.findById(id).orElseThrow();
+        assertTrue(updated.isPublic(), "Publicity flag should be updated to true");
+    }
+
+    /**
+     * Test that the publicity flag of a renovation record is updated correctly.
+     * <p>
+     * This test creates a renovation record, sends a request to set its publicity flag to false, and checks that the
+     * record is updated in the repository. It also verifies the correct redirection to the renovation details page.
+     * </p>
+     *
+     * @throws Exception if an error occurs during the test execution
+     */
+    @Test
+    public void changePublicFlag_setFalse_renovationIsNotPublic() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+        Long id = existingRecord.getId();
+
+        mockMvc.perform(post("/renovations/editPublicity/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"isPublic\": false}")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + id));
+
+        RenovationRecord updated = renovationRecordRepository.findById(id).orElseThrow();
+        assertFalse(updated.isPublic(), "Publicity flag should be updated to true");
+    }
+
+    /**
      * Tests posting to the edit renovations form with invalid details. If the name input is not the correct format (regex accepts any letter,
      * number, hyphen, comma, and/or space) and the description is too long, when the form is posted, the user stays on the same
      * page and the renovation is not updated.
@@ -702,4 +756,5 @@ public class RenovationControllerIntegrationTest {
         assertEquals("Test Renovation", notOwnerRecord.getName());
         assertNotEquals(janeRecord.getId(), notOwnerRecord.getId());
     }
+
 }
