@@ -5,7 +5,6 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.*;
-import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,6 @@ public class EditTaskController {
     private final RenovationTaskService renovationTaskService;
     private final EditTaskService editTaskService;
     private final RenovationRecordService renovationRecordService;
-    private final RenovationTaskValidation renovationTaskValidation;
     private final RenovationTaskRepository renovationTaskRepository;
     private final LoginService loginService;
 
@@ -39,20 +37,17 @@ public class EditTaskController {
      * @param renovationTaskService       the service for managing renovation tasks
      * @param renovationRecordService     the service for managing renovation records
      * @param editTaskService             the service handling logic specific to editing tasks
-     * @param renovationTaskValidation        the validation utility for renovation-related input
      * @param renovationTaskRepository    the repository for accessing renovation task data
      * @param loginService               the service for handling logging users in
      */
     @Autowired
     public EditTaskController(RenovationTaskService renovationTaskService, RenovationRecordService renovationRecordService,
                               EditTaskService editTaskService,
-                              RenovationTaskValidation renovationTaskValidation,
                               RenovationTaskRepository renovationTaskRepository,
                               LoginService loginService) {
         this.renovationTaskService = renovationTaskService;
         this.renovationRecordService = renovationRecordService;
         this.editTaskService = editTaskService;
-        this.renovationTaskValidation = renovationTaskValidation;
         this.renovationTaskRepository = renovationTaskRepository;
         this.loginService = loginService;
     }
