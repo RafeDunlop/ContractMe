@@ -316,11 +316,17 @@ public class RenovationController {
         return "viewRenovation";
     }
 
-
+    /**
+     * Handles the submission of a new tag to be created, and adding to renovation records
+     * @param renovationId id of the renovation record
+     * @param name of the tag
+     * @param redirectAttributes attributes for redirect
+     * @return the redirect to the view page for the renovation record.
+     */
     @PostMapping("/tags/add")
     public String addTagToRenovation(@RequestParam Long renovationId,
                                      @RequestParam("tagName") String name,
-                                     Model model, RedirectAttributes redirectAttributes) {
+                                     RedirectAttributes redirectAttributes) {
 
 
         return "redirect:/renovations/view?id=" + renovationId;
@@ -328,7 +334,10 @@ public class RenovationController {
 
 
     /**
-     * AJAX
+     * Gets an autocomplete list of tag names that partially match the input
+     * For AJAX requests
+     * @param partialTag the partial input of a tag from the user
+     * @return a list of matching tag names
      */
     @GetMapping("/tags/autocomplete")
     @ResponseBody

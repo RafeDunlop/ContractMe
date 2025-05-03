@@ -35,11 +35,20 @@ public class TagService {
         this.renovationRecordRepository = renovationRecordRepository;
     }
 
+    /**
+     * Returns a list of tag names like the given input by querying the repository
+     * @param tagName the input to search for
+     * @return a list of matching tag names
+     */
     public List<String> autocompleteTags(String tagName) {
         List<Tag> tags = tagRepository.findByNameContainingIgnoreCase(tagName);
         return tags.stream().map(Tag::get).collect(Collectors.toList());
     }
 
+    /**
+     * Creates and saves a new tag with a given name
+     * @param name of the tag to be saved
+     */
     public void addTag(String name) {
         Tag tag = new Tag(name);
         tagRepository.save(tag);

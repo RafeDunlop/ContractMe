@@ -1,4 +1,8 @@
+/** Js file used for autocompleting the tag entry field on viewRenovation.html */
+
 const input = document.getElementById("tagName");
+
+// Listen for input events on the tag input field
 input.addEventListener("input", function () {
     const partialTag = input.value.trim();
     if (partialTag.length < 1) {
@@ -8,9 +12,10 @@ input.addEventListener("input", function () {
     updateAutocomplete(partialTag);
 });
 
-
-
-
+/**
+ * Fetches the autocomplete suggestions for a partial tag input then updates the UI.
+ * @param {string} partialTag - The partial input from the user.
+ */
 function updateAutocomplete(partialTag) {
     fetch(`/renovations/tags/autocomplete?partialTag=${encodeURIComponent(partialTag)}`)
         .then(response => response.json())
@@ -22,7 +27,10 @@ function updateAutocomplete(partialTag) {
         });
     }
 
-
+/**
+ * Displays up to 3 tag suggestions in the autocomplete list.
+ * @param {string[]} tags - The list of tag names returned from the backend.
+ */
 function setAutoCompleteList(tags) {
     const list = document.getElementById("autocomplete-list");
 
@@ -45,7 +53,9 @@ function setAutoCompleteList(tags) {
 }
 
 
-
+/**
+ * Clears the autocomplete display list.
+ */
 function resetAutocomplete() {
     document.getElementById("autocomplete-list").innerHTML = "";
 }
