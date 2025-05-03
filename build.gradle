@@ -28,6 +28,9 @@ dependencies {
 
 	implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 
+	//implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
+
+
 	implementation 'org.webjars:webjars-locator:0.52'
 	implementation 'org.webjars:bootstrap:5.3.3'
 
