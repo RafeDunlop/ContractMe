@@ -2,10 +2,9 @@ Feature: U20 - As Inaya, I want to be able to tag my renovation records with com
   are more easily browsable by others interested in those tags.
 
   Scenario Outline: AC1.1 - Typing in the tag entry field shows autocomplete suggestions
-    Given I am on the renovation record details page
-    And there is an existing tag named "<existingTag>"
+    Given there is an existing tag named "<existingTag>"
     When I type "<input>" into the tag input field
-    Then I should see an autocomplete option containing "<existingTag>"
+    Then I should see an autocomplete list containing "<existingTag>"
 
     Examples:
       | input | existingTag  |
