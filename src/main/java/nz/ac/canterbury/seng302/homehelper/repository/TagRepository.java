@@ -17,7 +17,11 @@ import java.util.List;
  */
 @Repository
 public interface TagRepository extends CrudRepository<Tag, Long> {
-
+    /**
+     * Finds all tags whose names contain the given substring, case-insensitive.
+     * @param name of the substring
+     * @return a list of all matching tags like the given name
+     */
     @Query("SELECT t FROM Tag t WHERE LOWER(t.tagName) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<Tag> findByNameContainingIgnoreCase(@Param("name") String name);
 
