@@ -9,6 +9,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ * Basic unlinked location implementation using Geoapify
+ * @author Rafe Dunlop
+ */
 @Service
 public class LocationServiceGeoapify {
 
@@ -22,6 +26,11 @@ public class LocationServiceGeoapify {
 
     private static final Logger logger = LoggerFactory.getLogger(LocationServiceGeoapify.class);
 
+    /**
+     * Retrieves the localisation of a client from their ip address
+     * @param ip The ip address of the client machine
+     * @throws IOException if the request is unsuccessful
+     */
     public void getRoughLocation(Long ip) throws IOException {
         URL url = getUrlIpGrab(ip);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -29,6 +38,14 @@ public class LocationServiceGeoapify {
         logger.info(connection.getResponseMessage());
     }
 
+    /**
+     * Retrieves address autocomplete suggestions based on the specified prompt and sorted by the specified localisation information
+     * @param prompt The unfinished address input
+     * @param countryCode The <a href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2">ISO 3166</a> 2-letter country code
+     * @param latitude The latitude retrieved from an IP address
+     * @param longitude The longitude retrieved from an IP address
+     * @throws IOException if the request is unsuccessful
+     */
     public void getAutocomplete(String prompt, String countryCode, double latitude, double longitude) throws IOException {
         URL url = getAutoCompleteUrl(prompt, countryCode, latitude, longitude);;
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();

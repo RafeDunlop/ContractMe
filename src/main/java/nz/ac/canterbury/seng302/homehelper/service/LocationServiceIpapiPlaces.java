@@ -8,6 +8,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ * Basic unlinked location implementation using iPapi and Google Places
+ * @author Rafe Dunlop
+ */
 public class LocationServiceIpapiPlaces {
 
     private static final String ipapiBaseUrl = "https://ipapi.co/";
@@ -20,6 +24,11 @@ public class LocationServiceIpapiPlaces {
 
     private static final Logger logger = LoggerFactory.getLogger(LocationServiceIpapiPlaces.class);
 
+    /**
+     * Gets localisation information using an iPapi API
+     * @param ip The IP address to retrieve the localisation of
+     * @throws IOException If the request is not successful
+     */
     public void getRoughLocation(Long ip) throws IOException {
         URL url = getUrlIpGrab(ip);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -27,6 +36,14 @@ public class LocationServiceIpapiPlaces {
         logger.info(connection.getResponseMessage());
     }
 
+    /**
+     * Retrieves address autocomplete suggestions based on the specified prompt and sorted by the specified localisation information
+     * @param prompt The unfinished address input
+     * @param countryCode The <a href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2">ISO 3166</a> 2-letter country code
+     * @param latitude The latitude retrieved from an IP address
+     * @param longitude The longitude retrieved from an IP address
+     * @throws IOException if the request is unsuccessful
+     */
     public void getAutocomplete(String prompt, String countryCode, double latitude, double longitude) throws IOException {
         URL url = getAutocompleteUrl(prompt, countryCode, latitude, longitude);;
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
