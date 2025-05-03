@@ -36,6 +36,16 @@ function setAutoCompleteList(tags) {
 
     list.innerHTML = "";
 
+    // When currently no tags match display the message in place of dropdown
+    if (tags.length === 0) {
+        // No matching tags
+        const noTagsMessage = document.createElement("li");
+        noTagsMessage.classList.add("list-group-item", "disabled");
+        noTagsMessage.textContent = "No matching tags";
+        list.appendChild(noTagsMessage);
+        return;
+    }
+
     // Loop through each tag with max of 3 and create <li> for each
     for (let i = 0; i < Math.min(tags.length, 3); i++) {
         const tag = tags[i];
@@ -46,6 +56,10 @@ function setAutoCompleteList(tags) {
         item.addEventListener("click", function () {
             input.value = tag;
             resetAutocomplete();
+
+            // Submit the form on autocomplete
+            document.getElementById("add-tag-form").submit();
+
         });
 
         list.appendChild(item);
