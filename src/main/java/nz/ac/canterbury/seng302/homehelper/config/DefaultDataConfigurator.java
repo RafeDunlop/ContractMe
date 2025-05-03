@@ -25,7 +25,7 @@ import java.util.Locale;
  * @author Rafe Dunlop
  */
 @Component
-@Profile("!test")
+@Profile("!test & !production")
 public class DefaultDataConfigurator {
 
     private final RegisterService registerService;
