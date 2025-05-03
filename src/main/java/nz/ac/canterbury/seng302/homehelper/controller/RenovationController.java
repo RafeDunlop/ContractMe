@@ -319,7 +319,7 @@ public class RenovationController {
 
     @PostMapping("/tags/add")
     public String addTagToRenovation(@RequestParam Long renovationId,
-                                     @RequestParam("tagInput") String tagName,
+                                     @RequestParam("tagName") String name,
                                      Model model, RedirectAttributes redirectAttributes) {
 
 
@@ -332,7 +332,8 @@ public class RenovationController {
      */
     @GetMapping("/tags/autocomplete")
     @ResponseBody
-    public List<String> autocompleteTags(@RequestParam("query") String partialTag) {
+    public List<String> autocompleteTags(@RequestParam("partialTag") String partialTag) {
         return tagService.autocompleteTags(partialTag);
     }
+
 }

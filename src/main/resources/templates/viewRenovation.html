@@ -41,8 +41,9 @@
             <!-- Single Tag Add Form -->
             <form th:action="@{tags/add}" method="post" id="add-tag-form" class="mb-3">
                 <label for="tagName" class="fw-bold">Add Tags:</label>
-                <input type="text" class="form-control" id="tagName" name="tagInput" placeholder="Enter a tag"
+                <input type="text" class="form-control" id="tagName" name="tagName" placeholder="Enter a tag"
                        data-cy="tag" maxlength="129" autocomplete="off" required>
+                <ul id="autocomplete-list" class="list-group position-absolute"></ul>
                 <input type="hidden" name="renovationId" th:value="${renovation.id}">
             </form>
 
@@ -153,4 +154,5 @@
 
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
+<script type="text/javascript" th:src="@{/js/autocomplete.js}"></script>
 </html>
