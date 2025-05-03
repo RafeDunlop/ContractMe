@@ -719,8 +719,8 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(get("/renovations/tags/autocomplete")
                 .param("partialTag", "his"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0]").value("history"))
-                .andExpect(jsonPath("$[1]").value("historic"));
+                .andExpect(jsonPath("$[1]").value("historic"))
+                .andExpect(jsonPath("$[0]").value("history"));
     }
 
     @Test

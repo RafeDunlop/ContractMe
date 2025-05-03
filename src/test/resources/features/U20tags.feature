@@ -8,7 +8,7 @@ Feature: U20 - As Inaya, I want to be able to tag my renovation records with com
 
     Examples:
       | input | existingTag  |
-      | his   | historic     |
+      | ne    | new          |
       | Bath  | bathroom     |
       | bui   | Build        |
 
