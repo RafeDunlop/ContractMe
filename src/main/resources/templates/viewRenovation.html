@@ -2,6 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
     <title>View Renovation</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
@@ -20,10 +21,15 @@
     <div class="container mt-2">
         <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
         <input type="hidden" id="tasksPerPage" name="tasksPerPage" th:value="5"/>
+        <input type="hidden" id="renovationId" name="renovationId" th:value="${renovation.getId()}"/>
         <div id="content-container" class="card p-4 shadow-sm">
-            <h4 th:text="'Viewing Renovation: ' + ${renovation.name}" class="card-title mb-4"></h4>
-
-
+            <div style="display: flex; justify-content: space-between;">
+                <h4 th:text="'Viewing Renovation: ' + ${renovation.name}" class="card-title mb-4"></h4>
+                <form id="renovationForm">
+                    <input type="checkbox" id="publicCheckbox" name="isPublic" th:checked="${renovation.isPublic()}">
+                    <label for="publicCheckbox">Make my renovation record public</label>
+                </form>
+            </div>
             <div th:if="${renovation.description} != ''" class="card p-3 bg-light mb-3">
                 <h6 class="fw-bold">Description:</h6>
                 <p class="mb-0" th:text="${renovation.description}"></p>
@@ -151,7 +157,7 @@
 <div id="icon-selector-modal" class="modal" style="display: none">
     <div id="icon-selector-content"></div>
 </div>
-
+<script type="text/javascript" th:src="@{/js/renovationPublicity.js}"></script>
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
 <script type="text/javascript" th:src="@{/js/autocomplete.js}"></script>

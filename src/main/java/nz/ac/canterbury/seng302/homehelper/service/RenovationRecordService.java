@@ -65,6 +65,15 @@ public class RenovationRecordService {
         }
     }
     /**
+     * Changes publicity flag of the renovation record.
+     * @param isPublic publicity flag of renovation
+     * @param renovationRecord to edit the publicity
+     */
+    public void changePublicity(Boolean isPublic,RenovationRecord renovationRecord) {
+        renovationRecord.setPublicity(isPublic);
+        renovationRecordRepository.save(renovationRecord);
+    }
+    /**
      * Gets a renovation record by its id
      * @param id of the record to get
      * @return the record with the same id

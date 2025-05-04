@@ -251,6 +251,21 @@ public class RenovationController {
         redirectAttributes.addFlashAttribute("renovation", renovationRecord);
         return "redirect:/renovations/view?id=" + renovationRecord.getId();
     }
+    /**
+     * Updates the publicity status of a renovation record.
+     *
+     * @param id the ID of the renovation record
+     * @param payload a JSON map containing the new publicity status
+     * @return a redirect URL to the updated renovation view
+     */
+    @PostMapping("/editPublicity/{id}")
+    public String submitPublicity(@PathVariable("id") Long id,@RequestBody Map<String, Boolean> payload) {
+        logger.info("editPublicity/{id}");
+        boolean isPublic = payload.get("isPublic");
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
+        renovationRecordService.changePublicity(isPublic,renovationRecord);
+        return "redirect:/renovations/view?id=" + renovationRecord.getId();
+    }
 
     /**
      * Handles redirecting to the view record page for a given record based on the id
