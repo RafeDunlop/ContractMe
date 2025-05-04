@@ -58,18 +58,14 @@ public class RenovationRecordService {
     }
     /**
      * Removes a renovation record by its id, but first checks it exists.
-     * @param record of the record to remove
+     * @param id of the record to remove
      */
     @Transactional
     public void removeRenovationRecord(Long id){
         Optional<RenovationRecord> recordToRemove = renovationRecordRepository.findById(id);
         if (recordToRemove.isPresent()) {
-            System.out.println("Record found");
-            renovationTaskRepository.deleteById(id);
-            renovationRecordRepository.deleteById(id);
-            System.out.println("Record removed");
-        } else {
-            System.out.println("Record not found");
+            renovationTaskRepository.deleteTaskById(id);
+            renovationRecordRepository.delete(recordToRemove.get());
         }
     }
     /**
