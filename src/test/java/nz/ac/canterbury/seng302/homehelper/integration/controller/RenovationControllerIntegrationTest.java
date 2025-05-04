@@ -6,12 +6,14 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.TagService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -21,12 +23,15 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -47,6 +52,9 @@ public class RenovationControllerIntegrationTest {
 
     @Autowired
     private RenovationRecordRepository renovationRecordRepository;
+
+    @Autowired
+    private TagService tagService;
 
     private User currentUser;
     private User owner;
@@ -179,7 +187,7 @@ public class RenovationControllerIntegrationTest {
      */
     @Test
     public void postCreateRecord_validRecordDetails_createRecord() throws Exception {
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());
 
         // New record has a name with diacritic letters and a description of length 512 to test regex and boundaries.
@@ -193,7 +201,7 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("renovation",
                         hasProperty("name", is("Rénövatiôn Onē"))));
 
-        userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
+        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
         assertFalse(userRecords.isEmpty());
     }
 
@@ -269,14 +277,14 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertFalse(userRecords.isEmpty());
 
         mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 
-        userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());
     }
 
@@ -306,7 +314,7 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord existingRecord = new RenovationRecord(anotherUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());
 
         mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
@@ -374,10 +382,10 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId()));
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());
 
-        userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
+        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
         assertFalse(userRecords.isEmpty());
     }
 
@@ -458,10 +466,10 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("roomList", List.of("Room 1", "Room 2")));
 
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertFalse(userRecords.isEmpty());
 
-        userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One!");
+        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One!");
         assertTrue(userRecords.isEmpty());
     }
 
@@ -491,7 +499,7 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("description", "Some words"))
                 .andExpect(flash().attribute("roomList", List.of("Room 1", "Room 2")));
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByNameContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertFalse(userRecords.isEmpty());
     }
 
@@ -755,6 +763,26 @@ public class RenovationControllerIntegrationTest {
         assertEquals("Test Renovation", janeRecord.getName());
         assertEquals("Test Renovation", notOwnerRecord.getName());
         assertNotEquals(janeRecord.getId(), notOwnerRecord.getId());
+    }
+
+    @Test
+    public void testAutocompleteTags() throws Exception {
+        tagService.addTag("historic");
+        tagService.addTag("history");
+
+        mockMvc.perform(get("/renovations/tags/autocomplete")
+                .param("partialTag", "his"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]").value("historic"))
+                .andExpect(jsonPath("$[1]").value("history"));
+    }
+
+    @Test
+    public void testEmptyAutocompleteTags() throws Exception {
+        mockMvc.perform(get("/renovations/tags/autocomplete")
+                        .param("partialTag", "his"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
     }
 
 }

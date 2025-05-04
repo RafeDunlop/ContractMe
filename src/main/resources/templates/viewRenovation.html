@@ -44,6 +44,30 @@
                 </div>
             </div>
 
+            <!-- Single Tag Add Form -->
+            <form th:action="@{tags/add}" method="post" id="add-tag-form" class="mb-3">
+                <label for="tagName" class="fw-bold">Add Tags:</label>
+                <input type="text" class="form-control" id="tagName" name="tagName" placeholder="Enter a tag"
+                       data-cy="tag" maxlength="129" autocomplete="off" required>
+                <ul id="autocomplete-list" class="list-group position-absolute" style="z-index: 1000;"></ul>
+                <input type="hidden" name="renovationId" th:value="${renovation.id}">
+            </form>
+
+            <!-- Display added tags -->
+            <div id="tagList" class="mb-3">
+                <label class="fw-bold">Current Tags:</label>
+                <div class="list-group">
+                    <div th:each="tag : ${renovation.tags}" class="list-group-item">
+                        🛠️ <span th:text="${tag}" class="ms-2"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Place masons back/front html validation divs -->
+
+
+
+
             <div th:if="!${renovation.getRenovationTasks().isEmpty()}" class="mb-3">
                 <h6 class="fw-bold">Tasks:</h6>
                 <div id="taskGrid" class="task-grid"> <!-- Grid for responsive placing of tasks CSS -->
@@ -136,4 +160,5 @@
 <script type="text/javascript" th:src="@{/js/renovationPublicity.js}"></script>
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
+<script type="text/javascript" th:src="@{/js/autocomplete.js}"></script>
 </html>

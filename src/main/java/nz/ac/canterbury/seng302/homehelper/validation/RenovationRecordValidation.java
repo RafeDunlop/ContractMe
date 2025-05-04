@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.validation;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -76,6 +77,10 @@ public class RenovationRecordValidation {
     public List<String> validateName(String name) {
         List<String> errors = new ArrayList<>();
         Pattern pattern = Pattern.compile("^[\\p{L}\\d ,.\\-']*$", Pattern.UNICODE_CHARACTER_CLASS);
+        if (name.trim().length() > 128) {
+            errors.add(StringUtils.capitalize(" Name cannot be greater than 128 characters."));
+        }
+
         if (!pattern.matcher(name).matches()) {
             errors.add("Renovation record room names must only include letters, numbers, spaces, dots, hyphens or apostrophes.");
         }
