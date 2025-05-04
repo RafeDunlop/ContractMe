@@ -21,7 +21,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
@@ -175,7 +174,7 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(model().attributeExists("renovations"))
                 .andExpect(model().attribute("renovations", not(hasItem(
                         hasProperty("name", is("Renovation One"))))))
-                .andExpect(content().string(containsString("No Renovations found.")))
+                .andExpect(content().string(containsString("No renovations match your search.")))
                 .andExpect(content().string(not(containsString("No Renovations have been made yet."))));
     }
 
