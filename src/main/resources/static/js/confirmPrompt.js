@@ -27,6 +27,23 @@ function confirmDelete(button) {
     });
 }
 
+
+function confirmLogout() {
+    const prompt = "Are you sure you want to log out?";
+    confirmPrompt(prompt, "Confirm", "Cancel", true).then(async (confirm) => {
+        if (confirm) {
+            const response = await fetch(`/logout`, {
+                method: "GET",
+            })
+
+            if (!response.ok) {
+                alert("failed to log out")
+            }
+            window.location.href = "/logout";
+        }
+    });
+}
+
 /**
  * returns a promise which provides a boolean. The boolean corresponds to whether the user clicked confirm
  * @param promptText The text to display in the prompt
