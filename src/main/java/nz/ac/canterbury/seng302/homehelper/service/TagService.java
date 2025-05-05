@@ -1,16 +1,14 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
-import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -45,6 +43,16 @@ public class TagService {
         return tags.stream().map(Tag::get).collect(Collectors.toList());
     }
 
+    public boolean checkExists(String tagName) {
+        return tagRepository.findExactMatchTagByTagName(tagName).isEmpty();
+    }
+
+
+    public void addTagToRenovation(RenovationRecord record, String tagName) {
+        record.getTags().add(getTag(tagName));
+    }
+
+
     /**
      * Creates and saves a new tag with a given name
      * @param name of the tag to be saved
@@ -52,5 +60,10 @@ public class TagService {
     public void addTag(String name) {
         Tag tag = new Tag(name.toLowerCase());
         tagRepository.save(tag);
+    }
+
+
+    public Tag getTag(String tagName) {
+        return tagRepository.findExactMatchTagByTagName(tagName).orElse(null);
     }
 }
