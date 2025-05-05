@@ -65,7 +65,7 @@ public class RenovationRecordService {
         Optional<RenovationRecord> recordToRemove = renovationRecordRepository.findById(id);
         if (recordToRemove.isPresent()) {
             renovationTaskRepository.deleteTaskById(id);
-            renovationRecordRepository.delete(recordToRemove.get());
+            renovationRecordRepository.deleteById(id);
         }
     }
     /**

@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -14,23 +15,27 @@ import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 
 @SpringBootTest
+@WithMockUser
 @AutoConfigureMockMvc
 @Transactional
-@WithMockUser(username="jane@doe.com", roles = {"USER"})
-@ActiveProfiles("test")
 public class DeleteRenovationRecordSteps {
 
     @Autowired
@@ -48,11 +53,28 @@ public class DeleteRenovationRecordSteps {
     private User user;
     private Long renovationId;
 
+    @Before("@renovationDelete")
+    public void setupSecurityContext() {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "jane@doe.com",
+                        "password",
+                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                )
+        );
+        SecurityContextHolder.setContext(context);
+    }
+
+    @Before("@renovationDelete")
+    public void cleanupDatabase() {
+        renovationTaskRepository.deleteAll();
+        renovationRecordRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     @Given("I am an existing user")
     public void i_am_an_existing_user() {
-//        renovationTaskRepository.deleteAll();
-//        renovationRecordRepository.deleteAll();
-//        userRepository.deleteAll();
         user = new User("Jane", "Doe", "jane@doe.com", "password");
         user.activate();
         user.grantAuthority("ROLE_USER");
@@ -72,19 +94,13 @@ public class DeleteRenovationRecordSteps {
 
     @Given("I am on the confirmation prompt for deleting a renovation record")
     public void i_am_on_the_confirmation_prompt_for_deleting_a_renovation_record() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(get("/renovations")
+        mockMvc.perform(get("/renovations")
                         .with(csrf()))
-                .andReturn();
-
-        System.out.println(mvcResult.getResponse().getStatus());
-        System.out.println(mvcResult.getResponse().getRedirectedUrl());
-        System.out.println(mvcResult.getResponse().getContentAsString());
-
-//                .andExpect(status().isOk())
-//                .andExpect(view().name("renovationsTemplate"))
-//                .andExpect(model().attributeExists("renovations"))
-//                .andExpect(model().attribute("renovations", hasItem(
-//                        hasProperty("name", is("Renovation One")))));
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationsTemplate"))
+                .andExpect(model().attributeExists("renovations"))
+                .andExpect(model().attribute("renovations", hasItem(
+                        hasProperty("name", is("Renovation One")))));
     }
 
     @Given("The renovation record has {int} task\\(s)")
@@ -101,13 +117,8 @@ public class DeleteRenovationRecordSteps {
 
     @When("I click the \"Delete\" button")
     public void i_click_the_delete_button() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(delete("/renovations/delete/{id}", renovationId)
-                        .with(csrf()))
-                .andReturn();
-
-        System.out.println(mvcResult.getResponse().getStatus());
-        System.out.println(mvcResult.getResponse().getRedirectedUrl());
-        System.out.println(mvcResult.getResponse().getContentAsString());
+        mockMvc.perform(delete("/renovations/delete/{id}", renovationId)
+                        .with(csrf()));
     }
 
     @Then("The renovation record is permanently deleted")

@@ -1,3 +1,4 @@
+@renovationDelete
 Feature: U12 - As Kaia, I want to be able to delete my renovation records so that I can remove records that are no
   longer needed.
 
