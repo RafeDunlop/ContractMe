@@ -49,9 +49,13 @@ public class TagService {
 
 
     public void addTagToRenovation(RenovationRecord record, String tagName) {
+
         record.getTags().add(getTag(tagName));
     }
 
+    public void validateTagName(String tagName) {
+
+    }
 
     /**
      * Creates and saves a new tag with a given name
