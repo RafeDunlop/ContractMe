@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
+import nz.ac.canterbury.seng302.homehelper.service.TagService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ public class RenovationController {
     private final RenovationRecordService renovationRecordService;
     private final RenovationTaskService renovationTaskService;
     private final LoginService loginService;
+    private final TagService tagService;
 
     /**
      * induces spring to automatically sets up the {@code RenovationRecordService}
@@ -45,10 +47,11 @@ public class RenovationController {
      * @param loginService The login service provides the function to get the current user
      */
     @Autowired
-    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService) {
+    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.loginService = loginService;
+        this.tagService = tagService;
     }
 
     /**
@@ -248,6 +251,21 @@ public class RenovationController {
         redirectAttributes.addFlashAttribute("renovation", renovationRecord);
         return "redirect:/renovations/view?id=" + renovationRecord.getId();
     }
+    /**
+     * Updates the publicity status of a renovation record.
+     *
+     * @param id the ID of the renovation record
+     * @param payload a JSON map containing the new publicity status
+     * @return a redirect URL to the updated renovation view
+     */
+    @PostMapping("/editPublicity/{id}")
+    public String submitPublicity(@PathVariable("id") Long id,@RequestBody Map<String, Boolean> payload) {
+        logger.info("editPublicity/{id}");
+        boolean isPublic = payload.get("isPublic");
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
+        renovationRecordService.changePublicity(isPublic,renovationRecord);
+        return "redirect:/renovations/view?id=" + renovationRecord.getId();
+    }
 
     /**
      * Handles redirecting to the view record page for a given record based on the id
@@ -312,4 +330,34 @@ public class RenovationController {
 
         return "viewRenovation";
     }
+
+    /**
+     * Handles the submission of a new tag to be created, and adding to renovation records
+     * @param renovationId id of the renovation record
+     * @param name of the tag
+     * @param redirectAttributes attributes for redirect
+     * @return the redirect to the view page for the renovation record.
+     */
+    @PostMapping("/tags/add")
+    public String addTagToRenovation(@RequestParam Long renovationId,
+                                     @RequestParam("tagName") String name,
+                                     RedirectAttributes redirectAttributes) {
+
+
+        return "redirect:/renovations/view?id=" + renovationId;
+    }
+
+
+    /**
+     * Gets an autocomplete list of tag names that partially match the input
+     * For AJAX requests
+     * @param partialTag the partial input of a tag from the user
+     * @return a list of matching tag names
+     */
+    @GetMapping("/tags/autocomplete")
+    @ResponseBody
+    public List<String> autocompleteTags(@RequestParam("partialTag") String partialTag) {
+        return tagService.autocompleteTags(partialTag);
+    }
+
 }

@@ -2,6 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
     <title>View Renovation</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
@@ -20,10 +21,15 @@
     <div class="container mt-2">
         <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
         <input type="hidden" id="tasksPerPage" name="tasksPerPage" th:value="5"/>
+        <input type="hidden" id="renovationId" name="renovationId" th:value="${renovation.getId()}"/>
         <div id="content-container" class="card p-4 shadow-sm">
-            <h4 th:text="'Viewing Renovation: ' + ${renovation.name}" class="card-title mb-4"></h4>
-
-
+            <div style="display: flex; justify-content: space-between;">
+                <h4 th:text="'Viewing Renovation: ' + ${renovation.name}" class="card-title mb-4"></h4>
+                <form id="renovationForm">
+                    <input type="checkbox" id="publicCheckbox" name="isPublic" th:checked="${renovation.isPublic()}">
+                    <label for="publicCheckbox">Make my renovation record public</label>
+                </form>
+            </div>
             <div th:if="${renovation.description} != ''" class="card p-3 bg-light mb-3">
                 <h6 class="fw-bold">Description:</h6>
                 <p class="mb-0" th:text="${renovation.description}"></p>
@@ -38,6 +44,30 @@
                 </div>
             </div>
 
+            <!-- Single Tag Add Form -->
+            <form th:action="@{tags/add}" method="post" id="add-tag-form" class="mb-3">
+                <label for="tagName" class="fw-bold">Add Tags:</label>
+                <input type="text" class="form-control" id="tagName" name="tagName" placeholder="Enter a tag"
+                       data-cy="tag" maxlength="129" autocomplete="off" required>
+                <ul id="autocomplete-list" class="list-group position-absolute" style="z-index: 1000;"></ul>
+                <input type="hidden" name="renovationId" th:value="${renovation.id}">
+            </form>
+
+            <!-- Display added tags -->
+            <div id="tagList" class="mb-3">
+                <label class="fw-bold">Current Tags:</label>
+                <div class="list-group">
+                    <div th:each="tag : ${renovation.tags}" class="list-group-item">
+                        🛠️ <span th:text="${tag}" class="ms-2"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Place masons back/front html validation divs -->
+
+
+
+
             <div th:if="!${renovation.getRenovationTasks().isEmpty()}" class="mb-3">
                 <h6 class="fw-bold">Tasks:</h6>
                 <div id="taskGrid" class="task-grid"> <!-- Grid for responsive placing of tasks CSS -->
@@ -47,9 +77,10 @@
                                 <div class="d-flex align-items-center">
                                     <div class="position-relative">
                                         <div th:replace="~{fragments/addTaskIcon.html :: add-task-icon(${renovationTask})}"></div>
-                                        <img th:src="@{${'/images/' + renovationTask.getIconFileName()}}" alt="Task Icon" class="task-icon">
+                                        <img th:src="@{${'/images/' + renovationTask.getIconFileName()}}" alt="Task Icon" class="task-icon" th:onclick="${renovationTask.getIconFileName() != 'default-icon.png'} ? 'showIconSelector(' + ${renovationTask.getId()} + ')' : null">
+
                                         <button type="button" class="btn btn-secondary btn-sm rounded-circle opacity-75 top-0 start-100 translate-middle position-absolute"
-                                                th:onclick="|showIconSelector(${renovationTask.getId()})|">+</button>
+                                                th:if="${renovationTask.getIconFileName() == 'default-icon.png'}" th:onclick="|showIconSelector(${renovationTask.getId()})|">+</button>
                                     </div>
                                     <h5 class="card-title truncate ms-2 mb-0" th:text="${renovationTask.getName()}">Task Title</h5>
                                 </div>
@@ -123,6 +154,11 @@
     </div>
 </div>
 </body>
+<div id="icon-selector-modal" class="modal" style="display: none">
+    <div id="icon-selector-content"></div>
+</div>
+<script type="text/javascript" th:src="@{/js/renovationPublicity.js}"></script>
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
+<script type="text/javascript" th:src="@{/js/autocomplete.js}"></script>
 </html>

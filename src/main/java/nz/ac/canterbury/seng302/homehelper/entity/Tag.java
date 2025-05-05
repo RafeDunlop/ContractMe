@@ -30,6 +30,14 @@ public class Tag {
         this.tagName = tagName;
     }
 
+    public String getTagName() {
+        return tagName;
+    }
+
+    public void setTagName(String tagName) {
+        this.tagName = tagName;
+    }
+
     /**
      * Gets the value of this tag, it's name
      * @return The value of this tag
