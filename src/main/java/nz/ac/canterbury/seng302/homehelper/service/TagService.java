@@ -4,10 +4,13 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
+import nz.ac.canterbury.seng302.homehelper.validation.TagValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -21,16 +24,17 @@ public class TagService {
     private final TagRepository tagRepository;
 
     private final RenovationRecordRepository renovationRecordRepository;
-
+    private final TagValidation tagValidation;
     /**
      * Constructs repositories and validation classes as required.
      * @param tagRepository The repository for storing/updating/accessing {@link Tag} entities
      * @param renovationRecordRepository The repository for adding/removing tags from {@link RenovationRecord} entities
      */
     @Autowired
-    public TagService(TagRepository tagRepository, RenovationRecordRepository renovationRecordRepository) {
+    public TagService(TagRepository tagRepository, RenovationRecordRepository renovationRecordRepository, TagValidation tagValidation) {
         this.tagRepository = tagRepository;
         this.renovationRecordRepository = renovationRecordRepository;
+        this.tagValidation = tagValidation;
     }
 
     /**
@@ -53,8 +57,11 @@ public class TagService {
         record.getTags().add(getTag(tagName));
     }
 
-    public void validateTagName(String tagName) {
+    public Map<String, List<String>> validateTagName(String tagName) {
+        Map<String, List<String>> errors = new HashMap<>();
+        tagValidation.validateName(tagName);
 
+        return errors;
     }
 
     /**
@@ -62,6 +69,7 @@ public class TagService {
      * @param name of the tag to be saved
      */
     public void addTag(String name) {
+        // trim????
         Tag tag = new Tag(name.toLowerCase());
         tagRepository.save(tag);
     }

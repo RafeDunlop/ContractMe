@@ -5,6 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
+import nz.ac.canterbury.seng302.homehelper.validation.TagValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -18,12 +19,14 @@ import static org.mockito.Mockito.when;
 public class TagServiceTest {
     private TagRepository tagRepository;
     private RenovationRecordRepository renovationRecordRepository;
+    private TagValidation tagValidation;
     private TagService tagService;
     @BeforeEach
     void setUp() {
         tagRepository = Mockito.mock(TagRepository.class);
         renovationRecordRepository = Mockito.mock(RenovationRecordRepository.class);
-        tagService = new TagService(tagRepository, renovationRecordRepository);
+        tagValidation = Mockito.mock(TagValidation.class);
+        tagService = new TagService(tagRepository, renovationRecordRepository, tagValidation);
     }
 
     @Test
