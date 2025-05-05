@@ -7,6 +7,8 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -38,11 +40,12 @@ public class RenovationRecordService {
      * @param term The term to search for, not case-sensitive
      * @return a list of renovation records from the user that match the name
      */
-    public List<RenovationRecord> getRecordResultByName(User user, String term) {
+    public Page<RenovationRecord> getRecordResultByName(User user, String term,
+                                                        Pageable pageable) {
         if (term == null || term.trim().isEmpty()) {
-            return renovationRecordRepository.findByUser(user);
+            return renovationRecordRepository.findByUser(user, pageable);
         }
-        return renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(user, term);
+        return renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(user, term, pageable);
     }
 
     /**
