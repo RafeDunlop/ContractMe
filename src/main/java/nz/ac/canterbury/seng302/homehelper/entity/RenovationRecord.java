@@ -22,15 +22,18 @@ public class RenovationRecord {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "tag_id")
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "renovation_tags",
+            joinColumns = @JoinColumn(name = "renovation_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
     private List<Tag> tags;
 
     @Column(nullable = false)
     private String name;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, length = 513)
     private String description;
 
     @ElementCollection
@@ -45,6 +48,8 @@ public class RenovationRecord {
     @OneToMany(mappedBy = "renovationRecord",fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<RenovationTask> renovationTasks = new ArrayList<>();
 
+    @Column(nullable = false)
+    private boolean isPublic = false;
 
     public RenovationRecord() {}
 
@@ -60,6 +65,7 @@ public class RenovationRecord {
         this.name = name.trim(); //should not be possible to call constructor with empty string
         this.description = (description != null) ? description.trim() : "";
         this.rooms = new ArrayList<>();
+        this.tags = new ArrayList<>();
         rooms.forEach(room -> this.rooms.add(room.trim()));
     }
 
@@ -77,6 +83,14 @@ public class RenovationRecord {
      */
     public String getName() {
         return name;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
     }
 
     /**
@@ -181,7 +195,20 @@ public class RenovationRecord {
     public boolean removeTag(Tag tag) {
         return tags.remove(tag);
     }
-
+    /**
+     * Sets the publicity status of the renovation record
+     * @param status of the publicity of renovation record
+     */
+    public void setPublicity(boolean status) {
+        this.isPublic = status;
+    }
+    /**
+     * Gets the publicity status of the renovation record
+     * @return publicity status of renovation record
+     */
+    public boolean isPublic() {
+        return isPublic;
+    }
     /**
      * toString method returning all the values stored
      * @return string of the values of the record

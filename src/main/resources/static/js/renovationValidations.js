@@ -78,6 +78,14 @@ function checkNameField(input) {
         nameFrontendErrorMessage.textContent = "";
         nameBackendError.hidden = true;
 
+    } else if (input.length > 128) {
+        // In CREATE mode and name has less than 128 characters, it's valid
+        nameFrontendErrorMessage.textContent = " Name cannot be greater than 128 characters.";
+        nameFrontendError.hidden = false;
+        nameFrontendErrorMessage.hidden = false;
+        nameBackendError.hidden = true;
+        nameFieldValid = false;
+
     } else {
         const isValid = validateField(input, /^[\p{L}\d .,\-']*$/u, nameFrontendErrorMessage, roomNameErrorMessage);
         nameFieldValid = isValid;

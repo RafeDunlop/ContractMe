@@ -15,7 +15,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -75,6 +77,25 @@ public class LoginControllerIntegrationTest {
                         .password("password"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"))
-                .andExpect(request().sessionAttribute("errorMessage",  expectedError));
+                .andExpect(request().sessionAttribute("errorMessage", expectedError));
+    }
+
+    @Test
+    public void testLogout_userLoggedIn_logoutSuccessful() throws Exception {
+        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        User expectedUser = new User("John", "Smith", "john@smith.nz", passwordEncoder.encode("Test123!"));
+        expectedUser.activate();
+
+        Mockito.when(userRepository.findByEmailIgnoreCase("john@smith.nz")).thenReturn(Optional.of(expectedUser));
+        mockMvc.perform(formLogin("/login")
+                        .user("username", "john@smith.nz")
+                        .password("Test123!"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/main"));
+
+        mockMvc.perform(post("/logout").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("**/login"));
     }
 }
+
