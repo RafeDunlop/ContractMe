@@ -5,6 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
 import org.junit.jupiter.api.Assertions;
@@ -51,6 +52,9 @@ public class RenovationControllerIntegrationTest {
 
     @Autowired
     private RenovationRecordRepository renovationRecordRepository;
+
+    @Autowired
+    private RenovationTaskRepository renovationTaskRepository;
 
     @Autowired
     private TagService tagService;
@@ -267,14 +271,38 @@ public class RenovationControllerIntegrationTest {
     }
 
     /**
-     * Tests deleting a renovation when the id in the link is associated with a current record. A no content response is then returned
-     * to show the user the deletion was successful.
+     * Tests deleting a renovation when the id in the link is associated with a current record and the record has no tasks.
+     * A no content response is then returned to show the user the deletion was successful.
      * @throws Exception if the request processing fails
      */
     @Test
-    public void deleteRecord_validRecordId_deletionSuccess() throws Exception {
+    public void deleteRecord_validRecordIdWithoutTask_deletionSuccess() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
+
+        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
+        assertFalse(userRecords.isEmpty());
+
+        mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+
+        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
+        assertTrue(userRecords.isEmpty());
+    }
+
+    /**
+     * Tests deleting a renovation when the id in the link is associated with a current record and the record has a task.
+     * A no content response is then returned to show the user the deletion was successful.
+     * @throws Exception if the request processing fails
+     */
+    @Test
+    public void deleteRecord_validRecordIdWithTask_deletionSuccess() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        RenovationTask existingTask = new RenovationTask("Task", "description", List.of(), LocalDate.now(), existingRecord);
+        renovationTaskRepository.save(existingTask);
 
         List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertFalse(userRecords.isEmpty());

@@ -16,6 +16,7 @@ public class RenovationRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "renovation_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -45,7 +46,7 @@ public class RenovationRecord {
     @LastModifiedDate
     private LocalDateTime editedDate;
 
-    @OneToMany(mappedBy = "renovationRecord",fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "renovationRecord", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RenovationTask> renovationTasks = new ArrayList<>();
 
     @Column(nullable = false)

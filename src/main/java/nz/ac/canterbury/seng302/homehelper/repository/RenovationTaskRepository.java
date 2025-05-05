@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.repository;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
@@ -16,4 +18,8 @@ public interface RenovationTaskRepository extends CrudRepository<RenovationTask,
      * @return Optional.empty if none was found or an Optional of the specified task
      */
     Optional<RenovationTask> findById(long id);
+
+    @Modifying
+    @Query("DELETE FROM RenovationTask rt WHERE rt.renovationRecord.id = :id")
+    void deleteTaskById(long id);
 }
