@@ -36,7 +36,7 @@ public class RenovationRecord {
     @Column(nullable = false, length = 513)
     private String description;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> rooms;
 
     @Column
