@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -311,6 +312,10 @@ public class RenovationController {
 
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
+        User user = loginService.getUserByEmail();
+        if (!record.getUser().equals(user)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Renovation not found.");
+        }
 
         if (pageNumber < 1) return "redirect:/renovations/view?id=" + id + "&page=1&tasksPerPage=" + tasksPerPage;
 
