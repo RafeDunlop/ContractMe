@@ -184,7 +184,10 @@ public class SharingRenovationRecordsSteps {
 
         List<RenovationRecord> sorted = new ArrayList<>(records);
 
-        sorted.sort(Comparator.comparing(RenovationRecord::getCreatedTimestamp, Comparator.nullsLast(Comparator.naturalOrder())).reversed());
+        sorted.sort(Comparator.comparing(
+                RenovationRecord::getCreatedTimestamp,
+                Comparator.nullsLast(Comparator.reverseOrder())
+        ));
 
         assertEquals(sorted, records);
     }

@@ -303,14 +303,14 @@ public class RenovationControllerIntegrationTest {
         RenovationTask existingTask = new RenovationTask("Task", "description", List.of(), LocalDate.now(), existingRecord);
         renovationTaskRepository.save(existingTask);
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
         assertFalse(userRecords.isEmpty());
 
         mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 
-        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
+        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());
     }
 
