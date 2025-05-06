@@ -71,15 +71,12 @@ public class EditTaskController {
 
         User user = loginService.getUserByEmail();
         if (renovationRecord == null || renovationRecord.getUser() != user) {
-            return "redirect:/main";
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation task does not exist");
         }
 
         Optional<RenovationTask> renovationTask = renovationTaskRepository.findById(taskId);
-        if (renovationTask.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
-        }
-        if (renovationTask.get().getRenovationRecord() != renovationRecord) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation task does not exist.");
+        if (renovationTask.isEmpty() || renovationTask.get().getRenovationRecord() != renovationRecord) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation task does not exist");
         }
 
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO(renovationTask.get());
