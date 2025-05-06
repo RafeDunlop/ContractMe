@@ -33,13 +33,71 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
     List<RenovationRecord> findAll();
 
     /**
-     * Gets all renovation records not case-sensitive that are like the given string
+     * Finds all renovation records where the current user on the application matches the owner of the renovation.
+     * @param user The current user
+     * @return A list of all the renovation records from the user
+     */
+    @Query("SELECT f FROM RenovationRecord f " +
+            "WHERE f.user = :user " +
+            "ORDER BY f.createdDate DESC")
+    List<RenovationRecord> findByUser(@Param("user") User user);
+
+    /**
+     * Finds all of user's renovation records not case-sensitive that are like the given string
      * @param user The current user
      * @param term to search for records like it
-     * @return list off all records containing the string in its name
+     * @return list of all of user's records containing the string in its name or description
      */
-    @Query("SELECT r FROM RenovationRecord r WHERE (LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) OR LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%'))) AND r.user = :user")
-    List<RenovationRecord> searchNameOrDescriptionContainingIgnoreCase(@Param("user") User user, @Param("term") String term);
+    @Query("SELECT r FROM RenovationRecord r " +
+            "WHERE " + "(LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            "OR " + "LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%'))) " +
+            "AND " + "r.user = :user " +
+            "ORDER BY r.createdDate DESC")
+    List<RenovationRecord> findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(@Param("user") User user, @Param("term") String term);
+
+    /**
+     * Finds all public renovation records
+     * @return A list of all the public renovation records
+     */
+    @Query("SELECT f FROM RenovationRecord f " +
+            "WHERE f.isPublic = true " +
+            "ORDER BY f.createdDate DESC")
+    List<RenovationRecord> findByIsPublicTrue();
+    /**
+     * Finds all public renovation records not case-sensitive that are like the given string
+     * @param term to search for records like it
+     * @return list of all public records containing the string in its name
+     */
+    @Query("SELECT r FROM RenovationRecord r " +
+            "WHERE " + "(LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            "OR " + "LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%'))) " +
+            "AND " + "r.isPublic = true " +
+            "ORDER BY r.createdDate DESC")
+    List<RenovationRecord> findByIsPublicTrueSearchContainingNameOrDescriptionIgnoreCase(@Param("term") String term);
+
+    /**
+     * Finds all public or user's own renovation records
+     * @param user The current user
+     * @return A list of all public or user's own renovation records
+     */
+    @Query("SELECT f FROM RenovationRecord f " +
+            "WHERE " + "f.isPublic = true OR f.user = :user " +
+            "ORDER BY f.createdDate DESC")
+    List<RenovationRecord> findAllVisibleToUser(@Param("user") User user);
+
+    /**
+     * Finds all public or user's own renovation records not case-sensitive that are like the given string
+     * @param user The current user
+     * @param term to search for records like it
+     * @return list of all public or user's own renovation records containing the string in its name
+     */
+    @Query("SELECT r FROM RenovationRecord r " +
+            "WHERE " + "(LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            "OR " + "LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%'))) " +
+            "AND " + "(r.isPublic = true OR r.user = :user) " +
+            "ORDER BY r.createdDate DESC")
+    List<RenovationRecord> findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(@Param("user") User user, @Param("term") String term);
+
 
     /**
      * Finds a renovation record with a matching name not case-sensitive if it exists.
@@ -58,14 +116,6 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
      */
     @Query("SELECT f FROM RenovationRecord f WHERE (f.name) = (:name) AND (f.user) = (:user)")
     Optional<RenovationRecord> findExactMatch(@Param("name") String name, @Param("user") User user);
-
-    /**
-     * Finds all renovation records where the current user on the application matches the owner of the renovation.
-     * @param user The current user
-     * @return A list of all the renovation records from the user
-     */
-    @Query("SELECT f FROM RenovationRecord f WHERE (f.user) = (:user)")
-    List<RenovationRecord> findByUser(@Param("user") User user);
 
     /**
      * Deletes a record from the renovations record table by its id. The id cannot be null/
