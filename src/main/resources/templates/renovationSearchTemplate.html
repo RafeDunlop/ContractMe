@@ -47,6 +47,7 @@
         <!-- Renovation Cards Grid -->
         <div class="row">
             <div th:each="record : ${records}" class="col-md-3 mb-4">
+                <a th:href="@{/renovations/view(id=${record.getId()}, page=${pageNumber}, fromSearch=true)}">
                 <div class="card position-relative" style="width: 18rem;">
                     <!-- Badge if user owns the record -->
                     <span class="badge bg-primary position-absolute top-0 end-0 m-2"
@@ -73,13 +74,14 @@
                         </p>
                     </div>
                 </div>
+                </a>
             </div>
         </div>
+        </a>
         <div th:if="${#lists.isEmpty(records)}" class="alert alert-secondary mt-4">
             No renovations match your search.
         </div>
     </div>
 </div>
-
 </body>
 </html>
