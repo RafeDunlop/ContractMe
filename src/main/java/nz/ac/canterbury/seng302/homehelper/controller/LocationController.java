@@ -36,7 +36,9 @@ public class LocationController {
      */
     @GetMapping("/localisation")
     public ResponseEntity<LocalisationDTO> getLocalisation(HttpServletRequest request) {
+        logger.info("GET /localisation");
         String ipAddress = getIpFromRequest(request);
+        logger.debug("IP: {}", ipAddress);
         // validation via service/in following call etc.
         try {
             return new ResponseEntity<>(locationService.getRoughLocation(ipAddress), HttpStatus.OK);
@@ -56,6 +58,7 @@ public class LocationController {
     @GetMapping("/address-autocomplete/{prompt}")
     public ResponseEntity<List<AddressDTO>> getAddressAutoComplete(@PathVariable String prompt,
                                                    @ModelAttribute LocalisationDTO localisationDTO) {
+        logger.info("GET /address-autocomplete/{}", prompt);
         // validation via service/in following call etc.
         try {
             return new ResponseEntity<>(locationService.getAutocomplete(prompt, localisationDTO), HttpStatus.OK);

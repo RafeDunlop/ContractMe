@@ -45,6 +45,7 @@ public class LocationService {
      */
     public LocalisationDTO getRoughLocation(String ip) {
         ResponseEntity<String> response = restTemplate.getForEntity(getIpGrabUrl(ip), String.class);
+        logger.trace(response.getBody());
         if (response.getStatusCode() != HttpStatus.OK) {
             String errorMessage = String.format("could not retrieve localisation information. Response code: %s", response.getStatusCode());
             logger.warn(errorMessage);
@@ -65,12 +66,17 @@ public class LocationService {
      * @return a list of address objects with relevant fields, as retrieved from the API
      */
     public List<AddressDTO> getAutocomplete(String prompt, LocalisationDTO localisationDTO) {
+        if (localisationDTO.getCountry() == null || localisationDTO.getLocation() == null) {
+            logger.warn("Required localisation information is missing");
+            throw new IllegalArgumentException();
+        }
         ResponseEntity<String> response = restTemplate.getForEntity(getAutoCompleteUrl(
                 prompt,
                 localisationDTO.getCountry().getIso_code(),
                 localisationDTO.getLocation().getLatitude(),
                 localisationDTO.getLocation().getLongitude()
         ), String.class);
+        logger.trace(response.getBody());
         if (response.getStatusCode() != HttpStatus.OK) {
             String errorMessage = String.format("could not retrieve address autocomplete suggestions. Response code: %s", response.getStatusCode());
             logger.warn(errorMessage);
@@ -90,7 +96,7 @@ public class LocationService {
     private String getAutoCompleteUrl(String prompt, String countryCode, double latitude, double longitude) {
         for (String input : List.of(prompt, countryCode, String.valueOf(latitude), String.valueOf(longitude))) {
             if (input == null || input.isEmpty()) {
-                logger.info("Request is missing required inputs");
+                logger.warn("A required input is missing");
                 throw new IllegalArgumentException();
             }
         }
@@ -100,10 +106,11 @@ public class LocationService {
         sb.append(String.format("?text=%s", prompt));
         sb.append(String.format("&filter=countrycode:%s", countryCode));
         sb.append(String.format("&bias=proximity:%f,%f", latitude, longitude));
-        sb.append(String.format("&apiKey=%s", System.getenv("GEOAPIFY_API_KEY")));
         sb.append("&type=street");
         sb.append("&lang=en");
         sb.append("&format=json");
+        sb.append(String.format("&apiKey=%s", System.getenv("GEOAPIFY_API_KEY")));
+        logger.debug("calling autocomplete API: {}", sb);
         return sb.toString();
     }
 
@@ -112,6 +119,7 @@ public class LocationService {
         sb.append(geoapifyBaseUrl);
         sb.append(ipApi);
         sb.append(String.format("?ip=%s&apiKey=%s", ip, System.getenv("GEOAPIFY_API_KEY")));
+        logger.debug("calling IP grab API: {}", sb);
         return sb.toString();
     }
 }
