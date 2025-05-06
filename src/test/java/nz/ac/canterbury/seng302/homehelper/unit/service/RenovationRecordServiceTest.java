@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.unit.service;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
@@ -21,11 +22,13 @@ public class RenovationRecordServiceTest {
 
     private static RenovationRecordValidation renovationRecordValidation;
     private static RenovationRecordRepository renovationRecordRepository;
+    private static RenovationTaskRepository renovationTaskRepository;
     private static LoginService loginService;
 
     @BeforeAll
     public static void setUpBeforeClass() {
         renovationRecordRepository = mock(RenovationRecordRepository.class);
+        renovationTaskRepository = mock(RenovationTaskRepository.class);
         loginService = mock(LoginService.class);
         renovationRecordValidation = new RenovationRecordValidation(renovationRecordRepository, loginService);
 
@@ -38,7 +41,7 @@ public class RenovationRecordServiceTest {
         Mockito.when(renovationRecordRepository.findExactMatch("name", mockUser)).thenReturn(Optional.empty());
         Mockito.when(renovationRecordRepository.findExactMatch("name!", mockUser)).thenReturn(Optional.empty());
 
-        toTest = new RenovationRecordService(renovationRecordRepository, renovationRecordValidation);
+        toTest = new RenovationRecordService(renovationRecordRepository, renovationTaskRepository, renovationRecordValidation);
     }
 
     @Test
