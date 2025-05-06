@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.unit.service;
 
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
@@ -12,9 +13,8 @@ import org.mockito.Mockito;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class TagServiceTest {
     private TagRepository tagRepository;
@@ -65,4 +65,33 @@ public class TagServiceTest {
         assertTrue(result.contains("apartment"));
         assertTrue(result.contains("apartment"));
     }
+
+    @Test
+    public void checkExists_tagExists_returnsTrue() {
+        when(tagRepository.findExactMatchTagByTagName("cars")).thenReturn(Optional.of(new Tag("cars")));
+        assertFalse(tagService.checkExists("cars"));
+    }
+
+    @Test
+    public void checkExists_tagNotExists_returnsFalse() {
+        when(tagRepository.findExactMatchTagByTagName("hammer")).thenReturn(Optional.empty());
+        assertTrue(tagService.checkExists("hammer"));
+    }
+
+    @Test
+    public void addTagToRenovation_tagExists_succeeds() {
+        RenovationRecord record = new RenovationRecord();
+        String tagName = "kitchen";
+        Tag tag = new Tag(tagName);
+
+        when(tagService.getTag(tagName.toLowerCase().trim())).thenReturn(tag);
+
+        doNothing().when(renovationRecordRepository).save(record);
+
+        tagService.addTagToRenovation(record, tagName);
+
+        verify(renovationRecordRepository, times(1)).save(record);
+        assertTrue(record.getTags().contains(tag));
+    }
+
 }
