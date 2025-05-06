@@ -5,26 +5,33 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.TagService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -45,6 +52,12 @@ public class RenovationControllerIntegrationTest {
 
     @Autowired
     private RenovationRecordRepository renovationRecordRepository;
+
+    @Autowired
+    private RenovationTaskRepository renovationTaskRepository;
+
+    @Autowired
+    private TagService tagService;
 
     private User currentUser;
     private User owner;
@@ -258,14 +271,38 @@ public class RenovationControllerIntegrationTest {
     }
 
     /**
-     * Tests deleting a renovation when the id in the link is associated with a current record. A no content response is then returned
-     * to show the user the deletion was successful.
+     * Tests deleting a renovation when the id in the link is associated with a current record and the record has no tasks.
+     * A no content response is then returned to show the user the deletion was successful.
      * @throws Exception if the request processing fails
      */
     @Test
-    public void deleteRecord_validRecordId_deletionSuccess() throws Exception {
+    public void deleteRecord_validRecordIdWithoutTask_deletionSuccess() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
+
+        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
+        assertFalse(userRecords.isEmpty());
+
+        mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+
+        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
+        assertTrue(userRecords.isEmpty());
+    }
+
+    /**
+     * Tests deleting a renovation when the id in the link is associated with a current record and the record has a task.
+     * A no content response is then returned to show the user the deletion was successful.
+     * @throws Exception if the request processing fails
+     */
+    @Test
+    public void deleteRecord_validRecordIdWithTask_deletionSuccess() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        RenovationTask existingTask = new RenovationTask("Task", "description", List.of(), LocalDate.now(), existingRecord);
+        renovationTaskRepository.save(existingTask);
 
         List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
         assertFalse(userRecords.isEmpty());
@@ -377,6 +414,58 @@ public class RenovationControllerIntegrationTest {
 
         userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
         assertFalse(userRecords.isEmpty());
+    }
+
+    /**
+     * Test that the publicity flag of a renovation record is updated correctly.
+     * <p>
+     * This test creates a renovation record, sends a request to set its publicity flag to true, and checks that the
+     * record is updated in the repository. It also verifies the correct redirection to the renovation details page.
+     * </p>
+     *
+     * @throws Exception if an error occurs during the test execution
+     */
+    @Test
+    public void changePublicFlag_setTrue_renovationIsPublic() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+        Long id = existingRecord.getId();
+
+        mockMvc.perform(post("/renovations/editPublicity/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"isPublic\": true}")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + id));
+
+        RenovationRecord updated = renovationRecordRepository.findById(id).orElseThrow();
+        assertTrue(updated.isPublic(), "Publicity flag should be updated to true");
+    }
+
+    /**
+     * Test that the publicity flag of a renovation record is updated correctly.
+     * <p>
+     * This test creates a renovation record, sends a request to set its publicity flag to false, and checks that the
+     * record is updated in the repository. It also verifies the correct redirection to the renovation details page.
+     * </p>
+     *
+     * @throws Exception if an error occurs during the test execution
+     */
+    @Test
+    public void changePublicFlag_setFalse_renovationIsNotPublic() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+        Long id = existingRecord.getId();
+
+        mockMvc.perform(post("/renovations/editPublicity/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"isPublic\": false}")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + id));
+
+        RenovationRecord updated = renovationRecordRepository.findById(id).orElseThrow();
+        assertFalse(updated.isPublic(), "Publicity flag should be updated to true");
     }
 
     /**
@@ -585,6 +674,21 @@ public class RenovationControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "not.owner@example.com")
+    // GitHub copilot generated some parts of the following test
+    public void getViewRecord_notOwner_notFound() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "A cool renovation", "Some words", List.of("Room foo", "Room bar"));
+        existingRecord = renovationRecordRepository.save(existingRecord);
+        User loggedInUser = new User("Not", "Owner", "not.owner@example.com", "password");
+        userRepository.save(loggedInUser);
+
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .with(csrf()))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
     @WithMockUser(username = "not.owner@doe.com")
     public void editRenovationRecord_userNotOwner_redirectToMain() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/edit")
@@ -678,7 +782,7 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(post("/renovations/edit")
                         .param("id", String.valueOf(notOwnerRecord.getId()))
                         .param("name", "Test Renovation")
-                        .param("description", "Updated description by NotOwner")
+                        .param("description", "Updated description by NotOwn 0er")
                         .param("roomList", "Room B", "Room C")
                         .with(user("not.owner@doe.com").roles("USER"))
                         .with(csrf()))
@@ -702,4 +806,25 @@ public class RenovationControllerIntegrationTest {
         assertEquals("Test Renovation", notOwnerRecord.getName());
         assertNotEquals(janeRecord.getId(), notOwnerRecord.getId());
     }
+
+    @Test
+    public void testAutocompleteTags() throws Exception {
+        tagService.addTag("historic");
+        tagService.addTag("history");
+
+        mockMvc.perform(get("/renovations/tags/autocomplete")
+                .param("partialTag", "his"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]").value("historic"))
+                .andExpect(jsonPath("$[1]").value("history"));
+    }
+
+    @Test
+    public void testEmptyAutocompleteTags() throws Exception {
+        mockMvc.perform(get("/renovations/tags/autocomplete")
+                        .param("partialTag", "his"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
 }
