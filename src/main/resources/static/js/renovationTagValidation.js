@@ -13,10 +13,18 @@ const tagPattern = /^(?=.*\p{L}).*$/u;
 tagInput.addEventListener("input", function () {validateTag(tagInput.value)})
 
 function validateTag(input) {
-    console.log(tagNamesList);
-
-    input = input.trim();
-    if (input.length > 128) {
+    input = input.trim().toLowerCase();
+    if (tagNamesList.length >= 5) {
+        tagFrontendErrorMessage.textContent = "Renovation cannot have more than 5 tags.";
+        tagFrontendError.hidden = false;
+        tagBackendError.hidden = true;
+        return false;
+    } else if (tagNamesList.includes(input)) {
+        tagFrontendErrorMessage.textContent = "Renovation cannot contain duplicate tag names.";
+        tagFrontendError.hidden = false;
+        tagBackendError.hidden = true;
+        return false;
+    } else if (input.length > 128) {
         tagFrontendErrorMessage.textContent = "Tag cannot be greater than 128 characters.";
         tagFrontendError.hidden = false;
         tagBackendError.hidden = true;
