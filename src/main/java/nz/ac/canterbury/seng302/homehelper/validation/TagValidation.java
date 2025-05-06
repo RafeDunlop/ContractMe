@@ -12,10 +12,10 @@ public class TagValidation {
         List<String> errors = new ArrayList<>();
 
         if (tagName.isEmpty() || !tagName.matches("^(?=.*\\p{L}).*$")) {
-            errors.add(StringUtils.capitalize("tags must contain letters"));
+            errors.add(StringUtils.capitalize("Tags must contain one or more letters."));
         }
         if (tagName.length() > 255) {
-            errors.add(StringUtils.capitalize("tag cannot be greater than 128 characters."));
+            errors.add(StringUtils.capitalize("Tag cannot be greater than 128 characters."));
         }
         return errors;
     }

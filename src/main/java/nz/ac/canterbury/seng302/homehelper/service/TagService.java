@@ -49,15 +49,22 @@ public class TagService {
     }
 
 
-    public void addTagToRenovation(RenovationRecord record, String tagName) {
-        record.getTags().add(getTag(tagName));
-    }
-
-    public List<String> validateTagName(String tagName) {
-        List<String>errors = new ArrayList<>();
-        tagValidation.validateName(tagName);
+    public List<String> validateTag(RenovationRecord renovationRecord, String tagName) {
+        List<String> errors = new ArrayList<>();
+        if (renovationRecord.getTags().size() >= 5) {
+            errors.add("Renovation cannot have more than 5 tags.");
+        }
+        if (renovationRecord.getTags().stream().map(Tag::getTagName).toList().contains(tagName)) {
+            errors.add("Renovation cannot contain duplicate tag names.");
+        }
+        errors.addAll(tagValidation.validateName(tagName));
 
         return errors;
+    }
+
+    public void addTagToRenovation(RenovationRecord record, String tagName) {
+        record.getTags().add(getTag(tagName.trim()));
+        renovationRecordRepository.save(record);
     }
 
     /**
@@ -65,8 +72,7 @@ public class TagService {
      * @param name of the tag to be saved
      */
     public void addTag(String name) {
-        // trim????
-        Tag tag = new Tag(name.toLowerCase());
+        Tag tag = new Tag(name.toLowerCase().trim());
         tagRepository.save(tag);
     }
 

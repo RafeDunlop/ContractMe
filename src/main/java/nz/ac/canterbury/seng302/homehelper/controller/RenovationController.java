@@ -349,14 +349,16 @@ public class RenovationController {
                                      RedirectAttributes redirectAttributes) {
         logger.info("/tags/add");
 
-        if (tagService.checkExists(tagName)) {
-            tagService.addTag(tagName);
-            logger.info("TAg added");
-        }
-
         RenovationRecord record = renovationRecordService.getRecordById(renovationId);
-        tagService.addTagToRenovation(record, tagName);
-
+        List<String> errors = tagService.validateTag(record, tagName);
+        if (errors.isEmpty()) {
+            if (tagService.checkExists(tagName)) {
+                tagService.addTag(tagName);
+            }
+            tagService.addTagToRenovation(record, tagName);
+        } else {
+            redirectAttributes.addAttribute(errors);
+        }
         return "redirect:/renovations/view?id=" + renovationId;
     }
 

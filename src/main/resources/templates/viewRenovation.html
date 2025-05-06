@@ -58,13 +58,21 @@
                 <label class="fw-bold">Current Tags:</label>
                 <div class="list-group">
                     <div th:each="tag : ${renovation.tags}" class="list-group-item">
-                        🛠️ <span th:text="${tag}" class="ms-2"></span>
+                        🛠️ <span th:text="${tag.tagName}" class="ms-2"></span>
                     </div>
                 </div>
             </div>
 
-            <!-- Place masons back/front html validation divs -->
+            <!-- Frontend JS error -->
+<!--            <div class="alert alert-danger mt-2" role="alert" id="description-frontend-error" hidden>-->
+<!--                <ul><li><label class="form-label" id="description-frontend-error-message"></label></li></ul>-->
+<!--            </div>-->
 
+            <!-- Backend error -->
+            <div class="alert alert-danger mt-2" role="alert" id="description-backend-error"
+                 th:if="${errors}">
+                <ul><li th:each="msg : ${errors}" th:text="${msg}"></li></ul>
+            </div>
 
 
 
