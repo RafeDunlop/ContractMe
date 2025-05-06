@@ -357,7 +357,7 @@ public class RenovationController {
             }
             tagService.addTagToRenovation(record, tagName);
         } else {
-            redirectAttributes.addAttribute(errors);
+            redirectAttributes.addFlashAttribute("errors", errors);
         }
         return "redirect:/renovations/view?id=" + renovationId;
     }

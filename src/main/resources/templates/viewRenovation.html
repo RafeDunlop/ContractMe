@@ -53,6 +53,17 @@
                 <input type="hidden" name="renovationId" th:value="${renovation.id}">
             </form>
 
+            <!-- Frontend JS error -->
+            <div class="alert alert-danger mt-2" role="alert" id="description-frontend-error" hidden>
+                <ul><li><label class="form-label" id="description-frontend-error-message"></label></li></ul>
+            </div>-->
+
+            <!-- Backend error -->
+            <div class="alert alert-danger mt-2" role="alert" id="description-backend-error"
+                 th:if="${errors}">
+                <ul><li th:each="msg : ${errors}" th:text="${msg}"></li></ul>
+            </div>
+
             <!-- Display added tags -->
             <div id="tagList" class="mb-3">
                 <label class="fw-bold">Current Tags:</label>
@@ -63,16 +74,7 @@
                 </div>
             </div>
 
-            <!-- Frontend JS error -->
-<!--            <div class="alert alert-danger mt-2" role="alert" id="description-frontend-error" hidden>-->
-<!--                <ul><li><label class="form-label" id="description-frontend-error-message"></label></li></ul>-->
-<!--            </div>-->
 
-            <!-- Backend error -->
-            <div class="alert alert-danger mt-2" role="alert" id="description-backend-error"
-                 th:if="${errors}">
-                <ul><li th:each="msg : ${errors}" th:text="${msg}"></li></ul>
-            </div>
 
 
 

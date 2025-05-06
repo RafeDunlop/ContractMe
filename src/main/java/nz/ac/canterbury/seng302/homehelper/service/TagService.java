@@ -54,7 +54,7 @@ public class TagService {
         if (renovationRecord.getTags().size() >= 5) {
             errors.add("Renovation cannot have more than 5 tags.");
         }
-        if (renovationRecord.getTags().stream().map(Tag::getTagName).toList().contains(tagName)) {
+        if (renovationRecord.getTags().stream().map(Tag::getTagName).toList().contains(tagName.toLowerCase())) {
             errors.add("Renovation cannot contain duplicate tag names.");
         }
         errors.addAll(tagValidation.validateName(tagName));
@@ -63,7 +63,7 @@ public class TagService {
     }
 
     public void addTagToRenovation(RenovationRecord record, String tagName) {
-        record.getTags().add(getTag(tagName.trim()));
+        record.getTags().add(getTag(tagName.toLowerCase().trim()));
         renovationRecordRepository.save(record);
     }
 
