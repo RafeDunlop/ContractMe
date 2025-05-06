@@ -58,7 +58,7 @@ public class ForgotPasswordService {
 
         expectedUser.filter(User::isActivated)
                 .ifPresent(user -> eventPublisher.publishEvent(new OnResetPasswordSubmittedEvent(user, locale)));
-        return String.join("", userValidation.validateEmailString(email));
+        return String.join(";", userValidation.validateEmailString(email));
     }
 
     /**
