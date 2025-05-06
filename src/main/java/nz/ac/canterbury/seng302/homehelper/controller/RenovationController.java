@@ -15,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -118,7 +117,7 @@ public class RenovationController {
 
         if (!errors.isEmpty()) {
             // Add each error to a flash attribute, categorizing by error type
-            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
+            errors.forEach(redirectAttributes::addFlashAttribute);
 
             redirectAttributes.addFlashAttribute("name", name);
             redirectAttributes.addFlashAttribute("description", description);
@@ -246,7 +245,7 @@ public class RenovationController {
         Map<String, List<String>> errors = renovationRecordService.validateAllInputsEdit(renovationRecord, name);
 
         if (!errors.isEmpty()) {
-            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
+            errors.forEach(redirectAttributes::addFlashAttribute);
 
             redirectAttributes.addFlashAttribute("id", id);
             redirectAttributes.addFlashAttribute("name", name);
@@ -417,19 +416,11 @@ public class RenovationController {
                                     RedirectAttributes redirectAttributes) {
 
         User user = loginService.getUserByEmail();
-        List<RenovationRecord> records;
-
-        switch (visibility.toLowerCase()) {
-            case "public":
-                records = renovationRecordService.getPublicRecords(searchTerm);
-                break;
-            case "user":
-                records = renovationRecordService.getUserRecords(user, searchTerm);
-                break;
-            default:
-                records = renovationRecordService.getAllRecords(user, searchTerm);
-                break;
-        }
+        List<RenovationRecord> records = switch (visibility.toLowerCase()) {
+            case "public" -> renovationRecordService.getPublicRecords(searchTerm);
+            case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
+            default -> renovationRecordService.getAllRecords(user, searchTerm);
+        };
 
         redirectAttributes.addFlashAttribute("records", records);
         redirectAttributes.addFlashAttribute("visibility", visibility);
