@@ -1,13 +1,19 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.List;
 
 /**
  * Basic unlinked location implementation using Geoapify
@@ -22,68 +28,90 @@ public class LocationService {
 
     private static final String autocompleteApi = "geocode/autocomplete";
 
-    private static final long apiKey = -1; // redacted
-
     private static final Logger logger = LoggerFactory.getLogger(LocationService.class);
+
+    private final ObjectMapper objectMapper;
+
+    private final RestTemplate restTemplate;
+
+    public LocationService() {
+        this.objectMapper = new ObjectMapper();
+        this.restTemplate = new RestTemplate();
+    }
 
     /**
      * Retrieves the localisation of a client from their ip address
      * @param ip The ip address of the client machine
-     * @throws IOException if the request is unsuccessful
      */
-    public void getRoughLocation(Long ip) throws IOException {
-        URL url = getUrlIpGrab(ip);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestProperty("Accept", "application/json");
-        logger.info(connection.getResponseMessage());
+    public LocalisationDTO getRoughLocation(String ip) {
+        ResponseEntity<String> response = restTemplate.getForEntity(getIpGrabUrl(ip), String.class);
+        if (response.getStatusCode() != HttpStatus.OK) {
+            String errorMessage = String.format("could not retrieve localisation information. Response code: %s", response.getStatusCode());
+            logger.warn(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+        try {
+            return objectMapper.readValue(response.getBody(), LocalisationDTO.class);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            throw new IllegalStateException(e.getMessage());
+        }
     }
 
     /**
      * Retrieves address autocomplete suggestions based on the specified prompt and sorted by the specified localisation information
-     * @param prompt The unfinished address input
-     * @param countryCode The <a href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2">ISO 3166</a> 2-letter country code
-     * @param latitude The latitude retrieved from an IP address
-     * @param longitude The longitude retrieved from an IP address
-     * @throws IOException if the request is unsuccessful
+     * @param prompt The partial address input for which to retrieve autocomplete suggestions
+     * @param localisationDTO contains fields whose union defines the localisation of the request for biasing request results
+     * @return a list of address objects with relevant fields, as retrieved from the API
      */
-    public void getAutocomplete(String prompt, String countryCode, double latitude, double longitude) throws IOException {
-        URL url = getAutoCompleteUrl(prompt, countryCode, latitude, longitude);;
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestProperty("Accept", "application/json");
-        logger.info(connection.getResponseMessage());
+    public List<AddressDTO> getAutocomplete(String prompt, LocalisationDTO localisationDTO) {
+        ResponseEntity<String> response = restTemplate.getForEntity(getAutoCompleteUrl(
+                prompt,
+                localisationDTO.getCountry().getIso_code(),
+                localisationDTO.getLocation().getLatitude(),
+                localisationDTO.getLocation().getLongitude()
+        ), String.class);
+        if (response.getStatusCode() != HttpStatus.OK) {
+            String errorMessage = String.format("could not retrieve address autocomplete suggestions. Response code: %s", response.getStatusCode());
+            logger.warn(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
+        }
+        try {
+            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode results = root.get("results");
+            return objectMapper.readValue(results.toString(), new TypeReference<>() {});
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            throw new IllegalStateException(e.getMessage());
+        }
     }
 
 
-    private URL getAutoCompleteUrl(String prompt, String countryCode, double latitude, double longitude) {
+    private String getAutoCompleteUrl(String prompt, String countryCode, double latitude, double longitude) {
+        for (String input : List.of(prompt, countryCode, String.valueOf(latitude), String.valueOf(longitude))) {
+            if (input == null || input.isEmpty()) {
+                logger.info("Request is missing required inputs");
+                throw new IllegalArgumentException();
+            }
+        }
         StringBuilder sb = new StringBuilder();
         sb.append(geoapifyBaseUrl);
         sb.append(autocompleteApi);
         sb.append(String.format("?text=%s", prompt));
         sb.append(String.format("&filter=countrycode:%s", countryCode));
         sb.append(String.format("&bias=proximity:%f,%f", latitude, longitude));
-        sb.append(String.format("&apiKey=%d", apiKey));
+        sb.append(String.format("&apiKey=%s", System.getenv("GEOAPIFY_API_KEY")));
         sb.append("&type=street");
         sb.append("&lang=en");
         sb.append("&format=json");
-        try {
-            return new URL(sb.toString());
-        } catch (MalformedURLException e) {
-            logger.warn(e.getMessage());
-            throw new IllegalArgumentException("Malformed URL");
-        }
+        return sb.toString();
     }
 
-    private URL getUrlIpGrab(Long ip) {
+    private String getIpGrabUrl(String ip) {
         StringBuilder sb = new StringBuilder();
         sb.append(geoapifyBaseUrl);
         sb.append(ipApi);
-        sb.append(String.format("?ip=%d&apiKey=%d", ip, apiKey));
-        try {
-            return new URL(sb.toString());
-        } catch (MalformedURLException e) {
-            logger.warn(e.getMessage());
-            throw new IllegalArgumentException("Malformed URL");
-        }
+        sb.append(String.format("?ip=%s&apiKey=%s", ip, System.getenv("GEOAPIFY_API_KEY")));
+        return sb.toString();
     }
-
 }
