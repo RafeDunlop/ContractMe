@@ -8,10 +8,7 @@ import nz.ac.canterbury.seng302.homehelper.validation.TagValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -53,12 +50,11 @@ public class TagService {
 
 
     public void addTagToRenovation(RenovationRecord record, String tagName) {
-
         record.getTags().add(getTag(tagName));
     }
 
-    public Map<String, List<String>> validateTagName(String tagName) {
-        Map<String, List<String>> errors = new HashMap<>();
+    public List<String> validateTagName(String tagName) {
+        List<String>errors = new ArrayList<>();
         tagValidation.validateName(tagName);
 
         return errors;
