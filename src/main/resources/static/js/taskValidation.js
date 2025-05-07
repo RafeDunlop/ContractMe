@@ -69,7 +69,7 @@ function validateDescription(input) {
         descriptionBackendError.hidden = true;
         return false;
     } else if (input.length > maxDescriptionLength) {
-        setError(descriptionFrontendError, descriptionFrontendErrorMessage, `Description must be ${maxDescriptionLength} characters or fewer.`);
+        setError(descriptionFrontendError, descriptionFrontendErrorMessage, `Task description must be ${maxDescriptionLength} characters or less.`);
         descriptionBackendError.hidden = true;
         return false;
     } else {

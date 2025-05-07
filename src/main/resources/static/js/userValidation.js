@@ -48,7 +48,7 @@ export function checkPasswordStrength(passwordField, passwordFrontendError, pass
                                passwordBackendError) {
     const password = passwordField.value;
 
-    const strengthError = "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.";
+    const strengthError = "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, one special character, and no fields from your profile (like your name or email).";
 
     let passwordErrors = [];
 

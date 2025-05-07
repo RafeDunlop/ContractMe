@@ -138,7 +138,7 @@ public class EditTaskController {
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error {}", e.getMessage());
 
-            List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
+            List<String> errorsList = List.of(e.getMessage().split(";"));
             redirectAttributes.addFlashAttribute("errorMessages", errorsList);
             redirectAttributes.addFlashAttribute("renovationTaskDTO", renovationTaskDTO);
 
