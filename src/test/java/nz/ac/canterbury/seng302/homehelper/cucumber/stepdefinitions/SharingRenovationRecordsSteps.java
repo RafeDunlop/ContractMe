@@ -48,6 +48,8 @@ public class SharingRenovationRecordsSteps {
     private MvcResult result;
 
     private User testUser;
+    private String expectedVisibility;
+    private String expectedSearchTerm;
 
     @Given("I am logged in")
     public void i_am_logged_in() throws Exception {
@@ -131,7 +133,8 @@ public class SharingRenovationRecordsSteps {
     @Given("there are {int} public renovation records")
     public void there_are_public_renovation_records(int count) {
         for (int i = 0; i < count; i++) {
-            User otherUser = new User("Other", "User" + i, "other" + i + "@example.com", "Password123!");
+            String email = "other" + i + "_" + System.currentTimeMillis() + "@example.com";
+            User otherUser = new User("Other", "User" + i, email, "Password123!");
             otherUser.activate();
             userRepository.save(otherUser);
 
@@ -190,5 +193,67 @@ public class SharingRenovationRecordsSteps {
         ));
 
         assertEquals(sorted, records);
+    }
+
+    @When("I click on a renovation record")
+    public void i_click_on_a_renovation_record() throws Exception {
+        RenovationRecord record = repository.findByIsPublicTrue().get(0);
+        MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);
+
+        result = mockMvc.perform(get("/renovations/view")
+                        .param("id", record.getId().toString())
+                        .param("visibility", "public")
+                        .param("fromSearch", "true")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Then("I should see the details of that renovation record")
+    public void i_should_see_the_details_of_the_record() throws Exception {
+        String content = result.getResponse().getContentAsString();
+        assertTrue(content.contains("View Renovation"));
+    }
+
+    @Given("I have searched for visibility: {string} and search term: {string} renovation records")
+    public void i_have_searched_with_custom_filters(String visibility, String searchTerm) throws Exception {
+        this.expectedVisibility = visibility;
+        this.expectedSearchTerm = searchTerm;
+
+        MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);
+
+        result = mockMvc.perform(post("/renovations/search")
+                        .param("visibility", visibility)
+                        .param("searchTerm", searchTerm)
+                        .with(csrf())
+                        .session(session))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+
+        result = mockMvc.perform(get("/renovations/search")
+                        .with(csrf())
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @When("I click the “Back to search results” button")
+    public void i_click_back_to_search_results() throws Exception {
+        MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);
+
+        result = mockMvc.perform(get("/renovations/search")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Then("I should see the list of renovation records at the same search page I was on")
+    public void i_should_see_same_search_results_page() throws Exception {
+        String viewContent = result.getResponse().getContentAsString();
+
+        assertTrue(viewContent.contains("Renovation Records"));
+
+        assertTrue(viewContent.contains("<option value=\"" + expectedVisibility + "\" selected=\"selected\">"));
+        assertTrue(viewContent.contains("name=\"searchTerm\" value=\"" + expectedSearchTerm + "\""));
     }
 }

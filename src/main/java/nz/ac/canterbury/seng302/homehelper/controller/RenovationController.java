@@ -432,7 +432,6 @@ public class RenovationController {
                                           HttpSession session) {
         logger.info("POST /renovations/search");
 
-        // Fallback defaults
         if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";
 
