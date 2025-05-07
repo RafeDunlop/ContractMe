@@ -23,13 +23,20 @@
         <input type="hidden" id="tasksPerPage" name="tasksPerPage" th:value="5"/>
         <input type="hidden" id="renovationId" name="renovationId" th:value="${renovation.getId()}"/>
         <div id="content-container" class="card p-4 shadow-sm">
-            <div style="display: flex; justify-content: space-between;">
-                <h4 th:text="'Viewing Renovation: ' + ${renovation.name}" class="card-title mb-4"></h4>
-                <form id="renovationForm">
-                    <input type="checkbox" id="publicCheckbox" name="isPublic" th:checked="${renovation.isPublic()}">
-                    <label for="publicCheckbox">Make my renovation record public</label>
+            <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap">
+                <h5 class="mb-0">Viewing Renovation:</h5>
+
+                <form id="renovationForm" class="d-flex align-items-center">
+                    <input type="checkbox" id="publicCheckbox" name="isPublic" th:checked="${renovation.isPublic()}" class="me-1">
+                    <label for="publicCheckbox" class="mb-0">Make my renovation record public</label>
                 </form>
             </div>
+
+            <h4 th:text="${renovation.name}"
+                class="card-title text-truncate mb-4"
+                style="max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"
+                title="[[${renovation.name}]]">
+            </h4>
             <div th:if="${renovation.description} != ''" class="card p-3 bg-light mb-3">
                 <h6 class="fw-bold">Description:</h6>
                 <p class="mb-0" th:text="${renovation.description}"></p>

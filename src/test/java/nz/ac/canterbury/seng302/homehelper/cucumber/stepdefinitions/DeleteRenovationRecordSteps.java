@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
-import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -19,6 +18,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -50,43 +51,35 @@ public class DeleteRenovationRecordSteps {
     @Autowired
     private RenovationTaskRepository renovationTaskRepository;
 
-    private User user;
     private Long renovationId;
 
-    @Before("@renovationDelete")
-    public void setupSecurityContext() {
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(
-                new UsernamePasswordAuthenticationToken(
-                        "jane@doe.com",
-                        "password",
-                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
-                )
-        );
-        SecurityContextHolder.setContext(context);
-    }
+    private User testUser;
 
-    @Before("@renovationDelete")
-    public void cleanupDatabase() {
-        renovationTaskRepository.deleteAll();
-        renovationRecordRepository.deleteAll();
-        userRepository.deleteAll();
-    }
 
     @Given("I am an existing user")
-    public void i_am_an_existing_user() {
-        user = new User("Jane", "Doe", "jane@doe.com", "password");
-        user.activate();
-        user.grantAuthority("ROLE_USER");
-        userRepository.save(user);
+    public void i_am_an_existing_user() throws Exception {
+
+        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        String uniqueEmail = "test" + System.currentTimeMillis() + "@user.nz";
+        testUser = new User("Test", "User", uniqueEmail, encoder.encode("Test123!"));
+        testUser.activate();
+        userRepository.save(testUser);
+
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(testUser.getEmail(), null,
+                        List.of(new SimpleGrantedAuthority("ROLE_USER")));
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
     }
 
     @Given("I have an existing renovation")
     public void i_have_an_existing_renovation() {
-        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        RenovationRecord renovationRecord = new RenovationRecord(testUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(renovationRecord);
 
-        Optional<RenovationRecord> renovationWithId = renovationRecordRepository.findExactMatch("Renovation One", user);
+        Optional<RenovationRecord> renovationWithId = renovationRecordRepository.findExactMatch("Renovation One", testUser);
         Assertions.assertTrue(renovationWithId.isPresent());
         Assertions.assertEquals(renovationRecord.getName(), renovationWithId.get().getName());
         renovationId = renovationWithId.get().getId();
