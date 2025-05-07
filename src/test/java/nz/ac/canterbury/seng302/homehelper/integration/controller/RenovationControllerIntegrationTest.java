@@ -581,9 +581,9 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(get("/renovations/view")
                         .param("id", Long.toString(existingRecord.getId() + 1))
                         .with(csrf()))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().is4xxClientError())
                 .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
-                .andExpect(result -> assertEquals("400 BAD_REQUEST \"This renovation does not exist\"", Objects.requireNonNull(result.getResolvedException()).getMessage()));
+                .andExpect(result -> assertEquals("404 NOT_FOUND \"This renovation does not exist\"", Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
 
     @Test
