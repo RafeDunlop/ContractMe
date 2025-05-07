@@ -14,11 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.List;
@@ -60,6 +59,7 @@ public class RenovationControllerIntegrationTest {
     private User testUser;
 
     private RenovationRecord renovationRecord;
+    private MockHttpSession session;
 
     @BeforeEach
     public void setupUser() {
@@ -80,6 +80,8 @@ public class RenovationControllerIntegrationTest {
 
         renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
         renovationRecordRepository.save(renovationRecord);
+
+        session = new MockHttpSession();
     }
 
     /**
@@ -581,9 +583,9 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(get("/renovations/view")
                         .param("id", Long.toString(existingRecord.getId() + 1))
                         .with(csrf()))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().is4xxClientError())
                 .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
-                .andExpect(result -> assertEquals("400 BAD_REQUEST \"This renovation does not exist\"", Objects.requireNonNull(result.getResolvedException()).getMessage()));
+                .andExpect(result -> assertEquals("404 NOT_FOUND \"This renovation does not exist\"", Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
 
     @Test
@@ -690,10 +692,10 @@ public class RenovationControllerIntegrationTest {
     @Test
     @WithMockUser(username = "not.owner@doe.com")
     public void editRenovationRecord_userNotOwner_redirectToMain() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/renovations/edit")
+        mockMvc.perform(get("/renovations/edit")
                         .param("id", renovationRecord.getId().toString()))
-                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.redirectedUrl("/main"));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/main"));
     }
 
     @Test
@@ -904,5 +906,60 @@ public class RenovationControllerIntegrationTest {
                         hasProperty("name", is("Public Renovation")))))
                 .andExpect(flash().attribute("records", not(hasItem(
                         hasProperty("name", is("Private Renovation"))))));
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void getSearchRenovations_withDefaultValues_rendersSearchPageWithDefaultVisibility() throws Exception {
+        mockMvc.perform(get("/renovations/search"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attribute("visibility", is("all")))
+                .andExpect(model().attribute("searchTerm", is("")))
+                .andExpect(model().attribute("records", hasSize(0)));
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void getSearchRenovations_withSessionAttributes_rendersSearchPage() throws Exception {
+        session.setAttribute("visibility", "user");
+        session.setAttribute("searchTerm", "Test Renovation");
+
+        mockMvc.perform(get("/renovations/search").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attribute("visibility", is("user")))
+                .andExpect(model().attribute("searchTerm", is("Test Renovation")));
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void getSearchRenovations_withNoMatchingRecords_returnsEmptyResults() throws Exception {
+        session.setAttribute("visibility", "all");
+        session.setAttribute("searchTerm", "NonExistent");
+
+        mockMvc.perform(get("/renovations/search").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attribute("records", hasSize(0))); // No matching records
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void getSearchRenovations_withMatchingRecords_returnsFilteredResults() throws Exception {
+        RenovationRecord record = new RenovationRecord(owner, "Test Renovation", "Description", List.of("Room A"));
+        record.setPublicity(true);
+        renovationRecordRepository.save(record);
+
+        session.setAttribute("visibility", "all");
+        session.setAttribute("searchTerm", "Test Renovation");
+
+        mockMvc.perform(get("/renovations/search").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attribute("records", hasSize(1)))
+                .andExpect(model().attribute("records", hasItem(
+                        hasProperty("name", is("Test Renovation"))
+                )));
     }
 }

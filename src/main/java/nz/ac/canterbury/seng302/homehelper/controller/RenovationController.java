@@ -1,5 +1,4 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
@@ -272,7 +271,11 @@ public class RenovationController {
     public String submitPublicity(@PathVariable("id") Long id, @RequestBody Map<String, Boolean> payload) {
         logger.info("editPublicity/{id}");
         boolean isPublic = payload.get("isPublic");
+        User user = loginService.getUserByEmail();
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
+        if (!renovationRecord.getUser().equals(user)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Action not allowed.");
+        }
         renovationRecordService.changePublicity(isPublic, renovationRecord);
         return "redirect:/renovations/view?id=" + renovationRecord.getId();
     }
@@ -283,58 +286,49 @@ public class RenovationController {
      * @param id           of the renovation record to view
      * @param pageNumber   the page of tasks to view, defaults to 1
      * @param tasksPerPage the number of tasks to display on the page, based off the screen size
-     * @param request      request the HTTP servlet request
      * @param model        (map-like) representation of results to be used by thymeleaf
      * @return view page of the renovation
      * @throws ResponseStatusException if the renovation record does not exist
      */
-
     @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id,
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                  @RequestParam(defaultValue = "5", name = "tasksPerPage") int tasksPerPage,
-                                 HttpServletRequest request,
+                                 @RequestParam(name = "fromSearch", required = false, defaultValue = "false") boolean fromSearch,
                                  Model model) {
+        logger.info("GET /renovations/view");
 
         if (tasksPerPage < 1) {
             tasksPerPage = 5;
         }
 
-        HttpSession session = request.getSession();
-        if (session.getAttribute("tasksPerPage") != null) {
-            // If tasksPerPage is not passed in the request, fallback to session value.
-            tasksPerPage = (int) session.getAttribute("tasksPerPage");
-        }
-        // Scales the number of tasks per page based on screen size.
-        // The client cannot directly set this value.
-
-
         RenovationRecord record = renovationRecordService.getRecordById(id);
-        if (record == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
+        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
+
         User user = loginService.getUserByEmail();
-        if (!record.getUser().equals(user)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Renovation not found.");
+        boolean isOwner = user.equals(record.getUser());
+        if (!isOwner && !record.isPublic()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
-        if (pageNumber < 1) return "redirect:/renovations/view?id=" + id + "&page=1&tasksPerPage=" + tasksPerPage;
+        if (pageNumber < 1)
+            return "redirect:/renovations/view?id=" + id + "&page=1&tasksPerPage=" + tasksPerPage;
 
         int totalTasks = record.getRenovationTasks().size();
         int totalPages = (totalTasks + tasksPerPage - 1) / tasksPerPage;
 
-        if (pageNumber > (totalPages) && (totalTasks != 0))
+        if (pageNumber > totalPages && totalTasks != 0)
             return "redirect:/renovations/view?id=" + id + "&page=" + totalPages + "&tasksPerPage=" + tasksPerPage;
 
         Pageable pageable = PageRequest.of(pageNumber - 1, tasksPerPage);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
         List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
 
-        int paginationLinksStart;
-        int paginationLinksEnd;
+        int paginationLinksStart = Math.max(pageNumber - 2, 1);
+        int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
 
-        paginationLinksStart = Math.max(pageNumber - 2, 1);
-        paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
-        // Tracks two pages ahead and behind the current page for the page number buttons displaying on the page.
-
+        model.addAttribute("isOwner", isOwner);
+        model.addAttribute("fromSearch", fromSearch);
         model.addAttribute("tasks", paginatedTasks.getContent());
         model.addAttribute("pageNumber", pageNumber);
         model.addAttribute("totalPages", totalPages);
@@ -387,14 +381,35 @@ public class RenovationController {
      * @return the name of the view template for searching renovations
      */
     @GetMapping("/search")
-    public String searchRenovations(Model model) {
+    public String searchRenovations(Model model, HttpSession session) {
+        String visibility = (String) model.asMap().get("visibility");
+        String searchTerm = (String) model.asMap().get("searchTerm");
+
+        if (visibility == null) {
+            visibility = (String) session.getAttribute("visibility");
+            if (visibility == null) visibility = "all";
+        }
+
+        if (searchTerm == null) {
+            searchTerm = (String) session.getAttribute("searchTerm");
+            if (searchTerm == null) searchTerm = "";
+        }
+
+        model.addAttribute("visibility", visibility);
+        model.addAttribute("searchTerm", searchTerm);
+
         if (!model.containsAttribute("records")) {
+            logger.info("GET /renovations/search");
+
             User user = loginService.getUserByEmail();
-            List<RenovationRecord> records = renovationRecordService.getAllRecords(user, null);
+
+            List<RenovationRecord> records = switch (visibility.toLowerCase()) {
+                case "public" -> renovationRecordService.getPublicRecords(searchTerm);
+                case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
+                default -> renovationRecordService.getAllRecords(user, searchTerm);
+            };
 
             model.addAttribute("records", records);
-            model.addAttribute("visibility", "all");
-            model.addAttribute("searchTerm", "");
             model.addAttribute("user", user);
         }
         return "renovationSearchTemplate";
@@ -411,9 +426,18 @@ public class RenovationController {
      * @return a redirect to the GET search endpoint with the results stored in flash attributes
      */
     @PostMapping("/search")
-    public String submitSearchRenovations(@RequestParam String visibility,
-                                    @RequestParam(required = false) String searchTerm,
-                                    RedirectAttributes redirectAttributes) {
+    public String submitSearchRenovations(@RequestParam(required = false) String visibility,
+                                          @RequestParam(required = false) String searchTerm,
+                                          RedirectAttributes redirectAttributes,
+                                          HttpSession session) {
+        logger.info("POST /renovations/search");
+
+        if (visibility == null) visibility = "all";
+        if (searchTerm == null) searchTerm = "";
+
+        // Store in session so GET /search can use them
+        session.setAttribute("visibility", visibility);
+        session.setAttribute("searchTerm", searchTerm);
 
         User user = loginService.getUserByEmail();
         List<RenovationRecord> records = switch (visibility.toLowerCase()) {
@@ -426,6 +450,7 @@ public class RenovationController {
         redirectAttributes.addFlashAttribute("visibility", visibility);
         redirectAttributes.addFlashAttribute("searchTerm", searchTerm);
         redirectAttributes.addFlashAttribute("user", user);
+
         return "redirect:/renovations/search";
     }
 }

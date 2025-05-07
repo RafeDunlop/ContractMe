@@ -81,7 +81,7 @@ public class EditTaskController {
 
         Optional<RenovationTask> renovationTask = renovationTaskRepository.findById(taskId);
         if (renovationTask.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
         }
 
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO(renovationTask.get());
@@ -160,6 +160,10 @@ public class EditTaskController {
         logger.info("POST editTask/edit-icon/{id}");
         String iconName = requestBody.get("iconName");
         RenovationTask renovationTask = renovationTaskService.getTaskById(id);
+        User user = loginService.getUserByEmail();
+        if (!renovationTask.getRenovationRecord().getUser().equals(user)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Action not allowed.");
+        }
         RenovationRecord renovation = renovationTask.getRenovationRecord();
         editTaskService.updateTaskIcon(renovationTask, iconName);
         return "redirect:/renovations/view?id=" + renovation.getId();
