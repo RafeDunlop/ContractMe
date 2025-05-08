@@ -3,9 +3,11 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +32,7 @@ import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -54,6 +56,10 @@ public class RenovationControllerIntegrationTest {
 
     @Autowired
     private TagService tagService;
+
+
+    @Autowired
+    private RenovationRecordService renovationRecordService;
 
     private User currentUser;
     private User owner;
@@ -787,8 +793,14 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(get("/renovations/tags/autocomplete")
                 .param("partialTag", "his"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0]").value("historic"))
-                .andExpect(jsonPath("$[1]").value("history"));
+                .andExpect(jsonPath("$", hasItems("historic", "history")));
+
+        tagService.addTag("building-one");
+
+        mockMvc.perform(get("/renovations/tags/autocomplete")
+                        .param("partialTag", "build"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasItems("building-one")));
     }
 
     @Test
@@ -797,6 +809,33 @@ public class RenovationControllerIntegrationTest {
                         .param("partialTag", "his"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
+
+        tagService.addTag("ancient");
+
+        mockMvc.perform(get("/renovations/tags/autocomplete")
+                        .param("partialTag", " "))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    public void testAddExistingTagToRenovation() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(currentUser, "Test Renovation", "Some words", List.of("Room1", "Room2"));
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+
+        String testTagName = "apartment";
+        tagService.addTag(testTagName);
+
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", testTagName))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+
+        assertTrue(testRecord.getTags().stream()
+                .anyMatch(tag -> tag.getTagName().equals(testTagName)));
     }
 
 }
