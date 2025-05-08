@@ -285,7 +285,7 @@ public class RenovationController {
      *
      * @param id           of the renovation record to view
      * @param pageNumber   the page of tasks to view, defaults to 1
-     * @param tasksPerPage the number of tasks to display on the page, based off the screen size
+     * @param cardPerPage the number of tasks to display on the page, based off the screen size
      * @param model        (map-like) representation of results to be used by thymeleaf
      * @return view page of the renovation
      * @throws ResponseStatusException if the renovation record does not exist

@@ -608,7 +608,7 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(get("/renovations/view")
                         .param("id", Long.toString(existingRecord.getId()))
                         .param("page", "1")
-                        .param("tasksPerPage", "5")
+                        .param("cardPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("viewRenovation"))
@@ -621,7 +621,7 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(get("/renovations/view")
                         .param("id", Long.toString(existingRecord.getId()))
                         .param("page", "2")
-                        .param("tasksPerPage", "5")
+                        .param("cardPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("viewRenovation"))
@@ -633,7 +633,7 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(get("/renovations/view")
                         .param("id", Long.toString(existingRecord.getId()))
                         .param("page", "3")
-                        .param("tasksPerPage", "5")
+                        .param("cardPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("viewRenovation"))
@@ -660,19 +660,19 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(get("/renovations/view")
                         .param("id", Long.toString(existingRecord.getId()))
                         .param("page", "34")
-                        .param("tasksPerPage", "5")
+                        .param("cardPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=2&tasksPerPage=5"));
+                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=2&cardPerPage=5"));
 
 
         mockMvc.perform(get("/renovations/view")
                         .param("id", Long.toString(existingRecord.getId()))
                         .param("page", "-1")
-                        .param("tasksPerPage", "5")
+                        .param("cardPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=1&tasksPerPage=5"));
+                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=1&cardPerPage=5"));
     }
 
     @Test
