@@ -838,4 +838,66 @@ public class RenovationControllerIntegrationTest {
                 .anyMatch(tag -> tag.getTagName().equals(testTagName)));
     }
 
+
+    @Test
+    public void testAddNotExistingTagToRenovation() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(currentUser, "Test Renovation", "Some words", List.of("Room1", "Room2"));
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+
+        String newTagName = "new-tag";
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", newTagName))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+
+        assertTrue(testRecord.getTags().stream()
+                .anyMatch(tag -> tag.getTagName().equals(newTagName)));
+
+        String newNameSpecialCharacters = "builder1!";
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", newNameSpecialCharacters))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+
+        assertTrue(testRecord.getTags().stream()
+                .anyMatch(tag -> tag.getTagName().equals(newNameSpecialCharacters)));
+
+        String withSpacesNewName = "      electrician";
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", withSpacesNewName))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+
+        assertTrue(testRecord.getTags().stream()
+                .anyMatch(tag -> tag.getTagName().equals("electrician")));
+    }
+
+
+    @Test
+    public void testAddTagInvalidInputs() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(currentUser, "Test Renovation", "Description", List.of());
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", "    "))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("errors"));
+
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", "123"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("errors"));
+    }
 }

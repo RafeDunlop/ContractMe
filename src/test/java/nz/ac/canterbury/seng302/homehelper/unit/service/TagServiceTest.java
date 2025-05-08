@@ -81,17 +81,60 @@ public class TagServiceTest {
     @Test
     public void addTagToRenovation_tagExists_succeeds() {
         RenovationRecord record = new RenovationRecord();
+        record.setTags(new ArrayList<>());
+
         String tagName = "kitchen";
         Tag tag = new Tag(tagName);
 
-        when(tagService.getTag(tagName.toLowerCase().trim())).thenReturn(tag);
-
-        doNothing().when(renovationRecordRepository).save(record);
+        when(tagRepository.findExactMatchTagByTagName(tagName.toLowerCase().trim()))
+                .thenReturn(Optional.of(tag));
 
         tagService.addTagToRenovation(record, tagName);
 
         verify(renovationRecordRepository, times(1)).save(record);
         assertTrue(record.getTags().contains(tag));
     }
+
+
+
+    @Test
+    public void validateTag_validTag_returnsNoErrors() {
+        RenovationRecord record = mock(RenovationRecord.class);
+
+        List<String> errors = tagService.validateTag(record, "window");
+        System.out.println(errors);
+        assertTrue(errors.isEmpty());
+    }
+
+
+    @Test
+    public void validateTag_duplicateTag_returnsError() {
+        RenovationRecord record = new RenovationRecord();
+
+        record.setTags(new ArrayList<>(List.of(new Tag("bathroom"))));
+
+        List<String> errors = tagService.validateTag(record, "bathroom");
+
+        assertTrue(errors.contains("Renovation cannot contain duplicate tag names."));
+    }
+
+    @Test
+    public void validateTag_tooManyTags_returnsError() {
+        RenovationRecord record = new RenovationRecord();
+        List<Tag> tags = Arrays.asList(
+                new Tag("kitchen"),
+                new Tag("bathroom"),
+                new Tag("living-room"),
+                new Tag("bedroom"),
+                new Tag("garage")
+        );
+        record.setTags(tags);
+        when(record.getTags()).thenReturn(tags);
+
+        List<String> errors = tagService.validateTag(record, "window");
+
+        assertTrue(errors.contains("Renovation cannot have more than 5 tags."));
+    }
+
 
 }
