@@ -18,6 +18,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.List;
@@ -830,13 +831,20 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     public void searchRenovation_withNoMatches_returnsNoResultsMessage() throws Exception {
-        mockMvc.perform(post("/renovations/search")
+        MvcResult result = mockMvc.perform(post("/renovations/search")
                         .param("searchTerm", "NonExistentTerm")
                         .param("visibility", "all")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search"))
-                .andExpect(flash().attribute("records", hasSize(0)));
+                .andReturn();
+
+        String redirectedUrl = result.getResponse().getRedirectedUrl();
+
+        mockMvc.perform(get(redirectedUrl)
+                        .session((MockHttpSession) result.getRequest().getSession()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attribute("records", hasSize(0)));
     }
 
     @Test
@@ -846,16 +854,24 @@ public class RenovationControllerIntegrationTest {
         matchingRecord.setPublicity(true);
         renovationRecordRepository.save(matchingRecord);
 
-        mockMvc.perform(post("/renovations/search")
+        MvcResult postResult = mockMvc.perform(post("/renovations/search")
                         .param("searchTerm", "Test Renovation")
                         .param("visibility", "all")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search"))
-                .andExpect(flash().attributeExists("records"))
-                .andExpect(flash().attribute("records", hasSize(1)))
-                .andExpect(flash().attribute("records", hasItem(
-                        hasProperty("name", is("Test Renovation")))));
+                .andReturn();
+
+        String redirectedUrl = postResult.getResponse().getRedirectedUrl();
+
+        mockMvc.perform(get(redirectedUrl)
+                        .session((MockHttpSession) postResult.getRequest().getSession()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attributeExists("records"))
+                .andExpect(model().attribute("records", hasItem(
+                        hasProperty("name", is("Test Renovation"))
+                )));
+
     }
 
     @Test
@@ -869,17 +885,25 @@ public class RenovationControllerIntegrationTest {
         privateRecord.setPublicity(false);
         renovationRecordRepository.save(privateRecord);
 
-        mockMvc.perform(post("/renovations/search")
+        MvcResult postResult = mockMvc.perform(post("/renovations/search")
                         .param("searchTerm", "")
                         .param("visibility", "public")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search"))
-                .andExpect(flash().attributeExists("records"))
-                .andExpect(flash().attribute("records", hasSize(1)))
-                .andExpect(flash().attribute("records", hasItem(
+                .andReturn();
+
+        String redirectedUrl = postResult.getResponse().getRedirectedUrl();
+
+        // Step 2: Follow GET redirect and assert results
+        mockMvc.perform(get(redirectedUrl)
+                        .session((MockHttpSession) postResult.getRequest().getSession(false)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate")) // ensure your GET method returns this view
+                .andExpect(model().attributeExists("records"))
+                .andExpect(model().attribute("records", hasSize(1)))
+                .andExpect(model().attribute("records", hasItem(
                         hasProperty("name", is("Public Renovation")))))
-                .andExpect(flash().attribute("records", not(hasItem(
+                .andExpect(model().attribute("records", not(hasItem(
                         hasProperty("name", is("Private Renovation"))))));
     }
 
@@ -894,17 +918,23 @@ public class RenovationControllerIntegrationTest {
         privateRecord.setPublicity(false);
         renovationRecordRepository.save(privateRecord);
 
-        mockMvc.perform(post("/renovations/search")
+        MvcResult postResult = mockMvc.perform(post("/renovations/search")
                         .param("searchTerm", "Public")
                         .param("visibility", "public")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search"))
-                .andExpect(flash().attributeExists("records"))
-                .andExpect(flash().attribute("records", hasSize(1)))
-                .andExpect(flash().attribute("records", hasItem(
+                .andExpect(redirectedUrl("/renovations/search?page=1&renovationPerPage=5"))
+                .andReturn();
+
+        mockMvc.perform(get("/renovations/search")
+                        .session((MockHttpSession) postResult.getRequest().getSession(false)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attributeExists("records"))
+                .andExpect(model().attribute("records", hasSize(1)))
+                .andExpect(model().attribute("records", hasItem(
                         hasProperty("name", is("Public Renovation")))))
-                .andExpect(flash().attribute("records", not(hasItem(
+                .andExpect(model().attribute("records", not(hasItem(
                         hasProperty("name", is("Private Renovation"))))));
     }
 

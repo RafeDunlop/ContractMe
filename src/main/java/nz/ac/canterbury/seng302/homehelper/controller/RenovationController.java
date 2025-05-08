@@ -480,7 +480,6 @@ public class RenovationController {
             default -> renovationRecordService.getAllRecords(user, searchTerm);
         };
 
-//        redirectAttributes.addFlashAttribute("records", records);
         redirectAttributes.addFlashAttribute("visibility", visibility);
         redirectAttributes.addFlashAttribute("searchTerm", searchTerm);
         redirectAttributes.addFlashAttribute("user", user);
