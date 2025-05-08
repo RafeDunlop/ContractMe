@@ -27,6 +27,11 @@ public interface TagRepository extends CrudRepository<Tag, Long> {
     List<Tag> findByNameContainingIgnoreCase(@Param("name") String name);
 
 
+    /**
+     * Retrieves a tag that exactly matches the name, that is case-sensitive.
+     * @param name The exact name of the tag to find.
+     * @return An Optional containing the tag if it exists, or empty if not found.
+     */
     @Query("SELECT f FROM Tag f WHERE (f.tagName) = (:name)")
     Optional<Tag> findExactMatchTagByTagName(@Param("name") String name);
 }
