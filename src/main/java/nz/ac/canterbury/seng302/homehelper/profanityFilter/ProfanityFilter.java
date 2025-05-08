@@ -14,6 +14,8 @@ import java.util.Map;
 
 public class ProfanityFilter {
 
+    private static final ProfanityFilter instance = new ProfanityFilter();
+
     private static final List<String> SUPPORTED_LANGUAGES = Arrays.asList(
             "ar", "az", "bg", "bs", "ca", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr", "ga", "he", "hi", "hr",
             "hu", "hy", "id", "is", "it", "ja", "ka", "ko", "lt", "lv", "mk", "ms", "mt", "no", "nl", "pl", "pt", "ro",
@@ -29,31 +31,31 @@ public class ProfanityFilter {
             throw new RuntimeException("Unable to load dictionary file: " + file.getAbsolutePath(), e);
         }
     }
-    private final Map<String, Dictionary.Matcher> matchers;
 
-    public ProfanityFilter() {
-        this(.3f);
+    private final Map<String, Dictionary.Matcher> matchers = new HashMap<>();
+
+    private ProfanityFilter() {}
+
+    public static ProfanityFilter getInstance() {
+        return instance;
     }
 
-    public ProfanityFilter(float threshold) {
-        matchers = new HashMap<>(SUPPORTED_LANGUAGES.size());
-        for (String language : SUPPORTED_LANGUAGES) {
-            Dictionary dictionary = loadDictionary(language);
-            matchers.put(language, dictionary.matcher(threshold));
-        }
+    private Dictionary.Matcher getMatcher(String language) {
+        return matchers.computeIfAbsent(language, lang -> {
+            Dictionary dictionary = loadDictionary(lang);
+            return dictionary.matcher(0.3f);
+        });
     }
 
     public boolean test(String language, String text) {
         language = languageOf(language);
-
-        Dictionary.Matcher matcher = matchers.get(language);
+        Dictionary.Matcher matcher = getMatcher(language);
         return matcher != null && matcher.matches(text);
     }
 
     public Profanity find(String language, String text) {
         language = languageOf(language);
-
-        Dictionary.Matcher matcher = matchers.get(language);
+        Dictionary.Matcher matcher = getMatcher(language);
         return matcher != null ? matcher.find(text) : null;
     }
 
