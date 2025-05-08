@@ -21,7 +21,7 @@
 
     <div class="container mt-2">
         <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
-        <input type="hidden" id="tasksPerPage" name="tasksPerPage" th:value="5"/>
+        <input type="hidden" id="cardPerPage" name="cardPerPage" th:value="5"/>
         <input type="hidden" th:value="${searchTerm}" name="searchTerm"/>
 
         <div id="content-container" class="card p-4 shadow-sm">
@@ -53,8 +53,8 @@
             </form>
 
             <!-- Renovation Cards Grid -->
-            <div id="taskGrid" class="task-grid">
-                <div th:each="record : ${records}" class="task-card">
+            <div id="grid" class="task-grid">
+                <div th:each="record : ${records}" class="col-md-3 mb-4">
                     <a th:href="@{/renovations/view(id=${record.getId()}, page=${pageNumber}, fromSearch=true)}">
                     <div class="card position-relative" style="width: 18rem;">
                         <!-- Badge if user owns the record -->
@@ -94,39 +94,44 @@
                     <ul class="pagination" id="pagination">
                         <!-- First button (AC more than 10 pages) -->
                         <li class="page-item" th:if="${totalPages > 10}">
-                            <a class="page-link" href="#" th:href="@{/renovations/search(page=1, renovationPerPage=${renovationPerPage})}">First</a>
+                            <a class="page-link" href="#" th:href="@{/renovations/search(page=1, cardPerPage=${cardPerPage})}">First</a>
 
                         </li>
 
                         <!-- Previous button -->
                         <li class="page-item" th:if="${pageNumber > 1}">
-                            <a class="page-link" href="#" th:href="@{/renovations/search(page=${pageNumber - 1}, renovationPerPage=${renovationPerPage})}">Prev</a>
+                            <a class="page-link" href="#" th:href="@{/renovations/search(page=${pageNumber - 1}, cardPerPage=${cardPerPage})}">Prev</a>
                         </li>
 
                         <!-- Page buttons <= 10 Pages, AC3 -->
                         <li class="page-item" th:if="${totalPages <= 10}" th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
-                            <a class="page-link" th:href="@{/renovations/search(page=${pageLinkNumber}, renovationPerPage=${renovationPerPage})}" th:text="${pageLinkNumber}"></a>
+                            <a class="page-link" th:href="@{/renovations/search(page=${pageLinkNumber}, cardPerPage=${cardPerPage})}" th:text="${pageLinkNumber}"></a>
                         </li>
 
                         <!-- Page buttons > 10 Pages, AC3 -->
                         <li class="page-item" th:if="${totalPages > 10}"
                             th:each="pageLinkNumber : ${#numbers.sequence(paginationLinksStart, paginationLinksEnd)}"
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
-                            <a class="page-link" th:href="@{/renovations/search(page=${pageLinkNumber}, renovationPerPage=${renovationPerPage})}" th:text="${pageLinkNumber}"></a>
+                            <a class="page-link" th:href="@{/renovations/search(page=${pageLinkNumber}, cardPerPage=${cardPerPage})}" th:text="${pageLinkNumber}"></a>
                         </li>
 
                         <!-- Next button -->
                         <li class="page-item" th:if="${pageNumber < totalPages}">
-                            <a class="page-link" href="#" th:href="@{/renovations/search(page=${pageNumber + 1}, renovationPerPage=${renovationPerPage})}">Next</a>
+                            <a class="page-link" href="#" th:href="@{/renovations/search(page=${pageNumber + 1}, cardPerPage=${cardPerPage})}">Next</a>
                         </li>
 
                         <!-- Last button (AC more than 10 pages) -->
                         <li class="page-item" th:if="${totalPages > 10}">
-                            <a class="page-link" href="#" th:href="@{/renovations/search(page=${totalPages}, renovationPerPage=${renovationPerPage})}">Last</a>
+                            <a class="page-link" href="#" th:href="@{/renovations/search(page=${totalPages}, cardPerPage=${cardPerPage})}">Last</a>
                         </li>
 
                         <!-- Search field (AC more than 10 pages) --> <!-- CHANGE IF TO 10 after testing -->
+
+                        <li class="page-item d-flex align-items-center" th:if="${totalPages > 10}">
+                            <input type="number" class="form-control me-2" id="pageSearch" aria-label="Page Search" style="min-width: 50px;">
+                            <button class="btn btn-primary" th:onclick="|validateRenovationPageSearch()|">Search</button>
+                        </li>
 
                     </ul>
                 </div>
@@ -136,5 +141,5 @@
 </div>
 </body>
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
-<script type="text/javascript" th:src="@{/js/renovationPagination.js}"></script>
+<script type="text/javascript" th:src="@{/js/pagination.js}"></script>
 </html>
