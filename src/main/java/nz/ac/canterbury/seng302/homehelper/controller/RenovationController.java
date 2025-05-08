@@ -381,8 +381,10 @@ public class RenovationController {
      * @return the name of the view template for searching renovations
      */
     @GetMapping("/search")
-    public String searchRenovations(Model model, HttpSession session,@RequestParam(defaultValue = "1", name = "page") int pageNumber,
+    public String searchRenovations(Model model, HttpSession session,
+                                    @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                     @RequestParam(defaultValue = "5", name = "renovationPerPage") int renovationPerPage) {
+
         String visibility = (String) model.asMap().get("visibility");
         String searchTerm = (String) model.asMap().get("searchTerm");
 
@@ -417,24 +419,33 @@ public class RenovationController {
             };
 
             if (pageNumber < 1)
-                return "redirect:/renovations/search&page=" + pageNumber + "renovationPerPage=" + renovationPerPage;
+                return "redirect:/renovations/search?page=" + pageNumber + "&renovationPerPage=" + renovationPerPage;
+
 
             int totalRenovation = records.size();
 
             int totalPages = (totalRenovation + renovationPerPage - 1) / renovationPerPage;
 
             if (pageNumber > totalPages && totalRenovation != 0)
-                return "redirect:/renovations/search&page=" + pageNumber + "renovationPerPage=" + renovationPerPage;
+                return "redirect:/renovations/search?page=" + pageNumber + "&renovationPerPage=" + renovationPerPage;
 
             Pageable pageable = PageRequest.of(pageNumber - 1, renovationPerPage);
-            Page<RenovationRecord> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
+            Page<RenovationRecord> paginatedRecords = renovationRecordService.returnRecordPages(pageable, records);
             List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
 
             int paginationLinksStart = Math.max(pageNumber - 2, 1);
             int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
 
-            model.addAttribute("records", records);
+            // model.addAttribute("records", records);
             model.addAttribute("user", user);
+            model.addAttribute("records", paginatedRecords.getContent());
+            model.addAttribute("pageNumber", pageNumber);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("paginationLinksStart", paginationLinksStart);
+            model.addAttribute("paginationLinksEnd", paginationLinksEnd);
+            model.addAttribute("renovationPerPage", renovationPerPage);
+            model.addAttribute("icons", iconFileNames);
+
         }
         return "renovationSearchTemplate";
     }
@@ -463,6 +474,8 @@ public class RenovationController {
         session.setAttribute("visibility", visibility);
         session.setAttribute("searchTerm", searchTerm);
 
+
+
         User user = loginService.getUserByEmail();
         List<RenovationRecord> records = switch (visibility.toLowerCase()) {
             case "public" -> renovationRecordService.getPublicRecords(searchTerm);
@@ -470,11 +483,10 @@ public class RenovationController {
             default -> renovationRecordService.getAllRecords(user, searchTerm);
         };
 
-        redirectAttributes.addFlashAttribute("records", records);
+//        redirectAttributes.addFlashAttribute("records", records);
         redirectAttributes.addFlashAttribute("visibility", visibility);
         redirectAttributes.addFlashAttribute("searchTerm", searchTerm);
         redirectAttributes.addFlashAttribute("user", user);
-
-        return "redirect:/renovations/search";
+        return "redirect:/renovations/search?page=1&renovationPerPage=5";
     }
 }

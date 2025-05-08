@@ -2,12 +2,16 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -146,5 +150,32 @@ public class RenovationRecordService {
         MapUtil.putIfNotEmpty(errors, "descriptionError", renovationRecordValidation.validateDescription(renovationRecord.getDescription()));
         MapUtil.putIfNotEmpty(errors, "roomError", renovationRecordValidation.validateRooms(renovationRecord.getRooms()));
         return errors;
+    }
+
+
+    /**
+     * Returns a paginated list of tasks for the given record.
+     * @param renovationRecord The renovation record containing the list of tasks to be paginated.
+     * @param pageable spring pagination information, including the offset and page size.
+     * @return A page of tasks for the renovation record. If there are no tasks an empty page is returned.
+     */
+    public Page<RenovationRecord> returnRecordPages(Pageable pageable, List<RenovationRecord> records) {
+        List<RenovationRecord> recordsSubList = new ArrayList<>();
+
+        if (records == null || records.isEmpty()) {
+            return new PageImpl<>(recordsSubList, pageable, 0); // Return an empty page
+        }
+
+        int startIndex =(int) pageable.getOffset();
+        if (startIndex < 0) {
+            startIndex = 0;
+        }
+        if (startIndex >= records.size()) {
+            startIndex = records.size() - pageable.getPageSize();
+        }
+        int endIndex = Math.min(startIndex + pageable.getPageSize(), records.size());
+
+        recordsSubList = records.subList(startIndex, endIndex);
+        return new PageImpl<>(recordsSubList, pageable, records.size());
     }
 }
