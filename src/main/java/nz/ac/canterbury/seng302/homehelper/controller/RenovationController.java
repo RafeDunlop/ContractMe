@@ -381,9 +381,14 @@ public class RenovationController {
      * @return the name of the view template for searching renovations
      */
     @GetMapping("/search")
-    public String searchRenovations(Model model, HttpSession session) {
+    public String searchRenovations(Model model, HttpSession session,@RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                    @RequestParam(defaultValue = "5", name = "renovationPerPage") int renovationPerPage) {
         String visibility = (String) model.asMap().get("visibility");
         String searchTerm = (String) model.asMap().get("searchTerm");
+
+        if (renovationPerPage < 1) {
+            renovationPerPage = 5;
+        }
 
         if (visibility == null) {
             visibility = (String) session.getAttribute("visibility");
@@ -398,6 +403,8 @@ public class RenovationController {
         model.addAttribute("visibility", visibility);
         model.addAttribute("searchTerm", searchTerm);
 
+
+
         if (!model.containsAttribute("records")) {
             logger.info("GET /renovations/search");
 
@@ -408,6 +415,23 @@ public class RenovationController {
                 case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
                 default -> renovationRecordService.getAllRecords(user, searchTerm);
             };
+
+            if (pageNumber < 1)
+                return "redirect:/renovations/search&page=" + pageNumber + "renovationPerPage=" + renovationPerPage;
+
+            int totalRenovation = records.size();
+
+            int totalPages = (totalRenovation + renovationPerPage - 1) / renovationPerPage;
+
+            if (pageNumber > totalPages && totalRenovation != 0)
+                return "redirect:/renovations/search&page=" + pageNumber + "renovationPerPage=" + renovationPerPage;
+
+            Pageable pageable = PageRequest.of(pageNumber - 1, renovationPerPage);
+            Page<RenovationRecord> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
+            List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
+
+            int paginationLinksStart = Math.max(pageNumber - 2, 1);
+            int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
 
             model.addAttribute("records", records);
             model.addAttribute("user", user);
