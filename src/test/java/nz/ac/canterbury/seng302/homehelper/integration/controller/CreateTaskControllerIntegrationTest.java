@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -179,7 +180,7 @@ public class CreateTaskControllerIntegrationTest {
         Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("name", "Testname")
+                        .param("name", "Test name")
                         .param("description", "Description")
                         .param("rooms", "Room 1", "Room 2", "otherRoom")
                         .param("renovationId", "1")
@@ -187,7 +188,10 @@ public class CreateTaskControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view/create?id=1"))
-                .andExpect(flash().attribute("roomError", contains("Whoops, it looks like \"otherRoom\" is not a valid room anymore")));
+                .andExpect(flash().attribute("roomError", contains("Whoops, it looks like \"otherRoom\" is not a valid room anymore")))
+                .andExpect(flash().attribute("renovationId", 1L))
+                .andExpect(flash().attribute("renovationTaskDTO", Matchers.hasProperty("name", Matchers.equalTo("Test name"))))
+                .andExpect(flash().attribute("renovationTaskDTO", Matchers.hasProperty("description", Matchers.equalTo("Description"))));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 
