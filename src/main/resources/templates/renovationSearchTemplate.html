@@ -54,7 +54,7 @@
 
             <!-- Renovation Cards Grid -->
             <div id="taskGrid" class="task-grid">
-                <div th:each="record : ${records}" class="col-md-3 mb-4">
+                <div th:each="record : ${records}" class="task-card">
                     <a th:href="@{/renovations/view(id=${record.getId()}, page=${pageNumber}, fromSearch=true)}">
                     <div class="card position-relative" style="width: 18rem;">
                         <!-- Badge if user owns the record -->
@@ -136,5 +136,5 @@
 </div>
 </body>
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
-<script type="text/javascript" th:src="@{/js/pagination.js}"></script>
+<script type="text/javascript" th:src="@{/js/renovationPagination.js}"></script>
 </html>

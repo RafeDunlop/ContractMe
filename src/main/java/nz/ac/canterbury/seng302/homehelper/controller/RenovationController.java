@@ -431,12 +431,10 @@ public class RenovationController {
 
             Pageable pageable = PageRequest.of(pageNumber - 1, renovationPerPage);
             Page<RenovationRecord> paginatedRecords = renovationRecordService.returnRecordPages(pageable, records);
-            List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
 
             int paginationLinksStart = Math.max(pageNumber - 2, 1);
             int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
 
-            // model.addAttribute("records", records);
             model.addAttribute("user", user);
             model.addAttribute("records", paginatedRecords.getContent());
             model.addAttribute("pageNumber", pageNumber);
@@ -444,7 +442,6 @@ public class RenovationController {
             model.addAttribute("paginationLinksStart", paginationLinksStart);
             model.addAttribute("paginationLinksEnd", paginationLinksEnd);
             model.addAttribute("renovationPerPage", renovationPerPage);
-            model.addAttribute("icons", iconFileNames);
 
         }
         return "renovationSearchTemplate";
