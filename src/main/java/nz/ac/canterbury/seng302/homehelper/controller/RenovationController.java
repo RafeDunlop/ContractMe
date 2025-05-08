@@ -293,13 +293,13 @@ public class RenovationController {
     @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id,
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                 @RequestParam(defaultValue = "5", name = "tasksPerPage") int tasksPerPage,
+                                 @RequestParam(defaultValue = "5", name = "cardPerPage") int cardPerPage,
                                  @RequestParam(name = "fromSearch", required = false, defaultValue = "false") boolean fromSearch,
                                  Model model) {
         logger.info("GET /renovations/view");
 
-        if (tasksPerPage < 1) {
-            tasksPerPage = 5;
+        if (cardPerPage < 1) {
+            cardPerPage = 5;
         }
 
         RenovationRecord record = renovationRecordService.getRecordById(id);
@@ -312,15 +312,15 @@ public class RenovationController {
         }
 
         if (pageNumber < 1)
-            return "redirect:/renovations/view?id=" + id + "&page=1&tasksPerPage=" + tasksPerPage;
+            return "redirect:/renovations/view?id=" + id + "&page=1&cardPerPage=" + cardPerPage;
 
         int totalTasks = record.getRenovationTasks().size();
-        int totalPages = (totalTasks + tasksPerPage - 1) / tasksPerPage;
+        int totalPages = (totalTasks + cardPerPage - 1) / cardPerPage;
 
         if (pageNumber > totalPages && totalTasks != 0)
-            return "redirect:/renovations/view?id=" + id + "&page=" + totalPages + "&tasksPerPage=" + tasksPerPage;
+            return "redirect:/renovations/view?id=" + id + "&page=" + totalPages + "&cardPerPage=" + cardPerPage;
 
-        Pageable pageable = PageRequest.of(pageNumber - 1, tasksPerPage);
+        Pageable pageable = PageRequest.of(pageNumber - 1, cardPerPage);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
         List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
 
@@ -335,7 +335,7 @@ public class RenovationController {
         model.addAttribute("renovation", record);
         model.addAttribute("paginationLinksStart", paginationLinksStart);
         model.addAttribute("paginationLinksEnd", paginationLinksEnd);
-        model.addAttribute("tasksPerPage", tasksPerPage);
+        model.addAttribute("cardPerPage", cardPerPage);
         model.addAttribute("icons", iconFileNames);
 
         return "viewRenovation";
@@ -383,13 +383,13 @@ public class RenovationController {
     @GetMapping("/search")
     public String searchRenovations(Model model, HttpSession session,
                                     @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                    @RequestParam(defaultValue = "5", name = "renovationPerPage") int renovationPerPage) {
+                                    @RequestParam(defaultValue = "5", name = "cardPerPage") int cardPerPage) {
 
         String visibility = (String) model.asMap().get("visibility");
         String searchTerm = (String) model.asMap().get("searchTerm");
 
-        if (renovationPerPage < 1) {
-            renovationPerPage = 5;
+        if (cardPerPage < 1) {
+            cardPerPage = 5;
         }
 
         if (visibility == null) {
@@ -419,17 +419,17 @@ public class RenovationController {
             };
 
             if (pageNumber < 1)
-                return "redirect:/renovations/search?page=" + pageNumber + "&renovationPerPage=" + renovationPerPage;
+                return "redirect:/renovations/search?page=" + pageNumber + "&cardPerPage=" + cardPerPage;
 
 
             int totalRenovation = records.size();
 
-            int totalPages = (totalRenovation + renovationPerPage - 1) / renovationPerPage;
+            int totalPages = (totalRenovation + cardPerPage - 1) / cardPerPage;
 
             if (pageNumber > totalPages && totalRenovation != 0)
-                return "redirect:/renovations/search?page=" + pageNumber + "&renovationPerPage=" + renovationPerPage;
+                return "redirect:/renovations/search?page=" + pageNumber + "&cardPerPage=" + cardPerPage;
 
-            Pageable pageable = PageRequest.of(pageNumber - 1, renovationPerPage);
+            Pageable pageable = PageRequest.of(pageNumber - 1, cardPerPage);
             Page<RenovationRecord> paginatedRecords = renovationRecordService.returnRecordPages(pageable, records);
 
             int paginationLinksStart = Math.max(pageNumber - 2, 1);
@@ -441,7 +441,7 @@ public class RenovationController {
             model.addAttribute("totalPages", totalPages);
             model.addAttribute("paginationLinksStart", paginationLinksStart);
             model.addAttribute("paginationLinksEnd", paginationLinksEnd);
-            model.addAttribute("renovationPerPage", renovationPerPage);
+            model.addAttribute("renovationPerPage", cardPerPage);
 
         }
         return "renovationSearchTemplate";
@@ -483,6 +483,6 @@ public class RenovationController {
         redirectAttributes.addFlashAttribute("visibility", visibility);
         redirectAttributes.addFlashAttribute("searchTerm", searchTerm);
         redirectAttributes.addFlashAttribute("user", user);
-        return "redirect:/renovations/search?page=1&renovationPerPage=5";
+        return "redirect:/renovations/search?page=1&cardPerPage=5";
     }
 }
