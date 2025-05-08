@@ -138,7 +138,7 @@ public class EditTaskController {
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error {}", e.getMessage());
 
-            List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
+            List<String> errorsList = List.of(e.getMessage().split(";"));
             redirectAttributes.addFlashAttribute("errorMessages", errorsList);
             redirectAttributes.addFlashAttribute("renovationTaskDTO", renovationTaskDTO);
 
@@ -160,6 +160,10 @@ public class EditTaskController {
         logger.info("POST editTask/edit-icon/{id}");
         String iconName = requestBody.get("iconName");
         RenovationTask renovationTask = renovationTaskService.getTaskById(id);
+        User user = loginService.getUserByEmail();
+        if (!renovationTask.getRenovationRecord().getUser().equals(user)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Action not allowed.");
+        }
         RenovationRecord renovation = renovationTask.getRenovationRecord();
         editTaskService.updateTaskIcon(renovationTask, iconName);
         return "redirect:/renovations/view?id=" + renovation.getId();

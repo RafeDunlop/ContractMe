@@ -32,7 +32,7 @@ public class LoginController {
 
         Object error = request.getSession().getAttribute("errorMessage");
         if (error != null) {
-            List<String> errorsList = List.of(error.toString().split("(?<=\\.) "));
+            List<String> errorsList = List.of(error.toString().split(";"));
 
             List<String> emailErrors = new ArrayList<>();
             List<String> generalErrors = new ArrayList<>();

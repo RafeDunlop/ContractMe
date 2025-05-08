@@ -61,6 +61,8 @@ public class EditTaskControllerIntegrationTest {
     @MockBean
     private RenovationRecordService renovationRecordService;
 
+    private User user;
+
     @PostConstruct
     public void init() {
         mockMvc = MockMvcBuilders.standaloneSetup(editTaskController).build();

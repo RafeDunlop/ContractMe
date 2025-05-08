@@ -36,16 +36,40 @@ public class RenovationRecordService {
     }
 
     /**
-     * Retrieves a list of renovation records associated with the current user that are like the given name
+     * Retrieves a list of renovation records associated with the current user that are like the given term
      * @param user The current user
      * @param term The term to search for, not case-sensitive
-     * @return a list of renovation records from the user that match the name
+     * @return a list of renovation records from the user that match the term if given
      */
-    public List<RenovationRecord> getRecordResultByName(User user, String term) {
+    public List<RenovationRecord> getUserRecords(User user, String term) {
         if (term == null || term.trim().isEmpty()) {
             return renovationRecordRepository.findByUser(user);
         }
-        return renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(user, term);
+        return renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(user, term);
+    }
+
+    /**
+     * Retrieves a list of public renovation records that are like the given term
+     * @param term The term to search for, not case-sensitive
+     * @return a list of public renovation records that match the term if given
+     */
+    public List<RenovationRecord> getPublicRecords(String term) {
+        if (term == null || term.trim().isEmpty()) {
+            return renovationRecordRepository.findByIsPublicTrue();
+        }
+        return renovationRecordRepository.findByIsPublicTrueSearchContainingNameOrDescriptionIgnoreCase(term);
+    }
+
+    /**
+     * Retrieves a list of public or users renovation records that are like the given term
+     * @param term The term to search for, not case-sensitive
+     * @return a list of public or users renovation records that match the term if given
+     */
+    public List<RenovationRecord> getAllRecords(User user, String term) {
+        if (term == null || term.trim().isEmpty()) {
+            return renovationRecordRepository.findAllVisibleToUser(user);
+        }
+        return renovationRecordRepository.findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(user, term);
     }
 
     /**
