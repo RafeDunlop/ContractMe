@@ -2,6 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
     <title>View Renovation</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
@@ -20,10 +21,26 @@
     <div class="container mt-2">
         <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
         <input type="hidden" id="tasksPerPage" name="tasksPerPage" th:value="5"/>
+        <input type="hidden" id="renovationId" name="renovationId" th:value="${renovation.getId()}"/>
+        <input type="hidden" th:value="${searchTerm}" name="searchTerm"/>
+
+        <input type="hidden" name="visibility" th:value="${visibility}" />
+
         <div id="content-container" class="card p-4 shadow-sm">
-            <h4 th:text="'Viewing Renovation: ' + ${renovation.name}" class="card-title mb-4"></h4>
+            <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap">
+                <h5 class="mb-0">Viewing Renovation:</h5>
 
+                <form id="renovationForm" class="d-flex align-items-center" th:if="${isOwner}">
+                    <input type="checkbox" id="publicCheckbox" name="isPublic" th:checked="${renovation.isPublic()}" class="me-1">
+                    <label for="publicCheckbox" class="mb-0">Make my renovation record public</label>
+                </form>
+            </div>
 
+            <h4 th:text="${renovation.name}"
+                class="card-title text-truncate mb-4"
+                style="max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"
+                title="[[${renovation.name}]]">
+            </h4>
             <div th:if="${renovation.description} != ''" class="card p-3 bg-light mb-3">
                 <h6 class="fw-bold">Description:</h6>
                 <p class="mb-0" th:text="${renovation.description}"></p>
@@ -38,6 +55,32 @@
                 </div>
             </div>
 
+            <!-- Single Tag Add Form -->
+            <form th:action="@{tags/add}" method="post" id="add-tag-form" class="mb-3" th:if="${isOwner}">
+                <label for="tagName" class="fw-bold">Add Tags:</label>
+                <input type="text" class="form-control" id="tagName" name="tagName" placeholder="Enter a tag"
+                       data-cy="tag" maxlength="129" autocomplete="off" required>
+                <ul id="autocomplete-list" class="list-group position-absolute" style="z-index: 1000;"></ul>
+                <input type="hidden" name="renovationId" th:value="${renovation.id}">
+            </form>
+
+            <!-- Display added tags -->
+            <div id="tagList" class="mb-3">
+                <label class="fw-bold">Current Tags:</label>
+                <div class="list-group">
+                    <div th:each="tag : ${renovation.tags}" class="list-group-item">
+                        🛠️ <span th:text="${tag}" class="ms-2"></span>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- Place masons back/front html validation divs -->
+
+
+
+
             <div th:if="!${renovation.getRenovationTasks().isEmpty()}" class="mb-3">
                 <h6 class="fw-bold">Tasks:</h6>
                 <div id="taskGrid" class="task-grid"> <!-- Grid for responsive placing of tasks CSS -->
@@ -47,17 +90,21 @@
                                 <div class="d-flex align-items-center">
                                     <div class="position-relative">
                                         <div th:replace="~{fragments/addTaskIcon.html :: add-task-icon(${renovationTask})}"></div>
-                                        <img th:src="@{${'/images/' + renovationTask.getIconFileName()}}" alt="Task Icon" class="task-icon" th:onclick="${renovationTask.getIconFileName() != 'default-icon.png'} ? 'showIconSelector(' + ${renovationTask.getId()} + ')' : null">
+                                        <img th:src="@{${'/images/' + renovationTask.getIconFileName()}}" alt="Task Icon" class="task-icon"
+                                             th:onclick="${isOwner and renovationTask.getIconFileName() != 'default-icon.png'} ? 'showIconSelector(' + ${renovationTask.getId()} + ')' : null">
 
                                         <button type="button" class="btn btn-secondary btn-sm rounded-circle opacity-75 top-0 start-100 translate-middle position-absolute"
-                                                th:if="${renovationTask.getIconFileName() == 'default-icon.png'}" th:onclick="|showIconSelector(${renovationTask.getId()})|">+</button>
+                                                th:if="${isOwner} and ${renovationTask.getIconFileName() == 'default-icon.png'}"
+                                                th:onclick="|showIconSelector(${renovationTask.getId()})|">+</button>
                                     </div>
                                     <h5 class="card-title truncate ms-2 mb-0" th:text="${renovationTask.getName()}">Task Title</h5>
                                 </div>
                                 <p class="card-text truncate" th:text="${renovationTask.getDescription()}">Task Description</p>
                                 <p class="card-text"><strong>Due Date:</strong> <span th:text="${renovationTask.getDueDate()}">Due Date</span></p>
                                 <div class="d-flex justify-content-between">
-                                    <a th:href="@{/editTask(taskId=${renovationTask.getId()},renovationId=${renovation.getId()})}" class="btn btn-primary">Edit Task</a>
+                                    <a th:href="@{/editTask(taskId=${renovationTask.getId()},renovationId=${renovation.getId()})}"
+                                       class="btn btn-primary"
+                                       th:if="${isOwner}">Edit Task</a>
                                 </div>
                             </div>
                         </div>
@@ -113,11 +160,11 @@
                     <p id="errorText"></p>
                 </div>
 
-
-                <div class="mt-2 mb-2" >
-                    <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary">Edit</a>
-                    <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary">Add New Task</a>
-                    <a th:href="@{/renovations}" class="btn btn-primary">Back To Renovations</a>
+                <div class="mt-2 mb-2">
+                    <a th:href="@{/renovations/edit(id=${renovation.id}, visibility=${visibility})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
+                    <a th:href="@{/renovations/view/create(id=${renovation.id}, visibility=${visibility})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
+                    <a th:href="@{/renovations}" class="btn btn-primary" th:if="${isOwner and not fromSearch}">Back To Renovations</a>
+                    <a th:href="@{/renovations/search}" class="btn btn-secondary" th:if="${fromSearch}">Back to search results</a>
                 </div>
             </div>
         </div>
@@ -127,7 +174,8 @@
 <div id="icon-selector-modal" class="modal" style="display: none">
     <div id="icon-selector-content"></div>
 </div>
-
+<script type="text/javascript" th:src="@{/js/renovationPublicity.js}"></script>
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
+<script type="text/javascript" th:src="@{/js/autocomplete.js}"></script>
 </html>

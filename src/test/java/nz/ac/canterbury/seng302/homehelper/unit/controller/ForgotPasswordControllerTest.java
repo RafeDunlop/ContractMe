@@ -104,7 +104,7 @@ public class ForgotPasswordControllerTest {
 
         String loginPageRedirect = forgotPasswordController.resetPassword(token, redirectAttributesMock, modelMock);
 
-        Mockito.verify(redirectAttributesMock).addAttribute("error", expectedRedirectMessage);
+        Mockito.verify(redirectAttributesMock).addFlashAttribute("emailError", expectedRedirectMessage);
         assertEquals(expectedRedirect, loginPageRedirect);
     }
 
@@ -158,7 +158,7 @@ public class ForgotPasswordControllerTest {
 
         String resetPasswordForm = forgotPasswordController.submitPassword(token, newPassword, retypePassword, redirectAttributesMock, httpServletRequestMock);
 
-        Mockito.verify(redirectAttributesMock).addAttribute("error", expectedRedirectMessage);
+        Mockito.verify(redirectAttributesMock).addFlashAttribute("emailError", expectedRedirectMessage);
         assertEquals(expectedRedirect, resetPasswordForm);
     }
 }

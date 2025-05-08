@@ -5,19 +5,20 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.TagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -46,17 +47,24 @@ public class RenovationControllerIntegrationTest {
     @Autowired
     private RenovationRecordRepository renovationRecordRepository;
 
+    @Autowired
+    private RenovationTaskRepository renovationTaskRepository;
+
+    @Autowired
+    private TagService tagService;
+
     private User currentUser;
     private User owner;
     private User notOwner;
+    private User testUser;
 
     private RenovationRecord renovationRecord;
+    private MockHttpSession session;
 
     @BeforeEach
     public void setupUser() {
         currentUser = new User("Jane", "Doe", "jane@doe.com", "password");
         userRepository.save(currentUser);
-
 
         owner = new User("Owner", "User", "owner@doe.com", "Password");
         owner.grantAuthority("ROLE_USER");
@@ -66,8 +74,14 @@ public class RenovationControllerIntegrationTest {
         notOwner.grantAuthority("ROLE_USER");
         userRepository.save(notOwner);
 
+        testUser = new User("Test", "User", "test@doe.com", "Password");
+        testUser.grantAuthority("ROLE_USER");
+        userRepository.save(testUser);
+
         renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
         renovationRecordRepository.save(renovationRecord);
+
+        session = new MockHttpSession();
     }
 
     /**
@@ -177,7 +191,7 @@ public class RenovationControllerIntegrationTest {
      */
     @Test
     public void postCreateRecord_validRecordDetails_createRecord() throws Exception {
-        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());
 
         // New record has a name with diacritic letters and a description of length 512 to test regex and boundaries.
@@ -191,7 +205,7 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("renovation",
                         hasProperty("name", is("Rénövatiôn Onē"))));
 
-        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
+        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Rénövatiôn Onē");
         assertFalse(userRecords.isEmpty());
     }
 
@@ -258,23 +272,47 @@ public class RenovationControllerIntegrationTest {
     }
 
     /**
-     * Tests deleting a renovation when the id in the link is associated with a current record. A no content response is then returned
-     * to show the user the deletion was successful.
+     * Tests deleting a renovation when the id in the link is associated with a current record and the record has no tasks.
+     * A no content response is then returned to show the user the deletion was successful.
      * @throws Exception if the request processing fails
      */
     @Test
-    public void deleteRecord_validRecordId_deletionSuccess() throws Exception {
+    public void deleteRecord_validRecordIdWithoutTask_deletionSuccess() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
         assertFalse(userRecords.isEmpty());
 
         mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 
-        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
+        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
+        assertTrue(userRecords.isEmpty());
+    }
+
+    /**
+     * Tests deleting a renovation when the id in the link is associated with a current record and the record has a task.
+     * A no content response is then returned to show the user the deletion was successful.
+     * @throws Exception if the request processing fails
+     */
+    @Test
+    public void deleteRecord_validRecordIdWithTask_deletionSuccess() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        RenovationTask existingTask = new RenovationTask("Task", "description", List.of(), LocalDate.now(), existingRecord);
+        renovationTaskRepository.save(existingTask);
+
+        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
+        assertFalse(userRecords.isEmpty());
+
+        mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+
+        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());
     }
 
@@ -304,7 +342,7 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord existingRecord = new RenovationRecord(anotherUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());
 
         mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
@@ -372,11 +410,63 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId()));
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
         assertTrue(userRecords.isEmpty());
 
-        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Rénövatiôn Onē");
+        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Rénövatiôn Onē");
         assertFalse(userRecords.isEmpty());
+    }
+
+    /**
+     * Test that the publicity flag of a renovation record is updated correctly.
+     * <p>
+     * This test creates a renovation record, sends a request to set its publicity flag to true, and checks that the
+     * record is updated in the repository. It also verifies the correct redirection to the renovation details page.
+     * </p>
+     *
+     * @throws Exception if an error occurs during the test execution
+     */
+    @Test
+    public void changePublicFlag_setTrue_renovationIsPublic() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+        Long id = existingRecord.getId();
+
+        mockMvc.perform(post("/renovations/editPublicity/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"isPublic\": true}")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + id));
+
+        RenovationRecord updated = renovationRecordRepository.findById(id).orElseThrow();
+        assertTrue(updated.isPublic(), "Publicity flag should be updated to true");
+    }
+
+    /**
+     * Test that the publicity flag of a renovation record is updated correctly.
+     * <p>
+     * This test creates a renovation record, sends a request to set its publicity flag to false, and checks that the
+     * record is updated in the repository. It also verifies the correct redirection to the renovation details page.
+     * </p>
+     *
+     * @throws Exception if an error occurs during the test execution
+     */
+    @Test
+    public void changePublicFlag_setFalse_renovationIsNotPublic() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+        Long id = existingRecord.getId();
+
+        mockMvc.perform(post("/renovations/editPublicity/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"isPublic\": false}")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + id));
+
+        RenovationRecord updated = renovationRecordRepository.findById(id).orElseThrow();
+        assertFalse(updated.isPublic(), "Publicity flag should be updated to true");
     }
 
     /**
@@ -404,10 +494,10 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("roomList", List.of("Room 1", "Room 2")));
 
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
         assertFalse(userRecords.isEmpty());
 
-        userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One!");
+        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One!");
         assertTrue(userRecords.isEmpty());
     }
 
@@ -437,7 +527,7 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("description", "Some words"))
                 .andExpect(flash().attribute("roomList", List.of("Room 1", "Room 2")));
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(currentUser, "Renovation One");
+        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
         assertFalse(userRecords.isEmpty());
     }
 
@@ -493,9 +583,9 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(get("/renovations/view")
                         .param("id", Long.toString(existingRecord.getId() + 1))
                         .with(csrf()))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().is4xxClientError())
                 .andExpect(result -> assertInstanceOf(ResponseStatusException.class, result.getResolvedException()))
-                .andExpect(result -> assertEquals("400 BAD_REQUEST \"This renovation does not exist\"", Objects.requireNonNull(result.getResolvedException()).getMessage()));
+                .andExpect(result -> assertEquals("404 NOT_FOUND \"This renovation does not exist\"", Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
 
     @Test
@@ -585,12 +675,27 @@ public class RenovationControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "not.owner@example.com")
+    // GitHub copilot generated some parts of the following test
+    public void getViewRecord_notOwner_notFound() throws Exception {
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "A cool renovation", "Some words", List.of("Room foo", "Room bar"));
+        existingRecord = renovationRecordRepository.save(existingRecord);
+        User loggedInUser = new User("Not", "Owner", "not.owner@example.com", "password");
+        userRepository.save(loggedInUser);
+
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .with(csrf()))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
     @WithMockUser(username = "not.owner@doe.com")
     public void editRenovationRecord_userNotOwner_redirectToMain() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/renovations/edit")
+        mockMvc.perform(get("/renovations/edit")
                         .param("id", renovationRecord.getId().toString()))
-                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.redirectedUrl("/main"));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/main"));
     }
 
     @Test
@@ -678,7 +783,7 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(post("/renovations/edit")
                         .param("id", String.valueOf(notOwnerRecord.getId()))
                         .param("name", "Test Renovation")
-                        .param("description", "Updated description by NotOwner")
+                        .param("description", "Updated description by NotOwn 0er")
                         .param("roomList", "Room B", "Room C")
                         .with(user("not.owner@doe.com").roles("USER"))
                         .with(csrf()))
@@ -701,5 +806,160 @@ public class RenovationControllerIntegrationTest {
         assertEquals("Test Renovation", janeRecord.getName());
         assertEquals("Test Renovation", notOwnerRecord.getName());
         assertNotEquals(janeRecord.getId(), notOwnerRecord.getId());
+    }
+
+    @Test
+    public void testAutocompleteTags() throws Exception {
+        tagService.addTag("historic");
+        tagService.addTag("history");
+
+        mockMvc.perform(get("/renovations/tags/autocomplete")
+                .param("partialTag", "his"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]").value("historic"))
+                .andExpect(jsonPath("$[1]").value("history"));
+    }
+
+    @Test
+    public void testEmptyAutocompleteTags() throws Exception {
+        mockMvc.perform(get("/renovations/tags/autocomplete")
+                        .param("partialTag", "his"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    public void searchRenovation_withNoMatches_returnsNoResultsMessage() throws Exception {
+        mockMvc.perform(post("/renovations/search")
+                        .param("searchTerm", "NonExistentTerm")
+                        .param("visibility", "all")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/search"))
+                .andExpect(flash().attribute("records", hasSize(0)));
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void searchRenovation_withMatchingTerm_returnsMatchingRecords() throws Exception {
+        RenovationRecord matchingRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
+        matchingRecord.setPublicity(true);
+        renovationRecordRepository.save(matchingRecord);
+
+        mockMvc.perform(post("/renovations/search")
+                        .param("searchTerm", "Test Renovation")
+                        .param("visibility", "all")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/search"))
+                .andExpect(flash().attributeExists("records"))
+                .andExpect(flash().attribute("records", hasSize(1)))
+                .andExpect(flash().attribute("records", hasItem(
+                        hasProperty("name", is("Test Renovation")))));
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void searchRenovation_withVisibilityFilter_returnsFilteredResults() throws Exception {
+        RenovationRecord publicRecord = new RenovationRecord(owner, "Public Renovation", "Public Description", List.of("Room A"));
+        publicRecord.setPublicity(true);
+        renovationRecordRepository.save(publicRecord);
+
+        RenovationRecord privateRecord = new RenovationRecord(owner, "Private Renovation", "Private Description", List.of("Room B"));
+        privateRecord.setPublicity(false);
+        renovationRecordRepository.save(privateRecord);
+
+        mockMvc.perform(post("/renovations/search")
+                        .param("searchTerm", "")
+                        .param("visibility", "public")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/search"))
+                .andExpect(flash().attributeExists("records"))
+                .andExpect(flash().attribute("records", hasSize(1)))
+                .andExpect(flash().attribute("records", hasItem(
+                        hasProperty("name", is("Public Renovation")))))
+                .andExpect(flash().attribute("records", not(hasItem(
+                        hasProperty("name", is("Private Renovation"))))));
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void searchRenovation_withTermAndVisibilityFilter_returnsFilteredResults() throws Exception {
+        RenovationRecord publicRecord = new RenovationRecord(owner, "Public Renovation", "Room A Renovation", List.of("Room A"));
+        publicRecord.setPublicity(true);
+        renovationRecordRepository.save(publicRecord);
+
+        RenovationRecord privateRecord = new RenovationRecord(owner, "Private Renovation", "Room B Renovation", List.of("Room B"));
+        privateRecord.setPublicity(false);
+        renovationRecordRepository.save(privateRecord);
+
+        mockMvc.perform(post("/renovations/search")
+                        .param("searchTerm", "Public")
+                        .param("visibility", "public")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/search"))
+                .andExpect(flash().attributeExists("records"))
+                .andExpect(flash().attribute("records", hasSize(1)))
+                .andExpect(flash().attribute("records", hasItem(
+                        hasProperty("name", is("Public Renovation")))))
+                .andExpect(flash().attribute("records", not(hasItem(
+                        hasProperty("name", is("Private Renovation"))))));
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void getSearchRenovations_withDefaultValues_rendersSearchPageWithDefaultVisibility() throws Exception {
+        mockMvc.perform(get("/renovations/search"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attribute("visibility", is("all")))
+                .andExpect(model().attribute("searchTerm", is("")))
+                .andExpect(model().attribute("records", hasSize(0)));
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void getSearchRenovations_withSessionAttributes_rendersSearchPage() throws Exception {
+        session.setAttribute("visibility", "user");
+        session.setAttribute("searchTerm", "Test Renovation");
+
+        mockMvc.perform(get("/renovations/search").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attribute("visibility", is("user")))
+                .andExpect(model().attribute("searchTerm", is("Test Renovation")));
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void getSearchRenovations_withNoMatchingRecords_returnsEmptyResults() throws Exception {
+        session.setAttribute("visibility", "all");
+        session.setAttribute("searchTerm", "NonExistent");
+
+        mockMvc.perform(get("/renovations/search").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attribute("records", hasSize(0))); // No matching records
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void getSearchRenovations_withMatchingRecords_returnsFilteredResults() throws Exception {
+        RenovationRecord record = new RenovationRecord(owner, "Test Renovation", "Description", List.of("Room A"));
+        record.setPublicity(true);
+        renovationRecordRepository.save(record);
+
+        session.setAttribute("visibility", "all");
+        session.setAttribute("searchTerm", "Test Renovation");
+
+        mockMvc.perform(get("/renovations/search").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attribute("records", hasSize(1)))
+                .andExpect(model().attribute("records", hasItem(
+                        hasProperty("name", is("Test Renovation"))
+                )));
     }
 }

@@ -1,11 +1,17 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
+import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Access point for domain functionality which concerns renovation record tag entities, {@link Tag}
@@ -27,5 +33,24 @@ public class TagService {
     public TagService(TagRepository tagRepository, RenovationRecordRepository renovationRecordRepository) {
         this.tagRepository = tagRepository;
         this.renovationRecordRepository = renovationRecordRepository;
+    }
+
+    /**
+     * Returns a list of tag names like the given input by querying the repository
+     * @param tagName the input to search for
+     * @return a list of matching tag names
+     */
+    public List<String> autocompleteTags(String tagName) {
+        List<Tag> tags = tagRepository.findByNameContainingIgnoreCase(tagName);
+        return tags.stream().map(Tag::get).collect(Collectors.toList());
+    }
+
+    /**
+     * Creates and saves a new tag with a given name
+     * @param name of the tag to be saved
+     */
+    public void addTag(String name) {
+        Tag tag = new Tag(name.toLowerCase());
+        tagRepository.save(tag);
     }
 }
