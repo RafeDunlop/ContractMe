@@ -923,7 +923,7 @@ public class RenovationControllerIntegrationTest {
                         .param("visibility", "public")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search?page=1&renovationPerPage=5"))
+                .andExpect(redirectedUrl("/renovations/search?page=1&cardPerPage=5"))
                 .andReturn();
 
         mockMvc.perform(get("/renovations/search")
