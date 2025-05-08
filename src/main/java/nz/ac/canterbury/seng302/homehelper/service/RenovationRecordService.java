@@ -155,7 +155,7 @@ public class RenovationRecordService {
 
     /**
      * Returns a paginated list of tasks for the given record.
-     * @param renovationRecord The renovation record containing the list of tasks to be paginated.
+     * @param records The renovation record containing the list of tasks to be paginated.
      * @param pageable spring pagination information, including the offset and page size.
      * @return A page of tasks for the renovation record. If there are no tasks an empty page is returned.
      */
