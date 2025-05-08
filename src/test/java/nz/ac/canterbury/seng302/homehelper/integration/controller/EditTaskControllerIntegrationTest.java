@@ -211,7 +211,7 @@ public class EditTaskControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
-    public void testEditTask_userNotOwner_redirectToMain() throws Exception {
+    public void testEditTask_userNotOwner_404() throws Exception {
         User owner = new User("Owner", "User", "owner@doe.com", "Password");
         owner.grantAuthority("ROLE_USER");
 
@@ -226,7 +226,6 @@ public class EditTaskControllerIntegrationTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/editTask")
                         .param("taskId", "1")
                         .param("renovationId", "1"))
-                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.redirectedUrl("/main"));
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 }
