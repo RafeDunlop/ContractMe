@@ -202,7 +202,6 @@ public class SharingRenovationRecordsSteps {
 
         result = mockMvc.perform(get("/renovations/view")
                         .param("id", record.getId().toString())
-                        .param("visibility", "public")
                         .param("fromSearch", "true")
                         .session(session))
                 .andExpect(status().isOk())

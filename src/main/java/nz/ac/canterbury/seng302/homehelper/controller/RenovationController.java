@@ -295,12 +295,14 @@ public class RenovationController {
                                  Model model) {
         logger.info("GET /renovations/view");
 
-        Integer cardsPerPage = (Integer) model.asMap().get("cardsPerPage");
-        Boolean fromSearch = (Boolean) model.asMap().get("fromSearch");
-
-        if (cardsPerPage < 1) {
+        Object cardsPerPageObj = model.asMap().get("cardsPerPage");
+        Integer cardsPerPage = (cardsPerPageObj instanceof Integer) ? (Integer) cardsPerPageObj : null;
+        if (cardsPerPage == null || cardsPerPage < 1) {
             cardsPerPage = 5;
         }
+
+        Object fromSearchObj = model.asMap().get("fromSearch");
+        Boolean fromSearch = (fromSearchObj instanceof Boolean) ? (Boolean) fromSearchObj : false;
 
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
@@ -408,7 +410,12 @@ public class RenovationController {
             pageNumber = (Integer) session.getAttribute("pageNumber");
             if (pageNumber == null) pageNumber = 1;
         }
-        Integer cardsPerPage = (Integer) attributes.getOrDefault("cardsPerPage", session.getAttribute("cardsPerPage"));
+
+        Object cardsPerPageObj = attributes.get("cardsPerPage");
+        if (cardsPerPageObj == null) {
+            cardsPerPageObj = session.getAttribute("cardsPerPage");
+        }
+        Integer cardsPerPage = (cardsPerPageObj instanceof Integer) ? (Integer) cardsPerPageObj : null;
         if (cardsPerPage == null) cardsPerPage = 16;
 
         User user = loginService.getUserByEmail();
