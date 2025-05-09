@@ -100,18 +100,21 @@ public class RenovationTaskService {
      * of error messages for each invalid detail.
      * @return A map of errors generated from validating the task details
      */
-    public Map<String, List<String>> validateTaskDetails(RenovationTaskDTO renovationTaskDTO) {
+    public Map<String, List<String>> validateTaskDetails(RenovationTaskDTO renovationTaskDTO, RenovationRecord renovationRecord) {
         Map<String, List<String>> errors = new HashMap<>();
         String errorMessageType = "Task";
 
-        List<String> nameErrors = renovationTaskValidation.validateName(renovationTaskDTO.getName(), errorMessageType);
-        MapUtil.putIfNotEmpty(errors, "nameError", nameErrors);
+        List<String> nameError = renovationTaskValidation.validateName(renovationTaskDTO.getName(), errorMessageType);
+        MapUtil.putIfNotEmpty(errors, "nameError", nameError);
+
+        String roomError = renovationTaskValidation.validateRooms(renovationRecord, renovationTaskDTO.getRooms());
+        MapUtil.putIfNotEmpty(errors, "roomError", (roomError == null) ? null : List.of(roomError));
 
         String descriptionError = renovationTaskValidation.validateDescription(renovationTaskDTO.getDescription(), errorMessageType);
-        MapUtil.putIfNotEmpty(errors, "descriptionError", descriptionError == null ? null : List.of(descriptionError));
+        MapUtil.putIfNotEmpty(errors, "descriptionError", (descriptionError == null) ? null : List.of(descriptionError));
 
         String dueDateError = renovationTaskValidation.validateDueDate(renovationTaskDTO.getDueDate());
-        MapUtil.putIfNotEmpty(errors, "dueDateError", dueDateError == null ? null : List.of(dueDateError));
+        MapUtil.putIfNotEmpty(errors, "dueDateError", (dueDateError == null) ? null : List.of(dueDateError));
 
         return errors;
     }

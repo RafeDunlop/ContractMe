@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,23 @@ public class RenovationTaskValidation {
             return StringUtils.capitalize((errorMessageType + " description must be 512 characters or less.").trim());
         } else if (description.trim().isEmpty()) {
             return StringUtils.capitalize((errorMessageType + " description cannot be empty.").trim());
+        }
+        return null;
+    }
+
+    /**
+     * Ensures that all the rooms specified belong to the {@link RenovationRecord} specified.
+     * @param renovation The {@link RenovationRecord} which should contain all specified rooms
+     * @param rooms The rooms to check
+     * @return null if the parameters comply, otherwise a readable error corresponding to the first room which does not match
+     */
+    public String validateRooms(RenovationRecord renovation, List<String> rooms) {
+        for (String room : rooms) {
+            if (!renovation.getRooms().contains(room)) {
+                return StringUtils.capitalize((String.format(
+                        "Whoops, it looks like \"%s\" is not a valid room anymore", room
+                )).trim());
+            }
         }
         return null;
     }
