@@ -123,4 +123,25 @@ public class LocationControllerIntegrationTest {
                 .andExpect(jsonPath("$.location.latitude").value(-43.5234))
                 .andExpect(jsonPath("$.location.longitude").value(172.599));
     }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void testGetAddressAttribution_notLocal_getsAllInformation() throws Exception {
+        String expectedUrl = "https://api.geoapify.com/v1/geocode/autocomplete?text=10 Downing Street&filter=countrycode:UK&bias=proximity:51.4934,0.0000&type=street&lang=en&format=json&apiKey=notAnApiKey";
+        String json = "[{\"formatted\": \"10 Downing Street, SW1A 2AA, London, United Kingdom\"}]";
+        @SuppressWarnings("unchecked")
+        ResponseEntity<String> mockResponse = (ResponseEntity<String>) mock(ResponseEntity.class);
+        when(restTemplate.getForEntity(anyString(), String.class)).thenReturn(mockResponse); //todo replace any
+        when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
+        when(mockResponse.getBody()).thenReturn(json);
+        mockMvc.perform(MockMvcRequestBuilders.get("/address-autocomplete/{prompt}", "10 Downing Street")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("country.iso_code", "UK")
+                        .param("country.name", "United Kingdom")
+                        .param("location.latitude", "51.4934")
+                        .param("location.longitude", "0.0000")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].formatted").value("10 Downing Street, SW1A 2AA, London, United Kingdom"));
+    }
 }
