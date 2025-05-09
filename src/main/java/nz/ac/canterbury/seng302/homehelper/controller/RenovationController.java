@@ -382,68 +382,56 @@ public class RenovationController {
      */
     @GetMapping("/search")
     public String searchRenovations(Model model, HttpSession session,
-                                    @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                    @RequestParam(defaultValue = "5", name = "cardPerPage") int cardPerPage) {
+                                    @RequestParam(name = "page") Integer pageNumber) {
+        logger.info("GET /renovations/search");
 
-        String visibility = (String) model.asMap().get("visibility");
-        String searchTerm = (String) model.asMap().get("searchTerm");
+        Map<String, Object> attributes = model.asMap();
 
-        if (cardPerPage < 1) {
-            cardPerPage = 5;
+        String visibility = (String) attributes.getOrDefault("visibility", session.getAttribute("visibility"));
+        if (visibility == null) visibility = "all";
+        String searchTerm = (String) attributes.getOrDefault("searchTerm", session.getAttribute("searchTerm"));
+        if (searchTerm == null) searchTerm = "";
+        if (pageNumber == null) {
+            pageNumber = (Integer) session.getAttribute("pageNumber");
+            if (pageNumber == null) pageNumber = 1;
         }
+        Integer cardsPerPage = (Integer) attributes.getOrDefault("cardPerPage", session.getAttribute("cardsPerPage"));
+        if (cardsPerPage == null) cardsPerPage = 16;
 
-        if (visibility == null) {
-            visibility = (String) session.getAttribute("visibility");
-            if (visibility == null) visibility = "all";
-        }
+        User user = loginService.getUserByEmail();
 
-        if (searchTerm == null) {
-            searchTerm = (String) session.getAttribute("searchTerm");
-            if (searchTerm == null) searchTerm = "";
-        }
+        List<RenovationRecord> records = switch (visibility.toLowerCase()) {
+            case "public" -> renovationRecordService.getPublicRecords(searchTerm);
+            case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
+            default -> renovationRecordService.getAllRecords(user, searchTerm);
+        };
+
+        if (pageNumber < 1)
+            return "redirect:/renovations/search?page=1";
+
+        int totalRenovations = records.size();
+        int totalPages = (totalRenovations + cardsPerPage - 1) / cardsPerPage;
+
+        if (pageNumber > totalPages && totalRenovations != 0)
+            return "redirect:/renovations/search?page=" + totalPages;
+
+        Pageable pageable = PageRequest.of(pageNumber - 1, cardsPerPage);
+        Page<RenovationRecord> paginatedRecords = renovationRecordService.returnRecordPages(pageable, records);
+
+        int paginationLinksStart = Math.max(pageNumber - 2, 1);
+        int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
 
         model.addAttribute("visibility", visibility);
         model.addAttribute("searchTerm", searchTerm);
+        model.addAttribute("user", user);
+        model.addAttribute("records", paginatedRecords.getContent());
+        model.addAttribute("pageNumber", pageNumber);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("paginationLinksStart", paginationLinksStart);
+        model.addAttribute("paginationLinksEnd", paginationLinksEnd);
+        model.addAttribute("renovationPerPage", cardsPerPage);
+        model.addAttribute("paginatedRecordsSize", paginatedRecords.getSize());
 
-
-
-        if (!model.containsAttribute("records")) {
-            logger.info("GET /renovations/search");
-
-            User user = loginService.getUserByEmail();
-
-            List<RenovationRecord> records = switch (visibility.toLowerCase()) {
-                case "public" -> renovationRecordService.getPublicRecords(searchTerm);
-                case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
-                default -> renovationRecordService.getAllRecords(user, searchTerm);
-            };
-
-            if (pageNumber < 1)
-                return "redirect:/renovations/search?page=" + pageNumber + "&cardPerPage=" + cardPerPage;
-
-
-            int totalRenovation = records.size();
-
-            int totalPages = (totalRenovation + cardPerPage - 1) / cardPerPage;
-
-            if (pageNumber > totalPages && totalRenovation != 0)
-                return "redirect:/renovations/search?page=" + pageNumber + "&cardPerPage=" + cardPerPage;
-
-            Pageable pageable = PageRequest.of(pageNumber - 1, cardPerPage);
-            Page<RenovationRecord> paginatedRecords = renovationRecordService.returnRecordPages(pageable, records);
-
-            int paginationLinksStart = Math.max(pageNumber - 2, 1);
-            int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
-
-            model.addAttribute("user", user);
-            model.addAttribute("records", paginatedRecords.getContent());
-            model.addAttribute("pageNumber", pageNumber);
-            model.addAttribute("totalPages", totalPages);
-            model.addAttribute("paginationLinksStart", paginationLinksStart);
-            model.addAttribute("paginationLinksEnd", paginationLinksEnd);
-            model.addAttribute("renovationPerPage", cardPerPage);
-
-        }
         return "renovationSearchTemplate";
     }
 
@@ -460,6 +448,8 @@ public class RenovationController {
     @PostMapping("/search")
     public String submitSearchRenovations(@RequestParam(required = false) String visibility,
                                           @RequestParam(required = false) String searchTerm,
+                                          @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                          @RequestParam(defaultValue = "5", name = "cardPerPage") int cardsPerPage,
                                           RedirectAttributes redirectAttributes,
                                           HttpSession session) {
         logger.info("POST /renovations/search");
@@ -470,19 +460,16 @@ public class RenovationController {
         // Store in session so GET /search can use them
         session.setAttribute("visibility", visibility);
         session.setAttribute("searchTerm", searchTerm);
-
-
+        session.setAttribute("pageNumber", pageNumber);
+        session.setAttribute("cardPerPage", cardsPerPage);
 
         User user = loginService.getUserByEmail();
-        List<RenovationRecord> records = switch (visibility.toLowerCase()) {
-            case "public" -> renovationRecordService.getPublicRecords(searchTerm);
-            case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
-            default -> renovationRecordService.getAllRecords(user, searchTerm);
-        };
 
         redirectAttributes.addFlashAttribute("visibility", visibility);
         redirectAttributes.addFlashAttribute("searchTerm", searchTerm);
         redirectAttributes.addFlashAttribute("user", user);
-        return "redirect:/renovations/search?page=1&cardPerPage=5";
+        redirectAttributes.addFlashAttribute("pageNumber", pageNumber);
+        redirectAttributes.addFlashAttribute("cardPerPage", cardsPerPage);
+        return "redirect:/renovations/search?page=" + pageNumber;
     }
 }
