@@ -5,11 +5,23 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Reads translation units from a {@link Corpus} by reading corresponding lines
+ * from the source and target files in parallel.
+ * <p>
+ * Implements {@link Closeable} to ensure resources are released after use.
+ */
 public class CorpusReader implements Closeable {
 
     private final UnixLineReader sourceReader;
     private final UnixLineReader targetReader;
 
+    /**
+     * Constructs a {@code CorpusReader} for the given {@link Corpus}.
+     *
+     * @param corpus the corpus containing the source and target files
+     * @throws IOException if an I/O error occurs while opening the files
+     */
     public CorpusReader(Corpus corpus) throws IOException {
         boolean success = false;
 
@@ -23,6 +35,13 @@ public class CorpusReader implements Closeable {
         }
     }
 
+    /**
+     * Reads the next {@link TranslationUnit} from the corpus.
+     * Reads one line from each of the source and target files.
+     *
+     * @return the next translation unit, or {@code null} if end of both files is reached
+     * @throws IOException if the lines are unmatched or another I/O error occurs
+     */
     public TranslationUnit read() throws IOException {
         String source = sourceReader.readLine();
         String target = targetReader.readLine();
@@ -36,6 +55,12 @@ public class CorpusReader implements Closeable {
         }
     }
 
+    /**
+     * Closes the source and target file readers.
+     * If both readers throw exceptions, only the first is propagated.
+     *
+     * @throws IOException if an I/O error occurs while closing either reader
+     */
     @Override
     public void close() throws IOException {
         IOException ioe = null;
@@ -57,5 +82,4 @@ public class CorpusReader implements Closeable {
         if (ioe != null)
             throw ioe;
     }
-
 }

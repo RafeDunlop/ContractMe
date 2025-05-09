@@ -6,24 +6,52 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Represents a parallel corpus with associated source and target files.
+ * Used for managing corpora in the profanity filter module.
+ */
 public class Corpus {
 
     private final File source;
     private final File target;
 
+    /**
+     * Constructs a Corpus with the specified source and target files.
+     *
+     * @param source the source language file
+     * @param target the target language file
+     */
     public Corpus(File source, File target) {
         this.source = source;
         this.target = target;
     }
 
+    /**
+     * Returns the source file of this corpus.
+     *
+     * @return the source file
+     */
     public File source() {
         return source;
     }
 
+    /**
+     * Returns the target file of this corpus.
+     *
+     * @return the target file
+     */
     public File target() {
         return target;
     }
 
+    /**
+     * Returns a file with the same name (without extension) as the given file,
+     * but with a new extension.
+     *
+     * @param file the base file
+     * @param extension the new extension to apply
+     * @return the new file with the given extension
+     */
     private static File fileWithExtension(File file, String extension) {
         String name = file.getName();
         int ld = name.lastIndexOf('.');
@@ -33,6 +61,15 @@ public class Corpus {
         return new File(file.getParentFile(), name + "." + extension);
     }
 
+    /**
+     * Lists all valid Corpus pairs from a given folder, matching source and target file extensions.
+     *
+     * @param source the file extension for source files (without the dot)
+     * @param target the file extension for target files (without the dot)
+     * @param folder the folder to scan for corpus files
+     * @return a list of valid Corpus objects
+     * @throws FileNotFoundException if the provided folder is not a directory
+     */
     public static List<Corpus> list(String source, String target, File folder) throws FileNotFoundException {
         if (!folder.isDirectory())
             throw new FileNotFoundException(folder.toString());
