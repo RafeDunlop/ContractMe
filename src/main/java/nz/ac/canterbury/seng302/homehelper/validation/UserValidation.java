@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
+import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
+import nz.ac.canterbury.seng302.homehelper.profanityFilter.dictionary.Profanity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,6 +13,9 @@ import java.util.regex.Pattern;
 
 @Service
 public class UserValidation {
+
+    private final ProfanityFilter profanityFilter = ProfanityFilter.getInstance();
+
 
     /**
      * Validates whether the email is in the correct form.
@@ -53,6 +58,13 @@ public class UserValidation {
         if (name.length() > 64) {
             errors.add(nameType + " name must be 64 characters long or less.");
         }
+
+        //Validate if name contains any profane words
+        Profanity value = profanityFilter.find("en", name);
+        if (value != null) {
+            errors.add(nameType + " name doesn't adhere to Home Helper's language policy");
+        }
+
 
         return errors;
     }
