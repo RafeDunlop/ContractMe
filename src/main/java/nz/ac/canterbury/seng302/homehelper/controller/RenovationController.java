@@ -64,7 +64,7 @@ public class RenovationController {
     @GetMapping
     public String renovations(@RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery,
                               @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                              @RequestParam(defaultValue = "5", name = "tasksPerPage") int tasksPerPage,
+                              @RequestParam(defaultValue = "8", name = "itemsPerPage") int tasksPerPage,
                               Model model) {
         logger.info("GET renovations");
         try {
@@ -296,7 +296,7 @@ public class RenovationController {
     @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id,
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                 @RequestParam(defaultValue = "5", name = "tasksPerPage") int tasksPerPage,
+                                 @RequestParam(defaultValue = "5", name = "itemsPerPage") int tasksPerPage,
                                  @RequestParam(name = "fromSearch", required = false, defaultValue = "false") boolean fromSearch,
                                  Model model) {
         logger.info("GET /renovations/view");
@@ -315,13 +315,13 @@ public class RenovationController {
         }
 
         if (pageNumber < 1)
-            return "redirect:/renovations/view?id=" + id + "&page=1&tasksPerPage=" + tasksPerPage;
+            return "redirect:/renovations/view?id=" + id + "&page=1&itemsPerPage=" + tasksPerPage;
 
         int totalTasks = record.getRenovationTasks().size();
         int totalPages = (totalTasks + tasksPerPage - 1) / tasksPerPage;
 
         if (pageNumber > totalPages && totalTasks != 0)
-            return "redirect:/renovations/view?id=" + id + "&page=" + totalPages + "&tasksPerPage=" + tasksPerPage;
+            return "redirect:/renovations/view?id=" + id + "&page=" + totalPages + "&itemsPerPage=" + tasksPerPage;
 
         Pageable pageable = PageRequest.of(pageNumber - 1, tasksPerPage);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
@@ -338,7 +338,7 @@ public class RenovationController {
         model.addAttribute("renovation", record);
         model.addAttribute("paginationLinksStart", paginationLinksStart);
         model.addAttribute("paginationLinksEnd", paginationLinksEnd);
-        model.addAttribute("tasksPerPage", tasksPerPage);
+        model.addAttribute("itemsPerPage", tasksPerPage);
         model.addAttribute("icons", iconFileNames);
 
         return "viewRenovation";

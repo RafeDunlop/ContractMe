@@ -10,6 +10,9 @@ import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.*;
 
@@ -271,5 +274,28 @@ public class RenovationRecordServiceTest {
 
         Mockito.verify(renovationRecordRepository).findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(user, term);
         assertSame(result, expected);
+    }
+
+    @Test
+    public void getPaginatedUserRecords_withNullTerm_callsFindByUserMethod() {
+        User user = mock(User.class);
+        String term = null;
+
+
+        Pageable pageable = PageRequest.of(0, 10);
+        toTest.getPaginatedUserRecords(user, term, pageable);
+
+        Mockito.verify(renovationRecordRepository).findByUser(user, pageable);
+    }
+
+    @Test
+    public void getPaginatedUserRecords_withSearchTerm_callsSearchMethod() {
+        User user = mock(User.class);
+        String term = "living room";
+
+        Pageable pageable = PageRequest.of(0, 10);
+        toTest.getPaginatedUserRecords(user, term, pageable);
+
+        Mockito.verify(renovationRecordRepository).searchNameOrDescriptionContainingIgnoreCasePaginated(user, term, pageable);
     }
 }
