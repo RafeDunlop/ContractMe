@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
-import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -16,17 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -53,6 +50,8 @@ public class TagsSteps {
     private final UserContext userContext;
 
     private ResultActions resultActions;
+
+    private MvcResult mvcResult;
 
     public TagsSteps(UserContext userContext) {
         this.userContext = userContext;
@@ -102,7 +101,7 @@ public class TagsSteps {
     }
 
     @Then("I should see an autocomplete list containing {string}")
-    public void i_should_see_an_autocomplete_option_containing(String autocompleteTag) throws Exception {
+    public void i_should_see_an_autocomplete_list_containing(String autocompleteTag) throws Exception {
         MvcResult result = mockMvc.perform(get("/renovations/tags/autocomplete")
                         .param("partialTag", lastInput)
                         .with(csrf()))
@@ -141,5 +140,23 @@ public class TagsSteps {
 
         List<Tag> tags = expectedRenovationRecord.getTags();
         Assertions.assertNotNull(tags.stream().filter(tag -> tag.getTagName().equals(tagName)).findFirst().toString());
+    }
+
+    @Then("I should see an autocomplete list that doesn't contain {string}")
+    public void i_should_see_an_autocomplete_list_that_doesnt_contain_tag_doesnt_exist(String autocompleteTag) throws Exception {
+        mvcResult = mockMvc.perform(get("/renovations/tags/autocomplete")
+                        .param("partialTag", lastInput)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody = mvcResult.getResponse().getContentAsString();
+        assertFalse(responseBody.contains(autocompleteTag),
+                "Expected response to not contain tag: " + autocompleteTag);
+    }
+
+    @Then("I am told that there are no matching tags")
+    public void i_am_told_that_there_are_no_matching_tags() {
+        MockHttpServletResponse result = mvcResult.getResponse();
     }
 }
