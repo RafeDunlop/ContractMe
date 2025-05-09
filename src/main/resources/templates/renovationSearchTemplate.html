@@ -103,36 +103,38 @@
                     <ul class="pagination" id="pagination">
                         <!-- First button (AC more than 10 pages) -->
                         <li class="page-item" th:if="${totalPages > 10}">
-                            <div th:replace="fragments/paginationButton :: paginationButton(1, 'First')"></div>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(1, 'First')}"></div>
+
                         </li>
 
                         <!-- Previous button -->
                         <li class="page-item" th:if="${pageNumber > 1}">
-                            <div th:replace="fragments/paginationButton :: paginationButton(${pageNumber - 1}, 'Prev')"></div>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(${pageNumber - 1}, 'Prev')}"></div>
                         </li>
 
                         <!--  Page buttons <= 10 Pages, AC3 -->
                         <li class="page-item" th:if="${totalPages <= 10}"
                             th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
-                            <div th:replace="fragments/paginationButton :: paginationButton(${pageLinkNumber}, ${pageLinkNumber})"></div>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(${pageLinkNumber}, ${pageLinkNumber})}"></div>
+
                         </li>
 
                         <!-- Page buttons > 10 Pages, AC3 -->
                         <li class="page-item" th:if="${totalPages > 10}"
                             th:each="pageLinkNumber : ${#numbers.sequence(paginationLinksStart, paginationLinksEnd)}"
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
-                            <div th:replace="fragments/paginationButton :: paginationButton(${pageLinkNumber}, ${pageLinkNumber})"></div>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(${pageLinkNumber}, ${pageLinkNumber})}"></div>
                         </li>
 
                         <!-- Next button -->
                         <li class="page-item" th:if="${pageNumber < totalPages}">
-                            <div th:replace="fragments/paginationButton :: paginationButton(${pageNumber + 1}, 'Next')"></div>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(${pageNumber + 1}, 'Next')}"></div>
                         </li>
 
                         <!-- Last button (AC more than 10 pages) -->
                         <li class="page-item" th:if="${totalPages > 10}">
-                            <div th:replace="fragments/paginationButton :: paginationButton(${totalPages}, 'Last')"></div>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(${totalPages}, 'Last')}"></div>
                         </li>
 
                         <!-- Search field (AC more than 10 pages) --> <!-- CHANGE IF TO 10 after testing -->
@@ -142,6 +144,9 @@
                             <button class="btn btn-primary" th:onclick="|validateRenovationPageSearch()|">Search</button>
                         </li>
                     </ul>
+                </div>
+                <div class="alert alert-danger" id="errorMessage" style="margin-top: 20px; display: none;">
+                    <p id="errorText"></p>
                 </div>
             </div>
         </div>
