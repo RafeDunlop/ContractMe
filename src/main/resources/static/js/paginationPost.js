@@ -67,8 +67,8 @@ function validateRenovationPageSearch() {
 function updateLayout() {
     const grid = document.getElementById('grid');
     const cards = grid.querySelectorAll('.card');
-    const totalRenovations = parseInt(document.getElementById("totalRenovations").value, 10);
-    let pageNumber = parseInt(document.getElementById('pageNumber').value, 10);
+    const totalCards = parseInt(document.getElementById("totalCards").value, 10);
+    let pageNumber = parseInt(document.getElementById('pageInput').value, 10);
 
     if (cards.length === 0) {
         console.warn("No cards found in grid. Skipping layout update.");
@@ -86,15 +86,30 @@ function updateLayout() {
 
     let newCardsPerPage = columns * rows;
     const currentCardCount = cards.length;
-    const finalPage = pageNumber === Math.ceil(totalRenovations / newCardsPerPage);
+    const finalPage = pageNumber === Math.ceil(totalCards / newCardsPerPage);
 
     const layoutChanged = newCardsPerPage !== currentCardCount;
     const needsUpdate = layoutChanged && !finalPage;
 
-    if (pageNumber > (totalRenovations / newCardsPerPage))
+    if (pageNumber > (totalCards / newCardsPerPage))
     {
-        document.getElementById('pageInput').value = Math.ceil(totalRenovations / newCardsPerPage);
+        document.getElementById('pageInput').value = Math.ceil(totalCards / newCardsPerPage);
     }
+
+    // 🔍 Debug logs
+    console.log("=== Layout Debug Info ===");
+    console.log("Grid width:", gridWidth);
+    console.log("Card width (incl. margins):", cardWidth);
+    console.log("Columns:", columns);
+    console.log("Rows:", rows);
+    console.log("finalPage:", finalPage);
+    console.log("layoutChanged:", layoutChanged);
+    console.log("needsUpdate:", needsUpdate);
+    console.log("Columns:", columns);
+    console.log("Rows:", rows);
+    console.log("Calculated cardPerPage:", newCardsPerPage);
+    console.log("Current card count in DOM:", currentCardCount);
+    console.log("totalCards:", totalCards)
 
     if (needsUpdate && newCardsPerPage > 0) {
         console.info(`Layout change detected: submitting form with cardsPerPage = ${newCardsPerPage}`);

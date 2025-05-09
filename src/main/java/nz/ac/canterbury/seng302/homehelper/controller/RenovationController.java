@@ -285,7 +285,6 @@ public class RenovationController {
      *
      * @param id           of the renovation record to view
      * @param pageNumber   the page of tasks to view, defaults to 1
-     * @param cardsPerPage the number of tasks to display on the page, based off the screen size
      * @param model        (map-like) representation of results to be used by thymeleaf
      * @return view page of the renovation
      * @throws ResponseStatusException if the renovation record does not exist
@@ -293,10 +292,11 @@ public class RenovationController {
     @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id,
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                 @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage,
-                                 @RequestParam(name = "fromSearch", required = false, defaultValue = "false") boolean fromSearch,
                                  Model model) {
         logger.info("GET /renovations/view");
+
+        Integer cardsPerPage = (Integer) model.asMap().get("cardsPerPage");
+        Boolean fromSearch = (Boolean) model.asMap().get("fromSearch");
 
         if (cardsPerPage < 1) {
             cardsPerPage = 5;
@@ -314,10 +314,10 @@ public class RenovationController {
         if (pageNumber < 1)
             return "redirect:/renovations/view?id=" + id + "&page=1";
 
-        int totalTasks = record.getRenovationTasks().size();
-        int totalPages = (totalTasks + cardsPerPage - 1) / cardsPerPage;
+        int totalCards = record.getRenovationTasks().size();
+        int totalPages = (totalCards + cardsPerPage - 1) / cardsPerPage;
 
-        if (pageNumber > totalPages && totalTasks != 0)
+        if (pageNumber > totalPages && totalCards != 0)
             return "redirect:/renovations/view?id=" + id + "&page=" + totalPages;
 
         Pageable pageable = PageRequest.of(pageNumber - 1, cardsPerPage);
@@ -336,9 +336,22 @@ public class RenovationController {
         model.addAttribute("paginationLinksStart", paginationLinksStart);
         model.addAttribute("paginationLinksEnd", paginationLinksEnd);
         model.addAttribute("cardsPerPage", cardsPerPage);
+        model.addAttribute("totalCards", totalCards);
         model.addAttribute("icons", iconFileNames);
 
         return "viewRenovation";
+    }
+
+    @PostMapping("/view")
+    public String postViewRenovation(@RequestParam(name = "id") Long id,
+                                     @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                     @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage,
+                                     @RequestParam(name = "fromSearch", required = false, defaultValue = "false") boolean fromSearch,
+                                     RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("cardsPerPage", cardsPerPage);
+        redirectAttributes.addFlashAttribute("fromSearch", fromSearch);
+
+        return "redirect:/renovations/view?id=" + id + "&page=" + pageNumber;
     }
 
     /**
@@ -409,10 +422,10 @@ public class RenovationController {
         if (pageNumber < 1)
             return "redirect:/renovations/search?page=1";
 
-        int totalRenovations = records.size();
-        int totalPages = (totalRenovations + cardsPerPage - 1) / cardsPerPage;
+        int totalCards = records.size();
+        int totalPages = (totalCards + cardsPerPage - 1) / cardsPerPage;
 
-        if (pageNumber > totalPages && totalRenovations != 0)
+        if (pageNumber > totalPages && totalCards != 0)
             return "redirect:/renovations/search?page=" + totalPages;
 
         Pageable pageable = PageRequest.of(pageNumber - 1, cardsPerPage);
@@ -430,7 +443,7 @@ public class RenovationController {
         model.addAttribute("paginationLinksStart", paginationLinksStart);
         model.addAttribute("paginationLinksEnd", paginationLinksEnd);
         model.addAttribute("cardsPerPage", cardsPerPage);
-        model.addAttribute("totalRenovations", totalRenovations);
+        model.addAttribute("totalCards", totalCards);
 
         return "renovationSearchTemplate";
     }

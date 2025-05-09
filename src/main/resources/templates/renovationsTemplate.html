@@ -49,11 +49,15 @@
                 </tr>
                 <tr th:each="renovation : ${renovations}">
                     <td class="d-flex justify-content-between align-items-center">
-                        <a th:text="${renovation.name}"
-                           th:href="@{/renovations/view(id=${renovation.id})}"
-                           th:title="${renovation.name}"
-                           class="truncate-cell">
-                        </a>
+                        <form th:id="'form-' + ${renovation.id}" method="post" th:action="@{/renovations/view}">
+                            <input type="hidden" name="id" th:value="${renovation.id}" />
+                            <input type="hidden" name="page" value="1" />
+                            <input type="hidden" name="cardsPerPage" value="5" />
+                            <input type="hidden" name="fromSearch" value="false" />
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                        </form>
+                        <a href="#" th:text="${renovation.name}" th:onclick="'document.getElementById(\'form-' + ${renovation.id} + '\').submit(); return false;'"
+                           class="truncate-cell" th:title="${renovation.name}"></a>
                         <button type="button" class="btn btn-outline-danger custom-light-border"
                                 th:attr="data-id=${renovation.id}, data-searchQuery=${searchQuery}, data-csrf=${_csrf.token}"
                                 th:onclick="|confirmDelete(this)|">
