@@ -91,7 +91,7 @@ public class ForgotPasswordController {
             model.addAttribute("token", token);
             return "resetPasswordTemplate";
         }
-        redirectAttributes.addAttribute("error", "Reset password link has expired");
+        redirectAttributes.addFlashAttribute("emailError", "Reset password link has expired");
         return "redirect:/login";
     }
 
@@ -127,7 +127,7 @@ public class ForgotPasswordController {
             forgotPasswordService.updatePassword(user, newPassword);
             return "redirect:/login";
         }
-        redirectAttributes.addAttribute("error", "Reset password link has expired");
+        redirectAttributes.addFlashAttribute("emailError", "Reset password link has expired");
         return "redirect:/login";
     }
 }

@@ -190,10 +190,12 @@ public class ForgotPasswordControllerIntegrationTest {
     @Test
     void getResetPassword_enterInvalidToken_returnRedirectLoginPage() throws Exception{
         String token = "InVaLiDtOkEn";
+        String expectedMessage = "Reset password link has expired";
 
         mockMvc.perform(get("/password/reset/" + token))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl( "/login?error=Reset+password+link+has+expired"));
+                .andExpect(redirectedUrl( "/login"))
+                .andExpect(flash().attribute("emailError", expectedMessage));
     }
 
     /**
@@ -208,6 +210,9 @@ public class ForgotPasswordControllerIntegrationTest {
         String token = verificationCodeService.issueVerificationCode(GenerationStrategy.RESET_TOKEN,
                 resetUser, Locale.ENGLISH);
 
+        String expectedMessage = "Reset password link has expired";
+
+
         Optional<VerificationCode> verificationCode = verificationCodeRepository.findByCode(token);
         assertTrue(verificationCode.isPresent());
 
@@ -218,7 +223,8 @@ public class ForgotPasswordControllerIntegrationTest {
 
         mockMvc.perform(get("/password/reset/" + token))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl( "/login?error=Reset+password+link+has+expired"));
+                .andExpect(redirectedUrl( "/login"))
+                .andExpect(flash().attribute("emailError", expectedMessage));
 
         verificationCodeService.setDelay(10, TimeUnit.MINUTES);
     }
@@ -287,6 +293,8 @@ public class ForgotPasswordControllerIntegrationTest {
                 resetUser, Locale.ENGLISH);
         String newPassword = "Test123!";
         String retypePassword = "Test123!";
+        String expectedMessage = "Reset password link has expired";
+
 
         verificationCodeService.getScheduledFutureDeletion(token).get();
 
@@ -295,6 +303,7 @@ public class ForgotPasswordControllerIntegrationTest {
                         .param("confirmNewPassword", retypePassword)
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?error=Reset+password+link+has+expired"));
+                .andExpect(redirectedUrl("/login"))
+                .andExpect(flash().attribute("emailError", expectedMessage));
     }
 }
