@@ -61,7 +61,6 @@ public class TagsSteps {
     public void there_is_an_existing_tag_named(String tagName) {
         Tag tag = new Tag(tagName);
         tagRepository.save(tag);
-        System.out.println("Saving tag: " + tagName);
     }
 
     @When("I type {string} into the tag input field")
@@ -70,12 +69,12 @@ public class TagsSteps {
     }
 
     @Given("I have a renovation record and I am on that page")
-    public void i_have_a_renovation_record_and_I_am_on_that_page() {
+    public void i_have_a_renovation_record_and_i_am_on_that_page() {
         RenovationRecord newRenovationRecord = new RenovationRecord(userContext.getUser(), "Record " + System.currentTimeMillis(), "", List.of());
         renovationRecordRepository.save(newRenovationRecord);
 
         currentRenovationRecord = renovationRecordRepository.findExactMatchAllUsers(newRenovationRecord.getName()).orElse(null);
-        Assertions.assertNotNull(currentRenovationRecord);
+        assertNotNull(currentRenovationRecord);
     }
 
     @Given("The record has 5 tags")
@@ -88,8 +87,8 @@ public class TagsSteps {
         }
         renovationRecordRepository.save(currentRenovationRecord);
         RenovationRecord expectedRenovationRecord = renovationRecordRepository.findById(currentRenovationRecord.getId()).orElse(null);
-        Assertions.assertNotNull(expectedRenovationRecord);
-        Assertions.assertEquals(5, expectedRenovationRecord.getTags().size());
+        assertNotNull(expectedRenovationRecord);
+        assertEquals(5, expectedRenovationRecord.getTags().size());
     }
 
     @When("I enter a tag {string} into the tag input field")
@@ -102,13 +101,13 @@ public class TagsSteps {
 
     @Then("I should see an autocomplete list containing {string}")
     public void i_should_see_an_autocomplete_list_containing(String autocompleteTag) throws Exception {
-        MvcResult result = mockMvc.perform(get("/renovations/tags/autocomplete")
+        mvcResult = mockMvc.perform(get("/renovations/tags/autocomplete")
                         .param("partialTag", lastInput)
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String responseBody = result.getResponse().getContentAsString();
+        String responseBody = mvcResult.getResponse().getContentAsString();
         assertTrue(responseBody.contains(autocompleteTag),
                 "Expected response to contain tag: " + autocompleteTag);
     }
@@ -136,10 +135,10 @@ public class TagsSteps {
     @Then("The tag {string} is not added")
     public void the_tag_is_not_added(String tagName) throws Exception {
         RenovationRecord expectedRenovationRecord = renovationRecordRepository.findExactMatchAllUsers(currentRenovationRecord.getName()).orElse(null);
-        Assertions.assertNotNull(expectedRenovationRecord);
+        assertNotNull(expectedRenovationRecord);
 
         List<Tag> tags = expectedRenovationRecord.getTags();
-        Assertions.assertNotNull(tags.stream().filter(tag -> tag.getTagName().equals(tagName)).findFirst().toString());
+        assertTrue(tags.stream().noneMatch(tag -> tag.getTagName().equals(tagName)));
     }
 
     @Then("I should see an autocomplete list that doesn't contain {string}")
@@ -153,10 +152,5 @@ public class TagsSteps {
         String responseBody = mvcResult.getResponse().getContentAsString();
         assertFalse(responseBody.contains(autocompleteTag),
                 "Expected response to not contain tag: " + autocompleteTag);
-    }
-
-    @Then("I am told that there are no matching tags")
-    public void i_am_told_that_there_are_no_matching_tags() {
-        MockHttpServletResponse result = mvcResult.getResponse();
     }
 }
