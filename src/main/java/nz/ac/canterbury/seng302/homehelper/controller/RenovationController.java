@@ -285,7 +285,7 @@ public class RenovationController {
      *
      * @param id           of the renovation record to view
      * @param pageNumber   the page of tasks to view, defaults to 1
-     * @param cardPerPage the number of tasks to display on the page, based off the screen size
+     * @param cardsPerPage the number of tasks to display on the page, based off the screen size
      * @param model        (map-like) representation of results to be used by thymeleaf
      * @return view page of the renovation
      * @throws ResponseStatusException if the renovation record does not exist
@@ -293,13 +293,13 @@ public class RenovationController {
     @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id,
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                 @RequestParam(defaultValue = "5", name = "cardPerPage") int cardPerPage,
+                                 @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage,
                                  @RequestParam(name = "fromSearch", required = false, defaultValue = "false") boolean fromSearch,
                                  Model model) {
         logger.info("GET /renovations/view");
 
-        if (cardPerPage < 1) {
-            cardPerPage = 5;
+        if (cardsPerPage < 1) {
+            cardsPerPage = 5;
         }
 
         RenovationRecord record = renovationRecordService.getRecordById(id);
@@ -312,15 +312,15 @@ public class RenovationController {
         }
 
         if (pageNumber < 1)
-            return "redirect:/renovations/view?id=" + id + "&page=1&cardPerPage=" + cardPerPage;
+            return "redirect:/renovations/view?id=" + id + "&page=1";
 
         int totalTasks = record.getRenovationTasks().size();
-        int totalPages = (totalTasks + cardPerPage - 1) / cardPerPage;
+        int totalPages = (totalTasks + cardsPerPage - 1) / cardsPerPage;
 
         if (pageNumber > totalPages && totalTasks != 0)
-            return "redirect:/renovations/view?id=" + id + "&page=" + totalPages + "&cardPerPage=" + cardPerPage;
+            return "redirect:/renovations/view?id=" + id + "&page=" + totalPages;
 
-        Pageable pageable = PageRequest.of(pageNumber - 1, cardPerPage);
+        Pageable pageable = PageRequest.of(pageNumber - 1, cardsPerPage);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
         List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
 
@@ -335,7 +335,7 @@ public class RenovationController {
         model.addAttribute("renovation", record);
         model.addAttribute("paginationLinksStart", paginationLinksStart);
         model.addAttribute("paginationLinksEnd", paginationLinksEnd);
-        model.addAttribute("cardPerPage", cardPerPage);
+        model.addAttribute("cardsPerPage", cardsPerPage);
         model.addAttribute("icons", iconFileNames);
 
         return "viewRenovation";
@@ -382,7 +382,7 @@ public class RenovationController {
      */
     @GetMapping("/search")
     public String searchRenovations(Model model, HttpSession session,
-                                    @RequestParam(name = "page") Integer pageNumber) {
+                                    @RequestParam(name = "page", required = false) Integer pageNumber) {
         logger.info("GET /renovations/search");
 
         Map<String, Object> attributes = model.asMap();
@@ -395,7 +395,7 @@ public class RenovationController {
             pageNumber = (Integer) session.getAttribute("pageNumber");
             if (pageNumber == null) pageNumber = 1;
         }
-        Integer cardsPerPage = (Integer) attributes.getOrDefault("cardPerPage", session.getAttribute("cardsPerPage"));
+        Integer cardsPerPage = (Integer) attributes.getOrDefault("cardsPerPage", session.getAttribute("cardsPerPage"));
         if (cardsPerPage == null) cardsPerPage = 16;
 
         User user = loginService.getUserByEmail();
@@ -429,8 +429,8 @@ public class RenovationController {
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("paginationLinksStart", paginationLinksStart);
         model.addAttribute("paginationLinksEnd", paginationLinksEnd);
-        model.addAttribute("renovationPerPage", cardsPerPage);
-        model.addAttribute("paginatedRecordsSize", paginatedRecords.getSize());
+        model.addAttribute("cardsPerPage", cardsPerPage);
+        model.addAttribute("totalRenovations", totalRenovations);
 
         return "renovationSearchTemplate";
     }
@@ -442,34 +442,25 @@ public class RenovationController {
      *
      * @param visibility         the visibility filter to apply ("public", "user", or "all")
      * @param searchTerm         an optional term to search within renovation records
-     * @param redirectAttributes attributes to be passed on redirect to the search page
+     * @param session            HttpSession for storing attributes of most recent search
      * @return a redirect to the GET search endpoint with the results stored in flash attributes
      */
     @PostMapping("/search")
     public String submitSearchRenovations(@RequestParam(required = false) String visibility,
                                           @RequestParam(required = false) String searchTerm,
                                           @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                          @RequestParam(defaultValue = "5", name = "cardPerPage") int cardsPerPage,
-                                          RedirectAttributes redirectAttributes,
+                                          @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage,
                                           HttpSession session) {
         logger.info("POST /renovations/search");
 
         if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";
 
-        // Store in session so GET /search can use them
         session.setAttribute("visibility", visibility);
         session.setAttribute("searchTerm", searchTerm);
         session.setAttribute("pageNumber", pageNumber);
-        session.setAttribute("cardPerPage", cardsPerPage);
+        session.setAttribute("cardsPerPage", cardsPerPage);
 
-        User user = loginService.getUserByEmail();
-
-        redirectAttributes.addFlashAttribute("visibility", visibility);
-        redirectAttributes.addFlashAttribute("searchTerm", searchTerm);
-        redirectAttributes.addFlashAttribute("user", user);
-        redirectAttributes.addFlashAttribute("pageNumber", pageNumber);
-        redirectAttributes.addFlashAttribute("cardPerPage", cardsPerPage);
         return "redirect:/renovations/search?page=" + pageNumber;
     }
 }

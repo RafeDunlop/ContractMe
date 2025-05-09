@@ -4,7 +4,6 @@
  */
 
 
-
 /**
  * Onclick function for the task search button on View Renovation
  * Uses the confirmation prompt before searching
@@ -66,10 +65,10 @@ function validateRenovationPageSearch() {
  * This function updates the layout based on the window size and adjusts the number of tasks to be displayed on the page.
  */
 function updateLayout() {
-    const totalPages = parseInt(document.getElementById('data-total-pages').value, 10);
     const grid = document.getElementById('grid');
     const cards = grid.querySelectorAll('.card');
-    const paginatedRecordsSize = document.getElementById("paginatedRecordsSize");
+    const totalRenovations = parseInt(document.getElementById("totalRenovations").value, 10);
+    let pageNumber = parseInt(document.getElementById('pageNumber').value, 10);
 
     if (cards.length === 0) {
         console.warn("No cards found in grid. Skipping layout update.");
@@ -85,28 +84,27 @@ function updateLayout() {
     const columns = Math.max(1, Math.floor(gridWidth / cardWidth));
     const rows = calculateRows();
 
-    const newCardPerPage = columns * rows;
+    let newCardsPerPage = columns * rows;
     const currentCardCount = cards.length;
+    const finalPage = pageNumber === Math.ceil(totalRenovations / newCardsPerPage);
 
-    // 🔍 Debug logs
-    console.debug("=== Layout Debug Info ===");
-    console.debug("Grid width:", gridWidth);
-    console.debug("Card width (incl. margins):", cardWidth);
-    console.debug("Columns:", columns);
-    console.debug("Rows:", rows);
-    console.debug("Calculated cardPerPage:", newCardPerPage);
-    console.debug("Current card count in DOM:", currentCardCount);
+    const layoutChanged = newCardsPerPage !== currentCardCount;
+    const needsUpdate = layoutChanged && !finalPage;
 
-    if (newCardPerPage !== currentCardCount && newCardPerPage <= currentCardCount) {
-        console.info(`Layout change detected: submitting form with cardPerPage = ${newCardPerPage}`);
+    if (pageNumber > (totalRenovations / newCardsPerPage))
+    {
+        document.getElementById('pageInput').value = Math.ceil(totalRenovations / newCardsPerPage);
+    }
+
+    if (needsUpdate && newCardsPerPage > 0) {
+        console.info(`Layout change detected: submitting form with cardsPerPage = ${newCardsPerPage}`);
         const form = document.getElementById('search-form');
-        document.getElementById('cardPerPageInput').value = newCardPerPage;
+        document.getElementById("cardsPerPageInput").value = newCardsPerPage;
         form.submit();
     } else {
         console.debug("No layout change detected. No form submission needed.");
     }
 }
-
 
 /**
  * This function calculates the number of rows, using the top of task grid minus footer.
@@ -127,12 +125,10 @@ function calculateRows() {
     const footerHeight = footer.offsetHeight;
     const pageHeight = window.innerHeight;
 
-    const availableHeight = (pageHeight - gridTop) - footerHeight;
+    const availableHeight = (pageHeight - gridTop) - footerHeight - 220;
 
     return Math.max(1, Math.floor(availableHeight / cardHeight));
 }
 
 updateLayout()
 window.addEventListener('resize', updateLayout);
-
-
