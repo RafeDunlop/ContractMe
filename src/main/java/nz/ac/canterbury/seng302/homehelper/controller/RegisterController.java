@@ -3,6 +3,8 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import java.util.List;
 import java.util.Map;
 
+import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
+import nz.ac.canterbury.seng302.homehelper.profanityFilter.dictionary.Profanity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,9 @@ public class RegisterController {
     private final VerificationCodeService verificationCodeService;
 
     private final ApplicationEventPublisher eventPublisher;
+
+    private final ProfanityFilter profanityFilter = ProfanityFilter.getInstance();
+
 
     /**
      * Constructor for the register class, links controller and service layers
@@ -74,6 +79,13 @@ public class RegisterController {
         logger.info("POST /register");
 
         Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
+
+        Profanity value = profanityFilter.find("en", userRegisterDTO.getFirstName());
+        if (value != null) {
+            logger.info(value.toString());
+        } else {
+            logger.info(String.valueOf(value));
+        }
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
