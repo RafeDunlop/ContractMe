@@ -46,7 +46,7 @@ public class LoginService {
         }
         else {
             errors.add("The user email is invalid");
-            throw new IllegalArgumentException(String.join(" ", errors));
+            throw new IllegalArgumentException(String.join(";", errors));
         }
 
     }
@@ -66,7 +66,7 @@ public class LoginService {
             return optionalUser.get();
         } else {
             errors.add("The email address is unknown, or the password is invalid.");
-            throw new IllegalArgumentException(String.join(" ", errors));
+            throw new IllegalArgumentException(String.join(";", errors));
         }
     }
 }

@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import java.util.*;
 public class RenovationRecordService {
 
     private final RenovationRecordRepository renovationRecordRepository;
+    private final RenovationTaskRepository renovationTaskRepository;
     private final RenovationRecordValidation renovationRecordValidation;
 
     /**
@@ -27,22 +29,47 @@ public class RenovationRecordService {
      * @param renovationRecordRepository initializes with the repository for storing records
      */
     @Autowired
-    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationRecordValidation renovationRecordValidation) {
+    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation) {
         this.renovationRecordRepository = renovationRecordRepository;
+        this.renovationTaskRepository = renovationTaskRepository;
         this.renovationRecordValidation = renovationRecordValidation;
     }
 
     /**
-     * Retrieves a list of renovation records associated with the current user that are like the given name
+     * Retrieves a list of renovation records associated with the current user that are like the given term
      * @param user The current user
      * @param term The term to search for, not case-sensitive
-     * @return a list of renovation records from the user that match the name
+     * @return a list of renovation records from the user that match the term if given
      */
-    public List<RenovationRecord> getRecordResultByName(User user, String term) {
+    public List<RenovationRecord> getUserRecords(User user, String term) {
         if (term == null || term.trim().isEmpty()) {
             return renovationRecordRepository.findByUser(user);
         }
-        return renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCase(user, term);
+        return renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(user, term);
+    }
+
+    /**
+     * Retrieves a list of public renovation records that are like the given term
+     * @param term The term to search for, not case-sensitive
+     * @return a list of public renovation records that match the term if given
+     */
+    public List<RenovationRecord> getPublicRecords(String term) {
+        if (term == null || term.trim().isEmpty()) {
+            return renovationRecordRepository.findByIsPublicTrue();
+        }
+        return renovationRecordRepository.findByIsPublicTrueSearchContainingNameOrDescriptionIgnoreCase(term);
+    }
+
+    /**
+     * Retrieves a list of public or users renovation records that are like the given term
+     * @param term The term to search for, not case-sensitive
+     * @return a list of public or users renovation records that match the term if given
+     */
+    public List<RenovationRecord> getAllRecords(User user, String term) {
+        if (term == null || term.trim().isEmpty()) {
+            return renovationRecordRepository.findAllVisibleToUser(user);
+        }
+        return renovationRecordRepository.findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(user, term);
     }
 
     /**
@@ -61,6 +88,7 @@ public class RenovationRecordService {
     public void removeRenovationRecord(Long id){
         Optional<RenovationRecord> recordToRemove = renovationRecordRepository.findById(id);
         if (recordToRemove.isPresent()) {
+            renovationTaskRepository.deleteTaskById(id);
             renovationRecordRepository.deleteById(id);
         }
     }

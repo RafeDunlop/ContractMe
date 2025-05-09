@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.unit.service;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
@@ -12,8 +13,7 @@ import org.mockito.Mockito;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 public class RenovationRecordServiceTest {
@@ -22,11 +22,13 @@ public class RenovationRecordServiceTest {
 
     private static RenovationRecordValidation renovationRecordValidation;
     private static RenovationRecordRepository renovationRecordRepository;
+    private static RenovationTaskRepository renovationTaskRepository;
     private static LoginService loginService;
 
     @BeforeAll
     public static void setUpBeforeClass() {
         renovationRecordRepository = mock(RenovationRecordRepository.class);
+        renovationTaskRepository = mock(RenovationTaskRepository.class);
         loginService = mock(LoginService.class);
         renovationRecordValidation = new RenovationRecordValidation(renovationRecordRepository, loginService);
 
@@ -39,7 +41,7 @@ public class RenovationRecordServiceTest {
         Mockito.when(renovationRecordRepository.findExactMatch("name", mockUser)).thenReturn(Optional.empty());
         Mockito.when(renovationRecordRepository.findExactMatch("name!", mockUser)).thenReturn(Optional.empty());
 
-        toTest = new RenovationRecordService(renovationRecordRepository, renovationRecordValidation);
+        toTest = new RenovationRecordService(renovationRecordRepository, renovationTaskRepository, renovationRecordValidation);
     }
 
     @Test
@@ -190,5 +192,84 @@ public class RenovationRecordServiceTest {
 
         Map<String, List<String>> errors = toTest.validateAllInputsCreate(renovationName, "Some description", Arrays.asList("Kitchen"));
         assertTrue(errors.isEmpty(), "User A should not have any errors when creating a new renovation.");
+    }
+
+    @Test
+    public void getUserRecords_withNullTerm_returnsAllUserRecords() {
+        User user = mock(User.class);
+        List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+
+        Mockito.when(renovationRecordRepository.findByUser(user)).thenReturn(expected);
+
+        List<RenovationRecord> result = toTest.getUserRecords(user, null);
+
+        Mockito.verify(renovationRecordRepository).findByUser(user);
+        assertSame(result, expected);
+    }
+
+    @Test
+    public void getUserRecords_withSearchTerm_returnsFilteredRecords() {
+        User user = mock(User.class);
+        String term = "kitchen";
+        List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+
+        Mockito.when(renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(user, term)).thenReturn(expected);
+
+        List<RenovationRecord> result = toTest.getUserRecords(user, term);
+
+        Mockito.verify(renovationRecordRepository).findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(user, term);
+        assertSame(result, expected);
+    }
+
+    @Test
+    public void getPublicRecords_withNullTerm_returnsAllPublicRecords() {
+        List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+
+        Mockito.when(renovationRecordRepository.findByIsPublicTrue()).thenReturn(expected);
+
+        List<RenovationRecord> result = toTest.getPublicRecords(null);
+
+        Mockito.verify(renovationRecordRepository).findByIsPublicTrue();
+        assertSame(result, expected);
+    }
+
+    @Test
+    public void getPublicRecords_withSearchTerm_returnsFilteredPublicRecords() {
+        String term = "bathroom";
+        List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+
+        Mockito.when(renovationRecordRepository.findByIsPublicTrueSearchContainingNameOrDescriptionIgnoreCase(term)).thenReturn(expected);
+
+        List<RenovationRecord> result = toTest.getPublicRecords(term);
+
+        Mockito.verify(renovationRecordRepository).findByIsPublicTrueSearchContainingNameOrDescriptionIgnoreCase(term);
+        assertSame(result, expected);
+    }
+
+    @Test
+    public void getAllRecords_withNullTerm_returnsAllVisibleToUser() {
+        User user = mock(User.class);
+        List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+
+        Mockito.when(renovationRecordRepository.findAllVisibleToUser(user)).thenReturn(expected);
+
+        List<RenovationRecord> result = toTest.getAllRecords(user, null);
+
+        Mockito.verify(renovationRecordRepository).findAllVisibleToUser(user);
+        assertSame(result, expected);
+    }
+
+    @Test
+    public void getAllRecords_withSearchTerm_returnsFilteredRecords() {
+        User user = mock(User.class);
+        String term = "garage";
+        List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+
+        Mockito.when(renovationRecordRepository.findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(user, term)).thenReturn(expected);
+
+        List<RenovationRecord> result = toTest.getAllRecords(user, term);
+
+        Mockito.verify(renovationRecordRepository).findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(user, term);
+        assertSame(result, expected);
     }
 }

@@ -1,5 +1,4 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
@@ -15,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -44,8 +42,9 @@ public class RenovationController {
 
     /**
      * induces spring to automatically sets up the {@code RenovationRecordService}
+     *
      * @param renovationRecordService The renovation service which provides non-UI functionality
-     * @param loginService The login service provides the function to get the current user
+     * @param loginService            The login service provides the function to get the current user
      */
     @Autowired
     public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService) {
@@ -57,16 +56,17 @@ public class RenovationController {
 
     /**
      * Gets all renovations
+     *
      * @param searchQuery optional string to search on renovation name (partial matching)
-     * @param model (map-like) representation of results to be used by thymeleaf
+     * @param model       (map-like) representation of results to be used by thymeleaf
      * @return thymeleaf renovationsTemplate
      */
     @GetMapping
-    public String renovations(@RequestParam(value = "searchQuery", required = false, defaultValue="") String searchQuery, Model model) {
+    public String renovations(@RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery, Model model) {
         logger.info("GET renovations");
         try {
             User user = loginService.getUserByEmail();
-            model.addAttribute("renovations", renovationRecordService.getRecordResultByName(user, searchQuery));
+            model.addAttribute("renovations", renovationRecordService.getUserRecords(user, searchQuery));
             model.addAttribute("searchQuery", searchQuery);
             return "renovationsTemplate";
         } catch (IllegalArgumentException e) {
@@ -76,6 +76,7 @@ public class RenovationController {
 
     /**
      * Gets the renovation creation form
+     *
      * @return thymeleaf createRenovationTemplate
      */
     @GetMapping("/create")
@@ -97,13 +98,14 @@ public class RenovationController {
      *     <li>sets the fields of the form to what they were at submission time</li>
      *     <li>sets some additional parameters so the client-side javascript can provide useful and dynamic error reporting to the user</li>
      * </ul>
-     * @param name Name of the renovation
+     *
+     * @param name        Name of the renovation
      * @param description The description of the renovation
      * @return thymeleaf createRenovationTemplate OR viewRenovationTemplate
      */
     @PostMapping("/create")
-    public String submitRecord(@RequestParam(name="name") String name,
-                               @RequestParam(name = "description", required=false, defaultValue = "") String description,
+    public String submitRecord(@RequestParam(name = "name") String name,
+                               @RequestParam(name = "description", required = false, defaultValue = "") String description,
                                @RequestParam(name = "roomList", required = false) List<String> roomList,
                                RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/create");
@@ -114,7 +116,7 @@ public class RenovationController {
 
         if (!errors.isEmpty()) {
             // Add each error to a flash attribute, categorizing by error type
-            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
+            errors.forEach(redirectAttributes::addFlashAttribute);
 
             redirectAttributes.addFlashAttribute("name", name);
             redirectAttributes.addFlashAttribute("description", description);
@@ -147,6 +149,7 @@ public class RenovationController {
 
     /**
      * Deletes renovation record by its id, redirects back to my records page
+     *
      * @param id of the record to be deleted
      * @return response based on whether the record id exists, if the user doesn't have permission to delete the record, or
      * if the deletion was successful
@@ -167,15 +170,17 @@ public class RenovationController {
 
     /**
      * Gets the renovation editing form
-     * @param id The id of the renovation to be edited
+     *
+     * @param id    The id of the renovation to be edited
      * @param model (map-like) representation of name, language and isJava boolean for use in thymeleaf,
-     * with values being set to relevant parameters provided
+     *              with values being set to relevant parameters provided
      * @return Thymeleaf editRenovationTemplate
      */
     @GetMapping("/edit")
     public String editRenovation(@RequestParam(name = "id") Long id, Model model) {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
-        if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
+        if (renovationRecord == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
 
         User user = loginService.getUserByEmail();
         if (!renovationRecord.getUser().equals(user)) {
@@ -212,23 +217,25 @@ public class RenovationController {
      *      <li>sets the fields of the form to what they were at submission time</li>
      *      <li>sets some additional parameters so the client-side javascript can provide useful and dynamic error reporting to the user</li>
      * </ul>
-     * @param id of the record to be edited
-     * @param name of the record to be edited from the form field
-     * @param description of the record to be edited from the form field
-     * @param roomList list of rooms of the record to be edited from the form
+     *
+     * @param id                 of the record to be edited
+     * @param name               of the record to be edited from the form field
+     * @param description        of the record to be edited from the form field
+     * @param roomList           list of rooms of the record to be edited from the form
      * @param redirectAttributes (map-like) representation of results to be used by thymeleaf
      * @return redirect to the view page for the edited record
      */
     @PostMapping("/edit")
     public String submitRenovationEdit(@RequestParam(name = "id") Long id,
-                                       @RequestParam(name="name", required = false) String name,
+                                       @RequestParam(name = "name", required = false) String name,
                                        @RequestParam(name = "description", required = false) String description,
                                        @RequestParam(name = "roomList", required = false) List<String> roomList,
                                        RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/edit");
 
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
-        if (renovationRecord == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
+        if (renovationRecord == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
         if (roomList == null) roomList = new ArrayList<>(); //cannot be a default value as technically non-constant
 
         renovationRecord.setDescription(description);
@@ -237,7 +244,7 @@ public class RenovationController {
         Map<String, List<String>> errors = renovationRecordService.validateAllInputsEdit(renovationRecord, name);
 
         if (!errors.isEmpty()) {
-            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
+            errors.forEach(redirectAttributes::addFlashAttribute);
 
             redirectAttributes.addFlashAttribute("id", id);
             redirectAttributes.addFlashAttribute("name", name);
@@ -252,78 +259,76 @@ public class RenovationController {
         redirectAttributes.addFlashAttribute("renovation", renovationRecord);
         return "redirect:/renovations/view?id=" + renovationRecord.getId();
     }
+
     /**
      * Updates the publicity status of a renovation record.
      *
-     * @param id the ID of the renovation record
+     * @param id      the ID of the renovation record
      * @param payload a JSON map containing the new publicity status
      * @return a redirect URL to the updated renovation view
      */
     @PostMapping("/editPublicity/{id}")
-    public String submitPublicity(@PathVariable("id") Long id,@RequestBody Map<String, Boolean> payload) {
+    public String submitPublicity(@PathVariable("id") Long id, @RequestBody Map<String, Boolean> payload) {
         logger.info("editPublicity/{id}");
         boolean isPublic = payload.get("isPublic");
+        User user = loginService.getUserByEmail();
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
-        renovationRecordService.changePublicity(isPublic,renovationRecord);
+        if (!renovationRecord.getUser().equals(user)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Action not allowed.");
+        }
+        renovationRecordService.changePublicity(isPublic, renovationRecord);
         return "redirect:/renovations/view?id=" + renovationRecord.getId();
     }
 
     /**
      * Handles redirecting to the view record page for a given record based on the id
-     * @param id of the renovation record to view
-     * @param pageNumber the page of tasks to view, defaults to 1
+     *
+     * @param id           of the renovation record to view
+     * @param pageNumber   the page of tasks to view, defaults to 1
      * @param tasksPerPage the number of tasks to display on the page, based off the screen size
-     * @param request request the HTTP servlet request
-     * @param model (map-like) representation of results to be used by thymeleaf
+     * @param model        (map-like) representation of results to be used by thymeleaf
      * @return view page of the renovation
      * @throws ResponseStatusException if the renovation record does not exist
      */
-
     @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id,
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                  @RequestParam(defaultValue = "5", name = "tasksPerPage") int tasksPerPage,
-                                 HttpServletRequest request,
+                                 @RequestParam(name = "fromSearch", required = false, defaultValue = "false") boolean fromSearch,
                                  Model model) {
+        logger.info("GET /renovations/view");
 
         if (tasksPerPage < 1) {
             tasksPerPage = 5;
         }
 
-        HttpSession session = request.getSession();
-        if (session.getAttribute("tasksPerPage") != null) {
-            // If tasksPerPage is not passed in the request, fallback to session value.
-            tasksPerPage = (int) session.getAttribute("tasksPerPage");
-        }
-        // Scales the number of tasks per page based on screen size.
-        // The client cannot directly set this value.
-
-
         RenovationRecord record = renovationRecordService.getRecordById(id);
-        if (record == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
+        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
+
         User user = loginService.getUserByEmail();
-        if (!record.getUser().equals(user)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Renovation not found.");
+        boolean isOwner = user.equals(record.getUser());
+        if (!isOwner && !record.isPublic()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
-        if (pageNumber < 1) return "redirect:/renovations/view?id=" + id + "&page=1&tasksPerPage=" + tasksPerPage;
+        if (pageNumber < 1)
+            return "redirect:/renovations/view?id=" + id + "&page=1&tasksPerPage=" + tasksPerPage;
 
         int totalTasks = record.getRenovationTasks().size();
         int totalPages = (totalTasks + tasksPerPage - 1) / tasksPerPage;
 
-        if (pageNumber > (totalPages) && (totalTasks != 0)) return "redirect:/renovations/view?id=" + id + "&page=" + totalPages + "&tasksPerPage=" + tasksPerPage;
+        if (pageNumber > totalPages && totalTasks != 0)
+            return "redirect:/renovations/view?id=" + id + "&page=" + totalPages + "&tasksPerPage=" + tasksPerPage;
 
         Pageable pageable = PageRequest.of(pageNumber - 1, tasksPerPage);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
         List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
 
-        int paginationLinksStart;
-        int paginationLinksEnd;
+        int paginationLinksStart = Math.max(pageNumber - 2, 1);
+        int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
 
-        paginationLinksStart = Math.max(pageNumber - 2, 1);
-        paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
-        // Tracks two pages ahead and behind the current page for the page number buttons displaying on the page.
-
+        model.addAttribute("isOwner", isOwner);
+        model.addAttribute("fromSearch", fromSearch);
         model.addAttribute("tasks", paginatedTasks.getContent());
         model.addAttribute("pageNumber", pageNumber);
         model.addAttribute("totalPages", totalPages);
@@ -338,8 +343,9 @@ public class RenovationController {
 
     /**
      * Handles the submission of a new tag to be created, and adding to renovation records
-     * @param renovationId id of the renovation record
-     * @param tagName of the tag
+     *
+     * @param renovationId       id of the renovation record
+     * @param tagName            of the tag
      * @param redirectAttributes attributes for redirect
      * @return the redirect to the view page for the renovation record.
      */
@@ -366,6 +372,7 @@ public class RenovationController {
     /**
      * Gets an autocomplete list of tag names that partially match the input
      * For AJAX requests
+     *
      * @param partialTag the partial input of a tag from the user
      * @return a list of matching tag names
      */
@@ -375,4 +382,85 @@ public class RenovationController {
         return tagService.autocompleteTags(partialTag);
     }
 
+    /**
+     * Handles the GET request to display the renovation search page. If the model does not already contain
+     * renovation records, it retrieves all renovation records accessible to the current user and sets
+     * default attributes for visibility, search term, and user information.
+     *
+     * @param model the model used to populate attributes for the view
+     * @return the name of the view template for searching renovations
+     */
+    @GetMapping("/search")
+    public String searchRenovations(Model model, HttpSession session) {
+        String visibility = (String) model.asMap().get("visibility");
+        String searchTerm = (String) model.asMap().get("searchTerm");
+
+        if (visibility == null) {
+            visibility = (String) session.getAttribute("visibility");
+            if (visibility == null) visibility = "all";
+        }
+
+        if (searchTerm == null) {
+            searchTerm = (String) session.getAttribute("searchTerm");
+            if (searchTerm == null) searchTerm = "";
+        }
+
+        model.addAttribute("visibility", visibility);
+        model.addAttribute("searchTerm", searchTerm);
+
+        if (!model.containsAttribute("records")) {
+            logger.info("GET /renovations/search");
+
+            User user = loginService.getUserByEmail();
+
+            List<RenovationRecord> records = switch (visibility.toLowerCase()) {
+                case "public" -> renovationRecordService.getPublicRecords(searchTerm);
+                case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
+                default -> renovationRecordService.getAllRecords(user, searchTerm);
+            };
+
+            model.addAttribute("records", records);
+            model.addAttribute("user", user);
+        }
+        return "renovationSearchTemplate";
+    }
+
+    /**
+     * Handles the submission of a renovation search form. Filters renovation records based on the provided
+     * visibility setting and optional search term. The filtered records, search term, and visibility
+     * are added to redirect attributes and redirected to the search view.
+     *
+     * @param visibility         the visibility filter to apply ("public", "user", or "all")
+     * @param searchTerm         an optional term to search within renovation records
+     * @param redirectAttributes attributes to be passed on redirect to the search page
+     * @return a redirect to the GET search endpoint with the results stored in flash attributes
+     */
+    @PostMapping("/search")
+    public String submitSearchRenovations(@RequestParam(required = false) String visibility,
+                                          @RequestParam(required = false) String searchTerm,
+                                          RedirectAttributes redirectAttributes,
+                                          HttpSession session) {
+        logger.info("POST /renovations/search");
+
+        if (visibility == null) visibility = "all";
+        if (searchTerm == null) searchTerm = "";
+
+        // Store in session so GET /search can use them
+        session.setAttribute("visibility", visibility);
+        session.setAttribute("searchTerm", searchTerm);
+
+        User user = loginService.getUserByEmail();
+        List<RenovationRecord> records = switch (visibility.toLowerCase()) {
+            case "public" -> renovationRecordService.getPublicRecords(searchTerm);
+            case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
+            default -> renovationRecordService.getAllRecords(user, searchTerm);
+        };
+
+        redirectAttributes.addFlashAttribute("records", records);
+        redirectAttributes.addFlashAttribute("visibility", visibility);
+        redirectAttributes.addFlashAttribute("searchTerm", searchTerm);
+        redirectAttributes.addFlashAttribute("user", user);
+
+        return "redirect:/renovations/search";
+    }
 }

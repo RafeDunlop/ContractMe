@@ -63,11 +63,13 @@ public class EditTaskControllerIntegrationTest {
     @MockBean
     private RenovationRecordService renovationRecordService;
 
+    private User user;
+
     @BeforeEach
     public void setup_user() {
         mockMvc = MockMvcBuilders.standaloneSetup(editTaskController).build();
 
-        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
+        user = new User("Jane", "Doe", "jane@doe.com", "Password");
         user.grantAuthority("ROLE_USER");
         Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
 
@@ -185,6 +187,7 @@ public class EditTaskControllerIntegrationTest {
     @Test
     @WithMockUser(username = "jane@doe.com", roles = {"USER"})
     public void testEditTask_editTaskIcon_taskIconChangedReturnsToRenovations() throws Exception {
+        Mockito.when(loginService.getUserByEmail()).thenReturn(user);
         mockMvc.perform(MockMvcRequestBuilders.post("/editTask/edit-icon/1")
                     .contentType(MediaType.APPLICATION_JSON)
                         .param("id", "1")
