@@ -100,6 +100,17 @@ public class DefaultDataConfigurator {
                         defaultJERooms
                 )
         );
+
+// Add 200 test renovations for default1
+         for (int i = 1; i <= 200; i++) {
+             renovationRecordService.addRenovationRecord(
+                     new RenovationRecord(default1,
+                             "Test Renovation " + i,
+                             "Description for renovation " + i,
+                             defaultJERooms
+                     )
+             );
+         }
     }
 
     private void setupDefaultRenovationTasks() {

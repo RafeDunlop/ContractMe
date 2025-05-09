@@ -112,7 +112,7 @@
                 </div>
             </div>
             <div id="footer" class="mt-2">
-                <div th:replace="~{fragments/paginationFooter.html :: paginationFooter(pageUrl='renovations/view')}" class="d-flex justify-content-center" th:if="${totalPages > 0}"></div>
+                <div th:replace="~{fragments/paginationFooter.html :: paginationFooter(pageUrl='renovations/view', id=${renovation.id})}" class="d-flex justify-content-center" th:if="${totalPages > 0}"></div>
 
                 <div class="alert alert-danger" id="errorMessage" style="margin-top: 20px; display: none;">
                     <p id="errorText"></p>

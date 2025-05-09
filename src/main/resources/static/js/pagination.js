@@ -55,15 +55,15 @@ function updateLayout() {
     const columns = Math.max(1, Math.floor(gridWidth / cardWidth));  // Number of columns based on grid width
     const rows = calculateRows()
 
-    const tasksPerPage = columns * rows;
+    const itemsPerPage = columns * rows;
 
     // Get the current tasksPerPage from the URL
-    const currentParam = new URL(window.location.href).searchParams.get("tasksPerPage");
+    const currentParam = new URL(window.location.href).searchParams.get("itemsPerPage");
 
     // Only update the URL if tasksPerPage is different
-    if (String(tasksPerPage) !== currentParam) {
+    if (String(itemsPerPage) !== currentParam) {
         let url = new URL(window.location.href);
-        url.searchParams.set("tasksPerPage", tasksPerPage);
+        url.searchParams.set("itemsPerPage", itemsPerPage);
         window.location.assign(url.toString());
 
     }

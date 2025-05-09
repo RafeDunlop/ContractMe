@@ -48,7 +48,7 @@
                     <td colspan="1" class="text">No renovations match your search.</td>
                 </tr>
                 <tr th:each="renovation : ${renovations}">
-                    <td class="d-flex justify-content-between align-items-center">
+                    <td class="d-flex justify-content-between align-items-center table-row">
                         <a th:text="${renovation.name}"
                            th:href="@{/renovations/view(id=${renovation.id})}"
                            th:title="${renovation.name}"
@@ -63,7 +63,7 @@
                 </tr>
                 </tbody>
             </table>
-            <div th:replace="~{fragments/paginationFooter.html :: paginationFooter(pageUrl='renovations')}"></div>
+            <div th:replace="~{fragments/paginationFooter.html :: paginationFooter(pageUrl='renovations', id=${null})}"></div>
         </div>
 
         <div class="mt-4">
@@ -73,5 +73,5 @@
 </div>
 </body>
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
-<script type="text/javascript" th:src="@{/js/pagination.js}"></script>
+<script type="text/javascript" th:src="@{/js/renovationPagination.js}"></script>
 </html>

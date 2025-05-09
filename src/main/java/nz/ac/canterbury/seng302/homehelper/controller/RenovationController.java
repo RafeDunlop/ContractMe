@@ -64,12 +64,34 @@ public class RenovationController {
     @GetMapping
     public String renovations(@RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery,
                               @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                              @RequestParam(defaultValue = "8", name = "itemsPerPage") int tasksPerPage,
+                              @RequestParam(defaultValue = "8", name = "itemsPerPage") int itemsPerPage,
                               Model model) {
         logger.info("GET renovations");
         try {
+            if (itemsPerPage < 1) {
+                itemsPerPage = 8;
+            }
+            if (pageNumber < 1) {
+                return "redirect:/renovations?page=1&itemsPerPage=" + itemsPerPage;
+            }
+
             User user = loginService.getUserByEmail();
-            model.addAttribute("renovations", renovationRecordService.getUserRecords(user, searchQuery));
+            Pageable pageable = PageRequest.of(pageNumber - 1, itemsPerPage);
+            Page<RenovationRecord> renovationRecords = renovationRecordService.getPaginatedUserRecords(user, searchQuery, pageable);
+            int totalPages = renovationRecords.getTotalPages();
+            long totalRenovations = renovationRecords.getTotalElements();
+            int paginationLinksStart = Math.max(pageNumber - 2, 1);
+            int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
+
+            if (pageNumber > totalPages && totalRenovations != 0) {
+                return "redirect:/renovations?page=" + totalPages + "&itemsPerPage=" + itemsPerPage;
+            }
+            model.addAttribute("renovations", renovationRecords.getContent());
+            model.addAttribute("paginationLinksStart", paginationLinksStart);
+            model.addAttribute("paginationLinksEnd", paginationLinksEnd);
+            model.addAttribute("pageNumber", pageNumber);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("itemsPerPage", itemsPerPage);
             model.addAttribute("searchQuery", searchQuery);
             return "renovationsTemplate";
         } catch (IllegalArgumentException e) {
