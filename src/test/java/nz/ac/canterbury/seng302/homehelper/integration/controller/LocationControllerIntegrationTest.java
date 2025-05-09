@@ -1,13 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.controller.LocationController;
-import nz.ac.canterbury.seng302.homehelper.dto.AddressDataAttributionDTO;
-import nz.ac.canterbury.seng302.homehelper.dto.CoordsDTO;
-import nz.ac.canterbury.seng302.homehelper.dto.CountryDTO;
-import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDataAttributionDTO;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,8 +22,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestTemplate;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -53,12 +46,6 @@ public class LocationControllerIntegrationTest {
     @Mock
     private RestTemplate restTemplate;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    private AddressDataAttributionDTO addressAttribution;
-
-    private LocalisationDataAttributionDTO localisationAttribution;
-
     @PostConstruct
     private void init() {
         mockMvc = MockMvcBuilders.standaloneSetup(locationController).build();
@@ -69,15 +56,6 @@ public class LocationControllerIntegrationTest {
     public void setup() {
         ReflectionTestUtils.setField(locationService, "restTemplate", restTemplate);
         keys.setGeoapify("notAnApiKey");
-        localisationAttribution = new LocalisationDataAttributionDTO();
-        localisationAttribution.setName("IP to City Lite");
-        localisationAttribution.setAttribution("<a href='https://db-ip.com'>IP Geolocation by DB-IP</a>");
-        localisationAttribution.setLicense("Creative Commons Attribution License");
-        addressAttribution = new AddressDataAttributionDTO();
-        addressAttribution.setSourcename("openstreetmap");
-        addressAttribution.setAttribution("© OpenStreetMap contributors");
-        addressAttribution.setLicense("Open Database License");
-        addressAttribution.setUrl("https://www.openstreetmap.org/copyright");
     }
 
     @Test
@@ -127,11 +105,11 @@ public class LocationControllerIntegrationTest {
     @Test
     @WithMockUser(username = "jane@doe.com")
     public void testGetAddressAttribution_notLocal_getsAllInformation() throws Exception {
-        String expectedUrl = "https://api.geoapify.com/v1/geocode/autocomplete?text=10 Downing Street&filter=countrycode:UK&bias=proximity:51.4934,0.0000&type=street&lang=en&format=json&apiKey=notAnApiKey";
-        String json = "[{\"formatted\": \"10 Downing Street, SW1A 2AA, London, United Kingdom\"}]";
+        String expectedUrl = "https://api.geoapify.com/v1/geocode/autocomplete?text=10 Downing Street&filter=countrycode:UK&bias=proximity:51.493400,0.000000&type=street&lang=en&format=json&apiKey=notAnApiKey";
+        String json = "{\"results\":[{\"formatted\": \"10 Downing Street, SW1A 2AA, London, United Kingdom\"}]}";
         @SuppressWarnings("unchecked")
         ResponseEntity<String> mockResponse = (ResponseEntity<String>) mock(ResponseEntity.class);
-        when(restTemplate.getForEntity(anyString(), String.class)).thenReturn(mockResponse); //todo replace any
+        when(restTemplate.getForEntity(expectedUrl, String.class)).thenReturn(mockResponse); 
         when(mockResponse.getStatusCode()).thenReturn(HttpStatus.OK);
         when(mockResponse.getBody()).thenReturn(json);
         mockMvc.perform(MockMvcRequestBuilders.get("/address-autocomplete/{prompt}", "10 Downing Street")

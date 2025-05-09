@@ -117,7 +117,7 @@ public class LocationService {
         sb.append("&type=street");
         sb.append("&lang=en");
         sb.append("&format=json");
-        sb.append(String.format("&apiKey=%s", System.getenv("GEOAPIFY_API_KEY")));
+        sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
         logger.debug("calling autocomplete API: {}", sb);
         return sb.toString();
     }
