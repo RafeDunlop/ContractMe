@@ -93,8 +93,6 @@ function calculateRows() {
     return Math.max(1, Math.floor(availableHeight / cardHeight));
 }
 
-updateLayout()
-
 window.addEventListener('resize', updateLayout);
 
 

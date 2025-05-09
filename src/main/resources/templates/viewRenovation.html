@@ -64,12 +64,24 @@
                 <input type="hidden" name="renovationId" th:value="${renovation.id}">
             </form>
 
+            <!-- Frontend JS error -->
+            <div class="alert alert-danger mt-2" role="alert" id="tag-frontend-error" hidden>
+                <ul><li><label class="form-label" id="tag-frontend-error-message"></label></li></ul>
+            </div>
+
+            <!-- Backend error -->
+            <div class="alert alert-danger mt-2" role="alert" id="tag-backend-error"
+                 th:attr="hidden=${errors == null}">
+                <ul><li th:each="msg : ${errors}" th:text="${msg}"></li></ul>
+            </div>
+
+
             <!-- Display added tags -->
             <div id="tagList" class="mb-3">
                 <label class="fw-bold">Current Tags:</label>
-                <div class="list-group">
+                <div class="list-group" id="tag-list">
                     <div th:each="tag : ${renovation.tags}" class="list-group-item">
-                        🛠️ <span th:text="${tag}" class="ms-2"></span>
+                        🛠️ <span th:text="${tag.tagName}" class="ms-2"></span>
                     </div>
                 </div>
             </div>
@@ -178,4 +190,5 @@
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
 <script type="text/javascript" th:src="@{/js/autocomplete.js}"></script>
+<script type="text/javascript" th:src="@{/js/renovationTagValidation.js}"></script>
 </html>
