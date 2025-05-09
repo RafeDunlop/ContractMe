@@ -37,7 +37,6 @@ public class RegisterController {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    private final ProfanityFilter profanityFilter = ProfanityFilter.getInstance();
 
 
     /**
@@ -80,12 +79,6 @@ public class RegisterController {
 
         Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
 
-        Profanity value = profanityFilter.find("en", userRegisterDTO.getFirstName());
-        if (value != null) {
-            logger.info(value.toString());
-        } else {
-            logger.info(String.valueOf(value));
-        }
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
