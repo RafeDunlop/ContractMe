@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Controller to provide Location related endpoints
+ */
 @Controller
 public class LocationController {
 
@@ -39,7 +42,6 @@ public class LocationController {
         logger.info("GET /localisation");
         String ipAddress = getIpFromRequest(request);
         logger.debug("IP: {}", ipAddress);
-        // validation via service/in following call etc.
         try {
             return new ResponseEntity<>(locationService.getRoughLocation(ipAddress), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
@@ -59,7 +61,6 @@ public class LocationController {
     public ResponseEntity<List<AddressDTO>> getAddressAutoComplete(@PathVariable String prompt,
                                                    @ModelAttribute LocalisationDTO localisationDTO) {
         logger.info("GET /address-autocomplete/{}", prompt);
-        // validation via service/in following call etc.
         try {
             return new ResponseEntity<>(locationService.getAutocomplete(prompt, localisationDTO), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
@@ -67,6 +68,12 @@ public class LocationController {
         }
     }
 
+    /**
+     * Gets the IP address of the request, principally from the original client that submitted the request
+     * if forwarded
+     * @param request The request received by the localisation controller
+     * @return The IP address of the client
+     */
     private String getIpFromRequest(HttpServletRequest request) {
         String forwardingHeader = request.getHeader("X-Forwarded-For");
         if (forwardingHeader == null || forwardingHeader.isEmpty()) {
@@ -74,7 +81,4 @@ public class LocationController {
         }
         return forwardingHeader.split(",")[0];
     }
-
-
-
 }

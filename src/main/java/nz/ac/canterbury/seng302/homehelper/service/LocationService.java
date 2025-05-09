@@ -19,7 +19,6 @@ import java.util.List;
 
 /**
  * Basic unlinked location implementation using Geoapify
- * @author Rafe Dunlop
  */
 @Service
 public class LocationService {
@@ -100,7 +99,14 @@ public class LocationService {
         }
     }
 
-
+    /**
+     * Assembles the URL to call the Geoapify autocomplete API endpoint for the specified parameters
+     * @param prompt The incomplete address to provide suggestions for
+     * @param countryCode The iso-code for this country, e.g. de for germany, nz for New Zealand
+     * @param latitude The lateral position on earth in degrees from the prime meridian
+     * @param longitude The vertical position on earth in degrees from the equator
+     * @return The full url to call
+     */
     private String getAutoCompleteUrl(String prompt, String countryCode, double latitude, double longitude) {
         for (String input : List.of(prompt, countryCode, String.valueOf(latitude), String.valueOf(longitude))) {
             if (input == null || input.isEmpty()) {
@@ -122,6 +128,12 @@ public class LocationService {
         return sb.toString();
     }
 
+    /**
+     * Gets the fully qualified URL to submit to the Geoapify IP Geolocation API
+     * @param ip The IP address of the client. If it corresponds to localhost, it will be omitted from the request URL,
+     *           and the IP address of the hosting machine will be used
+     * @return The full url to call
+     */
     private String getIpGrabUrl(String ip) {
         StringBuilder sb = new StringBuilder();
         sb.append(GEOAPIFY_BASE_URL);

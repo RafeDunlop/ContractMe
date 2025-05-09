@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * Holds api keys defined in application.properties as keys.[api-name] for easy extraction and injection
- * @author Rafe Dunlop
  */
 @Component
 @ConfigurationProperties(prefix = "keys")
