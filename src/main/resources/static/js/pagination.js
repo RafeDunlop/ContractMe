@@ -1,8 +1,7 @@
 /**
- * Used in viewRenovation.html
+ * Used in viewRenovation.html and renovationSearchTemplate.html
  * Requires confirmPrompt.js loaded beforehand
  */
-
 
 
 /**
@@ -66,34 +65,44 @@ function validateRenovationPageSearch() {
  * This function updates the layout based on the window size and adjusts the number of tasks to be displayed on the page.
  */
 function updateLayout() {
-    const totalPages = parseInt(document.getElementById('data-total-pages').value, 10);
-    console.log("TOTAL PAGES UPDATE: " + totalPages)
-
-
-    // Getting elements needed for sizing
     const grid = document.getElementById('grid');
-    const card = grid.querySelector('.card');
+    const cards = grid.querySelectorAll('.card-count');
+    //const cards = grid.querySelectorAll('.task-card');
+    const totalCards = parseInt(document.getElementById("totalCards").value, 10);
+    let pageNumber = parseInt(document.getElementById('pageInput').value, 10);
+
+    if (cards.length === 0) {
+        console.warn("No cards found in grid. Skipping layout update.");
+        return;
+    }
+
+    const card = cards[0];  // Use the first card for size reference
     const cardStyles = window.getComputedStyle(card);
-
-    // Grid and card width used for calculating columns
     const gridWidth = grid.clientWidth;
-    const cardWidth = card.offsetWidth + parseFloat(cardStyles.marginTop) + parseFloat(cardStyles.marginBottom);
+    const cardWidth = card.offsetWidth + parseFloat(cardStyles.marginLeft) + parseFloat(cardStyles.marginRight);
 
-    // Calculate columns and rows based on available space
-    const columns = Math.max(1, Math.floor(gridWidth / cardWidth));  // Number of columns based on grid width
-    const rows = calculateRows()
+    const columns = Math.max(1, Math.floor(gridWidth / cardWidth));
+    const rows = calculateRows();
 
-    const cardPerPage = columns * rows;
+    let newCardsPerPage = columns * rows;
+    const currentCardCount = cards.length;
+    const finalPage = pageNumber === Math.ceil(totalCards / newCardsPerPage);
 
-    // Get the current tasksPerPage from the URL
-    const currentParam = new URL(window.location.href).searchParams.get("cardPerPage");
+    const layoutChanged = newCardsPerPage !== currentCardCount;
+    const needsUpdate = layoutChanged && !finalPage;
 
-    // Only update the URL if tasksPerPage is different
-    if (String(cardPerPage) !== currentParam) {
-        let url = new URL(window.location.href);
-        url.searchParams.set("cardPerPage", cardPerPage);
-        window.location.assign(url.toString());
+    if (pageNumber > (totalCards / newCardsPerPage))
+    {
+        document.getElementById('pageInput').value = Math.ceil(totalCards / newCardsPerPage);
+    }
 
+    if (needsUpdate && newCardsPerPage > 0) {
+        console.info(`Layout change detected: submitting form with cardsPerPage = ${newCardsPerPage}`);
+        const form = document.getElementById('search-form');
+        document.getElementById("cardsPerPageInput").value = newCardsPerPage;
+        form.submit();
+    } else {
+        console.debug("No layout change detected. No form submission needed.");
     }
 }
 
@@ -116,13 +125,10 @@ function calculateRows() {
     const footerHeight = footer.offsetHeight;
     const pageHeight = window.innerHeight;
 
-    const availableHeight = (pageHeight - gridTop) - footerHeight;
+    const availableHeight = (pageHeight - gridTop) - footerHeight - 220;
 
     return Math.max(1, Math.floor(availableHeight / cardHeight));
 }
 
 updateLayout()
-
 window.addEventListener('resize', updateLayout);
-
-

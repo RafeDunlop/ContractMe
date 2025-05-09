@@ -83,7 +83,7 @@
             <div th:if="!${renovation.getRenovationTasks().isEmpty()}" class="mb-3">
                 <h6 class="fw-bold">Tasks:</h6>
                 <div id="grid" class="task-grid"> <!-- Grid for responsive placing of tasks CSS -->
-                    <div th:each="renovationTask : ${tasks}" class="task-card"> <!-- Responsive task square CSS -->
+                    <div th:each="renovationTask : ${tasks}" class="card-count"> <!-- Responsive task square CSS -->
                         <div class="card" style="width: 18rem;">
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
@@ -115,36 +115,62 @@
                     <ul class="pagination" id="pagination">
                         <!-- First button (AC more than 10 pages) -->
                         <li class="page-item" th:if="${totalPages > 10}">
-                            <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=1, cardPerPage=${cardPerPage})}">First</a>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                1,
+                                'First'
+                            )}"></div>
                         </li>
 
                         <!-- Previous button -->
                         <li class="page-item" th:if="${pageNumber > 1}">
-                            <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${pageNumber - 1}, cardPerPage=${cardPerPage})}">Prev</a>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${pageNumber - 1},
+                                'Prev'
+                            )}"></div>
                         </li>
 
-                        <!-- Page buttons <= 10 Pages, AC3 -->
-                        <li class="page-item" th:if="${totalPages <= 10}" th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
+                        <!-- Page buttons (≤ 10 pages) -->
+                        <li class="page-item" th:if="${totalPages <= 10}"
+                            th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
-                            <a class="page-link" th:href="@{/renovations/view(id=${renovation.id}, page=${pageLinkNumber}, cardPerPage=${cardPerPage})}" th:text="${pageLinkNumber}"></a>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${pageLinkNumber},
+                                ${pageLinkNumber}
+                            )}"></div>
                         </li>
 
-                        <!-- Page buttons > 10 Pages, AC3 -->
+                        <!-- Page buttons (> 10 pages) -->
                         <li class="page-item" th:if="${totalPages > 10}"
                             th:each="pageLinkNumber : ${#numbers.sequence(paginationLinksStart, paginationLinksEnd)}"
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
-                            <a class="page-link" th:href="@{/renovations/view(id=${renovation.id}, page=${pageLinkNumber}, cardPerPage=${cardPerPage})}" th:text="${pageLinkNumber}"></a>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${pageLinkNumber},
+                                ${pageLinkNumber}
+                            )}"></div>
                         </li>
 
                         <!-- Next button -->
                         <li class="page-item" th:if="${pageNumber < totalPages}">
-                            <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${pageNumber + 1}, cardPerPage=${cardPerPage})}">Next</a>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${pageNumber + 1},
+                                'Next'
+                            )}"></div>
                         </li>
 
                         <!-- Last button (AC more than 10 pages) -->
                         <li class="page-item" th:if="${totalPages > 10}">
-                            <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${totalPages}, cardPerPage=${cardPerPage})}">Last</a>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${totalPages},
+                                'Last'
+                            )}"></div>
                         </li>
+
 
                         <!-- Search field (AC more than 10 pages) --> <!-- CHANGE IF TO 10 after testing -->
                         <li class="page-item d-flex align-items-center" th:if="${totalPages > 10}">
@@ -175,6 +201,6 @@
 </div>
 <script type="text/javascript" th:src="@{/js/renovationPublicity.js}"></script>
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
-<script type="text/javascript" th:src="@{/js/paginationPost.js}"></script>
+<script type="text/javascript" th:src="@{/js/pagination.js}"></script>
 <script type="text/javascript" th:src="@{/js/autocomplete.js}"></script>
 </html>
