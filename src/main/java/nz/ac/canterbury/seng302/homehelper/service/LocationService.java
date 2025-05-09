@@ -3,10 +3,12 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,11 +24,15 @@ import java.util.List;
 @Service
 public class LocationService {
 
-    private static final String geoapifyBaseUrl = "https://api.geoapify.com/v1/";
+    private static final String LOCALHOST_IP = "127.0.0.1";
 
-    private static final String ipApi = "ipinfo";
+    private static final String GEOAPIFY_BASE_URL = "https://api.geoapify.com/v1/";
 
-    private static final String autocompleteApi = "geocode/autocomplete";
+    private static final String IP_API = "ipinfo";
+
+    private final Keys keys;
+
+    private static final String AUTOCOMPLETE_API = "geocode/autocomplete";
 
     private static final Logger logger = LoggerFactory.getLogger(LocationService.class);
 
@@ -34,7 +40,9 @@ public class LocationService {
 
     private final RestTemplate restTemplate;
 
-    public LocationService() {
+    @Autowired
+    public LocationService(Keys keys) {
+        this.keys = keys;
         this.objectMapper = new ObjectMapper();
         this.restTemplate = new RestTemplate();
     }
@@ -101,8 +109,8 @@ public class LocationService {
             }
         }
         StringBuilder sb = new StringBuilder();
-        sb.append(geoapifyBaseUrl);
-        sb.append(autocompleteApi);
+        sb.append(GEOAPIFY_BASE_URL);
+        sb.append(AUTOCOMPLETE_API);
         sb.append(String.format("?text=%s", prompt));
         sb.append(String.format("&filter=countrycode:%s", countryCode));
         sb.append(String.format("&bias=proximity:%f,%f", latitude, longitude));
@@ -116,9 +124,11 @@ public class LocationService {
 
     private String getIpGrabUrl(String ip) {
         StringBuilder sb = new StringBuilder();
-        sb.append(geoapifyBaseUrl);
-        sb.append(ipApi);
-        sb.append(String.format("?ip=%s&apiKey=%s", ip, System.getenv("GEOAPIFY_API_KEY")));
+        sb.append(GEOAPIFY_BASE_URL);
+        sb.append(IP_API);
+        sb.append("?");
+        if (!ip.equals(LOCALHOST_IP)) sb.append(String.format("ip=%s", ip)); // use request ip instead if localhost
+        sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
         logger.debug("calling IP grab API: {}", sb);
         return sb.toString();
     }
