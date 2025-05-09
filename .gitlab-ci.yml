@@ -78,6 +78,7 @@ deploy-staging:
     - echo "export DB_PASSWORD=${DB_PASSWORD}" >> /home/gitlab-runner/staging/.env
     - echo "export SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}" >> /home/gitlab-runner/staging/.env
     - echo "export SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}" >> /home/gitlab-runner/staging/.env
+    - echo "export GEOAPIFY_API_KEY=${GEOAPIFY_API_KEY}" >> /home/gitlab-runner/staging/.env
     - sudo systemctl restart staging
   artifacts:
     paths:
@@ -97,6 +98,7 @@ deploy-production:
     - echo "export DB_PASSWORD=${DB_PASSWORD}" >> /home/gitlab-runner/production/.env
     - echo "export SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}" >> /home/gitlab-runner/production/.env
     - echo "export SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}" >> /home/gitlab-runner/production/.env
+    - echo "export GEOAPIFY_API_KEY=${GEOAPIFY_API_KEY}" >> /home/gitlab-runner/production/.env
     - chmod u+x /home/gitlab-runner/production.sh
     - sudo systemctl restart production
   artifacts:
