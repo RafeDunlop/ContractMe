@@ -379,6 +379,7 @@ public class RenovationController {
      * @param tagName The name of the tag to be removed
      */
     @PatchMapping("/tags/remove")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeTagFromRenovation(@RequestParam Long renovationId, @RequestParam String tagName) {
         logger.info("PATCH renovations/tags/remove");
         RenovationRecord record = renovationRecordService.getRecordById(renovationId);

@@ -10,6 +10,7 @@
             text-overflow: ellipsis;
         }
     </style>
+    <script type="text/javascript" th:src="@{/js/removeTag.js}"></script>
 </head>
 <body>
 
@@ -47,7 +48,7 @@
         <!-- Renovation Cards Grid -->
         <div class="row">
             <div th:each="record : ${records}" class="col-md-3 mb-4">
-                <a th:href="@{/renovations/view(id=${record.getId()}, page=${pageNumber}, fromSearch=true)}">
+<!--                <a th:href="@{/renovations/view(id=${record.getId()}, page=${pageNumber}, fromSearch=true)}">-->
                 <div class="card position-relative" style="width: 18rem;">
                     <!-- Badge if user owns the record -->
                     <span class="badge bg-primary position-absolute top-0 end-0 m-2"
@@ -61,11 +62,15 @@
 
                         <!-- Renovation record tags -->
                         <div class="mb-2">
-                            <span th:each="tag : ${record.tags}" class="badge bg-success me-1" th:text="${tag.getTagName()}">
-                                <button th:if="${record.user == user}" th:onclick="|removeTag(${tag.getTagName()}, ${record.id}, ${_csrf})|">
+                            <div th:each="tag : ${record.tags}" class="badge bg-success d-flex me-1 align-items-center">
+                                <span th:text="${tag.getTagName()}"></span>
+                                <button class="btn btn-sm  border-0 bg-transparent text-light ms-1"
+                                        th:if="${record.user == user}" type="button"
+                                        th:attr="data-renovationId=${record.id}, data-csrf=${_csrf.token}, data-tagName=${tag.tagName}"
+                                        th:onclick="|removeTag(this)|">
                                     x
                                 </button>
-                            </span>
+                            </div>
                         </div>
 
                         <!-- Renovation record description -->
@@ -78,7 +83,7 @@
                         </p>
                     </div>
                 </div>
-                </a>
+<!--                </a>-->
             </div>
         </div>
         </a>
