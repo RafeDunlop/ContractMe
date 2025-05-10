@@ -356,10 +356,10 @@ public class RenovationController {
         logger.info("/tags/add");
 
         RenovationRecord record = renovationRecordService.getRecordById(renovationId);
-        List<String> errors = tagService.validateTag(record, tagName);
+        List<String> errors = tagService.validateTagAndRecord(record, tagName);
         if (errors.isEmpty()) {
             if (tagService.checkExists(tagName)) {
-                tagService.addTag(tagName);
+                tagService.createTag(tagName);
             }
             tagService.addTagToRenovation(record, tagName);
         } else {

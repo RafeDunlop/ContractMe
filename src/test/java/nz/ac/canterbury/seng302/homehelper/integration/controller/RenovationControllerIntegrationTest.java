@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
-import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
@@ -28,7 +27,6 @@ import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -817,15 +815,15 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     public void testAutocompleteTags() throws Exception {
-        tagService.addTag("historic");
-        tagService.addTag("history");
+        tagService.createTag("historic");
+        tagService.createTag("history");
 
         mockMvc.perform(get("/renovations/tags/autocomplete")
                 .param("partialTag", "his"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasItems("historic", "history")));
 
-        tagService.addTag("building-one");
+        tagService.createTag("building-one");
 
         mockMvc.perform(get("/renovations/tags/autocomplete")
                         .param("partialTag", "build"))
@@ -840,7 +838,7 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
 
-        tagService.addTag("ancient");
+        tagService.createTag("ancient");
 
         mockMvc.perform(get("/renovations/tags/autocomplete")
                         .param("partialTag", " "))
@@ -855,7 +853,7 @@ public class RenovationControllerIntegrationTest {
         Long renovationId = testRecord.getId();
 
         String testTagName = "apartment";
-        tagService.addTag(testTagName);
+        tagService.createTag(testTagName);
 
         mockMvc.perform(post("/renovations/tags/add")
                         .with(csrf())

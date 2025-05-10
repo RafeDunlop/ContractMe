@@ -4,7 +4,6 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
 import nz.ac.canterbury.seng302.homehelper.validation.TagValidation;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,7 +100,7 @@ public class TagServiceTest {
     public void validateTag_validTag_returnsNoErrors() {
         RenovationRecord record = mock(RenovationRecord.class);
 
-        List<String> errors = tagService.validateTag(record, "window");
+        List<String> errors = tagService.validateTagAndRecord(record, "window");
         System.out.println(errors);
         assertTrue(errors.isEmpty());
     }
@@ -113,7 +112,7 @@ public class TagServiceTest {
 
         record.setTags(new ArrayList<>(List.of(new Tag("bathroom"))));
 
-        List<String> errors = tagService.validateTag(record, "bathroom");
+        List<String> errors = tagService.validateTagAndRecord(record, "bathroom");
 
         assertTrue(errors.contains("Renovation cannot contain duplicate tag names."));
     }
@@ -131,7 +130,7 @@ public class TagServiceTest {
         record.setTags(tags);
         when(record.getTags()).thenReturn(tags);
 
-        List<String> errors = tagService.validateTag(record, "window");
+        List<String> errors = tagService.validateTagAndRecord(record, "window");
 
         assertTrue(errors.contains("Renovation cannot have more than 5 tags."));
     }
