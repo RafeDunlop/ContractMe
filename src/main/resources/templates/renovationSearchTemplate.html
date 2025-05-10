@@ -9,6 +9,20 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        .tag-text {
+            display: inline-block;
+            max-width: 215px;
+        }
+        .tag-delete-button {
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            color: black;
+            transition: color 0.2s;
+        }
+        .tag-delete-button:hover {
+            color: dimgrey !important;
+        }
     </style>
     <script type="text/javascript" th:src="@{/js/removeTag.js}"></script>
 </head>
@@ -61,16 +75,16 @@
                         <h5 class="card-title truncate" th:text="${record.name}">Record Name</h5>
 
                         <!-- Renovation record tags -->
-                        <div class="mb-2">
-                            <div th:each="tag : ${record.tags}" class="badge bg-success d-flex me-1 align-items-center">
-                                <span th:text="${tag.getTagName()}"></span>
-                                <button class="btn btn-sm  border-0 bg-transparent text-light ms-1"
+                        <div class="d-flex flex-wrap">
+                            <span th:each="tag : ${record.tags}" class="badge bg-success d-flex align-items-center me-2 mb-2">
+                                <span class="tag-text text-truncate" th:text="${tag.getTagName()}"></span>
+                                <button class="tag-delete-button btn-sm border-0 bg-transparent text-light ms-1"
                                         th:if="${record.user == user}" type="button"
                                         th:attr="data-renovationId=${record.id}, data-csrf=${_csrf.token}, data-tagName=${tag.tagName}"
                                         th:onclick="|removeTag(this)|">
-                                    x
+                                    X
                                 </button>
-                            </div>
+                            </span>
                         </div>
 
                         <!-- Renovation record description -->
