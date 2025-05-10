@@ -100,4 +100,14 @@ public class TagService {
     public Tag getTag(String tagName) {
         return tagRepository.findExactMatchTagByTagName(tagName).orElse(null);
     }
+
+    /**
+     * Removes the specified tag from the {@link RenovationRecord} if it is there
+     * @param record The renovation record to remove the tag from
+     * @param tag The tag to be removed
+     */
+    public void removeTagFromRenovation(RenovationRecord record, Tag tag) {
+        record.getTags().remove(tag);
+        renovationRecordRepository.save(record);
+    }
 }

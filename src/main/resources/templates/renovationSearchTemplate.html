@@ -61,7 +61,11 @@
 
                         <!-- Renovation record tags -->
                         <div class="mb-2">
-                            <span th:each="tag : ${record.tags}" class="badge bg-secondary me-1" th:text="${tag}">Tag</span>
+                            <span th:each="tag : ${record.tags}" class="badge bg-success me-1" th:text="${tag.getTagName()}">
+                                <button th:if="${record.user == user}" th:onclick="|removeTag(${tag.getTagName()}, ${record.id}, ${_csrf})|">
+                                    x
+                                </button>
+                            </span>
                         </div>
 
                         <!-- Renovation record description -->
@@ -69,8 +73,8 @@
 
                         <!-- Renovation record publicity status -->
                         <p class="card-text">
-                            <span th:if="${record.public}" class="badge bg-success">Public</span>
-                            <span th:unless="${record.public}" class="badge bg-secondary">Private</span>
+                            <span th:if="${record.public}" class="badge bg-secondary">Public</span>
+                            <span th:unless="${record.public}" class="badge bg-danger">Private</span>
                         </p>
                     </div>
                 </div>
