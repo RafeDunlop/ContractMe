@@ -1,13 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> <!-- th:fragment="headerfiles"> -->
+<head>
     <meta charset="UTF-8"/>
     <link th:href="@{/css/styles.css}" rel="stylesheet">
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
-    <title>Title</title>
+    <title></title>
 </head>
 <body>
-<div th:fragment="location">
+<div th:fragment="locationForm (submissionEndpoint, locationDTO)">
+    <form th:action="@{${submissionEndpoint}}" method="post" id="location-form">
+        <div>
+
+            <!-- ADDRESS -->
+            <div class="mb-3">
+                <input type="text" class="form-control" id="address" name="address" placeholder="Address"
+                       aria-label="address" th:value="${locationDTO.address}">
+
+                <!-- Frontend JS Error -->
+
+                <!-- Backend error -->
+            </div>
+
+            <!-- SUBURB -->
+            <div class="mb-3">
+                <input type="text" class="form-control" id="suburb" name="suburb" placeholder="Suburb (optional)"
+                       aria-label="suburb" th:value="${locationDTO.suburb}">
+
+                <!-- Frontend JS Error -->
+
+                <!-- Backend error -->
+            </div>
+
+            <!-- CITY -->
+            <div class="mb-3">
+                <input type="text" class="form-control" id="city" name="city" placeholder="City (optional)"
+                       aria-label="city" th:value="${locationDTO.city}">
+
+                <!-- Frontend JS Error -->
+
+                <!-- Backend error -->
+            </div>
+
+            <!-- POSTCODE -->
+            <div class="mb-3">
+                <input type="text" class="form-control" id="postcode" name="postcode" placeholder="Postcode (optional)"
+                       aria-label="postcode" th:value="${locationDTO.postcode}">
+
+                <!-- Frontend JS Error -->
+
+                <!-- Backend error -->
+            </div>
+
+            <!-- COUNTRY -->
+            <div class="mb-3">
+                <input type="text" class="form-control" id="country" name="country" placeholder="Country (optional)"
+                       aria-label="country" th:value="${locationDTO.country}">
+
+                <!-- Frontend JS Error -->
+
+                <!-- Backend error -->
+            </div>
+
+        </div>
+    </form>
 </div>
 </body>
 </html>

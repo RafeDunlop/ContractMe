@@ -101,10 +101,11 @@
                     </table>
                 </div>
 
-                <!-- Location Form Fragment -->
+                <!-- LOCATION FORM FRAGMENT -->
 
-                <div class="hidden-form" id="location-form">
-                    <div th:replace="~{fragments/locationForm.html :: location}"></div>
+                <div class="shadow-overlay" id="location-form">
+                    <div th:replace="~{fragments/locationForm.html :: locationForm(
+                    submissionEndpoint='register', locationDTO=${locationDTO})}"></div>
                 </div>
 
                 <!-- PASSWORD -->

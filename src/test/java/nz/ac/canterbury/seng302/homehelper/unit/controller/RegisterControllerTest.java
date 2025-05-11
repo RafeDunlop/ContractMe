@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.unit.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.controller.RegisterController;
+import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
@@ -28,12 +29,13 @@ public class RegisterControllerTest {
 
         RedirectAttributes redirectAttributes = Mockito.mock(RedirectAttributes.class);
         UserRegisterDTO mockedUser = new UserRegisterDTO("","","","","");
+        LocationDTO mockedLocation = new LocationDTO("", "", "", "", "");
 
         User trialUser = Mockito.spy(new User("test", "test", "test", "test"));
         Mockito.when(registerServiceSpy.registerUser(mockedUser)).thenReturn((trialUser));
 
         Mockito.when(trialUser.getId()).thenReturn(1L);
-        String viewName = (registerController.submitRegistration(mockedUser, request, redirectAttributes));
+        String viewName = (registerController.submitRegistration(mockedUser, mockedLocation,request, redirectAttributes));
 
         Assertions.assertEquals("redirect:/confirm-registration", viewName);
 

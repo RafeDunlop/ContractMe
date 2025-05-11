@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import java.util.List;
 import java.util.Map;
 
+import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +53,11 @@ public class RegisterController {
      *
      * @return thymeleaf registration
      * @param userRegisterDTO, contains all params needed for a user object
+     * @param locationDTO, contains all params for a location object
      */
     @GetMapping("/register")
-    public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO) {
+    public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO,
+                               @ModelAttribute LocationDTO locationDTO) {
         logger.info("GET /register");
         return "registrationTemplate";
     }
@@ -69,6 +72,7 @@ public class RegisterController {
      */
     @PostMapping("/register")
     public String submitRegistration(@ModelAttribute UserRegisterDTO userRegisterDTO,
+                                     @ModelAttribute LocationDTO locationDTO,
                                      HttpServletRequest request,
                                      RedirectAttributes redirectAttributes) {
         logger.info("POST /register");
