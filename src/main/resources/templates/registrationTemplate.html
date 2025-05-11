@@ -7,6 +7,13 @@
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
     <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
 </head>
+
+<style>
+    .col-md-25 {
+        flex: 0 0 18%;
+        max-width: 22%;
+    }
+</style>
 <body>
 <div class="container mt-5">
     <div class="card p-4 shadow">
@@ -78,11 +85,26 @@
                 </div>
 
                 <!-- Location toggle switch -->
-                <div class="mb-3">
-                    <label class="switch">
-                        <input type="checkbox">
-                        <span class="slider"></span>
-                    </label>
+                <div>
+                    <table class="border border-0">
+                        <tr>
+                            <th class="p-4">Enter Location (Optional):</th>
+                            <th>
+                                <div class="mb-3">
+                                    <label class="switch">
+                                        <input type="checkbox" id="location-toggleswitch">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </th>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Location Form Fragment -->
+
+                <div class="hidden-form" id="location-form">
+                    <div th:replace="~{fragments/locationForm.html :: location}"></div>
                 </div>
 
                 <!-- PASSWORD -->
@@ -144,6 +166,23 @@
     </div>
 </div>
 </body>
+<script>
+    let locationToggleswitch = document.getElementById("location-toggleswitch");
+    let locationForm = document.getElementById("location-form");
+    locationToggleswitch.addEventListener("click", toggleLocationForm);
+
+
+    function toggleLocationForm() {
+
+        if (locationToggleswitch.checked === true) {
+            locationForm.style.display = "block";
+        }
+        else {
+            locationForm.style.display = "none";
+        }
+
+    }
+</script>
 <script type="module" src="/js/userValidation.js"></script>
 <script type="module" src="/js/registerValidation.js"></script>
 </html>
