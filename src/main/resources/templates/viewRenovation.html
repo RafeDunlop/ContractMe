@@ -7,6 +7,7 @@
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="stylesheet" th:href="@{/css/viewRenovationStyles.css}">
+    <link rel="stylesheet" th:href="@{/css/tags.css}">
     <script th:src="@{/js/addTaskIcon.js}"></script>
 </head>
 <body>
@@ -75,12 +76,16 @@
 
             <!-- Display added tags -->
             <div id="tagList" class="mb-3">
-                <label class="fw-bold">Current Tags:</label>
-                <div class="list-group" id="tag-list">
-                    <div th:each="tag : ${renovation.tags}" class="list-group-item">
-                        🛠️ <span th:text="${tag.tagName}" class="ms-2"></span>
-                    </div>
-                </div>
+                <label class="fw-bold d-block mb-1">Current Tags:</label>
+                <span th:each="tag : ${renovation.tags}" class="tag-box badge bg-success d-inline-flex align-items-center mb-2">
+                    <span class="tag-text-large text-truncate ms-1" th:text="${tag.getTagName()}"></span>
+                    <button class="tag-delete-button-large btn-sm border-0 bg-transparent text-light ms-1"
+                            th:if="${isOwner}" type="button"
+                            th:attr="data-renovationId=${renovation.id}, data-csrf=${_csrf.token}, data-tagName=${tag.tagName}"
+                            th:onclick="|removeTag(this)|">
+                        X
+                    </button>
+                </span>
             </div>
 
 
@@ -188,4 +193,5 @@
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
 <script type="text/javascript" th:src="@{/js/autocomplete.js}"></script>
 <script type="text/javascript" th:src="@{/js/renovationTagValidation.js}"></script>
+<script type="text/javascript" th:src="@{/js/removeTag.js}"></script>
 </html>

@@ -21,7 +21,7 @@ public class TagValidation {
         if (tagName.isEmpty() || !tagName.matches("^(?=.*\\p{L}).*$")) {
             errors.add(StringUtils.capitalize("Tags must contain one or more letters."));
         }
-        if (tagName.length() > 255) {
+        if (tagName.length() > 128) {
             errors.add(StringUtils.capitalize("Tag cannot be greater than 128 characters."));
         }
         return errors;
