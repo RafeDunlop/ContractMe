@@ -246,6 +246,11 @@ public class SharingRenovationRecordsSteps {
                 .andReturn();
     }
 
+    @Given("there is at least {int} pages")
+    public void there_is_at_lest_pages(Integer pages) {
+        // todo
+    }
+
     @Then("I should see the list of renovation records at the same search page I was on")
     public void i_should_see_same_search_results_page() throws Exception {
         String viewContent = result.getResponse().getContentAsString();
@@ -255,4 +260,13 @@ public class SharingRenovationRecordsSteps {
         assertTrue(viewContent.contains("<option value=\"" + expectedVisibility + "\" selected=\"selected\">"));
         assertTrue(viewContent.contains("name=\"searchTerm\" value=\"" + expectedSearchTerm + "\""));
     }
+
+    @Then("I should see a {string} element")
+    public void i_should_see_a_element(String element) throws Exception {
+        String content = result.getResponse().getContentAsString();
+        assertTrue(content.contains(element), "Expected to find " + element + " button");
+        System.out.println(content);
+
+    }
+
 }
