@@ -66,11 +66,11 @@
 
                         <!-- Renovation record tags -->
                         <div class="d-flex flex-wrap">
-                            <span th:each="tag : ${record.tags}" class="tag-box badge bg-success d-flex align-items-center mb-2">
+                            <span th:each="tag : ${record.getSortedTags()}" class="tag-box badge bg-success d-flex align-items-center me-2 mb-2">
                                 <span class="tag-text-small text-truncate" th:text="${tag.getTagName()}"></span>
                                 <button class="tag-delete-button-small btn-sm border-0 bg-transparent text-light ms-1"
                                         th:if="${record.user == user}" type="button"
-                                        th:attr="data-renovationId=${record.id}, data-csrf=${_csrf.token}, data-tagName=${tag.tagName}"
+                                        th:attr="data-renovationId=${record.id}, data-csrf=${_csrf.token}, data-tagName=${tag.getTagName()}"
                                         th:onclick="|removeTag(this)|">
                                     X
                                 </button>
