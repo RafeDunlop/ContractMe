@@ -1,6 +1,4 @@
-let locationButton = document.getElementById("location-button");
-let submitLocationButton = document.getElementById("submit-location");
-let cancelLocationButton = document.getElementById("cancel-location");
+let locationToggleSwitch = document.getElementById("location-toggleswitch");
 let locationForm = document.getElementById("location-form");
 let addressField = document.getElementById("address");
 let suburbField = document.getElementById("suburb");
@@ -9,15 +7,16 @@ let postcodeField = document.getElementById("postcode");
 let countryField = document.getElementById("country");
 
 
-locationButton.addEventListener("click",  displayLocationForm);
-submitLocationButton.addEventListener("click", storeLocationDetails);
-cancelLocationButton.addEventListener("click", closeLocationForm)
+locationToggleSwitch.addEventListener("click", displayLocationForm);
 
 function displayLocationForm() {
-    locationForm.style.display = "block";
+    if (locationToggleSwitch.checked === true) {
+        locationForm.style.display = "block";
+    }
+    else {
+        closeLocationForm()
+    }
 }
-
-function storeLocationDetails() {}
 
 function closeLocationForm() {
     locationForm.style.display = "none";

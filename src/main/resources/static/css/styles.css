@@ -41,6 +41,10 @@
     height: 30px;
 }
 
+.hidden-form-extension {
+    display: none;
+}
+
 
 
 .truncate {

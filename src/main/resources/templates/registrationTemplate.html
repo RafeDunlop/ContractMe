@@ -8,12 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
 </head>
 
-<style>
-    .col-md-25 {
-        flex: 0 0 18%;
-        max-width: 22%;
-    }
-</style>
+
 <body>
 <div class="container mt-5">
     <div class="card p-4 shadow">
@@ -64,7 +59,7 @@
                 </div>
 
                 <!-- EMAIL -->
-                <div class="mb-3">
+                <div>
                     <input type="text" class="form-control" id="email" name="email" placeholder="Email"
                            aria-label="email" th:value="${userRegisterDTO.email}">
 
@@ -84,12 +79,12 @@
                     </div>
                 </div>
 
-                <!--&lt;!&ndash; Location toggle switch &ndash;&gt;
+                <!-- LOCATION TOGGLE SWITCH -->
                 <div>
                     <table class="border border-0">
                         <tr>
-                            <th class="p-4">Enter Location (Optional):</th>
-                            <th>
+                            <th class="p-4" >Enter Location (Optional):</th>
+                            <th class="p-4">
                                 <div class="mb-3">
                                     <label class="switch">
                                         <input type="checkbox" id="location-toggleswitch">
@@ -99,12 +94,10 @@
                             </th>
                         </tr>
                     </table>
-                </div>-->
-
-                <button type="button" class="btn btn-primary" id="location-button">Add/Edit Location (Optional)</button>
+                </div>
 
                 <!-- LOCATION FORM FRAGMENT -->
-                <div class="mb-3" id="location-form">
+                <div class="hidden-form-extension" id="location-form">
                     <div th:replace="~{fragments/locationForm.html :: locationForm(
                     submissionEndpoint='register', locationDTO=${locationDTO})}"></div>
                 </div>
@@ -167,6 +160,7 @@
         </form>
     </div>
 </div>
+<div style="height: 50px;"></div>
 </body>
 <script type="module" src="/js/locationForm.js"></script>
 <script type="module" src="/js/userValidation.js"></script>
