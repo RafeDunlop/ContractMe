@@ -60,7 +60,7 @@ public class TagService {
      * @param tagName The tag name to validate.
      * @return A list of validation error messages.
      */
-    public List<String> validateTagAndRecord(RenovationRecord renovationRecord, String tagName) {
+    public List<String> validateTag(RenovationRecord renovationRecord, String tagName) {
         List<String> errors = new ArrayList<>();
         if (renovationRecord.getTags().size() >= 5) {
             errors.add("Renovation cannot have more than 5 tags.");
@@ -87,7 +87,7 @@ public class TagService {
      * Creates and saves a new tag with a given name.
      * @param name of the tag to be saved.
      */
-    public void createTag(String name) {
+    public void addTag(String name) {
         Tag tag = new Tag(name.toLowerCase().trim());
         tagRepository.save(tag);
     }

@@ -121,9 +121,9 @@ public class DefaultDataConfigurator {
     }
 
     private void setupDefaultTags() {
-        tagService.createTag("Historic");
-        tagService.createTag("History");
-        tagService.createTag("His");
-        tagService.createTag("histrionic");
+        tagService.addTag("Historic");
+        tagService.addTag("History");
+        tagService.addTag("His");
+        tagService.addTag("histrionic");
     }
 }
