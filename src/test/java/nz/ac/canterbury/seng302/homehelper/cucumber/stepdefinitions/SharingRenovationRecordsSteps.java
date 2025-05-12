@@ -254,11 +254,7 @@ public class SharingRenovationRecordsSteps {
         ModelAndView mav = result.getModelAndView();
         Map<String, Object> model = mav.getModel();
         int totalPages = (int) model.get("totalPages");
-
         int card = (int) model.get("cardsPerPage");
-
-        System.out.println("Total Pages: " + totalPages);
-        System.out.println("Cards: " + card);
 
         assertTrue(totalPages >= pages, "Expected at least: " + pages + " pages, there is only: " + totalPages);
     }
@@ -284,7 +280,6 @@ public class SharingRenovationRecordsSteps {
     @Then("I should not see a {string} element")
     public void i_should_not_see_a_element(String element) throws Exception{
         String content = result.getResponse().getContentAsString();
-
 
         assertFalse(content.contains("id=\"" + element + "\""),
                 "Did not expect to find element with id=\"" + element + "\"");

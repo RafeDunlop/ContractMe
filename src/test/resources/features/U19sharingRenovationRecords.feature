@@ -41,8 +41,8 @@ Feature: U19 - As Inaya, I want to be able to make my renovation record
     Given I am logged in
     And there are 200 public renovation records
     When I click the browse renovations button
-    And there is at least 10 pages
-#    Then I should see a "firstButton" element
+    And there is at least 11 pages
+    Then I should see a "firstButton" element
     And I should see a "lastButton" element
 
   Scenario: AC5.2 Pagination less than 10 pages so first/last buttons don't show.
@@ -58,7 +58,7 @@ Feature: U19 - As Inaya, I want to be able to make my renovation record
     Given I am logged in
     And there are 200 public renovation records
     When I click the browse renovations button
-    And there is at least 10 pages
+    And there is at least 11 pages
     Then I should see a "pageSearch" element
 
   Scenario: AC6.2 There is less then 10 pages user can't input page to go to.
