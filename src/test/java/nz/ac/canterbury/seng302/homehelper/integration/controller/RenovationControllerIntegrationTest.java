@@ -183,6 +183,23 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(content().string(not(containsString("No Renovations have been made yet."))));
     }
 
+    @Test
+    public void getRenovationRecord_selectPage_returnsCorrectPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
+            renovationRecordRepository.save(existingRecord);
+        }
+        mockMvc.perform(get("/renovations")
+                        .param("page", "2")
+                        .param("itemsPerPage", "5"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("renovationsTemplate"))
+            .andExpect(model().attributeExists("renovations"))
+            .andExpect(model().attribute("renovations", hasSize(5)))
+            .andExpect(model().attribute("pageNumber", 2))
+            .andExpect(model().attribute("renovations", hasItem(hasProperty("name", is("Renovation 5")))));
+    }
+
     /**
      * Tests posting to the create renovations page which will create a new renovation record under the current user. If all the details
      * (name, description, rooms) are in the correct format and then posted, the user is taken to the view page for that renovation and the
