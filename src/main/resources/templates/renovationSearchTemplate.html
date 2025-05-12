@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/tags.css}">
     <title>Renovation Records</title>
     <style>
         .truncate {
@@ -9,7 +10,11 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        .no-underline {
+            text-decoration: none;
+        }
     </style>
+    <script type="text/javascript" th:src="@{/js/removeTag.js}"></script>
 </head>
 <body>
 
@@ -47,7 +52,7 @@
         <!-- Renovation Cards Grid -->
         <div class="row">
             <div th:each="record : ${records}" class="col-md-3 mb-4">
-                <a th:href="@{/renovations/view(id=${record.getId()}, page=${pageNumber}, fromSearch=true)}">
+                <a th:href="@{/renovations/view(id=${record.getId()}, page=${pageNumber}, fromSearch=true)}" class="no-underline">
                 <div class="card position-relative" style="width: 18rem;">
                     <!-- Badge if user owns the record -->
                     <span class="badge bg-primary position-absolute top-0 end-0 m-2"
@@ -60,8 +65,16 @@
                         <h5 class="card-title truncate" th:text="${record.name}">Record Name</h5>
 
                         <!-- Renovation record tags -->
-                        <div class="mb-2">
-                            <span th:each="tag : ${record.tags}" class="badge bg-secondary me-1" th:text="${tag}">Tag</span>
+                        <div class="d-flex flex-wrap">
+                            <span th:each="tag : ${record.getSortedTags()}" class="tag-box badge bg-success d-flex align-items-center me-2 mb-2">
+                                <span class="tag-text-small text-truncate" th:text="${tag.getTagName()}"></span>
+                                <button class="tag-delete-button-small btn-sm border-0 bg-transparent text-light ms-1"
+                                        th:if="${record.user == user}" type="button"
+                                        th:attr="data-renovationId=${record.id}, data-csrf=${_csrf.token}, data-tagName=${tag.getTagName()}"
+                                        th:onclick="|removeTag(this)|">
+                                    X
+                                </button>
+                            </span>
                         </div>
 
                         <!-- Renovation record description -->
@@ -69,15 +82,14 @@
 
                         <!-- Renovation record publicity status -->
                         <p class="card-text">
-                            <span th:if="${record.public}" class="badge bg-success">Public</span>
-                            <span th:unless="${record.public}" class="badge bg-secondary">Private</span>
+                            <span th:if="${record.public}" class="badge bg-secondary">Public</span>
+                            <span th:unless="${record.public}" class="badge bg-danger">Private</span>
                         </p>
                     </div>
                 </div>
                 </a>
             </div>
         </div>
-        </a>
         <div th:if="${#lists.isEmpty(records)}" class="alert alert-secondary mt-4">
             No renovations match your search.
         </div>

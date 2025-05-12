@@ -90,6 +90,12 @@ public class RenovationRecord {
         return tags;
     }
 
+    public List<Tag> getSortedTags() {
+        return tags.stream()
+                .sorted((a, b) -> a.getTagName().compareToIgnoreCase(b.getTagName()))
+                .toList();
+    }
+
     public void setTags(List<Tag> tags) {
         this.tags = tags;
     }
