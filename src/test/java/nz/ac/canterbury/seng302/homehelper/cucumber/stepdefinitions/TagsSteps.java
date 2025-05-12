@@ -57,7 +57,6 @@ public class TagsSteps {
     public void there_is_an_existing_tag_named(String tagName) {
         Tag tag = new Tag(tagName);
         tagRepository.save(tag);
-        System.out.println("Saving tag: " + tagName);
     }
     @When("I type {string} into the tag input field")
     public void i_type_into_the_tag_input_field(String inputString) {
