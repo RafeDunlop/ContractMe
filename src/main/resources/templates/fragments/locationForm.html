@@ -7,66 +7,63 @@
     <title></title>
 </head>
 <body>
-<div th:fragment="locationForm (submissionEndpoint, locationDTO)">
-    <form th:action="@{${submissionEndpoint}}" method="post" id="location-form">
-        <div>
+<div th:fragment="locationForm (locationDTO)">
 
-            <!-- ADDRESS -->
-            <div class="mb-3">
-                <input type="text" class="form-control" id="address" name="address" placeholder="Address"
-                       aria-label="address" th:value="${locationDTO.address}">
+    <div>
 
-                <!-- Frontend JS Error -->
+        <!-- ADDRESS -->
+        <div class="mb-3">
+            <input type="text" class="form-control" id="address" name="address" placeholder="Address"
+                   aria-label="address" th:value="${locationDTO.address}">
 
-                <!-- Backend error -->
-            </div>
+            <!-- Frontend JS Error -->
 
-            <!-- SUBURB -->
-            <div class="mb-3">
-                <input type="text" class="form-control" id="suburb" name="suburb" placeholder="Suburb (optional)"
-                       aria-label="suburb" th:value="${locationDTO.suburb}">
-
-                <!-- Frontend JS Error -->
-
-                <!-- Backend error -->
-            </div>
-
-            <!-- CITY -->
-            <div class="mb-3">
-                <input type="text" class="form-control" id="city" name="city" placeholder="City (optional)"
-                       aria-label="city" th:value="${locationDTO.city}">
-
-                <!-- Frontend JS Error -->
-
-                <!-- Backend error -->
-            </div>
-
-            <!-- POSTCODE -->
-            <div class="mb-3">
-                <input type="text" class="form-control" id="postcode" name="postcode" placeholder="Postcode (optional)"
-                       aria-label="postcode" th:value="${locationDTO.postcode}">
-
-                <!-- Frontend JS Error -->
-
-                <!-- Backend error -->
-            </div>
-
-            <!-- COUNTRY -->
-            <div class="mb-3">
-                <input type="text" class="form-control" id="country" name="country" placeholder="Country (optional)"
-                       aria-label="country" th:value="${locationDTO.country}">
-
-                <!-- Frontend JS Error -->
-
-                <!-- Backend error -->
-            </div>
-
-
-
-            <div style="height: 50px;"></div>
-
+            <!-- Backend error -->
         </div>
-    </form>
+
+        <!-- SUBURB -->
+        <div class="mb-3">
+            <input type="text" class="form-control" id="suburb" name="suburb" placeholder="Suburb (optional)"
+                   aria-label="suburb" th:value="${locationDTO.suburb}">
+
+            <!-- Frontend JS Error -->
+
+            <!-- Backend error -->
+        </div>
+
+        <!-- CITY -->
+        <div class="mb-3">
+            <input type="text" class="form-control" id="city" name="city" placeholder="City (optional)"
+                   aria-label="city" th:value="${locationDTO.city}">
+
+            <!-- Frontend JS Error -->
+
+            <!-- Backend error -->
+        </div>
+
+        <!-- POSTCODE -->
+        <div class="mb-3">
+            <input type="text" class="form-control" id="postcode" name="postcode" placeholder="Postcode (optional)"
+                   aria-label="postcode" th:value="${locationDTO.postcode}">
+
+            <!-- Frontend JS Error -->
+
+            <!-- Backend error -->
+        </div>
+
+        <!-- COUNTRY -->
+        <div class="mb-3">
+            <input type="text" class="form-control" id="country" name="country" placeholder="Country (optional)"
+                   aria-label="country" th:value="${locationDTO.country}">
+
+            <!-- Frontend JS Error -->
+
+            <!-- Backend error -->
+        </div>
+
+        <div style="height: 50px;"></div>
+
+    </div>
 </div>
 </body>
 <script type="module" src="/js/locationForm.js"></script>
