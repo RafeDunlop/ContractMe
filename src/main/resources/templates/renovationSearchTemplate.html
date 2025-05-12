@@ -111,7 +111,7 @@
                 <div class="d-flex justify-content-center" th:if="${totalPages > 0}">
                     <ul class="pagination" id="pagination">
                         <!-- First button (AC more than 10 pages) -->
-                        <li class="page-item" th:if="${totalPages > 10}">
+                        <li id="firstButton" class="page-item" th:if="${totalPages > 10}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/search},
                                 1,
@@ -120,7 +120,7 @@
                         </li>
 
                         <!-- Previous button -->
-                        <li class="page-item" th:if="${pageNumber > 1}">
+                        <li id="prevButton" class="page-item" th:if="${pageNumber > 1}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/search},
                                 ${pageNumber - 1},
@@ -151,7 +151,7 @@
                         </li>
 
                         <!-- Next button -->
-                        <li class="page-item" th:if="${pageNumber < totalPages}">
+                        <li id="nextButton" class="page-item" th:if="${pageNumber < totalPages}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/search},
                                 ${pageNumber + 1},
@@ -160,7 +160,7 @@
                         </li>
 
                         <!-- Last button (AC more than 10 pages) -->
-                        <li class="page-item" th:if="${totalPages > 10}">
+                        <li id="lastButton" class="page-item" th:if="${totalPages > 10}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/search},
                                 ${totalPages},
@@ -168,8 +168,8 @@
                             )}"></div>
                         </li>
 
-                        <!-- Search field (AC more than 10 pages) --> <!-- CHANGE IF TO 10 after testing -->
-                        <li class="page-item d-flex align-items-center" th:if="${totalPages > 10}">
+                        <!-- Search field (AC more than 10 pages) -->
+                        <li id="pageSearchField" class="page-item d-flex align-items-center" th:if="${totalPages > 10}">
                             <input type="number" class="form-control me-2" id="pageSearch" aria-label="Page Search" style="min-width: 50px;">
                             <button class="btn btn-primary" th:onclick="|validateRenovationPageSearch()|">Search</button>
                         </li>

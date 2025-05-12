@@ -134,6 +134,7 @@ public class SharingRenovationRecordsSteps {
 
     @Given("there are {int} public renovation records")
     public void there_are_public_renovation_records(int count) {
+
         for (int i = 0; i < count; i++) {
             String email = "other" + i + "_" + System.currentTimeMillis() + "@example.com";
             User otherUser = new User("Other", "User" + i, email, "Password123!");
@@ -254,6 +255,11 @@ public class SharingRenovationRecordsSteps {
         Map<String, Object> model = mav.getModel();
         int totalPages = (int) model.get("totalPages");
 
+        int card = (int) model.get("cardsPerPage");
+
+        System.out.println("Total Pages: " + totalPages);
+        System.out.println("Cards: " + card);
+
         assertTrue(totalPages >= pages, "Expected at least: " + pages + " pages, there is only: " + totalPages);
     }
 
@@ -270,7 +276,19 @@ public class SharingRenovationRecordsSteps {
     @Then("I should see a {string} element")
     public void i_should_see_a_element(String element) throws Exception {
         String content = result.getResponse().getContentAsString();
-        assertTrue(content.contains(element), "Expected to find: " + element + " element");
+
+        assertTrue(content.contains("id=\"" + element + "\""),
+                "Expected to find element with id=\"" + element + "\"");
     }
+
+    @Then("I should not see a {string} element")
+    public void i_should_not_see_a_element(String element) throws Exception{
+        String content = result.getResponse().getContentAsString();
+
+
+        assertFalse(content.contains("id=\"" + element + "\""),
+                "Did not expect to find element with id=\"" + element + "\"");
+    }
+
 
 }
