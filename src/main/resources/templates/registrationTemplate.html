@@ -84,7 +84,7 @@
                     </div>
                 </div>
 
-                <!-- Location toggle switch -->
+                <!--&lt;!&ndash; Location toggle switch &ndash;&gt;
                 <div>
                     <table class="border border-0">
                         <tr>
@@ -99,7 +99,9 @@
                             </th>
                         </tr>
                     </table>
-                </div>
+                </div>-->
+
+                <button type="button" class="btn btn-primary" id="location-button">Add/Edit Location (Optional)</button>
 
                 <!-- LOCATION FORM FRAGMENT -->
 
@@ -167,23 +169,7 @@
     </div>
 </div>
 </body>
-<script>
-    let locationToggleswitch = document.getElementById("location-toggleswitch");
-    let locationForm = document.getElementById("location-form");
-    locationToggleswitch.addEventListener("click", toggleLocationForm);
-
-
-    function toggleLocationForm() {
-
-        if (locationToggleswitch.checked === true) {
-            locationForm.style.display = "block";
-        }
-        else {
-            locationForm.style.display = "none";
-        }
-
-    }
-</script>
+<script type="module" src="/js/locationForm.js"></script>
 <script type="module" src="/js/userValidation.js"></script>
 <script type="module" src="/js/registerValidation.js"></script>
 </html>
