@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDate;
@@ -9,11 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.annotation.PostConstruct;
 import nz.ac.canterbury.seng302.homehelper.controller.EditTaskController;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
-import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
@@ -38,9 +39,10 @@ import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 @ActiveProfiles("test")
-@AutoConfigureMockMvc
 @SpringBootTest
+@AutoConfigureMockMvc
 public class EditTaskControllerIntegrationTest {
 
     private MockMvc mockMvc;
@@ -58,34 +60,34 @@ public class EditTaskControllerIntegrationTest {
     private RenovationTaskService renovationTaskService;
 
     @MockBean
-    private LoginService loginService;
-
-    @MockBean
     private RenovationRecordService renovationRecordService;
 
     private User user;
 
+    @PostConstruct
+    public void init() {
+        mockMvc = MockMvcBuilders.standaloneSetup(editTaskController).build();
+    }
+
     @BeforeEach
     public void setup_user() {
-        mockMvc = MockMvcBuilders.standaloneSetup(editTaskController).build();
+        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
+        when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
 
-        user = new User("Jane", "Doe", "jane@doe.com", "Password");
-        user.grantAuthority("ROLE_USER");
-        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
+        User notOwner = new User("Not", "Owner", "not.owner@doe.com", "Password");
+        when(userRepository.findByEmailIgnoreCase("not.owner@doe.com")).thenReturn(Optional.of(notOwner));
 
         RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
+        when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
 
         RenovationTask renovationTask = new RenovationTask("Task 1", "New Task", new ArrayList<>(), null, renovationRecord);
-        Mockito.when(renovationTaskService.getTaskById(1L)).thenReturn(renovationTask);
+        when(renovationTaskService.getTaskById(1L)).thenReturn(renovationTask);
 
         RenovationTaskValidation renovationTaskValidation = new RenovationTaskValidation();
         ReflectionTestUtils.setField(renovationTaskService, "renovationTaskValidation", renovationTaskValidation);
 
-        Mockito.doCallRealMethod().when(renovationTaskService).validateTaskDetails(Mockito.any(RenovationTaskDTO.class));
+        Mockito.doCallRealMethod().when(renovationTaskService).validateTaskDetails(Mockito.any(RenovationTaskDTO.class), Mockito.any(RenovationRecord.class));
     }
-
-
 
     @Test
     @WithMockUser(username = "jane@doe.com")
@@ -147,6 +149,50 @@ public class EditTaskControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "jane@doe.com")
+    public void testEditTask_invalidRooms_TaskNotEditedStaysOnEditTask() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("name", "Task name")
+                        .param("description", "Description")
+                        .param("rooms", "Room 1", "Room 2", "otherRoom")
+                        .param("taskId", "1")
+                        .param("renovationId", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(redirectedUrl("/editTask?taskId=1&renovationId=1"))
+                .andExpect(flash().attribute("roomError", hasItem("Whoops, it looks like \"otherRoom\" is not a valid room anymore")));
+        Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
+    }
+
+    @Test
+    @WithMockUser(username = "not.owner@doe.com")
+    public void testEditTaskGET_invalidUser_TaskNotEditedStaysOnEditTask() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/editTask")
+            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("taskId", "1")
+                    .param("renovationId", "1")
+                    .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void testEditTask_invalidTaskId_TaskNotEditedStaysOnEditTask()
+            throws Exception {
+        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 2", "Description", List.of("Room 1", "Room 2"));
+        when(renovationRecordService.getRecordById(2L)).thenReturn(renovationRecord);
+        RenovationTask anotherTask = new RenovationTask("Task 2", "New Task", new ArrayList<>(), null, renovationRecord);
+        when(renovationTaskService.getTaskById(2L)).thenReturn(anotherTask);
+        mockMvc.perform(MockMvcRequestBuilders.get("/editTask")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("taskId", "2")
+                        .param("renovationId", "2")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
     public void testEditTask_taskDescriptionTooLong_TaskNotEditedStaysOnEditTask() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -187,7 +233,6 @@ public class EditTaskControllerIntegrationTest {
     @Test
     @WithMockUser(username = "jane@doe.com", roles = {"USER"})
     public void testEditTask_editTaskIcon_taskIconChangedReturnsToRenovations() throws Exception {
-        Mockito.when(loginService.getUserByEmail()).thenReturn(user);
         mockMvc.perform(MockMvcRequestBuilders.post("/editTask/edit-icon/1")
                     .contentType(MediaType.APPLICATION_JSON)
                         .param("id", "1")
@@ -199,22 +244,16 @@ public class EditTaskControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
-    public void testEditTask_userNotOwner_redirectToMain() throws Exception {
+    public void testEditTask_userNotOwner_404() throws Exception {
         User owner = new User("Owner", "User", "owner@doe.com", "Password");
         owner.grantAuthority("ROLE_USER");
 
-        User notOwner = new User("Not", "Owner", "not.owner@doe.com", "Password");
-        notOwner.grantAuthority("ROLE_USER");
-
-        Mockito.when(loginService.getUserByEmail()).thenReturn(notOwner);
-
         RenovationRecord renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
-        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
+        when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/editTask")
                         .param("taskId", "1")
                         .param("renovationId", "1"))
-                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(MockMvcResultMatchers.redirectedUrl("/main"));
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 }

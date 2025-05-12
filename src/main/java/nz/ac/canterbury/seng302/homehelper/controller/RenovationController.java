@@ -345,16 +345,26 @@ public class RenovationController {
      * Handles the submission of a new tag to be created, and adding to renovation records
      *
      * @param renovationId       id of the renovation record
-     * @param name               of the tag
+     * @param tagName            of the tag
      * @param redirectAttributes attributes for redirect
      * @return the redirect to the view page for the renovation record.
      */
     @PostMapping("/tags/add")
     public String addTagToRenovation(@RequestParam Long renovationId,
-                                     @RequestParam("tagName") String name,
+                                     @RequestParam("tagName") String tagName,
                                      RedirectAttributes redirectAttributes) {
+        logger.info("/tags/add");
 
-
+        RenovationRecord record = renovationRecordService.getRecordById(renovationId);
+        List<String> errors = tagService.validateTagAndRecord(record, tagName);
+        if (errors.isEmpty()) {
+            if (tagService.checkExists(tagName)) {
+                tagService.createTag(tagName);
+            }
+            tagService.addTagToRenovation(record, tagName);
+        } else {
+            redirectAttributes.addFlashAttribute("errors", errors);
+        }
         return "redirect:/renovations/view?id=" + renovationId;
     }
 

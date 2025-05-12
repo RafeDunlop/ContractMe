@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository interface for managing {@link Tag} entities.
@@ -25,4 +26,12 @@ public interface TagRepository extends CrudRepository<Tag, Long> {
     @Query("SELECT t FROM Tag t WHERE LOWER(t.tagName) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<Tag> findByNameContainingIgnoreCase(@Param("name") String name);
 
+
+    /**
+     * Retrieves a tag that exactly matches the name, that is case-sensitive.
+     * @param name The exact name of the tag to find.
+     * @return An Optional containing the tag if it exists, or empty if not found.
+     */
+    @Query("SELECT f FROM Tag f WHERE (f.tagName) = (:name)")
+    Optional<Tag> findExactMatchTagByTagName(@Param("name") String name);
 }
