@@ -20,10 +20,12 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -248,7 +250,11 @@ public class SharingRenovationRecordsSteps {
 
     @Given("there is at least {int} pages")
     public void there_is_at_lest_pages(Integer pages) {
-        // todo
+        ModelAndView mav = result.getModelAndView();
+        Map<String, Object> model = mav.getModel();
+        int totalPages = (int) model.get("totalPages");
+
+        assertTrue(totalPages >= pages, "Expected at least: " + pages + " pages, there is only: " + totalPages);
     }
 
     @Then("I should see the list of renovation records at the same search page I was on")
@@ -264,9 +270,7 @@ public class SharingRenovationRecordsSteps {
     @Then("I should see a {string} element")
     public void i_should_see_a_element(String element) throws Exception {
         String content = result.getResponse().getContentAsString();
-        assertTrue(content.contains(element), "Expected to find " + element + " button");
-        System.out.println(content);
-
+        assertTrue(content.contains(element), "Expected to find: " + element + " element");
     }
 
 }

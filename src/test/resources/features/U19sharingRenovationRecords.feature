@@ -20,55 +20,38 @@ Feature: U19 - As Inaya, I want to be able to make my renovation record
     And the renovation records should be sorted by most recent creation date first
 
 
-  Scenario: AC4 Pagination is triggered with Prev and Next buttons
+  Scenario: AC4 Pagination show Prev/Next buttons
     Given I am logged in
     And there are 20 public renovation records
-    And there is at least 2 pages
     When I click the browse renovations button
+    And there is at least 2 pages
     Then I should see a "Prev" element
     And I should see a "Next" element
 
-  Scenario: AC5.1 Pagination with first/last and nearby page numbers
+  Scenario: AC5.1 Pagination when over 10 pages can only see 2 pages ahead of current page.
     Given I am logged in
-    And there are 100 public renovation records
-    And there is at least 10 pages
+    And there are 150 public renovation records
     When I click the browse renovations button
+    And there is at least 10 pages
     Then I should see a "1" element
     And I should see a "2" element
     And I should see a "3" element
 
-  Scenario: AC5.1 Pagination with first/last and nearby page numbers
-    Given I am logged in
-    And there are 100 public renovation records
-    And there is at least 10 pages
-    When I click the browse renovations button
-    Then I should see a "First" element
-    And I should see a "Last" element
-
-  Scenario: AC6 User inputs page number
+  Scenario: AC5.2 Pagination over 10 pages so there are first/last buttons
     Given I am logged in
     And there are 150 public renovation records
     When I click the browse renovations button
+    And there is at least 10 pages
+    Then I should see a "First" element
+    And I should see a "Last" element
+
+
+  Scenario: AC6 User can input page to go to
+    Given I am logged in
+    And there are 150 public renovation records
+    When I click the browse renovations button
+    And there is at least 10 pages
     Then I should see a "pageSearch" element
-
-#  Scenario: AC7 Navigating to a valid page number
-#    Given I am logged in
-#    And there are 150 public renovation records
-#    And there are atleast 10 pages
-#    When I click the browse renovations button
-#    And I input page number "5" and confirm
-#    Then I should be taken to page "5"
-#
-#  Scenario: AC8 Inputting an invalid page number
-#    Given I am logged in
-#    And there are 150 public renovation records
-#    When I click the browse renovations button
-#    And I input page number "999" and confirm
-#    Then I should see an error message "The page number is outside the range of available pages."
-#    And I should still be on the current page
-
-
-
 
 
   Scenario: AC9 Viewing renovation record details from search results
