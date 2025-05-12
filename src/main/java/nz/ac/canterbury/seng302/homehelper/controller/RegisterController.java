@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,17 +36,19 @@ public class RegisterController {
     private final VerificationCodeService verificationCodeService;
 
     private final ApplicationEventPublisher eventPublisher;
+    private final LocationService locationService;
 
     /**
      * Constructor for the register class, links controller and service layers
      */
     @Autowired
     public RegisterController(RegisterService registerService,
-            ApplicationEventPublisher eventPublisher,
-            VerificationCodeService verificationCodeService) {
+                              ApplicationEventPublisher eventPublisher,
+                              VerificationCodeService verificationCodeService, LocationService locationService) {
         this.registerService = registerService;
         this.verificationCodeService = verificationCodeService;
         this.eventPublisher = eventPublisher;
+        this.locationService = locationService;
     }
 
     /**
@@ -78,6 +81,7 @@ public class RegisterController {
         logger.info("POST /register");
 
         Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
+        errors.putAll(locationService.validateLocation(locationDTO));
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);

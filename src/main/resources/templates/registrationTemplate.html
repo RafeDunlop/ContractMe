@@ -104,8 +104,7 @@
                 <button type="button" class="btn btn-primary" id="location-button">Add/Edit Location (Optional)</button>
 
                 <!-- LOCATION FORM FRAGMENT -->
-
-                <div class="shadow-overlay" id="location-form">
+                <div class="mb-3" id="location-form">
                     <div th:replace="~{fragments/locationForm.html :: locationForm(
                     submissionEndpoint='register', locationDTO=${locationDTO})}"></div>
                 </div>
