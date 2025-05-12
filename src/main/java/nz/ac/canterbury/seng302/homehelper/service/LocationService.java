@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Basic unlinked location implementation using Geoapify
@@ -148,5 +151,16 @@ public class LocationService {
 
     public Map<String, List<String>> validateLocation(LocationDTO dto) {
         return new HashMap<String, List<String>>();
+    }
+
+    /**
+     * checks if the location has been provided
+     * @param dto location data transfer object
+     * @return true if location has been provided, false if it hasn't
+     */
+    public boolean isLocationProvided(LocationDTO dto) {
+        return dto != null &&
+                Stream.of(dto.address, dto.country, dto.postcode, dto.city, dto.suburb)
+                        .anyMatch(field -> field != null && !field.trim().isEmpty());
     }
 }

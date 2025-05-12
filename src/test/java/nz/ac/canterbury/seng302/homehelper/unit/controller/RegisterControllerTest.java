@@ -5,6 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.controller.RegisterController;
 import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
 
@@ -24,8 +25,9 @@ public class RegisterControllerTest {
         RegisterService registerServiceSpy = Mockito.mock(RegisterService.class);
         VerificationCodeService verificationCodeServiceMock = Mockito.mock(VerificationCodeService.class);
         ApplicationEventPublisher applicationEventPublisher = Mockito.mock(ApplicationEventPublisher.class);
+        LocationService locationServiceMock = Mockito.mock(LocationService.class);
         RegisterController registerController = new RegisterController(
-                registerServiceSpy, applicationEventPublisher, verificationCodeServiceMock);
+                registerServiceSpy, applicationEventPublisher, verificationCodeServiceMock, locationServiceMock);
 
         RedirectAttributes redirectAttributes = Mockito.mock(RedirectAttributes.class);
         UserRegisterDTO mockedUser = new UserRegisterDTO("","","","","");

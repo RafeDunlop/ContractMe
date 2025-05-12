@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +93,16 @@ public class RegisterController {
         try {
             User user = registerService.registerUser(userRegisterDTO);
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
+            if (locationService.isLocationProvided(locationDTO)) {
+                Location userLocation = new Location(
+                        locationDTO.address,
+                        locationDTO.country,
+                        locationDTO.postcode,
+                        locationDTO.city,
+                        locationDTO.suburb
+                );
+                user.setLocation(userLocation);
+            }
             return "redirect:/confirm-registration";
         } catch (MailException e) {
             redirectAttributes.addFlashAttribute("error", "Error sending confirmation email.");
