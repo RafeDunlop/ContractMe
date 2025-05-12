@@ -39,11 +39,11 @@ Feature: U19 - As Inaya, I want to be able to make my renovation record
 
   Scenario: AC5.2 Pagination over 10 pages so there are first/last buttons
     Given I am logged in
-    And there are 150 public renovation records
+    And there are 200 public renovation records
     When I click the browse renovations button
     And there is at least 10 pages
-    Then I should see a "firstButton" element
-#    And I should see a "lastButton" element
+#    Then I should see a "firstButton" element
+    And I should see a "lastButton" element
 
   Scenario: AC5.2 Pagination less than 10 pages so first/last buttons don't show.
     Given I am logged in
@@ -56,7 +56,7 @@ Feature: U19 - As Inaya, I want to be able to make my renovation record
 
   Scenario: AC6.1 User can input page to go to
     Given I am logged in
-    And there are 150 public renovation records
+    And there are 200 public renovation records
     When I click the browse renovations button
     And there is at least 10 pages
     Then I should see a "pageSearch" element
@@ -65,7 +65,6 @@ Feature: U19 - As Inaya, I want to be able to make my renovation record
     Given I am logged in
     And there are 20 public renovation records
     When I click the browse renovations button
-    And there is at least 10 pages
     Then I should not see a "pageSearch" element
 
   Scenario: AC9 Viewing renovation record details from search results
@@ -77,6 +76,7 @@ Feature: U19 - As Inaya, I want to be able to make my renovation record
 
   Scenario Outline: AC10 Back to search results returns me to the same search page
     Given I am logged in
+    And there are 6 public renovation records
     And I have searched for visibility: <visibility> and search term: <searchTerm> renovation records
     And I click on a renovation record
     When I click the “Back to search results” button
