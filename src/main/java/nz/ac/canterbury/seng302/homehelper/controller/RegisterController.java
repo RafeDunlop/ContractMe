@@ -3,6 +3,9 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import java.util.List;
 import java.util.Map;
 
+import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
 import nz.ac.canterbury.seng302.homehelper.profanityFilter.dictionary.Profanity;
 import org.slf4j.Logger;
@@ -36,16 +39,15 @@ public class RegisterController {
     private final VerificationCodeService verificationCodeService;
 
     private final ApplicationEventPublisher eventPublisher;
-
-
+    private final LocationService locationService;
 
     /**
      * Constructor for the register class, links controller and service layers
      */
     @Autowired
     public RegisterController(RegisterService registerService,
-            ApplicationEventPublisher eventPublisher,
-            VerificationCodeService verificationCodeService) {
+                              ApplicationEventPublisher eventPublisher,
+                              VerificationCodeService verificationCodeService, LocationService locationService) {
         this.registerService = registerService;
         this.verificationCodeService = verificationCodeService;
         this.eventPublisher = eventPublisher;
@@ -56,9 +58,11 @@ public class RegisterController {
      *
      * @return thymeleaf registration
      * @param userRegisterDTO, contains all params needed for a user object
+     * @param locationDTO, contains all params for a location object
      */
     @GetMapping("/register")
-    public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO) {
+    public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO,
+                               @ModelAttribute LocationDTO locationDTO) {
         logger.info("GET /register");
         return "registrationTemplate";
     }
@@ -73,12 +77,13 @@ public class RegisterController {
      */
     @PostMapping("/register")
     public String submitRegistration(@ModelAttribute UserRegisterDTO userRegisterDTO,
+                                     @ModelAttribute LocationDTO locationDTO,
                                      HttpServletRequest request,
                                      RedirectAttributes redirectAttributes) {
         logger.info("POST /register");
 
         Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
-
+        errors.putAll(locationService.validateLocation(locationDTO));
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
@@ -89,6 +94,16 @@ public class RegisterController {
         try {
             User user = registerService.registerUser(userRegisterDTO);
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
+            if (locationService.isLocationProvided(locationDTO)) {
+                Location userLocation = new Location(
+                        locationDTO.address,
+                        locationDTO.country,
+                        locationDTO.postcode,
+                        locationDTO.city,
+                        locationDTO.suburb
+                );
+                user.setLocation(userLocation);
+            }
             return "redirect:/confirm-registration";
         } catch (MailException e) {
             redirectAttributes.addFlashAttribute("error", "Error sending confirmation email.");

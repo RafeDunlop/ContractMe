@@ -41,6 +41,12 @@
     height: 30px;
 }
 
+.hidden-form-extension {
+    display: none;
+}
+
+
+
 .truncate {
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -93,3 +99,5 @@
     overflow-wrap: break-word;
 
 }
+
+
