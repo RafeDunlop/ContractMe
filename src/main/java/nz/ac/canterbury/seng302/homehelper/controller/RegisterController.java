@@ -6,8 +6,6 @@ import java.util.Map;
 import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
-import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
-import nz.ac.canterbury.seng302.homehelper.profanityFilter.dictionary.Profanity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +49,7 @@ public class RegisterController {
         this.registerService = registerService;
         this.verificationCodeService = verificationCodeService;
         this.eventPublisher = eventPublisher;
+        this.locationService = locationService;
     }
 
     /**

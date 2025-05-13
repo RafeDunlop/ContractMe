@@ -7,3 +7,34 @@ Feature:As Kaia, I want to be able to add location to my profile and
     Then I can see the add location input fields
 
 
+
+  Scenario Outline: AC9.1 non valid postcode is not accepted
+    Given I am on the register form
+    When I enter an invalid postcode: "<postcode>"
+    Then I am taken back to the register form
+    And a message tells me that Postcode contains invalid characters
+    Examples:
+      | postcode     |
+      | 123-456      |  # Hyphen is invalid
+      | 12@34        |  # Symbol (@)
+      | A1B*2C3      |  # Asterisk is invalid
+      | A1B  2C3     |  # Multiple spaces
+      | A1B2C3!      |  # Ends with symbol
+      | (A1B2C3)     |  # Parentheses
+      |             |  # Empty string
+      |     1234    |  # Leading spaces
+      | 1234     56 |  # Multiple internal spaces
+
+  Scenario Outline: AC9.2 valid postcode is accepted
+    Given I am on the register form
+    When I enter an valid postcode: "<postcode>"
+    Then I am taken to the confirm register page
+
+    Examples:
+      | postcode  |
+      | 12345     |
+      | A1B 2C3   |
+      | AB123CD   |
+      | 75008     |
+      | 1010      |
+      | W1A 1AA   |
