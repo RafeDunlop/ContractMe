@@ -344,6 +344,19 @@ public class RenovationController {
         return "viewRenovation";
     }
 
+    /**
+     * Handles the submission of a renovation view request. Redirects to the GET view endpoint
+     * for a specific renovation record, including the requested page number and cards per page.
+     * The number of cards per page and search origin flag are added as flash attributes for use
+     * in the redirected view.
+     *
+     * @param id                 the ID of the renovation record to view
+     * @param pageNumber         the page number to display (default 1)
+     * @param cardsPerPage       the number of cards to display per page (defaults 5)
+     * @param fromSearch         a flag indicating whether the view was triggered from a search or not
+     * @param redirectAttributes used to store flash attributes for the redirect
+     * @return a redirect to the GET view endpoint with query parameters for the ID and page number
+     */
     @PostMapping("/view")
     public String postViewRenovation(@RequestParam(name = "id") Long id,
                                      @RequestParam(defaultValue = "1", name = "page") int pageNumber,
