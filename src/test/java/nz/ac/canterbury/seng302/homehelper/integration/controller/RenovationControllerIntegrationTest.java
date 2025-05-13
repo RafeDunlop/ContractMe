@@ -183,6 +183,12 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(content().string(not(containsString("No Renovations have been made yet."))));
     }
 
+    /**
+     * Tests that a paginated page can be selected using query parametrs.
+     * Verifies that the correct page is returned by specifiying the number
+     * of records per page.
+     * @throws Exception if the request processing fails
+     */
     @Test
     public void getRenovationRecord_selectPage_returnsCorrectPage() throws Exception {
         for (int i = 0; i < 20; i++) {
@@ -198,6 +204,19 @@ public class RenovationControllerIntegrationTest {
             .andExpect(model().attribute("renovations", hasSize(5)))
             .andExpect(model().attribute("pageNumber", 2))
             .andExpect(model().attribute("renovations", hasItem(hasProperty("name", is("Renovation 5")))));
+    }
+
+    @Test
+    public void getRenovationRecord_selectOutOfBoundsPage_returnsLastPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
+            renovationRecordRepository.save(existingRecord);
+        }
+        mockMvc.perform(get("/renovations")
+                        .param("page", "100")
+                        .param("itemsPerPage", "5"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations?page=4&itemsPerPage=5"));
     }
 
     /**
