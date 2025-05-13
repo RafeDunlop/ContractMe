@@ -25,17 +25,17 @@ Feature: U19 - As Inaya, I want to be able to make my renovation record
     And there are 20 public renovation records
     When I click the browse renovations button
     And there is at least 2 pages
-#    Then I should see a "prevButton" element
     Then I should see a "nextButton" element
 
-#  Scenario: AC5.1 Pagination when over 10 pages can only see 2 pages ahead of current page.
-#    Given I am logged in
-#    And there are 150 public renovation records
-#    When I click the browse renovations button
-#    And there is at least 10 pages
-#    Then I should see a "1" element
-#    And I should see a "2" element
-#    And I should see a "3" element
+  Scenario: AC5.1 Pagination when over 10 pages can only see 2 pages ahead of current page.
+    Given I am logged in
+    And there are 200 public renovation records
+    When I click the browse renovations button
+    And there is at least 10 pages
+    Then I should see a "page1" element
+    And I should see a "page2" element
+    And I should see a "page3" element
+    And I should not see a "page4" element
 
   Scenario: AC5.2 Pagination over 10 pages so there are first/last buttons
     Given I am logged in
@@ -45,7 +45,7 @@ Feature: U19 - As Inaya, I want to be able to make my renovation record
     Then I should see a "firstButton" element
     And I should see a "lastButton" element
 
-  Scenario: AC5.2 Pagination less than 10 pages so first/last buttons don't show.
+  Scenario: AC5.3 Pagination less than 10 pages so first/last buttons don't show.
     Given I am logged in
     And there are 20 public renovation records
     When I click the browse renovations button

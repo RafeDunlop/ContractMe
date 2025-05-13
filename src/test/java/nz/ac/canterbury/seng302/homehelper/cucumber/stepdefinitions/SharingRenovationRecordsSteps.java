@@ -254,7 +254,6 @@ public class SharingRenovationRecordsSteps {
         ModelAndView mav = result.getModelAndView();
         Map<String, Object> model = mav.getModel();
         int totalPages = (int) model.get("totalPages");
-        int card = (int) model.get("cardsPerPage");
 
         assertTrue(totalPages >= pages, "Expected at least: " + pages + " pages, there is only: " + totalPages);
     }
