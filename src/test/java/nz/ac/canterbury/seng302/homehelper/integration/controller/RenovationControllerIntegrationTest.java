@@ -206,6 +206,9 @@ public class RenovationControllerIntegrationTest {
             .andExpect(model().attribute("renovations", hasItem(hasProperty("name", is("Renovation 5")))));
     }
 
+    /**
+     * Tests that selecting a page that is out of bounds will redirect to the last page.
+     */
     @Test
     public void getRenovationRecord_selectOutOfBoundsPage_returnsLastPage() throws Exception {
         for (int i = 0; i < 20; i++) {
@@ -217,6 +220,38 @@ public class RenovationControllerIntegrationTest {
                         .param("itemsPerPage", "5"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations?page=4&itemsPerPage=5"));
+    }
+
+    /**
+     * Tests that requesting 0 items per page will redirect to the default of 8 items per page.
+     */
+    @Test
+    public void getRenovationRecord_zeroItemsPerPage_returns8ItemsPerPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
+            renovationRecordRepository.save(existingRecord);
+        }
+        mockMvc.perform(get("/renovations")
+                        .param("page", "1")
+                        .param("itemsPerPage", "0"))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(model().attribute("itemsPerPage", 8));
+    }
+
+    /**
+     * Tests that requesting a page number of 0 will redirect to the first page.
+     */
+    @Test
+    public void getRenovationRecord_zeroPageNumber_returnsFirstPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
+            renovationRecordRepository.save(existingRecord);
+        }
+        mockMvc.perform(get("/renovations")
+                        .param("page", "0")
+                        .param("itemsPerPage", "5"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations?page=1&itemsPerPage=5"));
     }
 
     /**
