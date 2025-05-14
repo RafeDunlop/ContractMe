@@ -949,6 +949,7 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(model().attribute("records", hasSize(0)))
                 .andExpect(model().attribute("totalCards", is(0)))
                 .andExpect(model().attribute("totalPages", is(0)))
+                .andExpect(model().attribute("pageNumber", is(1)))
                 .andExpect(model().attribute("cardsPerPage", is(16)))
                 .andExpect(model().attribute("visibility", is(visibility)))
                 .andExpect(model().attribute("searchTerm", is(searchTerm)));
@@ -983,7 +984,8 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(model().attributeExists("records"))
                 .andExpect(model().attribute("records", hasSize(1)))
                 .andExpect(model().attribute("totalCards", is(1)))
-                .andExpect(model().attribute("totalPages", is(1)))  // totalPages should be 1 since there is one record
+                .andExpect(model().attribute("totalPages", is(1)))
+                .andExpect(model().attribute("pageNumber", is(1)))
                 .andExpect(model().attribute("cardsPerPage", is(16)))
                 .andExpect(model().attribute("visibility", is(visibility)))
                 .andExpect(model().attribute("searchTerm", is(searchTerm)))
