@@ -18,31 +18,50 @@ public class LocationValidationTest {
 
 
     @Test
-    void testValidateName_invalidName_noError() {
+    void testValidateName_invalidCharacterName_Error() {
         List<String> result = locationValidation.validateCity("Chr%stchurch");
-        List<String> secondResult = locationValidation.validateCity("");
-        List<String> thirdResult = locationValidation.validateCity("Paris123");
-        List<String> fourthResult = locationValidation.validateCity("Wellington (NZ)");
-        List<String> fifthResult = locationValidation.validateCity("Tokyo*");
+        List<String> secondResult = locationValidation.validateCity("Paris123");
+        List<String> thirdResult = locationValidation.validateCity("Wellington (NZ)");
         assertTrue(result.get(0).contains("City contains invalid characters"));
-        assertTrue(secondResult.get(0).contains("City cannot be empty."));
+        assertTrue(secondResult.get(0).contains("City contains invalid characters"));
+        assertTrue(thirdResult.get(0).contains("City contains invalid characters"));}
+
+    @Test
+    void testValidateName_invalidNumberInName_Error() {
+        List<String> result = locationValidation.validateCity("Paris123");
+        List<String> secondResult = locationValidation.validateCity("23Kathmandu");
+        List<String> thirdResult = locationValidation.validateCity("Auc23kland");
+        assertTrue(result.get(0).contains("City contains invalid characters"));
+        assertTrue(secondResult.get(0).contains("City contains invalid characters"));
         assertTrue(thirdResult.get(0).contains("City contains invalid characters"));
-        assertTrue(fourthResult.get(0).contains("City contains invalid characters"));
-        assertTrue(fifthResult.get(0).contains("City contains invalid characters"));
     }
+
     @Test
     void testValidateName_validName_noError() {
-        List<String> firstResult = locationValidation.validateCity("Christchurch");
-        List<String> secondResult = locationValidation.validateCity("New York City");
-        List<String> thirdResult = locationValidation.validateCity("Saint-Pierre");
-        List<String> fourthResult = locationValidation.validateCity("O'Connell");
-        List<String> fifthResult = locationValidation.validateCity("Tórshavn");
-        assertTrue(firstResult.isEmpty());
+        List<String> result = locationValidation.validateCity("Christchurch");
+        List<String> secondResult = locationValidation.validateCity("Berlin");
+        assertTrue(result.isEmpty());
         assertTrue(secondResult.isEmpty());
-        assertTrue(thirdResult.isEmpty());
-        assertTrue(fourthResult.isEmpty());
-        assertTrue(fifthResult.isEmpty());
 
     }
+    @Test
+    void testValidateName_validCharacterName_noError() {
+        List<String> result = locationValidation.validateCity("Saint-Pierre");
+        List<String> secondResult = locationValidation.validateCity("O'Connell");
+        List<String> thirdResult = locationValidation.validateCity("Tórshavn");
+        assertTrue(result.isEmpty());
+        assertTrue(secondResult.isEmpty());
+        assertTrue(thirdResult.isEmpty());
+    }
+
+    @Test
+    void testValidateName_validSpaceName_noError() {
+        List<String> result = locationValidation.validateCity("New Delhi");
+        List<String> secondResult = locationValidation.validateCity("New York City");
+        assertTrue(result.isEmpty());
+        assertTrue(secondResult.isEmpty());
+    }
+
+
 
 }

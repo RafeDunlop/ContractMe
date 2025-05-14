@@ -20,15 +20,9 @@ public class LocationValidation {
     public List<String> validateCity(String city) {
         List<String> errors = new ArrayList<>();
         Pattern pattern = Pattern.compile("^[\\p{L} \\-']+$", Pattern.UNICODE_CHARACTER_CLASS);
-
-
-        if (city == null || city.trim().isEmpty()) {
-            errors.add("City cannot be empty.");
-        } else {
-            String cityName = city.trim();
-            if (!pattern.matcher(city).matches()) {
-                errors.add("City contains invalid characters");
-            }
+        String cityName = city.trim();
+        if (!pattern.matcher(cityName).matches()) {
+            errors.add("City contains invalid characters");
         }
 
         return errors;
