@@ -432,8 +432,6 @@ public class RenovationController {
         String searchTerm = (String) attributes.getOrDefault("searchTerm", session.getAttribute("searchTerm"));
         if (searchTerm == null) searchTerm = "";
 
-//        String tagNameList = (String) attributes.getOrDefault("tagNameList", session.getAttribute("tagNameList"));
-//        if (tagNameList == null) tagNameList = "";
         List<String> tagNameList = (List<String>) attributes.getOrDefault("tagNameList", session.getAttribute("tagNameList"));
         if (tagNameList == null) tagNameList = Collections.emptyList();
 

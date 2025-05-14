@@ -3,9 +3,11 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
@@ -51,6 +53,9 @@ public class RenovationControllerIntegrationTest {
 
     @Autowired
     private RenovationTaskRepository renovationTaskRepository;
+
+    @Autowired
+    private TagRepository tagRepository;
 
     @Autowired
     private TagService tagService;
@@ -1112,5 +1117,35 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(model().attribute("records", hasItem(
                         hasProperty("name", is("Test Renovation"))
                 )));
+    }
+
+    @Test
+    public void tagSearch_withValidList_displaysListOfTags() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "Test Renovation", "Room A Renovation", List.of("Room A"));
+        testRecord.setPublicity(true);
+        String tagName ="House";
+        Tag testTag = new Tag(tagName);
+        tagRepository.save(testTag);
+
+        testRecord.getTags().add(testTag);
+        renovationRecordRepository.save(testRecord);
+
+        MvcResult postResult = mockMvc.perform(post("/renovations/search")
+                        .param("tagNameList", tagName)
+                        .param("isTagSearch", "true")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/search?page=1"))
+                .andReturn();
+
+        mockMvc.perform(get("/renovations/search")
+                        .session((MockHttpSession) Objects.requireNonNull(postResult.getRequest().getSession(false))))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attributeExists("records"))
+                .andExpect(model().attribute("records", hasSize(1)))
+                .andExpect(model().attribute("records", hasItem(
+                        hasProperty("name", is("Test Renovation")))));
+
     }
 }
