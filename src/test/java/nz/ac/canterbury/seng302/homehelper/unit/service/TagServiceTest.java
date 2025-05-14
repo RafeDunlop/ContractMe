@@ -101,7 +101,6 @@ public class TagServiceTest {
         RenovationRecord record = mock(RenovationRecord.class);
 
         List<String> errors = tagService.validateTagAndRecord(record, "window");
-        System.out.println(errors);
         assertTrue(errors.isEmpty());
     }
 
