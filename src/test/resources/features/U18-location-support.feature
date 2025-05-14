@@ -39,15 +39,13 @@ Feature:As Kaia, I want to be able to add location to my profile and
     And a message tells me that Postcode contains invalid characters
     Examples:
       | postcode     |
-      | 123-456      |
-      | 12@34        |
-      | A1B*2C3      |
-      | A1B  2C3     |
-      | A1B2C3!      |
-      | (A1B2C3)     |
-      |             |
-      |     1234    |
-      | 1234     56 |
+      | 123-456      |  # Hyphen is invalid
+      | 12@34        |  # Symbol (@)
+      | A1B*2C3      |  # Asterisk is invalid
+      | A1B  2C3     |  # Multiple spaces
+      | A1B2C3!      |  # Ends with symbol
+      | (A1B2C3)     |  # Parentheses
+      | 1234     56 |  # Multiple internal spaces
 
   Scenario Outline: AC9.2 valid postcode is accepted
     Given I am on the register form

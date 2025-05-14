@@ -34,7 +34,7 @@ public class LocationValidation {
      * that it must not be empty
      *
      * @param postcode The postcode
-     * @return true if the postcode is valid
+     * @return error list
      */
     public List<String> validatePostcode(String postcode) {
         List<String> errors = new ArrayList<>();
@@ -44,13 +44,9 @@ public class LocationValidation {
         } else {
             String trimmed = postcode.trim();
 
-            // Check if only letters, numbers, and spaces
             if (!trimmed.matches("^[\\p{L}\\p{N} ]+$")) {
                 errors.add("Postcode contains invalid characters.");
-            }
-
-            // Check if more than one space
-            if (trimmed.chars().filter(c -> c == ' ').count() > 1) {
+            } else if (trimmed.chars().filter(c -> c == ' ').count() > 1) {
                 errors.add("Postcode contains invalid characters.");
             }
         }
