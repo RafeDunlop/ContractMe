@@ -1,29 +1,31 @@
 package nz.ac.canterbury.seng302.homehelper.unit.service;
 
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
+import nz.ac.canterbury.seng302.homehelper.validation.TagValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class TagServiceTest {
     private TagRepository tagRepository;
     private RenovationRecordRepository renovationRecordRepository;
+    private TagValidation tagValidation;
     private TagService tagService;
     @BeforeEach
     void setUp() {
         tagRepository = Mockito.mock(TagRepository.class);
         renovationRecordRepository = Mockito.mock(RenovationRecordRepository.class);
-        tagService = new TagService(tagRepository, renovationRecordRepository);
+        tagValidation = Mockito.mock(TagValidation.class);
+        tagService = new TagService(tagRepository, renovationRecordRepository, tagValidation);
     }
 
     @Test
@@ -62,4 +64,75 @@ public class TagServiceTest {
         assertTrue(result.contains("apartment"));
         assertTrue(result.contains("apartment"));
     }
+
+    @Test
+    public void checkExists_tagExists_returnsTrue() {
+        when(tagRepository.findExactMatchTagByTagName("cars")).thenReturn(Optional.of(new Tag("cars")));
+        assertFalse(tagService.checkExists("cars"));
+    }
+
+    @Test
+    public void checkExists_tagNotExists_returnsFalse() {
+        when(tagRepository.findExactMatchTagByTagName("hammer")).thenReturn(Optional.empty());
+        assertTrue(tagService.checkExists("hammer"));
+    }
+
+    @Test
+    public void addTagToRenovation_tagExists_succeeds() {
+        RenovationRecord record = new RenovationRecord();
+        record.setTags(new ArrayList<>());
+
+        String tagName = "kitchen";
+        Tag tag = new Tag(tagName);
+
+        when(tagRepository.findExactMatchTagByTagName(tagName.toLowerCase().trim()))
+                .thenReturn(Optional.of(tag));
+
+        tagService.addTagToRenovation(record, tagName);
+
+        verify(renovationRecordRepository, times(1)).save(record);
+        assertTrue(record.getTags().contains(tag));
+    }
+
+
+
+    @Test
+    public void validateTag_validTag_returnsNoErrors() {
+        RenovationRecord record = mock(RenovationRecord.class);
+
+        List<String> errors = tagService.validateTagAndRecord(record, "window");
+        assertTrue(errors.isEmpty());
+    }
+
+
+    @Test
+    public void validateTag_duplicateTag_returnsError() {
+        RenovationRecord record = new RenovationRecord();
+
+        record.setTags(new ArrayList<>(List.of(new Tag("bathroom"))));
+
+        List<String> errors = tagService.validateTagAndRecord(record, "bathroom");
+
+        assertTrue(errors.contains("Renovation cannot contain duplicate tag names."));
+    }
+
+    @Test
+    public void validateTag_tooManyTags_returnsError() {
+        RenovationRecord record = new RenovationRecord();
+        List<Tag> tags = Arrays.asList(
+                new Tag("kitchen"),
+                new Tag("bathroom"),
+                new Tag("living-room"),
+                new Tag("bedroom"),
+                new Tag("garage")
+        );
+        record.setTags(tags);
+        when(record.getTags()).thenReturn(tags);
+
+        List<String> errors = tagService.validateTagAndRecord(record, "window");
+
+        assertTrue(errors.contains("Renovation cannot have more than 5 tags."));
+    }
+
+
 }
