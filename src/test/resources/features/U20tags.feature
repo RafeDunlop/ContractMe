@@ -28,9 +28,9 @@ Feature: U20 - As Inaya, I want to be able to tag my renovation records with com
       | !@#$%^&*() |
       |            |
 
-  Scenario: AC3 - Tags associated with a record are visible on the view renovations page
+  Scenario: AC3 - Tags associated with a record are visible on the browse renovations page
     Given I have a renovation record with a tag "tagtag"
-    When I go to the view renovation page
+    When I go to the browse renovation page
     Then The tag "tagtag" is on the list of tags for the renovation
 
   Scenario Outline: AC4 - Inputted tags that are valid show up on the view renovations page

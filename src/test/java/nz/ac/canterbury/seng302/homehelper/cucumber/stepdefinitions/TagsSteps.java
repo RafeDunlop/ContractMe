@@ -115,6 +115,14 @@ public class TagsSteps {
                 .with(csrf()));
     }
 
+    @When("I go to the browse renovation page")
+    public void i_go_to_the_browse_renovation_page() throws Exception {
+        mvcResult = mockMvc.perform(get("/renovations/search")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
     @When("I go to the view renovation page")
     public void i_go_to_the_view_renovation_page() throws Exception {
         mvcResult = mockMvc.perform(get("/renovations/view?id=" + currentRenovationRecord.getId())
