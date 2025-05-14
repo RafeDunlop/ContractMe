@@ -37,7 +37,11 @@
                    aria-label="city" th:value="${addressDTO.city}">
 
             <!-- Frontend JS Error -->
-
+            <div class="alert alert-danger mt-2" id="city-frontend-error" hidden>
+                <ul>
+                    <li><label class="form-label" id="city-frontend-error-message"></label></li>
+                </ul>
+            </div>
             <!-- Backend error -->
             <div class="alert alert-danger mt-2" id="city-backend-error"
                  th:attr="hidden=${cityError == null}">

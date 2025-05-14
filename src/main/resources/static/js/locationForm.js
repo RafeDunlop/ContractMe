@@ -9,11 +9,17 @@ let postcodeFrontendErrorMessage = document.getElementById("postcode-frontend-er
 let postcodeFrontendError = document.getElementById("postcode-frontend-error");
 let postcodeBackendError = document.getElementById("postcode-backend-error");
 
+let cityFrontendErrorMessage = document.getElementById("city-frontend-error-message");
+let cityFrontendError = document.getElementById("city-frontend-error");
+let cityBackendError = document.getElementById("city-backend-error");
+
 let countryField = document.getElementById("country");
 
 locationToggleSwitch.addEventListener("click", displayLocationForm);
 
 postcodeField.addEventListener("blur", validatePostcode);
+cityField.addEventListener("blur", validateCity);
+
 
 function displayLocationForm() {
     if (locationToggleSwitch.checked === true) {
@@ -58,5 +64,27 @@ function validatePostcode() {
         postcodeFrontendError.hidden = true;
         postcodeFrontendErrorMessage.hidden = true;
         postcodeBackendError.hidden = true;
+    }
+}
+
+
+function validateCity() {
+    let city = cityField.value.trim();
+    let cityPattern = /^[\p{L} \-']+$/u;
+    let spaceCount = (city.match(/ /g) || []).length;
+    if (!city) {
+        cityFrontendErrorMessage.textContent = "";
+        cityFrontendError.hidden = true;
+        cityFrontendErrorMessage.hidden = true;
+        cityBackendError.hidden = true;
+    } else if (!cityPattern.test(city) || spaceCount > 1) {
+        cityFrontendErrorMessage.textContent = "City contains invalid characters.";
+        cityFrontendError.hidden = false;
+        cityBackendError.hidden = true;
+    } else {
+        cityFrontendErrorMessage.textContent = "";
+        cityFrontendError.hidden = true;
+        cityFrontendErrorMessage.hidden = true;
+        cityBackendError.hidden = true;
     }
 }
