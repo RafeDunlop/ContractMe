@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.util.List;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,41 @@ public class LocationFormSteps {
                 .andReturn();
     }
 
+    @When("I enter an valid city: {string}")
+    public void i_enter_an_valid_city(String city) throws Exception {
+        result = mockMvc.perform(post("/register")
+                        .param("firstName", "John")
+                        .param("lastName", "Doe")
+                        .param("email", "john.doe@example.com")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .param("address", "123 Street")
+                        .param("country", "New Zealand")
+                        .param("postcode", "8042")
+                        .param("city", city)
+                        .param("suburb", "Central")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+    }
+    @When("I enter an invalid city: {string}")
+    public void i_enter_an_invalid_city(String city) throws Exception {
+        result = mockMvc.perform(post("/register")
+                        .param("firstName", "John")
+                        .param("lastName", "Doe")
+                        .param("email", "john.doe@example.com")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .param("address", "123 Street")
+                        .param("country", "New Zealand")
+                        .param("postcode", "8042")
+                        .param("city", city)
+                        .param("suburb", "Central")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+    }
+
     @When("I enter an valid postcode: {string}")
     public void i_enter_an_valid_postcode(String postcode) throws Exception {
         result = mockMvc.perform(post("/register")
@@ -110,8 +146,14 @@ public class LocationFormSteps {
         assertTrue(content.contains("Postcode contains invalid characters"));
     }
 
+    @Then("a message tells me that the city contains invalid characters")
+    public void a_message_tells_me_that_the_city_contains_invalid_characters() throws Exception {
+        List<String> expectedErrors = List.of("City contains invalid characters");
+    }
+
     @Then("I am taken to the confirm register page")
     public void i_am_taken_to_the_confirm_register_page() throws Exception {
         assertTrue(Objects.requireNonNull(result.getResponse().getRedirectedUrl()).contains("/confirm-registration"));
     }
+
 }

@@ -17,7 +17,7 @@ public class LocationValidationTest {
 
 
     @Test
-    void testValidateName_invalidCharacterName_Error() {
+    void testValidateName_invalidCharacterCity_Error() {
         List<String> result = locationValidation.validateCity("Chr%stchurch");
         List<String> secondResult = locationValidation.validateCity("Paris123");
         List<String> thirdResult = locationValidation.validateCity("Wellington (NZ)");
@@ -26,7 +26,7 @@ public class LocationValidationTest {
         assertTrue(thirdResult.get(0).contains("City contains invalid characters"));}
 
     @Test
-    void testValidateName_invalidNumberInName_Error() {
+    void testValidateName_invalidNumberInCity_Error() {
         List<String> result = locationValidation.validateCity("Paris123");
         List<String> secondResult = locationValidation.validateCity("23Kathmandu");
         List<String> thirdResult = locationValidation.validateCity("Auc23kland");
@@ -36,7 +36,13 @@ public class LocationValidationTest {
     }
 
     @Test
-    void testValidateName_validName_noError() {
+    void testValidateName_invalidTabInCity_Error() {
+        List<String> result = locationValidation.validateCity("New\tDelhi");
+        assertTrue(result.get(0).contains("City contains invalid characters"));
+    }
+
+    @Test
+    void testValidateName_validCity_noError() {
         List<String> result = locationValidation.validateCity("Christchurch");
         List<String> secondResult = locationValidation.validateCity("Berlin");
         assertTrue(result.isEmpty());
@@ -44,7 +50,7 @@ public class LocationValidationTest {
 
     }
     @Test
-    void testValidateName_validCharacterName_noError() {
+    void testValidateName_validCharacterCity_noError() {
         List<String> result = locationValidation.validateCity("Saint-Pierre");
         List<String> secondResult = locationValidation.validateCity("O'Connell");
         List<String> thirdResult = locationValidation.validateCity("Tórshavn");
@@ -54,15 +60,15 @@ public class LocationValidationTest {
     }
 
     @Test
-    void testValidateName_validSpaceName_noError() {
+    void testValidateName_validSpaceCity_noError() {
         List<String> result = locationValidation.validateCity("New Delhi");
-        List<String> secondResult = locationValidation.validateCity("New York City");
+        List<String> secondResult = locationValidation.validateCity("New York City");;
         assertTrue(result.isEmpty());
         assertTrue(secondResult.isEmpty());
     }
 
 
-
+    @Test
     void invalidPostcode_nullPostcode_returnsEmptyError() {
         List<String> result = locationValidation.validatePostcode(null);
         assertTrue(result.contains("Postcode cannot be empty."));

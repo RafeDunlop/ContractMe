@@ -157,6 +157,7 @@ public class LocationService {
         Map<String, List<String>> errors = new HashMap<>();
 
         MapUtil.putIfNotEmpty(errors, "postcodeError", locationValidation.validatePostcode(dto.postcode));
+        MapUtil.putIfNotEmpty(errors, "cityError", locationValidation.validateCity(dto.city));
         return errors;
     }
 
