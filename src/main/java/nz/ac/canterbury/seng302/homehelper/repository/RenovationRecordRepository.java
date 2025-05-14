@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.repository;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -124,4 +125,12 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
     @Modifying
     @Query("DELETE FROM RenovationRecord f WHERE f.id = :id")
     void deleteById(@Param("id") @Nullable Long id);
+
+    /**
+     * Finds all records with OR logic with matching tags.
+     * @param tags objects in a list to search for
+     * @return list of renovation records matching the provided tags
+     */
+    @Query("SELECT r FROM RenovationRecord r JOIN r.tags t WHERE t IN :tags")
+    List<RenovationRecord> findAllByTags(@Param("tags") List<Tag> tags);
 }

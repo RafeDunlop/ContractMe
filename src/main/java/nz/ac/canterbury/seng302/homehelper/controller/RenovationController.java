@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
@@ -431,7 +432,9 @@ public class RenovationController {
         String searchTerm = (String) attributes.getOrDefault("searchTerm", session.getAttribute("searchTerm"));
         if (searchTerm == null) searchTerm = "";
 
-        @SuppressWarnings("unchecked") List<String> tags = (List<String>) attributes.getOrDefault("tags", session.getAttribute("tags"));
+        String tagNameList = (String) attributes.getOrDefault("tagNameList", session.getAttribute("tagNameList"));
+        if (tagNameList == null) tagNameList = "";
+        logger.info("TAG LIST PASSED : " + tagNameList);
         boolean isTagSearch = Boolean.TRUE.equals(session.getAttribute("isTagSearch"));
 
         if (pageNumber == null) {
@@ -452,7 +455,10 @@ public class RenovationController {
         List<RenovationRecord> records = Collections.emptyList();
 
         if (isTagSearch) {
-            logger.info("tag Search");
+            //List<Tag> tagList = tagService.getTags(tags);
+
+
+            logger.info("tag list: " );
         } else{
             records = switch (visibility.toLowerCase()) {
                 case "public" -> renovationRecordService.getPublicRecords(searchTerm);
@@ -504,7 +510,7 @@ public class RenovationController {
     @PostMapping("/search")
     public String submitSearchRenovations(@RequestParam(required = false) String visibility,
                                           @RequestParam(required = false) String searchTerm,
-                                          @RequestParam(required = false) List<String> tags,
+                                          @RequestParam(required = false) String tagNameList,
                                           @RequestParam(defaultValue = "false") boolean isTagSearch,
                                           @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                           @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage,
@@ -514,11 +520,11 @@ public class RenovationController {
         if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";
 
-        logger.info("IS TAG SEARCH: " + isTagSearch);
+        logger.info("TAG LIST: " + tagNameList);
 
         session.setAttribute("visibility", visibility);
         session.setAttribute("searchTerm", searchTerm);
-        session.setAttribute("tags", tags);
+        session.setAttribute("tagNameList", tagNameList);
         session.setAttribute("isTagSearch", isTagSearch);
         session.setAttribute("pageNumber", pageNumber);
         session.setAttribute("cardsPerPage", cardsPerPage);
