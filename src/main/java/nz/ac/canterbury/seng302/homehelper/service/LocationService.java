@@ -7,6 +7,8 @@ import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
+import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
+import nz.ac.canterbury.seng302.homehelper.validation.LocationValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,12 +44,14 @@ public class LocationService {
     private final ObjectMapper objectMapper;
 
     private final RestTemplate restTemplate;
+    private final LocationValidation locationValidation;
 
     @Autowired
-    public LocationService(Keys keys) {
+    public LocationService(Keys keys, LocationValidation locationValidation) {
         this.keys = keys;
         this.objectMapper = new ObjectMapper();
         this.restTemplate = new RestTemplate();
+        this.locationValidation = locationValidation;
     }
 
     /**
@@ -150,7 +154,10 @@ public class LocationService {
     }
 
     public Map<String, List<String>> validateLocation(LocationDTO dto) {
-        return new HashMap<String, List<String>>();
+        Map<String, List<String>> errors = new HashMap<>();
+
+        MapUtil.putIfNotEmpty(errors, "postcodeError", locationValidation.validatePostcode(dto.postcode));
+        return errors;
     }
 
     /**

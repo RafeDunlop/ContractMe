@@ -28,4 +28,35 @@ public class LocationValidation {
         return errors;
     }
 
+
+    /**
+     * Validates the postcode based on the specified pattern in addition to the mandatory condition
+     * that it must not be empty
+     *
+     * @param postcode The postcode
+     * @return true if the postcode is valid
+     */
+    public List<String> validatePostcode(String postcode) {
+        List<String> errors = new ArrayList<>();
+
+        if (postcode == null || postcode.trim().isEmpty()) {
+            errors.add("Postcode cannot be empty.");
+        } else {
+            String trimmed = postcode.trim();
+
+            // Check if only letters, numbers, and spaces
+            if (!trimmed.matches("^[\\p{L}\\p{N} ]+$")) {
+                errors.add("Postcode contains invalid characters.");
+            }
+
+            // Check if more than one space
+            if (trimmed.chars().filter(c -> c == ' ').count() > 1) {
+                errors.add("Postcode contains invalid characters.");
+            }
+        }
+
+        return errors;
+    }
+
+
 }
