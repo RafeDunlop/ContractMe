@@ -67,7 +67,9 @@ function validatePostcode() {
     }
 }
 
-
+/**
+ * Validates City Field.
+ */
 function validateCity() {
     let city = cityField.value.trim();
     let cityPattern = /^[\p{L} \-']+$/u;
