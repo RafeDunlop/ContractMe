@@ -82,19 +82,22 @@ public class RegisterController {
         logger.info("POST /register");
 
         Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
-        errors.putAll(locationService.validateLocation(addressDTO));
+
+        boolean locationProvided = addressDTO != null &&
+                (addressDTO.getAddress_line1() != null && !addressDTO.getAddress_line1().isBlank()
+                        || addressDTO.getRegion() != null && !addressDTO.getRegion().isBlank()
+                        || addressDTO.getCity() != null && !addressDTO.getCity().isBlank()
+                        || addressDTO.getPostcode() != null && !addressDTO.getPostcode().isBlank()
+                        || addressDTO.getCountry() != null && !addressDTO.getCountry().isBlank());
+        if (locationProvided) {
+            errors.putAll(locationService.validateLocation(addressDTO));
+        }
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
             redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
 
-            redirectAttributes.addFlashAttribute("locationUsed", addressDTO != null &&
-                    (addressDTO.getAddress_line1() != null && !addressDTO.getAddress_line1().isBlank()
-                            || addressDTO.getRegion() != null && !addressDTO.getRegion().isBlank()
-                            || addressDTO.getCity() != null && !addressDTO.getCity().isBlank()
-                            || addressDTO.getPostcode() != null && !addressDTO.getPostcode().isBlank()
-                            || addressDTO.getCountry() != null && !addressDTO.getCountry().isBlank()));
-
+            redirectAttributes.addFlashAttribute("locationUsed", locationProvided);
             return "redirect:/register";
         }
 
