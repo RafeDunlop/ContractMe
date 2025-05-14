@@ -20,10 +20,12 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -132,6 +134,7 @@ public class SharingRenovationRecordsSteps {
 
     @Given("there are {int} public renovation records")
     public void there_are_public_renovation_records(int count) {
+
         for (int i = 0; i < count; i++) {
             String email = "other" + i + "_" + System.currentTimeMillis() + "@example.com";
             User otherUser = new User("Other", "User" + i, email, "Password123!");
@@ -202,7 +205,6 @@ public class SharingRenovationRecordsSteps {
 
         result = mockMvc.perform(get("/renovations/view")
                         .param("id", record.getId().toString())
-                        .param("visibility", "public")
                         .param("fromSearch", "true")
                         .session(session))
                 .andExpect(status().isOk())
@@ -247,6 +249,15 @@ public class SharingRenovationRecordsSteps {
                 .andReturn();
     }
 
+    @Given("there is at least {int} pages")
+    public void there_is_at_lest_pages(Integer pages) {
+        ModelAndView mav = result.getModelAndView();
+        Map<String, Object> model = mav.getModel();
+        int totalPages = (int) model.get("totalPages");
+
+        assertTrue(totalPages >= pages, "Expected at least: " + pages + " pages, there is only: " + totalPages);
+    }
+
     @Then("I should see the list of renovation records at the same search page I was on")
     public void i_should_see_same_search_results_page() throws Exception {
         String viewContent = result.getResponse().getContentAsString();
@@ -256,4 +267,22 @@ public class SharingRenovationRecordsSteps {
         assertTrue(viewContent.contains("<option value=\"" + expectedVisibility + "\" selected=\"selected\">"));
         assertTrue(viewContent.contains("name=\"searchTerm\" value=\"" + expectedSearchTerm + "\""));
     }
+
+    @Then("I should see a {string} element")
+    public void i_should_see_a_element(String element) throws Exception {
+        String content = result.getResponse().getContentAsString();
+
+        assertTrue(content.contains("id=\"" + element + "\""),
+                "Expected to find element with id=\"" + element + "\"");
+    }
+
+    @Then("I should not see a {string} element")
+    public void i_should_not_see_a_element(String element) throws Exception{
+        String content = result.getResponse().getContentAsString();
+
+        assertFalse(content.contains("id=\"" + element + "\""),
+                "Did not expect to find element with id=\"" + element + "\"");
+    }
+
+
 }

@@ -3,6 +3,8 @@
 <head>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/tags.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/viewRenovationStyles.css}">
     <title>Renovation Records</title>
     <style>
         .truncate {
@@ -18,82 +20,184 @@
 </head>
 <body>
 
-<div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+<div class="container">
+    <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+    <div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
 
-<div class="container mt-4">
-    <div class="card p-4 shadow-sm">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 th:text="${visibility == 'public' ? 'Public Renovation Records' : (visibility == 'user' ? 'Your Renovation Records' : 'Renovation Records')}">Renovation Records</h4>
-        </div>
+    <div class="container mt-2">
+        <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
+        <input type="hidden" id="totalCards" th:value="${totalCards}"/>
 
-        <!-- Search and Visibility Filter -->
-        <form method="post" action="/renovations/search" class="row g-3 mb-4">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-
-            <div class="col-md-4">
-                <label class="form-label">Show:</label>
-                <select name="visibility" class="form-select">
-                    <option value="all" th:selected="${visibility == 'all'}">All</option>
-                    <option value="public" th:selected="${visibility == 'public'}">Public</option>
-                    <option value="user" th:selected="${visibility == 'user'}">User</option>
-                </select>
+        <div id="content-container" class="card p-4 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 th:text="${visibility == 'public' ? 'Public Renovation Records' : (visibility == 'user' ? 'Your Renovation Records' : 'Renovation Records')}">Renovation Records</h4>
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label">Search:</label>
-                <input type="text" name="searchTerm" th:value="${searchTerm}" class="form-control" placeholder="Enter keyword..."/>
-            </div>
+            <!-- Search and Visibility Filter -->
+            <form id="search-form" th:action="@{/renovations/search}" method="post" class="m-0">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" th:value="${cardsPerPage}" name="cardsPerPage" id="cardsPerPageInput"/>
+                <input type="hidden" th:value="${pageNumber}" name="page" id="pageInput" />
+                <input type="hidden" th:value="${visibility}" name="visibility"/>
 
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">Search</button>
-            </div>
-        </form>
 
-        <!-- Renovation Cards Grid -->
-        <div class="row">
-            <div th:each="record : ${records}" class="col-md-3 mb-4">
-                <a th:href="@{/renovations/view(id=${record.getId()}, page=${pageNumber}, fromSearch=true)}" class="no-underline">
-                <div class="card position-relative" style="width: 18rem;">
-                    <!-- Badge if user owns the record -->
-                    <span class="badge bg-primary position-absolute top-0 end-0 m-2"
-                          th:if="${record.user == user}">
-                        Yours
-                    </span>
-
-                    <div class="card-body">
-                        <!-- Renovation record name -->
-                        <h5 class="card-title truncate" th:text="${record.name}">Record Name</h5>
-
-                        <!-- Renovation record tags -->
-                        <div class="d-flex flex-wrap">
-                            <span th:each="tag : ${record.getSortedTags()}" class="tag-box badge bg-success d-flex align-items-center me-2 mb-2">
-                                <span class="tag-text-small text-truncate" th:text="${tag.getTagName()}"></span>
-                                <button class="tag-delete-button-small btn-sm border-0 bg-transparent text-light ms-1"
-                                        th:if="${record.user == user}" type="button"
-                                        th:attr="data-renovationId=${record.id}, data-csrf=${_csrf.token}, data-tagName=${tag.getTagName()}"
-                                        th:onclick="|removeTag(this)|">
-                                    X
-                                </button>
-                            </span>
-                        </div>
-
-                        <!-- Renovation record description -->
-                        <p class="card-text truncate" th:text="${record.description}">Description</p>
-
-                        <!-- Renovation record publicity status -->
-                        <p class="card-text">
-                            <span th:if="${record.public}" class="badge bg-secondary">Public</span>
-                            <span th:unless="${record.public}" class="badge bg-danger">Private</span>
-                        </p>
+                <div class="d-flex align-items-end">
+                    <div class="col-md-8 me-2">
+                        <label class="form-label">Search:</label>
+                        <input type="text" name="searchTerm" th:value="${searchTerm}" class="form-control" placeholder="Enter keyword..."/>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Search</button>
                     </div>
                 </div>
-                </a>
+            </form>
+
+            <form id="visibility-search-form" th:action="@{/renovations/search}" method="post" class="m-0">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" th:value="${cardsPerPage}" name="cardsPerPage" />
+                <input type="hidden" th:value="${pageNumber}" name="page" id="pageNumber" />
+                <input type="hidden" th:value="${searchTerm}" name="searchTerm"/>
+
+                <div class="col-md-4">
+                    <label class="form-label">Show:</label>
+                    <select name="visibility" class="form-select" onchange="this.form.submit()">
+                        <option value="all" th:selected="${visibility == 'all'}">All</option>
+                        <option value="public" th:selected="${visibility == 'public'}">Public</option>
+                        <option value="user" th:selected="${visibility == 'user'}">User</option>
+                    </select>
+                </div>
+            </form>
+
+            <!-- Renovation Cards Grid -->
+            <div id="grid" class="task-grid">
+                <div th:each="record : ${records}" class="col-md-3 mb-4">
+                    <form th:id="'form-' + ${record.getId()}" method="post" th:action="@{/renovations/view}">
+                        <input type="hidden" name="id" th:value="${record.getId()}" />
+                        <input type="hidden" name="page" value="1" />
+                        <input type="hidden" name="cardsPerPage" value="5" />
+                        <input type="hidden" name="fromSearch" value="true" />
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                    </form>
+                    <a href="#" th:onclick="'document.getElementById(\'form-' + ${record.getId()} + '\').submit(); return false;'">
+                        <div class="card card-count position-relative" style="width: 18rem;">
+                            <!-- Badge if user owns the record -->
+                            <span class="badge bg-primary position-absolute top-0 end-0 m-2"
+                                  th:if="${record.user == user}">
+                            Yours
+                        </span>
+
+                            <div class="card-body">
+                                <!-- Renovation record name -->
+                                <h5 class="card-title truncate" th:text="${record.name}">Record Name</h5>
+
+                                <!-- Renovation record tags -->
+                                <div class="d-flex flex-wrap">
+                                    <span th:each="tag : ${record.getSortedTags()}" class="tag-box badge bg-success d-flex align-items-center me-2 mb-2">
+                                        <span class="tag-text-small text-truncate" th:text="${tag.getTagName()}"></span>
+                                        <button class="tag-delete-button-small btn-sm border-0 bg-transparent text-light ms-1"
+                                                th:if="${record.user == user}" type="button"
+                                                th:attr="data-renovationId=${record.id}, data-csrf=${_csrf.token}, data-tagName=${tag.getTagName()}"
+                                                th:onclick="|removeTag(this)|">
+                                            X
+                                        </button>
+                                    </span>
+                                </div>
+
+                                <!-- Renovation record description -->
+                                <p class="card-text truncate" th:text="${record.description}">Description</p>
+
+                                <!-- Renovation record publicity status -->
+                                <p class="card-text">
+                                    <span th:if="${record.public}" class="badge bg-success">Public</span>
+                                    <span th:unless="${record.public}" class="badge bg-secondary">Private</span>
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
             </div>
-        </div>
-        <div th:if="${#lists.isEmpty(records)}" class="alert alert-secondary mt-4">
-            No renovations match your search.
+            <div th:if="${#lists.isEmpty(records)}" class="alert alert-secondary mt-4">
+                No renovations match your search.
+            </div>
+
+            <div id="footer" class="mt-2">
+                <div class="d-flex justify-content-center" th:if="${totalPages > 0}">
+                    <ul class="pagination" id="pagination">
+                        <!-- First button (AC more than 10 pages) -->
+                        <li id="firstButton" class="page-item" th:if="${totalPages > 10}">
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/search},
+                                1,
+                                'First'
+                            )}"></div>
+                        </li>
+
+                        <!-- Previous button -->
+                        <li id="prevButton" class="page-item" th:if="${pageNumber > 1}">
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/search},
+                                ${pageNumber - 1},
+                                'Prev'
+                            )}"></div>
+                        </li>
+
+                        <!-- Page buttons (≤ 10 pages) -->
+                        <li class="page-item" th:if="${totalPages <= 10}"
+                            th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
+                            th:classappend="${pageLinkNumber == pageNumber} ? 'active'"
+                            th:id="'page' + ${pageLinkNumber}">>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/search},
+                                ${pageLinkNumber},
+                                ${pageLinkNumber}
+                            )}"></div>
+                        </li>
+
+                        <!-- Page buttons (> 10 pages) -->
+                        <li class="page-item" th:if="${totalPages > 10}"
+                            th:each="pageLinkNumber : ${#numbers.sequence(paginationLinksStart, paginationLinksEnd)}"
+                            th:classappend="${pageLinkNumber == pageNumber} ? 'active'"
+                            th:id="'page' + ${pageLinkNumber}">>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/search},
+                                ${pageLinkNumber},
+                                ${pageLinkNumber}
+                            )}"></div>
+                        </li>
+
+                        <!-- Next button -->
+                        <li id="nextButton" class="page-item" th:if="${pageNumber < totalPages}">
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/search},
+                                ${pageNumber + 1},
+                                'Next'
+                            )}"></div>
+                        </li>
+
+                        <!-- Last button (AC more than 10 pages) -->
+                        <li id="lastButton" class="page-item" th:if="${totalPages > 10}">
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/search},
+                                ${totalPages},
+                                'Last'
+                            )}"></div>
+                        </li>
+
+                        <!-- Search field (AC more than 10 pages) -->
+                        <li id="pageSearchField" class="page-item d-flex align-items-center" th:if="${totalPages > 10}">
+                            <input type="number" class="form-control me-2" id="pageSearch" aria-label="Page Search" style="min-width: 50px;">
+                            <button class="btn btn-primary" th:onclick="|validateRenovationPageSearch()|">Search</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="alert alert-danger" id="errorMessage" style="margin-top: 20px; display: none;">
+                    <p id="errorText"></p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 </body>
+<script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
+<script type="text/javascript" th:src="@{/js/pagination.js}"></script>
 </html>

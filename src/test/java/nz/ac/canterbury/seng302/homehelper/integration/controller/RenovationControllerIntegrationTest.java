@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
-import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
@@ -21,6 +20,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.List;
@@ -617,7 +617,6 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(get("/renovations/view")
                         .param("id", Long.toString(existingRecord.getId()))
                         .param("page", "1")
-                        .param("tasksPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("viewRenovation"))
@@ -630,7 +629,6 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(get("/renovations/view")
                         .param("id", Long.toString(existingRecord.getId()))
                         .param("page", "2")
-                        .param("tasksPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("viewRenovation"))
@@ -642,7 +640,6 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(get("/renovations/view")
                         .param("id", Long.toString(existingRecord.getId()))
                         .param("page", "3")
-                        .param("tasksPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("viewRenovation"))
@@ -669,19 +666,18 @@ public class RenovationControllerIntegrationTest {
         mockMvc.perform(get("/renovations/view")
                         .param("id", Long.toString(existingRecord.getId()))
                         .param("page", "34")
-                        .param("tasksPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=2&tasksPerPage=5"));
+                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=2"));
 
 
         mockMvc.perform(get("/renovations/view")
                         .param("id", Long.toString(existingRecord.getId()))
                         .param("page", "-1")
-                        .param("tasksPerPage", "5")
+                        .param("cardPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=1&tasksPerPage=5"));
+                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=1"));
     }
 
     @Test
@@ -820,15 +816,15 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     public void testAutocompleteTags() throws Exception {
-        tagService.addTag("historic");
-        tagService.addTag("history");
+        tagService.createTag("historic");
+        tagService.createTag("history");
 
         mockMvc.perform(get("/renovations/tags/autocomplete")
                 .param("partialTag", "his"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasItems("historic", "history")));
 
-        tagService.addTag("building-one");
+        tagService.createTag("building-one");
 
         mockMvc.perform(get("/renovations/tags/autocomplete")
                         .param("partialTag", "build"))
@@ -843,7 +839,7 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
 
-        tagService.addTag("ancient");
+        tagService.createTag("ancient");
 
         mockMvc.perform(get("/renovations/tags/autocomplete")
                         .param("partialTag", " "))
@@ -858,7 +854,7 @@ public class RenovationControllerIntegrationTest {
         Long renovationId = testRecord.getId();
 
         String testTagName = "apartment";
-        tagService.addTag(testTagName);
+        tagService.createTag(testTagName);
 
         mockMvc.perform(post("/renovations/tags/add")
                         .with(csrf())
@@ -1018,32 +1014,72 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     public void searchRenovation_withNoMatches_returnsNoResultsMessage() throws Exception {
-        mockMvc.perform(post("/renovations/search")
-                        .param("searchTerm", "NonExistentTerm")
-                        .param("visibility", "all")
+        String searchTerm = "NonExistentTerm";
+        String visibility = "all";
+
+        // Step 1: Perform the POST request to trigger the search
+        MvcResult postResult = mockMvc.perform(post("/renovations/search")
+                        .param("searchTerm", searchTerm)
+                        .param("visibility", visibility)
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search"))
-                .andExpect(flash().attribute("records", hasSize(0)));
+                .andReturn();
+
+        String redirectedUrl = postResult.getResponse().getRedirectedUrl();
+
+        // Step 2: Follow GET redirect and assert results
+        mockMvc.perform(get(redirectedUrl)
+                        .session((MockHttpSession) postResult.getRequest().getSession(false)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attributeExists("records"))
+                .andExpect(model().attribute("records", hasSize(0)))
+                .andExpect(model().attribute("totalCards", is(0)))
+                .andExpect(model().attribute("totalPages", is(0)))
+                .andExpect(model().attribute("pageNumber", is(1)))
+                .andExpect(model().attribute("cardsPerPage", is(16)))
+                .andExpect(model().attribute("visibility", is(visibility)))
+                .andExpect(model().attribute("searchTerm", is(searchTerm)));
     }
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
     public void searchRenovation_withMatchingTerm_returnsMatchingRecords() throws Exception {
+        String searchTerm = "Test Renovation";
+        String visibility = "all";
+
+
         RenovationRecord matchingRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
         matchingRecord.setPublicity(true);
         renovationRecordRepository.save(matchingRecord);
 
-        mockMvc.perform(post("/renovations/search")
-                        .param("searchTerm", "Test Renovation")
-                        .param("visibility", "all")
+        // Step 1: Perform the POST request to trigger the search
+        MvcResult postResult = mockMvc.perform(post("/renovations/search")
+                        .param("searchTerm", searchTerm)
+                        .param("visibility", visibility)
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search"))
-                .andExpect(flash().attributeExists("records"))
-                .andExpect(flash().attribute("records", hasSize(1)))
-                .andExpect(flash().attribute("records", hasItem(
-                        hasProperty("name", is("Test Renovation")))));
+                .andReturn();
+
+        String redirectedUrl = postResult.getResponse().getRedirectedUrl();
+
+        // Step 2: Follow GET redirect and assert results
+        mockMvc.perform(get(redirectedUrl)
+                        .session((MockHttpSession) postResult.getRequest().getSession(false)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attributeExists("records"))
+                .andExpect(model().attribute("records", hasSize(1)))
+                .andExpect(model().attribute("totalCards", is(1)))
+                .andExpect(model().attribute("totalPages", is(1)))
+                .andExpect(model().attribute("pageNumber", is(1)))
+                .andExpect(model().attribute("cardsPerPage", is(16)))
+                .andExpect(model().attribute("visibility", is(visibility)))
+                .andExpect(model().attribute("searchTerm", is(searchTerm)))
+                .andExpect(model().attribute("records", hasItem(
+                        hasProperty("name", is(searchTerm))
+                )));
+
     }
 
     @Test
@@ -1057,17 +1093,25 @@ public class RenovationControllerIntegrationTest {
         privateRecord.setPublicity(false);
         renovationRecordRepository.save(privateRecord);
 
-        mockMvc.perform(post("/renovations/search")
+        MvcResult postResult = mockMvc.perform(post("/renovations/search")
                         .param("searchTerm", "")
                         .param("visibility", "public")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search"))
-                .andExpect(flash().attributeExists("records"))
-                .andExpect(flash().attribute("records", hasSize(1)))
-                .andExpect(flash().attribute("records", hasItem(
+                .andReturn();
+
+        String redirectedUrl = postResult.getResponse().getRedirectedUrl();
+
+        // Step 2: Follow GET redirect and assert results
+        mockMvc.perform(get(redirectedUrl)
+                        .session((MockHttpSession) postResult.getRequest().getSession(false)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate")) // ensure your GET method returns this view
+                .andExpect(model().attributeExists("records"))
+                .andExpect(model().attribute("records", hasSize(1)))
+                .andExpect(model().attribute("records", hasItem(
                         hasProperty("name", is("Public Renovation")))))
-                .andExpect(flash().attribute("records", not(hasItem(
+                .andExpect(model().attribute("records", not(hasItem(
                         hasProperty("name", is("Private Renovation"))))));
     }
 
@@ -1082,17 +1126,23 @@ public class RenovationControllerIntegrationTest {
         privateRecord.setPublicity(false);
         renovationRecordRepository.save(privateRecord);
 
-        mockMvc.perform(post("/renovations/search")
+        MvcResult postResult = mockMvc.perform(post("/renovations/search")
                         .param("searchTerm", "Public")
                         .param("visibility", "public")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search"))
-                .andExpect(flash().attributeExists("records"))
-                .andExpect(flash().attribute("records", hasSize(1)))
-                .andExpect(flash().attribute("records", hasItem(
+                .andExpect(redirectedUrl("/renovations/search?page=1"))
+                .andReturn();
+
+        mockMvc.perform(get("/renovations/search")
+                        .session((MockHttpSession) postResult.getRequest().getSession(false)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attributeExists("records"))
+                .andExpect(model().attribute("records", hasSize(1)))
+                .andExpect(model().attribute("records", hasItem(
                         hasProperty("name", is("Public Renovation")))))
-                .andExpect(flash().attribute("records", not(hasItem(
+                .andExpect(model().attribute("records", not(hasItem(
                         hasProperty("name", is("Private Renovation"))))));
     }
 

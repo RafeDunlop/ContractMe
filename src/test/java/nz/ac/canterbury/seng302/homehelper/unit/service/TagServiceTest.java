@@ -101,8 +101,7 @@ public class TagServiceTest {
     public void validateTag_validTag_returnsNoErrors() {
         RenovationRecord record = mock(RenovationRecord.class);
 
-        List<String> errors = tagService.validateTag(record, "window");
-        System.out.println(errors);
+        List<String> errors = tagService.validateTagAndRecord(record, "window");
         assertTrue(errors.isEmpty());
     }
 
@@ -113,7 +112,7 @@ public class TagServiceTest {
 
         record.setTags(new ArrayList<>(List.of(new Tag("bathroom"))));
 
-        List<String> errors = tagService.validateTag(record, "bathroom");
+        List<String> errors = tagService.validateTagAndRecord(record, "bathroom");
 
         assertTrue(errors.contains("Renovation cannot contain duplicate tag names."));
     }
@@ -130,7 +129,7 @@ public class TagServiceTest {
         );
         record.setTags(new ArrayList<>(tags));
 
-        List<String> errors = tagService.validateTag(record, "window");
+        List<String> errors = tagService.validateTagAndRecord(record, "window");
 
         assertTrue(errors.contains("Renovation cannot have more than 5 tags."));
     }
