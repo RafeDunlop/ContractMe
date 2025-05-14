@@ -39,6 +39,8 @@ public class RegisterController {
     private final ApplicationEventPublisher eventPublisher;
     private final LocationService locationService;
 
+
+
     /**
      * Constructor for the register class, links controller and service layers
      */
@@ -83,6 +85,7 @@ public class RegisterController {
 
         Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
         errors.putAll(locationService.validateLocation(locationDTO));
+
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
