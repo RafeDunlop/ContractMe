@@ -47,8 +47,18 @@
                    aria-label="postcode" th:value="${locationDTO.postcode}">
 
             <!-- Frontend JS Error -->
-
+            <div class="alert alert-danger mt-2" id="postcode-frontend-error" hidden>
+                <ul>
+                    <li><label class="form-label" id="postcode-frontend-error-message"></label></li>
+                </ul>
+            </div>
             <!-- Backend error -->
+            <div class="alert alert-danger mt-2" id="postcode-backend-error"
+                 th:attr="hidden=${postCodeError == null}">
+                <ul>
+                    <li th:each="msg : ${postCodeError}" th:text="${msg}"></li>
+                </ul>
+            </div>
         </div>
 
         <!-- COUNTRY -->
