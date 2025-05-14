@@ -3,7 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import java.util.List;
 import java.util.Map;
 
-import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.slf4j.Logger;
@@ -57,11 +57,11 @@ public class RegisterController {
      *
      * @return thymeleaf registration
      * @param userRegisterDTO, contains all params needed for a user object
-     * @param locationDTO, contains all params for a location object
+     * @param addressDTO, contains all params for a location object
      */
     @GetMapping("/register")
     public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO,
-                               @ModelAttribute LocationDTO locationDTO) {
+                               @ModelAttribute AddressDTO addressDTO) {
         logger.info("GET /register");
         return "registrationTemplate";
     }
@@ -76,24 +76,24 @@ public class RegisterController {
      */
     @PostMapping("/register")
     public String submitRegistration(@ModelAttribute UserRegisterDTO userRegisterDTO,
-                                     @ModelAttribute LocationDTO locationDTO,
+                                     @ModelAttribute AddressDTO addressDTO,
                                      HttpServletRequest request,
                                      RedirectAttributes redirectAttributes) {
         logger.info("POST /register");
 
         Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
-        errors.putAll(locationService.validateLocation(locationDTO));
+        errors.putAll(locationService.validateLocation(addressDTO));
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
             redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
 
-            redirectAttributes.addFlashAttribute("locationUsed", locationDTO != null &&
-                    (locationDTO.getAddress() != null && !locationDTO.getAddress().isBlank()
-                            || locationDTO.getSuburb() != null && !locationDTO.getSuburb().isBlank()
-                            || locationDTO.getCity() != null && !locationDTO.getCity().isBlank()
-                            || locationDTO.getPostcode() != null && !locationDTO.getPostcode().isBlank()
-                            || locationDTO.getCountry() != null && !locationDTO.getCountry().isBlank()));
+            redirectAttributes.addFlashAttribute("locationUsed", addressDTO != null &&
+                    (addressDTO.getAddress_line1() != null && !addressDTO.getAddress_line1().isBlank()
+                            || addressDTO.getRegion() != null && !addressDTO.getRegion().isBlank()
+                            || addressDTO.getCity() != null && !addressDTO.getCity().isBlank()
+                            || addressDTO.getPostcode() != null && !addressDTO.getPostcode().isBlank()
+                            || addressDTO.getCountry() != null && !addressDTO.getCountry().isBlank()));
 
             return "redirect:/register";
         }
@@ -101,13 +101,13 @@ public class RegisterController {
         try {
             User user = registerService.registerUser(userRegisterDTO);
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
-            if (locationService.isLocationProvided(locationDTO)) {
+            if (locationService.isLocationProvided(addressDTO)) {
                 Location userLocation = new Location(
-                        locationDTO.address,
-                        locationDTO.country,
-                        locationDTO.postcode,
-                        locationDTO.city,
-                        locationDTO.suburb
+                        addressDTO.getAddress_line1(),
+                        addressDTO.getCountry(),
+                        addressDTO.getPostcode(),
+                        addressDTO.getCity(),
+                        addressDTO.getRegion()
                 );
                 user.setLocation(userLocation);
             }
