@@ -53,6 +53,23 @@ gradlew cucumber
 - Set up Gitlab CI server (refer to the student guide on Scrumboard)
 - Decide on a LICENSE
 
+## Third-Party Software
+
+This project incorporates code from the project [profanity-filter](https://github.com/modernmt/profanity-filter?tab=Apache-2.0-1-ov-file)
+This covers the following directories:
+
+src/main/java/profanityFilter
+src/resources/profanityFilterResources
+
+These directories contain both original and modified code from this project.
+This project includes modifications to files originally licensed under the Apache License 2.0.
+Changes were made by [Jack Guard] and [Mason Ott] on [09/05/2025].
+
+Again, the URI for this repository can be found at [profanity-filter](https://github.com/modernmt/profanity-filter?tab=Apache-2.0-1-ov-file)
+
+The license for this project is found at [license](https://github.com/modernmt/profanity-filter/blob/main/LICENSE)
+The terms for the license under which this third party software has been used can be found at [Apache-2.0.](https://www.apache.org/licenses/LICENSE-2.0)
+
 ## Contributors
 
 - SENG302 teaching team

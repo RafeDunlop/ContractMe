@@ -10,6 +10,9 @@ import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.*;
 
@@ -271,5 +274,56 @@ public class RenovationRecordServiceTest {
 
         Mockito.verify(renovationRecordRepository).findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(user, term);
         assertSame(result, expected);
+    }
+
+    @Test
+    void returnRecordPages_withNullList_returnsEmptyPage() {
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<RenovationRecord> result = toTest.returnRecordPages(pageable, null);
+
+        assertTrue(result.isEmpty());
+        assertEquals(0, result.getTotalElements());
+    }
+
+    @Test
+    void returnRecordPages_withEmptyList_returnsEmptyPage() {
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<RenovationRecord> result = toTest.returnRecordPages(pageable, new ArrayList<>());
+
+        assertTrue(result.isEmpty());
+        assertEquals(0, result.getTotalElements());
+    }
+
+    @Test
+    void returnRecordPages_withValidPageable_returnsCorrectSublist() {
+        List<RenovationRecord> allRecords = createRecords(10);
+        Pageable pageable = PageRequest.of(1, 5);
+        Page<RenovationRecord> result = toTest.returnRecordPages(pageable, allRecords);
+
+        assertEquals(5, result.getContent().size());
+        assertEquals("Record 5", result.getContent().get(0).getName());
+        assertEquals("Record 9", result.getContent().get(4).getName());
+        assertEquals(10, result.getTotalElements());
+        assertEquals(2, result.getTotalPages());
+    }
+
+    @Test
+    void returnRecordPages_withPartialLastPage_returnsRemainingRecords() {
+        List<RenovationRecord> allRecords = createRecords(7);
+        Pageable pageable = PageRequest.of(1, 5);
+        Page<RenovationRecord> result = toTest.returnRecordPages(pageable, allRecords);
+
+        assertEquals(2, result.getContent().size());
+        assertEquals("Record 5", result.getContent().get(0).getName());
+        assertEquals("Record 6", result.getContent().get(1).getName());
+        assertEquals(2, result.getTotalPages());
+    }
+
+    private List<RenovationRecord> createRecords(int count) {
+        List<RenovationRecord> records = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            records.add(new RenovationRecord(mock(User.class), "Record " + i, "", Collections.emptyList()));
+        }
+        return records;
     }
 }

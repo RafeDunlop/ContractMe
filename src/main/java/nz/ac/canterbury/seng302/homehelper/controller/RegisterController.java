@@ -39,6 +39,8 @@ public class RegisterController {
     private final ApplicationEventPublisher eventPublisher;
     private final LocationService locationService;
 
+
+
     /**
      * Constructor for the register class, links controller and service layers
      */
@@ -82,6 +84,7 @@ public class RegisterController {
         logger.info("POST /register");
 
         Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
+
 
         boolean locationProvided = addressDTO != null &&
                 (addressDTO.getAddress_line1() != null && !addressDTO.getAddress_line1().isBlank()
