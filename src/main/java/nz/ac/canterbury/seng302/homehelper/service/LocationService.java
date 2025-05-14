@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
-import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +101,21 @@ public class LocationService {
             throw new IllegalStateException(e.getMessage());
         }
     }
+    public Map<String, List<String>> validateLocation(AddressDTO dto) {
+        return new HashMap<String, List<String>>();
+    }
+
+    /**
+     * checks if the location has been provided
+     * @param dto location data transfer object
+     * @return true if location has been provided, false if it hasn't
+     */
+    public boolean isLocationProvided(AddressDTO dto) {
+        return dto != null &&
+                Stream.of(dto.getAddress_line1(), dto.getCountry(), dto.getPostcode(), dto.getCity(), dto.getRegion())
+                        .anyMatch(field -> field != null && !field.trim().isEmpty());
+    }
+
 
     /**
      * Assembles the URL to call the Geoapify autocomplete API endpoint for the specified parameters
@@ -147,20 +161,5 @@ public class LocationService {
         sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
         logger.debug("calling IP grab API: {}", sb);
         return sb.toString();
-    }
-
-    public Map<String, List<String>> validateLocation(LocationDTO dto) {
-        return new HashMap<String, List<String>>();
-    }
-
-    /**
-     * checks if the location has been provided
-     * @param dto location data transfer object
-     * @return true if location has been provided, false if it hasn't
-     */
-    public boolean isLocationProvided(LocationDTO dto) {
-        return dto != null &&
-                Stream.of(dto.address, dto.country, dto.postcode, dto.city, dto.suburb)
-                        .anyMatch(field -> field != null && !field.trim().isEmpty());
     }
 }
