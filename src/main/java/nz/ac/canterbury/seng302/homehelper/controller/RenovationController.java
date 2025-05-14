@@ -434,7 +434,13 @@ public class RenovationController {
 
         String tagNameList = (String) attributes.getOrDefault("tagNameList", session.getAttribute("tagNameList"));
         if (tagNameList == null) tagNameList = "";
+//        List<String> tagNameList = (List<String>) attributes.getOrDefault("tagNameList", session.getAttribute("tagNameList"));
+//        if (tagNameList == null) tagNameList = Collections.emptyList();
+
         logger.info("TAG LIST PASSED : " + tagNameList);
+
+
+
         boolean isTagSearch = Boolean.TRUE.equals(session.getAttribute("isTagSearch"));
 
         if (pageNumber == null) {
@@ -452,13 +458,14 @@ public class RenovationController {
         User user = loginService.getUserByEmail();
 
         // Switching between search types
-        List<RenovationRecord> records = Collections.emptyList();
+        List<RenovationRecord> records;
 
         if (isTagSearch) {
-            //List<Tag> tagList = tagService.getTags(tags);
+            List<Tag> tagList = tagService.getTags(List.of(tagNameList));
+            records = renovationRecordService.getAllRecordsByTags(tagList);
 
-
-            logger.info("tag list: " );
+            logger.info("tag list: " + tagList);
+            logger.info("records associated list: " + records);
         } else{
             records = switch (visibility.toLowerCase()) {
                 case "public" -> renovationRecordService.getPublicRecords(searchTerm);
@@ -519,8 +526,6 @@ public class RenovationController {
 
         if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";
-
-        logger.info("TAG LIST: " + tagNameList);
 
         session.setAttribute("visibility", visibility);
         session.setAttribute("searchTerm", searchTerm);
