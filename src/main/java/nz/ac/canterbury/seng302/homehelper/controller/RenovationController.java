@@ -432,10 +432,10 @@ public class RenovationController {
         String searchTerm = (String) attributes.getOrDefault("searchTerm", session.getAttribute("searchTerm"));
         if (searchTerm == null) searchTerm = "";
 
-        String tagNameList = (String) attributes.getOrDefault("tagNameList", session.getAttribute("tagNameList"));
-        if (tagNameList == null) tagNameList = "";
-//        List<String> tagNameList = (List<String>) attributes.getOrDefault("tagNameList", session.getAttribute("tagNameList"));
-//        if (tagNameList == null) tagNameList = Collections.emptyList();
+//        String tagNameList = (String) attributes.getOrDefault("tagNameList", session.getAttribute("tagNameList"));
+//        if (tagNameList == null) tagNameList = "";
+        List<String> tagNameList = (List<String>) attributes.getOrDefault("tagNameList", session.getAttribute("tagNameList"));
+        if (tagNameList == null) tagNameList = Collections.emptyList();
 
         logger.info("TAG LIST PASSED : " + tagNameList);
 
@@ -461,7 +461,7 @@ public class RenovationController {
         List<RenovationRecord> records;
 
         if (isTagSearch) {
-            List<Tag> tagList = tagService.getTags(List.of(tagNameList));
+            List<Tag> tagList = tagService.getTags(tagNameList);
             records = renovationRecordService.getAllRecordsByTags(tagList);
 
             logger.info("tag list: " + tagList);
@@ -517,7 +517,7 @@ public class RenovationController {
     @PostMapping("/search")
     public String submitSearchRenovations(@RequestParam(required = false) String visibility,
                                           @RequestParam(required = false) String searchTerm,
-                                          @RequestParam(required = false) String tagNameList,
+                                          @RequestParam(name = "tagNameList", required = false) List<String> tagNameList,
                                           @RequestParam(defaultValue = "false") boolean isTagSearch,
                                           @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                           @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage,

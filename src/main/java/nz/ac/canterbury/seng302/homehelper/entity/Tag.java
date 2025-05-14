@@ -65,6 +65,6 @@ public class Tag {
      */
     @Override
     public String toString() {
-        return String.format("RenovationRecord{id=%d, value=%s}", id, tagName);
+        return String.format("Tag{id=%d, value=%s}", id, tagName);
     }
 }
