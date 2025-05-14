@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
-import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.LocationValidation;
 import org.slf4j.Logger;
@@ -106,6 +105,24 @@ public class LocationService {
             throw new IllegalStateException(e.getMessage());
         }
     }
+    public Map<String, List<String>> validateLocation(AddressDTO dto) {
+        Map<String, List<String>> errors = new HashMap<>();
+
+        MapUtil.putIfNotEmpty(errors, "postcodeError", locationValidation.validatePostcode(dto.getPostcode()));
+        return errors;
+    }
+
+    /**
+     * checks if the location has been provided
+     * @param dto location data transfer object
+     * @return true if location has been provided, false if it hasn't
+     */
+    public boolean isLocationProvided(AddressDTO dto) {
+        return dto != null &&
+                Stream.of(dto.getAddress_line1(), dto.getCountry(), dto.getPostcode(), dto.getCity(), dto.getRegion())
+                        .anyMatch(field -> field != null && !field.trim().isEmpty());
+    }
+
 
     /**
      * Assembles the URL to call the Geoapify autocomplete API endpoint for the specified parameters

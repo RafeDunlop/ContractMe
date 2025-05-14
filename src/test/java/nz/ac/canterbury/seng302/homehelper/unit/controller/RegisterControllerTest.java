@@ -2,7 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.unit.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.controller.RegisterController;
-import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
@@ -31,7 +31,7 @@ public class RegisterControllerTest {
 
         RedirectAttributes redirectAttributes = Mockito.mock(RedirectAttributes.class);
         UserRegisterDTO mockedUser = new UserRegisterDTO("","","","","");
-        LocationDTO mockedLocation = new LocationDTO("", "", "", "", "");
+        AddressDTO mockedLocation = new AddressDTO();
 
         User trialUser = Mockito.spy(new User("test", "test", "test", "test"));
         Mockito.when(registerServiceSpy.registerUser(mockedUser)).thenReturn((trialUser));
