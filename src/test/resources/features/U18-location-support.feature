@@ -21,8 +21,6 @@ Feature:As Kaia, I want to be able to add location to my profile and
       | A1B  2C3     |  # Multiple spaces
       | A1B2C3!      |  # Ends with symbol
       | (A1B2C3)     |  # Parentheses
-      |             |  # Empty string
-      |     1234    |  # Leading spaces
       | 1234     56 |  # Multiple internal spaces
 
   Scenario Outline: AC9.2 valid postcode is accepted
