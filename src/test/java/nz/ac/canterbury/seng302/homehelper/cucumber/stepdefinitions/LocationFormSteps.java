@@ -70,8 +70,6 @@ public class LocationFormSteps {
     @When("I leave the address field blank but fill any other field on the location form on the {string} page")
     public void i_leave_the_address_field_blank_but_fill_any_other_field_on_the_location_form_on_the_page(String endpoint) throws Exception {
 
-
-
             result = mockMvc.perform(post(endpoint)
                             .param("firstName", "Jane")
                             .param("lastName", "Doe")
@@ -86,10 +84,6 @@ public class LocationFormSteps {
                             .with(csrf()))
                     .andExpect(status().is3xxRedirection())
                     .andReturn();
-
-
-
-
 
     }
 
@@ -121,9 +115,9 @@ public class LocationFormSteps {
 
     }
 
-    @Then("The form from the {page_name} page is saved and contains the address I supplied")
+    @Then("The form from the {string} page is saved and contains the address I supplied")
     public void the_form_from_the_page_is_saved_and_contains_the_address_i_supplied(String endpoint) {
-
+        // Due to no database queries being defined for the scope of this task, this step cannot be completed yet
     }
 
 

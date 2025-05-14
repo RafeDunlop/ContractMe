@@ -19,7 +19,6 @@ Feature:As Kaia, I want to be able to add location to my profile and
 
 
 
-
     Scenario Outline: AC11: Given I supply a fully compliant address, when I submit the form,
     then the form is saved with the address I supplied.
       Given I am viewing the enter location details form on the <page_name> page
