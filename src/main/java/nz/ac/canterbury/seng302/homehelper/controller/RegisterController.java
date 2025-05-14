@@ -87,6 +87,14 @@ public class RegisterController {
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
             redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
+
+            redirectAttributes.addFlashAttribute("locationUsed", locationDTO != null &&
+                    (locationDTO.getAddress() != null && !locationDTO.getAddress().isBlank()
+                            || locationDTO.getSuburb() != null && !locationDTO.getSuburb().isBlank()
+                            || locationDTO.getCity() != null && !locationDTO.getCity().isBlank()
+                            || locationDTO.getPostcode() != null && !locationDTO.getPostcode().isBlank()
+                            || locationDTO.getCountry() != null && !locationDTO.getCountry().isBlank()));
+
             return "redirect:/register";
         }
 
