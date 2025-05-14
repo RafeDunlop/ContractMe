@@ -22,7 +22,7 @@ public class LocationValidation {
         Pattern pattern = Pattern.compile("^[\\p{L} \\-']+$", Pattern.UNICODE_CHARACTER_CLASS);
         String cityName = city.trim();
         if (!pattern.matcher(cityName).matches()) {
-            errors.add("City contains invalid characters");
+            errors.add("City contains invalid characters.");
         }
 
         return errors;

@@ -39,6 +39,12 @@
             <!-- Frontend JS Error -->
 
             <!-- Backend error -->
+            <div class="alert alert-danger mt-2" id="city-backend-error"
+                 th:attr="hidden=${cityError == null}">
+                <ul>
+                    <li th:each="msg : ${cityError}" th:text="${msg}"></li>
+                </ul>
+            </div>
         </div>
 
         <!-- POSTCODE -->

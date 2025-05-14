@@ -9,7 +9,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
 
   Scenario Outline: AC8.1 non valid city is not accepted
     Given I am on the register form
-    When I enter an invalid postcode: "<city>"
+    When I enter an invalid city: "<city>"
     Then I am taken back to the register form
     And a message tells me that the city contains invalid characters
     Examples:

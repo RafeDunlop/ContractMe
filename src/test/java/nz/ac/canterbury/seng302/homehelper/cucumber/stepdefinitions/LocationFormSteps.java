@@ -104,20 +104,18 @@ public class LocationFormSteps {
     }
     @When("I enter an invalid city: {string}")
     public void i_enter_an_invalid_city(String city) throws Exception {
-        result = mockMvc.perform(post("/register")
-                        .param("firstName", "John")
-                        .param("lastName", "Doe")
-                        .param("email", "john.doe@example.com")
-                        .param("password", "Test123!")
-                        .param("confirmPassword", "Test123!")
-                        .param("address", "123 Street")
-                        .param("country", "New Zealand")
-                        .param("postcode", "8042")
-                        .param("city", city)
-                        .param("suburb", "Central")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
+        resultActions = mockMvc.perform(post("/register")
+                .param("firstName", "John")
+                .param("lastName", "Doe")
+                .param("email", "john.doe@example.com")
+                .param("password", "Test123!")
+                .param("confirmPassword", "Test123!")
+                .param("address", "123 Street")
+                .param("country", "New Zealand")
+                .param("postcode", "8042")
+                .param("city", city)
+                .param("suburb", "Central")
+                .with(csrf()));
     }
 
     @When("I enter an valid postcode: {string}")
@@ -152,7 +150,8 @@ public class LocationFormSteps {
 
     @Then("a message tells me that the city contains invalid characters")
     public void a_message_tells_me_that_the_city_contains_invalid_characters() throws Exception {
-        List<String> expectedErrors = List.of("City contains invalid characters");
+        resultActions
+                .andExpect(flash().attribute("cityError", List.of("City contains invalid characters.")));
     }
 
     @Then("I am taken to the confirm register page")
