@@ -28,6 +28,27 @@
                 <h4 th:text="${visibility == 'public' ? 'Public Renovation Records' : (visibility == 'user' ? 'Your Renovation Records' : 'Renovation Records')}">Renovation Records</h4>
             </div>
 
+            <!-- Tag Search Bar (Above Visibility Search) -->
+            <form id="tag-search-form" th:action="@{/renovations/search}" method="post" class="m-0 mb-3">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" th:value="${cardsPerPage}" name="cardsPerPage" />
+                <input type="hidden" th:value="${pageNumber}" name="page" />
+                <input type="hidden" th:value="${tags}" name="searchTerm"/>
+                <input type="hidden" name="isTagSearch" value="true" />
+
+
+                <div class="d-flex align-items-end">
+                    <div class="col-md-8 me-2">
+                        <label class="form-label">Search:</label>
+                        <input type="text" name="tagSearch" th:value="${tags}" class="form-control" placeholder="Enter tags..."/>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Search V2</button>
+                    </div>
+                </div>
+            </form>
+
+
             <!-- Search and Visibility Filter -->
             <form id="search-form" th:action="@{/renovations/search}" method="post" class="m-0">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -50,7 +71,7 @@
             <form id="visibility-search-form" th:action="@{/renovations/search}" method="post" class="m-0">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <input type="hidden" th:value="${cardsPerPage}" name="cardsPerPage" />
-                <input type="hidden" th:value="${pageNumber}" name="page" id="pageNumber" />
+                <input type="hidden" th:value="${pageNumber}" name="page" />
                 <input type="hidden" th:value="${searchTerm}" name="searchTerm"/>
 
                 <div class="col-md-4">
@@ -132,7 +153,7 @@
                         <li class="page-item" th:if="${totalPages <= 10}"
                             th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'"
-                            th:id="'page' + ${pageLinkNumber}">>
+                            th:id="'page' + ${pageLinkNumber}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/search},
                                 ${pageLinkNumber},
@@ -144,7 +165,7 @@
                         <li class="page-item" th:if="${totalPages > 10}"
                             th:each="pageLinkNumber : ${#numbers.sequence(paginationLinksStart, paginationLinksEnd)}"
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'"
-                            th:id="'page' + ${pageLinkNumber}">>
+                            th:id="'page' + ${pageLinkNumber}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/search},
                                 ${pageLinkNumber},
