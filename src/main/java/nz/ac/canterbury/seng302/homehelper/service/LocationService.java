@@ -107,7 +107,7 @@ public class LocationService {
     }
     public Map<String, List<String>> validateLocation(AddressDTO dto) {
         Map<String, List<String>> errors = new HashMap<>();
-
+        MapUtil.putIfNotEmpty(errors, "cityError", locationValidation.validateCity(dto.getCity()));
         MapUtil.putIfNotEmpty(errors, "postcodeError", locationValidation.validatePostcode(dto.getPostcode()));
         return errors;
     }
@@ -170,22 +170,4 @@ public class LocationService {
         return sb.toString();
     }
 
-    public Map<String, List<String>> validateLocation(LocationDTO dto) {
-        Map<String, List<String>> errors = new HashMap<>();
-
-        MapUtil.putIfNotEmpty(errors, "postcodeError", locationValidation.validatePostcode(dto.postcode));
-        MapUtil.putIfNotEmpty(errors, "cityError", locationValidation.validateCity(dto.city));
-        return errors;
-    }
-
-    /**
-     * checks if the location has been provided
-     * @param dto location data transfer object
-     * @return true if location has been provided, false if it hasn't
-     */
-    public boolean isLocationProvided(LocationDTO dto) {
-        return dto != null &&
-                Stream.of(dto.address, dto.country, dto.postcode, dto.city, dto.suburb)
-                        .anyMatch(field -> field != null && !field.trim().isEmpty());
-    }
 }
