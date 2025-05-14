@@ -28,6 +28,21 @@ Feature: U20 - As Inaya, I want to be able to tag my renovation records with com
       | !@#$%^&*() |
       |            |
 
+  Scenario: AC3 - Tags associated with a record are visible on the view renovations page
+    Given I have a renovation record with a tag "tagtag"
+    When I go to the view renovation page
+    Then The tag "tagtag" is on the list of tags for the renovation
+
+  Scenario Outline: AC4 - Inputted tags that are valid show up on the view renovations page
+    Given I have a renovation record and I am on that page
+    When I enter a tag "<input>" into the tag input field
+    Then The tag "<input>" is added to the list of tags for the renovation
+    Examples:
+      | input       |
+      | ttaagg      |
+      | tag2        |
+      | tag3!@#%$^% |
+
   Scenario: AC5 - Entering a tag to a record with 5 tags returns an error.
     Given I have a renovation record and I am on that page
     And The record has 5 tags
@@ -44,3 +59,9 @@ Feature: U20 - As Inaya, I want to be able to tag my renovation records with com
       | OL     | old          |
       | GrEeN  | green        |
       | bRE    | break        |
+
+  Scenario: AC8 - Pressing the 'X' button next to the tag name will delete the tag
+    Given I have a renovation record with a tag "<input>"
+    When I go to the view renovation page
+    And Press the 'X' button next to the tag "<input>"
+    Then The tag "<input>" is removed from the list of tags for the renovation

@@ -23,6 +23,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -77,6 +80,19 @@ public class TagsSteps {
         assertNotNull(currentRenovationRecord);
     }
 
+    @Given("I have a renovation record with a tag {string}")
+    public void i_have_a_renovation_record_with_a_tag(String tagName) {
+        Tag tag = new Tag(tagName);
+        tagRepository.save(tag);
+        RenovationRecord newRenovationRecord = new RenovationRecord(userContext.getUser(), "Record " + System.currentTimeMillis(), "", List.of());
+        newRenovationRecord.addTag(tag);
+        renovationRecordRepository.save(newRenovationRecord);
+
+        currentRenovationRecord = renovationRecordRepository.findExactMatchAllUsers(newRenovationRecord.getName()).orElse(null);
+        assertNotNull(currentRenovationRecord);
+        assertTrue(currentRenovationRecord.getTags().contains(tag));
+    }
+
     @Given("The record has 5 tags")
     public void the_record_has_5_tags() throws Exception {
         for (int i = 0; i < 5; i++) {
@@ -97,6 +113,24 @@ public class TagsSteps {
                 .param("renovationId", currentRenovationRecord.getId().toString())
                 .param("tagName",tagName)
                 .with(csrf()));
+    }
+
+    @When("I go to the view renovation page")
+    public void i_go_to_the_view_renovation_page() throws Exception {
+        mvcResult = mockMvc.perform(get("/renovations/view?id=" + currentRenovationRecord.getId())
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @When("Press the 'X' button next to the tag {string}")
+    public void press_the_x_button_next_to_the_tag(String tagName) throws Exception {
+        mvcResult = mockMvc.perform(patch("/renovations/tags/remove")
+                        .param("renovationId", currentRenovationRecord.getId().toString())
+                        .param("tagName",tagName)
+                        .with(csrf()))
+                .andExpect(status().isNoContent())
+                .andReturn();
     }
 
     @Then("I should see an autocomplete list containing {string}")
@@ -141,6 +175,24 @@ public class TagsSteps {
         assertTrue(tags.stream().noneMatch(tag -> tag.getTagName().equals(tagName)));
     }
 
+    @Then("The tag {string} is on the list of tags for the renovation")
+    public void the_tag_is_on_the_list_of_tags_for_the_renovation(String tagName) throws Exception {
+        String content = mvcResult.getResponse().getContentAsString();
+        assertTrue(content.contains(tagName.trim()));
+    }
+
+    @Then("The tag {string} is added to the list of tags for the renovation")
+    public void the_tag_is_added_to_the_list_of_tags_for_the_renovation(String tagName) throws Exception {
+        assertEquals(302, resultActions.andReturn().getResponse().getStatus());
+
+        String url = resultActions.andReturn().getResponse().getRedirectedUrl();
+        assertNotNull(url);
+
+        mockMvc.perform(get(url).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(tagName)));
+    }
+
     @Then("I should see an autocomplete list that doesn't contain {string}")
     public void i_should_see_an_autocomplete_list_that_doesnt_contain_tag_doesnt_exist(String autocompleteTag) throws Exception {
         mvcResult = mockMvc.perform(get("/renovations/tags/autocomplete")
@@ -152,5 +204,12 @@ public class TagsSteps {
         String responseBody = mvcResult.getResponse().getContentAsString();
         assertFalse(responseBody.contains(autocompleteTag),
                 "Expected response to not contain tag: " + autocompleteTag);
+    }
+
+    @Then("The tag {string} is removed from the list of tags for the renovation")
+    public void the_tag_is_removed_from_the_list_of_tags_for_the_renovation(String tagName) throws Exception {
+        mockMvc.perform(get("/renovations/view?id=" + currentRenovationRecord.getId()).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString(tagName))));
     }
 }
