@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -9,8 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -50,15 +49,14 @@ public class LocationFormSteps {
         assertTrue(content.contains("id=\"country\""));
     }
 
-    @When("I enter a valid address {String} on the location form on the {String} page")
+    @When("I enter a valid address <address> on the location form on the <page_name> page")
     public void i_enter_a_valid_address_on_the_location_form_on_the_page(String address, String endpoint) throws Exception {
             result = mockMvc.perform(get(endpoint)
                     .param("address", address))
                     .andExpect(status().isOk())
                     .andReturn();
 
-
-
     }
+
 
 }
