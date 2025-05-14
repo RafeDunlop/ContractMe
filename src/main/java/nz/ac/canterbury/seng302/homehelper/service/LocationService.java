@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
-import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.LocationValidation;
 import org.slf4j.Logger;
@@ -107,7 +106,10 @@ public class LocationService {
         }
     }
     public Map<String, List<String>> validateLocation(AddressDTO dto) {
-        return new HashMap<String, List<String>>();
+        Map<String, List<String>> errors = new HashMap<>();
+
+        MapUtil.putIfNotEmpty(errors, "postcodeError", locationValidation.validatePostcode(dto.getPostcode()));
+        return errors;
     }
 
     /**
@@ -166,23 +168,5 @@ public class LocationService {
         sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
         logger.debug("calling IP grab API: {}", sb);
         return sb.toString();
-    }
-
-    public Map<String, List<String>> validateLocation(LocationDTO dto) {
-        Map<String, List<String>> errors = new HashMap<>();
-
-        MapUtil.putIfNotEmpty(errors, "postcodeError", locationValidation.validatePostcode(dto.postcode));
-        return errors;
-    }
-
-    /**
-     * checks if the location has been provided
-     * @param dto location data transfer object
-     * @return true if location has been provided, false if it hasn't
-     */
-    public boolean isLocationProvided(LocationDTO dto) {
-        return dto != null &&
-                Stream.of(dto.address, dto.country, dto.postcode, dto.city, dto.suburb)
-                        .anyMatch(field -> field != null && !field.trim().isEmpty());
     }
 }

@@ -92,6 +92,32 @@ public class RegisterControllerIntegrationTest {
         verify(emailService, times(1)).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 
+    @Test
+    public void testRegisterUser_validUserWithLocation_success() throws Exception {
+        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        User expectedUser = Mockito.spy(new User("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
+        Mockito.when(expectedUser.getId()).thenReturn(1L);
+        Mockito.when(verificationCodeRepository.save(Mockito.any(VerificationCode.class))).thenAnswer((InvocationOnMock) -> null);
+        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(expectedUser);
+        Mockito.when(userRepository.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(expectedUser));
+        mockMvc.perform(MockMvcRequestBuilders.post("/register")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane@doe.nz")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .param("address_line1", "123 Test Street")
+                        .param("city", "Testville")
+                        .param("region", "Testregion")
+                        .param("country", "NZ")
+                        .param("postcode", "8053")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(view().name("redirect:/confirm-registration"));
+        verify(emailService, times(1)).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+    }
+
     /**
      * Tests the registration of an invalid user.sendVerificationEmail(Mockito.anyString(), Mockito.anyString()),
      * This test simulates a user submitting an invalid registration form and expects:
@@ -170,4 +196,26 @@ public class RegisterControllerIntegrationTest {
         verify(verificationCodeRepository, never()).delete(Mockito.any(VerificationCode.class));
     }
 
+    @Test
+    public void testRegisterUser_invalidPostcode_failValidation() throws Exception {
+        List<String> expectedPostcodeError = List.of("Postcode contains invalid characters.");
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/register")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("firstName", "John")
+                        .param("lastName", "Smith")
+                        .param("email", "john@smith.nz")
+                        .param("password", "ValidPass123!")
+                        .param("confirmPassword", "ValidPass123!")
+                        .param("address_line1", "123 Test Street")
+                        .param("city", "Testville")
+                        .param("region", "Testregion")
+                        .param("country", "NZ")
+                        .param("postcode", "123@#")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/register"))
+                .andExpect(flash().attribute("postcodeError", expectedPostcodeError));
+        verify(emailService, never()).sendVerificationEmail(anyString(), anyString(), anyString(), any());
+    }
 }
