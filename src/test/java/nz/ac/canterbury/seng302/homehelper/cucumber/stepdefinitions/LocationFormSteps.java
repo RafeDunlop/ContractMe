@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
-import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -11,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -48,8 +48,13 @@ public class LocationFormSteps {
         assertTrue(content.contains("id=\"country\""));
     }
 
-    @Given("I am viewing the enter location details form")
-    public void i_am_viewing_the_enter_location_details_form_() throws Exception {
+    @Given("I am viewing the enter location details form on the register page")
+    public void i_am_viewing_the_enter_location_details_on_the_register_page() throws Exception {
+        result = mockMvc.perform(get("/register")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+
         String content = result.getResponse().getContentAsString();
 
         assertTrue(content.contains("id=\"location-form\""));
@@ -60,22 +65,27 @@ public class LocationFormSteps {
         assertTrue(content.contains("id=\"country\""));
     }
 
-    @When("I enter a value into the <field_name> field on the location form on the <page_name> page")
-    public void i_enter_a_value_into_the_field_on_the_location_form_on_the_page(String fieldName, String endpoint) throws Exception {
-
-        result = mockMvc.perform(get(endpoint)
-                .param(fieldName, fieldName))
-                .andExpect(status().isOk())
+    @When("I leave the address field blank on the location form on the register page")
+    public void i_leave_the_address_field_blank_on_the_register_page() throws Exception {
+        result = mockMvc.perform(post("/register")
+                        .param("firstName", "John")
+                        .param("lastName", "Doe")
+                        .param("email", "john.doe@example.com")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .param("address", "")
+                        .param("country", "New Zealand")
+                        .param("postcode", "8041")
+                        .param("city", "Wellington")
+                        .param("suburb", "Central")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
                 .andReturn();
     }
 
-    @And("I leave the address field blank on the location form on the <page_name> page")
-    public void i_leave_the_address_field_blank_on_the_page(String endpoint) throws Exception {
-
-        result = mockMvc.perform(get(endpoint)
-                        .param("address"))
-                    .andExpect(status().isOk())
-                    .andReturn();
-
+    @Then("I am told that I must supply an address field")
+    public void i_am_told_that_i_must_supply_an_address_field() throws Exception {
+        String content = result.getResponse().getContentAsString();
+        assertTrue(content.contains("must supply an address field"));
     }
 }
