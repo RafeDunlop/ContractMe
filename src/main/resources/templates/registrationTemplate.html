@@ -86,14 +86,14 @@
                     <div>Enter Location (Optional):</div>
                     <div>
                         <label class="switch">
-                            <input type="checkbox" id="location-toggleswitch">
+                            <input type="checkbox" id="location-toggleswitch" th:checked="${locationUsed}">
                             <span class="slider"></span>
                         </label>
                     </div>
                 </div>
 
                 <!-- LOCATION FORM FRAGMENT -->
-                <div class="hidden-form-extension" id="location-form">
+                <div th:class="${locationUsed} ? 'form-extension' : 'hidden-form-extension'" id="location-form">
                     <div th:replace="~{fragments/locationForm.html :: locationForm(
                      locationDTO=${locationDTO})}"></div>
                 </div>
