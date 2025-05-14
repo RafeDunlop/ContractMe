@@ -1,9 +1,10 @@
+@authoriseUser
 Feature: Renovation search functionality
     Scenario: AC5 - Pagination for large numbes of records
         Given I have run a search
-        When There are 20 records
-        Then I see pagination buttons
-        And The results are split into pages
+        When I have 20 records
+        Then I should see a "nextButton" element
+        And I should see a "prevButton" element
 
     Scenario Outline: AC6 - Navigate to page
         Given I see a list of <records> records

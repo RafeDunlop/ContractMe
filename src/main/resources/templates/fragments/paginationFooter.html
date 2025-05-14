@@ -2,40 +2,40 @@
     <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
     <ul class="pagination" id="pagination">
         <!-- First button (AC more than 10 pages) -->
-        <li class="page-item" th:if="${totalPages > 10}">
+        <li id="firstButton" class="page-item" th:if="${totalPages > 10}">
             <a class="page-link" href="#" th:href="@{/{url}(url=${pageUrl}, id=${id}, page=1, itemsPerPage=${itemsPerPage})}">First</a>
         </li>
 
         <!-- Previous button -->
-        <li class="page-item" th:if="${pageNumber > 1}">
+        <li id="prevButton" class="page-item" th:if="${pageNumber > 1}">
             <a class="page-link" href="#" th:href="@{/{url}(url=${pageUrl}, id=${id}, page=${pageNumber - 1}, itemsPerPage=${itemsPerPage})}">Prev</a>
         </li>
 
         <!-- Page buttons <= 10 Pages, AC3 -->
-        <li class="page-item" th:if="${totalPages <= 10}" th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
+        <li th:id="|page${pageLinkNumber}|" class="page-item" th:if="${totalPages <= 10}" th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
             th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
             <a class="page-link" th:href="@{/{url}(url=${pageUrl}, id=${id}, page=${pageLinkNumber}, itemsPerPage=${itemsPerPage})}" th:text="${pageLinkNumber}"></a>
         </li>
 
         <!-- Page buttons > 10 Pages, AC3 -->
-        <li class="page-item" th:if="${totalPages > 10}"
+        <li th:id="|page${pageLinkNumber}|" class="page-item" th:if="${totalPages > 10}"
             th:each="pageLinkNumber : ${#numbers.sequence(paginationLinksStart, paginationLinksEnd)}"
             th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
             <a class="page-link" th:href="@{/{url}(url=${pageUrl}, id=${id}, page=${pageLinkNumber}, itemsPerPage=${itemsPerPage})}" th:text="${pageLinkNumber}"></a>
         </li>
 
         <!-- Next button -->
-        <li class="page-item" th:if="${pageNumber < totalPages}">
+        <li id="nextButton" class="page-item" th:if="${pageNumber < totalPages}">
             <a class="page-link" href="#" th:href="@{/{url}(url=${pageUrl}, id=${id}, page=${pageNumber + 1}, itemsPerPage=${itemsPerPage})}">Next</a>
         </li>
 
         <!-- Last button (AC more than 10 pages) -->
-        <li class="page-item" th:if="${totalPages > 10}">
+        <li id="lastButton" class="page-item" th:if="${totalPages > 10}">
             <a class="page-link" href="#" th:href="@{/{url}(url=${pageUrl}, id=${id}, page=${totalPages}, itemsPerPage=${itemsPerPage})}">Last</a>
         </li>
 
         <!-- Search field (AC more than 10 pages) --> <!-- CHANGE IF TO 10 after testing -->
-        <li class="page-item d-flex align-items-center" th:if="${totalPages > 10}">
+        <li id="pageSearchField" class="page-item d-flex align-items-center" th:if="${totalPages > 10}">
             <input type="number" class="form-control me-2" id="pageSearch" aria-label="Page Search" style="min-width: 50px;">
             <button class="btn btn-primary" th:onclick="|validatePageSearch(${id})|">Go</button>
         </li>
