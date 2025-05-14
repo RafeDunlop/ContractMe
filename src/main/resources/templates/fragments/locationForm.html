@@ -11,10 +11,10 @@
 
     <div>
 
-        <!-- ADDRESS -->
+        <!-- ADDRESS (house number and street)-->
         <div class="mb-3">
-            <input type="text" class="form-control" id="address" name="address" placeholder="Address"
-                   aria-label="address" th:value="${locationDTO.address}">
+            <input type="text" class="form-control" id="address" name="address_line1" placeholder="Address"
+                   aria-label="address" th:value="${locationDTO.address_line1}">
 
             <!-- Frontend JS Error -->
 
@@ -23,8 +23,8 @@
 
         <!-- SUBURB -->
         <div class="mb-3">
-            <input type="text" class="form-control" id="suburb" name="suburb" placeholder="Suburb (optional)"
-                   aria-label="suburb" th:value="${locationDTO.suburb}">
+            <input type="text" class="form-control" id="suburb" name="region" placeholder="Suburb (optional)"
+                   aria-label="suburb" th:value="${locationDTO.region}">
 
             <!-- Frontend JS Error -->
 
