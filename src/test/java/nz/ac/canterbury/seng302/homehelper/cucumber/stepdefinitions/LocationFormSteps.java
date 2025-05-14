@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -68,6 +69,36 @@ public class LocationFormSteps {
         assertTrue(content.contains("id=\"country\""));
     }
 
+    @Given("I am viewing the enter location details form")
+    public void i_am_viewing_the_enter_location_details_form_() throws Exception {
+        String content = result.getResponse().getContentAsString();
+
+        assertTrue(content.contains("id=\"location-form\""));
+        assertTrue(content.contains("id=\"address\""));
+        assertTrue(content.contains("id=\"suburb\""));
+        assertTrue(content.contains("id=\"city\""));
+        assertTrue(content.contains("id=\"postcode\""));
+        assertTrue(content.contains("id=\"country\""));
+    }
+
+    @When("I enter a value into the <field_name> field on the location form on the <page_name> page")
+    public void i_enter_a_value_into_the_field_on_the_location_form_on_the_page(String fieldName, String endpoint) throws Exception {
+
+        result = mockMvc.perform(get(endpoint)
+                .param(fieldName, fieldName))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @And("I leave the address field blank on the location form on the <page_name> page")
+    public void i_leave_the_address_field_blank_on_the_page(String endpoint) throws Exception {
+
+        result = mockMvc.perform(get(endpoint)
+                        .param("address"))
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+    }
     @When("I enter an invalid postcode: {string}")
     public void i_enter_an_invalid_postcode(String postcode) throws Exception {
         resultActions = mockMvc.perform(post("/register")

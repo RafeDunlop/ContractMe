@@ -106,6 +106,21 @@ public class LocationService {
             throw new IllegalStateException(e.getMessage());
         }
     }
+    public Map<String, List<String>> validateLocation(AddressDTO dto) {
+        return new HashMap<String, List<String>>();
+    }
+
+    /**
+     * checks if the location has been provided
+     * @param dto location data transfer object
+     * @return true if location has been provided, false if it hasn't
+     */
+    public boolean isLocationProvided(AddressDTO dto) {
+        return dto != null &&
+                Stream.of(dto.getAddress_line1(), dto.getCountry(), dto.getPostcode(), dto.getCity(), dto.getRegion())
+                        .anyMatch(field -> field != null && !field.trim().isEmpty());
+    }
+
 
     /**
      * Assembles the URL to call the Geoapify autocomplete API endpoint for the specified parameters

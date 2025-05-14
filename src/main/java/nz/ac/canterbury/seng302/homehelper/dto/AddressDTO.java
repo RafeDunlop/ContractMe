@@ -17,6 +17,8 @@ public class AddressDTO {
 
     private String street;
 
+    private String region;
+
     private String housenumber;
 
     private String formatted;
@@ -123,5 +125,13 @@ public class AddressDTO {
 
     public void setAddress_line2(String address_line2) {
         this.address_line2 = address_line2;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 }
