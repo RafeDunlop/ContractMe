@@ -14,7 +14,7 @@
         <!-- ADDRESS (house number and street)-->
         <div class="mb-3">
             <input type="text" class="form-control" id="address" name="address_line1" placeholder="Address"
-                   aria-label="address" th:value="${addressDTO.address_line1}">
+                   aria-label="address" th:value="${addressDTO.address_line1}" th:attr="data-csrf=${_csrf.token}">
             <ul id="autocomplete-list" class="list-group position-absolute" style="z-index: 1000;"></ul>
 
             <!-- Frontend JS Error -->

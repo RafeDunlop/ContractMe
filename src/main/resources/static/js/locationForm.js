@@ -43,7 +43,6 @@ addressField.addEventListener("input", function () {
  */
 function updateAutocomplete(input) {
     clearTimeout(timeoutId);
-    //todo validate input for illegal chars
     if (autocompleteMap.has(input)) { // don't wait if we already know what the answer is
         setAutoCompleteList(autocompleteMap.get(input))
     } else {
@@ -55,21 +54,37 @@ function updateAutocomplete(input) {
 
 async function addAutocomplete(input) {
     try {
-    const response = await fetch(`/address-autocomplete/${encodeURIComponent(input)}?${localisation}`)
-    const results = await response.json();
-    autocompleteMap.set(input, results);
-    return results;
+        console.log(localisation);
+        const response = await fetch(`location/address-autocomplete/${encodeURIComponent(input)}`, {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": addressField.getAttribute("data-csrf"),
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(localisation)
+        })
+        const results = await response.json();
+        autocompleteMap.set(input, results);
+        return results;
     } catch (error) {
-        console.error("Error retrieving localisation:", error);
+        console.error("Error retrieving address autocomplete options:", error);
     }
     return null;
 }
 
-function getLocalisation() {
-    fetch(`/localisation`)
-        .then(response => response.json())
-        .then(result => localisation = result)
-        .catch(error => console.error("Error retrieving localisation:", error))
+async function getLocalisation() {
+    try {
+        const response = await fetch(`location/localisation`, {
+            method: "GET",
+            headers: {
+                "X-CSRF-TOKEN": addressField.getAttribute("data-csrf"),
+                "Content-Type": "application/json"
+            }
+        })
+        localisation = await response.json();
+    } catch (error) {
+        console.error("Error retrieving localisation:", error)
+    }
 }
 
 /**

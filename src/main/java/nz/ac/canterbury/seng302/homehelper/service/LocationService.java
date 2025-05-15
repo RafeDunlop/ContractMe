@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -141,9 +143,9 @@ public class LocationService {
         sb.append("&type=street");
         sb.append("&lang=en");
         sb.append("&format=json");
-        sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
         logger.debug("calling autocomplete API: {}", sb);
-        return sb.toString();
+        sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
+        return URLEncoder.encode(sb.toString(), Charset.defaultCharset());
     }
 
     /**
@@ -158,8 +160,8 @@ public class LocationService {
         sb.append(IP_API);
         sb.append("?");
         if (!ip.equals(LOCALHOST_IP)) sb.append(String.format("ip=%s", ip)); // use request ip instead if localhost
-        sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
         logger.debug("calling IP grab API: {}", sb);
+        sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
         return sb.toString();
     }
 }
