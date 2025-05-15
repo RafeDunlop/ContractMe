@@ -522,6 +522,10 @@ public class RenovationController {
                                           HttpSession session) {
         logger.info("POST /renovations/search");
 
+        if (isTagSearch && (tagNameList == null || tagNameList.isEmpty())) {
+            return "renovationSearchTemplate";
+        }
+
         if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";
 

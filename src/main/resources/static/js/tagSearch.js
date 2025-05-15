@@ -60,3 +60,10 @@ tagInput.addEventListener("keydown", (e) => {
         }
     }
 });
+
+document.getElementById("tag-search-form").addEventListener("submit", function(e) {
+    const tags = document.querySelectorAll('input[name="tagNameList"]');
+    if (tags.length === 0) {
+        e.preventDefault();
+    }
+});
