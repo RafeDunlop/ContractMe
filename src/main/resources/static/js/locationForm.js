@@ -11,21 +11,21 @@ let localisation;
 let autocompleteMap = new Map();
 let timeoutId;
 let committedFields = {
-    address: addressField.textContent,
-    suburb: suburbField.textContent,
-    city: cityField.textContent,
-    postcode: postcodeField.textContent,
-    country: countryField.textContent
+    address: addressField.value,
+    suburb: suburbField.value,
+    city: cityField.value,
+    postcode: postcodeField.value,
+    country: countryField.value
 }
 const inputDelayMS = 300;
-
-
 
 locationToggleSwitch.addEventListener("click", displayLocationForm);
 
 /** Js file used for autocompleting the tag entry field on viewRenovation.html */
 
 document.addEventListener("DOMContentLoaded", getLocalisation);
+
+
 
 // Listen for input events on the tag input field
 addressField.addEventListener("input", function () {
@@ -54,7 +54,6 @@ function updateAutocomplete(input) {
 
 async function addAutocomplete(input) {
     try {
-        console.log(localisation);
         const response = await fetch(`location/address-autocomplete/${encodeURIComponent(input)}`, {
             method: "POST",
             headers: {
@@ -112,19 +111,19 @@ function getAutocompleteOption(address) {
     item.textContent = address.formatted;
 
     item.addEventListener("mouseover", () => {
-        addressField.textContent = address.address_line1
-        suburbField.textContent = address.region
-        cityField.textContent = address.city
-        postcodeField.textContent = address.postcode
-        countryField.textContent = address.country
+        addressField.value = address.address_line1
+        suburbField.value = address.region
+        cityField.value = address.city
+        postcodeField.value = address.postcode
+        countryField.value = address.country
     })
 
     item.addEventListener("mouseout", () => {
-        addressField.textContent = committedFields.address
-        suburbField.textContent = committedFields.suburb
-        cityField.textContent = committedFields.city
-        postcodeField.textContent = committedFields.postcode
-        countryField.textContent = committedFields.country
+        addressField.value = committedFields.address
+        suburbField.value = committedFields.suburb
+        cityField.value = committedFields.city
+        postcodeField.value = committedFields.postcode
+        countryField.value = committedFields.country
     })
 
     item.addEventListener("click", function () {

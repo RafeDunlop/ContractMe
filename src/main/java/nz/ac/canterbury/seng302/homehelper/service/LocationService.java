@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,9 @@ import java.util.stream.Stream;
 @Service
 public class LocationService {
 
-    private static final String LOCALHOST_IP = "127.0.0.1";
+    private static final String LOCALHOST_IP_IPV4 = "127.0.0.1";
+
+    private static final String LOCALHOST_IP_IPV6 = "0:0:0:0:0:0:0:1";
 
     private static final String GEOAPIFY_BASE_URL = "https://api.geoapify.com/v1/";
 
@@ -137,15 +139,15 @@ public class LocationService {
         StringBuilder sb = new StringBuilder();
         sb.append(GEOAPIFY_BASE_URL);
         sb.append(AUTOCOMPLETE_API);
-        sb.append(String.format("?text=%s", prompt));
-        sb.append(String.format("&filter=countrycode:%s", countryCode));
+        sb.append(String.format("?text=%s", URLEncoder.encode(prompt, StandardCharsets.UTF_8)));
+        sb.append(String.format("&filter=countrycode:%s", countryCode.toLowerCase()));
         sb.append(String.format("&bias=proximity:%f,%f", latitude, longitude));
         sb.append("&type=street");
         sb.append("&lang=en");
         sb.append("&format=json");
         logger.debug("calling autocomplete API: {}", sb);
         sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
-        return URLEncoder.encode(sb.toString(), Charset.defaultCharset());
+        return sb.toString();
     }
 
     /**
@@ -159,7 +161,7 @@ public class LocationService {
         sb.append(GEOAPIFY_BASE_URL);
         sb.append(IP_API);
         sb.append("?");
-        if (!ip.equals(LOCALHOST_IP)) sb.append(String.format("ip=%s", ip)); // use request ip instead if localhost
+        if (!ip.equals(LOCALHOST_IP_IPV4) && !ip.equals(LOCALHOST_IP_IPV6)) sb.append(String.format("ip=%s", ip)); // use request ip instead if localhost
         logger.debug("calling IP grab API: {}", sb);
         sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
         return sb.toString();
