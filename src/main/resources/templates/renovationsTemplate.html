@@ -48,7 +48,7 @@
                     <td colspan="1" class="text">No renovations match your search.</td>
                 </tr>
                 <tr th:each="renovation : ${renovations}">
-                    <td class="d-flex justify-content-between align-items-center">
+                    <td class="d-flex justify-content-between align-items-center table-row">
                         <form th:id="'form-' + ${renovation.id}" method="post" th:action="@{/renovations/view}">
                             <input type="hidden" name="id" th:value="${renovation.id}" />
                             <input type="hidden" name="page" value="1" />

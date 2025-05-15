@@ -35,8 +35,7 @@ function updateTable() {
     const tableRowHeight = tableRow.offsetHeight;
     const pageHeight = window.innerHeight;
     const availableHeight = (pageHeight - tableRow.getBoundingClientRect().top);
-    const rows = Math.max(1, Math.floor(availableHeight / tableRowHeight));
-    const itemsPerPage = rows;
+    const itemsPerPage = Math.max(1, Math.floor(availableHeight / tableRowHeight));
 
     const currentParam = new URL(window.location.href).searchParams.get("itemsPerPage");
 
