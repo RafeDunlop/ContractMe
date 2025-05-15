@@ -85,8 +85,22 @@ public class TagSearchSteps {
         }
 
         renovationRecordRepository.save(renovationRecord);
+    }
 
+    @Given("a private renovation {string} exists with tags:")
+    public void a_private_renovation_exists_with_tags(String recordName, io.cucumber.datatable.DataTable tagNames) {
+        RenovationRecord renovationRecord = new RenovationRecord(userContext.getUser(), recordName, "", List.of());
 
+        if (renovationRecord.getTags() == null) {
+            renovationRecord.setTags(new ArrayList<>());
+        }
+        List<String> tagNameList = tagNames.asList();
+        for (String tagName : tagNameList) {
+            Tag tag = tagService.getTag(tagName);
+            renovationRecord.getTags().add(tag);
+        }
+
+        renovationRecordRepository.save(renovationRecord);
     }
 
     @When("I search for renovations with tags {string} and {string}")
