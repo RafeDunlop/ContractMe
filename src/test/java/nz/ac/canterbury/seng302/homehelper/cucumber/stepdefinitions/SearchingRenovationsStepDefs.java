@@ -33,7 +33,7 @@ public class SearchingRenovationsStepDefs {
     @Autowired
     private RenovationRecordRepository renovationRecordRepository;
 
-    private UserContext userContext;
+    private final UserContext userContext;
     private MvcResult result;
 
     public SearchingRenovationsStepDefs(UserContext userContext) {
@@ -55,6 +55,7 @@ public class SearchingRenovationsStepDefs {
     @When("I have run a search for {string}")
     public void i_have_run_a_search_for(String string) throws Exception {
         result = mockMvc.perform(get("/renovations")
+                        .param("searchQuery", string)
                 .with(csrf()))
             .andReturn();
     }

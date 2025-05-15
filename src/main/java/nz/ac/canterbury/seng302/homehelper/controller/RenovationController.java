@@ -72,7 +72,7 @@ public class RenovationController {
                 itemsPerPage = 8;
             }
             if (pageNumber < 1) {
-                return "redirect:/renovations?page=1&itemsPerPage=" + itemsPerPage;
+                return "redirect:/renovations?page=1&itemsPerPage=" + itemsPerPage + "&searchQuery=" + searchQuery;
             }
 
             User user = loginService.getUserByEmail();
@@ -84,7 +84,7 @@ public class RenovationController {
             int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
 
             if (pageNumber > totalPages && totalRenovations != 0) {
-                return "redirect:/renovations?page=" + totalPages + "&itemsPerPage=" + itemsPerPage;
+                return "redirect:/renovations?page=" + totalPages + "&itemsPerPage=" + itemsPerPage + "&searchQuery=" + searchQuery;
             }
             model.addAttribute("renovations", renovationRecords.getContent());
             model.addAttribute("paginationLinksStart", paginationLinksStart);
