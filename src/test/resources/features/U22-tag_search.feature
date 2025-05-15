@@ -1,7 +1,7 @@
 @authoriseUser
 Feature: As Sarah, I want to be able to search for public renovation records by tags so that I can find renovations that are matching my interest.
 
-  Scenario Outline: AC4 Submitting an empty tag search does nothing
+  Scenario Outline: AC4 Tag search returns only public records in results.
     Given the tags named "<tag_one>" and "<tag_two>" exist
     And a public renovation "<renovation_name_one>" exists with tags:
       | <tag_one> |
