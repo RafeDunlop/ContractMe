@@ -17,8 +17,8 @@ let countryField = document.getElementById("country");
 
 locationToggleSwitch.addEventListener("click", displayLocationForm);
 
-postcodeField.addEventListener("blur", validatePostcode);
-cityField.addEventListener("blur", validateCity);
+postcodeField.addEventListener("input", validatePostcode);
+cityField.addEventListener("input", validateCity);
 
 
 function displayLocationForm() {
