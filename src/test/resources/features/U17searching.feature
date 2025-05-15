@@ -9,6 +9,7 @@ Feature: Renovation search functionality
 
     Scenario Outline: AC6 - Navigate to page
         Given I have <records> records
+        And I have run a search for ""
         And I see a list of 8 records
         And I see pagination numbers for <pages> pages
         When I click on page number <page number>

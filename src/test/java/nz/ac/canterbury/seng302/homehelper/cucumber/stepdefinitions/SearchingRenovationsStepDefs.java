@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository
 @AutoConfigureMockMvc
 @Transactional
 public class SearchingRenovationsStepDefs {
+    private final int DEFAULT_PAGE_SIZE = 8;
     @Autowired
     private MockMvc mockMvc;
 
@@ -35,6 +37,7 @@ public class SearchingRenovationsStepDefs {
 
     private final UserContext userContext;
     private MvcResult result;
+    private String searchQuery;
 
     public SearchingRenovationsStepDefs(UserContext userContext) {
         this.userContext = userContext;
@@ -53,9 +56,10 @@ public class SearchingRenovationsStepDefs {
     }
 
     @When("I have run a search for {string}")
-    public void i_have_run_a_search_for(String string) throws Exception {
+    public void i_have_run_a_search_for(String searchTerm) throws Exception {
+        searchQuery = searchTerm;
         result = mockMvc.perform(get("/renovations")
-                        .param("searchQuery", string)
+                        .param("searchQuery", searchTerm)
                 .with(csrf()))
             .andReturn();
     }
@@ -68,11 +72,43 @@ public class SearchingRenovationsStepDefs {
 
     @Then("I see a list of {int} records")
     public void i_see_a_list_of_records(Integer numRecords) {
-        Object records = result.getModelAndView().getModel().get("renovations");
+        Object records = Objects.requireNonNull(result.getModelAndView()).getModel().get("renovations");
         assertInstanceOf(List.class, records, "Expected 'renovations' to be a List");
         @SuppressWarnings("unchecked")
         List<RenovationRecord> renovationRecords = (List<RenovationRecord>) records;
         assertEquals(numRecords, renovationRecords.size());
     }
 
+    @Given("I see pagination numbers for {int} pages")
+    public void i_see_pagination_numbers_for_pages(Integer pageNum) throws UnsupportedEncodingException {
+        String content = result.getResponse().getContentAsString();
+        int numPages = (int) Objects.requireNonNull(result.getModelAndView()).getModel().get("totalPages");
+        assertEquals(pageNum, numPages);
+        for (int i = 0; i < numPages; i++) {
+            assertTrue(content.contains(String.format("page%d", i + 1)), String.format("Expected to find page%d in the response", i + 1));
+        }
+    }
+
+    @When("I click on page number {int}")
+    public void i_click_on_page_number(Integer page) throws Exception {
+        result = mockMvc.perform(get("/renovations")
+                .param("searchQuery", searchQuery)
+                .param("page", page.toString()))
+            .andReturn();
+    }
+
+    @Then("I see the list of records corresponding to page {int}")
+    public void i_see_the_list_of_records_corresponding_to_page(Integer page) {
+        @SuppressWarnings("unchecked")
+        List<RenovationRecord> records = (List<RenovationRecord>) Objects.requireNonNull(result.getModelAndView()).getModel().get("renovations");
+        int expectedRenovationNumber = DEFAULT_PAGE_SIZE * (page - 1);
+        assertEquals(DEFAULT_PAGE_SIZE, result.getModelAndView().getModel().get("itemsPerPage"));
+        assertEquals("MyRenovation" + expectedRenovationNumber, records.getFirst().getName());
+    }
+
+    @Then("Page number {int} is currently highlighted")
+    public void page_number_is_currently_highlighted(Integer int1) throws UnsupportedEncodingException {
+        String content = result.getResponse().getContentAsString();
+        assertTrue(content.lines().anyMatch(s -> s.contains("page" + int1) && s.contains("active")));
+    }
 }
