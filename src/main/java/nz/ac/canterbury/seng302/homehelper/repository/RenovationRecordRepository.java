@@ -133,4 +133,18 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
      */
     @Query("SELECT r FROM RenovationRecord r JOIN r.tags t WHERE t IN :tags")
     List<RenovationRecord> findAllByTags(@Param("tags") List<Tag> tags);
+
+    /**
+     * Finds all public records with OR logic for matching tags
+     * It is primarily ordered by number of matching tags, then secondary matched by date created.
+     * @param tags the list of tags matching the query.
+     * @return list of tags found.
+     */
+    @Query("SELECT r FROM RenovationRecord r " +
+            "JOIN r.tags t " +
+            "WHERE r.isPublic = true AND t IN :tags " +
+            "GROUP BY r " +
+            "ORDER BY COUNT(t) DESC, r.createdDate DESC")
+    List<RenovationRecord> findAllPublicByTagsOrderByTagCountAndDate(@Param("tags") List<Tag> tags);
+
 }

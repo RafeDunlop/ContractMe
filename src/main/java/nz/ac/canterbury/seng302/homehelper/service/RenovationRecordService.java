@@ -186,6 +186,7 @@ public class RenovationRecordService {
      * @return a list of renovation records associated with the tags in the given list.
      */
     public List<RenovationRecord> getAllRecordsByTags(List<Tag> tagList) {
-        return renovationRecordRepository.findAllByTags(tagList);
+        // return renovationRecordRepository.findAllByTags(tagList);
+        return renovationRecordRepository.findAllPublicByTagsOrderByTagCountAndDate(tagList);
     }
 }
