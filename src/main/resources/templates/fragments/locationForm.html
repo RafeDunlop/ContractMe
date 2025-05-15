@@ -14,7 +14,7 @@
         <!-- ADDRESS (house number and street)-->
         <div class="mb-3">
             <input type="text" class="form-control" id="address" name="address_line1" placeholder="Address"
-                   aria-label="address" th:value="${addressDTO.address_line1}">
+                   aria-label="address" th:value="*{addressDTO.address_line1}">
 
             <!-- Frontend JS Error -->
 
@@ -24,7 +24,7 @@
         <!-- SUBURB -->
         <div class="mb-3">
             <input type="text" class="form-control" id="suburb" name="region" placeholder="Suburb (optional)"
-                   aria-label="suburb" th:value="${addressDTO.region}">
+                   aria-label="suburb" th:value="*{addressDTO.region}">
 
             <!-- Frontend JS Error -->
 
@@ -34,7 +34,7 @@
         <!-- CITY -->
         <div class="mb-3">
             <input type="text" class="form-control" id="city" name="city" placeholder="City (optional)"
-                   aria-label="city" th:value="${addressDTO.city}">
+                   aria-label="city" th:value="*{addressDTO.city}">
 
             <!-- Frontend JS Error -->
 
@@ -44,7 +44,7 @@
         <!-- POSTCODE -->
         <div class="mb-3">
             <input type="text" class="form-control" id="postcode" name="postcode" placeholder="Postcode (optional)"
-                   aria-label="postcode" th:value="${addressDTO.postcode}">
+                   aria-label="postcode" th:value="*{addressDTO.postcode}">
 
             <!-- Frontend JS Error -->
 
@@ -54,7 +54,7 @@
         <!-- COUNTRY -->
         <div class="mb-3">
             <input type="text" class="form-control" id="country" name="country" placeholder="Country (optional)"
-                   aria-label="country" th:value="${addressDTO.country}">
+                   aria-label="country" th:value="*{addressDTO.country}">
 
             <!-- Frontend JS Error -->
 

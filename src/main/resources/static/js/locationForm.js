@@ -20,14 +20,7 @@ function displayLocationForm() {
 
 function closeLocationForm() {
     locationForm.style.display = "none";
-    clearInputField(addressField);
-    clearInputField(suburbField);
-    clearInputField(cityField);
-    clearInputField(postcodeField);
-    clearInputField(countryField);
-}
-function clearInputField(inputField) {
-    if (!(inputField === "")) {
-        inputField.value = "";
-    }
+
+
+
 }

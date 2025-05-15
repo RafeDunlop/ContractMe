@@ -99,7 +99,7 @@ public class RegisterController {
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
             redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
-
+            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
             redirectAttributes.addFlashAttribute("locationUsed", locationProvided);
             return "redirect:/register";
         }
@@ -121,6 +121,7 @@ public class RegisterController {
         } catch (MailException e) {
             redirectAttributes.addFlashAttribute("error", "Error sending confirmation email.");
             redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
+            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
             return "redirect:/register";
         }
     }
