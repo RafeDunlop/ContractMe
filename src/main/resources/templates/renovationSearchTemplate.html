@@ -112,7 +112,7 @@
 
                                 <!-- Renovation record tags -->
                                 <div class="mb-2">
-                                    <span th:each="tag : ${record.tags}" class="badge bg-secondary me-1" th:text="${tag}">Tag</span>
+                                    <span th:each="tag : ${record.tags}" class="badge bg-secondary me-1" th:text="${tag.tagName}">Tag</span>
                                 </div>
 
                                 <!-- Renovation record description -->
