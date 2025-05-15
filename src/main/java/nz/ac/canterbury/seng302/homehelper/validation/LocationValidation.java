@@ -22,7 +22,7 @@ public class LocationValidation {
         List<String> errors = new ArrayList<>();
 
         if (!suburb.matches("^[\\p{L}\\d\\-\\s']*$")) {
-            errors.add("Suburb contains invalid characters.");
+            errors.add("Suburb must only include letters, spaces, hyphens, digits or apostrophes.");
         }
 
         return errors;

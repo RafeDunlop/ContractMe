@@ -17,15 +17,19 @@ Feature:As Kaia, I want to be able to add location to my profile and
       |  "/register"            |
 
 
-    Scenario: AC7:  Given I supply a suburb, when the suburb contains non valid characters (i.e. characters others than
+    Scenario Outline: AC7:  Given I supply a suburb, when the suburb contains non valid characters (i.e. characters others than
     letters, hyphen, apostrophe, number, space), then a message tells me that “Suburb contains invalid characters.”
     and the form is not saved.
       Given I am viewing the enter location details form on the <page_name> page
       When I enter an invalid address <address> and submit the form on the <page_name> page
       Then I am taken back to the <page_name> page
       And I am told that I have entered an invalid address
+      Examples:
+        | page_name               |
+        |  "/register"            |
 
-    Scenario Outline: AC11: Given I supply a fully compliant address, when I submit the form,
+
+  Scenario Outline: AC11: Given I supply a fully compliant address, when I submit the form,
     then the form is saved with the address I supplied.
       Given I am viewing the enter location details form on the <page_name> page
       When I enter a valid address and submit the location form on the <page_name> page

@@ -27,8 +27,21 @@
                    aria-label="suburb" th:value="${addressDTO.region}">
 
             <!-- Frontend JS Error -->
+            <div class="alert alert-danger mt-2" id="suburb-frontend-error" hidden>
+                <ul>
+                    <li><label class="form-label" id="suburb-frontend-error-message"></label></li>
+                </ul>
+            </div>
 
             <!-- Backend error -->
+            <div class="alert alert-danger mt-2" id="suburb-backend-error"
+                 th:attr="hidden=${suburbError == null}">
+                <ul>
+                    <li th:each="msg : ${suburbError}" th:text="${msg}"></li>
+                </ul>
+            </div>
+        </div>
+
         </div>
 
         <!-- CITY -->
@@ -67,4 +80,5 @@
 </div>
 </body>
 <script type="module" src="/js/locationForm.js"></script>
+<script type="module" src="/js/locationFormValidation.js"></script>
 </html>
