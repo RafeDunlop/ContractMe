@@ -86,10 +86,28 @@ public class RenovationRecord {
         return name;
     }
 
+    /**
+     * Gets a list of tags for the renovation record.
+     * @return list of tags
+     */
     public List<Tag> getTags() {
         return tags;
     }
 
+    /**
+     * Gets a sorted list of tags for the renovation record.
+     * @return list of tags
+     */
+    public List<Tag> getSortedTags() {
+        return tags.stream()
+                .sorted((a, b) -> a.getTagName().compareToIgnoreCase(b.getTagName()))
+                .toList();
+    }
+
+    /**
+     * Sets the list of tags for the renovation record.
+     * @param tags The list of tags to be added to the record
+     */
     public void setTags(List<Tag> tags) {
         this.tags = tags;
     }

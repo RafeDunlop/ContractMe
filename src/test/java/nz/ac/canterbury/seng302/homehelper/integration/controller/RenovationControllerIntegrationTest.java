@@ -930,6 +930,89 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attributeExists("errors"));
     }
+
+    @Test
+    public void addTagToRenovation_recordIdDoesntExist_notFoundErrorThrown() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "Random Renovation", "Some words", List.of());
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+        String tagName = "random tag 1";
+
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId + 1))
+                        .param("tagName", tagName))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void addTagToRenovation_recordNotOwnedByUser_unauthorizedErrorThrown() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "Random Renovation", "Some words", List.of());
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+        String tagName = "random tag 2";
+
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", tagName))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void removeTagFromRenovation_validUserAndRecordId_tagDeletedAndNoContentResponse() throws Exception {
+        Tag newTag = new Tag("random tag 3");
+        tagRepository.save(newTag);
+        RenovationRecord testRecord = new RenovationRecord(currentUser, "Test Renovation", "Some words", List.of("Room1", "Room2"));
+        testRecord.addTag(newTag);
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+
+        mockMvc.perform(patch("/renovations/tags/remove")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", newTag.getTagName()))
+                .andExpect(status().isNoContent());
+
+        assertTrue(testRecord.getTags().stream()
+                .noneMatch(tag -> tag.getTagName().equals(newTag.getTagName())));
+    }
+
+    @Test
+    public void removeTagFromRenovation_recordIdDoesntExist_notFoundErrorThrown() throws Exception {
+        Tag newTag = new Tag("random tag 4");
+        tagRepository.save(newTag);
+        RenovationRecord testRecord = new RenovationRecord(currentUser, "Test Renovation", "Some words", List.of("Room1", "Room2"));
+        testRecord.addTag(newTag);
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+
+        mockMvc.perform(patch("/renovations/tags/remove")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId + 1))
+                        .param("tagName", newTag.getTagName()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void removeTagFromRenovation_recordNotOwnedByUser_unauthorizedErrorThrown() throws Exception {
+        Tag newTag = new Tag("random tag 5");
+        tagRepository.save(newTag);
+        RenovationRecord testRecord = new RenovationRecord(owner, "Test Renovation", "Some words", List.of("Room1", "Room2"));
+        testRecord.addTag(newTag);
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+
+        mockMvc.perform(patch("/renovations/tags/remove")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", newTag.getTagName()))
+                .andExpect(status().isUnauthorized());
+
+        assertFalse(testRecord.getTags().stream()
+                .noneMatch(tag -> tag.getTagName().equals(newTag.getTagName())));
+    }
+
     @Test
     public void searchRenovation_withNoMatches_returnsNoResultsMessage() throws Exception {
         String searchTerm = "NonExistentTerm";

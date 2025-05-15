@@ -1,0 +1,33 @@
+.tag-box {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.tag-text-large {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.tag-text-small, .tag-text-large {
+    line-height: 1.3;
+}
+
+.tag-delete-button-small {
+    font-size: 18px;
+    font-weight: 620;
+}
+
+.tag-delete-button-large {
+    font-size: 24px;
+    font-weight: 750;
+}
+
+.tag-delete-button-small, .tag-delete-button-large {
+    cursor: pointer;
+    color: black;
+    transition: color 0.2s;
+}
+
+.tag-delete-button-small:hover, .tag-delete-button-large:hover {
+    color: grey !important;
+}

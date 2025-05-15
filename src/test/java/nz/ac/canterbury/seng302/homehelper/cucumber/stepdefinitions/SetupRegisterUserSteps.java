@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
+import io.cucumber.java.Before;
 import io.cucumber.java.BeforeStep;
 import io.cucumber.java.en.Given;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
@@ -28,7 +29,7 @@ public class SetupRegisterUserSteps {
         this.userContext = userContext;
     }
 
-    @BeforeStep("@authoriseUser")
+    @Before("@authoriseUser")
     public void i_am_an_existing_user() throws Exception {
 
         PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
