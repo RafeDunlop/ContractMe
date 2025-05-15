@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -110,5 +111,14 @@ public class SearchingRenovationsStepDefs {
     public void page_number_is_currently_highlighted(Integer int1) throws UnsupportedEncodingException {
         String content = result.getResponse().getContentAsString();
         assertTrue(content.lines().anyMatch(s -> s.contains("page" + int1) && s.contains("active")));
+    }
+
+    @When("I input page number {int} and confirm my choice")
+    public void i_input_page_number_and_confirm_my_choice(int pageNum) throws Exception {
+        result = mockMvc.perform(get("/renovations")
+                .param("page", String.valueOf(pageNum))
+                .param("searchQuery", searchQuery))
+                .andExpect(status().isOk())
+                .andReturn();
     }
 }

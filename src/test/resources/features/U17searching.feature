@@ -20,3 +20,23 @@ Feature: Renovation search functionality
             | 1           | 10      | 2     |
             | 2           | 20      | 3     |
             | 4           | 50      | 7     |
+
+    Scenario: AC7 - More than 10 pages
+        Given I have 100 records
+        When I have run a search for ""
+        And I click on page number 5
+        Then I see a "firstButton" button
+        And I see a "lastButton" button
+        And I see a "page3" button
+        And I see a "page7" button
+
+    Scenario: AC8 - Input page number
+        Given I have 100 records
+        When I have run a search for ""
+        Then I see a "pageSearch" button
+
+    Scenario: AC9 - Page number in range
+        Given I have 100 records
+        And I have run a search for ""
+        When I input page number 5 and confirm my choice
+        Then I see the list of records corresponding to page 5
