@@ -11,7 +11,6 @@ function focusTagInput() {
 function addTag(tag) {
     tag = tag.trim();
     if (tag === "" || tags.includes(tag)) return;
-
     tags.push(tag);
 
     // Create bubble
@@ -19,7 +18,7 @@ function addTag(tag) {
     bubble.className = "badge bg-primary text-white me-1 mb-1";
     bubble.textContent = tag;
 
-    // Add remove button
+    // Remove button
     const closeBtn = document.createElement("span");
     closeBtn.className = "ms-1";
     closeBtn.style.cursor = "pointer";
