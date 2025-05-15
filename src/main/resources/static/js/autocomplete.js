@@ -14,13 +14,17 @@ input.addEventListener("input", function () {
 
 /**
  * Fetches the autocomplete suggestions for a partial tag input then updates the UI.
+ * Removes tags that have been added to the renovation from the list of suggestions.
  * @param {string} partialTag - The partial input from the user.
  */
 function updateAutocomplete(partialTag) {
+    const existingTags = Array.from(document.getElementsByClassName("tag-text-large"))
+        .map(element => element.textContent.trim());
     fetch(`/renovations/tags/autocomplete?partialTag=${encodeURIComponent(partialTag)}`)
         .then(response => response.json())
         .then(tags => {
-            setAutoCompleteList(tags)
+            const filteredTags = tags.filter(tag => !existingTags.includes(tag));
+            setAutoCompleteList(filteredTags)
         })
         .catch(error => {
             console.error("Error getting tags:", error);

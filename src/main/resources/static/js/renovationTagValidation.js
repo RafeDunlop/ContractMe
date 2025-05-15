@@ -40,6 +40,4 @@ function validateTag(input) {
         tagBackendError.hidden = true;
         return true;
     }
-
-
 }
