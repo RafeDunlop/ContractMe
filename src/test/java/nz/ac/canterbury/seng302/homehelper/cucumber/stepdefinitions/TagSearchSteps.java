@@ -6,10 +6,8 @@ import io.cucumber.java.en.When;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -21,13 +19,15 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -54,6 +54,8 @@ public class TagSearchSteps {
     private final UserContext userContext;
 
     private MvcResult result;
+
+    private List<String> searchTerms;
 
     public TagSearchSteps(UserContext userContext) {
         this.userContext = userContext;
@@ -117,5 +119,30 @@ public class TagSearchSteps {
                                 .map(name -> hasProperty("name", is(name)))
                                 .collect(Collectors.toList())
                 )));
+    }
+
+    @Given("the tag search field is empty")
+    public void the_tag_search_field_is_empty() {
+        searchTerms = Collections.emptyList();
+    }
+
+    @When("I make a tag search")
+    public void i_make_a_tag_search() throws Exception {
+        var requestBuilder = post("/renovations/search")
+                .param("isTagSearch", "true")
+                .with(csrf());
+
+        for (String tag : searchTerms) {
+            requestBuilder = requestBuilder.param("tagNameList", tag);
+        }
+
+        result = mockMvc.perform(requestBuilder).andReturn();
+    }
+
+    @Then("I am not redirected")
+    public void i_should_not_be_redirected() {
+        int status = result.getResponse().getStatus();
+        assertNotEquals(302, status, "Expected no redirection, but got status 302 but was redirected");
+        assertEquals(200, status, "Expected status 200 when submitting empty tag search");
     }
 }
