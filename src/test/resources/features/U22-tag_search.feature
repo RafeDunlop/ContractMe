@@ -14,8 +14,9 @@ Feature: As Sarah, I want to be able to search for public renovation records by 
       | <renovation_name_one> |
 
     Examples:
-      | renovation_name_one | private_renovation_name | tag_one | tag_two |
-      | Renovation A        | Renovation B        | House   | Garden  |
+      | renovation_name_one     | private_renovation_name | tag_one | tag_two |
+      | PublicRenovation        | PrivateRenovation       | House   | Garden  |
+      | Public                  | Private                 | spare   | new     |
 
 
   Scenario: AC7 Submitting an empty tag search does nothing
@@ -36,6 +37,7 @@ Feature: As Sarah, I want to be able to search for public renovation records by 
       | <renovation_name_two> |
 
     Examples:
-      | renovation_name_one | renovation_name_two | tag_one | tag_two |
-      | Renovation A        | Renovation B        | House   | Garden  |
+      | renovation_name_one | renovation_name_two | tag_one   | tag_two |
+      | Renovation A        | Renovation B        | House     | Garden  |
+      | Renovation1         | Renovation2         | bedroom   | kitchen |
 

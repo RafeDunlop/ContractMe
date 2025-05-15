@@ -35,9 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 
 @AutoConfigureMockMvc
-@WithMockUser
 @SpringBootTest
-@Transactional
 public class TagSearchSteps {
 
     @Autowired
