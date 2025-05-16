@@ -5,8 +5,14 @@ let suburbField = document.getElementById("suburb");
 let cityField = document.getElementById("city");
 let postcodeField = document.getElementById("postcode");
 let countryField = document.getElementById("country");
-let autocompleteList = document.getElementById("autocomplete-list");
 
+locationToggleSwitch.addEventListener("click", displayLocationForm);
+
+
+/** Js file used for autocompleting the tag entry field on viewRenovation.html */
+
+const inputDelayMS = 300;
+let autocompleteList = document.getElementById("autocomplete-list");
 let localisation;
 let autocompleteMap = new Map();
 let timeoutId;
@@ -17,11 +23,6 @@ let committedFields = {
     postcode: postcodeField.value,
     country: countryField.value
 }
-const inputDelayMS = 300;
-
-locationToggleSwitch.addEventListener("click", displayLocationForm);
-
-/** Js file used for autocompleting the tag entry field on viewRenovation.html */
 
 document.addEventListener("DOMContentLoaded", getLocalisation);
 
@@ -35,10 +36,17 @@ addressField.addEventListener("input", function () {
     } else {
         autocompleteList.innerHTML = "";
     }
+
+    committedFields.address = input;
+    committedFields.suburb = suburbField.value;
+    committedFields.city = cityField.value;
+    committedFields.postcode = postcodeField.value;
+    committedFields.country = countryField.value;
 });
 
 /**
- * Fetches the autocomplete suggestions for a address prompt then updates the UI.
+ * Updates/schedules new autocomplete options and cancels any previously scheduled updates.
+ * Caches responses.
  * @param {string} input - The input from the user.
  */
 function updateAutocomplete(input) {
@@ -47,11 +55,16 @@ function updateAutocomplete(input) {
         setAutoCompleteList(autocompleteMap.get(input))
     } else {
         timeoutId = setTimeout(async () => {
-            setAutoCompleteList(await addAutocomplete(input, autocompleteMap))
+            setAutoCompleteList(await addAutocomplete(input))
         }, inputDelayMS)
     }
 }
 
+/**
+ * Gets the autocomplete options for a specified prompt, returns them and places them in {@code autocompleteMap}
+ * @param input The input for which to retrieve autocomplete suggestions
+ * @returns {Promise<Object[]>} returns a promise of the autocomplete suggestions, a list of addresses
+ */
 async function addAutocomplete(input) {
     try {
         const response = await fetch(`location/address-autocomplete/${encodeURIComponent(input)}`, {
@@ -71,6 +84,11 @@ async function addAutocomplete(input) {
     return null;
 }
 
+/**
+ * Gets the localisation of the current client based on their IP address using Geoapify IP Geolocation API
+ * and stores it in {@code localisation}
+ * @returns {Promise<void>} A promise to execute this void function
+ */
 async function getLocalisation() {
     try {
         const response = await fetch(`location/localisation`, {
@@ -87,8 +105,9 @@ async function getLocalisation() {
 }
 
 /**
- * Displays up to 3 tag suggestions in the autocomplete list.
- * @param addressList
+ * Resets the address autocomplete list tag and adds each address specified to it.
+ * If the list is empty adds a "no location suggestions are available" list item instead
+ * @param addressList The list of addresses to create list items for
  */
 function setAutoCompleteList(addressList) {
     autocompleteList.innerHTML = "";
@@ -105,6 +124,11 @@ function setAutoCompleteList(addressList) {
     }
 }
 
+/**
+ * Makes a single list item tag corresponding to the specified address and configures its event listeners
+ * @param address The address for which to create a list item tag
+ * @returns {HTMLLIElement} The fully qualified list item tag to be appended to a list tag
+ */
 function getAutocompleteOption(address) {
     const item = document.createElement("li");
     item.classList.add("list-group-item");

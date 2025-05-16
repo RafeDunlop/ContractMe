@@ -99,12 +99,13 @@ public class LocationService {
         try {
             JsonNode root = objectMapper.readTree(response.getBody());
             JsonNode results = root.get("results");
-            return objectMapper.readValue(results.toString(), new TypeReference<>() {});
+            return injectSuburbs(objectMapper.readValue(results.toString(), new TypeReference<>() {}));
         } catch (IOException e) {
             logger.error(e.getMessage());
             throw new IllegalStateException(e.getMessage());
         }
     }
+
     public Map<String, List<String>> validateLocation(AddressDTO dto) {
         return new HashMap<String, List<String>>();
     }
@@ -165,5 +166,24 @@ public class LocationService {
         logger.debug("calling IP grab API: {}", sb);
         sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
         return sb.toString();
+    }
+
+    /**
+     * Injects the region field into the addresses provided based on their second address line.
+     * "region" is interpreted as suburb
+     * @param addresses The addresses for which to set the suburb field
+     * @return The addresses specified
+     */
+    private List<AddressDTO> injectSuburbs(List<AddressDTO> addresses) {
+        for (AddressDTO address : addresses) {
+            if (address.getAddress_line2().contains(",")) {
+                address.setRegion(address.getAddress_line2().split(",")[0]);
+            } else if (address.getAddress_line2().contains(" ")) {
+                address.setRegion(address.getAddress_line2().split(" ")[0]);
+            } else {
+                address.setRegion(address.getAddress_line2());
+            }
+        }
+        return addresses;
     }
 }
