@@ -1,5 +1,6 @@
 const suburbPattern = /^[\p{L}\d\-'\s]*$/u;
 const cityPattern = /^[\p{L}\-'\s]*$/u;
+const countryPattern = /^[\p{L}\-']*[\s]+$/u;
 document.addEventListener("DOMContentLoaded", () => {
 
     let addressField = document.getElementById("address");
@@ -15,9 +16,14 @@ document.addEventListener("DOMContentLoaded", () => {
     let cityBackendError = document.getElementById("city-backend-error")
 
 
+    let countryField = document.getElementById("country");
+    let countryFrontendError = document.getElementById("country-frontend-error");
+    let countryFrontendErrorMessage = document.getElementById("country-frontend-error-message");
+    let countryBackendError = document.getElementById("country-backend-error")
+
+
     let postcodeField = document.getElementById("postcode");
 
-    let countryField = document.getElementById("country");
 
     // Event listeners
     suburbField.addEventListener("input", () =>
@@ -31,12 +37,22 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     cityField.addEventListener("input", () =>
-        checkOptionalField(suburbField.value,
+        checkOptionalField(cityField.value,
             cityFrontendError,
             cityFrontendErrorMessage,
             "City contains invalid characters",
             cityBackendError,
             cityPattern
+        )
+    );
+
+    countryField.addEventListener("input", () =>
+        checkOptionalField(countryField.value,
+            countryFrontendError,
+            countryFrontendErrorMessage,
+            "Country contains invalid characters",
+            countryBackendError,
+            countryPattern
         )
     );
 
