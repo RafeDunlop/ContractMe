@@ -1,7 +1,11 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,17 +33,20 @@ public class EditProfileController {
     private final EditProfileService editProfileService;
 
     private final LoginService loginService;
+    private final LocationService locationService;
 
     /**
      * Constructor for the controller and links the services to the controller.
      * @param editProfileService EditProfileService for validating updated user
      *                           and updating user details in database
+     * @param locationService LocationService for the user's location.
      * @param loginService LoginService for getting user by ID
      */
     @Autowired
-    public EditProfileController(EditProfileService editProfileService, LoginService loginService) {
+    public EditProfileController(EditProfileService editProfileService, LoginService loginService, LocationService locationService) {
         this.editProfileService = editProfileService;
         this.loginService = loginService;
+        this.locationService = locationService;
     }
 
     /**
@@ -49,7 +56,10 @@ public class EditProfileController {
      * @return editProfileTemplate page
      */
     @GetMapping("user/edit")
-    public String editProfile(Model model) {
+    public String editProfile(@ModelAttribute AddressDTO addressDTO,
+                              Model model) {
+
+
         logger.info("GET /user/edit");
         try {
             // Sets current user to page
@@ -59,6 +69,17 @@ public class EditProfileController {
             model.addAttribute("lastName", user.getLastName());
             model.addAttribute("email", user.getEmail());
             model.addAttribute("profilePicture", user.getProfilePicture());
+
+            Location location = user.getLocation();
+            if (location != null) {
+                addressDTO.setAddress_line1(location.getAddress());
+                addressDTO.setCountry(location.getCountry());
+                addressDTO.setPostcode(location.getPostcode());
+                addressDTO.setCity(location.getCity());
+                addressDTO.setRegion(location.getSuburb());
+            }
+
+            model.addAttribute("addressDTO", addressDTO);
 
             return "editProfileTemplate";
         } catch (NoSuchElementException e) {
@@ -78,7 +99,10 @@ public class EditProfileController {
      * @return A redirect string to either the profile view page on success or back to the edit profile page on failure.
      */
     @PostMapping("user/edit")
-    public String updateProfile(@ModelAttribute User updatedUser, RedirectAttributes redirectAttributes) {
+    public String updateProfile(@ModelAttribute User updatedUser,
+                                @ModelAttribute AddressDTO addressDTO,
+                                HttpServletRequest request,
+                                RedirectAttributes redirectAttributes) {
         logger.info("POST /user/edit");
 
         User newUser = loginService.getUserByEmail();
@@ -86,14 +110,26 @@ public class EditProfileController {
 
         Map<String, List<String>> errors = editProfileService.validateUpdate(updatedUser, sameEmail);
 
-        if (!errors.isEmpty()) {
-            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
 
+        boolean locationProvided = addressDTO != null &&
+                (addressDTO.getAddress_line1() != null && !addressDTO.getAddress_line1().isBlank()
+                        || addressDTO.getRegion() != null && !addressDTO.getRegion().isBlank()
+                        || addressDTO.getCity() != null && !addressDTO.getCity().isBlank()
+                        || addressDTO.getPostcode() != null && !addressDTO.getPostcode().isBlank()
+                        || addressDTO.getCountry() != null && !addressDTO.getCountry().isBlank());
+        if (locationProvided) {
+            errors.putAll(locationService.validateLocation(addressDTO));
+        }
+
+        if (!errors.isEmpty()) {
+            errors.forEach(redirectAttributes::addFlashAttribute);
             redirectAttributes.addFlashAttribute("user", newUser);
             redirectAttributes.addFlashAttribute("firstName", newUser.getFirstName());
             redirectAttributes.addFlashAttribute("lastName", newUser.getLastName());
             redirectAttributes.addFlashAttribute("email", newUser.getEmail());
             redirectAttributes.addFlashAttribute("profilePicture", newUser.getProfilePicture());
+            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
+            redirectAttributes.addFlashAttribute("locationUsed", locationProvided);
 
             return "redirect:/user/edit";
         }
@@ -101,6 +137,19 @@ public class EditProfileController {
         newUser.setFirstName(updatedUser.getFirstName());
         newUser.setLastName(updatedUser.getLastName());
         newUser.setEmail(updatedUser.getEmail());
+
+        if (locationProvided) {
+            Location userLocation = new Location(
+                    addressDTO.getAddress_line1(),
+                    addressDTO.getCountry(),
+                    addressDTO.getPostcode(),
+                    addressDTO.getCity(),
+                    addressDTO.getRegion()
+            );
+            newUser.setLocation(userLocation);
+        } else {
+            newUser.setLocation(null);
+        }
 
         editProfileService.updateUser(newUser);
         return "redirect:/user";

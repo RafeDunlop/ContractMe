@@ -4,6 +4,8 @@
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
     <title>Edit Profile</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
 </head>
 
 <body>
@@ -93,6 +95,26 @@
                 </div>
             </div>
 
+            <!-- LOCATION TOGGLE SWITCH -->
+
+
+            <div class="d-flex justify-content-between align-items-center py-4 px-0" style="width: 25%">
+                <div>Enter Location (Optional):</div>
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="location-toggleswitch" th:checked="${locationUsed}">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- LOCATION FORM FRAGMENT -->
+            <div th:class="${locationUsed} ? 'form-extension' : 'hidden-form-extension'" id="location-form">
+                <div th:replace="~{fragments/locationForm.html :: locationForm(
+                     addressDTO=${addressDTO})}"></div>
+            </div>
+
+
             <!-- Form submission buttons -->
             <div class="d-flex justify-content-between align-items-center">
                 <div>
@@ -107,6 +129,7 @@
     </div>
 </div>
 </body>
+<script type="module" src="/js/locationForm.js"></script>
 <script type="module" th:src="@{/js/userValidation.js}"></script>
 <script type="module" th:src="@{/js/profileValidation.js}"></script>
 </html>
