@@ -42,6 +42,22 @@ public class RenovationRecordService {
 
     /**
      * Retrieves a list of renovation records associated with the current user that are like the given term
+     * with pagination.
+     * @param user The current user
+     * @param term The term to search for, not case-sensitive
+     * @param pageable The pagination information
+     * @return a list of renovation records from the user that match the term if given
+     */
+    public Page<RenovationRecord> getPaginatedUserRecords(User user, String term,
+                                                        Pageable pageable) {
+        if (term == null || term.trim().isEmpty()) {
+            return renovationRecordRepository.findByUser(user, pageable);
+        }
+        return renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCasePaginated(user, term, pageable);
+    }
+
+    /**
+     * Retrieves a list of renovation records associated with the current user that are like the given term
      * @param user The current user
      * @param term The term to search for, not case-sensitive
      * @return a list of renovation records from the user that match the term if given

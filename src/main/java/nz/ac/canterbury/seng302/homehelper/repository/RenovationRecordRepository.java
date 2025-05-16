@@ -3,6 +3,9 @@ package nz.ac.canterbury.seng302.homehelper.repository;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -55,6 +58,13 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
             "AND " + "r.user = :user " +
             "ORDER BY r.createdDate DESC")
     List<RenovationRecord> findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(@Param("user") User user, @Param("term") String term);
+
+    @Query("SELECT r FROM RenovationRecord r " +
+            "WHERE " + "(LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            "OR " + "LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%'))) " +
+            "AND " + "r.user = :user " +
+            "ORDER BY r.createdDate DESC")
+    Page<RenovationRecord> searchNameOrDescriptionContainingIgnoreCasePaginated(@Param("user") User user, @Param("term") String term, @Nullable Pageable pageable);
 
     /**
      * Finds all public renovation records
@@ -117,6 +127,14 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
      */
     @Query("SELECT f FROM RenovationRecord f WHERE (f.name) = (:name) AND (f.user) = (:user)")
     Optional<RenovationRecord> findExactMatch(@Param("name") String name, @Param("user") User user);
+
+    /**
+     * Finds all renovation records where the current user on the application matches the owner of the renovation.
+     * @param user The current user
+     * @return A list of all the renovation records from the user
+     */
+    @Query("SELECT f FROM RenovationRecord f WHERE (f.user) = (:user)")
+    Page<RenovationRecord> findByUser(@Param("user") User user, @Nullable Pageable pageable);
 
     /**
      * Deletes a record from the renovations record table by its id. The id cannot be null/

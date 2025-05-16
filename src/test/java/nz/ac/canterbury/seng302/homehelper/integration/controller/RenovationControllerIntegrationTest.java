@@ -195,6 +195,77 @@ public class RenovationControllerIntegrationTest {
     }
 
     /**
+     * Tests that a paginated page can be selected using query parametrs.
+     * Verifies that the correct page is returned by specifiying the number
+     * of records per page.
+     * @throws Exception if the request processing fails
+     */
+    @Test
+    public void getRenovationRecord_selectPage_returnsCorrectPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
+            renovationRecordRepository.save(existingRecord);
+        }
+        mockMvc.perform(get("/renovations")
+                        .param("page", "2")
+                        .param("itemsPerPage", "5"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("renovationsTemplate"))
+            .andExpect(model().attributeExists("renovations"))
+            .andExpect(model().attribute("renovations", hasSize(5)))
+            .andExpect(model().attribute("pageNumber", 2))
+            .andExpect(model().attribute("renovations", hasItem(hasProperty("name", is("Renovation 5")))));
+    }
+
+    /**
+     * Tests that selecting a page that is out of bounds will redirect to the last page.
+     */
+    @Test
+    public void getRenovationRecord_selectOutOfBoundsPage_returnsLastPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
+            renovationRecordRepository.save(existingRecord);
+        }
+        mockMvc.perform(get("/renovations")
+                        .param("page", "100")
+                        .param("itemsPerPage", "5"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations?page=4&itemsPerPage=5"));
+    }
+
+    /**
+     * Tests that requesting 0 items per page will redirect to the default of 8 items per page.
+     */
+    @Test
+    public void getRenovationRecord_zeroItemsPerPage_returns8ItemsPerPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
+            renovationRecordRepository.save(existingRecord);
+        }
+        mockMvc.perform(get("/renovations")
+                        .param("page", "1")
+                        .param("itemsPerPage", "0"))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(model().attribute("itemsPerPage", 8));
+    }
+
+    /**
+     * Tests that requesting a page number of 0 will redirect to the first page.
+     */
+    @Test
+    public void getRenovationRecord_zeroPageNumber_returnsFirstPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
+            renovationRecordRepository.save(existingRecord);
+        }
+        mockMvc.perform(get("/renovations")
+                        .param("page", "0")
+                        .param("itemsPerPage", "5"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations?page=1&itemsPerPage=5"));
+    }
+
+    /**
      * Tests posting to the create renovations page which will create a new renovation record under the current user. If all the details
      * (name, description, rooms) are in the correct format and then posted, the user is taken to the view page for that renovation and the
      * record is added to the repository.
