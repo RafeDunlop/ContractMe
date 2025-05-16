@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
@@ -381,9 +382,13 @@ public class RenovationController {
     public String addTagToRenovation(@RequestParam Long renovationId,
                                      @RequestParam("tagName") String tagName,
                                      RedirectAttributes redirectAttributes) {
-        logger.info("/tags/add");
+        logger.info("POST renovations/tags/add");
 
         RenovationRecord record = renovationRecordService.getRecordById(renovationId);
+        if (record == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
+        else if (record.getUser() != loginService.getUserByEmail())
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You don't own this renovation");
         List<String> errors = tagService.validateTagAndRecord(record, tagName);
         if (errors.isEmpty()) {
             if (tagService.checkExists(tagName)) {
@@ -394,6 +399,24 @@ public class RenovationController {
             redirectAttributes.addFlashAttribute("errors", errors);
         }
         return "redirect:/renovations/view?id=" + renovationId;
+    }
+
+    /**
+     * Removes the specified tag from the specified renovation. If the renovation has no such tag, there is no result
+     * @param renovationId The id of the renovation to remove the tag from
+     * @param tagName The name of the tag to be removed
+     */
+    @PatchMapping("/tags/remove")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeTagFromRenovation(@RequestParam Long renovationId, @RequestParam String tagName) {
+        logger.info("PATCH renovations/tags/remove");
+        RenovationRecord record = renovationRecordService.getRecordById(renovationId);
+        Tag tag = tagService.getTag(tagName);
+        if (record == null || tag == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
+        else if (record.getUser() != loginService.getUserByEmail())
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You don't own this renovation");
+        tagService.removeTagFromRenovation(record, tag);
     }
 
 

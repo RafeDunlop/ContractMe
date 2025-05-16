@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/tags.css}">
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="stylesheet" th:href="@{/css/viewRenovationStyles.css}">
     <title>Renovation Records</title>
@@ -11,7 +12,11 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        .no-underline {
+            text-decoration: none;
+        }
     </style>
+    <script type="text/javascript" th:src="@{/js/removeTag.js}"></script>
 </head>
 <body>
 
@@ -86,8 +91,16 @@
                                 <h5 class="card-title truncate" th:text="${record.name}">Record Name</h5>
 
                                 <!-- Renovation record tags -->
-                                <div class="mb-2">
-                                    <span th:each="tag : ${record.tags}" class="badge bg-secondary me-1" th:text="${tag}">Tag</span>
+                                <div class="d-flex flex-wrap">
+                                    <span th:each="tag : ${record.getSortedTags()}" class="tag-box badge bg-success d-flex align-items-center me-2 mb-2">
+                                        <span class="tag-text-small text-truncate" th:text="${tag.getTagName()}"></span>
+                                        <button class="tag-delete-button-small btn-sm border-0 bg-transparent text-light ms-1"
+                                                th:if="${record.user == user}" type="button"
+                                                th:attr="data-renovationId=${record.id}, data-csrf=${_csrf.token}, data-tagName=${tag.getTagName()}"
+                                                th:onclick="|removeTag(this)|">
+                                            X
+                                        </button>
+                                    </span>
                                 </div>
 
                                 <!-- Renovation record description -->
