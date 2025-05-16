@@ -3,7 +3,6 @@
  * Requires confirmPrompt.js loaded beforehand
  */
 
-
 /**
  * Onclick function for the task search button on View Renovation
  * Uses the confirmation prompt before searching
