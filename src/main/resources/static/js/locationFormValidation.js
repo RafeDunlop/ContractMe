@@ -1,4 +1,4 @@
-const suburbPattern = "^[\\p{L}\\d\\-\\s']*$";
+const suburbPattern = /^[\p{L}\d\-'\s]*$/u;
 
 document.addEventListener("DOMContentLoaded", () => {
 

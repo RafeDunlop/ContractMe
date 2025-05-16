@@ -10,7 +10,6 @@ import java.util.List;
 @Service
 public class LocationValidation {
 
-
     /**
      * Validates city suburb by ensuring suburb name string
      * doesn't contain any invalid characters
