@@ -163,7 +163,21 @@ public class LocationValidationTest {
 
     @Test
     void validStreetAddress_containsAllAllowedChars_isValid() {
-        List<String> result = locationValidation.validateStreetAddress("34 Some-cool' street");
+        List<String> result = locationValidation.validateStreetAddress("34/140 Some-cool' street");
         assertEquals(0, result.size());
+    }
+
+    @Test
+    void invalidStreetAddress_emptyAddress_isNotValid() {
+        List<String> result = locationValidation.validateStreetAddress("");
+        assertEquals(1, result.size());
+        assertEquals("Street address is required.", result.get(0));
+    }
+
+    @Test
+    void invalidStreetAddress_containsInvalidChars_isNotValid() {
+        List<String> result = locationValidation.validateStreetAddress("~!@#$%^&*()_=+ 25 Some street");
+        assertEquals(1, result.size());
+        assertEquals("Street address contains invalid characters.", result.get(0));
     }
 }
