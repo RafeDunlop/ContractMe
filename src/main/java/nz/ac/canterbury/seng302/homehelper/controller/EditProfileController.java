@@ -52,6 +52,7 @@ public class EditProfileController {
     /**
      * Displays the editProfileTemplate page under the path "/user/edit" where id
      * is the ID of the user. Sets the current user to the page.
+     * @param addressDTO the dto containing data relating to fields in address form.
      * @param model Model interface
      * @return editProfileTemplate page
      */
@@ -95,13 +96,13 @@ public class EditProfileController {
      * with error messages and previously entered form data.
      *
      * @param updatedUser The user containing the edited profile details.
+     * @param addressDTO the dto containing data relating to fields in address form.
      * @param redirectAttributes Flash attributes used to pass data across the redirect in case of form submission errors.
      * @return A redirect string to either the profile view page on success or back to the edit profile page on failure.
      */
     @PostMapping("user/edit")
     public String updateProfile(@ModelAttribute User updatedUser,
                                 @ModelAttribute AddressDTO addressDTO,
-                                HttpServletRequest request,
                                 RedirectAttributes redirectAttributes) {
         logger.info("POST /user/edit");
 
