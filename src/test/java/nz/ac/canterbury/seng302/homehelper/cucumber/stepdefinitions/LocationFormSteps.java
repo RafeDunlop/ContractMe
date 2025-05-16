@@ -1,28 +1,26 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.util.List;
+
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.servlet.FlashMap;
-import java.util.List;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -142,6 +140,60 @@ public class LocationFormSteps {
     }
 
 
+    @When("I enter a valid address but an invalid suburb and submit the form on the {string} page")
+    public void i_enter_a_valid_address_but_an_invalid_suburb_and_submit_the_form_on_the_page(String endpoint) throws Exception {
+        MockHttpServletRequestBuilder request;
+
+
+        switch (endpoint) {
+            case "/register":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "a#$%")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .with(csrf());
+                resultActions = mockMvc.perform(request);
+                System.out.println(request.param("suburb", "a#$%"));
+
+                break;
+
+            case "/user/edit":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("suburb", "a#$%")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .with(csrf());
+
+                request = request.with(user("jane.doe@example.com").roles("USER"));
+                resultActions = mockMvc.perform(request);
+
+                break;
+
+
+            default:
+                throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
+
+        }
+
+
+    }
+
+
+
 
     @When("I enter an invalid postcode: {string}")
     public void i_enter_an_invalid_postcode(String postcode) throws Exception {
@@ -159,7 +211,7 @@ public class LocationFormSteps {
                         .with(csrf()));
     }
 
-    @When("I enter an valid city: {string}")
+    @When("I enter a valid city: {string}")
     public void i_enter_an_valid_city(String city) throws Exception {
         result = mockMvc.perform(post("/register")
                         .param("firstName", "John")
@@ -192,7 +244,7 @@ public class LocationFormSteps {
                 .with(csrf()));
     }
 
-    @When("I enter an valid postcode: {string}")
+    @When("I enter a valid postcode: {string}")
     public void i_enter_an_valid_postcode(String postcode) throws Exception {
         result = mockMvc.perform(post("/register")
                         .param("firstName", "John")
@@ -216,6 +268,14 @@ public class LocationFormSteps {
                 .andExpect(status().is3xxRedirection());
     }
 
+    @Then("I am taken back to the {string} page")
+    public void i_am_taken_back_to_the_page(String endpoint) throws Exception {
+        resultActions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(endpoint));
+
+    }
+
     @Then("a message tells me that Postcode contains invalid characters")
     public void a_message_tells_me_that_postcode_contains_invalid_characters() throws Exception {
         resultActions
@@ -231,6 +291,12 @@ public class LocationFormSteps {
     @Then("I am taken to the confirm register page")
     public void i_am_taken_to_the_confirm_register_page() throws Exception {
         assertTrue(Objects.requireNonNull(result.getResponse().getRedirectedUrl()).contains("/confirm-registration"));
+    }
+
+    @And("I am told that I have entered an invalid suburb")
+    public void i_am_told_that_i_have_entered_an_invalid_suburb() throws Exception {
+        resultActions
+                .andExpect(flash().attribute("suburbError", List.of("Suburb contains invalid characters")));
     }
 
 }

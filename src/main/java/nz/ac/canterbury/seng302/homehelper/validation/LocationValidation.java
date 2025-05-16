@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.homehelper.validation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 
@@ -80,9 +79,9 @@ public class LocationValidation {
         String trimmed = country.trim();
 
         if (!trimmed.matches("^[\\p{L}\\p{N} ]+$")) {
-            errors.add("Postcode contains invalid characters.");
+            errors.add("Country contains invalid characters.");
         } else if (trimmed.chars().filter(c -> c == ' ').count() > 1) {
-            errors.add("Postcode contains invalid characters.");
+            errors.add("Country contains invalid characters.");
         }
 
         return errors;
