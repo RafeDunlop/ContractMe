@@ -1,11 +1,9 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
-import nz.ac.canterbury.seng302.homehelper.service.LocationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.stereotype.Service;
 
 @Service
 public class LocationValidation {
@@ -24,6 +22,19 @@ public class LocationValidation {
             errors.add("Suburb must only include letters, spaces, hyphens, digits or apostrophes.");
         }
 
+        return errors;
+    }
+
+    /**
+     * Validates street address by checking for invalid characters
+     * @param address the street address (with number)
+     * @return errors list of errors found during validation
+     */
+    public List<String> validateStreetAddress(String address) {
+        List<String> errors = new ArrayList<>();
+        if (!address.matches("^[\\p{L}\\-'\\d\\s.]*$")) {
+            errors.add("Street address contains invalid characters.");
+        }
         return errors;
     }
 
