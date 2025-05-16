@@ -112,19 +112,18 @@ public class EditProfileController {
 
         Map<String, List<String>> errors = editProfileService.validateUpdate(updatedUser, sameEmail);
 
-
+        // Checks if the users location has been modified in the form and compares to their old location.
         Location currentLocation = newUser.getLocation();
         Location formLocation = locationService.isLocationProvided(addressDTO)
-                ? new Location(
-                addressDTO.getAddress_line1(),
+                ? new Location(addressDTO.getAddress_line1(),
                 addressDTO.getCountry(),
                 addressDTO.getPostcode(),
                 addressDTO.getCity(),
                 addressDTO.getRegion()
         )
                 : null;
-        boolean locationProvided = !Objects.equals(currentLocation, formLocation);
-        if (locationProvided) {
+        boolean locationChanged = !Objects.equals(currentLocation, formLocation);
+        if (locationChanged) {
             errors.putAll(locationService.validateLocation(addressDTO));
         }
 
@@ -136,7 +135,7 @@ public class EditProfileController {
             redirectAttributes.addFlashAttribute("email", newUser.getEmail());
             redirectAttributes.addFlashAttribute("profilePicture", newUser.getProfilePicture());
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
-            redirectAttributes.addFlashAttribute("locationUsed", locationProvided);
+            redirectAttributes.addFlashAttribute("locationUsed", locationChanged);
 
             return "redirect:/user/edit";
         }
@@ -145,7 +144,9 @@ public class EditProfileController {
         newUser.setLastName(updatedUser.getLastName());
         newUser.setEmail(updatedUser.getEmail());
 
-        newUser.setLocation(formLocation);
+        if (locationChanged) {
+            newUser.setLocation(formLocation);
+        }
         editProfileService.updateUser(newUser);
 
         return "redirect:/user";
