@@ -20,21 +20,7 @@ function displayLocationForm() {
         locationForm.style.display = "block";
     }
     else {
-        closeLocationForm()
-    }
-}
-
-function closeLocationForm() {
-    locationForm.style.display = "none";
-    clearInputField(addressField);
-    clearInputField(suburbField);
-    clearInputField(cityField);
-    clearInputField(postcodeField);
-    clearInputField(countryField);
-}
-function clearInputField(inputField) {
-    if (!(inputField === "")) {
-        inputField.value = "";
+        locationForm.style.display = "none";
     }
 }
 
