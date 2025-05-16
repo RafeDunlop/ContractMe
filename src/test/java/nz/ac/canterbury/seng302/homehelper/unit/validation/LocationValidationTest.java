@@ -1,4 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.unit.validation;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -14,6 +15,10 @@ import java.util.stream.Stream;
 public class LocationValidationTest {
     private static LocationValidation locationValidation;
 
+    @BeforeAll
+    public static void setUp() {
+        locationValidation = new LocationValidation();
+    }
 
 
     @Test
@@ -154,5 +159,11 @@ public class LocationValidationTest {
     void validPostcode_postcodeWithLeadingAndTrailingSpaces_isTrimmedAndValid() {
         List<String> result = locationValidation.validatePostcode(" 1234 ");
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void validStreetAddress_containsAllAllowedChars_isValid() {
+        List<String> result = locationValidation.validateStreetAddress("34 Some-cool' street");
+        assertEquals(0, result.size());
     }
 }
