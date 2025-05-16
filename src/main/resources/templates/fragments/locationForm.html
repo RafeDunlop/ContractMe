@@ -14,17 +14,28 @@
         <!-- ADDRESS (house number and street)-->
         <div class="mb-3">
             <input type="text" class="form-control" id="address" name="address_line1" placeholder="Address"
-                   aria-label="address" th:value="${addressDTO.address_line1}">
+                   aria-label="address" th:value="*{addressDTO.address_line1}" maxlength="128">
 
             <!-- Frontend JS Error -->
+            <div class="alert alert-danger mt-2" id="address-frontend-error" hidden>
+                <ul>
+                    <li><label class="form-label" id="address-frontend-error-message"></label></li>
+                </ul>
+            </div>
 
             <!-- Backend error -->
+            <div class="alert alert-danger mt-2" id="address-backend-error"
+                 th:attr="hidden=${addressError == null}">
+                <ul>
+                    <li th:each="msg : ${addressError}" th:text="${msg}"></li>
+                </ul>
+            </div>
         </div>
 
         <!-- SUBURB -->
         <div class="mb-3">
             <input type="text" class="form-control" id="suburb" name="region" placeholder="Suburb (optional)"
-                   aria-label="suburb" th:value="${addressDTO.region}">
+                   aria-label="suburb" th:value="*{addressDTO.region}" maxlength="128">
 
             <!-- Frontend JS Error -->
             <div class="alert alert-danger mt-2" id="suburb-frontend-error" hidden>
@@ -42,18 +53,21 @@
             </div>
         </div>
 
-        </div>
-
         <!-- CITY -->
         <div class="mb-3">
             <input type="text" class="form-control" id="city" name="city" placeholder="City (optional)"
-                   aria-label="city" th:value="${addressDTO.city}">
+                   aria-label="city" th:value="*{addressDTO.city}" maxlength="128">
 
             <!-- Frontend JS Error -->
+            <div class="alert alert-danger mt-2" id="city-frontend-error" hidden>
+                <ul>
+                    <li><label class="form-label" id="city-frontend-error-message"></label></li>
+                </ul>
+            </div>
 
             <!-- Backend error -->
             <div class="alert alert-danger mt-2" id="city-backend-error"
-                 th:attr="hidden=${cityError == null}">
+                 th:attr="hidden=${Error == null}">
                 <ul>
                     <li th:each="msg : ${cityError}" th:text="${msg}"></li>
                 </ul>
@@ -63,7 +77,7 @@
         <!-- POSTCODE -->
         <div class="mb-3">
             <input type="text" class="form-control" id="postcode" name="postcode" placeholder="Postcode (optional)"
-                   aria-label="postcode" th:value="${addressDTO.postcode}">
+                   aria-label="postcode" th:value="*{addressDTO.postcode}" maxlength="128">
 
             <!-- Frontend JS Error -->
             <div class="alert alert-danger mt-2" id="postcode-frontend-error" hidden>
@@ -71,11 +85,12 @@
                     <li><label class="form-label" id="postcode-frontend-error-message"></label></li>
                 </ul>
             </div>
+
             <!-- Backend error -->
             <div class="alert alert-danger mt-2" id="postcode-backend-error"
-                 th:attr="hidden=${postCodeError == null}">
+                 th:attr="hidden=${postcodeError == null}">
                 <ul>
-                    <li th:each="msg : ${postCodeError}" th:text="${msg}"></li>
+                    <li th:each="msg : ${postcodeError}" th:text="${msg}"></li>
                 </ul>
             </div>
         </div>
@@ -83,11 +98,22 @@
         <!-- COUNTRY -->
         <div class="mb-3">
             <input type="text" class="form-control" id="country" name="country" placeholder="Country (optional)"
-                   aria-label="country" th:value="${addressDTO.country}">
+                   aria-label="country" th:value="*{addressDTO.country}" maxlength="128">
 
             <!-- Frontend JS Error -->
+            <div class="alert alert-danger mt-2" id="country-frontend-error" hidden>
+                <ul>
+                    <li><label class="form-label" id="country-frontend-error-message"></label></li>
+                </ul>
+            </div>
 
             <!-- Backend error -->
+            <div class="alert alert-danger mt-2" id="country-backend-error"
+                 th:attr="hidden=${countryError == null}">
+                <ul>
+                    <li th:each="msg : ${countryError}" th:text="${msg}"></li>
+                </ul>
+            </div>
         </div>
 
         <div style="height: 50px;"></div>
@@ -96,5 +122,5 @@
 </div>
 </body>
 <script type="module" src="/js/locationForm.js"></script>
-<script type="module" src="/js/locationFormValidation.js"></script>
+<script type = "module" src="/js/locationFormValidation.js"></script>
 </html>

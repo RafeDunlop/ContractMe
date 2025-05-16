@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
-import nz.ac.canterbury.seng302.homehelper.dto.LocationDTO;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.LocationValidation;
 import org.slf4j.Logger;
@@ -44,14 +43,15 @@ public class LocationService {
     private final ObjectMapper objectMapper;
 
     private final RestTemplate restTemplate;
+
     private final LocationValidation locationValidation;
 
     @Autowired
     public LocationService(Keys keys, LocationValidation locationValidation) {
         this.keys = keys;
+        this.locationValidation = locationValidation;
         this.objectMapper = new ObjectMapper();
         this.restTemplate = new RestTemplate();
-        this.locationValidation = locationValidation;
     }
 
     /**
@@ -107,8 +107,11 @@ public class LocationService {
         }
     }
     public Map<String, List<String>> validateLocation(AddressDTO dto) {
-        return new HashMap<String, List<String>>();
+        Map<String, List<String>> errors = new HashMap<>();
+        MapUtil.putIfNotEmpty(errors, "suburbError", locationValidation.validateSuburb(dto.getRegion()));
+        return errors;
     }
+
 
     /**
      * checks if the location has been provided
