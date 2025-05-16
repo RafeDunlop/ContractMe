@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * Controller for the edit profile page
@@ -112,12 +113,17 @@ public class EditProfileController {
         Map<String, List<String>> errors = editProfileService.validateUpdate(updatedUser, sameEmail);
 
 
-        boolean locationProvided = addressDTO != null &&
-                (addressDTO.getAddress_line1() != null && !addressDTO.getAddress_line1().isBlank()
-                        || addressDTO.getRegion() != null && !addressDTO.getRegion().isBlank()
-                        || addressDTO.getCity() != null && !addressDTO.getCity().isBlank()
-                        || addressDTO.getPostcode() != null && !addressDTO.getPostcode().isBlank()
-                        || addressDTO.getCountry() != null && !addressDTO.getCountry().isBlank());
+        Location currentLocation = newUser.getLocation();
+        Location formLocation = locationService.isLocationProvided(addressDTO)
+                ? new Location(
+                addressDTO.getAddress_line1(),
+                addressDTO.getCountry(),
+                addressDTO.getPostcode(),
+                addressDTO.getCity(),
+                addressDTO.getRegion()
+        )
+                : null;
+        boolean locationProvided = !Objects.equals(currentLocation, formLocation);
         if (locationProvided) {
             errors.putAll(locationService.validateLocation(addressDTO));
         }
@@ -139,20 +145,9 @@ public class EditProfileController {
         newUser.setLastName(updatedUser.getLastName());
         newUser.setEmail(updatedUser.getEmail());
 
-        if (locationProvided) {
-            Location userLocation = new Location(
-                    addressDTO.getAddress_line1(),
-                    addressDTO.getCountry(),
-                    addressDTO.getPostcode(),
-                    addressDTO.getCity(),
-                    addressDTO.getRegion()
-            );
-            newUser.setLocation(userLocation);
-        } else {
-            newUser.setLocation(null);
-        }
-
+        newUser.setLocation(formLocation);
         editProfileService.updateUser(newUser);
+
         return "redirect:/user";
     }
 

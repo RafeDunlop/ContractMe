@@ -4,15 +4,18 @@ package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -22,6 +25,9 @@ public class LocationFormSteps {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private MvcResult result;
 
@@ -52,8 +58,14 @@ public class LocationFormSteps {
 
     @Given("I am viewing the enter location details form on the {string} page")
     public void i_am_viewing_the_enter_location_details_form_on_the_page(String endPoint) throws Exception {
-        result = mockMvc.perform(get(endPoint)
-                .with(csrf()))
+        MockHttpServletRequestBuilder request = get(endPoint)
+                .with(csrf());
+
+        if (endPoint.equals("/user/edit")) {
+            request.with(user("jane.doe@example.com").roles("USER"));
+        }
+
+        result = mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -69,23 +81,37 @@ public class LocationFormSteps {
 
     @When("I leave the address field blank but fill any other field on the location form on the {string} page")
     public void i_leave_the_address_field_blank_but_fill_any_other_field_on_the_location_form_on_the_page(String endpoint) throws Exception {
+        MockHttpServletRequestBuilder request = post(endpoint)
+                .param("firstName", "Jane")
+                .param("lastName", "Doe")
+                .param("email", "jane.doe@example.com")
+                .param("address_line1", "") // <- IMPORTANT: make sure param name matches controller!
+                .param("suburb", "Riccarton")
+                .param("city", "Christchurch")
+                .param("postcode", "8041")
+                .param("country", "New Zealand")
+                .with(csrf());
 
-            result = mockMvc.perform(post(endpoint)
-                            .param("firstName", "Jane")
-                            .param("lastName", "Doe")
-                            .param("email", "jane.doe@example.com")
-                            .param("password", "Test123!")
-                            .param("confirmPassword", "Test123!")
-                            .param("address", "")
-                            .param("suburb", "Riccarton")
-                            .param("city", "Christchurch")
-                            .param("postcode", "8041")
-                            .param("country", "New Zealand")
-                            .with(csrf()))
-                    .andExpect(status().is3xxRedirection())
-                    .andReturn();
+        switch (endpoint) {
+            case "/register":
+                request = request
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!");
+                break;
 
+            case "/user/edit":
+                request = request.with(user("jane.doe@example.com").roles("USER"));
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
+        }
+
+        result = mockMvc.perform(request)
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
     }
+
 
 
 
@@ -98,21 +124,35 @@ public class LocationFormSteps {
 
     @When("I enter a valid address and submit the location form on the {string} page")
     public void i_enter_a_valid_address_and_submit_the_location_form_on_the_page(String endpoint) throws Exception {
-        result = mockMvc.perform(post(endpoint)
-                        .param("firstName", "Jane")
-                        .param("lastName", "Doe")
-                        .param("email", "jane.doe@example.com")
-                        .param("password", "Test123!")
-                        .param("confirmPassword", "Test123!")
-                        .param("address", "200 Riccarton Road")
-                        .param("suburb", "Riccarton")
-                        .param("city", "Christchurch")
-                        .param("postcode", "8041")
-                        .param("country", "New Zealand")
-                        .with(csrf()))
+        MockHttpServletRequestBuilder request = post(endpoint)
+                .param("firstName", "Jane")
+                .param("lastName", "Doe")
+                .param("email", "jane.doe@example.com")
+                .param("address_line1", "200 Riccarton Road")
+                .param("suburb", "Riccarton")
+                .param("city", "Christchurch")
+                .param("postcode", "8041")
+                .param("country", "New Zealand")
+                .with(csrf());
+
+        // Endpoint specific params
+        switch (endpoint) {
+            case "/register":
+                request.param("password", "Test123!")
+                        .param("confirmPassword", "Test123!");
+                break;
+
+            case "/user/edit":
+                request.with(user("jane.doe@example.com").roles("USER"));
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
+        }
+
+        result = mockMvc.perform(request)
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
-
     }
 
     @Then("The form from the {string} page is saved and contains the address I supplied")

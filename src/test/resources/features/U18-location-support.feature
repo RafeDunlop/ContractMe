@@ -15,8 +15,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
     Examples:
       | page_name               |
       |  "/register"            |
-
-
+      |  "/user/edit"           |
 
 
     Scenario Outline: AC11: Given I supply a fully compliant address, when I submit the form,
@@ -27,6 +26,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
       Examples:
         | page_name               |
         |  "/register"            |
+        |  "/user/edit"           |
 
 
 
