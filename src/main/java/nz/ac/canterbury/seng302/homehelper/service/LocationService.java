@@ -15,7 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Basic unlinked location implementation using Geoapify
@@ -98,6 +101,21 @@ public class LocationService {
             throw new IllegalStateException(e.getMessage());
         }
     }
+    public Map<String, List<String>> validateLocation(AddressDTO dto) {
+        return new HashMap<String, List<String>>();
+    }
+
+    /**
+     * checks if the location has been provided
+     * @param dto location data transfer object
+     * @return true if location has been provided, false if it hasn't
+     */
+    public boolean isLocationProvided(AddressDTO dto) {
+        return dto != null &&
+                Stream.of(dto.getAddress_line1(), dto.getCountry(), dto.getPostcode(), dto.getCity(), dto.getRegion())
+                        .anyMatch(field -> field != null && !field.trim().isEmpty());
+    }
+
 
     /**
      * Assembles the URL to call the Geoapify autocomplete API endpoint for the specified parameters

@@ -43,6 +43,9 @@ public class User {
     @Column
     private String profilePicture;
 
+    @Column
+    private Location location;
+
     @Column(name = "activated")
     private boolean activated;
 
@@ -52,13 +55,13 @@ public class User {
     private List<Authority> userRoles;
 
     /**
-     * Creates a new User object
+     * Creates a new User object without location
      * @param firstName first name of user
      * @param lastName last name of user
      * @param email user's email
      * @param password user's password
      */
-    public User(String firstName, String lastName, String email,  String password) {
+    public User(String firstName, String lastName, String email, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -186,6 +189,22 @@ public class User {
      */
     public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }
 
+    /**
+     * Gets the location of user
+     * @return location entity
+     */
+    public Location getLocation() {
+        return location;
+    }
+
+    /**
+     * Sets the location of user
+     * @param location location entity
+     */
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     /**
      * Set the user account active and grants role user.
