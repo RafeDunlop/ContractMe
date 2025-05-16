@@ -1,6 +1,7 @@
 const suburbPattern = /^[\p{L}\d\-'\s]*$/u;
 const cityPattern = /^[\p{L}\-'\s]*$/u;
-const countryPattern = /^[\p{L}\-']*[\s]+$/u;
+const countryPattern = /^(?!.* {2})[\p{L}\p{N} ]+$/u;
+
 document.addEventListener("DOMContentLoaded", () => {
 
     let addressField = document.getElementById("address");
@@ -68,7 +69,6 @@ function checkOptionalField(input, frontendError, frontendErrorMessage, errorMes
         backendError.hidden = true;
 
     }
-
     else {
         frontendErrorMessage.textContent = "";
         frontendError.hidden = true;

@@ -22,7 +22,7 @@ public class LocationValidation {
         List<String> errors = new ArrayList<>();
 
         if (!suburb.matches("^[\\p{L}\\d\\-\\s']*$")) {
-            errors.add("Suburb must only include letters, spaces, hyphens, digits or apostrophes.");
+            errors.add("Suburb contains invalid characters");
         }
 
         return errors;
@@ -37,12 +37,10 @@ public class LocationValidation {
      */
     public List<String> validateCity(String city) {
         List<String> errors = new ArrayList<>();
-        Pattern pattern = Pattern.compile("^[\\p{L} \\-']+$", Pattern.UNICODE_CHARACTER_CLASS);
-        String cityName = city.trim();
-        if (!pattern.matcher(cityName).matches()) {
-            errors.add("City contains invalid characters.");
-        }
 
+        if (!city.matches("^[\\p{L}\\-\\s']*$")) {
+            errors.add("City contains invalid characters");
+        }
         return errors;
     }
 
