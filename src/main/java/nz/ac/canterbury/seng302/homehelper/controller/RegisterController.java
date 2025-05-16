@@ -39,8 +39,6 @@ public class RegisterController {
     private final ApplicationEventPublisher eventPublisher;
     private final LocationService locationService;
 
-
-
     /**
      * Constructor for the register class, links controller and service layers
      */

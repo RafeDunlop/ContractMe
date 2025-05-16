@@ -3,24 +3,46 @@ let locationForm = document.getElementById("location-form");
 let addressField = document.getElementById("address");
 let suburbField = document.getElementById("suburb");
 let cityField = document.getElementById("city");
+
 let postcodeField = document.getElementById("postcode");
+let postcodeFrontendErrorMessage = document.getElementById("postcode-frontend-error-message");
+let postcodeFrontendError = document.getElementById("postcode-frontend-error");
+let postcodeBackendError = document.getElementById("postcode-backend-error");
+
 let countryField = document.getElementById("country");
 
-
 locationToggleSwitch.addEventListener("click", displayLocationForm);
+
+postcodeField.addEventListener("blur", validatePostcode);
 
 function displayLocationForm() {
     if (locationToggleSwitch.checked === true) {
         locationForm.style.display = "block";
     }
     else {
-        closeLocationForm()
+        locationForm.style.display = "none";
     }
 }
 
-function closeLocationForm() {
-    locationForm.style.display = "none";
+function validatePostcode() {
+    let postcode = postcodeField.value.trim();
+    let postcodePattern = /^[\p{L}\p{N} ]+$/u;
+    let spaceCount = (postcode.match(/ /g) || []).length;
 
-
-
+    if (!postcode) {
+        postcodeFrontendErrorMessage.textContent = "Postcode cannot be empty.";
+        postcodeFrontendError.hidden = false;
+        postcodeFrontendErrorMessage.hidden = false;
+        postcodeBackendError.hidden = true;
+    } else if (!postcodePattern.test(postcode) || spaceCount > 1) {
+        postcodeFrontendErrorMessage.textContent = "Postcode contains invalid characters.";
+        postcodeFrontendError.hidden = false;
+        postcodeFrontendErrorMessage.hidden = false;
+        postcodeBackendError.hidden = true;
+    } else {
+        postcodeFrontendErrorMessage.textContent = "";
+        postcodeFrontendError.hidden = true;
+        postcodeFrontendErrorMessage.hidden = true;
+        postcodeBackendError.hidden = true;
+    }
 }
