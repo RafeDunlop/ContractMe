@@ -2,6 +2,9 @@ package nz.ac.canterbury.seng302.homehelper.entity;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Entity which represents a tag associated with 0 or more {@link RenovationRecord} entities
  * @author Rafe Dunlop
@@ -17,6 +20,8 @@ public class Tag {
     @Column(nullable = false, unique = true)
     private String tagName;
 
+    @ManyToMany(mappedBy = "tags")
+    private Set<RenovationRecord> renovationRecords = new HashSet<>();
     /**
      * JPA required no-args constructor
      */
@@ -60,6 +65,6 @@ public class Tag {
      */
     @Override
     public String toString() {
-        return String.format("RenovationRecord{id=%d, value=%s}", id, tagName);
+        return String.format("Tag{id=%d, value=%s}", id, tagName);
     }
 }
