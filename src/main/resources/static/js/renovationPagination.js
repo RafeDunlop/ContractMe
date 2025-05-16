@@ -30,6 +30,10 @@ function validateRenovationPageSearch() {
     }
 }
 
+/**
+ * Updates the number of items in the page based on the page size and size of
+ * each table row.
+ */
 function updateTable() {
     const tableRow = document.getElementsByClassName('table-row')[0];
     const tableRowHeight = tableRow.offsetHeight;
