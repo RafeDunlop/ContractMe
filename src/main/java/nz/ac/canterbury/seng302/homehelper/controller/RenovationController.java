@@ -23,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -477,6 +478,16 @@ public class RenovationController {
         if (visibility == null) visibility = "all";
         String searchTerm = (String) attributes.getOrDefault("searchTerm", session.getAttribute("searchTerm"));
         if (searchTerm == null) searchTerm = "";
+
+        List<String> tagNameList = (List<String>) attributes.getOrDefault("tagNameList", session.getAttribute("tagNameList"));
+        if (tagNameList == null) tagNameList = Collections.emptyList();
+
+        logger.info("TAG LIST PASSED : " + tagNameList);
+
+
+
+        boolean isTagSearch = Boolean.TRUE.equals(session.getAttribute("isTagSearch"));
+
         if (pageNumber == null) {
             pageNumber = (Integer) session.getAttribute("pageNumber");
             if (pageNumber == null) pageNumber = 1;
@@ -491,11 +502,23 @@ public class RenovationController {
 
         User user = loginService.getUserByEmail();
 
-        List<RenovationRecord> records = switch (visibility.toLowerCase()) {
-            case "public" -> renovationRecordService.getPublicRecords(searchTerm);
-            case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
-            default -> renovationRecordService.getAllRecords(user, searchTerm);
-        };
+        // Switching between search types
+        List<RenovationRecord> records;
+
+        if (isTagSearch) {
+            List<Tag> tagList = tagService.getTags(tagNameList);
+            records = renovationRecordService.getAllRecordsByTags(tagList);
+
+            logger.info("tag list: " + tagList);
+            logger.info("records associated list: " + records);
+        } else{
+            records = switch (visibility.toLowerCase()) {
+                case "public" -> renovationRecordService.getPublicRecords(searchTerm);
+                case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
+                default -> renovationRecordService.getAllRecords(user, searchTerm);
+            };
+        }
+
 
         if (pageNumber < 1)
             return "redirect:/renovations/search?page=1";
@@ -539,16 +562,24 @@ public class RenovationController {
     @PostMapping("/search")
     public String submitSearchRenovations(@RequestParam(required = false) String visibility,
                                           @RequestParam(required = false) String searchTerm,
+                                          @RequestParam(name = "tagNameList", required = false) List<String> tagNameList,
+                                          @RequestParam(defaultValue = "false") boolean isTagSearch,
                                           @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                           @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage,
                                           HttpSession session) {
         logger.info("POST /renovations/search");
+
+        if (isTagSearch && (tagNameList == null || tagNameList.isEmpty())) {
+            return "renovationSearchTemplate";
+        }
 
         if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";
 
         session.setAttribute("visibility", visibility);
         session.setAttribute("searchTerm", searchTerm);
+        session.setAttribute("tagNameList", tagNameList);
+        session.setAttribute("isTagSearch", isTagSearch);
         session.setAttribute("pageNumber", pageNumber);
         session.setAttribute("cardsPerPage", cardsPerPage);
 

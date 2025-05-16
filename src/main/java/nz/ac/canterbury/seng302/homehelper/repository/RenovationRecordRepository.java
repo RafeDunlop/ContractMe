@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.repository;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 
 import org.springframework.data.domain.Page;
@@ -108,6 +109,7 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
             "ORDER BY r.createdDate DESC")
     List<RenovationRecord> findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(@Param("user") User user, @Param("term") String term);
 
+
     /**
      * Finds a renovation record with a matching name not case-sensitive if it exists.
      * Searches all records
@@ -141,4 +143,26 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
     @Modifying
     @Query("DELETE FROM RenovationRecord f WHERE f.id = :id")
     void deleteById(@Param("id") @Nullable Long id);
+
+    /**
+     * Finds all records with OR logic with matching tags.
+     * @param tags objects in a list to search for
+     * @return list of renovation records matching the provided tags
+     */
+    @Query("SELECT r FROM RenovationRecord r JOIN r.tags t WHERE t IN :tags")
+    List<RenovationRecord> findAllByTags(@Param("tags") List<Tag> tags);
+
+    /**
+     * Finds all public records with OR logic for matching tags
+     * It is primarily ordered by number of matching tags, then secondary matched by date created.
+     * @param tags the list of tags matching the query.
+     * @return list of tags found.
+     */
+    @Query("SELECT r FROM RenovationRecord r " +
+            "JOIN r.tags t " +
+            "WHERE r.isPublic = true AND t IN :tags " +
+            "GROUP BY r " +
+            "ORDER BY COUNT(t) DESC, r.createdDate DESC")
+    List<RenovationRecord> findAllPublicByTagsOrderByTagCountAndDate(@Param("tags") List<Tag> tags);
+
 }
