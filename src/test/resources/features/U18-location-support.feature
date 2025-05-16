@@ -6,6 +6,10 @@ Feature:As Kaia, I want to be able to add location to my profile and
     When I click the location toggle switch
     Then I can see the add location input fields
 
+  Scenario: AC2: I can optionally supply my location when editing my profile
+    Given I am on the edit profile form
+    When I click the location toggle switch
+    Then I can see the add location input fields
 
   Scenario Outline: AC5:  Given I am facing a form that asks for my location, when I want to give my location, then I must
   supply a street address with the street number, optionally a suburb, a city, a postcode, and a country.

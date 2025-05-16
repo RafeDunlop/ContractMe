@@ -4,6 +4,7 @@ package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,8 +32,23 @@ public class LocationFormSteps {
 
     private MvcResult result;
 
+    @Given("I am on the edit profile form")
+    public void i_am_on_the_edit_profile_form() throws Exception {
+        MockHttpServletRequestBuilder request = get("/user/edit")
+                .with(user("jane.doe@example.com").roles("USER"));
+
+        result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+
+    }
+
     @Given("I am on the register form")
     public void i_am_on_the_register_form() throws Exception {
+        User user = new User("Jane", "Doe", "jane.doe@example.com", "password");
+        user.grantAuthority("ROLE_USER");
+        userRepository.save(user);
+
         result = mockMvc.perform(get("/register"))
                 .andExpect(status().isOk())
                 .andReturn();
