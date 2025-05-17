@@ -862,7 +862,7 @@ public class RenovationControllerIntegrationTest {
                         .param("renovationId", String.valueOf(renovationId))
                         .param("tagName", testTagName))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId + "&page=1"));
 
         assertTrue(testRecord.getTags().stream()
                 .anyMatch(tag -> tag.getTagName().equals(testTagName)));
@@ -881,7 +881,7 @@ public class RenovationControllerIntegrationTest {
                         .param("renovationId", String.valueOf(renovationId))
                         .param("tagName", newTagName))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId  + "&page=1"));
 
         assertTrue(testRecord.getTags().stream()
                 .anyMatch(tag -> tag.getTagName().equals(newTagName)));
@@ -892,7 +892,7 @@ public class RenovationControllerIntegrationTest {
                         .param("renovationId", String.valueOf(renovationId))
                         .param("tagName", newNameSpecialCharacters))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId + "&page=1"));
 
         assertTrue(testRecord.getTags().stream()
                 .anyMatch(tag -> tag.getTagName().equals(newNameSpecialCharacters)));
@@ -903,7 +903,7 @@ public class RenovationControllerIntegrationTest {
                         .param("renovationId", String.valueOf(renovationId))
                         .param("tagName", withSpacesNewName))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId + "&page=1"));
 
         assertTrue(testRecord.getTags().stream()
                 .anyMatch(tag -> tag.getTagName().equals("electrician")));
