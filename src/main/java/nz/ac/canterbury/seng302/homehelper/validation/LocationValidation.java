@@ -32,7 +32,7 @@ public class LocationValidation {
      * that it must not be empty
      *
      * @param city The city name to be checked
-     * @return true if the specified city name matches the specified pattern and is non-empty
+     * @return list of errors, empty if none are found
      */
     public List<String> validateCity(String city) {
         List<String> errors = new ArrayList<>();
@@ -79,9 +79,9 @@ public class LocationValidation {
         String trimmed = country.trim();
 
         if (!trimmed.matches("^[\\p{L}\\p{N} ]+$")) {
-            errors.add("Country contains invalid characters.");
+            errors.add("Country contains invalid characters");
         } else if (trimmed.chars().filter(c -> c == ' ').count() > 1) {
-            errors.add("Country contains invalid characters.");
+            errors.add("Country contains invalid characters");
         }
 
         return errors;

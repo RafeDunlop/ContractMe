@@ -30,7 +30,9 @@ Feature:As Kaia, I want to be able to add location to my profile and
 
 
 
-  Scenario Outline: AC8.1 non valid city is not accepted
+  Scenario Outline: AC8: Given I supply a city, when the city contains non valid characters (i.e. characters
+  other than letters, hyphen, apostrophe, space), then a message tells me that “City contains invalid characters.”
+  and the form is not saved.
     Given I am viewing the enter location details form on the <page_name> page
     When I enter a valid address but an invalid city and submit the form on the <page_name> page
     Then I am taken back to the <page_name> page
@@ -70,6 +72,17 @@ Feature:As Kaia, I want to be able to add location to my profile and
       | 1010      |
       | W1A 1AA   |
 
+
+    Scenario Outline: AC10: Given I supply a country, when the country contains non valid characters (i.e. characters
+    other than letters, hyphen, apostrophe, single space), then a message tells me that “Country contains invalid
+    characters.” and the form is not saved
+      Given I am viewing the enter location details form on the <page_name> page
+      When I enter a valid address but an invalid country and submit the form on the <page_name> page
+      Then I am taken back to the <page_name> page
+      And I am told that I have entered an invalid country
+      Examples:
+        | page_name               |
+        |  "/register"            |
 
 
   Scenario Outline: AC11: Given I supply a fully compliant address, when I submit the form,
