@@ -12,8 +12,9 @@ const tagPattern = /^(?=.*\p{L}).*$/u;
 
 tagInput.addEventListener("input", function () {validateTag(tagInput.value)})
 
-function validateTag(input) {
+async function validateTag(input) {
     input = input.trim().toLowerCase();
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const errors = [];
     if (tagNamesList.length >= 5) {
         errors.push("Renovation cannot have more than 5 tags.");
@@ -24,6 +25,17 @@ function validateTag(input) {
             errors.push("Tags must contain one or more letters.");
         } if (input.length > 128) {
             errors.push("Tag cannot be greater than 128 characters.");
+        }
+        const response = await fetch(`/renovations/tags/profanity-filter?tagName=${encodeURIComponent(input)}`, {
+            method: "GET",
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Content-Type': 'application/json'
+            },
+        });
+        const profanityInTag = await response.json();
+        if (profanityInTag === true) {
+            errors.push("Name does not follow the system language standards.")
         }
     }
 

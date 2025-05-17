@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
@@ -535,5 +536,12 @@ public class RenovationController {
         session.setAttribute("cardsPerPage", cardsPerPage);
 
         return "redirect:/renovations/search?page=" + pageNumber;
+    }
+
+    @GetMapping("/tags/profanity-filter")
+    @ResponseBody
+    public boolean tagProfanityFilter(@RequestParam("tagName") String tagName) {
+        ProfanityFilter profanityFilter = ProfanityFilter.getInstance();
+        return profanityFilter.find("en", tagName) != null;
     }
 }
