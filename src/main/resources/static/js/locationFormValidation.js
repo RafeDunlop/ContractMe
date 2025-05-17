@@ -3,41 +3,48 @@ const cityPattern = /^[\p{L}\-'\s]*$/u;
 const postcodePattern = /^(?!.* {2})[\p{L}\p{N} ]+$/u;
 const countryPattern = /^(?!.* {2})[\p{L}\-' ]+$/u;
 
+
+let addressField = document.getElementById("address");
+
+let suburbField = document.getElementById("suburb");
+let suburbFrontendError = document.getElementById("suburb-frontend-error");
+let suburbFrontendErrorMessage = document.getElementById("suburb-frontend-error-message");
+let suburbBackendError = document.getElementById("suburb-backend-error")
+
+let cityField = document.getElementById("city");
+let cityFrontendError = document.getElementById("city-frontend-error");
+let cityFrontendErrorMessage = document.getElementById("city-frontend-error-message");
+let cityBackendError = document.getElementById("city-backend-error")
+
+let postcodeField = document.getElementById("postcode");
+let postcodeFrontendError = document.getElementById("postcode-frontend-error");
+let postcodeFrontendErrorMessage = document.getElementById("postcode-frontend-error-message");
+let postcodeBackendError = document.getElementById("postcode-backend-error")
+
+let countryField = document.getElementById("country");
+let countryFrontendError = document.getElementById("country-frontend-error");
+let countryFrontendErrorMessage = document.getElementById("country-frontend-error-message");
+let countryBackendError = document.getElementById("country-backend-error")
+
+
 document.addEventListener("DOMContentLoaded", () => {
-
-    let addressField = document.getElementById("address");
-
-    let suburbField = document.getElementById("suburb");
-    let suburbFrontendError = document.getElementById("suburb-frontend-error");
-    let suburbFrontendErrorMessage = document.getElementById("suburb-frontend-error-message");
-    let suburbBackendError = document.getElementById("suburb-backend-error")
-
-    let cityField = document.getElementById("city");
-    let cityFrontendError = document.getElementById("city-frontend-error");
-    let cityFrontendErrorMessage = document.getElementById("city-frontend-error-message");
-    let cityBackendError = document.getElementById("city-backend-error")
-
-    let postcodeField = document.getElementById("postcode");
-    let postcodeFrontendError = document.getElementById("postcode-frontend-error");
-    let postcodeFrontendErrorMessage = document.getElementById("postcode-frontend-error-message");
-    let postcodeBackendError = document.getElementById("postcode-backend-error")
-
-    let countryField = document.getElementById("country");
-    let countryFrontendError = document.getElementById("country-frontend-error");
-    let countryFrontendErrorMessage = document.getElementById("country-frontend-error-message");
-    let countryBackendError = document.getElementById("country-backend-error")
 
 
 
     // Event listeners
-    suburbField.addEventListener("input", () =>
+
+
+
+    ["input", "focus"].forEach( event =>
+        suburbField.addEventListener(event, () =>
         checkOptionalField(suburbField.value,
             suburbFrontendError,
             suburbFrontendErrorMessage,
-            "Suburb contains invalid characters.",
+            "Suburb contains invalid characters",
             suburbBackendError,
             suburbPattern
             )
+        )
     );
 
     cityField.addEventListener("input", () =>
@@ -83,9 +90,22 @@ function checkOptionalField(input, frontendError, frontendErrorMessage, errorMes
 
     }
     else {
-        frontendErrorMessage.textContent = "";
-        frontendError.hidden = true;
-        frontendErrorMessage.hidden = true;
-        backendError.hidden = true;
+        hideSingleErrorMessage(frontendErrorMessage, frontendError, backendError)
     }
+}
+
+
+export function hideAllErrorMessages() {
+    hideSingleErrorMessage(suburbFrontendErrorMessage, suburbFrontendError, suburbBackendError);
+    hideSingleErrorMessage(cityFrontendErrorMessage, cityFrontendError, cityBackendError);
+    hideSingleErrorMessage(postcodeFrontendErrorMessage, postcodeFrontendError, postcodeBackendError);
+    hideSingleErrorMessage(countryFrontendErrorMessage, countryFrontendError, countryBackendError);
+
+}
+
+function hideSingleErrorMessage(frontendErrorMessage, frontendError, backendError) {
+    frontendErrorMessage.textContent = "";
+    frontendError.hidden = true;
+    frontendErrorMessage.hidden = true;
+    backendError.hidden = true;
 }
