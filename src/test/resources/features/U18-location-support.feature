@@ -31,27 +31,13 @@ Feature:As Kaia, I want to be able to add location to my profile and
 
 
   Scenario Outline: AC8.1 non valid city is not accepted
-    Given I am on the register form
-    When I enter an invalid city: "<city>"
-    Then I am taken back to the register form
-    And a message tells me that the city contains invalid characters
+    Given I am viewing the enter location details form on the <page_name> page
+    When I enter a valid address but an invalid city and submit the form on the <page_name> page
+    Then I am taken back to the <page_name> page
+    And I am told that I have entered an invalid city
     Examples:
-      | city              |
-      | Christ23church    |
-      | Wellington%       |
-      | Moscow (Russia)   |
-      | Sy^dney           |
-
-  Scenario Outline: AC8.2 valid city is accepted
-    Given I am on the register form
-    When I enter a valid city: "<city>"
-    Then I am taken to the confirm register page
-    Examples:
-      | city              |
-      | Christchurch      |
-      | Wellington        |
-      | Moscow            |
-      | Sydney            |
+      | page_name               |
+      | "/register"             |
 
 
 

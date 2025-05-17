@@ -144,7 +144,6 @@ public class LocationFormSteps {
     public void i_enter_a_valid_address_but_an_invalid_suburb_and_submit_the_form_on_the_page(String endpoint) throws Exception {
         MockHttpServletRequestBuilder request;
 
-
         switch (endpoint) {
             case "/register":
                 request = post(endpoint)
@@ -160,7 +159,6 @@ public class LocationFormSteps {
                         .param("confirmPassword", "Test123!")
                         .with(csrf());
                 resultActions = mockMvc.perform(request);
-                System.out.println(request.param("suburb", "a#$%"));
 
                 break;
 
@@ -170,7 +168,7 @@ public class LocationFormSteps {
                         .param("lastName", "Doe")
                         .param("email", "jane.doe@example.com")
                         .param("address_line1", "77 Ilam Road")
-                        .param("suburb", "a#$%")
+                        .param("region", "a#$%")
                         .param("city", "Christchurch")
                         .param("postcode", "8041")
                         .param("country", "New Zealand")
@@ -189,10 +187,7 @@ public class LocationFormSteps {
 
         }
 
-
     }
-
-
 
 
     @When("I enter an invalid postcode: {string}")
@@ -228,6 +223,7 @@ public class LocationFormSteps {
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
     }
+
     @When("I enter an invalid city: {string}")
     public void i_enter_an_invalid_city(String city) throws Exception {
         resultActions = mockMvc.perform(post("/register")
@@ -299,4 +295,59 @@ public class LocationFormSteps {
                 .andExpect(flash().attribute("suburbError", List.of("Suburb contains invalid characters")));
     }
 
+    @When("I enter a valid address but an invalid city and submit the form on the {string} page")
+    public void i_enter_a_valid_address_but_an_invalid_city_and_submit_the_form_on_the_page(String endpoint) throws Exception {
+        MockHttpServletRequestBuilder request;
+
+
+        switch (endpoint) {
+            case "/register":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christ23church")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .with(csrf());
+                resultActions = mockMvc.perform(request);
+
+                break;
+
+            case "/user/edit":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("suburb", "Ilam")
+                        .param("city", "Christ23church")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .with(csrf());
+
+                request = request.with(user("jane.doe@example.com").roles("USER"));
+                resultActions = mockMvc.perform(request);
+
+                break;
+
+
+            default:
+                throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
+
+        }
+
+    }
+
+    @And("I am told that I have entered an invalid city")
+    public void i_am_told_that_i_have_entered_an_invalid_city() throws Exception {
+        resultActions
+                .andExpect(flash().attribute("cityError", List.of("City contains invalid characters")));
+    }
 }
