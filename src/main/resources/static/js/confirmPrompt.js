@@ -22,7 +22,7 @@ function confirmDelete(button) {
             if (!response.ok) {
                 alert("failed to delete renovation")
             }
-            window.location.assign(`/renovations?searchQuery=${encodeURIComponent(searchQuery || '')}`);
+            window.location.assign(`renovations?searchQuery=${encodeURIComponent(searchQuery || '')}`);
         }
     });
 }
