@@ -176,6 +176,9 @@ public class LocationService {
      */
     private List<AddressDTO> injectSuburbs(List<AddressDTO> addresses) {
         for (AddressDTO address : addresses) {
+            if (address.getAddress_line2() == null || address.getAddress_line2().isEmpty()) {
+                continue;
+            }
             if (address.getAddress_line2().contains(",")) {
                 address.setRegion(address.getAddress_line2().split(",")[0]);
             } else if (address.getAddress_line2().contains(" ")) {
