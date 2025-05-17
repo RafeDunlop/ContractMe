@@ -22,7 +22,7 @@ function confirmDelete(button) {
             if (!response.ok) {
                 alert("failed to delete renovation")
             }
-            window.location.assign(`/renovations?searchQuery=${encodeURIComponent(searchQuery || '')}`);
+            window.location.assign(`renovations?searchQuery=${encodeURIComponent(searchQuery || '')}`);
         }
     });
 }
@@ -32,7 +32,7 @@ function confirmLogout() {
     const prompt = "Are you sure you want to log out?";
     confirmPrompt(prompt, "Confirm", "Cancel", true).then(async (confirm) => {
         if (confirm) {
-            const response = await fetch(`/logout`, {
+            const response = await fetch(`logout`, {
                 method: "GET",
             })
 
