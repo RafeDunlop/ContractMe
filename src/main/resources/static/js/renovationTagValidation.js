@@ -12,6 +12,15 @@ const tagPattern = /^(?=.*\p{L}).*$/u;
 
 tagInput.addEventListener("input", function () {validateTag(tagInput.value)})
 
+/**
+ * Validates a tag input for renovations.
+ *
+ * Displays appropriate frontend error messages for any validation failures.
+ *
+ * @param {string} input - The tag name entered by the user.
+ * @returns {Promise<boolean>} - Returns a promise that resolves to `true` if validation passes, otherwise `false`.
+ *
+ */
 async function validateTag(input) {
     input = input.trim().toLowerCase();
     const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
