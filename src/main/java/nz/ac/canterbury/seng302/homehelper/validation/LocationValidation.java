@@ -54,8 +54,8 @@ public class LocationValidation {
 
         String trimmed = postcode.trim();
 
-        if (!trimmed.matches("^[\\p{L}\\p{N} ]+$")) {
-            errors.add("Postcode contains invalid characters.");
+        if (!trimmed.matches("^[\\p{L}\\p{N} ]*$")) {
+            errors.add("Postcode contains invalid characters");
         } else if (trimmed.chars().filter(c -> c == ' ').count() > 1) {
             errors.add("Postcode contains invalid characters");
         }
@@ -74,7 +74,7 @@ public class LocationValidation {
 
         String trimmed = country.trim();
 
-        if (!trimmed.matches("^[\\p{L}\\p{N}\\-' ]+$")) {
+        if (!trimmed.matches("^[\\p{L}\\p{N}\\-' ]*$")) {
             errors.add("Country contains invalid characters");
         } else if (trimmed.chars().filter(c -> c == ' ').count() > 1) {
             errors.add("Country contains invalid characters");
