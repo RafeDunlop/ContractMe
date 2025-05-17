@@ -14,28 +14,28 @@ tagInput.addEventListener("input", function () {validateTag(tagInput.value)})
 
 function validateTag(input) {
     input = input.trim().toLowerCase();
+    const errors = [];
     if (tagNamesList.length >= 5) {
-        tagFrontendErrorMessage.textContent = "Renovation cannot have more than 5 tags.";
-        tagFrontendError.hidden = false;
-        tagBackendError.hidden = true;
-        return false;
+        errors.push("Renovation cannot have more than 5 tags.");
     } else if (tagNamesList.includes(input)) {
-        tagFrontendErrorMessage.textContent = "Renovation cannot contain duplicate tag names.";
-        tagFrontendError.hidden = false;
-        tagBackendError.hidden = true;
-        return false;
-    } else if (input.length > 128) {
-        tagFrontendErrorMessage.textContent = "Tag cannot be greater than 128 characters.";
-        tagFrontendError.hidden = false;
-        tagBackendError.hidden = true;
-        return false;
-    } else if (input === "" || !tagPattern.test(input)) {
-        tagFrontendErrorMessage.textContent = "Tags must contain one or more letters.";
+        errors.push("Renovation cannot contain duplicate tag names.");
+    } else {
+        if (input === "" || !tagPattern.test(input)) {
+            errors.push("Tags must contain one or more letters.");
+        } if (input.length > 128) {
+            errors.push("Tag cannot be greater than 128 characters.");
+        }
+    }
+
+    if (errors.length) {
+        tagFrontendErrorMessage.innerHTML =
+            errors.map(msg => `<li>${msg}</li>`).join("");
+        tagFrontendError.classList.add("show");    // bootstrap’s .show or just remove hidden
         tagFrontendError.hidden = false;
         tagBackendError.hidden = true;
         return false;
     } else {
-        tagFrontendErrorMessage.textContent = "";
+        tagFrontendErrorMessage.innerHTML = "";
         tagFrontendError.hidden = true;
         tagBackendError.hidden = true;
         return true;

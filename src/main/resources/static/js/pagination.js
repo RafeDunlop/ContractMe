@@ -100,6 +100,21 @@ function updateLayout() {
         console.info(`Layout change detected: submitting form with cardsPerPage = ${newCardsPerPage}`);
         const form = document.getElementById('search-form');
         document.getElementById("cardsPerPageInput").value = newCardsPerPage;
+
+        const backendError = document.getElementById('tag-backend-error');
+        if (backendError && backendError.hidden === false) {
+            backendError.querySelectorAll('li').forEach(li => {
+                const text = li.innerText.trim();
+                if (!text) {
+                    return;
+                }
+                const errorInput = document.createElement('input');
+                errorInput.type = 'hidden';
+                errorInput.name = 'errorMessage';
+                errorInput.value = text;
+                form.appendChild(errorInput);
+            });
+        }
         form.submit();
     } else {
         console.debug("No layout change detected. No form submission needed.");
