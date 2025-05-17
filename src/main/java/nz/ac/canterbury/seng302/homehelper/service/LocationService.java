@@ -118,7 +118,7 @@ public class LocationService {
 
         MapUtil.putIfNotEmpty(errors, "suburbError", locationValidation.validateSuburb(dto.getRegion()));
         MapUtil.putIfNotEmpty(errors, "cityError", locationValidation.validateCity(dto.getCity()));
-
+        MapUtil.putIfNotEmpty(errors,"postcodeError", locationValidation.validatePostcode(dto.getPostcode()));
         MapUtil.putIfNotEmpty(errors, "countryError", locationValidation.validateCountry(dto.getCountry()));
 
         return errors;

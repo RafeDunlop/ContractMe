@@ -96,7 +96,7 @@ public class LocationFormSteps {
                             .param("password", "Test123!")
                             .param("confirmPassword", "Test123!")
                             .param("address", "")
-                            .param("suburb", "Riccarton")
+                            .param("region", "Riccarton")
                             .param("city", "Christchurch")
                             .param("postcode", "8041")
                             .param("country", "New Zealand")
@@ -124,7 +124,7 @@ public class LocationFormSteps {
                         .param("password", "Test123!")
                         .param("confirmPassword", "Test123!")
                         .param("address", "200 Riccarton Road")
-                        .param("suburb", "Riccarton")
+                        .param("region", "Riccarton")
                         .param("city", "Christchurch")
                         .param("postcode", "8041")
                         .param("country", "New Zealand")
@@ -202,43 +202,11 @@ public class LocationFormSteps {
                         .param("country", "New Zealand")
                         .param("postcode", postcode)
                         .param("city", "Wellington")
-                        .param("suburb", "Central")
+                        .param("region", "Central")
                         .with(csrf()));
     }
 
-    @When("I enter a valid city: {string}")
-    public void i_enter_an_valid_city(String city) throws Exception {
-        result = mockMvc.perform(post("/register")
-                        .param("firstName", "John")
-                        .param("lastName", "Doe")
-                        .param("email", "john.doe@example.com")
-                        .param("password", "Test123!")
-                        .param("confirmPassword", "Test123!")
-                        .param("address", "123 Street")
-                        .param("country", "New Zealand")
-                        .param("postcode", "8042")
-                        .param("city", city)
-                        .param("suburb", "Central")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-    }
 
-    @When("I enter an invalid city: {string}")
-    public void i_enter_an_invalid_city(String city) throws Exception {
-        resultActions = mockMvc.perform(post("/register")
-                .param("firstName", "John")
-                .param("lastName", "Doe")
-                .param("email", "john.doe@example.com")
-                .param("password", "Test123!")
-                .param("confirmPassword", "Test123!")
-                .param("address", "123 Street")
-                .param("country", "New Zealand")
-                .param("postcode", "8042")
-                .param("city", city)
-                .param("suburb", "Central")
-                .with(csrf()));
-    }
 
     @When("I enter a valid postcode: {string}")
     public void i_enter_an_valid_postcode(String postcode) throws Exception {
@@ -252,7 +220,7 @@ public class LocationFormSteps {
                         .param("country", "New Zealand")
                         .param("postcode", postcode)
                         .param("city", "Wellington")
-                        .param("suburb", "Central")
+                        .param("region", "Central")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
@@ -324,7 +292,7 @@ public class LocationFormSteps {
                         .param("lastName", "Doe")
                         .param("email", "jane.doe@example.com")
                         .param("address_line1", "77 Ilam Road")
-                        .param("suburb", "Ilam")
+                        .param("region", "Ilam")
                         .param("city", "Christ23church")
                         .param("postcode", "8041")
                         .param("country", "New Zealand")
@@ -374,7 +342,7 @@ public class LocationFormSteps {
                         .param("lastName", "Doe")
                         .param("email", "jane.doe@example.com")
                         .param("address_line1", "77 Ilam Road")
-                        .param("suburb", "Ilam")
+                        .param("region", "Ilam")
                         .param("city", "Christchurch")
                         .param("postcode", "8041")
                         .param("country", "New  Zealand!")
