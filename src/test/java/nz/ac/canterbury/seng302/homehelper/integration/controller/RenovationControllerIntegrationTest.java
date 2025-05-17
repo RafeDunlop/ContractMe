@@ -3,9 +3,11 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
@@ -51,6 +53,9 @@ public class RenovationControllerIntegrationTest {
 
     @Autowired
     private RenovationTaskRepository renovationTaskRepository;
+
+    @Autowired
+    private TagRepository tagRepository;
 
     @Autowired
     private TagService tagService;
@@ -187,6 +192,77 @@ public class RenovationControllerIntegrationTest {
                         hasProperty("name", is("Renovation One"))))))
                 .andExpect(content().string(containsString("No renovations match your search.")))
                 .andExpect(content().string(not(containsString("No Renovations have been made yet."))));
+    }
+
+    /**
+     * Tests that a paginated page can be selected using query parametrs.
+     * Verifies that the correct page is returned by specifiying the number
+     * of records per page.
+     * @throws Exception if the request processing fails
+     */
+    @Test
+    public void getRenovationRecord_selectPage_returnsCorrectPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
+            renovationRecordRepository.save(existingRecord);
+        }
+        mockMvc.perform(get("/renovations")
+                        .param("page", "2")
+                        .param("itemsPerPage", "5"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("renovationsTemplate"))
+            .andExpect(model().attributeExists("renovations"))
+            .andExpect(model().attribute("renovations", hasSize(5)))
+            .andExpect(model().attribute("pageNumber", 2))
+            .andExpect(model().attribute("renovations", hasItem(hasProperty("name", is("Renovation 5")))));
+    }
+
+    /**
+     * Tests that selecting a page that is out of bounds will redirect to the last page.
+     */
+    @Test
+    public void getRenovationRecord_selectOutOfBoundsPage_returnsLastPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
+            renovationRecordRepository.save(existingRecord);
+        }
+        mockMvc.perform(get("/renovations")
+                        .param("page", "100")
+                        .param("itemsPerPage", "5"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations?page=4&itemsPerPage=5"));
+    }
+
+    /**
+     * Tests that requesting 0 items per page will redirect to the default of 8 items per page.
+     */
+    @Test
+    public void getRenovationRecord_zeroItemsPerPage_returns8ItemsPerPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
+            renovationRecordRepository.save(existingRecord);
+        }
+        mockMvc.perform(get("/renovations")
+                        .param("page", "1")
+                        .param("itemsPerPage", "0"))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(model().attribute("itemsPerPage", 8));
+    }
+
+    /**
+     * Tests that requesting a page number of 0 will redirect to the first page.
+     */
+    @Test
+    public void getRenovationRecord_zeroPageNumber_returnsFirstPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
+            renovationRecordRepository.save(existingRecord);
+        }
+        mockMvc.perform(get("/renovations")
+                        .param("page", "0")
+                        .param("itemsPerPage", "5"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations?page=1&itemsPerPage=5"));
     }
 
     /**
@@ -925,6 +1001,89 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attributeExists("errors"));
     }
+
+    @Test
+    public void addTagToRenovation_recordIdDoesntExist_notFoundErrorThrown() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "Random Renovation", "Some words", List.of());
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+        String tagName = "random tag 1";
+
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId + 1))
+                        .param("tagName", tagName))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void addTagToRenovation_recordNotOwnedByUser_unauthorizedErrorThrown() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "Random Renovation", "Some words", List.of());
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+        String tagName = "random tag 2";
+
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", tagName))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void removeTagFromRenovation_validUserAndRecordId_tagDeletedAndNoContentResponse() throws Exception {
+        Tag newTag = new Tag("random tag 3");
+        tagRepository.save(newTag);
+        RenovationRecord testRecord = new RenovationRecord(currentUser, "Test Renovation", "Some words", List.of("Room1", "Room2"));
+        testRecord.addTag(newTag);
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+
+        mockMvc.perform(patch("/renovations/tags/remove")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", newTag.getTagName()))
+                .andExpect(status().isNoContent());
+
+        assertTrue(testRecord.getTags().stream()
+                .noneMatch(tag -> tag.getTagName().equals(newTag.getTagName())));
+    }
+
+    @Test
+    public void removeTagFromRenovation_recordIdDoesntExist_notFoundErrorThrown() throws Exception {
+        Tag newTag = new Tag("random tag 4");
+        tagRepository.save(newTag);
+        RenovationRecord testRecord = new RenovationRecord(currentUser, "Test Renovation", "Some words", List.of("Room1", "Room2"));
+        testRecord.addTag(newTag);
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+
+        mockMvc.perform(patch("/renovations/tags/remove")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId + 1))
+                        .param("tagName", newTag.getTagName()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void removeTagFromRenovation_recordNotOwnedByUser_unauthorizedErrorThrown() throws Exception {
+        Tag newTag = new Tag("random tag 5");
+        tagRepository.save(newTag);
+        RenovationRecord testRecord = new RenovationRecord(owner, "Test Renovation", "Some words", List.of("Room1", "Room2"));
+        testRecord.addTag(newTag);
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+
+        mockMvc.perform(patch("/renovations/tags/remove")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", newTag.getTagName()))
+                .andExpect(status().isUnauthorized());
+
+        assertFalse(testRecord.getTags().stream()
+                .noneMatch(tag -> tag.getTagName().equals(newTag.getTagName())));
+    }
+
     @Test
     public void searchRenovation_withNoMatches_returnsNoResultsMessage() throws Exception {
         String searchTerm = "NonExistentTerm";
@@ -1111,6 +1270,102 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(model().attribute("records", hasSize(1)))
                 .andExpect(model().attribute("records", hasItem(
                         hasProperty("name", is("Test Renovation"))
+                )));
+    }
+
+    @Test
+    public void tagSearch_withValidPublicRenovation_displaysListOfTags() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "Test Renovation", "Room A Renovation", List.of("Room A"));
+        testRecord.setPublicity(true);
+        RenovationRecord testRecord2 = new RenovationRecord(owner, "Test Renovation", "Room A Renovation", List.of("Room A"));
+        String tagName ="House";
+        Tag testTag = new Tag(tagName);
+        tagRepository.save(testTag);
+        testRecord.getTags().add(testTag);
+        testRecord2.getTags().add(testTag);
+        renovationRecordRepository.save(testRecord);
+        renovationRecordRepository.save(testRecord2);
+
+        MvcResult postResult = mockMvc.perform(post("/renovations/search")
+                        .param("tagNameList", tagName)
+                        .param("isTagSearch", "true")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/search?page=1"))
+                .andReturn();
+
+        mockMvc.perform(get("/renovations/search")
+                        .session((MockHttpSession) Objects.requireNonNull(postResult.getRequest().getSession(false))))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attributeExists("records"))
+                .andExpect(model().attribute("records", hasSize(1)))
+                .andExpect(model().attribute("records", hasItem(
+                        hasProperty("name", is("Test Renovation")))));
+    }
+
+    @Test
+    public void tagSearch_withNoPublicRenovation_NoResults() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "Test Renovation", "Room A Renovation", List.of("Room A"));
+        String tagName ="Apartment";
+        Tag testTag = new Tag(tagName);
+        tagRepository.save(testTag);
+        testRecord.getTags().add(testTag);
+        renovationRecordRepository.save(testRecord);
+
+        MvcResult postResult = mockMvc.perform(post("/renovations/search")
+                        .param("tagNameList", tagName)
+                        .param("isTagSearch", "true")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/search?page=1"))
+                .andReturn();
+
+        mockMvc.perform(get("/renovations/search")
+                        .session((MockHttpSession) Objects.requireNonNull(postResult.getRequest().getSession(false))))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attributeExists("records"))
+                .andExpect(model().attribute("records", hasSize(0)));
+    }
+
+    @Test
+    public void tagSearch_withValidPublicRenovation_displaysMoreMatchingTagsFirstListOfTags() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
+        RenovationRecord testRecord2 = new RenovationRecord(owner, "RenovationTwoTags", "Room A Renovation", List.of("Room A"));
+        testRecord.setPublicity(true);
+        testRecord2.setPublicity(true);
+
+        String tagName ="House";
+        String tagName2 ="New";
+        Tag testTag = new Tag(tagName);
+        Tag testTag2 = new Tag(tagName2);
+        tagRepository.save(testTag);
+        tagRepository.save(testTag2);
+
+        testRecord.getTags().add(testTag);
+        testRecord2.getTags().add(testTag);
+        testRecord2.getTags().add(testTag2);
+        renovationRecordRepository.save(testRecord);
+        renovationRecordRepository.save(testRecord2);
+
+        MvcResult postResult = mockMvc.perform(post("/renovations/search")
+                        .param("tagNameList", tagName)
+                        .param("tagNameList", tagName2)
+                        .param("isTagSearch", "true")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/search?page=1"))
+                .andReturn();
+
+        mockMvc.perform(get("/renovations/search")
+                        .session((MockHttpSession) Objects.requireNonNull(postResult.getRequest().getSession(false))))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andExpect(model().attribute("records", hasSize(2)))
+                .andExpect(model().attribute("records", contains(
+                        hasProperty("name", is("RenovationTwoTags")),
+                        hasProperty("name", is("RenovationOneTag"))
                 )));
     }
 }
