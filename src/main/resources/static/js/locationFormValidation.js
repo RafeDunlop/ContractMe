@@ -1,6 +1,7 @@
 const suburbPattern = /^[\p{L}\d\-'\s]*$/u;
 const cityPattern = /^[\p{L}\-'\s]*$/u;
-const countryPattern = /^(?!.* {2})[\p{L}\p{N} ]+$/u;
+const postcodePattern = /^(?!.* {2})[\p{L}\p{N} ]+$/u;
+const countryPattern = /^(?!.* {2})[\p{L}\-' ]+$/u;
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -16,14 +17,16 @@ document.addEventListener("DOMContentLoaded", () => {
     let cityFrontendErrorMessage = document.getElementById("city-frontend-error-message");
     let cityBackendError = document.getElementById("city-backend-error")
 
+    let postcodeField = document.getElementById("postcode");
+    let postcodeFrontendError = document.getElementById("postcode-frontend-error");
+    let postcodeFrontendErrorMessage = document.getElementById("postcode-frontend-error-message");
+    let postcodeBackendError = document.getElementById("postcode-backend-error")
 
     let countryField = document.getElementById("country");
     let countryFrontendError = document.getElementById("country-frontend-error");
     let countryFrontendErrorMessage = document.getElementById("country-frontend-error-message");
     let countryBackendError = document.getElementById("country-backend-error")
 
-
-    let postcodeField = document.getElementById("postcode");
 
 
     // Event listeners
@@ -44,6 +47,16 @@ document.addEventListener("DOMContentLoaded", () => {
             "City contains invalid characters",
             cityBackendError,
             cityPattern
+        )
+    );
+
+    postcodeField.addEventListener("input", () =>
+        checkOptionalField(postcodeField.value,
+            postcodeFrontendError,
+            postcodeFrontendErrorMessage,
+            "Postcode contains invalid characters",
+            postcodeBackendError,
+            postcodePattern
         )
     );
 

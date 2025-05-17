@@ -13,7 +13,7 @@ let countryField = document.getElementById("country");
 
 locationToggleSwitch.addEventListener("click", displayLocationForm);
 
-postcodeField.addEventListener("blur", validatePostcode);
+
 
 function displayLocationForm() {
     if (locationToggleSwitch.checked === true) {
@@ -24,6 +24,7 @@ function displayLocationForm() {
     }
 }
 
+//postcodeField.addEventListener("blur", validatePostcode);
 /*function validatePostcode() {
     let postcode = postcodeField.value.trim();
     let postcodePattern = /^[\p{L}\p{N} ]+$/u;
