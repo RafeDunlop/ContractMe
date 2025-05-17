@@ -14,7 +14,10 @@ import java.util.stream.Stream;
 public class LocationValidationTest {
     private static LocationValidation locationValidation;
 
-
+    @BeforeAll
+    public static void setUp() {
+        locationValidation = new LocationValidation();
+    }
 
     @Test
     void testValidateName_invalidCharacterCity_Error() {
@@ -62,7 +65,7 @@ public class LocationValidationTest {
     @Test
     void testValidateName_validSpaceCity_noError() {
         List<String> result = locationValidation.validateCity("New Delhi");
-        List<String> secondResult = locationValidation.validateCity("New York City");;
+        List<String> secondResult = locationValidation.validateCity("New York City");
         assertTrue(result.isEmpty());
         assertTrue(secondResult.isEmpty());
     }
