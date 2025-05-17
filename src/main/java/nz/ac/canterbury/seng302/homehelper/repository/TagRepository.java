@@ -34,4 +34,12 @@ public interface TagRepository extends CrudRepository<Tag, Long> {
      */
     @Query("SELECT f FROM Tag f WHERE (f.tagName) = (:name)")
     Optional<Tag> findExactMatchTagByTagName(@Param("name") String name);
+
+    /**
+     * Retrieves list of tags that exactly matches the names provided.
+     * @param names The exact names of the tags to find.
+     * @return A list of tags matching the tag names.
+     */
+    @Query("SELECT f FROM Tag f WHERE f.tagName IN (:names)")
+    List<Tag> findExactMatchTagsByTagNames(@Param("names") List<String> names);
 }

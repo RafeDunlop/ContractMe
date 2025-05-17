@@ -8,10 +8,8 @@
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="stylesheet" th:href="@{/css/viewRenovationStyles.css}">
+    <link rel="stylesheet" th:href="@{/css/tags.css}">
     <script th:src="@{/js/addTaskIcon.js}"></script>
-    <style>
-
-    </style>
 </head>
 <body>
 
@@ -20,12 +18,16 @@
     <div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
 
     <div class="container mt-2">
-        <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
-        <input type="hidden" id="tasksPerPage" name="tasksPerPage" th:value="5"/>
-        <input type="hidden" id="renovationId" name="renovationId" th:value="${renovation.getId()}"/>
-        <input type="hidden" th:value="${searchTerm}" name="searchTerm"/>
 
-        <input type="hidden" name="visibility" th:value="${visibility}" />
+        <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
+        <input type="hidden" id="totalCards" th:value="${totalCards}" name="totalCards" />
+
+        <form id="search-form" method="post" th:action="@{/renovations/view}" style="display:none;">
+            <input type="hidden" id="renovationId" name="id" th:value="${renovation.getId()}">
+            <input type="hidden" id="pageInput" th:value="${pageNumber}" name="page">
+            <input type="hidden" id="cardsPerPageInput" th:value="${cardsPerPage}" name="cardsPerPage">
+            <input type="hidden" id="FromSearch" th:value="${fromSearch}" name="fromSearch">
+        </form>
 
         <div id="content-container" class="card p-4 shadow-sm">
             <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap">
@@ -79,25 +81,22 @@
 
             <!-- Display added tags -->
             <div id="tagList" class="mb-3">
-                <label class="fw-bold">Current Tags:</label>
-                <div class="list-group" id="tag-list">
-                    <div th:each="tag : ${renovation.tags}" class="list-group-item">
-                        🛠️ <span th:text="${tag.tagName}" class="ms-2"></span>
-                    </div>
-                </div>
+                <label class="fw-bold d-block mb-1">Current Tags:</label>
+                <span th:each="tag : ${renovation.getSortedTags()}" class="tag-box badge bg-success d-inline-flex align-items-center me-2 mb-2">
+                    <span class="tag-text-large text-truncate ms-1" th:text="${tag.getTagName()}"></span>
+                    <button class="tag-delete-button-large btn-sm border-0 bg-transparent text-light ms-1"
+                            th:if="${isOwner}" type="button"
+                            th:attr="data-renovationId=${renovation.id}, data-csrf=${_csrf.token}, data-tagName=${tag.getTagName()}"
+                            th:onclick="|removeTag(this)|">
+                        X
+                    </button>
+                </span>
             </div>
-
-
-
-            <!-- Place masons back/front html validation divs -->
-
-
-
 
             <div th:if="!${renovation.getRenovationTasks().isEmpty()}" class="mb-3">
                 <h6 class="fw-bold">Tasks:</h6>
-                <div id="taskGrid" class="task-grid"> <!-- Grid for responsive placing of tasks CSS -->
-                    <div th:each="renovationTask : ${tasks}" class="task-card"> <!-- Responsive task square CSS -->
+                <div id="grid" class="task-grid"> <!-- Grid for responsive placing of tasks CSS -->
+                    <div th:each="renovationTask : ${tasks}" class="card-count"> <!-- Responsive task square CSS -->
                         <div class="card" style="width: 18rem;">
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
@@ -129,41 +128,67 @@
                     <ul class="pagination" id="pagination">
                         <!-- First button (AC more than 10 pages) -->
                         <li class="page-item" th:if="${totalPages > 10}">
-                            <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=1, tasksPerPage=${tasksPerPage})}">First</a>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                1,
+                                'First'
+                            )}"></div>
                         </li>
 
                         <!-- Previous button -->
                         <li class="page-item" th:if="${pageNumber > 1}">
-                            <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${pageNumber - 1}, tasksPerPage=${tasksPerPage})}">Prev</a>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${pageNumber - 1},
+                                'Prev'
+                            )}"></div>
                         </li>
 
-                        <!-- Page buttons <= 10 Pages, AC3 -->
-                        <li class="page-item" th:if="${totalPages <= 10}" th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
+                        <!-- Page buttons (≤ 10 pages) -->
+                        <li class="page-item" th:if="${totalPages <= 10}"
+                            th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
-                            <a class="page-link" th:href="@{/renovations/view(id=${renovation.id}, page=${pageLinkNumber}, tasksPerPage=${tasksPerPage})}" th:text="${pageLinkNumber}"></a>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${pageLinkNumber},
+                                ${pageLinkNumber}
+                            )}"></div>
                         </li>
 
-                        <!-- Page buttons > 10 Pages, AC3 -->
+                        <!-- Page buttons (> 10 pages) -->
                         <li class="page-item" th:if="${totalPages > 10}"
                             th:each="pageLinkNumber : ${#numbers.sequence(paginationLinksStart, paginationLinksEnd)}"
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
-                            <a class="page-link" th:href="@{/renovations/view(id=${renovation.id}, page=${pageLinkNumber}, tasksPerPage=${tasksPerPage})}" th:text="${pageLinkNumber}"></a>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${pageLinkNumber},
+                                ${pageLinkNumber}
+                            )}"></div>
                         </li>
 
                         <!-- Next button -->
                         <li class="page-item" th:if="${pageNumber < totalPages}">
-                            <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${pageNumber + 1}, tasksPerPage=${tasksPerPage})}">Next</a>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${pageNumber + 1},
+                                'Next'
+                            )}"></div>
                         </li>
 
                         <!-- Last button (AC more than 10 pages) -->
                         <li class="page-item" th:if="${totalPages > 10}">
-                            <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${totalPages}, tasksPerPage=${tasksPerPage})}">Last</a>
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${totalPages},
+                                'Last'
+                            )}"></div>
                         </li>
+
 
                         <!-- Search field (AC more than 10 pages) --> <!-- CHANGE IF TO 10 after testing -->
                         <li class="page-item d-flex align-items-center" th:if="${totalPages > 10}">
                             <input type="number" class="form-control me-2" id="pageSearch" aria-label="Page Search" style="min-width: 50px;">
-                            <button class="btn btn-primary" th:onclick="|validatePageSearch(${renovation.id})|">Search</button>
+                            <button class="btn btn-primary" th:onclick="|validateTaskPageSearch(${renovation.id})|">Search</button>
                         </li>
 
                     </ul>
@@ -192,4 +217,5 @@
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
 <script type="text/javascript" th:src="@{/js/autocomplete.js}"></script>
 <script type="text/javascript" th:src="@{/js/renovationTagValidation.js}"></script>
+<script type="text/javascript" th:src="@{/js/removeTag.js}"></script>
 </html>

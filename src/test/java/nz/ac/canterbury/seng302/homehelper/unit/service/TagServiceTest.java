@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.unit.service;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
@@ -101,7 +102,6 @@ public class TagServiceTest {
         RenovationRecord record = mock(RenovationRecord.class);
 
         List<String> errors = tagService.validateTagAndRecord(record, "window");
-        System.out.println(errors);
         assertTrue(errors.isEmpty());
     }
 
@@ -127,13 +127,40 @@ public class TagServiceTest {
                 new Tag("bedroom"),
                 new Tag("garage")
         );
-        record.setTags(tags);
-        when(record.getTags()).thenReturn(tags);
+        record.setTags(new ArrayList<>(tags));
 
         List<String> errors = tagService.validateTagAndRecord(record, "window");
 
         assertTrue(errors.contains("Renovation cannot have more than 5 tags."));
     }
 
+    @Test
+    public void removeTagFromRenovation_tagExistsNoOtherTags_tagRemovedFromRecord() {
+        RenovationRecord record = new RenovationRecord(Mockito.mock(User.class), "Test Renovation", "Some words", List.of("Room1", "Room2"));
+        Tag tag = new Tag("kitchen");
+        List<Tag> tagList = new ArrayList<>();
+        tagList.add(tag);
+        record.setTags(tagList);
 
+        tagService.removeTagFromRenovation(record, tag);
+        verify(renovationRecordRepository, times(1)).save(record);
+        assertFalse(record.getTags().contains(tag));
+    }
+
+    @Test
+    public void removeTagFromRenovation_tagExistsWithOtherTags_tagRemovedFromRecord() {
+        RenovationRecord record = new RenovationRecord(Mockito.mock(User.class), "Test Renovation", "Some words", List.of("Room1", "Room2"));
+        Tag tag = new Tag("kitchen");
+        Tag otherTag = new Tag("kitchen 2");
+        List<Tag> tagList = new ArrayList<>();
+        tagList.add(tag);
+        tagList.add(otherTag);
+        record.setTags(tagList);
+
+
+        tagService.removeTagFromRenovation(record, tag);
+        verify(renovationRecordRepository, times(1)).save(record);
+        assertFalse(record.getTags().contains(tag));
+        assertTrue(record.getTags().contains(otherTag));
+    }
 }

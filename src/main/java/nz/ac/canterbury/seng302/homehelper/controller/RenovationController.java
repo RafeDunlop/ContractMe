@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
@@ -22,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -62,11 +64,36 @@ public class RenovationController {
      * @return thymeleaf renovationsTemplate
      */
     @GetMapping
-    public String renovations(@RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery, Model model) {
+    public String renovations(@RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery,
+                              @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                              @RequestParam(defaultValue = "8", name = "itemsPerPage") int itemsPerPage,
+                              Model model) {
         logger.info("GET renovations");
         try {
+            if (itemsPerPage < 1) {
+                itemsPerPage = 8;
+            }
+            if (pageNumber < 1) {
+                return "redirect:/renovations?page=1&itemsPerPage=" + itemsPerPage + (!searchQuery.isEmpty() ? "&searchQuery=" + searchQuery : "");
+            }
+
             User user = loginService.getUserByEmail();
-            model.addAttribute("renovations", renovationRecordService.getUserRecords(user, searchQuery));
+            Pageable pageable = PageRequest.of(pageNumber - 1, itemsPerPage);
+            Page<RenovationRecord> renovationRecords = renovationRecordService.getPaginatedUserRecords(user, searchQuery, pageable);
+            int totalPages = renovationRecords.getTotalPages();
+            long totalRenovations = renovationRecords.getTotalElements();
+            int paginationLinksStart = Math.max(pageNumber - 2, 1);
+            int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
+
+            if (pageNumber > totalPages && totalRenovations != 0) {
+                return "redirect:/renovations?page=" + totalPages + "&itemsPerPage=" + itemsPerPage + (!searchQuery.isEmpty() ? "&searchQuery=" + searchQuery : "");
+            }
+            model.addAttribute("renovations", renovationRecords.getContent());
+            model.addAttribute("paginationLinksStart", paginationLinksStart);
+            model.addAttribute("paginationLinksEnd", paginationLinksEnd);
+            model.addAttribute("pageNumber", pageNumber);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("itemsPerPage", itemsPerPage);
             model.addAttribute("searchQuery", searchQuery);
             return "renovationsTemplate";
         } catch (IllegalArgumentException e) {
@@ -285,7 +312,6 @@ public class RenovationController {
      *
      * @param id           of the renovation record to view
      * @param pageNumber   the page of tasks to view, defaults to 1
-     * @param tasksPerPage the number of tasks to display on the page, based off the screen size
      * @param model        (map-like) representation of results to be used by thymeleaf
      * @return view page of the renovation
      * @throws ResponseStatusException if the renovation record does not exist
@@ -293,14 +319,17 @@ public class RenovationController {
     @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id,
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                 @RequestParam(defaultValue = "5", name = "tasksPerPage") int tasksPerPage,
-                                 @RequestParam(name = "fromSearch", required = false, defaultValue = "false") boolean fromSearch,
                                  Model model) {
         logger.info("GET /renovations/view");
 
-        if (tasksPerPage < 1) {
-            tasksPerPage = 5;
+        Object cardsPerPageObj = model.asMap().get("cardsPerPage");
+        Integer cardsPerPage = (cardsPerPageObj instanceof Integer) ? (Integer) cardsPerPageObj : null;
+        if (cardsPerPage == null || cardsPerPage < 1) {
+            cardsPerPage = 5;
         }
+
+        Object fromSearchObj = model.asMap().get("fromSearch");
+        Boolean fromSearch = (fromSearchObj instanceof Boolean) ? (Boolean) fromSearchObj : false;
 
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
@@ -312,15 +341,15 @@ public class RenovationController {
         }
 
         if (pageNumber < 1)
-            return "redirect:/renovations/view?id=" + id + "&page=1&tasksPerPage=" + tasksPerPage;
+            return "redirect:/renovations/view?id=" + id + "&page=1";
 
-        int totalTasks = record.getRenovationTasks().size();
-        int totalPages = (totalTasks + tasksPerPage - 1) / tasksPerPage;
+        int totalCards = record.getRenovationTasks().size();
+        int totalPages = (totalCards + cardsPerPage - 1) / cardsPerPage;
 
-        if (pageNumber > totalPages && totalTasks != 0)
-            return "redirect:/renovations/view?id=" + id + "&page=" + totalPages + "&tasksPerPage=" + tasksPerPage;
+        if (pageNumber > totalPages && totalCards != 0)
+            return "redirect:/renovations/view?id=" + id + "&page=" + totalPages;
 
-        Pageable pageable = PageRequest.of(pageNumber - 1, tasksPerPage);
+        Pageable pageable = PageRequest.of(pageNumber - 1, cardsPerPage);
         Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
         List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
 
@@ -335,10 +364,36 @@ public class RenovationController {
         model.addAttribute("renovation", record);
         model.addAttribute("paginationLinksStart", paginationLinksStart);
         model.addAttribute("paginationLinksEnd", paginationLinksEnd);
-        model.addAttribute("tasksPerPage", tasksPerPage);
+        model.addAttribute("cardsPerPage", cardsPerPage);
+        model.addAttribute("totalCards", totalCards);
         model.addAttribute("icons", iconFileNames);
 
         return "viewRenovation";
+    }
+
+    /**
+     * Handles the submission of a renovation view request. Redirects to the GET view endpoint
+     * for a specific renovation record, including the requested page number and cards per page.
+     * The number of cards per page and search origin flag are added as flash attributes for use
+     * in the redirected view.
+     *
+     * @param id                 the ID of the renovation record to view
+     * @param pageNumber         the page number to display (default 1)
+     * @param cardsPerPage       the number of cards to display per page (defaults 5)
+     * @param fromSearch         a flag indicating whether the view was triggered from a search or not
+     * @param redirectAttributes used to store flash attributes for the redirect
+     * @return a redirect to the GET view endpoint with query parameters for the ID and page number
+     */
+    @PostMapping("/view")
+    public String postViewRenovation(@RequestParam(name = "id") Long id,
+                                     @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                     @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage,
+                                     @RequestParam(name = "fromSearch", required = false, defaultValue = "false") boolean fromSearch,
+                                     RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("cardsPerPage", cardsPerPage);
+        redirectAttributes.addFlashAttribute("fromSearch", fromSearch);
+
+        return "redirect:/renovations/view?id=" + id + "&page=" + pageNumber;
     }
 
     /**
@@ -353,9 +408,13 @@ public class RenovationController {
     public String addTagToRenovation(@RequestParam Long renovationId,
                                      @RequestParam("tagName") String tagName,
                                      RedirectAttributes redirectAttributes) {
-        logger.info("/tags/add");
+        logger.info("POST renovations/tags/add");
 
         RenovationRecord record = renovationRecordService.getRecordById(renovationId);
+        if (record == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
+        else if (record.getUser() != loginService.getUserByEmail())
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You don't own this renovation");
         List<String> errors = tagService.validateTagAndRecord(record, tagName);
         if (errors.isEmpty()) {
             if (tagService.checkExists(tagName)) {
@@ -366,6 +425,24 @@ public class RenovationController {
             redirectAttributes.addFlashAttribute("errors", errors);
         }
         return "redirect:/renovations/view?id=" + renovationId;
+    }
+
+    /**
+     * Removes the specified tag from the specified renovation. If the renovation has no such tag, there is no result
+     * @param renovationId The id of the renovation to remove the tag from
+     * @param tagName The name of the tag to be removed
+     */
+    @PatchMapping("/tags/remove")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeTagFromRenovation(@RequestParam Long renovationId, @RequestParam String tagName) {
+        logger.info("PATCH renovations/tags/remove");
+        RenovationRecord record = renovationRecordService.getRecordById(renovationId);
+        Tag tag = tagService.getTag(tagName);
+        if (record == null || tag == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
+        else if (record.getUser() != loginService.getUserByEmail())
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You don't own this renovation");
+        tagService.removeTagFromRenovation(record, tag);
     }
 
 
@@ -391,37 +468,84 @@ public class RenovationController {
      * @return the name of the view template for searching renovations
      */
     @GetMapping("/search")
-    public String searchRenovations(Model model, HttpSession session) {
-        String visibility = (String) model.asMap().get("visibility");
-        String searchTerm = (String) model.asMap().get("searchTerm");
+    public String searchRenovations(Model model, HttpSession session,
+                                    @RequestParam(name = "page", required = false) Integer pageNumber) {
+        logger.info("GET /renovations/search");
 
-        if (visibility == null) {
-            visibility = (String) session.getAttribute("visibility");
-            if (visibility == null) visibility = "all";
+        Map<String, Object> attributes = model.asMap();
+
+        String visibility = (String) attributes.getOrDefault("visibility", session.getAttribute("visibility"));
+        if (visibility == null) visibility = "all";
+        String searchTerm = (String) attributes.getOrDefault("searchTerm", session.getAttribute("searchTerm"));
+        if (searchTerm == null) searchTerm = "";
+
+        List<String> tagNameList = (List<String>) attributes.getOrDefault("tagNameList", session.getAttribute("tagNameList"));
+        if (tagNameList == null) tagNameList = Collections.emptyList();
+
+        logger.info("TAG LIST PASSED : " + tagNameList);
+
+
+
+        boolean isTagSearch = Boolean.TRUE.equals(session.getAttribute("isTagSearch"));
+
+        if (pageNumber == null) {
+            pageNumber = (Integer) session.getAttribute("pageNumber");
+            if (pageNumber == null) pageNumber = 1;
         }
 
-        if (searchTerm == null) {
-            searchTerm = (String) session.getAttribute("searchTerm");
-            if (searchTerm == null) searchTerm = "";
+        Object cardsPerPageObj = attributes.get("cardsPerPage");
+        if (cardsPerPageObj == null) {
+            cardsPerPageObj = session.getAttribute("cardsPerPage");
         }
+        Integer cardsPerPage = (cardsPerPageObj instanceof Integer) ? (Integer) cardsPerPageObj : null;
+        if (cardsPerPage == null) cardsPerPage = 16;
 
-        model.addAttribute("visibility", visibility);
-        model.addAttribute("searchTerm", searchTerm);
+        User user = loginService.getUserByEmail();
 
-        if (!model.containsAttribute("records")) {
-            logger.info("GET /renovations/search");
+        // Switching between search types
+        List<RenovationRecord> records;
 
-            User user = loginService.getUserByEmail();
+        if (isTagSearch) {
+            List<Tag> tagList = tagService.getTags(tagNameList);
+            records = renovationRecordService.getAllRecordsByTags(tagList);
 
-            List<RenovationRecord> records = switch (visibility.toLowerCase()) {
+            logger.info("tag list: " + tagList);
+            logger.info("records associated list: " + records);
+        } else{
+            records = switch (visibility.toLowerCase()) {
                 case "public" -> renovationRecordService.getPublicRecords(searchTerm);
                 case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
                 default -> renovationRecordService.getAllRecords(user, searchTerm);
             };
-
-            model.addAttribute("records", records);
-            model.addAttribute("user", user);
         }
+
+
+        if (pageNumber < 1)
+            return "redirect:/renovations/search?page=1";
+
+        int totalCards = records.size();
+        int totalPages = (totalCards + cardsPerPage - 1) / cardsPerPage;
+
+        if (pageNumber > totalPages && totalCards != 0)
+            return "redirect:/renovations/search?page=" + totalPages;
+
+        Pageable pageable = PageRequest.of(pageNumber - 1, cardsPerPage);
+        Page<RenovationRecord> paginatedRecords = renovationRecordService.returnRecordPages(pageable, records);
+
+        int paginationLinksStart = Math.max(pageNumber - 2, 1);
+        int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
+
+        model.addAttribute("visibility", visibility);
+        model.addAttribute("searchTerm", searchTerm);
+        model.addAttribute("user", user);
+        model.addAttribute("records", paginatedRecords.getContent());
+        model.addAttribute("pageNumber", pageNumber);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("paginationLinksStart", paginationLinksStart);
+        model.addAttribute("paginationLinksEnd", paginationLinksEnd);
+        model.addAttribute("cardsPerPage", cardsPerPage);
+        model.addAttribute("totalCards", totalCards);
+
         return "renovationSearchTemplate";
     }
 
@@ -432,35 +556,33 @@ public class RenovationController {
      *
      * @param visibility         the visibility filter to apply ("public", "user", or "all")
      * @param searchTerm         an optional term to search within renovation records
-     * @param redirectAttributes attributes to be passed on redirect to the search page
+     * @param session            HttpSession for storing attributes of most recent search
      * @return a redirect to the GET search endpoint with the results stored in flash attributes
      */
     @PostMapping("/search")
     public String submitSearchRenovations(@RequestParam(required = false) String visibility,
                                           @RequestParam(required = false) String searchTerm,
-                                          RedirectAttributes redirectAttributes,
+                                          @RequestParam(name = "tagNameList", required = false) List<String> tagNameList,
+                                          @RequestParam(defaultValue = "false") boolean isTagSearch,
+                                          @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                          @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage,
                                           HttpSession session) {
         logger.info("POST /renovations/search");
+
+        if (isTagSearch && (tagNameList == null || tagNameList.isEmpty())) {
+            return "renovationSearchTemplate";
+        }
 
         if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";
 
-        // Store in session so GET /search can use them
         session.setAttribute("visibility", visibility);
         session.setAttribute("searchTerm", searchTerm);
+        session.setAttribute("tagNameList", tagNameList);
+        session.setAttribute("isTagSearch", isTagSearch);
+        session.setAttribute("pageNumber", pageNumber);
+        session.setAttribute("cardsPerPage", cardsPerPage);
 
-        User user = loginService.getUserByEmail();
-        List<RenovationRecord> records = switch (visibility.toLowerCase()) {
-            case "public" -> renovationRecordService.getPublicRecords(searchTerm);
-            case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
-            default -> renovationRecordService.getAllRecords(user, searchTerm);
-        };
-
-        redirectAttributes.addFlashAttribute("records", records);
-        redirectAttributes.addFlashAttribute("visibility", visibility);
-        redirectAttributes.addFlashAttribute("searchTerm", searchTerm);
-        redirectAttributes.addFlashAttribute("user", user);
-
-        return "redirect:/renovations/search";
+        return "redirect:/renovations/search?page=" + pageNumber;
     }
 }

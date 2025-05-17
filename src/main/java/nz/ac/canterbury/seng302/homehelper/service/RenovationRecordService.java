@@ -2,12 +2,17 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -33,6 +38,22 @@ public class RenovationRecordService {
         this.renovationRecordRepository = renovationRecordRepository;
         this.renovationTaskRepository = renovationTaskRepository;
         this.renovationRecordValidation = renovationRecordValidation;
+    }
+
+    /**
+     * Retrieves a list of renovation records associated with the current user that are like the given term
+     * with pagination.
+     * @param user The current user
+     * @param term The term to search for, not case-sensitive
+     * @param pageable The pagination information
+     * @return a list of renovation records from the user that match the term if given
+     */
+    public Page<RenovationRecord> getPaginatedUserRecords(User user, String term,
+                                                        Pageable pageable) {
+        if (term == null || term.trim().isEmpty()) {
+            return renovationRecordRepository.findByUser(user, pageable);
+        }
+        return renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCasePaginated(user, term, pageable);
     }
 
     /**
@@ -146,5 +167,42 @@ public class RenovationRecordService {
         MapUtil.putIfNotEmpty(errors, "descriptionError", renovationRecordValidation.validateDescription(renovationRecord.getDescription()));
         MapUtil.putIfNotEmpty(errors, "roomError", renovationRecordValidation.validateRooms(renovationRecord.getRooms()));
         return errors;
+    }
+
+
+    /**
+     * Returns a paginated list of tasks for the given record.
+     * @param records The renovation record containing the list of tasks to be paginated.
+     * @param pageable spring pagination information, including the offset and page size.
+     * @return A page of tasks for the renovation record. If there are no tasks an empty page is returned.
+     */
+    public Page<RenovationRecord> returnRecordPages(Pageable pageable, List<RenovationRecord> records) {
+        List<RenovationRecord> recordsSubList = new ArrayList<>();
+
+        if (records == null || records.isEmpty()) {
+            return new PageImpl<>(recordsSubList, pageable, 0); // Return an empty page
+        }
+
+        int startIndex =(int) pageable.getOffset();
+        if (startIndex < 0) {
+            startIndex = 0;
+        }
+        if (startIndex >= records.size()) {
+            startIndex = records.size() - pageable.getPageSize();
+        }
+        int endIndex = Math.min(startIndex + pageable.getPageSize(), records.size());
+
+        recordsSubList = records.subList(startIndex, endIndex);
+        return new PageImpl<>(recordsSubList, pageable, records.size());
+    }
+
+    /**
+     * Retrieves a list of all renovation records that are associated with the given tags.
+     * @param tagList the list of tag objects.
+     * @return a list of renovation records associated with the tags in the given list.
+     */
+    public List<RenovationRecord> getAllRecordsByTags(List<Tag> tagList) {
+        // return renovationRecordRepository.findAllByTags(tagList);
+        return renovationRecordRepository.findAllPublicByTagsOrderByTagCountAndDate(tagList);
     }
 }

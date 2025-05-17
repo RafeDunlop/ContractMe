@@ -49,12 +49,16 @@
                     <td colspan="1" class="text">No renovations match your search.</td>
                 </tr>
                 <tr th:each="renovation : ${renovations}">
-                    <td class="d-flex justify-content-between align-items-center">
-                        <a th:text="${renovation.name}"
-                           th:href="@{/renovations/view(id=${renovation.id})}"
-                           th:title="${renovation.name}"
-                           class="truncate-cell">
-                        </a>
+                    <td class="d-flex justify-content-between align-items-center table-row">
+                        <form th:id="'form-' + ${renovation.id}" method="post" th:action="@{/renovations/view}">
+                            <input type="hidden" name="id" th:value="${renovation.id}" />
+                            <input type="hidden" name="page" value="1" />
+                            <input type="hidden" name="cardsPerPage" value="5" />
+                            <input type="hidden" name="fromSearch" value="false" />
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                        </form>
+                        <a href="#" th:text="${renovation.name}" th:onclick="'document.getElementById(\'form-' + ${renovation.id} + '\').submit(); return false;'"
+                           class="truncate-cell" th:title="${renovation.name}"></a>
                         <button type="button" class="btn btn-outline-danger custom-light-border"
                                 th:attr="data-id=${renovation.id}, data-searchQuery=${searchQuery}, data-csrf=${_csrf.token}"
                                 th:onclick="|confirmDelete(this)|">
@@ -64,6 +68,10 @@
                 </tr>
                 </tbody>
             </table>
+            <div th:replace="~{fragments/paginationFooter.html :: paginationFooter(pageUrl='renovations', searchTerm=${searchQuery})}"></div>
+            <div class="alert alert-danger" id="errorMessage" style="margin-top: 20px; display: none;">
+                <p id="errorText"></p>
+            </div>
         </div>
 
         <div class="mt-4">
@@ -72,4 +80,6 @@
     </div>
 </div>
 </body>
+<script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
+<script type="text/javascript" th:src="@{/js/renovationPagination.js}"></script>
 </html>

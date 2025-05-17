@@ -1,7 +1,11 @@
 package nz.ac.canterbury.seng302.homehelper.repository;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -54,6 +58,13 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
             "AND " + "r.user = :user " +
             "ORDER BY r.createdDate DESC")
     List<RenovationRecord> findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(@Param("user") User user, @Param("term") String term);
+
+    @Query("SELECT r FROM RenovationRecord r " +
+            "WHERE " + "(LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            "OR " + "LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%'))) " +
+            "AND " + "r.user = :user " +
+            "ORDER BY r.createdDate DESC")
+    Page<RenovationRecord> searchNameOrDescriptionContainingIgnoreCasePaginated(@Param("user") User user, @Param("term") String term, @Nullable Pageable pageable);
 
     /**
      * Finds all public renovation records
@@ -118,10 +129,40 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
     Optional<RenovationRecord> findExactMatch(@Param("name") String name, @Param("user") User user);
 
     /**
+     * Finds all renovation records where the current user on the application matches the owner of the renovation.
+     * @param user The current user
+     * @return A list of all the renovation records from the user
+     */
+    @Query("SELECT f FROM RenovationRecord f WHERE (f.user) = (:user)")
+    Page<RenovationRecord> findByUser(@Param("user") User user, @Nullable Pageable pageable);
+
+    /**
      * Deletes a record from the renovations record table by its id. The id cannot be null/
      * @param id The record id
      */
     @Modifying
     @Query("DELETE FROM RenovationRecord f WHERE f.id = :id")
     void deleteById(@Param("id") @Nullable Long id);
+
+    /**
+     * Finds all records with OR logic with matching tags.
+     * @param tags objects in a list to search for
+     * @return list of renovation records matching the provided tags
+     */
+    @Query("SELECT r FROM RenovationRecord r JOIN r.tags t WHERE t IN :tags")
+    List<RenovationRecord> findAllByTags(@Param("tags") List<Tag> tags);
+
+    /**
+     * Finds all public records with OR logic for matching tags
+     * It is primarily ordered by number of matching tags, then secondary matched by date created.
+     * @param tags the list of tags matching the query.
+     * @return list of tags found.
+     */
+    @Query("SELECT r FROM RenovationRecord r " +
+            "JOIN r.tags t " +
+            "WHERE r.isPublic = true AND t IN :tags " +
+            "GROUP BY r " +
+            "ORDER BY COUNT(t) DESC, r.createdDate DESC")
+    List<RenovationRecord> findAllPublicByTagsOrderByTagCountAndDate(@Param("tags") List<Tag> tags);
+
 }
