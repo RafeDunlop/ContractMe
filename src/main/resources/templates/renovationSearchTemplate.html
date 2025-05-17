@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <base href="${#request.contextPath}"/>
     <title>Renovation Records</title>
     <style>
         .truncate {

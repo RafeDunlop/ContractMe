@@ -32,7 +32,7 @@ function confirmLogout() {
     const prompt = "Are you sure you want to log out?";
     confirmPrompt(prompt, "Confirm", "Cancel", true).then(async (confirm) => {
         if (confirm) {
-            const response = await fetch(`/logout`, {
+            const response = await fetch(`logout`, {
                 method: "GET",
             })
 

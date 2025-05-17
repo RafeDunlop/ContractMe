@@ -17,7 +17,7 @@ input.addEventListener("input", function () {
  * @param {string} partialTag - The partial input from the user.
  */
 function updateAutocomplete(partialTag) {
-    fetch(`/renovations/tags/autocomplete?partialTag=${encodeURIComponent(partialTag)}`)
+    fetch(`renovations/tags/autocomplete?partialTag=${encodeURIComponent(partialTag)}`)
         .then(response => response.json())
         .then(tags => {
             setAutoCompleteList(tags)
