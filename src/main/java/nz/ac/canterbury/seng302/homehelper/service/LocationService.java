@@ -56,6 +56,7 @@ public class LocationService {
     /**
      * Retrieves the localisation of a client from their ip address
      * @param ip The ip address of the client machine
+     * @return The localisation of the client identified by their IP address packaged into a DTO object
      */
     public LocalisationDTO getRoughLocation(String ip) {
         ResponseEntity<String> response = restTemplate.getForEntity(getIpGrabUrl(ip), String.class);
