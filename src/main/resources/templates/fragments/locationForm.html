@@ -68,7 +68,7 @@
 
             <!-- Backend error -->
             <div class="alert alert-danger mt-2" id="city-backend-error"
-                 th:attr="hidden=${Error == null}">
+                 th:attr="hidden=${cityError == null}">
                 <ul>
                     <li th:each="msg : ${cityError}" th:text="${msg}"></li>
                 </ul>
@@ -122,5 +122,5 @@
     </div>
 </div>
 </body>
-<script type="module" th:src="@{/js/locationForm.js}"></script>
+<script type="module" src="/js/locationForm.js"></script>
 </html>

@@ -1,10 +1,9 @@
+import {
+    hideAllErrorMessages
+} from "./locationFormValidation.js";
+
 let locationToggleSwitch = document.getElementById("location-toggleswitch");
 let locationForm = document.getElementById("location-form");
-let addressField = document.getElementById("address");
-let suburbField = document.getElementById("suburb");
-let cityField = document.getElementById("city");
-let postcodeField = document.getElementById("postcode");
-let countryField = document.getElementById("country");
 
 locationToggleSwitch.addEventListener("click", displayLocationForm);
 
@@ -188,15 +187,14 @@ function getAutocompleteOption(address) {
 function displayLocationForm() {
     if (locationToggleSwitch.checked === true) {
         locationForm.style.display = "block";
+
     }
     else {
-        closeLocationForm()
+        locationForm.style.display = "none";
+        hideAllErrorMessages()
+
     }
 }
 
-function closeLocationForm() {
-    locationForm.style.display = "none";
 
 
-
-}

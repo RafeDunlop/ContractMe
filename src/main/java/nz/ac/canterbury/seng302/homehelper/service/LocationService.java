@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
+import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
+import nz.ac.canterbury.seng302.homehelper.validation.LocationValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +48,12 @@ public class LocationService {
 
     private final RestTemplate restTemplate;
 
+    private final LocationValidation locationValidation;
+
     @Autowired
-    public LocationService(Keys keys) {
+    public LocationService(Keys keys, LocationValidation locationValidation) {
         this.keys = keys;
+        this.locationValidation = locationValidation;
         this.objectMapper = new ObjectMapper();
         this.restTemplate = new RestTemplate();
     }
@@ -107,9 +112,23 @@ public class LocationService {
         }
     }
 
+
+    /**
+     * Runs validation on each of the user input params
+     * @param dto the addressdto containing the user inputted location data
+     * @return map of errors
+     */
     public Map<String, List<String>> validateLocation(AddressDTO dto) {
-        return new HashMap<String, List<String>>();
+        Map<String, List<String>> errors = new HashMap<>();
+
+        MapUtil.putIfNotEmpty(errors, "suburbError", locationValidation.validateSuburb(dto.getRegion()));
+        MapUtil.putIfNotEmpty(errors, "cityError", locationValidation.validateCity(dto.getCity()));
+        MapUtil.putIfNotEmpty(errors,"postcodeError", locationValidation.validatePostcode(dto.getPostcode()));
+        MapUtil.putIfNotEmpty(errors, "countryError", locationValidation.validateCountry(dto.getCountry()));
+
+        return errors;
     }
+
 
     /**
      * checks if the location has been provided
