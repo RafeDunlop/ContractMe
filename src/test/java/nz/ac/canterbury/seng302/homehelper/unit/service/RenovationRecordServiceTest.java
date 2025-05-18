@@ -80,7 +80,8 @@ public class RenovationRecordServiceTest {
         toTest.addRenovationLocation(renovationRecord, addressDTO);
 
         ArgumentCaptor<RenovationRecord> captor = ArgumentCaptor.forClass(RenovationRecord.class);
-        verify(renovationRecordRepository).save(captor.capture());
+        Mockito.verify(renovationRecordRepository, Mockito.times(2)).save(captor.capture());
+
 
         RenovationRecord savedRenovation = captor.getValue();
         Location location = savedRenovation.getLocation();
