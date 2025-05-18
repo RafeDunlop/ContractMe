@@ -25,24 +25,46 @@ let committedFields = {
 }
 
 document.addEventListener("DOMContentLoaded", getLocalisation);
+/**
+ * Hides the autocomplete options if you click away
+ */
+document.addEventListener("click", event => {
+    if (addressField === event.target) {
+        triggerUpdateAutocomplete()
+    } else if (locationForm.contains(event.target)) {
+        commitAddressFields()
+        autocompleteList.innerHTML = "";
+    } else {
+        autocompleteList.innerHTML = "";
+    }
+})
+addressField.addEventListener("input", triggerUpdateAutocomplete);
 
-
-
-// Listen for input events on the tag input field
-addressField.addEventListener("input", function () {
+/**
+ * Handles the logic of whether to update the autocomplete list (or hide it).
+ * Calls function to commit the address details
+ */
+function triggerUpdateAutocomplete() {
     const input = addressField.value.trim();
     if (input.length) {
         updateAutocomplete(input)
     } else {
         autocompleteList.innerHTML = "";
     }
+    commitAddressFields();
+}
 
-    committedFields.address = input;
-    committedFields.suburb = suburbField.value;
-    committedFields.city = cityField.value;
-    committedFields.postcode = postcodeField.value;
-    committedFields.country = countryField.value;
-});
+/**
+ * Commits the address fields currently inputted to revert to
+ * if an autocomplete option is hovered over but not clicked
+ */
+function commitAddressFields() {
+    committedFields.address = addressField.value.trim();;
+    committedFields.suburb = suburbField.value.trim();
+    committedFields.city = cityField.value.trim();
+    committedFields.postcode = postcodeField.value.trim();
+    committedFields.country = countryField.value.trim();
+}
 
 /**
  * Updates/schedules new autocomplete options and cancels any previously scheduled updates.
