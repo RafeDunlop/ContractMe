@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.unit.service;
 
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
@@ -9,6 +11,7 @@ import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +21,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class RenovationRecordServiceTest {
 
@@ -59,11 +63,43 @@ public class RenovationRecordServiceTest {
     }
 
     @Test
+    public void testAddRenovationLocation_locationAdded() {
+
+        User mockUser = mock(User.class);
+
+
+        RenovationRecord renovationRecord = new RenovationRecord(mockUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+
+        AddressDTO addressDTO = new AddressDTO();
+        addressDTO.setAddress_line1("123 Main St");
+        addressDTO.setCountry("New Zealand");
+        addressDTO.setPostcode("8011");
+        addressDTO.setCity("Christchurch");
+        addressDTO.setRegion("Canterbury");
+
+        toTest.addRenovationLocation(renovationRecord, addressDTO);
+
+        ArgumentCaptor<RenovationRecord> captor = ArgumentCaptor.forClass(RenovationRecord.class);
+        verify(renovationRecordRepository).save(captor.capture());
+
+        RenovationRecord savedRenovation = captor.getValue();
+        Location location = savedRenovation.getLocation();
+
+        assertNotNull(location);
+        assertEquals("123 Main St", location.getAddress());
+        assertEquals("New Zealand", location.getCountry());
+        assertEquals("8011", location.getPostcode());
+        assertEquals("Christchurch", location.getCity());
+        assertEquals("Canterbury", location.getSuburb());
+    }
+
+    @Test
     public void setRenovationPublic_isPublic() {
 
         User mockUser = mock(User.class);
 
         RenovationRecord renovationRecord = new RenovationRecord(mockUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+
 
         toTest.changePublicity(true, renovationRecord);
 
@@ -206,7 +242,7 @@ public class RenovationRecordServiceTest {
 
         List<RenovationRecord> result = toTest.getUserRecords(user, null);
 
-        Mockito.verify(renovationRecordRepository).findByUser(user);
+        verify(renovationRecordRepository).findByUser(user);
         assertSame(result, expected);
     }
 
@@ -220,7 +256,7 @@ public class RenovationRecordServiceTest {
 
         List<RenovationRecord> result = toTest.getUserRecords(user, term);
 
-        Mockito.verify(renovationRecordRepository).findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(user, term);
+        verify(renovationRecordRepository).findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(user, term);
         assertSame(result, expected);
     }
 
@@ -232,7 +268,7 @@ public class RenovationRecordServiceTest {
 
         List<RenovationRecord> result = toTest.getPublicRecords(null);
 
-        Mockito.verify(renovationRecordRepository).findByIsPublicTrue();
+        verify(renovationRecordRepository).findByIsPublicTrue();
         assertSame(result, expected);
     }
 
@@ -245,7 +281,7 @@ public class RenovationRecordServiceTest {
 
         List<RenovationRecord> result = toTest.getPublicRecords(term);
 
-        Mockito.verify(renovationRecordRepository).findByIsPublicTrueSearchContainingNameOrDescriptionIgnoreCase(term);
+        verify(renovationRecordRepository).findByIsPublicTrueSearchContainingNameOrDescriptionIgnoreCase(term);
         assertSame(result, expected);
     }
 
@@ -258,7 +294,7 @@ public class RenovationRecordServiceTest {
 
         List<RenovationRecord> result = toTest.getAllRecords(user, null);
 
-        Mockito.verify(renovationRecordRepository).findAllVisibleToUser(user);
+        verify(renovationRecordRepository).findAllVisibleToUser(user);
         assertSame(result, expected);
     }
 
@@ -272,7 +308,7 @@ public class RenovationRecordServiceTest {
 
         List<RenovationRecord> result = toTest.getAllRecords(user, term);
 
-        Mockito.verify(renovationRecordRepository).findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(user, term);
+        verify(renovationRecordRepository).findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(user, term);
         assertSame(result, expected);
     }
 
@@ -285,7 +321,7 @@ public class RenovationRecordServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         toTest.getPaginatedUserRecords(user, term, pageable);
 
-        Mockito.verify(renovationRecordRepository).findByUser(user, pageable);
+        verify(renovationRecordRepository).findByUser(user, pageable);
     }
 
     @Test
@@ -296,7 +332,7 @@ public class RenovationRecordServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         toTest.getPaginatedUserRecords(user, term, pageable);
 
-        Mockito.verify(renovationRecordRepository).searchNameOrDescriptionContainingIgnoreCasePaginated(user, term, pageable);
+        verify(renovationRecordRepository).searchNameOrDescriptionContainingIgnoreCasePaginated(user, term, pageable);
     }
 
     @Test
