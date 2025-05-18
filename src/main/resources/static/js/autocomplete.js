@@ -1,6 +1,16 @@
 /** Js file used for autocompleting the tag entry field on viewRenovation.html */
 
-const input = document.getElementById("tagName");
+const formPath = window.location.pathname;
+let input;
+
+if (formPath === "/renovations/view") {
+    input = document.getElementById("tagName");
+} else if (formPath === "/renovations/search") {
+    input = document.getElementById("tag-input");
+} else {
+    console.warn(`Unexpected form path: ${formPath}`);
+}
+
 
 // Listen for input events on the tag input field
 input.addEventListener("input", function () {
@@ -18,8 +28,14 @@ input.addEventListener("input", function () {
  * @param {string} partialTag - The partial input from the user.
  */
 function updateAutocomplete(partialTag) {
-    const existingTags = Array.from(document.getElementsByClassName("tag-text-large"))
-        .map(element => element.textContent.trim());
+    let existingTags;
+    if (input.id === "tagName") {
+        existingTags = Array.from(document.getElementsByClassName("tag-text-large"))
+            .map(element => element.textContent.trim());
+    } else {
+        existingTags = Array.from(document.getElementsByClassName("tag-text-large"))
+            .map(element => element.textContent.trim());
+    }
     fetch(`renovations/tags/autocomplete?partialTag=${encodeURIComponent(partialTag)}`)
         .then(response => response.json())
         .then(tags => {
