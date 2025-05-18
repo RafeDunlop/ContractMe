@@ -109,7 +109,7 @@ public class LocationControllerIntegrationTest {
 
     @Test
     public void testGetAddress_notLocal_getsAllInformation() throws Exception {
-        String expectedUrl = "https://api.geoapify.com/v1/geocode/autocomplete?text=10+Downing+Street&filter=countrycode:uk&bias=proximity:51.493400,0.000000&type=street&lang=en&format=json&apiKey=notAnApiKey";
+        String expectedUrl = "https://api.geoapify.com/v1/geocode/autocomplete?text=10+Downing+Street&filter=countrycode:uk&bias=proximity:51.493400,0.000000&lang=en&format=json&apiKey=notAnApiKey";
         String json = "{\"results\":[{\"formatted\": \"10 Downing Street, SW1A 2AA, London, United Kingdom\"}]}";
         @SuppressWarnings("unchecked")
         ResponseEntity<String> mockResponse = (ResponseEntity<String>) mock(ResponseEntity.class);
