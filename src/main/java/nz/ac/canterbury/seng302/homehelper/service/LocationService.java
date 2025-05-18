@@ -144,7 +144,6 @@ public class LocationService {
         sb.append(String.format("?text=%s", URLEncoder.encode(prompt, StandardCharsets.UTF_8)));
         sb.append(String.format("&filter=countrycode:%s", countryCode.toLowerCase()));
         sb.append(String.format("&bias=proximity:%f,%f", latitude, longitude));
-        sb.append("&type=street");
         sb.append("&lang=en");
         sb.append("&format=json");
         logger.debug("calling autocomplete API: {}", sb);
