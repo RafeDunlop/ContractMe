@@ -106,14 +106,7 @@ public class RegisterController {
             User user = registerService.registerUser(userRegisterDTO);
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
             if (locationService.isLocationProvided(addressDTO)) {
-                Location userLocation = new Location(
-                        addressDTO.getAddress_line1(),
-                        addressDTO.getCountry(),
-                        addressDTO.getPostcode(),
-                        addressDTO.getCity(),
-                        addressDTO.getRegion()
-                );
-                user.setLocation(userLocation);
+                registerService.registerLocation(user,addressDTO);
             }
             return "redirect:/confirm-registration";
         } catch (MailException e) {
