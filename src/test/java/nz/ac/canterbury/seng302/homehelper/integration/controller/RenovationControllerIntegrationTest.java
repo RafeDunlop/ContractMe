@@ -932,6 +932,40 @@ public class RenovationControllerIntegrationTest {
     }
 
     @Test
+    public void addTagToRenovation_inappropriateTagName_profanityWarningThrown() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(currentUser, "Random Renovation", "Some words", List.of());
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+        String tagName = "ass";
+
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", tagName))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("errors"))
+                .andExpect(flash().attribute("errors", is(List.of("Name does not follow the system language standards."))));
+    }
+
+    @Test
+    public void addTagToRenovation_noLettersAndAboveMaxLength_noLettersAndMaxLengthErrorThrown() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(currentUser, "Random Renovation", "Some words", List.of());
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+        String tagName = "!".repeat(129);
+
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", tagName))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("errors"))
+                .andExpect(flash().attribute("errors", containsInAnyOrder(
+                        "Tags must contain one or more letters.",
+                        "Tag cannot be greater than 128 characters.")));
+    }
+
+    @Test
     public void addTagToRenovation_recordIdDoesntExist_notFoundErrorThrown() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "Random Renovation", "Some words", List.of());
         renovationRecordRepository.save(testRecord);
@@ -1201,4 +1235,21 @@ public class RenovationControllerIntegrationTest {
                         hasProperty("name", is("Test Renovation"))
                 )));
     }
+
+    @Test
+    public void getProfanityFilter_invalidName_returnTrue() throws Exception {
+        String invalidName = "ass";
+        mockMvc.perform(get("/renovations/tags/profanity-filter").param("tagName", invalidName))
+                .andExpect(content().string(equalTo("true")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void getProfanityFilter_validName_returnFalse() throws Exception {
+        String invalidName = "Bathroom";
+        mockMvc.perform(get("/renovations/tags/profanity-filter").param("tagName", invalidName))
+                .andExpect(content().string(equalTo("false")))
+                .andExpect(status().isOk());
+    }
+
 }

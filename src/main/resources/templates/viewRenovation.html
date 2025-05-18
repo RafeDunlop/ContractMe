@@ -70,12 +70,13 @@
             <div class="alert alert-danger mt-2" role="alert" id="tag-frontend-error" hidden>
                 <ul><li><label class="form-label" id="tag-frontend-error-message"></label></li></ul>
             </div>
-
             <!-- Backend error -->
             <div class="alert alert-danger mt-2" role="alert" id="tag-backend-error"
                  th:attr="hidden=${errors == null}">
                 <ul><li th:each="msg : ${errors}" th:text="${msg}"></li></ul>
             </div>
+
+            
 
 
             <!-- Display added tags -->
