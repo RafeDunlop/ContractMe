@@ -48,13 +48,18 @@
                         </div>
                     </div>
                     <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">TagSearch</button>
+                        <button type="submit" class="btn btn-primary w-100">Search for Tag</button>
                     </div>
                 </div>
 
                 <!-- Hidden inputs for each tag -->
                 <div id="hidden-tag-inputs"></div>
             </form>
+
+            <!-- Frontend Validation for Tag Search -->
+
+
+            <!-- Backend Validation for Tag Search -->
 
 
             <!-- Search and Visibility Filter -->
@@ -87,7 +92,7 @@
                     <select name="visibility" class="form-select" onchange="this.form.submit()">
                         <option value="all" th:selected="${visibility == 'all'}">All</option>
                         <option value="public" th:selected="${visibility == 'public'}">Public</option>
-                        <option value="user" th:selected="${visibility == 'user'}">User</option>
+                        <option value="user" th:selected="${visibility == 'user'}">Private</option>
                     </select>
                 </div>
             </form>
