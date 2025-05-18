@@ -14,7 +14,7 @@
 
     <div class="card p-4 shadow-sm">
         <h4 class="card-title mb-4">Start a new renovation!</h4>
-        <form th:action="@{create}" method="post" id="renovation-form">
+        <form th:action="@{/renovations/create}" method="post" id="renovation-form">
 
             <div id="room-hidden-inputs" th:each="room : ${roomList}">
                 <input type="hidden" name="roomList" th:value="${room}" />
