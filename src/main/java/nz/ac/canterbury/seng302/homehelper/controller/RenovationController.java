@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 import jakarta.servlet.http.HttpSession;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
@@ -107,8 +108,9 @@ public class RenovationController {
      * @return thymeleaf createRenovationTemplate
      */
     @GetMapping("/create")
-    public String record() {
+    public String record(@ModelAttribute AddressDTO addressDTO) {
         logger.info("GET /renovations/create");
+
         return "createRenovationTemplate";
     }
 
