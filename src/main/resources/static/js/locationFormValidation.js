@@ -85,6 +85,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
+/**
+ * Checks suburb, city, postcode or country fields to run frontend validation.
+ * @param input text inside input field
+ * @param frontendError associated front end error box
+ * @param frontendErrorMessage message box of associated front end error
+ * @param errorMessageContent text string of error message
+ * @param backendError backend error box
+ * @param fieldPattern regex against which the user input is matched
+ */
 function checkOptionalField(input, frontendError, frontendErrorMessage, errorMessageContent, backendError, fieldPattern) {
     input = input.trim();
 
@@ -100,7 +109,11 @@ function checkOptionalField(input, frontendError, frontendErrorMessage, errorMes
     }
 }
 
-
+/**
+ * Hides all error messages on the location form. This is used so that, if the
+ * user has any frontend or backend error messages on the location form and closes
+ * then reopens it with the toggle switch, the error messages disappear.
+ */
 export function hideAllErrorMessages() {
     hideSingleErrorMessage(suburbFrontendErrorMessage, suburbFrontendError, suburbBackendError);
     hideSingleErrorMessage(cityFrontendErrorMessage, cityFrontendError, cityBackendError);
@@ -109,6 +122,12 @@ export function hideAllErrorMessages() {
 
 }
 
+/**
+ * Closes an individual error field.
+ * @param frontendErrorMessage message box of associated front end error
+ * @param frontendError associated front end error box
+ * @param backendError backend error box
+ */
 function hideSingleErrorMessage(frontendErrorMessage, frontendError, backendError) {
     frontendErrorMessage.textContent = "";
     frontendError.hidden = true;
