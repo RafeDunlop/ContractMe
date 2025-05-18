@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +28,9 @@ import java.util.stream.Stream;
 @Service
 public class LocationService {
 
-    private static final String LOCALHOST_IP = "127.0.0.1";
+    private static final String LOCALHOST_IP_IPV4 = "127.0.0.1";
+
+    private static final String LOCALHOST_IP_IPV6 = "0:0:0:0:0:0:0:1";
 
     private static final String GEOAPIFY_BASE_URL = "https://api.geoapify.com/v1/";
 
@@ -52,6 +56,7 @@ public class LocationService {
     /**
      * Retrieves the localisation of a client from their ip address
      * @param ip The ip address of the client machine
+     * @return The localisation of the client identified by their IP address packaged into a DTO object
      */
     public LocalisationDTO getRoughLocation(String ip) {
         ResponseEntity<String> response = restTemplate.getForEntity(getIpGrabUrl(ip), String.class);
@@ -95,12 +100,13 @@ public class LocationService {
         try {
             JsonNode root = objectMapper.readTree(response.getBody());
             JsonNode results = root.get("results");
-            return objectMapper.readValue(results.toString(), new TypeReference<>() {});
+            return injectSuburbs(objectMapper.readValue(results.toString(), new TypeReference<>() {}));
         } catch (IOException e) {
             logger.error(e.getMessage());
             throw new IllegalStateException(e.getMessage());
         }
     }
+
     public Map<String, List<String>> validateLocation(AddressDTO dto) {
         return new HashMap<String, List<String>>();
     }
@@ -135,14 +141,13 @@ public class LocationService {
         StringBuilder sb = new StringBuilder();
         sb.append(GEOAPIFY_BASE_URL);
         sb.append(AUTOCOMPLETE_API);
-        sb.append(String.format("?text=%s", prompt));
-        sb.append(String.format("&filter=countrycode:%s", countryCode));
+        sb.append(String.format("?text=%s", URLEncoder.encode(prompt, StandardCharsets.UTF_8)));
+        sb.append(String.format("&filter=countrycode:%s", countryCode.toLowerCase()));
         sb.append(String.format("&bias=proximity:%f,%f", latitude, longitude));
-        sb.append("&type=street");
         sb.append("&lang=en");
         sb.append("&format=json");
-        sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
         logger.debug("calling autocomplete API: {}", sb);
+        sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
         return sb.toString();
     }
 
@@ -157,9 +162,31 @@ public class LocationService {
         sb.append(GEOAPIFY_BASE_URL);
         sb.append(IP_API);
         sb.append("?");
-        if (!ip.equals(LOCALHOST_IP)) sb.append(String.format("ip=%s", ip)); // use request ip instead if localhost
-        sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
+        if (!ip.equals(LOCALHOST_IP_IPV4) && !ip.equals(LOCALHOST_IP_IPV6)) sb.append(String.format("ip=%s", ip)); // use request ip instead if localhost
         logger.debug("calling IP grab API: {}", sb);
+        sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
         return sb.toString();
+    }
+
+    /**
+     * Injects the region field into the addresses provided based on their second address line.
+     * "region" is interpreted as suburb
+     * @param addresses The addresses for which to set the suburb field
+     * @return The addresses specified
+     */
+    private List<AddressDTO> injectSuburbs(List<AddressDTO> addresses) {
+        for (AddressDTO address : addresses) {
+            if (address.getAddress_line2() == null || address.getAddress_line2().isEmpty()) {
+                continue;
+            }
+            if (address.getAddress_line2().contains(",")) {
+                address.setRegion(address.getAddress_line2().split(",")[0]);
+            } else if (address.getAddress_line2().contains(" ")) {
+                address.setRegion(address.getAddress_line2().split(" ")[0]);
+            } else {
+                address.setRegion(address.getAddress_line2());
+            }
+        }
+        return addresses;
     }
 }
