@@ -1371,7 +1371,7 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "jane@doe.com")
-    public void getForm_userWithLocation_locationPrefilled() throws Exception {
+    public void getForm_renovationWithLocation_locationAdded() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         AddressDTO addressDTO = new AddressDTO();
         addressDTO.setAddress_line1("164 Ingoldsby Street");
@@ -1403,5 +1403,31 @@ public class RenovationControllerIntegrationTest {
         assertEquals(addressDTO.getCity(), loc.getCity());
         assertEquals(addressDTO.getRegion(), loc.getSuburb());
         assertEquals(addressDTO.getPostcode(), loc.getPostcode());
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void getForm_renovationWitoutLocation_locationNotAdded() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
+
+
+        mockMvc.perform(post("/renovations/create")
+                        .param("name", testRecord.getName())
+                        .param("description", testRecord.getDescription())
+                        .param("roomList", "Kitchen", "Dining Room")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+
+        List<RenovationRecord> allRecords = renovationRecordRepository.findAll();
+        assertFalse(allRecords.isEmpty(), "No renovation records saved");
+        RenovationRecord saved = allRecords.get(1);
+        Location loc = saved.getLocation();
+        assertNotNull(loc, "Location should be set on renovation");
+        assertNull(loc.getAddress());
+        assertNull(null, loc.getCountry());
+        assertNull(null, loc.getCity());
+        assertNull(loc.getSuburb());
+        assertNull(loc.getPostcode());
     }
 }

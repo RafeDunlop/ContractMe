@@ -94,6 +94,7 @@ public class RenovationRecordServiceTest {
         assertEquals("Canterbury", location.getSuburb());
     }
 
+    
     @Test
     public void setRenovationPublic_isPublic() {
 

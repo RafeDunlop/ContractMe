@@ -81,8 +81,10 @@ public class LocationFormSteps {
 
     @Given("I am viewing the enter location details form on the {string} page")
     public void i_am_viewing_the_enter_location_details_form_on_the_page(String endPoint) throws Exception {
-        result = mockMvc.perform(get(endPoint)
-                .with(csrf()))
+        MockHttpServletRequestBuilder request = get(endPoint)
+                .with(user("jane.doe@example.com").roles("USER"));
+
+        result = mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -127,20 +129,36 @@ public class LocationFormSteps {
 
     @When("I enter a valid address and submit the location form on the {string} page")
     public void i_enter_a_valid_address_and_submit_the_location_form_on_the_page(String endpoint) throws Exception {
-        result = mockMvc.perform(post(endpoint)
-                        .param("firstName", "Jane")
-                        .param("lastName", "Doe")
-                        .param("email", "jane.doe@example.com")
-                        .param("password", "Test123!")
-                        .param("confirmPassword", "Test123!")
-                        .param("address", "200 Riccarton Road")
-                        .param("region", "Riccarton")
-                        .param("city", "Christchurch")
-                        .param("postcode", "8041")
-                        .param("country", "New Zealand")
-                        .with(csrf()))
+        MockHttpServletRequestBuilder request = post(endpoint)
+                .param("firstName", "Jane")
+                .param("lastName", "Doe")
+                .param("email", "jane.doe@example.com")
+                .param("address_line1", "200 Riccarton Road")
+                .param("suburb", "Riccarton")
+                .param("city", "Christchurch")
+                .param("postcode", "8041")
+                .param("country", "New Zealand")
+                .with(csrf());
+
+        // Endpoint specific params
+        switch (endpoint) {
+            case "/register":
+                request.param("password", "Test123!")
+                        .param("confirmPassword", "Test123!");
+                break;
+
+            case "/user/edit":
+                request.with(user("jane.doe@example.com").roles("USER"));
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
+        }
+
+        result = mockMvc.perform(request)
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
+
 
     }
 

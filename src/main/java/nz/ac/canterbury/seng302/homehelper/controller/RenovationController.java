@@ -50,6 +50,7 @@ public class RenovationController {
      *
      * @param renovationRecordService The renovation service which provides non-UI functionality
      * @param loginService            The login service provides the function to get the current user
+     * @param locationService         The location service provides the function to validate the locations
      */
     @Autowired
     public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService,LocationService locationService) {

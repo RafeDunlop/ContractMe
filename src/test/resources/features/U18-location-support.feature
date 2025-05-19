@@ -80,5 +80,5 @@ Feature:As Kaia, I want to be able to add location to my profile and
     Examples:
       | page_name               |
       |  "/register"            |
-
+      |  "/renovations/create"  |
 
