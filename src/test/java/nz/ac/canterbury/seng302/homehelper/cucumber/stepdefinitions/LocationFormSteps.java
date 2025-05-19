@@ -187,9 +187,9 @@ public class LocationFormSteps {
                 throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
         }
 
-        result = mockMvc.perform(request)
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
+        resultActions = mockMvc.perform(request)
+                .andExpect(status().is3xxRedirection());
+
     }
 
     @When("I leave the address field blank but fill any other field on the location form on the edit page for my existing record")
@@ -208,9 +208,8 @@ public class LocationFormSteps {
                 .with(user(existingRecord.getUser().getEmail()).roles("USER"))
                 .with(csrf());
 
-        result = mockMvc.perform(request)
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
+        resultActions = mockMvc.perform(request)
+                .andExpect(status().is3xxRedirection());
     }
 
 

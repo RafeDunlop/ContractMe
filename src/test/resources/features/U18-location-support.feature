@@ -27,17 +27,6 @@ Feature:As Kaia, I want to be able to add location to my profile and
       |  "/register"            |
       |  "/user/edit"           |
 
-    Scenario Outline: AC6: Valid characters in street address (letters, hyphen,
-        apostrophe, number, space, dot, slash [PO Approved 16/05/2025].
-        Given I am viewing the enter location details form on the <page_name> page
-        When I enter <invalid address> in the address field and submit the location form on the <page_name> page
-        Then The street address error message tells me "Street address contains invalid characters."
-        Examples:
-            | page_name    | invalid address |
-            | "/register"  | "!@#$%^&*()_+"  |
-            | "/user/edit" | "!@#$%^&*()_+"  |
-            | "/register"  |  "\t\r\"`¿?°" |
-            | "/user/edit" |  "\t\r\"`¿?°" |
 
   Scenario: AC5.2:  Given I am facing a form that asks for my location, when I want to give my location, then I must
   supply a street address with the street number, optionally a suburb, a city, a postcode, and a country.
@@ -46,7 +35,17 @@ Feature:As Kaia, I want to be able to add location to my profile and
     When I leave the address field blank but fill any other field on the location form on the edit page for my existing record
     Then I am told that I must supply an address field
 
-
+  Scenario Outline: AC6: Valid characters in street address (letters, hyphen,
+  apostrophe, number, space, dot, slash [PO Approved 16/05/2025].
+    Given I am viewing the enter location details form on the <page_name> page
+    When I enter <invalid address> in the address field and submit the location form on the <page_name> page
+    Then The street address error message tells me "Street address contains invalid characters."
+    Examples:
+      | page_name    | invalid address |
+      | "/register"  | "!@#$%^&*()_+"  |
+      | "/user/edit" | "!@#$%^&*()_+"  |
+      | "/register"  |  "\t\r\"`¿?°" |
+      | "/user/edit" |  "\t\r\"`¿?°" |
 
   Scenario Outline: AC7.1:  Given I supply a suburb, when the suburb contains non valid characters (i.e. characters others than
   letters, hyphen, apostrophe, number, space), then a message tells me that “Suburb contains invalid characters.”

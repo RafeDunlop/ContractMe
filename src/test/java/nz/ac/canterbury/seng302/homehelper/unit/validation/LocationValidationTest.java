@@ -163,13 +163,13 @@ public class LocationValidationTest {
     @ParameterizedTest
     @MethodSource("getValidStreetAddress")
     void locationValidation_validStreetAddress_isValid(String streetAddress) {
-        List<String> result = locationValidation.validateStreetAddress(streetAddress);
+        List<String> result = locationValidation.validateStreetAddress(streetAddress, true);
         assertEquals(0, result.size());
     }
 
     @Test
     void invalidStreetAddress_emptyAddress_isNotValid() {
-        List<String> result = locationValidation.validateStreetAddress("");
+        List<String> result = locationValidation.validateStreetAddress("", true);
         assertEquals(1, result.size());
         assertEquals("Street address is required.", result.get(0));
     }
@@ -177,7 +177,7 @@ public class LocationValidationTest {
     @ParameterizedTest
     @MethodSource("getInvalidStreetAddress")
     void locationValidation_invalidStreetAddress_isNotValid(String streetAddress) {
-        List<String> result = locationValidation.validateStreetAddress(streetAddress);
+        List<String> result = locationValidation.validateStreetAddress(streetAddress, true);
         assertEquals(1, result.size());
         assertEquals("Street address contains invalid characters.", result.get(0));
     }
