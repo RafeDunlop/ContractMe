@@ -1,10 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
-import nz.ac.canterbury.seng302.homehelper.entity.Tag;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.*;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
@@ -24,10 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Controller for /renovation and subsidiary endpoints, associated with the consuming of renovations
@@ -216,6 +210,7 @@ public class RenovationController {
      * Gets the renovation editing form
      *
      * @param id    The id of the renovation to be edited
+     * @param addressDTO the dto containing data relating to fields in address form.
      * @param model (map-like) representation of name, language and isJava boolean for use in thymeleaf,
      *              with values being set to relevant parameters provided
      * @return Thymeleaf editRenovationTemplate
@@ -237,6 +232,18 @@ public class RenovationController {
         if (!model.containsAttribute("name")) {
             model.addAttribute("renovation", renovationRecord);
         }
+
+        Location location = renovationRecord.getLocation();
+        if (location != null) {
+            addressDTO.setAddress_line1(location.getAddress());
+            addressDTO.setCountry(location.getCountry());
+            addressDTO.setPostcode(location.getPostcode());
+            addressDTO.setCity(location.getCity());
+            addressDTO.setRegion(location.getSuburb());
+        }
+
+        model.addAttribute("addressDTO", addressDTO);
+
 
         return "editRenovationTemplate";
     }
@@ -269,6 +276,7 @@ public class RenovationController {
      * @param description        of the record to be edited from the form field
      * @param roomList           list of rooms of the record to be edited from the form
      * @param redirectAttributes (map-like) representation of results to be used by thymeleaf
+     * @param addressDTO the dto containing data relating to fields in address form.
      * @return redirect to the view page for the edited record
      */
     @PostMapping("/edit")
@@ -290,6 +298,22 @@ public class RenovationController {
 
         Map<String, List<String>> errors = renovationRecordService.validateAllInputsEdit(renovationRecord, name);
 
+        Location currentLocation = renovationRecord.getLocation();
+        Location formLocation = locationService.isLocationProvided(addressDTO)
+                ? new Location(addressDTO.getAddress_line1(),
+                addressDTO.getCountry(),
+                addressDTO.getPostcode(),
+                addressDTO.getCity(),
+                addressDTO.getRegion()
+        )
+                : null;
+        boolean locationChanged = !Objects.equals(currentLocation, formLocation);
+        if (locationChanged) {
+            errors.putAll(locationService.validateLocation(addressDTO));
+        }
+
+
+
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
 
@@ -297,13 +321,21 @@ public class RenovationController {
             redirectAttributes.addFlashAttribute("name", name);
             redirectAttributes.addFlashAttribute("description", description);
             redirectAttributes.addFlashAttribute("roomList", roomList);
+
+            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
+            redirectAttributes.addFlashAttribute("locationUsed", locationChanged);
+
             return "redirect:/renovations/edit?id=" + renovationRecord.getId();
         }
 
         renovationRecord.setName(name); // don't set the name until the changes are valid to avoid db divergence
-        renovationRecordService.addRenovationRecord(renovationRecord); //updates existing record (identified by id)
 
         redirectAttributes.addFlashAttribute("renovation", renovationRecord);
+
+        if (locationChanged) {
+            renovationRecord.setLocation(formLocation);
+        }
+        renovationRecordService.addRenovationRecord(renovationRecord); //updates existing record (identified by id)
         return "redirect:/renovations/view?id=" + renovationRecord.getId();
     }
 
