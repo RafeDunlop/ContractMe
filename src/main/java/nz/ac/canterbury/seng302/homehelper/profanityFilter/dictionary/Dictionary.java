@@ -88,6 +88,31 @@ public class Dictionary implements Iterable<Profanity> {
         }
     }
 
+    private class MultiRegexMatcher implements Matcher {
+        private final List<Pattern> patterns;
+
+        public MultiRegexMatcher(List<Pattern> patterns) {
+            this.patterns = patterns;
+        }
+
+        @Override
+        public Profanity find(String input) {
+            input = ' ' + Text.normalize(input) + ' ';
+            for (Pattern pattern : patterns) {
+                java.util.regex.Matcher matcher = pattern.matcher(input);
+                if (matcher.find()) {
+                    return new Profanity(matcher.group(), 1.0f); // or look up actual score if needed
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public boolean matches(String input) {
+            return find(input) != null;
+        }
+    }
+
     private final Map<String, Profanity> profanities;
     private final boolean isSpaceSeparated;
 
@@ -138,11 +163,11 @@ public class Dictionary implements Iterable<Profanity> {
             if (line.isEmpty()) continue;
 
             String[] cols = line.split("\t");
-            String text = Text.normalize(cols[0]);
-            if (text.isEmpty())
+//            String text = Text.normalize(cols[0]);
+            if (cols[0].isEmpty())
                 throw new IOException("Invalid value at line: \"" + line + "\"");
             float score = cols.length > 1 ? Float.parseFloat(cols[1]) : 1.f;
-            profanities.add(new Profanity(text, score));
+            profanities.add(new Profanity(cols[0], score));
         }
 
         return new Dictionary(language, profanities);
@@ -187,25 +212,22 @@ public class Dictionary implements Iterable<Profanity> {
      * @return a {@link Matcher} instance
      */
     public Matcher matcher(float threshold) {
-        StringBuilder regex = new StringBuilder();
-        if (isSpaceSeparated) regex.append(' ');
-        regex.append('(');
+        List<Pattern> regexPatterns = new ArrayList<>();
 
-        boolean profanityFound = false;
         for (Profanity profanity : profanities.values()) {
             if (profanity.score() >= threshold) {
-                regex.append(profanity.text()).append('|');
-                profanityFound = true;
+                try {
+                    Pattern pattern = Pattern.compile(profanity.text(), Pattern.CASE_INSENSITIVE);
+                    regexPatterns.add(pattern);
+                } catch (Exception e) {
+                    System.err.println("Invalid regex in dictionary: " + profanity.text());
+                }
             }
         }
 
-        if (!profanityFound) return FalseMatcher.INSTANCE;
+        if (regexPatterns.isEmpty()) return FalseMatcher.INSTANCE;
 
-        regex.setLength(regex.length() - 1);
-        regex.append(')');
-        if (isSpaceSeparated) regex.append(' ');
-
-        return new RegexMatcher(Pattern.compile(regex.toString()));
+        return new MultiRegexMatcher(regexPatterns);
     }
 
     /**

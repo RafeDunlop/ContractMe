@@ -81,7 +81,7 @@ public class ProfanityFilter {
     private Dictionary.Matcher getMatcher(String language) {
         return matchers.computeIfAbsent(language, lang -> {
             Dictionary dictionary = loadDictionary(lang);
-            return dictionary.matcher(0.3f);
+            return dictionary.matcher(0.0f);
         });
     }
 
