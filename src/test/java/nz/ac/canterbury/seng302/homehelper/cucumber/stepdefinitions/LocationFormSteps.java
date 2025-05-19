@@ -537,7 +537,6 @@ public class LocationFormSteps {
                         .param("description", "Test Description")
                         .param("roomList", "Kitchen")
                         .param("address_line1", "77 Ilam Road")
-                        .param("address_line1", "77 Ilam Road")
                         .param("region", "Ilam")
                         .param("city", "Christchurch")
                         .param("postcode", "8041")

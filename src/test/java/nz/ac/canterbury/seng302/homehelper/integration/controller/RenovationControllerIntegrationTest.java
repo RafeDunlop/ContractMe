@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -1404,4 +1405,41 @@ public class RenovationControllerIntegrationTest {
         assertEquals(addressDTO.getRegion(), loc.getSuburb());
         assertEquals(addressDTO.getPostcode(), loc.getPostcode());
     }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void editRenovation_validLocationDetails_LocationUpdated() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
+        renovationRecordRepository.save(testRecord);
+
+        AddressDTO addressDTO = new AddressDTO();
+        addressDTO.setAddress_line1("33 Moorhouse Ave");
+        addressDTO.setCountry("New Zealand");
+        addressDTO.setPostcode("8043");
+        addressDTO.setCity("Christchurch");
+        addressDTO.setRegion("Sydenham");
+
+        mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
+                    .param("address_line1", addressDTO.getAddress_line1())
+                    .param("country", addressDTO.getCountry())
+                    .param("postcode", addressDTO.getPostcode())
+                    .param("city", addressDTO.getCity())
+                    .param("region", addressDTO.getRegion())
+                        .param("name", "Renovation")
+                        .param("description", "Some words")
+                        .param("roomList", "Room 1", "Room 2")
+
+                    .with(csrf()))
+                    .andExpect(status().is3xxRedirection())
+                    .andReturn();
+
+        Location location = testRecord.getLocation();
+        assertNotNull(location, "Location should be set on renovation");
+        assertEquals(addressDTO.getAddress_line1(), location.getAddress());
+        assertEquals(addressDTO.getCountry(), location.getCountry());
+        assertEquals(addressDTO.getCity(), location.getCity());
+        assertEquals(addressDTO.getRegion(), location.getSuburb());
+        assertEquals(addressDTO.getPostcode(), location.getPostcode());
+    }
+
 }
