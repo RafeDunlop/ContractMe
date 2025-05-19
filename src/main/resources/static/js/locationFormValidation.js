@@ -1,3 +1,4 @@
+const addressPattern = /^[\p{L}\-'\d\s.\/]*$/u;
 const suburbPattern = /^[\p{L}\d\-'\s]*$/u;
 const cityPattern = /^[\p{L}\-'\s]*$/u;
 const postcodePattern = /^(?!.* {2})[\p{L}\p{N} ]*$/u;
@@ -5,6 +6,9 @@ const countryPattern = /^(?!.* {2})[\p{L}\-' ]*$/u;
 
 
 let addressField = document.getElementById("address");
+let addressFrontendError = document.getElementById("address-frontend-error");
+let addressFrontendErrorMessage = document.getElementById("address-frontend-error-message");
+let addressBackendError = document.getElementById("address-backend-error");
 
 let suburbField = document.getElementById("suburb");
 let suburbFrontendError = document.getElementById("suburb-frontend-error");
@@ -32,7 +36,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // Event listeners
-
+    ["input", "focus"].forEach(event =>
+        addressField.addEventListener(event, () =>
+            checkOptionalField(addressField.value,
+                addressFrontendError,
+                addressFrontendErrorMessage,
+                "Street address contains invalid characters.",
+                addressBackendError,
+                addressPattern
+            )
+        )
+    );
 
 
     ["input", "focus"].forEach(event =>
