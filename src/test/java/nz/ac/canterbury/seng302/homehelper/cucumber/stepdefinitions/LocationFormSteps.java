@@ -5,11 +5,14 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 
 import java.util.Collections;
+
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +27,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -210,8 +217,8 @@ public class LocationFormSteps {
 
     @Then("I am told that I must supply an address field")
     public void i_am_told_that_i_must_supply_an_address_field() throws Exception {
-        String content = result.getResponse().getContentAsString();
-        //assertTrue(content.contains("Cannot submit location without an address"));
+        resultActions.andExpect(flash().attribute("addressError",
+                    List.of("Street address is required.")));
     }
 
 
@@ -569,5 +576,36 @@ public class LocationFormSteps {
     public void i_am_told_that_i_have_entered_an_invalid_country() throws Exception {
         resultActions
                 .andExpect(flash().attribute("countryError", List.of("Country contains invalid characters.")));
+    }
+
+    @When("I enter {string} in the address field and submit the location form on the {string} page")
+    public void i_enter_in_the_address_field_and_submit_the_location_form_on_the_page(String address, String endpoint) throws Exception {
+        List<String> userProfileEndpoints = List.of("/register", "/user/edit");
+        List<String> userAuthenticatedEndpoints = List.of("/user/edit", "/renovations/create", "/renovations/edit");
+        MockHttpServletRequestBuilder request = post(endpoint)
+            .param("address_line1", address)
+            .param("suburb", "")
+            .param("city", "")
+            .param("postcode", "")
+            .param("country", "")
+            .with(csrf());
+
+        if (userProfileEndpoints.contains(endpoint)) {
+            request = request.param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!");
+        }
+
+        if (userAuthenticatedEndpoints.contains(endpoint)) {
+            request = request.with(user("jane.doe@example.com").roles("USER"));
+        }
+        resultActions = mockMvc.perform(request);
+    }
+
+    @Then("The street address error message tells me {string}")
+    public void the_street_address_error_message_tells_me(String expectedError) throws Exception {
+        resultActions.andExpect(flash().attribute("addressError", List.of(expectedError)));
     }
 }

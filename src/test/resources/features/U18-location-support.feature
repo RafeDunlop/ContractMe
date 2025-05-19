@@ -1,15 +1,15 @@
 Feature:As Kaia, I want to be able to add location to my profile and
-  my renovation records so that I can keep track of where they are.
-  Scenario: AC1: Given I register to the system, when I am asked to supply my details, then I can
-  optionally supply my location.
-    Given I am on the register form
-    When I click the location toggle switch
-    Then I can see the add location input fields
+    my renovation records so that I can keep track of where they are.
+    Scenario: AC1: Given I register to the system, when I am asked to supply my details, then I can
+        optionally supply my location.
+        Given I am on the register form
+        When I click the location toggle switch
+        Then I can see the add location input fields
 
-  Scenario: AC2: I can optionally supply my location when editing my profile
-    Given I am on the edit profile form
-    When I click the location toggle switch
-    Then I can see the add location input fields
+    Scenario: AC2: I can optionally supply my location when editing my profile
+        Given I am on the edit profile form
+        When I click the location toggle switch
+        Then I can see the add location input fields
 
   Scenario: AC4: I can optionally supply my location when editing a renovation record
     Given I have an existing renovation record
@@ -27,6 +27,17 @@ Feature:As Kaia, I want to be able to add location to my profile and
       |  "/register"            |
       |  "/user/edit"           |
 
+    Scenario Outline: AC6: Valid characters in street address (letters, hyphen,
+        apostrophe, number, space, dot, slash [PO Approved 16/05/2025].
+        Given I am viewing the enter location details form on the <page_name> page
+        When I enter <invalid address> in the address field and submit the location form on the <page_name> page
+        Then The street address error message tells me "Street address contains invalid characters."
+        Examples:
+            | page_name    | invalid address |
+            | "/register"  | "!@#$%^&*()_+"  |
+            | "/user/edit" | "!@#$%^&*()_+"  |
+            | "/register"  |  "\t\r\"`¿?°" |
+            | "/user/edit" |  "\t\r\"`¿?°" |
 
   Scenario: AC5.2:  Given I am facing a form that asks for my location, when I want to give my location, then I must
   supply a street address with the street number, optionally a suburb, a city, a postcode, and a country.
@@ -103,20 +114,20 @@ Feature:As Kaia, I want to be able to add location to my profile and
     And I am told that I have entered an invalid postcode
 
 
-  Scenario Outline: AC10: Given I supply a country, when the country contains non valid characters (i.e. characters
-  other than letters, hyphen, apostrophe, single space), then a message tells me that “Country contains invalid
-  characters.” and the form is not saved
-    Given I am viewing the enter location details form on the <page_name> page
-    When I enter a valid address but an invalid country and submit the form on the <page_name> page
-    Then I am taken back to the <page_name> page
-    And I am told that I have entered an invalid country
-    Examples:
-      | page_name               |
-      |  "/register"            |
-      |  "/user/edit"           |
+    Scenario Outline: AC10.1: Given I supply a country, when the country contains non valid characters (i.e. characters
+        other than letters, hyphen, apostrophe, single space), then a message tells me that “Country contains invalid
+        characters.” and the form is not saved
+        Given I am viewing the enter location details form on the <page_name> page
+        When I enter a valid address but an invalid country and submit the form on the <page_name> page
+        Then I am taken back to the <page_name> page
+        And I am told that I have entered an invalid country
+        Examples:
+            | page_name               |
+            |  "/register"            |
+            |  "/user/edit"           |
 
 
-  Scenario: AC10: Given I supply a country, when the country contains non valid characters (i.e. characters
+  Scenario: AC10.2: Given I supply a country, when the country contains non valid characters (i.e. characters
   other than letters, hyphen, apostrophe, single space), then a message tells me that “Country contains invalid
   characters.” and the form is not saved
     Given I have an existing renovation record
