@@ -70,6 +70,7 @@ public class RegisterController {
      * Handles form submission for user registration.
      *
      * @param userRegisterDTO the data transfer object containing user registration details
+     * @param addressDTO, dto containing user location details
      * @param request the HTTP servlet request
      * @param redirectAttributes attributes for a redirect scenario
      * @return redirect address
@@ -106,14 +107,7 @@ public class RegisterController {
             User user = registerService.registerUser(userRegisterDTO);
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
             if (locationService.isLocationProvided(addressDTO)) {
-                Location userLocation = new Location(
-                        addressDTO.getAddress_line1(),
-                        addressDTO.getCountry(),
-                        addressDTO.getPostcode(),
-                        addressDTO.getCity(),
-                        addressDTO.getRegion()
-                );
-                user.setLocation(userLocation);
+                registerService.registerLocation(user,addressDTO);
             }
             return "redirect:/confirm-registration";
         } catch (MailException e) {

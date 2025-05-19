@@ -20,7 +20,7 @@ input.addEventListener("input", function () {
 function updateAutocomplete(partialTag) {
     const existingTags = Array.from(document.getElementsByClassName("tag-text-large"))
         .map(element => element.textContent.trim());
-    fetch(`/renovations/tags/autocomplete?partialTag=${encodeURIComponent(partialTag)}`)
+    fetch(`renovations/tags/autocomplete?partialTag=${encodeURIComponent(partialTag)}`)
         .then(response => response.json())
         .then(tags => {
             const filteredTags = tags.filter(tag => !existingTags.includes(tag));

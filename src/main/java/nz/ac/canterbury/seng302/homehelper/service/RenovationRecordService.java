@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
@@ -37,6 +38,22 @@ public class RenovationRecordService {
         this.renovationRecordRepository = renovationRecordRepository;
         this.renovationTaskRepository = renovationTaskRepository;
         this.renovationRecordValidation = renovationRecordValidation;
+    }
+
+    /**
+     * Retrieves a list of renovation records associated with the current user that are like the given term
+     * with pagination.
+     * @param user The current user
+     * @param term The term to search for, not case-sensitive
+     * @param pageable The pagination information
+     * @return a list of renovation records from the user that match the term if given
+     */
+    public Page<RenovationRecord> getPaginatedUserRecords(User user, String term,
+                                                        Pageable pageable) {
+        if (term == null || term.trim().isEmpty()) {
+            return renovationRecordRepository.findByUser(user, pageable);
+        }
+        return renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCasePaginated(user, term, pageable);
     }
 
     /**
@@ -177,5 +194,15 @@ public class RenovationRecordService {
 
         recordsSubList = records.subList(startIndex, endIndex);
         return new PageImpl<>(recordsSubList, pageable, records.size());
+    }
+
+    /**
+     * Retrieves a list of all renovation records that are associated with the given tags.
+     * @param tagList the list of tag objects.
+     * @return a list of renovation records associated with the tags in the given list.
+     */
+    public List<RenovationRecord> getAllRecordsByTags(List<Tag> tagList) {
+        // return renovationRecordRepository.findAllByTags(tagList);
+        return renovationRecordRepository.findAllPublicByTagsOrderByTagCountAndDate(tagList);
     }
 }
