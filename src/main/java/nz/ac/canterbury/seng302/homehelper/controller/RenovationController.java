@@ -221,7 +221,9 @@ public class RenovationController {
      * @return Thymeleaf editRenovationTemplate
      */
     @GetMapping("/edit")
-    public String editRenovation(@RequestParam(name = "id") Long id, Model model) {
+    public String editRenovation(@RequestParam(name = "id") Long id,
+                                 @ModelAttribute AddressDTO addressDTO,
+                                 Model model) {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
@@ -274,6 +276,7 @@ public class RenovationController {
                                        @RequestParam(name = "name", required = false) String name,
                                        @RequestParam(name = "description", required = false) String description,
                                        @RequestParam(name = "roomList", required = false) List<String> roomList,
+                                       @ModelAttribute AddressDTO addressDTO,
                                        RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/edit");
 
