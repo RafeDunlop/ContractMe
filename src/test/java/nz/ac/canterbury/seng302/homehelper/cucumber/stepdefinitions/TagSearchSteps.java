@@ -151,6 +151,12 @@ public class TagSearchSteps {
         result = mockMvc.perform(requestBuilder).andReturn();
     }
 
+    @Then("I should see the message {string}")
+    public void i_should_see_the_message(String errorMessage) throws Exception {
+        String content = result.getResponse().getContentAsString();
+        assert content.contains(errorMessage) : "Error message not found: " + errorMessage;
+    }
+
     @Then("I am not redirected")
     public void i_should_not_be_redirected() {
         int status = result.getResponse().getStatus();
