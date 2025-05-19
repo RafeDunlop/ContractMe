@@ -180,7 +180,8 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
             "OR " + "LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%'))) " +
             "AND t IN :tags " +
             "AND " + "r.isPublic = true " +
-            "ORDER BY r.createdDate DESC")
+            "GROUP BY r " +
+            "ORDER BY COUNT(t) DESC, r.createdDate DESC")
     List<RenovationRecord> findByIsPublicTrueSearchContainingNameOrDescriptionAndTagsIgnoreCase(@Param("term") String term,
                                                                                          @Param("tags") List<Tag> tags);
 
@@ -196,7 +197,8 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
             "OR " + "LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%'))) " +
             "AND " + "t IN :tags " +
             "AND " + "(r.isPublic = true OR r.user = :user) " +
-            "ORDER BY r.createdDate DESC")
+            "GROUP BY r " +
+            "ORDER BY COUNT(t) DESC, r.createdDate DESC")
     List<RenovationRecord> findAllVisibleToUserSearchContainingNameOrDescriptionAndTagsIgnoreCase(@Param("user") User user,
                                                                                            @Param("term") String term,
                                                                                            @Param("tags") List<Tag> tags);
