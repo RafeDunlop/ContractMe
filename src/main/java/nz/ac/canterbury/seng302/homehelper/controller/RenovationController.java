@@ -507,7 +507,7 @@ public class RenovationController {
 
         if (isTagSearch) {
             List<Tag> tagList = tagService.getTags(tagNameList);
-            records = renovationRecordService.getAllRecordsByTags(tagList);
+            records = renovationRecordService.getAllRecordsByTags(tagList, visibility, user);
 
             logger.info("tag list: " + tagList);
             logger.info("records associated list: " + records);

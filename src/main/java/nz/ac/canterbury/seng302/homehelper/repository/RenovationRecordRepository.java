@@ -160,7 +160,7 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
      */
     @Query("SELECT r FROM RenovationRecord r " +
             "JOIN r.tags t " +
-            "WHERE r.isPublic = true AND t IN :tags " +
+            "WHERE r.isPublic = false AND t IN :tags " +
             "GROUP BY r " +
             "ORDER BY COUNT(t) DESC, r.createdDate DESC")
     List<RenovationRecord> findAllPublicByTagsOrderByTagCountAndDate(@Param("tags") List<Tag> tags);

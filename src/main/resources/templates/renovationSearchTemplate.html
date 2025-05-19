@@ -5,6 +5,7 @@
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="stylesheet" th:href="@{/css/viewRenovationStyles.css}">
+    <link rel="stylesheet" th:href="@{/css/tags.css}">
     <title>Renovation Records</title>
     <style>
         .truncate {
@@ -44,6 +45,7 @@
                         <label for="tag-input" class="form-label">Tag Search:</label>
                         <div id="tag-input-container" class="form-control d-flex flex-wrap" style="min-height: 40px; cursor: text;" onclick="focusTagInput()">
                             <!-- Tags will be added here -->
+                            <span id="tag-bubbles"></span>
                             <input type="text" id="tag-input" class="border-0 flex-grow-1" placeholder="Enter tags..." style="outline: none; min-width: 100px;">
                         </div>
                         <ul id="autocomplete-list" class="list-group position-absolute" style="z-index: 1000;"></ul>
@@ -103,7 +105,7 @@
                         <input type="hidden" name="fromSearch" value="true" />
                         <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
                     </form>
-                    <a href="#" th:onclick="'document.getElementById(\'form-' + ${record.getId()} + '\').submit(); return false;'">
+                    <a href="#" th:onclick="'document.getElementById(\'form-' + ${record.getId()} + '\').submit(); return false;'" class="no-underline">
                         <div class="card card-count position-relative" style="width: 18rem;">
                             <!-- Badge if user owns the record -->
                             <span class="badge bg-primary position-absolute top-0 end-0 m-2"
