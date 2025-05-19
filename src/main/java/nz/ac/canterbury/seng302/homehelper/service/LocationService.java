@@ -121,6 +121,7 @@ public class LocationService {
     public Map<String, List<String>> validateLocation(AddressDTO dto) {
         Map<String, List<String>> errors = new HashMap<>();
 
+        MapUtil.putIfNotEmpty(errors, "addressError", locationValidation.validateStreetAddress(dto.getAddress_line1()));
         MapUtil.putIfNotEmpty(errors, "suburbError", locationValidation.validateSuburb(dto.getRegion()));
         MapUtil.putIfNotEmpty(errors, "cityError", locationValidation.validateCity(dto.getCity()));
         MapUtil.putIfNotEmpty(errors,"postcodeError", locationValidation.validatePostcode(dto.getPostcode()));

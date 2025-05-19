@@ -1,9 +1,16 @@
 import {
-    hideAllErrorMessages
+    hideAllErrorMessages,
+    checkAllLocationFields
 } from "./locationFormValidation.js";
 
 let locationToggleSwitch = document.getElementById("location-toggleswitch");
 let locationForm = document.getElementById("location-form");
+
+let addressField = document.getElementById("address");
+let suburbField = document.getElementById("suburb");
+let cityField = document.getElementById("city");
+let postcodeField = document.getElementById("postcode");
+let countryField = document.getElementById("country");
 
 locationToggleSwitch.addEventListener("click", displayLocationForm);
 
@@ -31,7 +38,7 @@ document.addEventListener("click", event => {
     if (addressField === event.target) {
         triggerUpdateAutocomplete()
     } else if (locationForm.contains(event.target)) {
-        commitAddressFields()
+        commitAddressFields();
         autocompleteList.innerHTML = "";
     } else {
         autocompleteList.innerHTML = "";
@@ -58,7 +65,7 @@ function triggerUpdateAutocomplete() {
  * if an autocomplete option is hovered over but not clicked
  */
 function commitAddressFields() {
-    committedFields.address = addressField.value.trim();;
+    committedFields.address = addressField.value.trim();
     committedFields.suburb = suburbField.value.trim();
     committedFields.city = cityField.value.trim();
     committedFields.postcode = postcodeField.value.trim();
@@ -179,6 +186,7 @@ function getAutocompleteOption(address) {
         committedFields.country = address.country
 
         autocompleteList.innerHTML = "";
+        checkAllLocationFields();
     });
 
     return item;

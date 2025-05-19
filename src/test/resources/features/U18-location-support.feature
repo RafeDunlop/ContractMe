@@ -1,10 +1,10 @@
 Feature:As Kaia, I want to be able to add location to my profile and
-  my renovation records so that I can keep track of where they are.
-  Scenario: AC1: Given I register to the system, when I am asked to supply my details, then I can
-  optionally supply my location.
-    Given I am on the register form
-    When I click the location toggle switch
-    Then I can see the add location input fields
+    my renovation records so that I can keep track of where they are.
+    Scenario: AC1: Given I register to the system, when I am asked to supply my details, then I can
+        optionally supply my location.
+        Given I am on the register form
+        When I click the location toggle switch
+        Then I can see the add location input fields
 
   Scenario: AC3: Given I edit my profile, when I am asked to supply my details, then I can optionally supply my
   location.
@@ -28,6 +28,17 @@ Feature:As Kaia, I want to be able to add location to my profile and
       |  "/user/edit"           |
       |  "/renovations/create"  |
 
+    Scenario Outline: AC6: Valid characters in street address (letters, hyphen,
+        apostrophe, number, space, dot, slash [PO Approved 16/05/2025].
+        Given I am viewing the enter location details form on the <page_name> page
+        When I enter <invalid address> in the address field and submit the location form on the <page_name> page
+        Then The street address error message tells me "Street address contains invalid characters."
+        Examples:
+            | page_name    | invalid address |
+            | "/register"  | "!@#$%^&*()_+"  |
+            | "/user/edit" | "!@#$%^&*()_+"  |
+            | "/register"  |  "\t\r\"`¿?°" |
+            | "/user/edit" |  "\t\r\"`¿?°" |
 
     Scenario Outline: AC7:  Given I supply a suburb, when the suburb contains non valid characters (i.e. characters others than
     letters, hyphen, apostrophe, number, space), then a message tells me that “Suburb contains invalid characters.”
