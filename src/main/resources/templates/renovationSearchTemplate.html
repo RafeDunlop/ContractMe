@@ -141,7 +141,8 @@
                 </div>
             </div>
             <div th:if="${#lists.isEmpty(records)}" class="alert alert-secondary mt-4">
-                No renovations match your search.
+                <span th:if="${isTagSearch}">No renovations contain your searched tags.</span>
+                <span th:unless="${isTagSearch}">No renovations match your search.</span>
             </div>
 
             <div id="footer" class="mt-2">

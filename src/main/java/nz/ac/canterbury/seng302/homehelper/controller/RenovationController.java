@@ -528,8 +528,7 @@ public class RenovationController {
             List<Tag> tagList = tagService.getTags(tagNameList);
             records = renovationRecordService.getAllRecordsByTags(tagList);
 
-            logger.info("tag list: " + tagList);
-            logger.info("records associated list: " + records);
+
         } else{
             records = switch (visibility.toLowerCase()) {
                 case "public" -> renovationRecordService.getPublicRecords(searchTerm);
@@ -564,6 +563,7 @@ public class RenovationController {
         model.addAttribute("paginationLinksEnd", paginationLinksEnd);
         model.addAttribute("cardsPerPage", cardsPerPage);
         model.addAttribute("totalCards", totalCards);
+        model.addAttribute("isTagSearch", isTagSearch);
 
         return "renovationSearchTemplate";
     }
