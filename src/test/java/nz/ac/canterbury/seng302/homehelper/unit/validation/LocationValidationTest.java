@@ -1,4 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.unit.validation;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -150,6 +151,37 @@ public class LocationValidationTest {
         assertTrue(result.isEmpty());
     }
 
+    public static Stream<String> getValidStreetAddress() {
+        return Stream.of("34/140 Some-cool' street", "1 Nice street", "12345",
+                "Ørneborgvej 14", "œæÖę");
+    }
+
+    public static Stream<String> getInvalidStreetAddress() {
+        return Stream.of("!@#$%^&*()_+", "\t\r\"`¿?°\\");
+    }
+
+    @ParameterizedTest
+    @MethodSource("getValidStreetAddress")
+    void locationValidation_validStreetAddress_isValid(String streetAddress) {
+        List<String> result = locationValidation.validateStreetAddress(streetAddress);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void invalidStreetAddress_emptyAddress_isNotValid() {
+        List<String> result = locationValidation.validateStreetAddress("");
+        assertEquals(1, result.size());
+        assertEquals("Street address is required.", result.get(0));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getInvalidStreetAddress")
+    void locationValidation_invalidStreetAddress_isNotValid(String streetAddress) {
+        List<String> result = locationValidation.validateStreetAddress(streetAddress);
+        assertEquals(1, result.size());
+        assertEquals("Street address contains invalid characters.", result.get(0));
+    }
+
     @Test
     void validPostcode_postcodeWithMultipleSpaces_isValid() {
         List<String> result = locationValidation.validatePostcode("12 34 56");
@@ -178,7 +210,5 @@ public class LocationValidationTest {
     public void locationValidation_invalidCountry_inputNotAccepted(String country) {
             List<String> result = locationValidation.validateCountry(country);
             assertTrue(result.contains("Country contains invalid characters"));
-        }
-
-
+    }
 }
