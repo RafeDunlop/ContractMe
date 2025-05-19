@@ -4,9 +4,14 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
@@ -18,14 +23,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-
-
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -39,8 +40,12 @@ public class LocationFormSteps {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private RenovationRecordRepository renovationRecordRepository;
+
     private MvcResult result;
     private ResultActions resultActions;
+    private RenovationRecord existingRecord;
 
     @Autowired
     private VerificationCodeRepository verificationCodeRepository;
@@ -79,6 +84,32 @@ public class LocationFormSteps {
                 .andReturn();
 
     }
+
+    @Given("I have an existing renovation record")
+    public void i_have_an_existing_renovation_record() {
+        User user = userRepository.findByEmailIgnoreCase("jane.doe@example.com")
+                .orElseThrow(() -> new IllegalStateException("Test user should exist"));
+
+        existingRecord = new RenovationRecord(user, "Test Record", null, Collections.emptyList());
+        renovationRecordRepository.save(existingRecord);
+        userRepository.save(user);
+
+    }
+    @Given("I am on the edit record for my existing record")
+    public void i_am_on_the_edit_record_for_my_existing_record() throws Exception {
+        assertNotNull(existingRecord, "Renovation record must be exist before accessing edit page");
+
+        String email = existingRecord.getUser().getEmail();
+        MockHttpServletRequestBuilder request = get("/renovations/edit?id=" + existingRecord.getId())
+                .with(user(email).roles("USER"));
+
+        result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+
+
 
     @When("I click the location toggle switch")
     public void i_click_the_location_toggle_switch() throws Exception {

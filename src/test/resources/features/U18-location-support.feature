@@ -11,6 +11,12 @@ Feature:As Kaia, I want to be able to add location to my profile and
     When I click the location toggle switch
     Then I can see the add location input fields
 
+  Scenario: AC4: I can optionally supply my location when editing a renovation record
+    Given I have an existing renovation record
+    And I am on the edit record for my existing record
+    When I click the location toggle switch
+    Then I can see the add location input fields
+
   Scenario Outline: AC5:  Given I am facing a form that asks for my location, when I want to give my location, then I must
   supply a street address with the street number, optionally a suburb, a city, a postcode, and a country.
     Given I am viewing the enter location details form on the <page_name> page
