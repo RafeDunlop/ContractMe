@@ -40,7 +40,7 @@ public class LocationValidationTest {
     @MethodSource("getInvalidSuburb")
     public void LocationValidation_InvalidSuburbName_InputNotAccepted(String suburb) {
         List<String> result = locationValidation.validateSuburb(suburb);
-        Assertions.assertTrue(result.contains("Suburb contains invalid characters"));
+        Assertions.assertTrue(result.contains("Suburb contains invalid characters."));
 
     }
 
@@ -51,18 +51,18 @@ public class LocationValidationTest {
         List<String> result = locationValidation.validateCity("Chr%stchurch");
         List<String> secondResult = locationValidation.validateCity("Paris123");
         List<String> thirdResult = locationValidation.validateCity("Wellington (NZ)");
-        assertTrue(result.get(0).contains("City contains invalid characters"));
-        assertTrue(secondResult.get(0).contains("City contains invalid characters"));
-        assertTrue(thirdResult.get(0).contains("City contains invalid characters"));}
+        assertTrue(result.get(0).contains("City contains invalid characters."));
+        assertTrue(secondResult.get(0).contains("City contains invalid characters."));
+        assertTrue(thirdResult.get(0).contains("City contains invalid characters."));}
 
     @Test
     void testValidateName_invalidNumberInCity_Error() {
         List<String> result = locationValidation.validateCity("Paris123");
         List<String> secondResult = locationValidation.validateCity("23Kathmandu");
         List<String> thirdResult = locationValidation.validateCity("Auc23kland");
-        assertTrue(result.get(0).contains("City contains invalid characters"));
-        assertTrue(secondResult.get(0).contains("City contains invalid characters"));
-        assertTrue(thirdResult.get(0).contains("City contains invalid characters"));
+        assertTrue(result.get(0).contains("City contains invalid characters."));
+        assertTrue(secondResult.get(0).contains("City contains invalid characters."));
+        assertTrue(thirdResult.get(0).contains("City contains invalid characters."));
     }
 
 
@@ -96,27 +96,27 @@ public class LocationValidationTest {
     @Test
     void invalidPostcode_postcodeWithSpecialCharacters_returnsInvalidCharacterError() {
         List<String> result = locationValidation.validatePostcode("123$%");
-        assertTrue(result.contains("Postcode contains invalid characters"));
+        assertTrue(result.contains("Postcode contains invalid characters."));
     }
 
 
     @Test
     void invalidPostcode_postcodeWithTab_returnsInvalidCharacterError() {
         List<String> result = locationValidation.validatePostcode("12\t34");
-        assertTrue(result.contains("Postcode contains invalid characters"));
+        assertTrue(result.contains("Postcode contains invalid characters."));
     }
 
 
     @Test
     void invalidPostcode_postcodeWithNewline_returnsInvalidCharacterError() {
         List<String> result = locationValidation.validatePostcode("123\n456");
-        assertTrue(result.contains("Postcode contains invalid characters"));
+        assertTrue(result.contains("Postcode contains invalid characters."));
     }
 
     @Test
     void invalidPostcode_postcodeWithConsecutiveSpaces_returnsInvalidCharacterError() {
         List<String> result = locationValidation.validatePostcode("123  456");
-        assertTrue(result.contains("Postcode contains invalid characters"));
+        assertTrue(result.contains("Postcode contains invalid characters."));
     }
 
 
@@ -177,7 +177,7 @@ public class LocationValidationTest {
     @MethodSource("getInvalidCountry")
     public void locationValidation_invalidCountry_inputNotAccepted(String country) {
             List<String> result = locationValidation.validateCountry(country);
-            assertTrue(result.contains("Country contains invalid characters"));
+            assertTrue(result.contains("Country contains invalid characters."));
         }
 
 

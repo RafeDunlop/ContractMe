@@ -21,7 +21,7 @@ public class LocationValidation {
         List<String> errors = new ArrayList<>();
 
         if (suburb != null && !suburb.isBlank() && !suburb.matches("^[\\p{L}\\d\\-\\s']*$")) {
-            errors.add("Suburb contains invalid characters");
+            errors.add("Suburb contains invalid characters.");
         }
 
         return errors;
@@ -38,7 +38,7 @@ public class LocationValidation {
         List<String> errors = new ArrayList<>();
 
         if (city != null && !city.isBlank() && !city.matches("^[\\p{L}\\-\\s']*$")) {
-            errors.add("City contains invalid characters");
+            errors.add("City contains invalid characters.");
         }
         return errors;
     }
@@ -55,7 +55,7 @@ public class LocationValidation {
 
         String trimmed = postcode.trim();
         if (!trimmed.matches("^(?!.* {2})[\\p{L}\\p{N} ]*$")) {
-            errors.add("Postcode contains invalid characters");
+            errors.add("Postcode contains invalid characters.");
         }
 
         return errors;
@@ -73,7 +73,7 @@ public class LocationValidation {
 
         String trimmed = country.trim();
         if (!trimmed.matches("^(?!.* {2})[\\p{L}\\-' ]*$")) {
-            errors.add("Country contains invalid characters");
+            errors.add("Country contains invalid characters.");
         }
 
         return errors;
