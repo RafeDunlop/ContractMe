@@ -185,6 +185,26 @@ public class LocationFormSteps {
                 .andReturn();
     }
 
+    @When("I leave the address field blank but fill any other field on the location form on the edit page for my existing record")
+    public void i_leave_the_address_field_blank_but_fill_any_other_field_on_the_location_form_on_the_edit_page_for_my_existing_record() throws Exception {
+        assertNotNull(existingRecord, "Existing renovation record must exist");
+
+        MockHttpServletRequestBuilder request = post("/renovations/edit?id=" + existingRecord.getId())
+                .param("name", existingRecord.getName())
+                .param("description", "Some description")
+                .param("roomList", "Kitchen")
+                .param("address_line1", "")
+                .param("suburb", "Riccarton")
+                .param("city", "Christchurch")
+                .param("postcode", "8041")
+                .param("country", "New Zealand")
+                .with(user(existingRecord.getUser().getEmail()).roles("USER"))
+                .with(csrf());
+
+        result = mockMvc.perform(request)
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+    }
 
 
 
@@ -197,6 +217,12 @@ public class LocationFormSteps {
 
     @When("I enter a valid address and submit the location form on the {string} page")
     public void i_enter_a_valid_address_and_submit_the_location_form_on_the_page(String endpoint) throws Exception {
+        String originalEndpoint = endpoint;
+
+        if (endpoint.startsWith("/renovations/edit")) {
+            endpoint = "/renovations/edit?id=" + existingRecord.getId();
+        }
+
         MockHttpServletRequestBuilder request = post(endpoint)
                 .param("firstName", "Jane")
                 .param("lastName", "Doe")
@@ -209,7 +235,7 @@ public class LocationFormSteps {
                 .with(csrf());
 
         // Endpoint specific params
-        switch (endpoint) {
+        switch (originalEndpoint) {
             case "/register":
                 request.param("password", "Test123!")
                         .param("confirmPassword", "Test123!");
@@ -218,6 +244,15 @@ public class LocationFormSteps {
             case "/user/edit":
                 request.with(user("jane.doe@example.com").roles("USER"));
                 break;
+
+            case "/renovations/edit":
+                request = request
+                        .param("name", existingRecord.getName())
+                        .param("description", "Test Description")
+                        .param("roomList", "Kitchen")
+                        .with(user("jane.doe@example.com").roles("USER"));
+                break;
+
 
             default:
                 throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
@@ -240,6 +275,23 @@ public class LocationFormSteps {
         MockHttpServletRequestBuilder request;
 
         switch (endpoint) {
+            case "/renovations/edit":
+                request = post("/renovations/edit?id=" + existingRecord.getId())
+                        .param("name", existingRecord.getName())
+                        .param("description", "Test Description")
+                        .param("roomList", "Kitchen")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "a#$%")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .with(user("jane.doe@example.com").roles("USER"))
+                        .with(csrf());
+
+                resultActions = mockMvc.perform(request);
+                break;
+
+
             case "/register":
                 request = post(endpoint)
                         .param("firstName", "Jane")
@@ -293,6 +345,14 @@ public class LocationFormSteps {
 
     }
 
+    @Then("I am taken back to the edit page for my record")
+    public void i_am_taken_back_to_the_edit_page_for_my_record() throws Exception {
+        String expectedRedirect = "/renovations/edit?id=" + existingRecord.getId();
+
+        resultActions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirect));
+    }
 
     @And("I am told that I have entered an invalid suburb")
     public void i_am_told_that_i_have_entered_an_invalid_suburb() throws Exception {
@@ -342,6 +402,21 @@ public class LocationFormSteps {
 
                 break;
 
+            case "/renovations/edit":
+                request = post("/renovations/edit?id=" + existingRecord.getId())
+                        .param("name", existingRecord.getName())
+                        .param("description", "Test Description")
+                        .param("roomList", "Kitchen")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christ23church")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .with(user("jane.doe@example.com").roles("USER"))
+                        .with(csrf());
+
+                resultActions = mockMvc.perform(request);
+                break;
 
             default:
                 throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
@@ -389,9 +464,23 @@ public class LocationFormSteps {
 
                 request = request.with(user("jane.doe@example.com").roles("USER"));
                 resultActions = mockMvc.perform(request);
-
                 break;
 
+            case "/renovations/edit":
+                request = post("/renovations/edit?id=" + existingRecord.getId())
+                        .param("name", existingRecord.getName())
+                        .param("description", "Test Description")
+                        .param("roomList", "Kitchen")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041@")
+                        .param("country", "New Zealand!")
+                        .with(user("jane.doe@example.com").roles("USER"))
+                        .with(csrf());
+
+                resultActions = mockMvc.perform(request);
+                break;
 
             default:
                 throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
@@ -442,6 +531,22 @@ public class LocationFormSteps {
 
                 break;
 
+            case "/renovations/edit":
+                request = post("/renovations/edit?id=" + existingRecord.getId())
+                        .param("name", existingRecord.getName())
+                        .param("description", "Test Description")
+                        .param("roomList", "Kitchen")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041")
+                        .param("country", "New  Zealand!")
+                        .with(user("jane.doe@example.com").roles("USER"))
+                        .with(csrf());
+
+                resultActions = mockMvc.perform(request);
+                break;
 
             default:
                 throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
