@@ -19,6 +19,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
     Examples:
       | page_name               |
       |  "/register"            |
+      |  "/user/edit"           |
 
 
     Scenario Outline: AC7:  Given I supply a suburb, when the suburb contains non valid characters (i.e. characters others than
@@ -31,6 +32,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
       Examples:
         | page_name               |
         |  "/register"            |
+        |  "/user/edit"           |
 
 
   Scenario Outline: AC8: Given I supply a city, when the city contains non valid characters (i.e. characters
@@ -43,6 +45,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
     Examples:
       | page_name               |
       | "/register"             |
+      |  "/user/edit"           |
 
 
     Scenario Outline: AC9:  Given I supply a postcode, when the postcode contains non valid characters (i.e. characters
@@ -55,6 +58,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
       Examples:
         | page_name               |
         | "/register"             |
+        |  "/user/edit"           |
 
 
 

@@ -47,13 +47,15 @@ public class LocationFormSteps {
 
     @Given("I am on the edit profile form")
     public void i_am_on_the_edit_profile_form() throws Exception {
+        User testUser = new User("Jane", "Doe", "jane.doe@example.com", "password");
+        userRepository.save(testUser);
+
         MockHttpServletRequestBuilder request = get("/user/edit")
                 .with(user("jane.doe@example.com").roles("USER"));
 
         result = mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
-
     }
 
     @Given("I am on the register form")
