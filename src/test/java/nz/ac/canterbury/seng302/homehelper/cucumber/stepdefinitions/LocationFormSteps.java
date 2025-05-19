@@ -1,11 +1,15 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
-
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import java.util.List;
+
+import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,10 +17,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
+
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -31,6 +40,10 @@ public class LocationFormSteps {
     private UserRepository userRepository;
 
     private MvcResult result;
+    private ResultActions resultActions;
+
+    @Autowired
+    private VerificationCodeRepository verificationCodeRepository;
 
     @Given("I am on the edit profile form")
     public void i_am_on_the_edit_profile_form() throws Exception {
@@ -45,10 +58,10 @@ public class LocationFormSteps {
 
     @Given("I am on the register form")
     public void i_am_on_the_register_form() throws Exception {
-        User user = new User("Jane", "Doe", "jane.doe@example.com", "password");
-        user.grantAuthority("ROLE_USER");
-        userRepository.save(user);
-
+        userRepository.findByEmailIgnoreCase("john.doe@example.com").ifPresent(user -> {
+            verificationCodeRepository.deleteAll();
+            userRepository.delete(user);
+        });
         result = mockMvc.perform(get("/register"))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -169,6 +182,7 @@ public class LocationFormSteps {
         result = mockMvc.perform(request)
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
+
     }
 
     @Then("The form from the {string} page is saved and contains the address I supplied")
@@ -177,5 +191,235 @@ public class LocationFormSteps {
     }
 
 
+    @When("I enter a valid address but an invalid suburb and submit the form on the {string} page")
+    public void i_enter_a_valid_address_but_an_invalid_suburb_and_submit_the_form_on_the_page(String endpoint) throws Exception {
+        MockHttpServletRequestBuilder request;
 
+        switch (endpoint) {
+            case "/register":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "a#$%")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .with(csrf());
+                resultActions = mockMvc.perform(request);
+
+                break;
+
+            case "/user/edit":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "a#$%")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .with(csrf());
+
+                request = request.with(user("jane.doe@example.com").roles("USER"));
+                resultActions = mockMvc.perform(request);
+
+                break;
+
+
+            default:
+                throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
+
+        }
+
+    }
+
+
+    @Then("I am taken back to the {string} page")
+    public void i_am_taken_back_to_the_page(String endpoint) throws Exception {
+        resultActions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(endpoint));
+
+    }
+
+
+    @And("I am told that I have entered an invalid suburb")
+    public void i_am_told_that_i_have_entered_an_invalid_suburb() throws Exception {
+        resultActions
+                .andExpect(flash().attribute("suburbError", List.of("Suburb contains invalid characters")));
+    }
+
+    @When("I enter a valid address but an invalid city and submit the form on the {string} page")
+    public void i_enter_a_valid_address_but_an_invalid_city_and_submit_the_form_on_the_page(String endpoint) throws Exception {
+        MockHttpServletRequestBuilder request;
+
+
+        switch (endpoint) {
+            case "/register":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christ23church")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .with(csrf());
+                resultActions = mockMvc.perform(request);
+
+                break;
+
+            case "/user/edit":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christ23church")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .with(csrf());
+
+                request = request.with(user("jane.doe@example.com").roles("USER"));
+                resultActions = mockMvc.perform(request);
+
+                break;
+
+
+            default:
+                throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
+
+        }
+
+    }
+
+    @When("I enter a valid address but an invalid postcode and submit the form on the {string} page")
+    public void i_enter_a_valid_address_but_an_invalid_postcode_and_submit_the_form_on_the_page(String endpoint) throws Exception {
+        MockHttpServletRequestBuilder request;
+
+
+        switch (endpoint) {
+            case "/register":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041@")
+                        .param("country", "New Zealand")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .with(csrf());
+                resultActions = mockMvc.perform(request);
+
+                break;
+
+            case "/user/edit":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041@")
+                        .param("country", "New Zealand!")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .with(csrf());
+
+                request = request.with(user("jane.doe@example.com").roles("USER"));
+                resultActions = mockMvc.perform(request);
+
+                break;
+
+
+            default:
+                throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
+
+        }
+    }
+
+
+    @When("I enter a valid address but an invalid country and submit the form on the {string} page")
+    public void i_enter_a_valid_address_but_an_invalid_country_and_submit_the_form_on_the_page(String endpoint) throws Exception {
+        MockHttpServletRequestBuilder request;
+
+
+        switch (endpoint) {
+            case "/register":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041")
+                        .param("country", "New  Zealand!")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .with(csrf());
+                resultActions = mockMvc.perform(request);
+
+                break;
+
+            case "/user/edit":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041")
+                        .param("country", "New  Zealand!")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .with(csrf());
+
+                request = request.with(user("jane.doe@example.com").roles("USER"));
+                resultActions = mockMvc.perform(request);
+
+                break;
+
+
+            default:
+                throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
+
+        }
+    }
+
+    @And("I am told that I have entered an invalid city")
+    public void i_am_told_that_i_have_entered_an_invalid_city() throws Exception {
+        resultActions
+                .andExpect(flash().attribute("cityError", List.of("City contains invalid characters")));
+    }
+
+    @And("I am told that I have entered an invalid postcode")
+    public void i_am_told_that_i_have_entered_an_invalid_postcode() throws Exception {
+        resultActions
+                .andExpect(flash().attribute("postcodeError", List.of("Postcode contains invalid characters")));
+    }
+
+    @And("I am told that I have entered an invalid country")
+    public void i_am_told_that_i_have_entered_an_invalid_country() throws Exception {
+        resultActions
+                .andExpect(flash().attribute("countryError", List.of("Country contains invalid characters")));
+    }
 }

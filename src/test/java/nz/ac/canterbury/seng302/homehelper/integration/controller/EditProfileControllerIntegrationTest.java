@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -334,6 +335,9 @@ public class EditProfileControllerIntegrationTest {
                         .param("region", addressDTO.getRegion()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user"));
+
+        User savedUser = userRepository.findByEmailIgnoreCase("jane@doe.com").orElseThrow();
+        assertNotNull(savedUser.getLocation());
     }
 
     @Test
@@ -342,27 +346,27 @@ public class EditProfileControllerIntegrationTest {
         User testUser = new User("Jane", "Doe", "jane@doe.com", "password");
         userRepository.save(testUser);
 
-//        mockMvc.perform(post("/user/edit")
-//                        .param("firstName", "Jane")
-//                        .param("lastName", "Doe")
-//                        .param("email", "jane@doe.com")
-//                        .param("address_line1", "!!!")
-//                        .param("country", "@@@")
-//                        .param("postcode", "ABC")
-//                        .param("city", "###")
-//                        .param("region", "909"))
-//                .andExpect(status().is3xxRedirection())
-//                .andExpect(redirectedUrl("/user/edit"))
-//                .andExpect(flash().attributeExists("addressDTO"))
-//                .andExpect(flash().attribute("addressDTO",
-//                        Matchers.allOf(
-//                                Matchers.hasProperty("address_line1", Matchers.is("!!!")),
-//                                Matchers.hasProperty("country", Matchers.is("@@@")),
-//                                Matchers.hasProperty("postcode", Matchers.is("ABC")),
-//                                Matchers.hasProperty("city", Matchers.is("###")),
-//                                Matchers.hasProperty("region", Matchers.is("909"))
-//                        )
-//                ));
+        mockMvc.perform(post("/user/edit")
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane@doe.com")
+                        .param("address_line1", "!!!")
+                        .param("country", "@@@")
+                        .param("postcode", "ABC")
+                        .param("city", "###")
+                        .param("region", "909"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/edit"))
+                .andExpect(flash().attributeExists("addressDTO"))
+                .andExpect(flash().attribute("addressDTO",
+                        Matchers.allOf(
+                                Matchers.hasProperty("address_line1", Matchers.is("!!!")),
+                                Matchers.hasProperty("country", Matchers.is("@@@")),
+                                Matchers.hasProperty("postcode", Matchers.is("ABC")),
+                                Matchers.hasProperty("city", Matchers.is("###")),
+                                Matchers.hasProperty("region", Matchers.is("909"))
+                        )
+                ));
 
         User savedUser = userRepository.findByEmailIgnoreCase("jane@doe.com").orElseThrow();
         assertNull(savedUser.getLocation());

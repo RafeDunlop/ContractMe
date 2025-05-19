@@ -18,6 +18,7 @@ import java.util.List;
  * Controller to provide Location related endpoints
  */
 @Controller
+@RequestMapping("/location")
 public class LocationController {
 
     private static final Logger logger = LoggerFactory.getLogger(LocationController.class);
@@ -57,9 +58,9 @@ public class LocationController {
      *                        {@code location.latitude} and {@code location.longitude}
      * @return An ordered list of autocompletion suggestions
      */
-    @GetMapping("/address-autocomplete/{prompt}")
+    @PostMapping("/address-autocomplete/{prompt}")
     public ResponseEntity<List<AddressDTO>> getAddressAutoComplete(@PathVariable String prompt,
-                                                   @ModelAttribute LocalisationDTO localisationDTO) {
+                                                   @RequestBody LocalisationDTO localisationDTO) {
         logger.info("GET /address-autocomplete/{}", prompt);
         try {
             return new ResponseEntity<>(locationService.getAutocomplete(prompt, localisationDTO), HttpStatus.OK);

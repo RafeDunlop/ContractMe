@@ -7,14 +7,15 @@
     <title></title>
 </head>
 <body>
-<div th:fragment="locationForm (addressDTO)">
+<div th:fragment="locationForm (addressDTO)" id="location-form">
 
     <div>
 
         <!-- ADDRESS (house number and street)-->
         <div class="mb-3">
             <input type="text" class="form-control" id="address" name="address_line1" placeholder="Address"
-                   aria-label="address" th:value="*{addressDTO.address_line1}" maxlength="128">
+                   aria-label="address" th:value="${addressDTO.address_line1}" th:attr="data-csrf=${_csrf.token}" maxlength="128">
+            <ul id="autocomplete-list" class="list-group position-absolute" style="z-index: 1000;"></ul>
 
             <!-- Frontend JS Error -->
             <div class="alert alert-danger mt-2" id="address-frontend-error" hidden>
@@ -67,7 +68,7 @@
 
             <!-- Backend error -->
             <div class="alert alert-danger mt-2" id="city-backend-error"
-                 th:attr="hidden=${Error == null}">
+                 th:attr="hidden=${cityError == null}">
                 <ul>
                     <li th:each="msg : ${cityError}" th:text="${msg}"></li>
                 </ul>

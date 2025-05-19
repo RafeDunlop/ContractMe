@@ -42,7 +42,7 @@ async function submitIcon(taskId) {
     const iconFileName = button.id;
     const csrfToken = button.getAttribute("data-csrf");
     taskId = button.getAttribute("data-taskid");
-    const response = await fetch(`/editTask/edit-icon/${taskId}`, {
+    const response = await fetch(`editTask/edit-icon/${taskId}`, {
         method: "POST",
         headers: {'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json'},
         body: JSON.stringify({ iconName: iconFileName })
@@ -65,7 +65,7 @@ async function deleteIcon(button) {
     const taskId = button.getAttribute("data-taskid");
     const overlay = getIconSelector(taskId);
     overlay.style.display = 'none';
-    const response = await fetch(`/editTask/edit-icon/${taskId}`, {
+    const response = await fetch(`editTask/edit-icon/${taskId}`, {
         method: "POST",
         headers: {'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json'},
         body: JSON.stringify({ iconName: "default-icon.png" })
