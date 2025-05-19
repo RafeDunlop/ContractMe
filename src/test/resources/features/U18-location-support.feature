@@ -127,7 +127,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
 
 
 
-  Scenario Outline: AC11: Given I supply a fully compliant address, when I submit the form,
+  Scenario Outline: AC11.1: Given I supply a fully compliant address, when I submit the form,
   then the form is saved with the address I supplied.
     Given I am viewing the enter location details form on the <page_name> page
     When I enter a valid address and submit the location form on the <page_name> page
@@ -137,7 +137,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
       |  "/register"            |
       |  "/user/edit"           |
 
-  Scenario: AC11: Given I supply a fully compliant address, when I submit the form,
+  Scenario: AC11.2: Given I supply a fully compliant address, when I submit the form,
   then the form is saved with the address I supplied.
     Given I have an existing renovation record
     And I am on the edit record for my existing record

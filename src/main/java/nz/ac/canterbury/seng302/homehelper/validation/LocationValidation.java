@@ -51,10 +51,10 @@ public class LocationValidation {
      */
     public List<String> validatePostcode(String postcode) {
         List<String> errors = new ArrayList<>();
+        if (postcode == null || postcode.isBlank()) return errors;
 
         String trimmed = postcode.trim();
-
-        if (!postcode.isBlank() && !trimmed.matches("^(?!.* {2})[\\p{L}\\p{N} ]*$")) {
+        if (!trimmed.matches("^(?!.* {2})[\\p{L}\\p{N} ]*$")) {
             errors.add("Postcode contains invalid characters");
         }
 
@@ -69,16 +69,13 @@ public class LocationValidation {
      */
     public List<String> validateCountry(String country) {
         List<String> errors = new ArrayList<>();
+        if (country == null || country.isBlank()) return errors;
 
         String trimmed = country.trim();
-
         if (!trimmed.matches("^(?!.* {2})[\\p{L}\\-' ]*$")) {
             errors.add("Country contains invalid characters");
         }
 
-
         return errors;
     }
-
-
 }
