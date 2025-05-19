@@ -77,7 +77,11 @@ function setAutoCompleteList(tags) {
             input.value = tag;
             resetAutocomplete();
 
-            // Submit the form on autocomplete
+            if (formPath === "/renovations/view") {
+                document.getElementById("add-tag-form").action = "/renovations/addTag";
+            } else if (formPath === "/renovations/search") {
+                addTag(input.value);
+            }
             document.getElementById("add-tag-form").submit();
 
         });
