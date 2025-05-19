@@ -161,10 +161,11 @@ public class RenovationController {
         if (!errors.isEmpty()) {
             // Add each error to a flash attribute, categorizing by error type
             errors.forEach(redirectAttributes::addFlashAttribute);
-
             redirectAttributes.addFlashAttribute("name", name);
             redirectAttributes.addFlashAttribute("description", description);
             redirectAttributes.addFlashAttribute("roomList", roomList);
+            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
+            redirectAttributes.addFlashAttribute("locationUsed", locationProvided);
 
             return "redirect:/renovations/create";
         }
