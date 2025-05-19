@@ -370,6 +370,5 @@ public class EditProfileControllerIntegrationTest {
 
         User savedUser = userRepository.findByEmailIgnoreCase("jane@doe.com").orElseThrow();
         assertNull(savedUser.getLocation());
-        // todo fails until validation is implemented
     }
 }
