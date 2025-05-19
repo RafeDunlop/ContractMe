@@ -106,9 +106,21 @@ public class LocationService {
             throw new IllegalStateException(e.getMessage());
         }
     }
+
+
+    /**
+     * Runs validation on each of the user input params
+     * @param dto the addressdto containing the user inputted location data
+     * @return map of errors
+     */
     public Map<String, List<String>> validateLocation(AddressDTO dto) {
         Map<String, List<String>> errors = new HashMap<>();
+
         MapUtil.putIfNotEmpty(errors, "suburbError", locationValidation.validateSuburb(dto.getRegion()));
+        MapUtil.putIfNotEmpty(errors, "cityError", locationValidation.validateCity(dto.getCity()));
+        MapUtil.putIfNotEmpty(errors,"postcodeError", locationValidation.validatePostcode(dto.getPostcode()));
+        MapUtil.putIfNotEmpty(errors, "countryError", locationValidation.validateCountry(dto.getCountry()));
+
         return errors;
     }
 

@@ -20,7 +20,6 @@ public class LocationValidationTest {
         locationValidation = new LocationValidation();
     }
 
-
     @Test
     void testValidateName_invalidCharacterCity_Error() {
         List<String> result = locationValidation.validateCity("Chr%stchurch");
@@ -67,7 +66,7 @@ public class LocationValidationTest {
     @Test
     void testValidateName_validSpaceCity_noError() {
         List<String> result = locationValidation.validateCity("New Delhi");
-        List<String> secondResult = locationValidation.validateCity("New York City");;
+        List<String> secondResult = locationValidation.validateCity("New York City");
         assertTrue(result.isEmpty());
         assertTrue(secondResult.isEmpty());
     }

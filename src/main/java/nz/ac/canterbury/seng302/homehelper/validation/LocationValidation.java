@@ -6,6 +6,9 @@ import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 
+import org.springframework.stereotype.Service;
+
+
 @Service
 public class LocationValidation {
 
@@ -20,7 +23,7 @@ public class LocationValidation {
         List<String> errors = new ArrayList<>();
 
         if (!suburb.matches("^[\\p{L}\\d\\-\\s']*$")) {
-            errors.add("Suburb must only include letters, spaces, hyphens, digits or apostrophes.");
+            errors.add("Suburb contains invalid characters");
         }
 
         return errors;
@@ -46,24 +49,20 @@ public class LocationValidation {
      * that it must not be empty
      *
      * @param city The city name to be checked
-     * @return true if the specified city name matches the specified pattern and is non-empty
+     * @return list of errors, empty if none are found
      */
     public List<String> validateCity(String city) {
         List<String> errors = new ArrayList<>();
-        Pattern pattern = Pattern.compile("^[\\p{L} \\-']+$", Pattern.UNICODE_CHARACTER_CLASS);
-        String cityName = city.trim();
-        if (!pattern.matcher(cityName).matches()) {
-            errors.add("City contains invalid characters.");
-        }
 
+        if (!city.matches("^[\\p{L}\\-\\s']*$")) {
+            errors.add("City contains invalid characters");
+        }
         return errors;
     }
 
 
     /**
-     * Validates the postcode based on the specified pattern in addition to the mandatory condition
-     * that it must not be empty
-     *
+     * Validates the postcode based on the specified pattern
      * @param postcode The postcode
      * @return error list
      */
@@ -80,6 +79,26 @@ public class LocationValidation {
             } else if (trimmed.chars().filter(c -> c == ' ').count() > 1) {
                 errors.add("Postcode contains invalid characters.");
             }
+        }
+
+        return errors;
+    }
+
+
+    /**
+     * Validates the postcode based on the specified pattern
+     * @param country The country
+     * @return list of errors
+     */
+    public List<String> validateCountry(String country) {
+        List<String> errors = new ArrayList<>();
+
+        String trimmed = country.trim();
+
+        if (!trimmed.matches("^[\\p{L}\\p{N} ]+$")) {
+            errors.add("Country contains invalid characters");
+        } else if (trimmed.chars().filter(c -> c == ' ').count() > 1) {
+            errors.add("Country contains invalid characters");
         }
 
         return errors;

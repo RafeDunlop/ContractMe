@@ -24,7 +24,7 @@ function displayLocationForm() {
     }
 }
 
-function validatePostcode() {
+/*function validatePostcode() {
     let postcode = postcodeField.value.trim();
     let postcodePattern = /^[\p{L}\p{N} ]+$/u;
     let spaceCount = (postcode.match(/ /g) || []).length;
@@ -44,5 +44,6 @@ function validatePostcode() {
         postcodeFrontendError.hidden = true;
         postcodeFrontendErrorMessage.hidden = true;
         postcodeBackendError.hidden = true;
-    }
-}
+        }
+    }*/
+
