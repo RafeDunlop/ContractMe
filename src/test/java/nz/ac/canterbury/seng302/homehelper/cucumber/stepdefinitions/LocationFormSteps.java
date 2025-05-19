@@ -50,6 +50,17 @@ public class LocationFormSteps {
                 .andReturn();
     }
 
+    @Given("I am on the create renovation form")
+    public void i_am_on_the_create_renovation_form() throws Exception {
+        MockHttpServletRequestBuilder request = get("/renovations/create")
+                .with(user("jane.doe@example.com").roles("USER"));
+
+        result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+
+    }
+
     @When("I click the location toggle switch")
     public void i_click_the_location_toggle_switch() throws Exception {
         String content = result.getResponse().getContentAsString();
