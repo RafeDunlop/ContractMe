@@ -6,6 +6,10 @@ Feature:As Kaia, I want to be able to add location to my profile and
     When I click the location toggle switch
     Then I can see the add location input fields
 
+  Scenario: AC2: I can optionally supply my location when editing my profile
+    Given I am on the edit profile form
+    When I click the location toggle switch
+    Then I can see the add location input fields
 
   Scenario Outline: AC5:  Given I am facing a form that asks for my location, when I want to give my location, then I must
   supply a street address with the street number, optionally a suburb, a city, a postcode, and a country.
@@ -15,6 +19,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
     Examples:
       | page_name               |
       |  "/register"            |
+      |  "/user/edit"           |
 
 
     Scenario Outline: AC7:  Given I supply a suburb, when the suburb contains non valid characters (i.e. characters others than
@@ -27,6 +32,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
       Examples:
         | page_name               |
         |  "/register"            |
+        |  "/user/edit"           |
 
 
   Scenario Outline: AC8: Given I supply a city, when the city contains non valid characters (i.e. characters
@@ -39,6 +45,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
     Examples:
       | page_name               |
       | "/register"             |
+      |  "/user/edit"           |
 
 
     Scenario Outline: AC9:  Given I supply a postcode, when the postcode contains non valid characters (i.e. characters
@@ -51,6 +58,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
       Examples:
         | page_name               |
         | "/register"             |
+        |  "/user/edit"           |
 
 
 
@@ -64,15 +72,19 @@ Feature:As Kaia, I want to be able to add location to my profile and
       Examples:
         | page_name               |
         |  "/register"            |
+        |  "/user/edit"           |
 
 
-  Scenario Outline: AC11: Given I supply a fully compliant address, when I submit the form,
-  then the form is saved with the address I supplied.
-    Given I am viewing the enter location details form on the <page_name> page
-    When I enter a valid address and submit the location form on the <page_name> page
-    Then The form from the <page_name> page is saved and contains the address I supplied
-    Examples:
-      | page_name               |
-      |  "/register"            |
+    Scenario Outline: AC11: Given I supply a fully compliant address, when I submit the form,
+    then the form is saved with the address I supplied.
+      Given I am viewing the enter location details form on the <page_name> page
+      When I enter a valid address and submit the location form on the <page_name> page
+      Then The form from the <page_name> page is saved and contains the address I supplied
+      Examples:
+        | page_name               |
+        |  "/register"            |
+        |  "/user/edit"           |
+
+
 
 
