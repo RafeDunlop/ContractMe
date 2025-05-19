@@ -24,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.*;
@@ -1473,5 +1474,40 @@ public class RenovationControllerIntegrationTest {
 
         RenovationRecord record = renovationRecordRepository.findById(testRecord.getId()).get();
         assertNull(record.getLocation());
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void editRenovation_existingLocationInvalidForm_locationNotUpdated() throws Exception {
+        Location initialLocation = new Location(
+                "10 Queen Street ", "Australia", "8011", "Sydney", "Mt Druit"
+        );
+        RenovationRecord testRecord = new RenovationRecord(owner, "Test Record", "Description", List.of("Room A"));
+        testRecord.setLocation(initialLocation);
+        renovationRecordRepository.save(testRecord);
+
+        mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
+                        .param("address_line1", "33 Fendylton Ave")
+                        .param("country", "New Zealand")
+                        .param("postcode", "!!!!!!!!!")
+                        .param("city", "Christchurch")
+                        .param("region", "Fendylton")
+                        .param("name", "Renovation")
+                        .param("description", "Some words")
+                        .param("roomList", "Room 1", "Room 2")
+
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+
+        RenovationRecord record = renovationRecordRepository.findById(testRecord.getId())
+                .orElseThrow(() -> new AssertionError("Optional null"));
+        Location location = testRecord.getLocation();
+
+        assertEquals(initialLocation.getAddress(), location.getAddress(), "Address should not change");
+        assertEquals(initialLocation.getCity(), location.getCity(), "City should not change");
+        assertEquals(initialLocation.getCountry(), location.getCountry(), "Country should not change");
+        assertEquals(initialLocation.getPostcode(), location.getPostcode(), "Postcode should not change");
+        assertEquals(initialLocation.getSuburb(), location.getSuburb(), "Region/suburb should not change");
     }
 }
