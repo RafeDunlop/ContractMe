@@ -79,10 +79,13 @@ function setAutoCompleteList(tags) {
 
             if (formPath === "/renovations/view") {
                 document.getElementById("add-tag-form").action = "/renovations/addTag";
+                document.getElementById("add-tag-form").submit();
+
             } else if (formPath === "/renovations/search") {
                 addTag(input.value);
+                document.getElementById("tag-input").value="";
+                resetAutocomplete();
             }
-            document.getElementById("add-tag-form").submit();
 
         });
 

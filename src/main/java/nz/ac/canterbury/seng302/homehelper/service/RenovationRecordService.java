@@ -201,17 +201,12 @@ public class RenovationRecordService {
      * @param tagList the list of tag objects.
      * @return a list of renovation records associated with the tags in the given list.
      */
-    public List<RenovationRecord> getAllRecordsByTags(List<Tag> tagList, String visibility, User user) {
+    public List<RenovationRecord> getAllRecordsByTags(List<Tag> tagList, String visibility, User user, String searchTerm) {
         return switch (visibility) {
-            case "all" -> {
-                System.out.println("All");
-                yield renovationRecordRepository.findAllPublicByTagsOrderByTagCountAndDate(tagList);
-            }
-            case "public" -> renovationRecordRepository.findAllPublicByTagsOrderByTagCountAndDate(tagList);
-            case "user" -> {
-                System.out.println("User");
-                yield renovationRecordRepository.findAllPublicByTagsOrderByTagCountAndDate(tagList);
-            }
+            case "all" -> renovationRecordRepository.findAllVisibleToUserSearchContainingNameOrDescriptionAndTagsIgnoreCase(user, searchTerm, tagList);
+            case "public" -> renovationRecordRepository.findByIsPublicTrueSearchContainingNameOrDescriptionAndTagsIgnoreCase(searchTerm, tagList);
+            case "user" -> renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionAndTagsIgnoreCase(user, searchTerm, tagList);
+
             default -> new ArrayList<>();
         };
     }

@@ -79,6 +79,7 @@ tagInput.addEventListener("keydown", (e) => {
         e.preventDefault();
         addTag(tagInput.value);
         tagInput.value = "";
+        resetAutocomplete();
     } else if (e.key === "Backspace" && tagInput.value === "") {
         const lastTag = tags[tags.length - 1];
         if (lastTag) {
