@@ -38,7 +38,7 @@ public class LocationValidation {
         List<String> errors = new ArrayList<>();
         if (address.isBlank()) {
             errors.add("Street address is required.");
-        } else if (!address.matches("^[\\p{L}\\-'\\d\\s.]*$")) {
+        } else if (!address.matches("^[\\p{L}\\-'\\d\\s./]*$")) {
             errors.add("Street address contains invalid characters.");
         }
         return errors;
