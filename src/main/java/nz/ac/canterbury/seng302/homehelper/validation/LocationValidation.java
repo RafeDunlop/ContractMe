@@ -38,12 +38,11 @@ public class LocationValidation {
     public List<String> validateStreetAddress(String address, boolean isRequired) {
         List<String> errors = new ArrayList<>();
 
-        if (isRequired) {
-            if (address == null || address.isBlank()) {
-                errors.add("Street address is required.");
-            } else if (!address.matches("^[\\p{L}\\-'\\d\\s./]*$")) {
-                errors.add("Street address contains invalid characters.");
-            }
+        if (isRequired & address.isBlank()) {
+            errors.add("Street address is required.");
+        }
+        if (!address.matches("^[\\p{L}\\-'\\d\\s./]*$")) {
+            errors.add("Street address contains invalid characters.");
         }
 
         return errors;
