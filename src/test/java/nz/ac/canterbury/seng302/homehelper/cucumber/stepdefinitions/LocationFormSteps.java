@@ -4,6 +4,8 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import java.util.List;
 
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
@@ -11,14 +13,18 @@ import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -38,6 +44,19 @@ public class LocationFormSteps {
 
     @Autowired
     private VerificationCodeRepository verificationCodeRepository;
+
+    @Given("I am on the edit profile form")
+    public void i_am_on_the_edit_profile_form() throws Exception {
+        User testUser = new User("Jane", "Doe", "jane.doe@example.com", "password");
+        userRepository.save(testUser);
+
+        MockHttpServletRequestBuilder request = get("/user/edit")
+                .with(user("jane.doe@example.com").roles("USER"));
+
+        result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+    }
 
     @Given("I am on the register form")
     public void i_am_on_the_register_form() throws Exception {
@@ -82,7 +101,11 @@ public class LocationFormSteps {
     @Given("I am viewing the enter location details form on the {string} page")
     public void i_am_viewing_the_enter_location_details_form_on_the_page(String endPoint) throws Exception {
         MockHttpServletRequestBuilder request = get(endPoint)
-                .with(user("jane.doe@example.com").roles("USER"));
+                .with(csrf());
+
+        if (endPoint.equals("/user/edit")) {
+            request.with(user("jane.doe@example.com").roles("USER"));
+        }
 
         result = mockMvc.perform(request)
                 .andExpect(status().isOk())
@@ -100,23 +123,37 @@ public class LocationFormSteps {
 
     @When("I leave the address field blank but fill any other field on the location form on the {string} page")
     public void i_leave_the_address_field_blank_but_fill_any_other_field_on_the_location_form_on_the_page(String endpoint) throws Exception {
+        MockHttpServletRequestBuilder request = post(endpoint)
+                .param("firstName", "Jane")
+                .param("lastName", "Doe")
+                .param("email", "jane.doe@example.com")
+                .param("address_line1", "") // <- IMPORTANT: make sure param name matches controller!
+                .param("suburb", "Riccarton")
+                .param("city", "Christchurch")
+                .param("postcode", "8041")
+                .param("country", "New Zealand")
+                .with(csrf());
 
-            result = mockMvc.perform(post(endpoint)
-                            .param("firstName", "Jane")
-                            .param("lastName", "Doe")
-                            .param("email", "jane.doe@example.com")
-                            .param("password", "Test123!")
-                            .param("confirmPassword", "Test123!")
-                            .param("address", "")
-                            .param("region", "Riccarton")
-                            .param("city", "Christchurch")
-                            .param("postcode", "8041")
-                            .param("country", "New Zealand")
-                            .with(csrf()))
-                    .andExpect(status().is3xxRedirection())
-                    .andReturn();
+        switch (endpoint) {
+            case "/register":
+                request = request
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!");
+                break;
 
+            case "/user/edit":
+                request = request.with(user("jane.doe@example.com").roles("USER"));
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
+        }
+
+        result = mockMvc.perform(request)
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
     }
+
 
 
 
