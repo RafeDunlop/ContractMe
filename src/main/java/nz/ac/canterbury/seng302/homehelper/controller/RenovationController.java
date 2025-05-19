@@ -44,6 +44,7 @@ public class RenovationController {
      *
      * @param renovationRecordService The renovation service which provides non-UI functionality
      * @param loginService            The login service provides the function to get the current user
+     * @param locationService         The location service provides the function to validate the locations
      */
     @Autowired
     public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService,LocationService locationService) {
@@ -154,10 +155,11 @@ public class RenovationController {
         if (!errors.isEmpty()) {
             // Add each error to a flash attribute, categorizing by error type
             errors.forEach(redirectAttributes::addFlashAttribute);
-
             redirectAttributes.addFlashAttribute("name", name);
             redirectAttributes.addFlashAttribute("description", description);
             redirectAttributes.addFlashAttribute("roomList", roomList);
+            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
+            redirectAttributes.addFlashAttribute("locationUsed", locationProvided);
 
             return "redirect:/renovations/create";
         }

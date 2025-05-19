@@ -93,7 +93,10 @@ public class UserValidation {
      */
     public boolean passwordContainsFields(String password, String firstName, String lastName, String email) {
         Pattern pattern = Pattern.compile(
-                "(" + Pattern.quote(firstName) + ")|(" + Pattern.quote(lastName) + ")|(" + Pattern.quote(email) + ")",
+                "(" + Pattern.quote(firstName) + ")"
+                + (!(lastName == null || lastName.isBlank()) ? "|(" + Pattern.quote(lastName) + ")" : "")
+                + "|("
+                + Pattern.quote(email) + ")",
                 Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(password);
         return password != null && matcher.find();

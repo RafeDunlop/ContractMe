@@ -157,6 +157,13 @@ public class UserValidationTest {
     }
 
     @Test
+    public void PasswordValidation_BlankLastName_AcceptInputs() {
+        UserValidation userValidation = new UserValidation();
+        List<String> result = userValidation.validatePasswordString("Test123!", "John", "", "john.smith@example.com");
+        Assertions.assertEquals(0, result.size());
+    }
+
+    @Test
     public void PasswordValidation_ValidPasswordThatMatch_RejectInputs() {
         UserValidation userValidation = new UserValidation();
         Assertions.assertTrue(userValidation.validateConfirmPasswordString("Test123!", "Test123!","registerPassword").isEmpty());

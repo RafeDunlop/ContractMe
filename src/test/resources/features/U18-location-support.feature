@@ -6,10 +6,16 @@ Feature:As Kaia, I want to be able to add location to my profile and
         When I click the location toggle switch
         Then I can see the add location input fields
 
-    Scenario: AC2: I can optionally supply my location when editing my profile
-        Given I am on the edit profile form
-        When I click the location toggle switch
-        Then I can see the add location input fields
+  Scenario: AC3: Given I edit my profile, when I am asked to supply my details, then I can optionally supply my
+  location.
+    Given I am on the create renovation form
+    When I click the location toggle switch
+    Then I can see the add location input fields
+
+  Scenario: AC2: I can optionally supply my location when editing my profile
+    Given I am on the edit profile form
+    When I click the location toggle switch
+    Then I can see the add location input fields
 
   Scenario: AC4: I can optionally supply my location when editing a renovation record
     Given I have an existing renovation record
@@ -26,6 +32,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
       | page_name               |
       |  "/register"            |
       |  "/user/edit"           |
+      |  "/renovations/create"  |
 
 
   Scenario: AC5.2:  Given I am facing a form that asks for my location, when I want to give my location, then I must
@@ -58,6 +65,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
       | page_name               |
       |  "/register"            |
       |  "/user/edit"           |
+      |  "/renovations/create"  |
 
   Scenario: AC7.2:  Given I supply a suburb, when the suburb contains non valid characters (i.e. characters others than
   letters, hyphen, apostrophe, number, space), then a message tells me that “Suburb contains invalid characters.”
@@ -80,6 +88,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
       | page_name               |
       | "/register"             |
       |  "/user/edit"           |
+      |  "/renovations/create"  |
 
   Scenario: AC8.2: Given I supply a city, when the city contains non valid characters (i.e. characters
   other than letters, hyphen, apostrophe, space), then a message tells me that “City contains invalid characters.”
@@ -102,6 +111,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
       | page_name               |
       | "/register"             |
       |  "/user/edit"           |
+      |  "/renovations/create"  |
 
   Scenario: AC9.2:  Given I supply a postcode, when the postcode contains non valid characters (i.e. characters
   others than letters, number, a single space), then a message tells me that “Postcode contains invalid characters.”
@@ -124,7 +134,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
             | page_name               |
             |  "/register"            |
             |  "/user/edit"           |
-
+            |  "/renovations/create"  |
 
   Scenario: AC10.2: Given I supply a country, when the country contains non valid characters (i.e. characters
   other than letters, hyphen, apostrophe, single space), then a message tells me that “Country contains invalid
@@ -146,7 +156,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
       | page_name               |
       |  "/register"            |
       |  "/user/edit"           |
-
+      |  "/renovations/create"  |
   Scenario: AC11.2: Given I supply a fully compliant address, when I submit the form,
   then the form is saved with the address I supplied.
     Given I have an existing renovation record

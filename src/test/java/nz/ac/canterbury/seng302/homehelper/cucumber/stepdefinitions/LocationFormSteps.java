@@ -18,6 +18,8 @@ import java.util.Optional;
 
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,8 +43,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 public class LocationFormSteps {
 
+    private static final Logger log = LoggerFactory.getLogger(LocationFormSteps.class);
     @Autowired
     private MockMvc mockMvc;
+
+    private MvcResult result;
+    private ResultActions resultActions;
 
     @Autowired
     private UserRepository userRepository;
@@ -50,8 +56,6 @@ public class LocationFormSteps {
     @Autowired
     private RenovationRecordRepository renovationRecordRepository;
 
-    private MvcResult result;
-    private ResultActions resultActions;
     private RenovationRecord existingRecord;
 
     @Autowired
@@ -141,9 +145,10 @@ public class LocationFormSteps {
         MockHttpServletRequestBuilder request = get(endPoint)
                 .with(csrf());
 
-        if (endPoint.equals("/user/edit")) {
+        if (endPoint.equals("/user/edit") || endPoint.equals("/renovations/create")) {
             request.with(user("jane.doe@example.com").roles("USER"));
         }
+
 
         result = mockMvc.perform(request)
                 .andExpect(status().isOk())
@@ -182,6 +187,14 @@ public class LocationFormSteps {
             case "/user/edit":
                 request = request.with(user("jane.doe@example.com").roles("USER"));
                 break;
+
+            case "/renovations/create":
+                request.param("name", "Test")
+                        .param("description", "Test description")
+                        .param("roomList", "Kitchen", "Dining Room")
+                        .with(user("jane.doe@example.com").roles("USER"));
+                break;
+
 
             default:
                 throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
@@ -251,6 +264,13 @@ public class LocationFormSteps {
                 request.with(user("jane.doe@example.com").roles("USER"));
                 break;
 
+            case "/renovations/create":
+                request.param("name", "Test")
+                        .param("description", "Test description")
+                        .param("roomList", "Kitchen", "Dining Room")
+                        .with(user("jane.doe@example.com").roles("USER"));
+                break;
+
             case "/renovations/edit":
                 request = request
                         .param("name", existingRecord.getName())
@@ -267,6 +287,7 @@ public class LocationFormSteps {
         result = mockMvc.perform(request)
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
+
 
     }
 
@@ -327,6 +348,28 @@ public class LocationFormSteps {
                         .param("country", "New Zealand")
                         .param("password", "Test123!")
                         .param("confirmPassword", "Test123!")
+                        .with(csrf());
+
+                request = request.with(user("jane.doe@example.com").roles("USER"));
+                resultActions = mockMvc.perform(request);
+
+                break;
+
+            case "/renovations/create":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "a#$%")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .param("name", "Test")
+                        .param("description", "Test description")
+                        .param("roomList", "Kitchen", "Dining Room")
                         .with(csrf());
 
                 request = request.with(user("jane.doe@example.com").roles("USER"));
@@ -423,6 +466,27 @@ public class LocationFormSteps {
 
                 resultActions = mockMvc.perform(request);
                 break;
+            case "/renovations/create":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christ23church")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .param("name", "Test")
+                        .param("description", "Test description")
+                        .param("roomList", "Kitchen", "Dining Room")
+                        .with(csrf());
+
+                request = request.with(user("jane.doe@example.com").roles("USER"));
+                resultActions = mockMvc.perform(request);
+
+                break;
 
             default:
                 throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
@@ -488,6 +552,28 @@ public class LocationFormSteps {
                 resultActions = mockMvc.perform(request);
                 break;
 
+            case "/renovations/create":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041@")
+                        .param("country", "New Zealand")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .param("name", "Test")
+                        .param("description", "Test description")
+                        .param("roomList", "Kitchen", "Dining Room")
+                        .with(csrf());
+
+                request = request.with(user("jane.doe@example.com").roles("USER"));
+                resultActions = mockMvc.perform(request);
+
+                break;
+
             default:
                 throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
 
@@ -551,6 +637,28 @@ public class LocationFormSteps {
                         .with(csrf());
 
                 resultActions = mockMvc.perform(request);
+                break;
+
+            case "/renovations/create":
+                request = post(endpoint)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane.doe@example.com")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041")
+                        .param("country", "New  Zealand!")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .param("name", "Test")
+                        .param("description", "Test description")
+                        .param("roomList", "Kitchen", "Dining Room")
+                        .with(csrf());
+
+                request = request.with(user("jane.doe@example.com").roles("USER"));
+                resultActions = mockMvc.perform(request);
+
                 break;
 
             default:
