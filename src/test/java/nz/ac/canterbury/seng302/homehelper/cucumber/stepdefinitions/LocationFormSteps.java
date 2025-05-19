@@ -357,7 +357,7 @@ public class LocationFormSteps {
     @And("I am told that I have entered an invalid suburb")
     public void i_am_told_that_i_have_entered_an_invalid_suburb() throws Exception {
         resultActions
-                .andExpect(flash().attribute("suburbError", List.of("Suburb contains invalid characters")));
+                .andExpect(flash().attribute("suburbError", List.of("Suburb contains invalid characters.")));
     }
 
     @When("I enter a valid address but an invalid city and submit the form on the {string} page")
@@ -556,18 +556,18 @@ public class LocationFormSteps {
     @And("I am told that I have entered an invalid city")
     public void i_am_told_that_i_have_entered_an_invalid_city() throws Exception {
         resultActions
-                .andExpect(flash().attribute("cityError", List.of("City contains invalid characters")));
+                .andExpect(flash().attribute("cityError", List.of("City contains invalid characters.")));
     }
 
     @And("I am told that I have entered an invalid postcode")
     public void i_am_told_that_i_have_entered_an_invalid_postcode() throws Exception {
         resultActions
-                .andExpect(flash().attribute("postcodeError", List.of("Postcode contains invalid characters")));
+                .andExpect(flash().attribute("postcodeError", List.of("Postcode contains invalid characters.")));
     }
 
     @And("I am told that I have entered an invalid country")
     public void i_am_told_that_i_have_entered_an_invalid_country() throws Exception {
         resultActions
-                .andExpect(flash().attribute("countryError", List.of("Country contains invalid characters")));
+                .andExpect(flash().attribute("countryError", List.of("Country contains invalid characters.")));
     }
 }
