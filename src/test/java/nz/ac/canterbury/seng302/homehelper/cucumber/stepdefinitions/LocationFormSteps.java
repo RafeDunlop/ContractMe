@@ -4,12 +4,17 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+
+import java.util.Collections;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
@@ -23,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -47,6 +52,11 @@ public class LocationFormSteps {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RenovationRecordRepository renovationRecordRepository;
+
+    private RenovationRecord existingRecord;
 
     @Autowired
     private VerificationCodeRepository verificationCodeRepository;
@@ -85,6 +95,32 @@ public class LocationFormSteps {
                 .andReturn();
 
     }
+
+    @Given("I have an existing renovation record")
+    public void i_have_an_existing_renovation_record() {
+        User user = userRepository.findByEmailIgnoreCase("jane.doe@example.com")
+                .orElseThrow(() -> new IllegalStateException("Test user should exist"));
+
+        existingRecord = new RenovationRecord(user, "Test Record", null, Collections.emptyList());
+        renovationRecordRepository.save(existingRecord);
+        userRepository.save(user);
+
+    }
+    @Given("I am on the edit record for my existing record")
+    public void i_am_on_the_edit_record_for_my_existing_record() throws Exception {
+        assertNotNull(existingRecord, "Renovation record must be exist before accessing edit page");
+
+        String email = existingRecord.getUser().getEmail();
+        MockHttpServletRequestBuilder request = get("/renovations/edit?id=" + existingRecord.getId())
+                .with(user(email).roles("USER"));
+
+        result = mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+
+
 
     @When("I click the location toggle switch")
     public void i_click_the_location_toggle_switch() throws Exception {
@@ -166,8 +202,28 @@ public class LocationFormSteps {
 
         resultActions = mockMvc.perform(request)
                 .andExpect(status().is3xxRedirection());
+
     }
 
+    @When("I leave the address field blank but fill any other field on the location form on the edit page for my existing record")
+    public void i_leave_the_address_field_blank_but_fill_any_other_field_on_the_location_form_on_the_edit_page_for_my_existing_record() throws Exception {
+        assertNotNull(existingRecord, "Existing renovation record must exist");
+
+        MockHttpServletRequestBuilder request = post("/renovations/edit?id=" + existingRecord.getId())
+                .param("name", existingRecord.getName())
+                .param("description", "Some description")
+                .param("roomList", "Kitchen")
+                .param("address_line1", "")
+                .param("suburb", "Riccarton")
+                .param("city", "Christchurch")
+                .param("postcode", "8041")
+                .param("country", "New Zealand")
+                .with(user(existingRecord.getUser().getEmail()).roles("USER"))
+                .with(csrf());
+
+        resultActions = mockMvc.perform(request)
+                .andExpect(status().is3xxRedirection());
+    }
 
 
 
@@ -180,6 +236,12 @@ public class LocationFormSteps {
 
     @When("I enter a valid address and submit the location form on the {string} page")
     public void i_enter_a_valid_address_and_submit_the_location_form_on_the_page(String endpoint) throws Exception {
+        String originalEndpoint = endpoint;
+
+        if (endpoint.startsWith("/renovations/edit")) {
+            endpoint = "/renovations/edit?id=" + existingRecord.getId();
+        }
+
         MockHttpServletRequestBuilder request = post(endpoint)
                 .param("firstName", "Jane")
                 .param("lastName", "Doe")
@@ -192,7 +254,7 @@ public class LocationFormSteps {
                 .with(csrf());
 
         // Endpoint specific params
-        switch (endpoint) {
+        switch (originalEndpoint) {
             case "/register":
                 request.param("password", "Test123!")
                         .param("confirmPassword", "Test123!");
@@ -208,6 +270,15 @@ public class LocationFormSteps {
                         .param("roomList", "Kitchen", "Dining Room")
                         .with(user("jane.doe@example.com").roles("USER"));
                 break;
+
+            case "/renovations/edit":
+                request = request
+                        .param("name", existingRecord.getName())
+                        .param("description", "Test Description")
+                        .param("roomList", "Kitchen")
+                        .with(user("jane.doe@example.com").roles("USER"));
+                break;
+
 
             default:
                 throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
@@ -231,6 +302,23 @@ public class LocationFormSteps {
         MockHttpServletRequestBuilder request;
 
         switch (endpoint) {
+            case "/renovations/edit":
+                request = post("/renovations/edit?id=" + existingRecord.getId())
+                        .param("name", existingRecord.getName())
+                        .param("description", "Test Description")
+                        .param("roomList", "Kitchen")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "a#$%")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .with(user("jane.doe@example.com").roles("USER"))
+                        .with(csrf());
+
+                resultActions = mockMvc.perform(request);
+                break;
+
+
             case "/register":
                 request = post(endpoint)
                         .param("firstName", "Jane")
@@ -306,11 +394,19 @@ public class LocationFormSteps {
 
     }
 
+    @Then("I am taken back to the edit page for my record")
+    public void i_am_taken_back_to_the_edit_page_for_my_record() throws Exception {
+        String expectedRedirect = "/renovations/edit?id=" + existingRecord.getId();
+
+        resultActions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirect));
+    }
 
     @And("I am told that I have entered an invalid suburb")
     public void i_am_told_that_i_have_entered_an_invalid_suburb() throws Exception {
         resultActions
-                .andExpect(flash().attribute("suburbError", List.of("Suburb contains invalid characters")));
+                .andExpect(flash().attribute("suburbError", List.of("Suburb contains invalid characters.")));
     }
 
     @When("I enter a valid address but an invalid city and submit the form on the {string} page")
@@ -355,6 +451,21 @@ public class LocationFormSteps {
 
                 break;
 
+            case "/renovations/edit":
+                request = post("/renovations/edit?id=" + existingRecord.getId())
+                        .param("name", existingRecord.getName())
+                        .param("description", "Test Description")
+                        .param("roomList", "Kitchen")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christ23church")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .with(user("jane.doe@example.com").roles("USER"))
+                        .with(csrf());
+
+                resultActions = mockMvc.perform(request);
+                break;
             case "/renovations/create":
                 request = post(endpoint)
                         .param("firstName", "Jane")
@@ -423,7 +534,22 @@ public class LocationFormSteps {
 
                 request = request.with(user("jane.doe@example.com").roles("USER"));
                 resultActions = mockMvc.perform(request);
+                break;
 
+            case "/renovations/edit":
+                request = post("/renovations/edit?id=" + existingRecord.getId())
+                        .param("name", existingRecord.getName())
+                        .param("description", "Test Description")
+                        .param("roomList", "Kitchen")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041@")
+                        .param("country", "New Zealand!")
+                        .with(user("jane.doe@example.com").roles("USER"))
+                        .with(csrf());
+
+                resultActions = mockMvc.perform(request);
                 break;
 
             case "/renovations/create":
@@ -497,6 +623,22 @@ public class LocationFormSteps {
 
                 break;
 
+            case "/renovations/edit":
+                request = post("/renovations/edit?id=" + existingRecord.getId())
+                        .param("name", existingRecord.getName())
+                        .param("description", "Test Description")
+                        .param("roomList", "Kitchen")
+                        .param("address_line1", "77 Ilam Road")
+                        .param("region", "Ilam")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041")
+                        .param("country", "New  Zealand!")
+                        .with(user("jane.doe@example.com").roles("USER"))
+                        .with(csrf());
+
+                resultActions = mockMvc.perform(request);
+                break;
+
             case "/renovations/create":
                 request = post(endpoint)
                         .param("firstName", "Jane")
@@ -528,19 +670,19 @@ public class LocationFormSteps {
     @And("I am told that I have entered an invalid city")
     public void i_am_told_that_i_have_entered_an_invalid_city() throws Exception {
         resultActions
-                .andExpect(flash().attribute("cityError", List.of("City contains invalid characters")));
+                .andExpect(flash().attribute("cityError", List.of("City contains invalid characters.")));
     }
 
     @And("I am told that I have entered an invalid postcode")
     public void i_am_told_that_i_have_entered_an_invalid_postcode() throws Exception {
         resultActions
-                .andExpect(flash().attribute("postcodeError", List.of("Postcode contains invalid characters")));
+                .andExpect(flash().attribute("postcodeError", List.of("Postcode contains invalid characters.")));
     }
 
     @And("I am told that I have entered an invalid country")
     public void i_am_told_that_i_have_entered_an_invalid_country() throws Exception {
         resultActions
-                .andExpect(flash().attribute("countryError", List.of("Country contains invalid characters")));
+                .andExpect(flash().attribute("countryError", List.of("Country contains invalid characters.")));
     }
 
     @When("I enter {string} in the address field and submit the location form on the {string} page")

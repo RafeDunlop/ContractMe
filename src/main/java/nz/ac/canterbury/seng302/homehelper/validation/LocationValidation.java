@@ -23,7 +23,7 @@ public class LocationValidation {
         List<String> errors = new ArrayList<>();
 
         if (suburb != null && !suburb.isBlank() && !suburb.matches("^[\\p{L}\\d\\-\\s']*$")) {
-            errors.add("Suburb contains invalid characters");
+            errors.add("Suburb contains invalid characters.");
         }
 
         return errors;
@@ -32,15 +32,19 @@ public class LocationValidation {
     /**
      * Validates street address by checking for invalid characters
      * @param address the street address (with number)
+     * @param isRequired boolean for tracking if other fields have any input to check if its required.
      * @return errors list of errors found during validation
      */
-    public List<String> validateStreetAddress(String address) {
+    public List<String> validateStreetAddress(String address, boolean isRequired) {
         List<String> errors = new ArrayList<>();
-        if (address.isBlank()) {
+
+        if (isRequired && (address == null || address.isBlank())) {
             errors.add("Street address is required.");
-        } else if (!address.matches("^[\\p{L}\\-'\\d\\s./]*$")) {
+        }
+        if (address != null &&!address.matches("^[\\p{L}\\-'\\d\\s./]*$")) {
             errors.add("Street address contains invalid characters.");
         }
+
         return errors;
     }
 
@@ -55,7 +59,7 @@ public class LocationValidation {
         List<String> errors = new ArrayList<>();
 
         if (city != null && !city.isBlank() && !city.matches("^[\\p{L}\\-\\s']*$")) {
-            errors.add("City contains invalid characters");
+            errors.add("City contains invalid characters.");
         }
         return errors;
     }
@@ -68,11 +72,11 @@ public class LocationValidation {
      */
     public List<String> validatePostcode(String postcode) {
         List<String> errors = new ArrayList<>();
+        if (postcode == null || postcode.isBlank()) return errors;
 
         String trimmed = postcode.trim();
-
-        if (!postcode.isBlank() && !trimmed.matches("^(?!.* {2})[\\p{L}\\p{N} ]*$")) {
-            errors.add("Postcode contains invalid characters");
+        if (!trimmed.matches("^(?!.* {2})[\\p{L}\\p{N} ]*$")) {
+            errors.add("Postcode contains invalid characters.");
         }
 
         return errors;
@@ -86,16 +90,13 @@ public class LocationValidation {
      */
     public List<String> validateCountry(String country) {
         List<String> errors = new ArrayList<>();
+        if (country == null || country.isBlank()) return errors;
 
         String trimmed = country.trim();
-
         if (!trimmed.matches("^(?!.* {2})[\\p{L}\\-' ]*$")) {
-            errors.add("Country contains invalid characters");
+            errors.add("Country contains invalid characters.");
         }
-
 
         return errors;
     }
-
-
 }

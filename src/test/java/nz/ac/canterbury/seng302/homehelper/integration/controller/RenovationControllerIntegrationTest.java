@@ -9,7 +9,6 @@ import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.*;
@@ -1437,6 +1437,112 @@ public class RenovationControllerIntegrationTest {
         assertEquals(addressDTO.getCity(), loc.getCity());
         assertEquals(addressDTO.getRegion(), loc.getSuburb());
         assertEquals(addressDTO.getPostcode(), loc.getPostcode());
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void editRenovation_validLocationDetails_LocationUpdated() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
+        renovationRecordRepository.save(testRecord);
+
+        AddressDTO addressDTO = new AddressDTO();
+        addressDTO.setAddress_line1("33 Moorhouse Ave");
+        addressDTO.setCountry("New Zealand");
+        addressDTO.setPostcode("8043");
+        addressDTO.setCity("Christchurch");
+        addressDTO.setRegion("Sydenham");
+
+        mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
+                    .param("address_line1", addressDTO.getAddress_line1())
+                    .param("country", addressDTO.getCountry())
+                    .param("postcode", addressDTO.getPostcode())
+                    .param("city", addressDTO.getCity())
+                    .param("region", addressDTO.getRegion())
+                        .param("name", "Renovation")
+                        .param("description", "Some words")
+                        .param("roomList", "Room 1", "Room 2")
+
+                    .with(csrf()))
+                    .andExpect(status().is3xxRedirection())
+                    .andReturn();
+
+        Location location = testRecord.getLocation();
+        assertNotNull(location, "Location should be set on renovation");
+        assertEquals(addressDTO.getAddress_line1(), location.getAddress());
+        assertEquals(addressDTO.getCountry(), location.getCountry());
+        assertEquals(addressDTO.getCity(), location.getCity());
+        assertEquals(addressDTO.getRegion(), location.getSuburb());
+        assertEquals(addressDTO.getPostcode(), location.getPostcode());
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void editRenovation_invalidLocation_locationNotSaved() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
+        renovationRecordRepository.save(testRecord);
+
+        AddressDTO addressDTO = new AddressDTO();
+        addressDTO.setAddress_line1("1 Cool Street");
+        addressDTO.setCountry("New  Zealand");
+        addressDTO.setPostcode("|}{)(*)&*&%");
+        addressDTO.setCity("Christ)(*)( church");
+        addressDTO.setRegion("Foo$bar");
+
+        mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
+                        .param("address_line1", addressDTO.getAddress_line1())
+                        .param("country", addressDTO.getCountry())
+                        .param("postcode", addressDTO.getPostcode())
+                        .param("city", addressDTO.getCity())
+                        .param("region", addressDTO.getRegion())
+                        .param("name", "Renovation")
+                        .param("description", "Some words")
+                        .param("roomList", "Room 1", "Room 2")
+
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("countryError", List.of("Country contains invalid characters.")))
+                .andExpect(flash().attribute("cityError", List.of("City contains invalid characters.")))
+                .andExpect(flash().attribute("postcodeError", List.of("Postcode contains invalid characters.")))
+                .andExpect(flash().attribute("suburbError", List.of("Suburb contains invalid characters.")))
+                .andReturn();
+
+        RenovationRecord record = renovationRecordRepository.findById(testRecord.getId()).get();
+        assertNull(record.getLocation());
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void editRenovation_existingLocationInvalidForm_locationNotUpdated() throws Exception {
+        Location initialLocation = new Location(
+                "10 Queen Street ", "Australia", "8011", "Sydney", "Mt Druit"
+        );
+        RenovationRecord testRecord = new RenovationRecord(owner, "Test Record", "Description", List.of("Room A"));
+        testRecord.setLocation(initialLocation);
+        renovationRecordRepository.save(testRecord);
+
+        mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
+                        .param("address_line1", "33 Fendylton Ave")
+                        .param("country", "New Zealand")
+                        .param("postcode", "!!!!!!!!!")
+                        .param("city", "Christchurch")
+                        .param("region", "Fendylton")
+                        .param("name", "Renovation")
+                        .param("description", "Some words")
+                        .param("roomList", "Room 1", "Room 2")
+
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+
+        RenovationRecord record = renovationRecordRepository.findById(testRecord.getId())
+                .orElseThrow(() -> new AssertionError("Optional null"));
+        Location location = testRecord.getLocation();
+
+        assertEquals(initialLocation.getAddress(), location.getAddress(), "Address should not change");
+        assertEquals(initialLocation.getCity(), location.getCity(), "City should not change");
+        assertEquals(initialLocation.getCountry(), location.getCountry(), "Country should not change");
+        assertEquals(initialLocation.getPostcode(), location.getPostcode(), "Postcode should not change");
+        assertEquals(initialLocation.getSuburb(), location.getSuburb(), "Region/suburb should not change");
     }
 
     @Test
