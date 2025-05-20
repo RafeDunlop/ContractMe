@@ -151,7 +151,7 @@
                         <!-- First button (AC more than 10 pages) -->
                         <li id="firstButton" class="page-item" th:if="${totalPages > 10}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
-                                @{/renovations/search},
+                                @{renovations/search},
                                 1,
                                 'First'
                             )}"></div>
@@ -160,7 +160,7 @@
                         <!-- Previous button -->
                         <li id="prevButton" class="page-item" th:if="${pageNumber > 1}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
-                                @{/renovations/search},
+                                @{renovations/search},
                                 ${pageNumber - 1},
                                 'Prev'
                             )}"></div>
@@ -172,7 +172,7 @@
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'"
                             th:id="'page' + ${pageLinkNumber}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
-                                @{/renovations/search},
+                                @{renovations/search},
                                 ${pageLinkNumber},
                                 ${pageLinkNumber}
                             )}"></div>
@@ -184,7 +184,7 @@
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'"
                             th:id="'page' + ${pageLinkNumber}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
-                                @{/renovations/search},
+                                @{renovations/search},
                                 ${pageLinkNumber},
                                 ${pageLinkNumber}
                             )}"></div>
@@ -193,7 +193,7 @@
                         <!-- Next button -->
                         <li id="nextButton" class="page-item" th:if="${pageNumber < totalPages}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
-                                @{/renovations/search},
+                                @{renovations/search},
                                 ${pageNumber + 1},
                                 'Next'
                             )}"></div>
@@ -202,7 +202,7 @@
                         <!-- Last button (AC more than 10 pages) -->
                         <li id="lastButton" class="page-item" th:if="${totalPages > 10}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
-                                @{/renovations/search},
+                                @{renovations/search},
                                 ${totalPages},
                                 'Last'
                             )}"></div>
