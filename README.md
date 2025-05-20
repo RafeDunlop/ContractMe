@@ -3,7 +3,6 @@ Welcome to Home Helper! Home Helper makes organising your renovations easy.
 You will be able to create an account, create and manage your renovations,
 add tasks to keep track of what needs doing, and browse public renovations.
 
-
 ## Dependencies
 - Java >= 17, get the latest openjdk build from [jdk.java.net](https://jdk.java.net/)
 or preferably your package manager. You will probably need the full JDK to use
@@ -13,6 +12,7 @@ mail)
 - [Cucumber](https://cucumber.io/) for automated acceptance tests
 - [JUnit 5/Jupiter](https://junit.org/junit5/) for automated unit/integration
 tests
+- [Geoapify](https://www.geoapify.com/) see below for info about API keys
 
 All dependencies, apart from the Java runtime/jdk itself, are managed via
 gradle, by following the steps below to run the application locally, all
@@ -24,7 +24,9 @@ If required, contact a maintainer (see contributors below) to gain access
 to environment variables such as API keys, otherwise create your own API keys
 and an email account and create an `env.properties` file:
 
-```env.properties
+```
+# env.properties
+
 DB_PASSWORD=password
 DB_USERNAME=sa
 SPRING_MAIL_PASSWORD=<your email password>
