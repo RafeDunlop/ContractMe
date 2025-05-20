@@ -97,11 +97,10 @@ public class Dictionary implements Iterable<Profanity> {
 
         @Override
         public Profanity find(String input) {
-            input = ' ' + Text.normalize(input) + ' ';
+            input = input.toLowerCase();
             for (Pattern pattern : patterns) {
-                java.util.regex.Matcher matcher = pattern.matcher(input);
-                if (matcher.find()) {
-                    return new Profanity(matcher.group(), 1.0f); // or look up actual score if needed
+                if (pattern.matcher(input).matches()) {
+                    return new Profanity(pattern.toString(), 1.0f); // or look up actual score if needed
                 }
             }
             return null;
@@ -163,11 +162,11 @@ public class Dictionary implements Iterable<Profanity> {
             if (line.isEmpty()) continue;
 
             String[] cols = line.split("\t");
-//            String text = Text.normalize(cols[0]);
-            if (cols[0].isEmpty())
+            String text = cols[0];
+            if (text.isEmpty())
                 throw new IOException("Invalid value at line: \"" + line + "\"");
             float score = cols.length > 1 ? Float.parseFloat(cols[1]) : 1.f;
-            profanities.add(new Profanity(cols[0], score));
+            profanities.add(new Profanity(text, score));
         }
 
         return new Dictionary(language, profanities);

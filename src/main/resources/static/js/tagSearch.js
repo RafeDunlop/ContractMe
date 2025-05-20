@@ -90,13 +90,3 @@ tagInput.addEventListener("keydown", (e) => {
         }
     }
 });
-
-/**
- * Prevention of submitting post request if the search bar is empty, for AC not allowing empty search.
- */
-document.getElementById("tag-search-form").addEventListener("submit", function(e) {
-    const tags = document.querySelectorAll('input[name="tagNameList"]');
-    if (tags.length === 0) {
-        e.preventDefault();
-    }
-});
