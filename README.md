@@ -64,6 +64,7 @@ src/resources/profanityFilterResources
 These directories contain both original and modified code from this project.
 This project includes modifications to files originally licensed under the Apache License 2.0.
 Changes were made by [Jack Guard] and [Mason Ott] on [09/05/2025].
+Changes were made by [Ryan Hamilton] on [20/05/2025].
 
 Again, the URI for this repository can be found at [profanity-filter](https://github.com/modernmt/profanity-filter?tab=Apache-2.0-1-ov-file)
 

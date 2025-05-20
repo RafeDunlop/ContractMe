@@ -163,4 +163,5 @@ public class TagServiceTest {
         assertFalse(record.getTags().contains(tag));
         assertTrue(record.getTags().contains(otherTag));
     }
+
 }

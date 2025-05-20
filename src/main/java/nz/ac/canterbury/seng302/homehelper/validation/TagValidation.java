@@ -32,7 +32,7 @@ public class TagValidation {
         }
         Profanity value = profanityFilter.find("en", tagName);
         if (value != null) {
-            errors.add("Name does not follow the system language standards");
+            errors.add("Name does not follow the system language standards.");
         }
 
         return errors;

@@ -160,7 +160,7 @@ public class TagsSteps {
 
         resultActions
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + currentRenovationRecord.getId()))
+                .andExpect(redirectedUrl("/renovations/view?id=" + currentRenovationRecord.getId() + "&page=1"))
                 .andExpect(flash().attribute("errors", expectedErrors));
     }
 
@@ -170,7 +170,17 @@ public class TagsSteps {
 
         resultActions
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + currentRenovationRecord.getId()))
+                .andExpect(redirectedUrl("/renovations/view?id=" + currentRenovationRecord.getId() + "&page=1"))
+                .andExpect(flash().attribute("errors", expectedErrors));
+    }
+
+    @Then("I am told that the tag name is inappropriate")
+    public void i_am_told_that_the_tag_name_is_inappropriate() throws Exception {
+        List<String> expectedErrors = List.of("Name does not follow the system language standards.");
+
+        resultActions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + currentRenovationRecord.getId() + "&page=1"))
                 .andExpect(flash().attribute("errors", expectedErrors));
     }
 
