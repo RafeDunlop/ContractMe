@@ -106,6 +106,5 @@ function setAutoCompleteList(tags) {
  * Clears the autocomplete display list.
  */
 function resetAutocomplete() {
-    console.log("Clearing suggestions")
     document.getElementById("autocomplete-list").innerHTML = "";
 }
