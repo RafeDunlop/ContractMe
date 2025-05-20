@@ -59,7 +59,7 @@
             </div>
 
             <!-- Single Tag Add Form -->
-            <form th:action="@{tags/add}" method="post" id="add-tag-form" class="mb-3" th:if="${isOwner}">
+            <form th:action="@{/renovations/tags/add}" method="post" id="add-tag-form" class="mb-3" th:if="${isOwner}">
                 <label for="tagName" class="fw-bold">Add Tags:</label>
                 <input type="text" class="form-control" id="tagName" name="tagName" placeholder="Enter a tag"
                        data-cy="tag" maxlength="129" autocomplete="off" required>
