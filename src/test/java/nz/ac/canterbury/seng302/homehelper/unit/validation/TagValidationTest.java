@@ -51,8 +51,8 @@ public class TagValidationTest {
 
     @Test
     public void tagValidation_oneLetters_returnsNoErrors() {
-        when(profanityFilter.find("en","A123")).thenReturn(null);
-        List<String> errors = tagValidation.validateName("A123");
+        when(profanityFilter.find("en","A 123")).thenReturn(null);
+        List<String> errors = tagValidation.validateName("A 123");
         assertTrue(errors.isEmpty());
     }
 

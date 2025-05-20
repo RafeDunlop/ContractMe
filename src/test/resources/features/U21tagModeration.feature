@@ -13,8 +13,6 @@ Feature: U21 - As Inaya, I want to be able to know when I input an inappropriate
       | frigged |
       | turd    |
 
-
-
   Scenario Outline: AC2 - Typing an inappropriate tag name with slight variation shows a warning that the tag is not allowed
     Given I have a renovation record and I am on that page
     When I enter a tag "<input>" into the tag input field
