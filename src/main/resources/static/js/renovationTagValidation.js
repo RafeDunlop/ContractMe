@@ -35,7 +35,7 @@ async function validateTag(input) {
         } if (input.length > 128) {
             errors.push("Tag cannot be greater than 128 characters.");
         }
-        const response = await fetch(`/renovations/tags/profanity-filter?tagName=${encodeURIComponent(input)}`, {
+        const response = await fetch(`renovations/tags/profanity-filter?tagName=${encodeURIComponent(input)}`, {
             method: "GET",
             headers: {
                 'X-CSRF-TOKEN': csrfToken,
