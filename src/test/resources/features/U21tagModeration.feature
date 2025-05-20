@@ -13,7 +13,7 @@ Feature: U21 - As Inaya, I want to be able to know when I input an inappropriate
       | frigged |
       | turd    |
 
-  Scenario Outline: AC2 - Typing an inappropriate tag name with slight variation shows a warning that the tag is not allowed
+  Scenario Outline: AC2.1 - Typing an inappropriate tag name with slight variation shows a warning that the tag is not allowed
     Given I have a renovation record and I am on that page
     When I enter a tag "<input>" into the tag input field
     Then I am told that the tag name is inappropriate
@@ -21,7 +21,16 @@ Feature: U21 - As Inaya, I want to be able to know when I input an inappropriate
     Examples:
       | input   |
       | f*ck    |
-      | sh*t    |
+      | s***    |
       | fr1gged |
-      | a$s     |
 
+  Scenario Outline: AC2.2 - Typing a tag name with multiple words that contains an inappropriate shows a warning that the tag is not allowed
+    Given I have a renovation record and I am on that page
+    When I enter a tag "<input>" into the tag input field
+    Then I am told that the tag name is inappropriate
+    And The tag "<input>" is not added
+    Examples:
+      | input       |
+      | no a$s      |
+      | s*** s***   |
+      | a a a a a** |

@@ -42,7 +42,7 @@ public class TagValidationTest {
     }
 
     @Test
-    public void tagValidation_tagLessThan128Characters_returnsErrors() {
+    public void tagValidation_tagLessThan128Characters_returnsNoErrors() {
         String name128 = "a".repeat(128);
         when(profanityFilter.find("en",name128)).thenReturn(null);
         List<String> errors = tagValidation.validateName(name128);
