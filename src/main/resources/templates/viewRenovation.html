@@ -2,121 +2,221 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+    <base th:href="@{/}"/>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
     <title>View Renovation</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/viewRenovationStyles.css}">
+    <link rel="stylesheet" th:href="@{/css/tags.css}">
     <script th:src="@{/js/addTaskIcon.js}"></script>
-    <style>
-
-    </style>
 </head>
 <body>
-<div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
-<div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
-<div class="container mt-5">
 
-    <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
-    <input type="hidden" id="tasksPerPage" name="tasksPerPage" th:value="5"/>
-    <div class="card p-4 shadow-sm">
-        <h4 th:text="'Viewing Renovation: ' + ${renovation.name}" class="card-title mb-4"></h4>
+<div class="container">
+    <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+    <div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
 
+    <div class="container mt-2">
 
-        <div th:if="${renovation.description} != ''" class="card p-3 bg-light mb-3">
-            <h6 class="fw-bold">Description:</h6>
-            <p class="mb-0" th:text="${renovation.description}"></p>
-        </div>
+        <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
+        <input type="hidden" id="totalCards" th:value="${totalCards}" name="totalCards" />
 
-        <div th:if="!${renovation.rooms.isEmpty()}" class="mb-3">
-            <h6 class="fw-bold">Rooms:</h6>
-            <div class="list-group">
-                <div th:each="room : ${renovation.rooms}" class="list-group-item">
-                    🛠️ <span th:text="${room}" class="ms-2"></span>
+        <form id="search-form" method="post" th:action="@{/renovations/view}" style="display:none;">
+            <input type="hidden" id="renovationId" name="id" th:value="${renovation.getId()}">
+            <input type="hidden" id="pageInput" th:value="${pageNumber}" name="page">
+            <input type="hidden" id="cardsPerPageInput" th:value="${cardsPerPage}" name="cardsPerPage">
+            <input type="hidden" id="FromSearch" th:value="${fromSearch}" name="fromSearch">
+        </form>
+
+        <div id="content-container" class="card p-4 shadow-sm">
+            <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap">
+                <h5 class="mb-0">Viewing Renovation:</h5>
+
+                <form id="renovationForm" class="d-flex align-items-center" th:if="${isOwner}">
+                    <input type="checkbox" id="publicCheckbox" name="isPublic" th:checked="${renovation.isPublic()}" class="me-1">
+                    <label for="publicCheckbox" class="mb-0">Make my renovation record public</label>
+                </form>
+            </div>
+
+            <h4 th:text="${renovation.name}"
+                class="card-title text-truncate mb-4"
+                style="max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"
+                title="[[${renovation.name}]]">
+            </h4>
+            <div th:if="${renovation.description} != ''" class="card p-3 bg-light mb-3">
+                <h6 class="fw-bold">Description:</h6>
+                <p class="mb-0" th:text="${renovation.description}"></p>
+            </div>
+
+            <div th:if="!${renovation.rooms.isEmpty()}" class="mb-3">
+                <h6 class="fw-bold">Rooms:</h6>
+                <div class="list-group">
+                    <div th:each="room : ${renovation.rooms}" class="list-group-item">
+                        🛠️ <span th:text="${room}" class="ms-2"></span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div th:if="!${renovation.getRenovationTasks().isEmpty()}" class="mb-3">
-            <h6 class="fw-bold">Tasks:</h6>
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3">
-                <div th:each="renovationTask : ${tasks}" class="col mb-4">
-                    <div class="card" style="width: 18rem;">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="position-relative">
-                                    <div th:replace="~{fragments/addTaskIcon.html :: add-task-icon}"></div>
-                                    <img th:src="@{${'/images/' + renovationTask.getIconFileName()}}" alt="Task Icon" class="task-icon">
-                                    <button type="button" class="btn btn-secondary btn-sm rounded-circle opacity-75 top-0 start-100 translate-middle position-absolute" th:onclick="|showIconSelector()|">+</button>
+            <!-- Single Tag Add Form -->
+            <form th:action="@{/renovations/tags/add}" method="post" id="add-tag-form" class="mb-3" th:if="${isOwner}">
+                <label for="tagName" class="fw-bold">Add Tags:</label>
+                <input type="text" class="form-control" id="tagName" name="tagName" placeholder="Enter a tag"
+                       data-cy="tag" maxlength="129" autocomplete="off" required>
+                <ul id="autocomplete-list" class="list-group position-absolute" style="z-index: 1000;"></ul>
+                <input type="hidden" name="renovationId" th:value="${renovation.id}">
+            </form>
+
+            <!-- Frontend JS error -->
+            <div class="alert alert-danger mt-2" role="alert" id="tag-frontend-error" hidden>
+                <ul><li><label class="form-label" id="tag-frontend-error-message"></label></li></ul>
+            </div>
+            <!-- Backend error -->
+            <div class="alert alert-danger mt-2" role="alert" id="tag-backend-error"
+                 th:attr="hidden=${errors == null}">
+                <ul><li th:each="msg : ${errors}" th:text="${msg}"></li></ul>
+            </div>
+
+            
+
+
+            <!-- Display added tags -->
+            <div id="tagList" class="mb-3">
+                <label class="fw-bold d-block mb-1">Current Tags:</label>
+                <span th:each="tag : ${renovation.getSortedTags()}" class="tag-box badge bg-success d-inline-flex align-items-center me-2 mb-2">
+                    <span class="tag-text-large text-truncate ms-1" th:text="${tag.getTagName()}"></span>
+                    <button class="tag-delete-button-large btn-sm border-0 bg-transparent text-light ms-1"
+                            th:if="${isOwner}" type="button"
+                            th:attr="data-renovationId=${renovation.id}, data-csrf=${_csrf.token}, data-tagName=${tag.getTagName()}"
+                            th:onclick="|removeTag(this)|">
+                        X
+                    </button>
+                </span>
+            </div>
+
+            <div th:if="!${renovation.getRenovationTasks().isEmpty()}" class="mb-3">
+                <h6 class="fw-bold">Tasks:</h6>
+                <div id="grid" class="task-grid"> <!-- Grid for responsive placing of tasks CSS -->
+                    <div th:each="renovationTask : ${tasks}" class="card-count"> <!-- Responsive task square CSS -->
+                        <div class="card" style="width: 18rem;">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="position-relative">
+                                        <div th:replace="~{fragments/addTaskIcon.html :: add-task-icon(${renovationTask})}"></div>
+                                        <img th:src="@{${'/images/' + renovationTask.getIconFileName()}}" alt="Task Icon" class="task-icon"
+                                             th:onclick="${isOwner and renovationTask.getIconFileName() != 'default-icon.png'} ? 'showIconSelector(' + ${renovationTask.getId()} + ')' : null">
+
+                                        <button type="button" class="btn btn-secondary btn-sm rounded-circle opacity-75 top-0 start-100 translate-middle position-absolute"
+                                                th:if="${isOwner} and ${renovationTask.getIconFileName() == 'default-icon.png'}"
+                                                th:onclick="|showIconSelector(${renovationTask.getId()})|">+</button>
+                                    </div>
+                                    <h5 class="card-title truncate ms-2 mb-0" th:text="${renovationTask.getName()}">Task Title</h5>
                                 </div>
-                                <h5 class="card-title truncate ms-2 mb-0" th:text="${renovationTask.getName()}">Task Title</h5>
-                            </div>
-                            <p class="card-text truncate" th:text="${renovationTask.getDescription()}">Task Description</p>
-                            <p class="card-text"><strong>Due Date:</strong> <span th:text="${renovationTask.getDueDate()}">Due Date</span></p>
-                            <div class="d-flex justify-content-between">
-                                <a th:href="@{/editTask(taskId=${renovationTask.getId()},renovationId=${renovation.getId()})}" class="btn btn-primary">Edit Task</a>
+                                <p class="card-text truncate" th:text="${renovationTask.getDescription()}">Task Description</p>
+                                <p class="card-text"><strong>Due Date:</strong> <span th:text="${renovationTask.getDueDate()}">Due Date</span></p>
+                                <div class="d-flex justify-content-between">
+                                    <a th:href="@{/editTask(taskId=${renovationTask.getId()},renovationId=${renovation.getId()})}"
+                                       class="btn btn-primary"
+                                       th:if="${isOwner}">Edit Task</a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div id="footer" class="mt-2">
+                <div class="d-flex justify-content-center" th:if="${totalPages > 0}">
+                    <ul class="pagination" id="pagination">
+                        <!-- First button (AC more than 10 pages) -->
+                        <li class="page-item" th:if="${totalPages > 10}">
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                1,
+                                'First'
+                            )}"></div>
+                        </li>
+
+                        <!-- Previous button -->
+                        <li class="page-item" th:if="${pageNumber > 1}">
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${pageNumber - 1},
+                                'Prev'
+                            )}"></div>
+                        </li>
+
+                        <!-- Page buttons (≤ 10 pages) -->
+                        <li class="page-item" th:if="${totalPages <= 10}"
+                            th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
+                            th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${pageLinkNumber},
+                                ${pageLinkNumber}
+                            )}"></div>
+                        </li>
+
+                        <!-- Page buttons (> 10 pages) -->
+                        <li class="page-item" th:if="${totalPages > 10}"
+                            th:each="pageLinkNumber : ${#numbers.sequence(paginationLinksStart, paginationLinksEnd)}"
+                            th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${pageLinkNumber},
+                                ${pageLinkNumber}
+                            )}"></div>
+                        </li>
+
+                        <!-- Next button -->
+                        <li class="page-item" th:if="${pageNumber < totalPages}">
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${pageNumber + 1},
+                                'Next'
+                            )}"></div>
+                        </li>
+
+                        <!-- Last button (AC more than 10 pages) -->
+                        <li class="page-item" th:if="${totalPages > 10}">
+                            <div th:replace="~{fragments/paginationButton :: paginationButton(
+                                @{/renovations/view(id=${renovation.id})},
+                                ${totalPages},
+                                'Last'
+                            )}"></div>
+                        </li>
+
+
+                        <!-- Search field (AC more than 10 pages) --> <!-- CHANGE IF TO 10 after testing -->
+                        <li class="page-item d-flex align-items-center" th:if="${totalPages > 10}">
+                            <input type="number" class="form-control me-2" id="pageSearch" aria-label="Page Search" style="min-width: 50px;">
+                            <button class="btn btn-primary" th:onclick="|validateTaskPageSearch(${renovation.id})|">Search</button>
+                        </li>
+
+                    </ul>
+                </div>
+
+                <div class="alert alert-danger" id="errorMessage" style="margin-top: 20px; display: none;">
+                    <p id="errorText"></p>
+                </div>
+
+                <div class="mt-2 mb-2">
+                    <a th:href="@{/renovations/edit(id=${renovation.id}, visibility=${visibility})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
+                    <a th:href="@{/renovations/view/create(id=${renovation.id}, visibility=${visibility})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
+                    <a th:href="@{/renovations}" class="btn btn-primary" th:if="${isOwner and not fromSearch}">Back To Renovations</a>
+                    <a th:href="@{/renovations/search}" class="btn btn-secondary" th:if="${fromSearch}">Back to search results</a>
+                </div>
+            </div>
         </div>
-        <div class="d-flex justify-content-center" th:if="${totalPages > 0}">
-            <ul class="pagination" id="pagination">
-                <!-- First button (AC more than 10 pages) -->
-                <li class="page-item" th:if="${totalPages > 10}">
-                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=1, tasksPerPage=${tasksPerPage})}">First</a>
-                </li>
-
-                <!-- Previous button -->
-                <li class="page-item" th:if="${pageNumber > 1}">
-                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${pageNumber - 1}, tasksPerPage=${tasksPerPage})}">Prev</a>
-                </li>
-
-                <!-- Page buttons <= 10 Pages, AC3 -->
-                <li class="page-item" th:if="${totalPages <= 10}" th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
-                    th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
-                    <a class="page-link" th:href="@{/renovations/view(id=${renovation.id}, page=${pageLinkNumber}, tasksPerPage=${tasksPerPage})}" th:text="${pageLinkNumber}"></a>
-                </li>
-
-                <!-- Page buttons > 10 Pages, AC3 -->
-                <li class="page-item" th:if="${totalPages > 10}"
-                    th:each="pageLinkNumber : ${#numbers.sequence(paginationLinksStart, paginationLinksEnd)}"
-                    th:classappend="${pageLinkNumber == pageNumber} ? 'active'">
-                    <a class="page-link" th:href="@{/renovations/view(id=${renovation.id}, page=${pageLinkNumber}, tasksPerPage=${tasksPerPage})}" th:text="${pageLinkNumber}"></a>
-                </li>
-
-                <!-- Next button -->
-                <li class="page-item" th:if="${pageNumber < totalPages}">
-                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${pageNumber + 1}, tasksPerPage=${tasksPerPage})}">Next</a>
-                </li>
-
-                <!-- Last button (AC more than 10 pages) -->
-                <li class="page-item" th:if="${totalPages > 10}">
-                    <a class="page-link" href="#" th:href="@{/renovations/view(id=${renovation.id}, page=${totalPages}, tasksPerPage=${tasksPerPage})}">Last</a>
-                </li>
-
-                <!-- Search field (AC more than 10 pages) --> <!-- CHANGE IF TO 10 after testing -->
-                <li class="page-item d-flex align-items-center" th:if="${totalPages > 10}">
-                    <input type="number" class="form-control me-2" id="pageSearch" aria-label="Page Search" style="min-width: 50px;">
-                    <button class="btn btn-primary" th:onclick="|validatePageSearch(${renovation.id})|">Search</button>
-                </li>
-
-            </ul>
-        </div>
-    </div>
-
-    <div class="alert alert-danger" id="errorMessage" style="margin-top: 20px; display: none;">
-        <p id="errorText"></p>
-    </div>
-
-
-    <div class="mt-4 mb-4">
-        <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary">Edit</a>
-        <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary">Add New Task</a>
-        <a th:href="@{/renovations}" class="btn btn-primary">Back To Renovations</a>
     </div>
 </div>
-
 </body>
+<div id="icon-selector-modal" class="modal" style="display: none">
+    <div id="icon-selector-content"></div>
+</div>
+<script type="text/javascript" th:src="@{/js/renovationPublicity.js}"></script>
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
+<script type="text/javascript" th:src="@{/js/autocomplete.js}"></script>
+<script type="text/javascript" th:src="@{/js/renovationTagValidation.js}"></script>
+<script type="text/javascript" th:src="@{/js/removeTag.js}"></script>
 </html>

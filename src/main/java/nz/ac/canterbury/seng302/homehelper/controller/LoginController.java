@@ -5,8 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,12 +23,39 @@ public class LoginController {
      * @return loginTemplate
      */
     @GetMapping("/login")
-    public String login(@RequestParam(value="error", required = false) String error, Model model) {
+    public String login(HttpServletRequest request, Model model) {
         logger.info("GET /login");
+
+        Object email = request.getSession().getAttribute("email");
+        model.addAttribute("email", email);
+        request.getSession().removeAttribute("email");
+
+        Object error = request.getSession().getAttribute("errorMessage");
         if (error != null) {
-            List<String> errorsList = List.of(error.split("(?<=\\.) "));
-            model.addAttribute("errorMessage", errorsList);
+            List<String> errorsList = List.of(error.toString().split(";"));
+
+            List<String> emailErrors = new ArrayList<>();
+            List<String> generalErrors = new ArrayList<>();
+
+            for (String err : errorsList) {
+                if (err.trim().toLowerCase().contains("email address must be in the form")) {
+                    emailErrors.add(err.trim());
+                } else {
+                    generalErrors.add(err.trim());
+                }
+            }
+
+            if (!emailErrors.isEmpty()) {
+                model.addAttribute("emailError", emailErrors);
+            }
+
+            if (!generalErrors.isEmpty()) {
+                model.addAttribute("errorMessage", generalErrors);
+            }
+
+            request.getSession().removeAttribute("errorMessage");
         }
+
         return "loginTemplate";
     }
 }

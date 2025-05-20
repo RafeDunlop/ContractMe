@@ -1,14 +1,21 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.controller.EditProfileController;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -21,10 +28,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -32,6 +43,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+@WithMockUser(username = "jane@doe.com")
 @ActiveProfiles("test")
 public class EditProfileControllerIntegrationTest {
 
@@ -40,8 +54,11 @@ public class EditProfileControllerIntegrationTest {
 
     private MockMvc mockMvc;
 
-    @MockBean
+    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private LoginService loginService;
 
     @PostConstruct
     public void setUp() {
@@ -58,7 +75,7 @@ public class EditProfileControllerIntegrationTest {
     @WithMockUser(username = "jane@doe.com")
     public void getForm_validUserId_returnForm() throws Exception {
         User expectedUser = new User("Jane", "Doe", "jane@doe.com", "password");
-        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser.getEmail())).thenReturn(Optional.of(expectedUser));
+        userRepository.save(expectedUser);
         mockMvc.perform(get("/user/edit"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("editProfileTemplate"))
@@ -82,7 +99,7 @@ public class EditProfileControllerIntegrationTest {
         User updatedUser = new User("John", "Doe", "john@doe.com", "password");
         expectedUser.grantAuthority("ROLE_USER");
         updatedUser.grantAuthority("ROLE_USER");
-        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser.getEmail())).thenReturn(Optional.of(expectedUser));
+        userRepository.save(expectedUser);
 
         mockMvc.perform(post("/user/edit")
                         .param("firstName", updatedUser.getFirstName())
@@ -94,13 +111,12 @@ public class EditProfileControllerIntegrationTest {
                 .andExpect(header().exists("Location"))
                 .andExpect(header().string("Location", "/user"));
 
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        Mockito.verify(userRepository).save(userCaptor.capture());
-        User capturedUser = userCaptor.getValue();
-        Assertions.assertEquals(updatedUser.getFirstName(), capturedUser.getFirstName());
-        Assertions.assertEquals(updatedUser.getLastName(), capturedUser.getLastName());
-        Assertions.assertEquals(updatedUser.getEmail(), capturedUser.getEmail());
-        Assertions.assertEquals(updatedUser.getProfilePicture(), capturedUser.getProfilePicture());
+        User savedUser = userRepository.findByEmailIgnoreCase(updatedUser.getEmail()).orElseThrow();
+
+        Assertions.assertEquals(updatedUser.getFirstName(), savedUser.getFirstName());
+        Assertions.assertEquals(updatedUser.getLastName(), savedUser.getLastName());
+        Assertions.assertEquals(updatedUser.getEmail(), savedUser.getEmail());
+        Assertions.assertEquals(updatedUser.getProfilePicture(), savedUser.getProfilePicture());
     }
 
     /**
@@ -115,19 +131,20 @@ public class EditProfileControllerIntegrationTest {
         User expectedUser = new User("Jane", "Doe", "jane@doe.com", "password");
         User updatedUser = new User("", "", "jane@doe.com", "password");
         List<String> expectedErrors = List.of("First name cannot be empty.");
-        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser.getEmail())).thenReturn(Optional.of(expectedUser));
+        userRepository.save(expectedUser);
         mockMvc.perform(post("/user/edit")
                         .param("firstName", updatedUser.getFirstName())
                         .param("lastName", updatedUser.getLastName())
                         .param("email", updatedUser.getEmail())
                         .param("password", updatedUser.getPassword()))
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("errorMessages", expectedErrors))
-                .andExpect(model().attributeExists("user"))
-                .andExpect(model().attribute("firstName", updatedUser.getFirstName()))
-                .andExpect(model().attribute("lastName", updatedUser.getLastName()))
-                .andExpect(model().attribute("email", updatedUser.getEmail()))
-                .andExpect(model().attribute("profilePicture", updatedUser.getProfilePicture()));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/edit"))
+                .andExpect(flash().attribute("firstNameError", expectedErrors))
+                .andExpect(flash().attributeExists("user"))
+                .andExpect(flash().attribute("firstName", expectedUser.getFirstName()))
+                .andExpect(flash().attribute("lastName", expectedUser.getLastName()))
+                .andExpect(flash().attribute("email", expectedUser.getEmail()))
+                .andExpect(flash().attribute("profilePicture", expectedUser.getProfilePicture()));
     }
 
     /**
@@ -141,20 +158,22 @@ public class EditProfileControllerIntegrationTest {
     public void postForm_invalidEmailFormat_returnEmailFormatError() throws Exception {
         User expectedUser = new User("Jane", "Doe", "jane@doe.com", "password");
         User updatedUser = new User("Jane", "Doe", "jane@", "password");
-        List<String> expectedErrors = List.of("Email address must be in the form ‘jane@doe.nz’.");
-        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser.getEmail())).thenReturn(Optional.of(expectedUser));
+        List<String> expectedErrors = new ArrayList<>();
+        expectedErrors.add("Email address must be in the form 'jane@doe.nz'.");
+        userRepository.save(expectedUser);
         mockMvc.perform(post("/user/edit")
                         .param("firstName", updatedUser.getFirstName())
                         .param("lastName", updatedUser.getLastName())
                         .param("email", updatedUser.getEmail())
                         .param("password", updatedUser.getPassword()))
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("errorMessages", expectedErrors))
-                .andExpect(model().attributeExists("user"))
-                .andExpect(model().attribute("firstName", updatedUser.getFirstName()))
-                .andExpect(model().attribute("lastName", updatedUser.getLastName()))
-                .andExpect(model().attribute("email", updatedUser.getEmail()))
-                .andExpect(model().attribute("profilePicture", updatedUser.getProfilePicture()));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/edit"))
+                .andExpect(flash().attribute("emailError", expectedErrors))
+                .andExpect(flash().attributeExists("user"))
+                .andExpect(flash().attribute("firstName", expectedUser.getFirstName()))
+                .andExpect(flash().attribute("lastName", expectedUser.getLastName()))
+                .andExpect(flash().attribute("email", expectedUser.getEmail()))
+                .andExpect(flash().attribute("profilePicture", expectedUser.getProfilePicture()));
     }
 
     /**
@@ -164,26 +183,33 @@ public class EditProfileControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    @WithMockUser(username = "doe@jane.com")
+    @WithMockUser(username = "jane@doe.com") // Use the same email as expectedUser1
     public void postForm_emailAlreadyExists_returnEmailExistsError() throws Exception {
+        // Mock users with different emails for the test
         User expectedUser1 = new User("Jane", "Doe", "jane@doe.com", "password");
         User expectedUser2 = new User("Jane", "Doe", "doe@jane.com", "password");
         List<String> expectedErrors = List.of("This email address is already in use.");
-        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser1.getEmail())).thenReturn(Optional.of(expectedUser1));
-        Mockito.when(userRepository.findByEmailIgnoreCase(expectedUser2.getEmail())).thenReturn(Optional.of(expectedUser2));
+
+        userRepository.save(expectedUser1);
+        userRepository.save(expectedUser2);
+
+        // Perform the POST request with updatedUser's details (changing email to 'doe@jane.com')
         mockMvc.perform(post("/user/edit")
                         .param("firstName", expectedUser1.getFirstName())
                         .param("lastName", expectedUser1.getLastName())
-                        .param("email", expectedUser1.getEmail())
+                        .param("email", expectedUser2.getEmail())
                         .param("password", expectedUser1.getPassword()))
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("errorMessages", expectedErrors))
-                .andExpect(model().attributeExists("user"))
-                .andExpect(model().attribute("firstName", expectedUser1.getFirstName()))
-                .andExpect(model().attribute("lastName", expectedUser1.getLastName()))
-                .andExpect(model().attribute("email", expectedUser1.getEmail()))
-                .andExpect(model().attribute("profilePicture", expectedUser1.getProfilePicture()));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/edit"))
+                .andExpect(flash().attribute("emailError", expectedErrors))
+                .andExpect(flash().attributeExists("user"))
+                .andExpect(flash().attribute("firstName", expectedUser1.getFirstName()))
+                .andExpect(flash().attribute("lastName", expectedUser1.getLastName()))
+                .andExpect(flash().attribute("email", expectedUser1.getEmail()))
+                .andExpect(flash().attribute("profilePicture", expectedUser1.getProfilePicture()));
     }
+
+
 
     /**
      * Tests the upload profile picture function when the user submits a file for invalid format
@@ -193,7 +219,7 @@ public class EditProfileControllerIntegrationTest {
     @WithMockUser(username = "jane@doe.com")
     public void uploadProfilePicture_invalidFormat_returnError() throws Exception {
         User testUser = new User("Jane", "Doe", "jane@doe.com", "password");
-        when(userRepository.findByEmailIgnoreCase(testUser.getEmail())).thenReturn(Optional.of(testUser));
+        userRepository.save(testUser);
 
         List<String> expectedErrors = List.of("Image must be of type png, jpg or svg.");
         MockMultipartFile file = new MockMultipartFile(
@@ -207,7 +233,7 @@ public class EditProfileControllerIntegrationTest {
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user/edit"))
-                .andExpect(flash().attribute("errorMessages", expectedErrors));
+                .andExpect(flash().attribute("profilePictureError", expectedErrors));
     }
 
     /**
@@ -218,7 +244,7 @@ public class EditProfileControllerIntegrationTest {
     @WithMockUser(username = "jane@doe.com")
     public void uploadProfilePicture_fileTooLarge_returnError() throws Exception {
         User testUser = new User("Jane", "Doe", "jane@doe.com", "password");
-        when(userRepository.findByEmailIgnoreCase(testUser.getEmail())).thenReturn(Optional.of(testUser));
+        userRepository.save(testUser);
 
         List<String> expectedErrors = List.of("Image must be less than 10MB.");
 
@@ -236,7 +262,7 @@ public class EditProfileControllerIntegrationTest {
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user/edit"))
-                .andExpect(flash().attribute("errorMessages", expectedErrors));
+                .andExpect(flash().attribute("profilePictureError", expectedErrors));
     }
 
     /**
@@ -247,7 +273,7 @@ public class EditProfileControllerIntegrationTest {
     @WithMockUser(username = "jane@doe.com")
     public void uploadProfilePicture_validImageFile_success() throws Exception {
         User testUser = new User("Jane", "Doe", "jane@doe.com", "password");
-        when(userRepository.findByEmailIgnoreCase(testUser.getEmail())).thenReturn(Optional.of(testUser));
+        userRepository.save(testUser);
 
         byte[] imageBytes = Files.readAllBytes(Paths.get("src/test/resources/test_1.jpg"));
         MockMultipartFile file = new MockMultipartFile(
@@ -261,5 +287,88 @@ public class EditProfileControllerIntegrationTest {
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user"));
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void getForm_userWithLocation_locationPrefilled() throws Exception {
+        User testUser = new User("Jane", "Doe", "jane@doe.com", "password");
+        Location location = new Location("123 Linwood Ave", "New Zealand", "8045", "Christchurch", "Linwood");
+        testUser.setLocation(location);
+        userRepository.save(testUser);
+
+        mockMvc.perform(get("/user/edit"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("editProfileTemplate"))
+                .andExpect(model().attribute("addressDTO",
+                        Matchers.allOf(
+                                Matchers.hasProperty("address_line1", Matchers.is("123 Linwood Ave")),
+                                Matchers.hasProperty("country", Matchers.is("New Zealand")),
+                                Matchers.hasProperty("postcode", Matchers.is("8045")),
+                                Matchers.hasProperty("city", Matchers.is("Christchurch")),
+                                Matchers.hasProperty("region", Matchers.is("Linwood"))
+                        )
+                ));
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void postForm_validDataWithLocation_shouldUpdateUserAndPersistLocation() throws Exception {
+        User testUser = new User("Jane", "Doe", "jane@doe.com", "password");
+        userRepository.save(testUser);
+
+        AddressDTO addressDTO = new AddressDTO();
+        addressDTO.setAddress_line1("164 Ingoldsby Street");
+        addressDTO.setCountry("New Zealand");
+        addressDTO.setPostcode("8023");
+        addressDTO.setCity("Christchurch");
+        addressDTO.setRegion("Beckenham");
+
+        mockMvc.perform(post("/user/edit")
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane@doe.com")
+                        .param("address_line1", addressDTO.getAddress_line1())
+                        .param("country", addressDTO.getCountry())
+                        .param("postcode", addressDTO.getPostcode())
+                        .param("city", addressDTO.getCity())
+                        .param("region", addressDTO.getRegion()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user"));
+
+        User savedUser = userRepository.findByEmailIgnoreCase("jane@doe.com").orElseThrow();
+        assertNotNull(savedUser.getLocation());
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void postForm_invalidLocation_shouldRedirectWithErrors() throws Exception {
+        User testUser = new User("Jane", "Doe", "jane@doe.com", "password");
+        userRepository.save(testUser);
+
+        mockMvc.perform(post("/user/edit")
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane@doe.com")
+                        .param("address_line1", "!!!")
+                        .param("country", "@@@")
+                        .param("postcode", "ABC")
+                        .param("city", "###")
+                        .param("region", "909"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/edit"))
+                .andExpect(flash().attributeExists("addressDTO"))
+                .andExpect(flash().attribute("addressDTO",
+                        Matchers.allOf(
+                                Matchers.hasProperty("address_line1", Matchers.is("!!!")),
+                                Matchers.hasProperty("country", Matchers.is("@@@")),
+                                Matchers.hasProperty("postcode", Matchers.is("ABC")),
+                                Matchers.hasProperty("city", Matchers.is("###")),
+                                Matchers.hasProperty("region", Matchers.is("909"))
+                        )
+                ));
+
+        User savedUser = userRepository.findByEmailIgnoreCase("jane@doe.com").orElseThrow();
+        assertNull(savedUser.getLocation());
     }
 }

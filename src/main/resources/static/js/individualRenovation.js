@@ -7,60 +7,96 @@ import {
 
 let roomFieldValid = false;
 let roomList = [];
-let roomErrorLabel = document.getElementById("room-error-message")
-let roomNameField = document.getElementById("roomList")
-let createRoomButton = document.getElementById("create-room-button")
-let descriptionTextField = document.getElementById("description")
-let form = document.getElementById("renovation-form");
+
 
 const roomNameErrorMessage =
     "Renovation record room names must only include letters, numbers, spaces, " +
-    "dots, hyphens or apostrophes"
+    "dots, hyphens or apostrophes";
+
+let roomFrontendError, roomFrontendErrorMessage, roomBackendError;
+let roomNameField, createRoomButton, descriptionTextField, form;
 
 /**
  * Runs when the document loads.
  * Adds event listeners on html elements and extracts the roomList
  */
 document.addEventListener("DOMContentLoaded", () => {
-    form.addEventListener("submit", function (event) { injectRoomsIntoSubmission(form, event, roomList) });
-    roomNameField.addEventListener("input", function() { checkRoomName(roomNameField.value) });
-    createRoomButton.addEventListener("click", function() { addRoom('roomList', 'room-list'     ) });
-    descriptionTextField.addEventListener("input", function() {
+    roomFrontendError = document.getElementById("room-frontend-error");
+    roomFrontendErrorMessage = document.getElementById("room-frontend-error-message");
+    roomBackendError = document.getElementById("room-backend-error");
+    roomNameField = document.getElementById("roomList");
+    createRoomButton = document.getElementById("create-room-button");
+    descriptionTextField = document.getElementById("description");
+    form = document.getElementById("renovation-form");
+
+    // Now everything below can use those elements
+    form.addEventListener("submit", function (event) {
+        injectRoomsIntoSubmission(form, event, roomList)
+    });
+
+    roomNameField.addEventListener("input", function () {
+        checkRoomName(roomNameField.value);
+        let roomError = getRoomNameError(roomNameField.value.trim());
+        const isError = roomError !== null;
+        roomFrontendError.hidden = !isError;
+        roomFrontendErrorMessage.hidden = !isError;
+        if (isError) {
+            roomFrontendErrorMessage.textContent = roomError;
+        }
+    });
+
+    createRoomButton.addEventListener("click", addRoom);
+
+
+    descriptionTextField.addEventListener("input", function () {
         updateCharCounter("description", "description-length-counter")
     });
-    let previousRoomList, previousRoomListString;
-    previousRoomListString = document.getElementById('roomListEdit').value;
-    if (previousRoomListString === "") {
-        previousRoomList = [];
-    } else {
-        previousRoomList = previousRoomListString.split(',');
-    }
-    console.log(previousRoomList.type);
+
+    let hiddenRoomInputs = document.querySelectorAll('#room-hidden-inputs input[type="hidden"]');
+    let previousRoomList = Array.from(hiddenRoomInputs).map(input => input.value);
     setRoomList(previousRoomList, "room-list");
     updateCharCounter("description", "description-length-counter");
 });
 
 function checkRoomName(input) {
-    roomFieldValid = validateField(input, /^[\p{L}\d .,\-']*$/u, roomErrorLabel, roomNameErrorMessage);
+    roomFieldValid = validateField(input, /^[\p{L}\d .,\-']*$/u, roomFrontendErrorMessage, roomNameErrorMessage);
 }
 
-function addRoom(inputId, roomTableId) {
-    let input = document.getElementById(inputId);
-    let room = input.value.trim();
+function addRoom() {
+    let room = roomNameField.value.trim();
     if (room === "") {
-        // If the room is empty, don't add it to the list, just return.
         console.log("No room entered.");
         return;
     }
-    let roomError = getRoomNameError(room)
-    const isError = roomError !== null
-    roomErrorLabel.hidden = ! isError
+
+    let roomError = getRoomNameError(room);
+    const isError = roomError !== null;
+    roomFrontendErrorMessage.hidden = !isError;
+
     if (!isError) {
-        input.value = "";
+        roomNameField.value = ""; // Reset input value
+        roomFrontendError.hidden = true;
+        roomFrontendErrorMessage.hidden = true;
+        roomBackendError.hidden = true;
+
+        // Add room to the list
         roomList.push(room);
-        renderRooms(roomList, roomTableId);
+
+        // Render rooms in the frontend (updates the UI with the new room)
+        renderRooms(roomList, "room-list");
+
+        // Create and append hidden input to the room-hidden-inputs div
+        let input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "roomList";
+        input.value = room;
+        document.getElementById("room-hidden-inputs").appendChild(input);
+
     } else {
-        roomErrorLabel.textContent = roomError
+        roomFrontendErrorMessage.textContent = roomError;
+        roomFrontendErrorMessage.hidden = false;
+        roomFrontendError.hidden = false;
+        roomBackendError.hidden = true;
     }
 }
 
@@ -68,6 +104,10 @@ function setRoomList(previousRoomList, roomTableId) {
     if (previousRoomList !== null) {
         roomList = previousRoomList;
         renderRooms(roomList, roomTableId);
+
+        // Also inject hidden inputs for each room from the model
+        const hiddenInputsDiv = document.getElementById("room-hidden-inputs");
+        hiddenInputsDiv.innerHTML = ""; // Clear any existing ones
     }
 }
 
@@ -76,7 +116,10 @@ function getRoomNameError(toAdd) {
     const validCharactersPattern = /^[\p{L}\d .,\-']*$/u;
     if (!validCharactersPattern.test(toAdd)) {
         error = "Renovation record room names must only contain letters, numbers, spaces, dots, hyphens or apostrophes";
-    } else if (roomList.indexOf(toAdd, 0) !== -1) {
+    } else if(toAdd.length >= 255) {
+        error = "Renovation record room names must be less than 255 characters";
+    }
+    else if (roomList.indexOf(toAdd, 0) !== -1) {
         error = "You already have a room with this name"
     }
     return error;

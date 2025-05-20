@@ -55,11 +55,11 @@ public class SecurityConfiguration {
         http.authorizeHttpRequests(auth -> auth
                         // Give access to database and allow all users to go on the matching pages.
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/h2/**")).permitAll()
-                        .requestMatchers("/", "/register", "/login", "/confirm-registration", "/password/**", "/webjars/**").permitAll()
+                        .requestMatchers("/", "/register", "/login",  "/location/**", "/confirm-registration", "/password/**", "/webjars/**", "/css/**", "/js/**").permitAll()
 
                         // Only the specified roles can reach the matching pages
                         .requestMatchers("/admin").hasRole("ADMIN")
-                        .requestMatchers("/main", "/user/**", "/renovations/**").hasRole("USER")
+                        .requestMatchers("/main", "/user/**", "/renovations/**", "/logout").hasRole("USER")
                         .anyRequest().authenticated())
 
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
@@ -73,7 +73,7 @@ public class SecurityConfiguration {
                         .defaultSuccessUrl("/main", true)
                         .failureHandler(authFailHandler))
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
                         .logoutSuccessUrl("/login")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID"));

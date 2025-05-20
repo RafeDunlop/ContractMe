@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -56,21 +57,22 @@ public class ForgotPasswordController {
      * are any problems. Otherwise, sets an email confirmation message, and if the email is associated to an account, a token
      * will be created and an email will be sent to that account in order to reset their password.
      * @param email Email associated with the user to have their password reset.
-     * @param model Model interface
      * @param request Post request used to get locale
      * @return Template for forgot password page
      */
     @PostMapping("/password/forgot")
-    public String submitEmail(@RequestParam("email") String email, Model model, HttpServletRequest request) {
+    public String submitEmail(@RequestParam("email") String email, HttpServletRequest request, RedirectAttributes redirectAttributes) {
         logger.info("POST /password/forgot");
         String errorMessage = forgotPasswordService.validateEmail(email, request.getLocale());
-        if (errorMessage.isEmpty()) {
-            model.addAttribute("emailMessage", "An email was sent to the address if it was recognised");
 
+        if (errorMessage.isEmpty()) {
+            redirectAttributes.addFlashAttribute("emailMessage",
+                    "An email was sent to the address if it was recognised");
         } else {
-            model.addAttribute("errorMessage", errorMessage);
+            redirectAttributes.addFlashAttribute("emailError", errorMessage);
         }
-        return "forgotPasswordTemplate";
+
+        return "redirect:/password/forgot";
     }
 
     /**
@@ -89,7 +91,7 @@ public class ForgotPasswordController {
             model.addAttribute("token", token);
             return "resetPasswordTemplate";
         }
-        redirectAttributes.addAttribute("error", "Reset password link has expired");
+        redirectAttributes.addFlashAttribute("emailError", "Reset password link has expired");
         return "redirect:/login";
     }
 
@@ -99,27 +101,25 @@ public class ForgotPasswordController {
      * an error message shows up. If the token is invalid, it redirects the user to the login page with message.
      * @param token Reset password token for user
      * @param newPassword New password for user
-     * @param retypePassword Retype new password for confirmation
+     * @param confirmNewPassword Retype new password for confirmation
      * @param redirectAttributes Message for redirect page
-     * @param model Model interface
      * @param request Post request used to get locale
      * @return Template for reset password page or redirect to login page
      */
     @PostMapping("/password/reset/{token}")
     public String submitPassword(@PathVariable String token, @RequestParam("newPassword") String newPassword,
-                              @RequestParam("retypePassword") String retypePassword,
+                              @RequestParam("confirmNewPassword") String confirmNewPassword,
                               RedirectAttributes redirectAttributes,
-                              Model model,
                               HttpServletRequest request) {
         logger.info("POST /password/forgot/{}", token);
         Optional<User> expectedUser = verificationCodeService.getUserByToken(token);
         if (expectedUser.isPresent()) {
             User user = expectedUser.get();
-            List<String> errors = forgotPasswordService.validatePasswords(newPassword, retypePassword);
+            Map<String, List<String>> errors = forgotPasswordService.validatePasswords(newPassword, confirmNewPassword, user);
             if (!errors.isEmpty()) {
-                model.addAttribute("errorMessages", errors);
-                model.addAttribute("token", token);
-                return "resetPasswordTemplate";
+                errors.forEach(redirectAttributes::addFlashAttribute);
+                redirectAttributes.addFlashAttribute("token", token);
+                return "redirect:/password/reset/" + token;
             }
             verificationCodeService.consumeResetPasswordToken(token);
             request.getContextPath();
@@ -127,7 +127,7 @@ public class ForgotPasswordController {
             forgotPasswordService.updatePassword(user, newPassword);
             return "redirect:/login";
         }
-        redirectAttributes.addAttribute("error", "Reset password link has expired");
+        redirectAttributes.addFlashAttribute("emailError", "Reset password link has expired");
         return "redirect:/login";
     }
 }

@@ -1,19 +1,23 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
 import jakarta.transaction.Transactional;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
+import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
+import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
 /**
  * Performs all logic to do with renovation records which does not face the UI
@@ -23,30 +27,92 @@ import java.util.regex.Pattern;
 @Service
 public class RenovationRecordService {
 
-    private static final Logger logger = LoggerFactory.getLogger(RenovationRecordService.class);
-    private static final int maximumDescriptionLength = 512;
     private final RenovationRecordRepository renovationRecordRepository;
+    private final RenovationTaskRepository renovationTaskRepository;
+    private final RenovationRecordValidation renovationRecordValidation;
 
     /**
      * Constructor for the RenovationRecordService class
      * @param renovationRecordRepository initializes with the repository for storing records
      */
     @Autowired
-    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository) {
+    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation) {
         this.renovationRecordRepository = renovationRecordRepository;
+        this.renovationTaskRepository = renovationTaskRepository;
+        this.renovationRecordValidation = renovationRecordValidation;
     }
 
     /**
-     * Retrieves a list of renovation records associated with the current user that are like the given name
+     * Retrieves a list of renovation records associated with the current user that are like the given term
+     * with pagination.
      * @param user The current user
-     * @param name The name to search for, not case-sensitive
-     * @return a list of renovation records from the user that match the name
+     * @param term The term to search for, not case-sensitive
+     * @param pageable The pagination information
+     * @return a list of renovation records from the user that match the term if given
      */
-    public List<RenovationRecord> getRecordResultByName(User user, String name) {
-        if (name == null || name.trim().isEmpty()) {
+    public Page<RenovationRecord> getPaginatedUserRecords(User user, String term,
+                                                        Pageable pageable) {
+        if (term == null || term.trim().isEmpty()) {
+            return renovationRecordRepository.findByUser(user, pageable);
+        }
+        return renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCasePaginated(user, term, pageable);
+    }
+
+    /**
+     * Retrieves a list of renovation records associated with the current user that are like the given term
+     * @param user The current user
+     * @param term The term to search for, not case-sensitive
+     * @return a list of renovation records from the user that match the term if given
+     */
+    public List<RenovationRecord> getUserRecords(User user, String term) {
+        if (term == null || term.trim().isEmpty()) {
             return renovationRecordRepository.findByUser(user);
         }
-        return renovationRecordRepository.findByNameContainingIgnoreCase(user, name);
+        return renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(user, term);
+    }
+
+    /**
+     * Creates a location and attaches it to the user entity
+     * Saves the user with its location to the database
+     *
+     * @param renovation The renovation to attach location to
+     * @param addressDTO Data transfer object for user registration
+     *
+     */
+    public void addRenovationLocation(RenovationRecord renovation, AddressDTO addressDTO) {
+        Location userLocation = new Location(
+                addressDTO.getAddress_line1(),
+                addressDTO.getCountry(),
+                addressDTO.getPostcode(),
+                addressDTO.getCity(),
+                addressDTO.getRegion()
+        );
+        renovation.setLocation(userLocation);
+        renovationRecordRepository.save(renovation);
+    }
+
+    /**
+     * Retrieves a list of public renovation records that are like the given term
+     * @param term The term to search for, not case-sensitive
+     * @return a list of public renovation records that match the term if given
+     */
+    public List<RenovationRecord> getPublicRecords(String term) {
+        if (term == null || term.trim().isEmpty()) {
+            return renovationRecordRepository.findByIsPublicTrue();
+        }
+        return renovationRecordRepository.findByIsPublicTrueSearchContainingNameOrDescriptionIgnoreCase(term);
+    }
+
+    /**
+     * Retrieves a list of public or users renovation records that are like the given term
+     * @param term The term to search for, not case-sensitive
+     * @return a list of public or users renovation records that match the term if given
+     */
+    public List<RenovationRecord> getAllRecords(User user, String term) {
+        if (term == null || term.trim().isEmpty()) {
+            return renovationRecordRepository.findAllVisibleToUser(user);
+        }
+        return renovationRecordRepository.findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(user, term);
     }
 
     /**
@@ -65,8 +131,18 @@ public class RenovationRecordService {
     public void removeRenovationRecord(Long id){
         Optional<RenovationRecord> recordToRemove = renovationRecordRepository.findById(id);
         if (recordToRemove.isPresent()) {
+            renovationTaskRepository.deleteTaskById(id);
             renovationRecordRepository.deleteById(id);
         }
+    }
+    /**
+     * Changes publicity flag of the renovation record.
+     * @param isPublic publicity flag of renovation
+     * @param renovationRecord to edit the publicity
+     */
+    public void changePublicity(Boolean isPublic,RenovationRecord renovationRecord) {
+        renovationRecord.setPublicity(isPublic);
+        renovationRecordRepository.save(renovationRecord);
     }
     /**
      * Gets a renovation record by its id
@@ -78,118 +154,77 @@ public class RenovationRecordService {
     }
 
     /**
-     * Validates all renovation fields, returning false if any do not pass their validity checks
-     * @param name The name to be validated
-     * @param description The description to be validated
-     * @param roomList The roomList to be validated
-     * @return true if and only if all fields are valid
+     * Validates all renovation fields for creating a new renovation record.
+     *
+     * @param name The name of the renovation to validate.
+     * @param description The description of the renovation to validate.
+     * @param roomList The list of room names to validate.
+     * @return A map of validation errors, where each key is a field name (e.g., "nameError")
+     *         and the corresponding value is a list of error messages.
      */
-    public boolean validateAllInputsCreate(String name, String description, List<String> roomList) {
-        Pattern pattern = Pattern.compile("^[\\p{L}\\d ,.\\-']*$", Pattern.UNICODE_CHARACTER_CLASS);
-        return validateAllInputs(
-                name,
-                description,
-                roomList,
-                nameLambda -> !checkForExactMatch(nameLambda) && validateName(nameLambda, pattern),
-                pattern
-        );
+    public Map<String, List<String>> validateAllInputsCreate(String name, String description, List<String> roomList) {
+        Map<String, List<String>> errors = new HashMap<>();
+
+        MapUtil.putIfNotEmpty(errors, "nameError", renovationRecordValidation.validateName(name));
+        MapUtil.putIfNotEmpty(errors, "nameError", renovationRecordValidation.checkForExactMatchCreate(name));
+        MapUtil.putIfNotEmpty(errors, "descriptionError", renovationRecordValidation.validateDescription(description));
+        MapUtil.putIfNotEmpty(errors, "roomError", renovationRecordValidation.validateRooms(roomList));
+        return errors;
     }
 
     /**
-     * Validates all renovation fields, returning false if any do not pass their validity checks.
-     * This method allows names that do not diverge from the specified {@code RenovationRecord}
-     * @param renovationRecord The renovation which contains all fields except the name,
-     *                         which represents the database-saved version
-     * @param newName The name to check
-     * @return true if and only if all fields are valid
+     * Validates all renovation fields for editing an existing renovation record.
+     * Allows the name to match the current name of the provided renovation record.
+     *
+     * @param renovationRecord The existing renovation record, including its original name, description, and rooms.
+     * @param newName The new name to validate.
+     * @return A map of validation errors, where each key is a field name (e.g., "nameError")
+     *         and the corresponding value is a list of error messages. Returns an empty map if all inputs are valid.
      */
-    public boolean validateAllInputsEdit(RenovationRecord renovationRecord, String newName) {
-        Pattern pattern = Pattern.compile("^[\\p{L}\\d ,.\\-']*$", Pattern.UNICODE_CHARACTER_CLASS);
-        return validateAllInputs(
-                newName,
-                renovationRecord.getDescription(),
-                renovationRecord.getRooms(),
-                name -> !checkForExactMatch(name, renovationRecord) && validateName(name, pattern),
-                pattern
-        );
+    public Map<String, List<String>> validateAllInputsEdit(RenovationRecord renovationRecord, String newName) {
+        Map<String, List<String>> errors = new HashMap<>();
+
+        MapUtil.putIfNotEmpty(errors, "nameError", renovationRecordValidation.validateName(newName));
+        MapUtil.putIfNotEmpty(errors, "nameError", renovationRecordValidation.checkForExactMatchEdit(newName, renovationRecord));
+        MapUtil.putIfNotEmpty(errors, "descriptionError", renovationRecordValidation.validateDescription(renovationRecord.getDescription()));
+        MapUtil.putIfNotEmpty(errors, "roomError", renovationRecordValidation.validateRooms(renovationRecord.getRooms()));
+        return errors;
     }
 
-    /**
-     * Calls other functions to validate all renovation fields, returning false if any do not pass their validity checks. Predicate for
-     * name is tested which calls the checkForExactMatch and validateName functions.
-     * @param name Name of the record
-     * @param description Description for the record
-     * @param roomList List of rooms for the record
-     * @param nameChecker A predicate which checks if the name doesn't exist and if it follows the correct string pattern
-     * @param pattern The string pattern the list of rooms must follow
-     * @return A boolean whether all the details are in the correct format and are valid
-     */
-    private boolean validateAllInputs(String name, String description, List<String> roomList, Predicate<String> nameChecker, Pattern pattern) {
-        return (validateAllRoomNames(roomList, pattern) &&
-                validateDescriptionLength(description) &&
-                nameChecker.test(name));
-    }
 
     /**
-     * Checks whether there is a saved renovation with the specified name in the database
-     * <strong>
-     *     This version of the method passes names which are identical to that of the specified
-     *     {@code RenovationRecord}. <u>This means that the name field of the {@code RenovationRecord}
-     *     must not be updated before saving the renovation</u>
-     * </strong>
-     * @param name The name to check
-     * @param renovationRecord The renovation whose name is always valid
-     * @return true if there is no match or the match is the specified {@code RenovationRecord}
+     * Returns a paginated list of tasks for the given record.
+     * @param records The renovation record containing the list of tasks to be paginated.
+     * @param pageable spring pagination information, including the offset and page size.
+     * @return A page of tasks for the renovation record. If there are no tasks an empty page is returned.
      */
-    public boolean checkForExactMatch(String name, RenovationRecord renovationRecord) {
-        return checkForExactMatch(name) && !renovationRecord.getName().equals(name);
-    }
+    public Page<RenovationRecord> returnRecordPages(Pageable pageable, List<RenovationRecord> records) {
+        List<RenovationRecord> recordsSubList = new ArrayList<>();
 
-    /**
-     * Validates the specified renovation name based on the specified pattern in addition to the mandatory condition
-     * that it must not be empty
-     * @param name The name to be checked
-     * @param pattern the pattern against which to check the renovation name
-     * @return true if the specified name matches the specified pattern and is non-empty
-     */
-    public boolean validateName(String name, Pattern pattern) {
-        return pattern.matcher(name).matches() && !name.isEmpty();
-    }
-
-    /**
-     * Runs the specified validity pattern on each specified room, returning {@code false} if any room
-     * is not valid
-     * @param roomNames a list of rooms to check
-     * @param validityPattern A regular expression asserting the format which a room should follow
-     * @return {@code false} if any room is invalid, otherwise true
-     */
-    public boolean validateAllRoomNames(List<String> roomNames, Pattern validityPattern) {
-        for (String room : roomNames) {
-            Matcher matcher = validityPattern.matcher(room);
-            if (!matcher.matches()) {
-                logger.info("{} does not match", room);
-                return false;
-            }
+        if (records == null || records.isEmpty()) {
+            return new PageImpl<>(recordsSubList, pageable, 0); // Return an empty page
         }
-        return true;
+
+        int startIndex =(int) pageable.getOffset();
+        if (startIndex < 0) {
+            startIndex = 0;
+        }
+        if (startIndex >= records.size()) {
+            startIndex = records.size() - pageable.getPageSize();
+        }
+        int endIndex = Math.min(startIndex + pageable.getPageSize(), records.size());
+
+        recordsSubList = records.subList(startIndex, endIndex);
+        return new PageImpl<>(recordsSubList, pageable, records.size());
     }
 
     /**
-     * Checks that the specified description is within a valid length range
-     * Note that no conditions are placed on the contents of the description
-     * @param description The description to be tested
-     * @return {@code true} if the description is less than the maximum description length
+     * Retrieves a list of all renovation records that are associated with the given tags.
+     * @param tagList the list of tag objects.
+     * @return a list of renovation records associated with the tags in the given list.
      */
-    public boolean validateDescriptionLength(String description) {
-        return description.length() <= maximumDescriptionLength;
-    }
-
-    /**
-     * Checks if a name has an exact match in the repository
-     * @param name the name to check to see if its present in the repository
-     * @return true if a match for the name is found, otherwise false
-     */
-    public boolean checkForExactMatch(String name) {
-        return renovationRecordRepository.findExactMatch(name.trim()).isPresent();
+    public List<RenovationRecord> getAllRecordsByTags(List<Tag> tagList) {
+        // return renovationRecordRepository.findAllByTags(tagList);
+        return renovationRecordRepository.findAllPublicByTagsOrderByTagCountAndDate(tagList);
     }
 }

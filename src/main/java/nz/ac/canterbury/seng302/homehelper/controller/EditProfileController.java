@@ -1,7 +1,11 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +19,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * Controller for the edit profile page
@@ -28,27 +34,34 @@ public class EditProfileController {
     private final EditProfileService editProfileService;
 
     private final LoginService loginService;
+    private final LocationService locationService;
 
     /**
      * Constructor for the controller and links the services to the controller.
      * @param editProfileService EditProfileService for validating updated user
      *                           and updating user details in database
+     * @param locationService LocationService for the user's location.
      * @param loginService LoginService for getting user by ID
      */
     @Autowired
-    public EditProfileController(EditProfileService editProfileService, LoginService loginService) {
+    public EditProfileController(EditProfileService editProfileService, LoginService loginService, LocationService locationService) {
         this.editProfileService = editProfileService;
         this.loginService = loginService;
+        this.locationService = locationService;
     }
 
     /**
      * Displays the editProfileTemplate page under the path "/user/edit" where id
      * is the ID of the user. Sets the current user to the page.
+     * @param addressDTO the dto containing data relating to fields in address form.
      * @param model Model interface
      * @return editProfileTemplate page
      */
     @GetMapping("user/edit")
-    public String editProfile(Model model) {
+    public String editProfile(@ModelAttribute AddressDTO addressDTO,
+                              Model model) {
+
+
         logger.info("GET /user/edit");
         try {
             // Sets current user to page
@@ -59,6 +72,17 @@ public class EditProfileController {
             model.addAttribute("email", user.getEmail());
             model.addAttribute("profilePicture", user.getProfilePicture());
 
+            Location location = user.getLocation();
+            if (location != null) {
+                addressDTO.setAddress_line1(location.getAddress());
+                addressDTO.setCountry(location.getCountry());
+                addressDTO.setPostcode(location.getPostcode());
+                addressDTO.setCity(location.getCity());
+                addressDTO.setRegion(location.getSuburb());
+            }
+
+            model.addAttribute("addressDTO", addressDTO);
+
             return "editProfileTemplate";
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
@@ -66,43 +90,66 @@ public class EditProfileController {
     }
 
     /**
-     * Posts a form with the updated user details. Goes back to "/user" if the
-     * user is updated; otherwise, the error messages are set and stays on same page.
-     * @param updatedUser User object with the updated user details
-     * @param model Model interface
-     * @return editProfileTemplate page or redirect to user page
+     * Handles the submission of the edit profile form.
+     * Attempt to edit profile using the provided form data.
+     * If successful, it redirects to the profile view page.
+     * If an error occurs during task creation, it redirects back to the edit profile.
+     * with error messages and previously entered form data.
+     *
+     * @param updatedUser The user containing the edited profile details.
+     * @param addressDTO the dto containing data relating to fields in address form.
+     * @param redirectAttributes Flash attributes used to pass data across the redirect in case of form submission errors.
+     * @return A redirect string to either the profile view page on success or back to the edit profile page on failure.
      */
     @PostMapping("user/edit")
-    public String updateProfile(@ModelAttribute User updatedUser, Model model) {
+    public String updateProfile(@ModelAttribute User updatedUser,
+                                @ModelAttribute AddressDTO addressDTO,
+                                RedirectAttributes redirectAttributes) {
         logger.info("POST /user/edit");
-        User newUser = null;
-        try {
-            // Get original user and email, then set details to updated user values
-            newUser = loginService.getUserByEmail();
-            boolean sameEmail = newUser.getEmail().equals(updatedUser.getEmail());
-            newUser.setFirstName(updatedUser.getFirstName());
-            newUser.setLastName(updatedUser.getLastName());
-            newUser.setEmail(updatedUser.getEmail());
 
-            // Send updated user details for validation and updating
-            editProfileService.updateUser(newUser, sameEmail);
-            return "redirect:/user";
-        } catch (NoSuchElementException pageNotFoundError) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, pageNotFoundError.getMessage());
-        } catch (IllegalArgumentException detailsInvalidError) {
-            // Set error messages on page
-            logger.warn("Form submission error: {}", detailsInvalidError.getMessage());
-            List<String> errorsList = List.of(detailsInvalidError.getMessage().split("(?<=\\.) "));
-            model.addAttribute("errorMessages", errorsList);
+        User newUser = loginService.getUserByEmail();
+        boolean sameEmail = newUser.getEmail().equals(updatedUser.getEmail());
 
-            model.addAttribute("user", newUser);
-            assert newUser != null;
-            model.addAttribute("firstName", newUser.getFirstName());
-            model.addAttribute("lastName", newUser.getLastName());
-            model.addAttribute("email", newUser.getEmail());
-            model.addAttribute("profilePicture", newUser.getProfilePicture());
-            return "editProfileTemplate";
+        Map<String, List<String>> errors = editProfileService.validateUpdate(updatedUser, sameEmail);
+
+        // Checks if the users location has been modified in the form and compares to their old location.
+        Location currentLocation = newUser.getLocation();
+        Location formLocation = locationService.isLocationProvided(addressDTO)
+                ? new Location(addressDTO.getAddress_line1(),
+                addressDTO.getCountry(),
+                addressDTO.getPostcode(),
+                addressDTO.getCity(),
+                addressDTO.getRegion()
+        )
+                : null;
+        boolean locationChanged = !Objects.equals(currentLocation, formLocation);
+        if (locationChanged) {
+            errors.putAll(locationService.validateLocation(addressDTO));
         }
+
+        if (!errors.isEmpty()) {
+            errors.forEach(redirectAttributes::addFlashAttribute);
+            redirectAttributes.addFlashAttribute("user", newUser);
+            redirectAttributes.addFlashAttribute("firstName", newUser.getFirstName());
+            redirectAttributes.addFlashAttribute("lastName", newUser.getLastName());
+            redirectAttributes.addFlashAttribute("email", newUser.getEmail());
+            redirectAttributes.addFlashAttribute("profilePicture", newUser.getProfilePicture());
+            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
+            redirectAttributes.addFlashAttribute("locationUsed", locationChanged);
+
+            return "redirect:/user/edit";
+        }
+
+        newUser.setFirstName(updatedUser.getFirstName());
+        newUser.setLastName(updatedUser.getLastName());
+        newUser.setEmail(updatedUser.getEmail());
+
+        if (locationChanged) {
+            newUser.setLocation(formLocation);
+        }
+        editProfileService.updateUser(newUser);
+
+        return "redirect:/user";
     }
 
     /**
@@ -121,10 +168,10 @@ public class EditProfileController {
         List<String> errors = editProfileService.updateProfilePicture(user, file);
 
         if (!errors.isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessages", errors);
-            return "redirect:/user/edit"; // Stay on the edit page with errors
+            redirectAttributes.addFlashAttribute("profilePictureError", errors);
+            return "redirect:/user/edit";
         }
 
-        return "redirect:/user"; // Redirect to /user on success
+        return "redirect:/user";
     }
 }

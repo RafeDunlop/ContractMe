@@ -1,0 +1,214 @@
+package nz.ac.canterbury.seng302.homehelper.unit.validation;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import nz.ac.canterbury.seng302.homehelper.validation.LocationValidation;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
+
+public class LocationValidationTest {
+    private static LocationValidation locationValidation;
+
+    @BeforeAll
+    public static void setUp() {
+        locationValidation = new LocationValidation();
+    }
+
+
+    public static Stream<String> getValidSuburb() {
+        return Stream.of("Riccarton", "Upper-Riccarton", "Taylor's Mistake", "Ilam1", "Петроградский р-н",
+                "명동", "");
+    }
+
+    @ParameterizedTest
+    @MethodSource("getValidSuburb")
+    public void LocationValidation_ValidSuburbName_InputAccepted(String suburb) {
+        Assertions.assertTrue(locationValidation.validateSuburb(suburb).isEmpty());
+    }
+
+    public static Stream<String> getInvalidSuburb() {
+        return Stream.of("r*ccarton", ",", "!@#$%^&*()");
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("getInvalidSuburb")
+    public void LocationValidation_InvalidSuburbName_InputNotAccepted(String suburb) {
+        List<String> result = locationValidation.validateSuburb(suburb);
+        Assertions.assertTrue(result.contains("Suburb contains invalid characters."));
+
+    }
+
+
+
+    @Test
+    void testValidateName_invalidCharacterCity_Error() {
+        List<String> result = locationValidation.validateCity("Chr%stchurch");
+        List<String> secondResult = locationValidation.validateCity("Paris123");
+        List<String> thirdResult = locationValidation.validateCity("Wellington (NZ)");
+        assertTrue(result.get(0).contains("City contains invalid characters."));
+        assertTrue(secondResult.get(0).contains("City contains invalid characters."));
+        assertTrue(thirdResult.get(0).contains("City contains invalid characters."));}
+
+    @Test
+    void testValidateName_invalidNumberInCity_Error() {
+        List<String> result = locationValidation.validateCity("Paris123");
+        List<String> secondResult = locationValidation.validateCity("23Kathmandu");
+        List<String> thirdResult = locationValidation.validateCity("Auc23kland");
+        assertTrue(result.get(0).contains("City contains invalid characters."));
+        assertTrue(secondResult.get(0).contains("City contains invalid characters."));
+        assertTrue(thirdResult.get(0).contains("City contains invalid characters."));
+    }
+
+
+    @Test
+    void testValidateName_validCity_noError() {
+        List<String> result = locationValidation.validateCity("Christchurch");
+        List<String> secondResult = locationValidation.validateCity("Berlin");
+        assertTrue(result.isEmpty());
+        assertTrue(secondResult.isEmpty());
+
+    }
+    @Test
+    void testValidateName_validCharacterCity_noError() {
+        List<String> result = locationValidation.validateCity("Saint-Pierre");
+        List<String> secondResult = locationValidation.validateCity("O'Connell");
+        List<String> thirdResult = locationValidation.validateCity("Tórshavn");
+        assertTrue(result.isEmpty());
+        assertTrue(secondResult.isEmpty());
+        assertTrue(thirdResult.isEmpty());
+    }
+
+    @Test
+    void testValidateName_validSpaceCity_noError() {
+        List<String> result = locationValidation.validateCity("New Delhi");
+        List<String> secondResult = locationValidation.validateCity("New York City");
+        assertTrue(result.isEmpty());
+        assertTrue(secondResult.isEmpty());
+    }
+
+
+    @Test
+    void invalidPostcode_postcodeWithSpecialCharacters_returnsInvalidCharacterError() {
+        List<String> result = locationValidation.validatePostcode("123$%");
+        assertTrue(result.contains("Postcode contains invalid characters."));
+    }
+
+
+    @Test
+    void invalidPostcode_postcodeWithTab_returnsInvalidCharacterError() {
+        List<String> result = locationValidation.validatePostcode("12\t34");
+        assertTrue(result.contains("Postcode contains invalid characters."));
+    }
+
+
+    @Test
+    void invalidPostcode_postcodeWithNewline_returnsInvalidCharacterError() {
+        List<String> result = locationValidation.validatePostcode("123\n456");
+        assertTrue(result.contains("Postcode contains invalid characters."));
+    }
+
+    @Test
+    void invalidPostcode_postcodeWithConsecutiveSpaces_returnsInvalidCharacterError() {
+        List<String> result = locationValidation.validatePostcode("123  456");
+        assertTrue(result.contains("Postcode contains invalid characters."));
+    }
+
+
+    @Test
+    void validPostcode_alphanumericPostcode_isValid() {
+        List<String> result = locationValidation.validatePostcode("A1B2C3");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void validPostcode_numericPostcode_isValid() {
+        List<String> result = locationValidation.validatePostcode("8011");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void validPostcode_postcodeWithSingleSpace_isValid() {
+        List<String> result = locationValidation.validatePostcode("A1 234");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void validPostcode_postcodeWithUnicodeLetters_isValid() {
+        List<String> result = locationValidation.validatePostcode("Tór4");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void validPostcode_postcodeWithLeadingAndTrailingSpaces_isTrimmedAndValid() {
+        List<String> result = locationValidation.validatePostcode(" 1234 ");
+        assertTrue(result.isEmpty());
+    }
+
+    public static Stream<String> getValidStreetAddress() {
+        return Stream.of("34/140 Some-cool' street", "1 Nice street", "12345",
+                "Ørneborgvej 14", "œæÖę");
+    }
+
+    public static Stream<String> getInvalidStreetAddress() {
+        return Stream.of("!@#$%^&*()_+", "\t\r\"`¿?°\\");
+    }
+
+    @ParameterizedTest
+    @MethodSource("getValidStreetAddress")
+    void locationValidation_validStreetAddress_isValid(String streetAddress) {
+        List<String> result = locationValidation.validateStreetAddress(streetAddress, true);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void invalidStreetAddress_emptyAddress_isNotValid() {
+        List<String> result = locationValidation.validateStreetAddress("", true);
+        assertEquals(1, result.size());
+        assertEquals("Street address is required.", result.get(0));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getInvalidStreetAddress")
+    void locationValidation_invalidStreetAddress_isNotValid(String streetAddress) {
+        List<String> result = locationValidation.validateStreetAddress(streetAddress, true);
+        assertEquals(1, result.size());
+        assertEquals("Street address contains invalid characters.", result.get(0));
+    }
+
+    @Test
+    void validPostcode_postcodeWithMultipleSpaces_isValid() {
+        List<String> result = locationValidation.validatePostcode("12 34 56");
+        assertTrue(result.isEmpty());
+    }
+
+
+    public static Stream<String> getValidCountry() {
+        return Stream.of("Aotearoa", "New Zealand", "Central African Republic", "Egypt'", "Pórtugal",
+                "Guinea-Bissau", "россия", "한국", "Côte d'Ivoire");
+    }
+
+    @ParameterizedTest
+    @MethodSource("getValidCountry")
+    public void locationValidation_validCountry_inputAccepted(String country) {
+        List<String> result = locationValidation.validateCountry(country);
+        assertTrue(result.isEmpty());
+    }
+
+    public static Stream<String> getInvalidCountry() {
+        return Stream.of(",", "Aot3aroa", "New  Zealand", "New Zealand!", "Finl&nd", "3ngland", "Ru$$i@");
+    }
+
+    @ParameterizedTest
+    @MethodSource("getInvalidCountry")
+    public void locationValidation_invalidCountry_inputNotAccepted(String country) {
+        List<String> result = locationValidation.validateCountry(country);
+        assertTrue(result.contains("Country contains invalid characters."));
+    }
+}

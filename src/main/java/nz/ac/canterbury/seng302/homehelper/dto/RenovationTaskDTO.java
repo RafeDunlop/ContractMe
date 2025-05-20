@@ -1,6 +1,9 @@
 package nz.ac.canterbury.seng302.homehelper.dto;
 
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -11,6 +14,18 @@ public class RenovationTaskDTO {
     String description;
     LocalDate dueDate;
     List<String> rooms;
+
+    /**
+     * Default constructor for {@code RenovationTaskDTO}.
+     * Initializes the task with an empty name and description, a {@code null} due date,
+     * and an empty list of rooms.
+     */
+    public RenovationTaskDTO() {
+        this.name = "";
+        this.description = "";
+        this.dueDate = null;
+        this.rooms = new ArrayList<>();
+    }
 
     /**
      * constructor which accepts an initial state for an unvalidated and unsaved {@link nz.ac.canterbury.seng302.homehelper.entity.RenovationTask}
@@ -25,6 +40,19 @@ public class RenovationTaskDTO {
         this.dueDate = dueDate;
         this.rooms = rooms;
     }
+
+    /**
+     * Constructs a {@code RenovationTaskDTO} from an existing {@link RenovationTask} entity.
+     * Copies the task name, description, due date, and list of rooms from the entity.
+     * @param task the {@code RenovationTask} to convert into a DTO
+     */
+    public RenovationTaskDTO(RenovationTask task) {
+        this.name = task.getName();
+        this.description = task.getDescription();
+        this.dueDate = task.getDueDate();
+        this.rooms = task.getRoomList();
+    }
+
 
     /**
     Returns the description

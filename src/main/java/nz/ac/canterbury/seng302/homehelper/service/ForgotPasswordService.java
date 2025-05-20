@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.event.OnResetPasswordSubmittedEvent;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -46,7 +47,7 @@ public class ForgotPasswordService {
     }
 
     /**
-     * Validate the given email string. Check whether user with the email exists and if it's in the correct format.
+     * Validate the given email string. Check whether user with the email exists, is validated, and if it's in the correct format.
      * Sets an event to generate token and send email if true.
      * @param email Inputted email
      * @param locale Region/Language preference
@@ -55,8 +56,9 @@ public class ForgotPasswordService {
     public String validateEmail(String email, Locale locale) {
         Optional<User> expectedUser = userRepository.findByEmailIgnoreCase(email);
 
-        expectedUser.ifPresent(user -> eventPublisher.publishEvent(new OnResetPasswordSubmittedEvent(user, locale)));
-        return String.join("", userValidation.validateEmailString(email));
+        expectedUser.filter(User::isActivated)
+                .ifPresent(user -> eventPublisher.publishEvent(new OnResetPasswordSubmittedEvent(user, locale)));
+        return String.join(";", userValidation.validateEmailString(email));
     }
 
     /**
@@ -81,10 +83,17 @@ public class ForgotPasswordService {
      * Validate inputted passwords by sending details to UserValidation and return list of errors.
      * @param newPassword New password for user
      * @param confirmPassword Confirm new password
-     * @return List of password errors
+     * @param user The user object to check for profile fields in the password
+     * @return Mapping of password errors
      */
-    public List<String> validatePasswords(String newPassword, String confirmPassword) {
-        return new ArrayList<>(userValidation.validatePasswordString(newPassword, confirmPassword, "resetPassword"));
+    public Map<String, List<String>> validatePasswords(String newPassword, String confirmPassword, User user) {
+        Map<String, List<String>> errors = new HashMap<>();
+
+        MapUtil.putIfNotEmpty(errors, "newPasswordError", userValidation.validatePasswordString(newPassword, user.getFirstName(), user.getLastName(), user.getEmail()));
+        MapUtil.putIfNotEmpty(errors, "confirmNewPasswordError", userValidation.validateConfirmPasswordString(
+                newPassword, confirmPassword, "resetPassword"));
+
+        return errors;
     }
 
     /**

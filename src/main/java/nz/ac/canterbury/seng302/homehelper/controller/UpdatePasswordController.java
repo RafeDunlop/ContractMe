@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -49,29 +50,29 @@ public class UpdatePasswordController {
      * Posts a form with the updated user password. Goes back to "/user" if the
      * user password is updated; otherwise, the error messages are set and stays on same page.
      * @param updatePasswordDTO User object with the updated user details
-     * @param model Model interface
      * @param bindingResult for binding error messages
      * @param redirectAttributes to redirect the success message to /user page.
      * @return updatePasswordTemplate page or redirect to user page
      */
     @PostMapping("user/edit/updatePassword")
-    public String tryChangePassword(@ModelAttribute("updatePasswordDTO") UpdatePasswordDTO updatePasswordDTO, BindingResult bindingResult, Model model,
+    public String tryChangePassword(@ModelAttribute("updatePasswordDTO") UpdatePasswordDTO updatePasswordDTO,
+            BindingResult bindingResult,
             RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(error -> logger.info(error.getDefaultMessage()));
         }
-        try {
-            updatePasswordService.updatePassword(updatePasswordDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "Password updated successfully.");
-            return "redirect:/user";
-        } catch (IllegalArgumentException e) {
-            logger.warn("Form submission error: {}", e.getMessage());
 
-            List<String> errorsList = List.of(e.getMessage().split("(?<=\\.) "));
+        Map<String, List<String>> errors = updatePasswordService.updatePasswordValidation(updatePasswordDTO);
 
-            model.addAttribute("errorMessages", errorsList);
-            return "updatePasswordTemplate";
+        if (!errors.isEmpty()) {
+            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
 
+            redirectAttributes.addFlashAttribute("updatePasswordDTO", updatePasswordDTO);
+            return "redirect:/user/edit/updatePassword";
         }
+
+        updatePasswordService.updatePassword(updatePasswordDTO);
+        redirectAttributes.addFlashAttribute("successMessage", "Password updated successfully.");
+        return "redirect:/user";
     }
 }

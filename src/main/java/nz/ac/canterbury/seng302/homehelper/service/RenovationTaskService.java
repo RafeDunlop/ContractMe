@@ -4,7 +4,8 @@ import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
+import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
+import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,27 +18,24 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class RenovationTaskService {
 
     Logger logger = LoggerFactory.getLogger(RenovationTaskService.class);
 
-    private final RenovationValidation renovationValidation;
     private final RenovationTaskRepository renovationTaskRepository;
+    private final RenovationTaskValidation renovationTaskValidation;
 
     /**
      * Constructor for RenovationTaskService class
      * @param renovationTaskRepository initialises the repo for storing tasks
      */
     @Autowired
-    public RenovationTaskService(RenovationTaskRepository renovationTaskRepository, RenovationValidation renovationValidation) {
+    public RenovationTaskService(RenovationTaskRepository renovationTaskRepository, RenovationTaskValidation renovationTaskValidation) {
         this.renovationTaskRepository = renovationTaskRepository;
-        this.renovationValidation = renovationValidation;
+        this.renovationTaskValidation = renovationTaskValidation;
     }
 
     public RenovationTask getTaskById(Long id) {
@@ -48,11 +46,6 @@ public class RenovationTaskService {
      * Adds a new renovation task to the repository
      */
     public void addRenovationTask(RenovationTaskDTO renovationTaskDTO, RenovationRecord renovationRecord) {
-        List<String> errors = renovationValidation.validateTaskDetails(renovationTaskDTO);
-
-        if (!errors.isEmpty()) {
-            throw new IllegalArgumentException(String.join(" ", errors));
-        }
 
         String name = renovationTaskDTO.getName();
         String description = renovationTaskDTO.getDescription();
@@ -100,5 +93,29 @@ public class RenovationTaskService {
             logger.error("Error while trying to get icon filenames", e);
             return Collections.emptyList();
         }
+    }
+
+    /**
+     * Validates the details of the task inputted by the user. Checks to see if all the details are valid and returns a map
+     * of error messages for each invalid detail.
+     * @return A map of errors generated from validating the task details
+     */
+    public Map<String, List<String>> validateTaskDetails(RenovationTaskDTO renovationTaskDTO, RenovationRecord renovationRecord) {
+        Map<String, List<String>> errors = new HashMap<>();
+        String errorMessageType = "Task";
+
+        List<String> nameError = renovationTaskValidation.validateName(renovationTaskDTO.getName(), errorMessageType);
+        MapUtil.putIfNotEmpty(errors, "nameError", nameError);
+
+        String roomError = renovationTaskValidation.validateRooms(renovationRecord, renovationTaskDTO.getRooms());
+        MapUtil.putIfNotEmpty(errors, "roomError", (roomError == null) ? null : List.of(roomError));
+
+        String descriptionError = renovationTaskValidation.validateDescription(renovationTaskDTO.getDescription(), errorMessageType);
+        MapUtil.putIfNotEmpty(errors, "descriptionError", (descriptionError == null) ? null : List.of(descriptionError));
+
+        String dueDateError = renovationTaskValidation.validateDueDate(renovationTaskDTO.getDueDate());
+        MapUtil.putIfNotEmpty(errors, "dueDateError", (dueDateError == null) ? null : List.of(dueDateError));
+
+        return errors;
     }
 }

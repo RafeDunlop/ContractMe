@@ -12,9 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
+
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class UpdatePasswordServiceTest {
     private static UpdatePasswordService updatePasswordService;
@@ -23,17 +25,12 @@ public class UpdatePasswordServiceTest {
     private static PasswordEncoder passwordEncoder;
     private static User testUser;
 
-    /**
-     * Mocks required classes for constructor of UpdatePasswordService
-     * Creates a testUser and populates with valid details
-     * Mocks getUserByEmail to return the testUser
-     */
     @BeforeEach
     void Setup() {
-        LoginService loginServiceMock = Mockito.mock(LoginService.class);
+        LoginService loginServiceMock = mock(LoginService.class);
         UserValidation userValidation = new UserValidation();
-        userRepositoryMock = Mockito.mock(UserRepository.class);
-        EmailService emailServiceMock = Mockito.mock(EmailService.class);
+        userRepositoryMock = mock(UserRepository.class);
+        EmailService emailServiceMock = mock(EmailService.class);
 
         updatePasswordService = new UpdatePasswordService(userValidation, loginServiceMock, userRepositoryMock, emailServiceMock);
         passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -43,127 +40,90 @@ public class UpdatePasswordServiceTest {
         when(loginServiceMock.getUserByEmail()).thenReturn(testUser);
     }
 
-    /**
-     * Creates a DTO with valid form inputs
-     * Sets the testUsers password back to default
-     */
     @BeforeEach
     void initializeDTO() {
-        updatePasswordDTO =  new UpdatePasswordDTO("Test123!", "Test1234!", "Test1234!");
+        updatePasswordDTO = new UpdatePasswordDTO("Test123!", "Test1234!", "Test1234!");
         testUser.setPassword(passwordEncoder.encode("Test123!"));
     }
 
-    /**
-     * Tests with new password and retyped new password empty
-     */
     @Test
-    void test_update_password_empty_passwords() {
+    void testUpdatePassword_emptyPasswords_error() {
         updatePasswordDTO.setNewPassword("");
         updatePasswordDTO.setRetypePassword("");
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            updatePasswordService.updatePassword(updatePasswordDTO);
-        });
+        Map<String, java.util.List<String>> errors = updatePasswordService.updatePasswordValidation(updatePasswordDTO);
 
-        assertTrue(exception.getMessage().contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."));
+        assertTrue(errors.containsKey("newPasswordError"));
+        assertFalse(errors.isEmpty());
+        verify(userRepositoryMock, never()).save(testUser);
     }
 
-    /**
-     * Blue sky scenario with all valid form details
-     */
     @Test
-    void test_update_password_blue_sky() {
+    void testUpdatePassword_blueSky_noErrorPasswordUpdated() {
+        Map<String, java.util.List<String>> errors = updatePasswordService.updatePasswordValidation(updatePasswordDTO);
+
+        assertTrue(errors.isEmpty());
+
         updatePasswordService.updatePassword(updatePasswordDTO);
+
         assertTrue(passwordEncoder.matches("Test1234!", testUser.getPassword()));
-        Mockito.verify(userRepositoryMock, Mockito.times(1)).save(testUser);
+        verify(userRepositoryMock, times(1)).save(testUser);
     }
 
-    /**
-     * Tests with the users current password wrong, but valid new and retyped password
-     */
     @Test
-    void test_update_password_wrong_current_password() {
-        updatePasswordDTO.setCurrentPassword("Test1234567!");
+    void testUpdatePassword_wrongCurrentPassword_error() {
+        updatePasswordDTO.setCurrentPassword("WrongPassword!");
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            updatePasswordService.updatePassword(updatePasswordDTO);
-        });
+        Map<String, java.util.List<String>> errors = updatePasswordService.updatePasswordValidation(updatePasswordDTO);
 
-        assertTrue(exception.getMessage().contains("Your old password is incorrect."));
-        Mockito.verify(userRepositoryMock, Mockito.never()).save(testUser);
+        assertTrue(errors.containsKey("oldPasswordError"));
+        verify(userRepositoryMock, never()).save(testUser);
     }
 
-    /**
-     * Tests with new password and retyped new password valid but different
-     */
     @Test
-    void test_update_password_retyped_password_wrong() {
+    void testUpdatePassword_retypedPasswordWrong_error() {
         updatePasswordDTO.setNewPassword("Test!12345");
         updatePasswordDTO.setRetypePassword("Typo!12345");
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            updatePasswordService.updatePassword(updatePasswordDTO);
-        });
+        Map<String, java.util.List<String>> errors = updatePasswordService.updatePasswordValidation(updatePasswordDTO);
 
-        assertTrue(exception.getMessage().contains("New Passwords do not match."));
-        Mockito.verify(userRepositoryMock, Mockito.never()).save(testUser);
+        assertTrue(errors.containsKey("newPasswordRetypeError"));
+        verify(userRepositoryMock, never()).save(testUser);
     }
 
-    /**
-     * Tests with new password and retyped new password the same but too short for requirements
-     */
     @Test
-    void test_update_password_too_short_password() {
+    void testUpdatePassword_passwordTooShort_error() {
         updatePasswordDTO.setNewPassword("Test1!");
         updatePasswordDTO.setRetypePassword("Test1!");
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            updatePasswordService.updatePassword(updatePasswordDTO);
-        });
+        Map<String, java.util.List<String>> errors = updatePasswordService.updatePasswordValidation(updatePasswordDTO);
 
-        assertTrue(exception.getMessage().contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."));
-        Mockito.verify(userRepositoryMock, Mockito.never()).save(testUser);
+        assertTrue(errors.containsKey("newPasswordError"));
+        verify(userRepositoryMock, never()).save(testUser);
     }
 
-    /**
-     * Tests with new password and retyped new password null
-     */
     @Test
-    void test_update_password_null_passwords() {
-        updatePasswordDTO.setNewPassword(null);
-        updatePasswordDTO.setRetypePassword(null);
-
-        assertThrows(NullPointerException.class, () -> {
-            updatePasswordService.updatePassword(updatePasswordDTO);
-        });
-        Mockito.verify(userRepositoryMock, Mockito.never()).save(testUser);
-    }
-
-    /**
-     * Tests with new password and retyped new password same but missing uppercase
-     */
-    @Test
-    void test_update_password_missing_uppercase() {
+    void testUpdatePassword_missingUppercase_error() {
         updatePasswordDTO.setNewPassword("test12345!");
         updatePasswordDTO.setRetypePassword("test12345!");
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            updatePasswordService.updatePassword(updatePasswordDTO);
-        });
+        Map<String, java.util.List<String>> errors = updatePasswordService.updatePasswordValidation(updatePasswordDTO);
 
-        assertTrue(exception.getMessage().contains("Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character."));
-        Mockito.verify(userRepositoryMock, Mockito.never()).save(testUser);
+        assertTrue(errors.containsKey("newPasswordError"));
+        verify(userRepositoryMock, never()).save(testUser);
     }
 
-    /**
-     * Tests with a range of special characters in the password
-     */
     @Test
-    void test_update_password_special_characters() {
+    void testUpdatePassword_specialCharacters_noErrorUpdatedPassword() {
         updatePasswordDTO.setNewPassword("Test1!@#$%^&*()=+;:.,");
         updatePasswordDTO.setRetypePassword("Test1!@#$%^&*()=+;:.,");
 
+        Map<String, java.util.List<String>> errors = updatePasswordService.updatePasswordValidation(updatePasswordDTO);
+
+        assertTrue(errors.isEmpty());
+
         updatePasswordService.updatePassword(updatePasswordDTO);
-        Mockito.verify(userRepositoryMock, Mockito.times(1)).save(testUser);
+
+        verify(userRepositoryMock, times(1)).save(testUser);
     }
 }

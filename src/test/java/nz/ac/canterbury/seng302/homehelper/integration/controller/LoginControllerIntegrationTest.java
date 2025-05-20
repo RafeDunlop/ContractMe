@@ -13,14 +13,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -73,15 +70,32 @@ public class LoginControllerIntegrationTest {
      */
     @Test
     public void testLoginUser_userWithSameEmailInRepositoryWrongPassword_fail() throws Exception {
-        List<String> expectedErrorList = List.of(URLEncoder.encode("The email address is unknown, or the password is invalid.", StandardCharsets.UTF_8));
+        String expectedError = "The email address is unknown, or the password is invalid.";
         Mockito.when(userRepository.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty());
         mockMvc.perform(formLogin("/login")
                         .user("username", "jane@doe.nz")
                         .password("password"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("/login?error=*"))
-                .andDo(result -> mockMvc.perform(get(Objects.requireNonNull(result.getResponse().getRedirectedUrl())))
-                        .andExpect(model().attribute("errorMessage", expectedErrorList)));
+                .andExpect(redirectedUrl("/login"))
+                .andExpect(request().sessionAttribute("errorMessage", expectedError));
     }
 
+    @Test
+    public void testLogout_userLoggedIn_logoutSuccessful() throws Exception {
+        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        User expectedUser = new User("John", "Smith", "john@smith.nz", passwordEncoder.encode("Test123!"));
+        expectedUser.activate();
+
+        Mockito.when(userRepository.findByEmailIgnoreCase("john@smith.nz")).thenReturn(Optional.of(expectedUser));
+        mockMvc.perform(formLogin("/login")
+                        .user("username", "john@smith.nz")
+                        .password("Test123!"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/main"));
+
+        mockMvc.perform(post("/logout").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("**/login"));
+    }
 }
+

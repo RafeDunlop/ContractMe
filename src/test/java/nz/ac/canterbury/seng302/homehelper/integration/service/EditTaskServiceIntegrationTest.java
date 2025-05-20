@@ -14,7 +14,7 @@ import org.mockito.Mockito;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EditTaskService;
-import nz.ac.canterbury.seng302.homehelper.validation.RenovationValidation;
+import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 
 public class EditTaskServiceIntegrationTest {
     private EditTaskService editTaskService;
@@ -23,7 +23,7 @@ public class EditTaskServiceIntegrationTest {
     @BeforeEach
     public void setUp() {
         renovationTaskRepository = mock(RenovationTaskRepository.class);
-        editTaskService = new EditTaskService(renovationTaskRepository, new RenovationValidation());
+        editTaskService = new EditTaskService(renovationTaskRepository, new RenovationTaskValidation());
     }
 
     @Test

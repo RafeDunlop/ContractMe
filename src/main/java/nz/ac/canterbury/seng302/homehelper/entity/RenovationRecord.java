@@ -16,20 +16,31 @@ public class RenovationRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "renovation_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "renovation_tags",
+            joinColumns = @JoinColumn(name = "renovation_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private List<Tag> tags;
+
     @Column(nullable = false)
     private String name;
 
-    @Lob
-    @Column(nullable = false)
+    @Column
+    private Location location;
+
+    @Column(nullable = false, length = 513)
     private String description;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> rooms;
 
     @Column
@@ -38,14 +49,17 @@ public class RenovationRecord {
     @LastModifiedDate
     private LocalDateTime editedDate;
 
-    @OneToMany(mappedBy = "renovationRecord",fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "renovationRecord", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RenovationTask> renovationTasks = new ArrayList<>();
 
+    @Column(nullable = false)
+    private boolean isPublic = false;
 
     public RenovationRecord() {}
 
     /**
      * Constructor for RenovationRecord
+     * Creates a new Renovation object without location
      * @param user The owner of this record
      * @param name of the record, unique
      * @param description of the record, not required
@@ -56,6 +70,7 @@ public class RenovationRecord {
         this.name = name.trim(); //should not be possible to call constructor with empty string
         this.description = (description != null) ? description.trim() : "";
         this.rooms = new ArrayList<>();
+        this.tags = new ArrayList<>();
         rooms.forEach(room -> this.rooms.add(room.trim()));
     }
 
@@ -73,6 +88,32 @@ public class RenovationRecord {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Gets a list of tags for the renovation record.
+     * @return list of tags
+     */
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    /**
+     * Gets a sorted list of tags for the renovation record.
+     * @return list of tags
+     */
+    public List<Tag> getSortedTags() {
+        return tags.stream()
+                .sorted((a, b) -> a.getTagName().compareToIgnoreCase(b.getTagName()))
+                .toList();
+    }
+
+    /**
+     * Sets the list of tags for the renovation record.
+     * @param tags The list of tags to be added to the record
+     */
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
     }
 
     /**
@@ -120,6 +161,7 @@ public class RenovationRecord {
      * @return list of renovation tasks
      */
     public List<RenovationTask> getRenovationTasks() {return renovationTasks; }
+
     /**
      * Gets created date of the renovation record
      */
@@ -157,6 +199,55 @@ public class RenovationRecord {
      */
     public void setRooms(List<String> rooms) {
         this.rooms = rooms;
+    }
+
+    /**
+     * Links the specified {@link Tag} to this entity
+     * @param tag The {@link Tag} entity to be added to this entity's tags
+     * @return The result of the {@link List} add operation; whether it was successful
+     */
+    public boolean addTag(Tag tag) {
+        return tags.add(tag);
+    }
+
+    /**
+     * Removes the specified {@link Tag} from this entity, if present
+     * @param tag The {@link Tag} entity to be removed from this entity's tags
+     * @return The result of the {@link List} remove operation; whether it successfully removed teh {@link Tag}
+     */
+    public boolean removeTag(Tag tag) {
+        return tags.remove(tag);
+    }
+    /**
+     * Sets the publicity status of the renovation record
+     * @param status of the publicity of renovation record
+     */
+    public void setPublicity(boolean status) {
+        this.isPublic = status;
+    }
+    /**
+     * Gets the publicity status of the renovation record
+     * @return publicity status of renovation record
+     */
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    /**
+     * Gets the location of renovation
+     * @return location entity
+     */
+    public Location getLocation() {
+        return location;
+    }
+
+    /**
+     * Sets the location of renovation
+     * @param location location entity
+     */
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     /**

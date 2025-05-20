@@ -1,5 +1,11 @@
 # Merge %{source_branch} to %{target_branch}
 
+## Summary 
+
+[Insert summary here]
+
+## Commits
+
 %{all_commits}
 
 %{co_authored_by}
@@ -15,12 +21,13 @@
     - [ ] Code has no smells
     - [ ] Docstrings added to all public methods
     - [ ] Meets all relevant ACs listed with the task (if applicable)
+    - [ ] Automated acceptance tests have been added (if applicable)
+    - [ ] Meets all relevant NFRs
 - [ ] Code is readable
 - [ ] Documentation makes sense and adds value
 - [ ] TODOs removed
 - [ ] No commented out code
 - [ ] No debugging code
-- [ ] Code is readable
 - [ ] All automated tests pass
 - [ ] [Manual Testing](https://eng-git.canterbury.ac.nz/seng302-2025/team-200/-/wikis/Manual%20Testing) is complete and
   covers all testable ACs

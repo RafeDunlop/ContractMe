@@ -2,10 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+    <base th:href="@{/}"/>
     <title>Create renovation</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
-
+    <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
 </head>
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
@@ -13,50 +14,134 @@
 
     <div class="card p-4 shadow-sm">
         <h4 class="card-title mb-4">Start a new renovation!</h4>
-        <form th:action="@{create}" method="post" id="renovation-form">
+        <form th:action="@{/renovations/create}" method="post" id="renovation-form">
 
-            <input type="hidden" id="roomListEdit" th:name="roomListEdit" th:value="${#strings.arrayJoin(roomList, ',')}">
+            <div id="room-hidden-inputs" th:each="room : ${roomList}">
+                <input type="hidden" name="roomList" th:value="${room}" />
+            </div>
             <input type="hidden" id="existingName" th:name="existingName" th:value="${existingName}">
 
+            <!-- NAME -->
             <div class="mb-3">
                 <label for="name" class="form-label">Name:</label>
                 <input type="text" class="form-control" id="name" placeholder="Enter a name for your renovation"
-                       th:name="name" th:value="${name}" data-cy="name" required autofocus>
-                <div class="error-label-div">
-                    <label class="form-label" id="name-error-message"></label>
+                       th:name="name" th:value="${name}" data-cy="name" maxlength="129" autofocus>
+
+                <!-- Frontend JS error -->
+                <div class="alert alert-danger mb-4" role="alert" id="name-frontend-error" hidden>
+                    <div class="error-box">
+                        <ul>
+                            <li>
+                                <label class="form-label" id="name-frontend-error-message" ></label>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Backend error -->
+                <div class="alert alert-danger mb-4" role="alert" id="name-backend-error"
+                     th:if="${nameError}">
+                    <div class="error-box">
+                        <ul>
+                            <li th:each="msg : ${nameError}" th:text="${msg}"></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
+
+            <!-- DESCRIPTION -->
             <div class="mb-3">
                 <label for="description" class="form-label">Description:</label>
                 <span id="description-length-counter" class="counter">0/512</span>
                 <textarea class="form-control" id="description" placeholder="Enter a description for your new renovation"
-                          th:name = "description" th:text="${description}"
-                          autofocus></textarea>
-                <div class="error-label-div">
-                    <label class="form-label" hidden id="description-error-message">Text gets updated based off error</label>
+                          th:name = "description" th:text="${description}"></textarea>
+
+                <!-- Frontend JS error -->
+                <div class="alert alert-danger mb-4" role="alert" id="description-frontend-error" hidden>
+                    <div class="error-box">
+                        <ul>
+                            <li>
+                                <label class="form-label" id="description-frontend-error-message" hidden></label>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Backend error -->
+                <div class="alert alert-danger mb-4" role="alert" id="description-backend-error" hidden
+                     th:if="${descriptionError}">
+                    <div class="error-box">
+                        <ul>
+                            <li th:each="msg : ${descriptionError}" th:text="${msg}"></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
+            <!-- ROOM LIST -->
             <div class="mb-3">
                 <div class="input-group">
                     <input type="text" class="form-control" id="roomList" placeholder="Enter a room name"
-                           th:name="roomList" data-cy="roomList" autofocus>
+                           th:name="roomList" data-cy="roomList">
                     <button type="button" class="btn btn-primary" id="create-room-button">Add</button>
                 </div>
-                <div class="error-label-div">
-                    <label class="form-label" id="room-error-message"></label>
+
+                <!-- Frontend JS error -->
+                <div class="alert alert-danger mb-4" role="alert" id="room-frontend-error" hidden>
+                    <div class="error-box">
+                        <ul>
+                            <li>
+                                <label class="form-label" id="room-frontend-error-message" hidden></label>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
+
+                <!-- Backend error -->
+                <div class="alert alert-danger mb-4" role="alert" id="room-backend-error" th:attr="hidden=${roomError == null}">
+                    <div class="error-box">
+                        <ul>
+                            <li th:each="msg : ${roomError}" th:text="${msg}"></li>
+                        </ul>
+                    </div>
+                </div>
+
                 <table id="room-list" class="table table-bordered"></table>
             </div>
 
-            <button type="submit" disabled="disabled" id="submit-record" class="btn btn-primary">Create</button>
+            <!-- LOCATION TOGGLE SWITCH -->
+
+            <div class="d-flex justify-content-between align-items-center py-4 px-0" style="width: 22%">
+                <div>Enter Location (Optional):</div>
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="location-toggleswitch" th:checked="${locationUsed}">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- LOCATION FORM FRAGMENT -->
+            <div th:class="${locationUsed} ? 'form-extension' : 'hidden-form-extension'" id="location-form">
+                <div th:replace="~{fragments/locationForm.html :: locationForm(
+                     addressDTO=${addressDTO})}"></div>
+            </div>
+
+            <button type="submit" id="submit-record" class="btn btn-primary">Create</button>
+
+
+
         </form>
     </div>
+
+    <!-- CANCEL BUTTON -->
     <div class="mt-4">
         <a th:href="@{/renovations}" class="btn  btn-primary">Cancel</a>
     </div>
 </div>
 </body>
-<script type="module" th:src="@{/js/createRecordValidations.js}"></script>
+<script type="module" th:src="@{/js/locationForm.js}"></script>
+<script type = "module" th:src="@{/js/locationFormValidation.js}"></script>
+<script type="module" th:src="@{/js/renovationValidations.js}"></script>
 <script type="module" th:src="@{/js/individualRenovation.js}"></script>
 </html>

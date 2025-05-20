@@ -46,7 +46,7 @@ public class LoginService {
         }
         else {
             errors.add("The user email is invalid");
-            throw new IllegalArgumentException(String.join(" ", errors));
+            throw new IllegalArgumentException(String.join(";", errors));
         }
 
     }
@@ -60,13 +60,13 @@ public class LoginService {
      * @throws IllegalArgumentException if the email is invalid
      */
     public User getUserByEmailAndPassword(String email, String password) throws NoSuchElementException, IllegalArgumentException {
-        List<String> errors = userValidation.validateEmailString(email);
+        List<String> errors = userValidation.validateEmailString(email.trim());
         Optional<User> optionalUser = userRepository.findByEmailIgnoreCase(email);
         if (optionalUser.isPresent() && passwordEncoder.matches(password, optionalUser.get().getPassword())) {
             return optionalUser.get();
         } else {
             errors.add("The email address is unknown, or the password is invalid.");
-            throw new IllegalArgumentException(String.join(" ", errors));
+            throw new IllegalArgumentException(String.join(";", errors));
         }
     }
 }

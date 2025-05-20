@@ -1,5 +1,5 @@
 #room-list {
-    max-width: 500px;
+    max-width: 1000px;
     max-height: 300px;
     overflow-y: auto;
     background-color: white;
@@ -7,7 +7,6 @@
 }
 
 #room-list td {
-    white-space: nowrap;
     background-color: inherit;
 }
 
@@ -16,20 +15,11 @@
     overflow: hidden;
 }
 
-#name-error-message {
-    color: red;
-}
-#description-error-message {
-    color: red;
-}
 .error-label-div {
     min-height: 30px;
     display: inline-block;
 }
 
-#room-error-message {
-    color: red;
-}
 
 .shadow-overlay {
     display: none;
@@ -50,6 +40,12 @@
     width: 30px;  /* Adjust icon size */
     height: 30px;
 }
+
+.hidden-form-extension {
+    display: none;
+}
+
+
 
 .truncate {
     display: -webkit-box;
@@ -82,3 +78,26 @@
 .active {
     border: 2px solid #0D6EFD !important;
 }
+
+.truncate-cell {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.room-delete-button {
+    background-color: white;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+.room-cell {
+    white-space: normal;
+    overflow-wrap: break-word;
+
+}
+
+
