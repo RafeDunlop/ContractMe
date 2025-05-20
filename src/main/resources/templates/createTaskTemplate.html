@@ -13,7 +13,7 @@
 <div class="container mt-5">
     <div class="card p-4 shadow-sm">
         <h4 class="card-title mb-4">Add Task to Renovation</h4>
-        <form th:action="@{create}" method="post" id="create-task-form" th:object="${renovationTaskDTO}" novalidate>
+        <form th:action="@{/renovations/view/create}" method="post" id="create-task-form" th:object="${renovationTaskDTO}" novalidate>
 
             <input type="hidden" id="availableRoomList" th:name="availableRoomList" th:value="${#strings.arrayJoin(roomList, ',')}">
             <input type="hidden" id="renovationId" th:name="renovationId" th:value="${renovation.id}">
