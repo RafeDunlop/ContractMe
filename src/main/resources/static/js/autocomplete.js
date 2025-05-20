@@ -1,6 +1,6 @@
 /** Js file used for autocompleting the tag entry field on viewRenovation.html */
 
-const formPath = window.location.pathname;
+let formPath = window.location.pathname;
 let input;
 
 if (formPath === "/renovations/view") {

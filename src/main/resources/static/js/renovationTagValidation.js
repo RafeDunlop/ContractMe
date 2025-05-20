@@ -1,16 +1,24 @@
-
-let tagInput = document.getElementById("tagName");
+let tagNameInput;
 let tagFrontendError = document.getElementById("tag-frontend-error");
 let tagFrontendErrorMessage = document.getElementById("tag-frontend-error-message");
 let tagBackendError = document.getElementById("tag-backend-error");
+let tagNameListElements
+let tagNamesList
 
-const tagNameListElements = document.querySelectorAll('#tag-list span');
-const tagNamesList = Array.from(tagNameListElements).map(el => el.textContent.trim());
 
+if (formPath === "/renovations/view") {
+    tagNameInput = document.getElementById("tagName");
+    tagNameListElements = document.querySelectorAll('#tag-list span');
+    tagNamesList = Array.from(tagNameListElements).map(el => el.textContent.trim());
+} else if (formPath === "/renovations/search") {
+    tagNameInput = document.getElementById("tag-input");
+} else {
+    console.warn(`Unexpected form path: ${formPath}`);
+}
 
 const tagPattern = /^(?=.*\p{L}).*$/u;
 
-tagInput.addEventListener("input", function () {validateTag(tagInput.value)})
+tagNameInput.addEventListener("input", function () {validateTag(tagNameInput.value)})
 
 /**
  * Validates a tag input for renovations.
@@ -25,9 +33,9 @@ async function validateTag(input) {
     input = input.trim().toLowerCase();
     const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const errors = [];
-    if (tagNamesList.length >= 5) {
+    if (formPath === "/renovations/view" && tagNamesList.length >= 5) {
         errors.push("Renovation cannot have more than 5 tags.");
-    } else if (tagNamesList.includes(input)) {
+    } else if (formPath === "/renovations/view" && tagNamesList.includes(input)) {
         errors.push("Renovation cannot contain duplicate tag names.");
     } else {
         if (input === "" || !tagPattern.test(input)) {
