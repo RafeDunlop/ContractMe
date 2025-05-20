@@ -39,7 +39,7 @@ function confirmLogout() {
             if (!response.ok) {
                 alert("failed to log out")
             }
-            window.location.href = "/logout";
+            window.location.assign("logout");
         }
     });
 }

@@ -1,16 +1,15 @@
 package nz.ac.canterbury.seng302.homehelper.profanityFilter;
 
-import nz.ac.canterbury.seng302.homehelper.profanityFilter.dictionary.Dictionary;
-import nz.ac.canterbury.seng302.homehelper.profanityFilter.dictionary.Profanity;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import nz.ac.canterbury.seng302.homehelper.profanityFilter.dictionary.Dictionary;
+import nz.ac.canterbury.seng302.homehelper.profanityFilter.dictionary.Profanity;
 
 /**
  * ProfanityFilter class provides a singleton-based profanity detection system
@@ -46,7 +45,7 @@ public class ProfanityFilter {
         String basePath = "src/main/resources/profanityFilterResources/com/modernmt/text/profanityFilterResources/";
         File file = new File(basePath + "dictionary." + language);
 
-        try (InputStream stream = new FileInputStream(file)) {
+        try (InputStream stream = ProfanityFilter.class.getClassLoader().getResourceAsStream("profanityFilterResources/com/modernmt/text/profanityFilterResources/" + "dictionary." + language)) {
             return Dictionary.read(language, stream);
         } catch (IOException e) {
             throw new RuntimeException("Unable to load dictionary file: " + file.getAbsolutePath(), e);
