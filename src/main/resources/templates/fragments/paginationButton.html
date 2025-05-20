@@ -5,6 +5,13 @@
     <form th:action="@{${address}}" method="post" class="m-0">
         <input type="hidden" name="page" th:value="${pageNum}" />
         <input type="hidden" name="cardsPerPage" th:value="${cardsPerPage}" />
+        <!-- Optional searchTerm input -->
+        <input type="hidden" th:if="${searchTerm != null and searchTerm != ''}" th:value="${searchTerm}" name="searchTerm">
+        <!-- Optional tagNameList input -->
+        <input type="hidden" th:if="${tagNameList != null and tagNameList != ''}" th:value="${tagNameList}" name="tagNameList" id="tagNameList">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <!-- Optional visibility input -->
+        <input type="hidden" th:if="${visibility != null}" th:value="${visibility}" name="visibility"/>
         <button type="submit" class="page-link" th:text="${label}"></button>
     </form>
 </div>

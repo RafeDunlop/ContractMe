@@ -532,7 +532,7 @@ public class RenovationController {
         // Switching between search types
         List<RenovationRecord> records;
 
-        if (isTagSearch) {
+        if (isTagSearch && !tagNameList.isEmpty()) {
             List<Tag> tagList = tagService.getTags(tagNameList);
             records = renovationRecordService.getAllRecordsByTags(tagList, visibility, user, searchTerm);
 
@@ -572,7 +572,9 @@ public class RenovationController {
         model.addAttribute("paginationLinksEnd", paginationLinksEnd);
         model.addAttribute("cardsPerPage", cardsPerPage);
         model.addAttribute("totalCards", totalCards);
-
+        if (tagNameList != null && !tagNameList.isEmpty()) {
+            model.addAttribute("tagNameList", tagNameList);
+        }
         return "renovationSearchTemplate";
     }
 
@@ -595,10 +597,6 @@ public class RenovationController {
                                           @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage,
                                           HttpSession session) {
         logger.info("POST /renovations/search");
-
-        if (isTagSearch && (tagNameList == null || tagNameList.isEmpty())) {
-            return "renovationSearchTemplate";
-        }
 
         if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";

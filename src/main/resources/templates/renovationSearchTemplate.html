@@ -67,6 +67,7 @@
 
             <!-- Search and Visibility Filter -->
             <form id="search-form" th:action="@{/renovations/search}" method="post" class="m-0 mb-3">
+                <input type="hidden" th:value="${tagNameList}" name="tagNameList" id="tagNameList">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <input type="hidden" th:value="${cardsPerPage}" name="cardsPerPage" id="cardsPerPageInput"/>
                 <input type="hidden" th:value="${pageNumber}" name="page" id="pageInput" />
@@ -177,7 +178,7 @@
                         <li class="page-item" th:if="${totalPages <= 10}"
                             th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'"
-                            th:id="'page' + ${pageLinkNumber}">>
+                            th:id="'page' + ${pageLinkNumber}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/search},
                                 ${pageLinkNumber},
@@ -189,7 +190,7 @@
                         <li class="page-item" th:if="${totalPages > 10}"
                             th:each="pageLinkNumber : ${#numbers.sequence(paginationLinksStart, paginationLinksEnd)}"
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'"
-                            th:id="'page' + ${pageLinkNumber}">>
+                            th:id="'page' + ${pageLinkNumber}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/search},
                                 ${pageLinkNumber},
