@@ -932,7 +932,7 @@ public class RenovationControllerIntegrationTest {
                         .param("renovationId", String.valueOf(renovationId))
                         .param("tagName", testTagName))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId + "&page=1"));
 
         assertTrue(testRecord.getTags().stream()
                 .anyMatch(tag -> tag.getTagName().equals(testTagName)));
@@ -951,7 +951,7 @@ public class RenovationControllerIntegrationTest {
                         .param("renovationId", String.valueOf(renovationId))
                         .param("tagName", newTagName))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId  + "&page=1"));
 
         assertTrue(testRecord.getTags().stream()
                 .anyMatch(tag -> tag.getTagName().equals(newTagName)));
@@ -962,7 +962,7 @@ public class RenovationControllerIntegrationTest {
                         .param("renovationId", String.valueOf(renovationId))
                         .param("tagName", newNameSpecialCharacters))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId + "&page=1"));
 
         assertTrue(testRecord.getTags().stream()
                 .anyMatch(tag -> tag.getTagName().equals(newNameSpecialCharacters)));
@@ -973,7 +973,7 @@ public class RenovationControllerIntegrationTest {
                         .param("renovationId", String.valueOf(renovationId))
                         .param("tagName", withSpacesNewName))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId + "&page=1"));
 
         assertTrue(testRecord.getTags().stream()
                 .anyMatch(tag -> tag.getTagName().equals("electrician")));
@@ -999,6 +999,40 @@ public class RenovationControllerIntegrationTest {
                         .param("tagName", "123"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attributeExists("errors"));
+    }
+
+    @Test
+    public void addTagToRenovation_inappropriateTagName_profanityWarningThrown() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(currentUser, "Random Renovation", "Some words", List.of());
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+        String tagName = "ass";
+
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", tagName))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("errors"))
+                .andExpect(flash().attribute("errors", is(List.of("Name does not follow the system language standards."))));
+    }
+
+    @Test
+    public void addTagToRenovation_noLettersAndAboveMaxLength_noLettersAndMaxLengthErrorThrown() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(currentUser, "Random Renovation", "Some words", List.of());
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+        String tagName = "!".repeat(129);
+
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", tagName))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("errors"))
+                .andExpect(flash().attribute("errors", containsInAnyOrder(
+                        "Tags must contain one or more letters.",
+                        "Tag cannot be greater than 128 characters.")));
     }
 
     @Test
@@ -1536,4 +1570,21 @@ public class RenovationControllerIntegrationTest {
         assertNull(loc.getSuburb());
         assertNull(loc.getPostcode());
     }
+
+    @Test
+    public void getProfanityFilter_invalidName_returnTrue() throws Exception {
+        String invalidName = "ass";
+        mockMvc.perform(get("/renovations/tags/profanity-filter").param("tagName", invalidName))
+                .andExpect(content().string(equalTo("true")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void getProfanityFilter_validName_returnFalse() throws Exception {
+        String invalidName = "Bathroom";
+        mockMvc.perform(get("/renovations/tags/profanity-filter").param("tagName", invalidName))
+                .andExpect(content().string(equalTo("false")))
+                .andExpect(status().isOk());
+    }
+
 }

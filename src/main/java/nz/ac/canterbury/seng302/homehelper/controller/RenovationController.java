@@ -1,7 +1,11 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.*;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.Tag;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
@@ -443,9 +447,15 @@ public class RenovationController {
                                      @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                      @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage,
                                      @RequestParam(name = "fromSearch", required = false, defaultValue = "false") boolean fromSearch,
+                                     @RequestParam(name = "errorMessage", required = false) List<String> errorMessage,
                                      RedirectAttributes redirectAttributes) {
+        logger.info("POST /renovations/view");
         redirectAttributes.addFlashAttribute("cardsPerPage", cardsPerPage);
         redirectAttributes.addFlashAttribute("fromSearch", fromSearch);
+
+        if (errorMessage != null && !errorMessage.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errors", errorMessage);
+        }
 
         return "redirect:/renovations/view?id=" + id + "&page=" + pageNumber;
     }
@@ -461,6 +471,7 @@ public class RenovationController {
     @PostMapping("/tags/add")
     public String addTagToRenovation(@RequestParam Long renovationId,
                                      @RequestParam("tagName") String tagName,
+                                     @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                      RedirectAttributes redirectAttributes) {
         logger.info("POST renovations/tags/add");
 
@@ -478,7 +489,7 @@ public class RenovationController {
         } else {
             redirectAttributes.addFlashAttribute("errors", errors);
         }
-        return "redirect:/renovations/view?id=" + renovationId;
+        return "redirect:/renovations/view?id=" + renovationId + "&page=" + pageNumber;
     }
 
     /**
@@ -563,8 +574,7 @@ public class RenovationController {
             List<Tag> tagList = tagService.getTags(tagNameList);
             records = renovationRecordService.getAllRecordsByTags(tagList);
 
-            logger.info("tag list: " + tagList);
-            logger.info("records associated list: " + records);
+
         } else{
             records = switch (visibility.toLowerCase()) {
                 case "public" -> renovationRecordService.getPublicRecords(searchTerm);
@@ -599,6 +609,7 @@ public class RenovationController {
         model.addAttribute("paginationLinksEnd", paginationLinksEnd);
         model.addAttribute("cardsPerPage", cardsPerPage);
         model.addAttribute("totalCards", totalCards);
+        model.addAttribute("isTagSearch", isTagSearch);
 
         return "renovationSearchTemplate";
     }
@@ -638,5 +649,12 @@ public class RenovationController {
         session.setAttribute("cardsPerPage", cardsPerPage);
 
         return "redirect:/renovations/search?page=" + pageNumber;
+    }
+
+    @GetMapping("/tags/profanity-filter")
+    @ResponseBody
+    public boolean tagProfanityFilter(@RequestParam("tagName") String tagName) {
+        ProfanityFilter profanityFilter = ProfanityFilter.getInstance();
+        return profanityFilter.find("en", tagName) != null;
     }
 }

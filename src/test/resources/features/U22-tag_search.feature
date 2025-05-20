@@ -18,6 +18,14 @@ Feature: As Sarah, I want to be able to search for public renovation records by 
       | PublicRenovation        | PrivateRenovation       | House   | Garden  |
       | Public                  | Private                 | spare   | new     |
 
+  Scenario: AC5 Tag search returns no results and shows error message
+    Given the tags named "NewBuild" and "Apartment" exist
+    And a public renovation "HouseRenovation" exists with tags:
+      | House |
+    When I search for renovations with tags "NewBuild" and "Apartment"
+    Then I should see the message "No renovations contain your searched tags."
+
+
 
   Scenario: AC7 Submitting an empty tag search does nothing
     Given the tag search field is empty
