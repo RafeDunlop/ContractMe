@@ -61,7 +61,7 @@ function checkSuburb() {
     checkOptionalField(suburbField.value,
         suburbFrontendError,
         suburbFrontendErrorMessage,
-        "Suburb contains invalid characters",
+        "Suburb contains invalid characters.",
         suburbBackendError,
         suburbPattern
     )
@@ -74,7 +74,7 @@ function checkCity() {
     checkOptionalField(cityField.value,
         cityFrontendError,
         cityFrontendErrorMessage,
-        "City contains invalid characters",
+        "City contains invalid characters.",
         cityBackendError,
         cityPattern
     )
@@ -87,7 +87,7 @@ function checkPostCode() {
     checkOptionalField(postcodeField.value,
         postcodeFrontendError,
         postcodeFrontendErrorMessage,
-        "Postcode contains invalid characters",
+        "Postcode contains invalid characters.",
         postcodeBackendError,
         postcodePattern
     )
@@ -100,7 +100,7 @@ function checkCountry() {
     checkOptionalField(countryField.value,
         countryFrontendError,
         countryFrontendErrorMessage,
-        "Country contains invalid characters",
+        "Country contains invalid characters.",
         countryBackendError,
         countryPattern
     )
