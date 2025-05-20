@@ -20,11 +20,22 @@ required dependencies should be pulled in for you.
 
 ## How to run
 ### 1 - Setting up environment variables
-On our [wiki](https://eng-git.canterbury.ac.nz/seng302-2025/team-200/-/wikis/Home), 
-find the credentials for our Spring mail service. These variables must be defined before your run the command in
-section 2. How you define them is unimportant. however, if you are using intelliJ one way is by editing your run configuration,
-run > edit configurations > HomeHelperApplication > modify options > environment variables and entering the variables
-using key=pair values seperated by semicolons (;)
+If required, contact a maintainer (see contributors below) to gain access
+to environment variables such as API keys, otherwise create your own API keys
+and an email account and create an `env.properties` file:
+
+```env.properties
+DB_PASSWORD=password
+DB_USERNAME=sa
+SPRING_MAIL_PASSWORD=<your email password>
+SPRING_MAIL_USERNAME=<your email address>
+GEOAPIFY_API_KEY=<your geoapify key>
+```
+See [Geoapify](https://www.geoapify.com/) for info on the API and how to create
+a key.
+Note that currently we only support Gmail with the default configuration, but
+`src/main/resources/application.properties` can be modified with email settings
+for other email servers.
 
 ### 2 - Running the project
 From the root directory ...
