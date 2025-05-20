@@ -3,8 +3,9 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import java.util.List;
 import java.util.Map;
 
-import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
-import nz.ac.canterbury.seng302.homehelper.profanityFilter.dictionary.Profanity;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,19 +37,19 @@ public class RegisterController {
     private final VerificationCodeService verificationCodeService;
 
     private final ApplicationEventPublisher eventPublisher;
-
-
+    private final LocationService locationService;
 
     /**
      * Constructor for the register class, links controller and service layers
      */
     @Autowired
     public RegisterController(RegisterService registerService,
-            ApplicationEventPublisher eventPublisher,
-            VerificationCodeService verificationCodeService) {
+                              ApplicationEventPublisher eventPublisher,
+                              VerificationCodeService verificationCodeService, LocationService locationService) {
         this.registerService = registerService;
         this.verificationCodeService = verificationCodeService;
         this.eventPublisher = eventPublisher;
+        this.locationService = locationService;
     }
 
     /**
@@ -56,9 +57,11 @@ public class RegisterController {
      *
      * @return thymeleaf registration
      * @param userRegisterDTO, contains all params needed for a user object
+     * @param addressDTO, contains all params for a location object
      */
     @GetMapping("/register")
-    public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO) {
+    public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO,
+                               @ModelAttribute AddressDTO addressDTO) {
         logger.info("GET /register");
         return "registrationTemplate";
     }
@@ -67,12 +70,14 @@ public class RegisterController {
      * Handles form submission for user registration.
      *
      * @param userRegisterDTO the data transfer object containing user registration details
+     * @param addressDTO, dto containing user location details
      * @param request the HTTP servlet request
      * @param redirectAttributes attributes for a redirect scenario
      * @return redirect address
      */
     @PostMapping("/register")
     public String submitRegistration(@ModelAttribute UserRegisterDTO userRegisterDTO,
+                                     @ModelAttribute AddressDTO addressDTO,
                                      HttpServletRequest request,
                                      RedirectAttributes redirectAttributes) {
         logger.info("POST /register");
@@ -80,19 +85,35 @@ public class RegisterController {
         Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
 
 
+        boolean locationProvided = addressDTO != null &&
+                (addressDTO.getAddress_line1() != null && !addressDTO.getAddress_line1().isBlank()
+                        || addressDTO.getRegion() != null && !addressDTO.getRegion().isBlank()
+                        || addressDTO.getCity() != null && !addressDTO.getCity().isBlank()
+                        || addressDTO.getPostcode() != null && !addressDTO.getPostcode().isBlank()
+                        || addressDTO.getCountry() != null && !addressDTO.getCountry().isBlank());
+        if (locationProvided) {
+            errors.putAll(locationService.validateLocation(addressDTO));
+        }
+
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
             redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
+            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
+            redirectAttributes.addFlashAttribute("locationUsed", locationProvided);
             return "redirect:/register";
         }
 
         try {
             User user = registerService.registerUser(userRegisterDTO);
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
+            if (locationService.isLocationProvided(addressDTO)) {
+                registerService.registerLocation(user,addressDTO);
+            }
             return "redirect:/confirm-registration";
         } catch (MailException e) {
             redirectAttributes.addFlashAttribute("error", "Error sending confirmation email.");
             redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
+            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
             return "redirect:/register";
         }
     }

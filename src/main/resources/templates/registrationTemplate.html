@@ -2,10 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+    <base th:href="@{/}"/>
     <title>Home Helper Registration</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
 </head>
+
+
 <body>
 <div class="container mt-5">
     <div class="card p-4 shadow">
@@ -56,7 +60,7 @@
                 </div>
 
                 <!-- EMAIL -->
-                <div class="mb-3">
+                <div>
                     <input type="text" class="form-control" id="email" name="email" placeholder="Email"
                            aria-label="email" th:value="${userRegisterDTO.email}">
 
@@ -74,6 +78,24 @@
                             <li th:each="msg : ${emailError}" th:text="${msg}"></li>
                         </ul>
                     </div>
+                </div>
+
+                <!-- LOCATION TOGGLE SWITCH -->
+
+                <div class="d-flex justify-content-between align-items-center py-4 px-0" style="width: 22%">
+                    <div>Enter Location (Optional):</div>
+                    <div>
+                        <label class="switch">
+                            <input type="checkbox" id="location-toggleswitch" th:checked="${locationUsed}">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- LOCATION FORM FRAGMENT -->
+                <div th:class="${locationUsed} ? 'form-extension' : 'hidden-form-extension'" id="location-form">
+                    <div th:replace="~{fragments/locationForm.html :: locationForm(
+                     addressDTO=${addressDTO})}"></div>
                 </div>
 
                 <!-- PASSWORD -->
@@ -132,9 +154,12 @@
                 <a th:href="@{/}" class="btn btn-outline-secondary m-4">Cancel</a>
             </div>
         </form>
-    </div>
+    </div>F
 </div>
+<div style="height: 50px;"></div>
 </body>
-<script type="module" src="/js/userValidation.js"></script>
-<script type="module" src="/js/registerValidation.js"></script>
+<script type="module" th:src="@{/js/locationForm.js}"></script>
+<script type = "module" th:src="@{/js/locationFormValidation.js}"></script>
+<script type="module" th:src="@{/js/userValidation.js}"></script>
+<script type="module" th:src="@{/js/registerValidation.js}"></script>
 </html>

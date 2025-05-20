@@ -2,10 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+    <base th:href="@{/}"/>
     <title>Create renovation</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
-
+    <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
 </head>
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
@@ -13,7 +14,7 @@
 
     <div class="card p-4 shadow-sm">
         <h4 class="card-title mb-4">Start a new renovation!</h4>
-        <form th:action="@{create}" method="post" id="renovation-form">
+        <form th:action="@{/renovations/create}" method="post" id="renovation-form">
 
             <div id="room-hidden-inputs" th:each="room : ${roomList}">
                 <input type="hidden" name="roomList" th:value="${room}" />
@@ -108,7 +109,28 @@
                 <table id="room-list" class="table table-bordered"></table>
             </div>
 
+            <!-- LOCATION TOGGLE SWITCH -->
+
+            <div class="d-flex justify-content-between align-items-center py-4 px-0" style="width: 22%">
+                <div>Enter Location (Optional):</div>
+                <div>
+                    <label class="switch">
+                        <input type="checkbox" id="location-toggleswitch" th:checked="${locationUsed}">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- LOCATION FORM FRAGMENT -->
+            <div th:class="${locationUsed} ? 'form-extension' : 'hidden-form-extension'" id="location-form">
+                <div th:replace="~{fragments/locationForm.html :: locationForm(
+                     addressDTO=${addressDTO})}"></div>
+            </div>
+
             <button type="submit" id="submit-record" class="btn btn-primary">Create</button>
+
+
+
         </form>
     </div>
 
@@ -118,6 +140,8 @@
     </div>
 </div>
 </body>
+<script type="module" src="/js/locationForm.js"></script>
+<script type = "module" src="/js/locationFormValidation.js"></script>
 <script type="module" th:src="@{/js/renovationValidations.js}"></script>
 <script type="module" th:src="@{/js/individualRenovation.js}"></script>
 </html>

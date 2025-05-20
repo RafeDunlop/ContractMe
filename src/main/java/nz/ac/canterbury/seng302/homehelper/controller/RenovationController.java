@@ -1,10 +1,12 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 import jakarta.servlet.http.HttpSession;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
@@ -24,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -41,19 +44,22 @@ public class RenovationController {
     private final RenovationTaskService renovationTaskService;
     private final LoginService loginService;
     private final TagService tagService;
+    private final LocationService locationService;
 
     /**
      * induces spring to automatically sets up the {@code RenovationRecordService}
      *
      * @param renovationRecordService The renovation service which provides non-UI functionality
      * @param loginService            The login service provides the function to get the current user
+     * @param locationService         The location service provides the function to validate the locations
      */
     @Autowired
-    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService) {
+    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService,LocationService locationService) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.loginService = loginService;
         this.tagService = tagService;
+        this.locationService = locationService;
     }
 
     /**
@@ -64,11 +70,36 @@ public class RenovationController {
      * @return thymeleaf renovationsTemplate
      */
     @GetMapping
-    public String renovations(@RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery, Model model) {
+    public String renovations(@RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery,
+                              @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                              @RequestParam(defaultValue = "8", name = "itemsPerPage") int itemsPerPage,
+                              Model model) {
         logger.info("GET renovations");
         try {
+            if (itemsPerPage < 1) {
+                itemsPerPage = 8;
+            }
+            if (pageNumber < 1) {
+                return "redirect:/renovations?page=1&itemsPerPage=" + itemsPerPage + (!searchQuery.isEmpty() ? "&searchQuery=" + searchQuery : "");
+            }
+
             User user = loginService.getUserByEmail();
-            model.addAttribute("renovations", renovationRecordService.getUserRecords(user, searchQuery));
+            Pageable pageable = PageRequest.of(pageNumber - 1, itemsPerPage);
+            Page<RenovationRecord> renovationRecords = renovationRecordService.getPaginatedUserRecords(user, searchQuery, pageable);
+            int totalPages = renovationRecords.getTotalPages();
+            long totalRenovations = renovationRecords.getTotalElements();
+            int paginationLinksStart = Math.max(pageNumber - 2, 1);
+            int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
+
+            if (pageNumber > totalPages && totalRenovations != 0) {
+                return "redirect:/renovations?page=" + totalPages + "&itemsPerPage=" + itemsPerPage + (!searchQuery.isEmpty() ? "&searchQuery=" + searchQuery : "");
+            }
+            model.addAttribute("renovations", renovationRecords.getContent());
+            model.addAttribute("paginationLinksStart", paginationLinksStart);
+            model.addAttribute("paginationLinksEnd", paginationLinksEnd);
+            model.addAttribute("pageNumber", pageNumber);
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("itemsPerPage", itemsPerPage);
             model.addAttribute("searchQuery", searchQuery);
             return "renovationsTemplate";
         } catch (IllegalArgumentException e) {
@@ -82,7 +113,7 @@ public class RenovationController {
      * @return thymeleaf createRenovationTemplate
      */
     @GetMapping("/create")
-    public String record() {
+    public String record(@ModelAttribute AddressDTO addressDTO) {
         logger.info("GET /renovations/create");
         return "createRenovationTemplate";
     }
@@ -103,26 +134,39 @@ public class RenovationController {
      *
      * @param name        Name of the renovation
      * @param description The description of the renovation
+     * @param addressDTO, dto containing renovation location details
      * @return thymeleaf createRenovationTemplate OR viewRenovationTemplate
      */
     @PostMapping("/create")
     public String submitRecord(@RequestParam(name = "name") String name,
                                @RequestParam(name = "description", required = false, defaultValue = "") String description,
                                @RequestParam(name = "roomList", required = false) List<String> roomList,
+                               @ModelAttribute AddressDTO addressDTO,
                                RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/create");
 
         if (roomList == null) roomList = new ArrayList<>(); //cannot be a default value as technically non-constant
         Map<String, List<String>> errors = renovationRecordService.validateAllInputsCreate(name, description, roomList);
 
+        boolean locationProvided = addressDTO != null &&
+                (addressDTO.getAddress_line1() != null && !addressDTO.getAddress_line1().isBlank()
+                        || addressDTO.getRegion() != null && !addressDTO.getRegion().isBlank()
+                        || addressDTO.getCity() != null && !addressDTO.getCity().isBlank()
+                        || addressDTO.getPostcode() != null && !addressDTO.getPostcode().isBlank()
+                        || addressDTO.getCountry() != null && !addressDTO.getCountry().isBlank());
+
+        if (locationProvided) {
+            errors.putAll(locationService.validateLocation(addressDTO));
+        }
 
         if (!errors.isEmpty()) {
             // Add each error to a flash attribute, categorizing by error type
             errors.forEach(redirectAttributes::addFlashAttribute);
-
             redirectAttributes.addFlashAttribute("name", name);
             redirectAttributes.addFlashAttribute("description", description);
             redirectAttributes.addFlashAttribute("roomList", roomList);
+            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
+            redirectAttributes.addFlashAttribute("locationUsed", locationProvided);
 
             return "redirect:/renovations/create";
         }
@@ -133,6 +177,7 @@ public class RenovationController {
                 RenovationRecord renovationRecord = new RenovationRecord(user, name, description, roomList);
 
                 renovationRecordService.addRenovationRecord(renovationRecord);
+                renovationRecordService.addRenovationLocation(renovationRecord,addressDTO);
                 redirectAttributes.addFlashAttribute("renovation", renovationRecord);
                 return "redirect:/renovations/view?id=" + renovationRecord.getId();
 
@@ -460,6 +505,16 @@ public class RenovationController {
         if (visibility == null) visibility = "all";
         String searchTerm = (String) attributes.getOrDefault("searchTerm", session.getAttribute("searchTerm"));
         if (searchTerm == null) searchTerm = "";
+
+        List<String> tagNameList = (List<String>) attributes.getOrDefault("tagNameList", session.getAttribute("tagNameList"));
+        if (tagNameList == null) tagNameList = Collections.emptyList();
+
+        logger.info("TAG LIST PASSED : " + tagNameList);
+
+
+
+        boolean isTagSearch = Boolean.TRUE.equals(session.getAttribute("isTagSearch"));
+
         if (pageNumber == null) {
             pageNumber = (Integer) session.getAttribute("pageNumber");
             if (pageNumber == null) pageNumber = 1;
@@ -474,11 +529,23 @@ public class RenovationController {
 
         User user = loginService.getUserByEmail();
 
-        List<RenovationRecord> records = switch (visibility.toLowerCase()) {
-            case "public" -> renovationRecordService.getPublicRecords(searchTerm);
-            case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
-            default -> renovationRecordService.getAllRecords(user, searchTerm);
-        };
+        // Switching between search types
+        List<RenovationRecord> records;
+
+        if (isTagSearch) {
+            List<Tag> tagList = tagService.getTags(tagNameList);
+            records = renovationRecordService.getAllRecordsByTags(tagList);
+
+            logger.info("tag list: " + tagList);
+            logger.info("records associated list: " + records);
+        } else{
+            records = switch (visibility.toLowerCase()) {
+                case "public" -> renovationRecordService.getPublicRecords(searchTerm);
+                case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
+                default -> renovationRecordService.getAllRecords(user, searchTerm);
+            };
+        }
+
 
         if (pageNumber < 1)
             return "redirect:/renovations/search?page=1";
@@ -522,16 +589,24 @@ public class RenovationController {
     @PostMapping("/search")
     public String submitSearchRenovations(@RequestParam(required = false) String visibility,
                                           @RequestParam(required = false) String searchTerm,
+                                          @RequestParam(name = "tagNameList", required = false) List<String> tagNameList,
+                                          @RequestParam(defaultValue = "false") boolean isTagSearch,
                                           @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                           @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage,
                                           HttpSession session) {
         logger.info("POST /renovations/search");
+
+        if (isTagSearch && (tagNameList == null || tagNameList.isEmpty())) {
+            return "renovationSearchTemplate";
+        }
 
         if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";
 
         session.setAttribute("visibility", visibility);
         session.setAttribute("searchTerm", searchTerm);
+        session.setAttribute("tagNameList", tagNameList);
+        session.setAttribute("isTagSearch", isTagSearch);
         session.setAttribute("pageNumber", pageNumber);
         session.setAttribute("cardsPerPage", cardsPerPage);
 
