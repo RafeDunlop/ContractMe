@@ -9,6 +9,7 @@ import nz.ac.canterbury.seng302.homehelper.service.UpdatePasswordService;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 

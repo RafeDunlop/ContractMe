@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.repository;
 
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;

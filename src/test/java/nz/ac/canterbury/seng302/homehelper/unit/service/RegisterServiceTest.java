@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.security.authentication.AuthenticationManager;
 
 import java.util.ArrayList;
 import java.util.List;
