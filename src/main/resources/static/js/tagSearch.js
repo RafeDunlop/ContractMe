@@ -26,35 +26,37 @@ function focusTagInput() {
  */
 function addTag(tag) {
     tag = tag.trim();
-    if (tag === "" || tags.includes(tag)) return;
-    tags.push(tag);
+    if (tagFrontendError.hidden === true) {
+        if (tag === "" || tags.includes(tag)) return;
+        tags.push(tag);
 
-    // Create bubble
-    const bubble = document.createElement("span");
-    bubble.className = "tag-box badge bg-success d-flex align-items-center me-2 mt-1 mb-1";
+        // Create bubble
+        const bubble = document.createElement("span");
+        bubble.className = "tag-box badge bg-success d-flex align-items-center me-2 mt-1 mb-1";
 
-    const bubbleText = document.createElement("span");
-    bubbleText.className = "tag-text-small text-truncate";
-    bubbleText.textContent = tag;
+        const bubbleText = document.createElement("span");
+        bubbleText.className = "tag-text-small text-truncate";
+        bubbleText.textContent = tag;
 
-    // Remove button
-    const closeBtn = document.createElement("button");
-    closeBtn.className = "tag-delete-button-small btn-sm border-0 bg-transparent text-light ms-1";
-    closeBtn.style.cursor = "pointer";
-    closeBtn.innerHTML = "&times;";
-    closeBtn.onclick = () => removeTag(tag, bubble);
+        // Remove button
+        const closeBtn = document.createElement("button");
+        closeBtn.className = "tag-delete-button-small btn-sm border-0 bg-transparent text-light ms-1";
+        closeBtn.style.cursor = "pointer";
+        closeBtn.innerHTML = "&times;";
+        closeBtn.onclick = () => removeTag(tag, bubble);
 
-    bubble.appendChild(bubbleText);
-    bubble.appendChild(closeBtn);
-    tagInputContainer.insertBefore(bubble, tagBubbles);
+        bubble.appendChild(bubbleText);
+        bubble.appendChild(closeBtn);
+        tagInputContainer.insertBefore(bubble, tagBubbles);
 
-    // Add hidden input
-    const hidden = document.createElement("input");
-    hidden.type = "hidden";
-    hidden.name = "tagNameList";
-    hidden.value = tag;
-    hidden.dataset.tag = tag;
-    hiddenInputs.appendChild(hidden);
+        // Add hidden input
+        const hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.name = "tagNameList";
+        hidden.value = tag;
+        hidden.dataset.tag = tag;
+        hiddenInputs.appendChild(hidden);
+    }
 }
 
 

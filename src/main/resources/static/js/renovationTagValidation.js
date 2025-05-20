@@ -1,15 +1,16 @@
 let tagNameInput;
 let tagFrontendError = document.getElementById("tag-frontend-error");
 let tagFrontendErrorMessage = document.getElementById("tag-frontend-error-message");
-let tagBackendError = document.getElementById("tag-backend-error");
-let tagNameListElements
-let tagNamesList
+let tagBackendError;
+let tagNameListElements;
+let tagNamesList;
 
 
 if (formPath === "/renovations/view") {
     tagNameInput = document.getElementById("tagName");
     tagNameListElements = document.querySelectorAll('#tag-list span');
     tagNamesList = Array.from(tagNameListElements).map(el => el.textContent.trim());
+    tagBackendError = document.getElementById("tag-backend-error");
 } else if (formPath === "/renovations/search") {
     tagNameInput = document.getElementById("tag-input");
 } else {
@@ -61,12 +62,16 @@ async function validateTag(input) {
             errors.map(msg => `<li>${msg}</li>`).join("");
         tagFrontendError.classList.add("show");    // bootstrap’s .show or just remove hidden
         tagFrontendError.hidden = false;
-        tagBackendError.hidden = true;
+        if (formPath === "/renovations/view") {
+            tagBackendError.hidden = true;
+        }
         return false;
     } else {
         tagFrontendErrorMessage.innerHTML = "";
         tagFrontendError.hidden = true;
-        tagBackendError.hidden = true;
+        if (formPath === "/renovations/view") {
+            tagBackendError.hidden = true;
+        }
         return true;
     }
 }
