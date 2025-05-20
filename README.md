@@ -1,3 +1,23 @@
+## Description
+Welcome to Home Helper! Home Helper makes organising your renovations easy.
+You will be able to create an account, create and manage your renovations,
+add tasks to keep track of what needs doing, and browse public renovations.
+
+
+## Dependencies
+- Java >= 17, get the latest openjdk build from [jdk.java.net](https://jdk.java.net/)
+or preferably your package manager. You will probably need the full JDK to use
+Gradle.
+- [Spring Boot](https://spring.io/projects/spring-boot) (including spring boot
+mail)
+- [Cucumber](https://cucumber.io/) for automated acceptance tests
+- [JUnit 5/Jupiter](https://junit.org/junit5/) for automated unit/integration
+tests
+
+All dependencies, apart from the Java runtime/jdk itself, are managed via
+gradle, by following the steps below to run the application locally, all
+required dependencies should be pulled in for you.
+
 ## How to run
 ### 1 - Setting up environment variables
 On our [wiki](https://eng-git.canterbury.ac.nz/seng302-2025/team-200/-/wikis/Home), 
@@ -22,14 +42,24 @@ gradlew bootRun
 By default, the application will run on local port 8080 [http://localhost:8080](http://localhost:8080)
 
 ### 3 - Using the application
-> You may want to include information here about how to use the application, notably:
-> - default user credentials if required
-> - link to home/login page
-> - disclosing known issues (and workarounds if applicable)
-> - ...
+See our deployed production server [here](https://csse-seng302-team200.canterbury.ac.nz/prod/)
+or our deployed staging server [here](https://csse-seng302-team200.canterbury.ac.nz/test/).
+Note that the staging server is in development and should not be considered
+stable.
+
+Known issues are tracked [on GitLab](https://eng-git.canterbury.ac.nz/seng302-2025/team-200/-/issues).
+## Default user accounts
+The table below has the credentials for default users which can be used for
+testing.
+
+| Account Type | Email | Password | Notes |
+| ------------ | ----- | -------- | ----- |
+| User         | seng302.team200.test@gmail.com | P4$$word | This user has (a renovation with) enough tasks to display many-page pagination |
+| User | seng302.team200.test1@gmail.com | P4$$word | This user has (a renovation with) only 1 task |
 
 ## How to run tests
-> Once you have some tests written make sure you detail how to run them, especially if there are special requirements.
+Ensure that your environment variables are set up correctly to run the tests
+in your local environment.
 
 On Linux:
 ```
@@ -45,13 +75,6 @@ gradlew test
 gradlew integration
 gradlew cucumber
 ```
-
-
-## Todo (Sprint 2)
-
-- Update team name into `build.gradle`
-- Set up Gitlab CI server (refer to the student guide on Scrumboard)
-- Decide on a LICENSE
 
 ## Third-Party Software
 
@@ -81,6 +104,24 @@ The terms for the license under which this third party software has been used ca
 - Ryan Hamilton
 - Sean Reitsma
 - Mason Ott
+
+## License Notice
+
+Home Helper, a web application for managing renovations
+Copyright (C) 2025 SENG302 Team 200
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ## References
 
