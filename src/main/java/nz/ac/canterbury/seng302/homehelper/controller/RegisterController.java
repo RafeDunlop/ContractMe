@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

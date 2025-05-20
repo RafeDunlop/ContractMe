@@ -25,7 +25,7 @@ import java.util.Optional;
 @Controller
 public class ForgotPasswordController {
 
-    private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+    private static final Logger logger = LoggerFactory.getLogger(ForgotPasswordController.class);
 
     private final ForgotPasswordService forgotPasswordService;
 

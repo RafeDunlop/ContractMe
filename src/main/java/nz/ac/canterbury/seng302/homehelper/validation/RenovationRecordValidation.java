@@ -34,7 +34,7 @@ public class RenovationRecordValidation {
     /**
      * Checks if a name has an exact match in the repository with the logged-in user
      * @param name the name to check to see if its present in the repository
-     * @return true if a match for the name is found, otherwise false
+     * @return list of errors
      */
     public List<String> checkForExactMatchCreate(String name) {
         List<String> errors = new ArrayList<>();
@@ -53,7 +53,7 @@ public class RenovationRecordValidation {
      * </strong>
      * @param name The name to check
      * @param renovationRecord The renovation whose name is always valid
-     * @return true if there is no match or the match is the specified {@code RenovationRecord}
+     * @return list of errors
      */
     public List<String> checkForExactMatchEdit(String name, RenovationRecord renovationRecord) {
         List<String> errors = new ArrayList<>();
@@ -72,7 +72,7 @@ public class RenovationRecordValidation {
      * that it must not be empty
      *
      * @param name The name to be checked
-     * @return true if the specified name matches the specified pattern and is non-empty
+     * @return list of errors
      */
     public List<String> validateName(String name) {
         List<String> errors = new ArrayList<>();
