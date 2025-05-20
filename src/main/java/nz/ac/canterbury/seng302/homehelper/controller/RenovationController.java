@@ -1,9 +1,12 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 import jakarta.servlet.http.HttpSession;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
@@ -41,19 +44,22 @@ public class RenovationController {
     private final RenovationTaskService renovationTaskService;
     private final LoginService loginService;
     private final TagService tagService;
+    private final LocationService locationService;
 
     /**
      * induces spring to automatically sets up the {@code RenovationRecordService}
      *
      * @param renovationRecordService The renovation service which provides non-UI functionality
      * @param loginService            The login service provides the function to get the current user
+     * @param locationService         The location service provides the function to validate the locations
      */
     @Autowired
-    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService) {
+    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService,LocationService locationService) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.loginService = loginService;
         this.tagService = tagService;
+        this.locationService = locationService;
     }
 
     /**
@@ -107,7 +113,7 @@ public class RenovationController {
      * @return thymeleaf createRenovationTemplate
      */
     @GetMapping("/create")
-    public String record() {
+    public String record(@ModelAttribute AddressDTO addressDTO) {
         logger.info("GET /renovations/create");
         return "createRenovationTemplate";
     }
@@ -128,26 +134,39 @@ public class RenovationController {
      *
      * @param name        Name of the renovation
      * @param description The description of the renovation
+     * @param addressDTO, dto containing renovation location details
      * @return thymeleaf createRenovationTemplate OR viewRenovationTemplate
      */
     @PostMapping("/create")
     public String submitRecord(@RequestParam(name = "name") String name,
                                @RequestParam(name = "description", required = false, defaultValue = "") String description,
                                @RequestParam(name = "roomList", required = false) List<String> roomList,
+                               @ModelAttribute AddressDTO addressDTO,
                                RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/create");
 
         if (roomList == null) roomList = new ArrayList<>(); //cannot be a default value as technically non-constant
         Map<String, List<String>> errors = renovationRecordService.validateAllInputsCreate(name, description, roomList);
 
+        boolean locationProvided = addressDTO != null &&
+                (addressDTO.getAddress_line1() != null && !addressDTO.getAddress_line1().isBlank()
+                        || addressDTO.getRegion() != null && !addressDTO.getRegion().isBlank()
+                        || addressDTO.getCity() != null && !addressDTO.getCity().isBlank()
+                        || addressDTO.getPostcode() != null && !addressDTO.getPostcode().isBlank()
+                        || addressDTO.getCountry() != null && !addressDTO.getCountry().isBlank());
+
+        if (locationProvided) {
+            errors.putAll(locationService.validateLocation(addressDTO));
+        }
 
         if (!errors.isEmpty()) {
             // Add each error to a flash attribute, categorizing by error type
             errors.forEach(redirectAttributes::addFlashAttribute);
-
             redirectAttributes.addFlashAttribute("name", name);
             redirectAttributes.addFlashAttribute("description", description);
             redirectAttributes.addFlashAttribute("roomList", roomList);
+            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
+            redirectAttributes.addFlashAttribute("locationUsed", locationProvided);
 
             return "redirect:/renovations/create";
         }
@@ -158,6 +177,7 @@ public class RenovationController {
                 RenovationRecord renovationRecord = new RenovationRecord(user, name, description, roomList);
 
                 renovationRecordService.addRenovationRecord(renovationRecord);
+                renovationRecordService.addRenovationLocation(renovationRecord,addressDTO);
                 redirectAttributes.addFlashAttribute("renovation", renovationRecord);
                 return "redirect:/renovations/view?id=" + renovationRecord.getId();
 
@@ -389,9 +409,15 @@ public class RenovationController {
                                      @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                      @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage,
                                      @RequestParam(name = "fromSearch", required = false, defaultValue = "false") boolean fromSearch,
+                                     @RequestParam(name = "errorMessage", required = false) List<String> errorMessage,
                                      RedirectAttributes redirectAttributes) {
+        logger.info("POST /renovations/view");
         redirectAttributes.addFlashAttribute("cardsPerPage", cardsPerPage);
         redirectAttributes.addFlashAttribute("fromSearch", fromSearch);
+
+        if (errorMessage != null && !errorMessage.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errors", errorMessage);
+        }
 
         return "redirect:/renovations/view?id=" + id + "&page=" + pageNumber;
     }
@@ -407,6 +433,7 @@ public class RenovationController {
     @PostMapping("/tags/add")
     public String addTagToRenovation(@RequestParam Long renovationId,
                                      @RequestParam("tagName") String tagName,
+                                     @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                      RedirectAttributes redirectAttributes) {
         logger.info("POST renovations/tags/add");
 
@@ -424,7 +451,7 @@ public class RenovationController {
         } else {
             redirectAttributes.addFlashAttribute("errors", errors);
         }
-        return "redirect:/renovations/view?id=" + renovationId;
+        return "redirect:/renovations/view?id=" + renovationId + "&page=" + pageNumber;
     }
 
     /**
@@ -584,5 +611,12 @@ public class RenovationController {
         session.setAttribute("cardsPerPage", cardsPerPage);
 
         return "redirect:/renovations/search?page=" + pageNumber;
+    }
+
+    @GetMapping("/tags/profanity-filter")
+    @ResponseBody
+    public boolean tagProfanityFilter(@RequestParam("tagName") String tagName) {
+        ProfanityFilter profanityFilter = ProfanityFilter.getInstance();
+        return profanityFilter.find("en", tagName) != null;
     }
 }

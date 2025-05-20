@@ -59,7 +59,7 @@
             </div>
 
             <!-- Single Tag Add Form -->
-            <form th:action="@{renovations/tags/add}" method="post" id="add-tag-form" class="mb-3" th:if="${isOwner}">
+            <form th:action="@{/renovations/tags/add}" method="post" id="add-tag-form" class="mb-3" th:if="${isOwner}">
                 <label for="tagName" class="fw-bold">Add Tags:</label>
                 <input type="text" class="form-control" id="tagName" name="tagName" placeholder="Enter a tag"
                        data-cy="tag" maxlength="129" autocomplete="off" required>
@@ -71,12 +71,13 @@
             <div class="alert alert-danger mt-2" role="alert" id="tag-frontend-error" hidden>
                 <ul><li><label class="form-label" id="tag-frontend-error-message"></label></li></ul>
             </div>
-
             <!-- Backend error -->
             <div class="alert alert-danger mt-2" role="alert" id="tag-backend-error"
                  th:attr="hidden=${errors == null}">
                 <ul><li th:each="msg : ${errors}" th:text="${msg}"></li></ul>
             </div>
+
+
 
 
             <!-- Display added tags -->

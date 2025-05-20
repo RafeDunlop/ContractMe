@@ -105,7 +105,7 @@
                         <input type="hidden" name="fromSearch" value="true" />
                         <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
                     </form>
-                    <a href="#" th:onclick="'document.getElementById(\'form-' + ${record.getId()} + '\').submit(); return false;'" class="no-underline">
+                    <a th:href="@{/renovations/view(id=${record.getId()}, page=${pageNumber}, fromSearch=true)}" class="no-underline">
                         <div class="card card-count position-relative" style="width: 18rem;">
                             <!-- Badge if user owns the record -->
                             <span class="badge bg-primary position-absolute top-0 end-0 m-2"

@@ -34,6 +34,9 @@ public class RenovationRecord {
     @Column(nullable = false)
     private String name;
 
+    @Column
+    private Location location;
+
     @Column(nullable = false, length = 513)
     private String description;
 
@@ -56,6 +59,7 @@ public class RenovationRecord {
 
     /**
      * Constructor for RenovationRecord
+     * Creates a new Renovation object without location
      * @param user The owner of this record
      * @param name of the record, unique
      * @param description of the record, not required
@@ -228,6 +232,24 @@ public class RenovationRecord {
     public boolean isPublic() {
         return isPublic;
     }
+
+    /**
+     * Gets the location of renovation
+     * @return location entity
+     */
+    public Location getLocation() {
+        return location;
+    }
+
+    /**
+     * Sets the location of renovation
+     * @param location location entity
+     */
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
     /**
      * toString method returning all the values stored
      * @return string of the values of the record

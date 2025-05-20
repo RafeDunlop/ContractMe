@@ -1,16 +1,15 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
 import jakarta.transaction.Transactional;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
-import nz.ac.canterbury.seng302.homehelper.entity.Tag;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.*;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -933,7 +932,7 @@ public class RenovationControllerIntegrationTest {
                         .param("renovationId", String.valueOf(renovationId))
                         .param("tagName", testTagName))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId + "&page=1"));
 
         assertTrue(testRecord.getTags().stream()
                 .anyMatch(tag -> tag.getTagName().equals(testTagName)));
@@ -952,7 +951,7 @@ public class RenovationControllerIntegrationTest {
                         .param("renovationId", String.valueOf(renovationId))
                         .param("tagName", newTagName))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId  + "&page=1"));
 
         assertTrue(testRecord.getTags().stream()
                 .anyMatch(tag -> tag.getTagName().equals(newTagName)));
@@ -963,7 +962,7 @@ public class RenovationControllerIntegrationTest {
                         .param("renovationId", String.valueOf(renovationId))
                         .param("tagName", newNameSpecialCharacters))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId + "&page=1"));
 
         assertTrue(testRecord.getTags().stream()
                 .anyMatch(tag -> tag.getTagName().equals(newNameSpecialCharacters)));
@@ -974,7 +973,7 @@ public class RenovationControllerIntegrationTest {
                         .param("renovationId", String.valueOf(renovationId))
                         .param("tagName", withSpacesNewName))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId));
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationId + "&page=1"));
 
         assertTrue(testRecord.getTags().stream()
                 .anyMatch(tag -> tag.getTagName().equals("electrician")));
@@ -1000,6 +999,40 @@ public class RenovationControllerIntegrationTest {
                         .param("tagName", "123"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attributeExists("errors"));
+    }
+
+    @Test
+    public void addTagToRenovation_inappropriateTagName_profanityWarningThrown() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(currentUser, "Random Renovation", "Some words", List.of());
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+        String tagName = "ass";
+
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", tagName))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("errors"))
+                .andExpect(flash().attribute("errors", is(List.of("Name does not follow the system language standards."))));
+    }
+
+    @Test
+    public void addTagToRenovation_noLettersAndAboveMaxLength_noLettersAndMaxLengthErrorThrown() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(currentUser, "Random Renovation", "Some words", List.of());
+        renovationRecordRepository.save(testRecord);
+        Long renovationId = testRecord.getId();
+        String tagName = "!".repeat(129);
+
+        mockMvc.perform(post("/renovations/tags/add")
+                        .with(csrf())
+                        .param("renovationId", String.valueOf(renovationId))
+                        .param("tagName", tagName))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attributeExists("errors"))
+                .andExpect(flash().attribute("errors", containsInAnyOrder(
+                        "Tags must contain one or more letters.",
+                        "Tag cannot be greater than 128 characters.")));
     }
 
     @Test
@@ -1368,4 +1401,84 @@ public class RenovationControllerIntegrationTest {
                         hasProperty("name", is("RenovationOneTag"))
                 )));
     }
+
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void getForm_renovationWithLocation_locationAdded() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
+        AddressDTO addressDTO = new AddressDTO();
+        addressDTO.setAddress_line1("164 Ingoldsby Street");
+        addressDTO.setCountry("New Zealand");
+        addressDTO.setPostcode("8023");
+        addressDTO.setCity("Christchurch");
+        addressDTO.setRegion("Beckenham");
+
+        mockMvc.perform(post("/renovations/create")
+                .param("name", testRecord.getName())
+                .param("description", testRecord.getDescription())
+                .param("roomList", "Kitchen", "Dining Room")
+                .param("address_line1", addressDTO.getAddress_line1())
+                .param("country", addressDTO.getCountry())
+                .param("postcode", addressDTO.getPostcode())
+                .param("city", addressDTO.getCity())
+                .param("region", addressDTO.getRegion())
+                .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+
+        List<RenovationRecord> allRecords = renovationRecordRepository.findAll();
+        assertFalse(allRecords.isEmpty(), "No renovation records saved");
+        RenovationRecord saved = allRecords.get(1);
+        Location loc = saved.getLocation();
+        assertNotNull(loc, "Location should be set on renovation");
+        assertEquals(addressDTO.getAddress_line1(), loc.getAddress());
+        assertEquals(addressDTO.getCountry(), loc.getCountry());
+        assertEquals(addressDTO.getCity(), loc.getCity());
+        assertEquals(addressDTO.getRegion(), loc.getSuburb());
+        assertEquals(addressDTO.getPostcode(), loc.getPostcode());
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void getForm_renovationWitoutLocation_locationNotAdded() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
+
+
+        mockMvc.perform(post("/renovations/create")
+                        .param("name", testRecord.getName())
+                        .param("description", testRecord.getDescription())
+                        .param("roomList", "Kitchen", "Dining Room")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+
+        List<RenovationRecord> allRecords = renovationRecordRepository.findAll();
+        assertFalse(allRecords.isEmpty(), "No renovation records saved");
+        RenovationRecord saved = allRecords.get(1);
+        Location loc = saved.getLocation();
+        assertNotNull(loc, "Location should be set on renovation");
+        assertNull(loc.getAddress());
+        assertNull(null, loc.getCountry());
+        assertNull(null, loc.getCity());
+        assertNull(loc.getSuburb());
+        assertNull(loc.getPostcode());
+    }
+
+    @Test
+    public void getProfanityFilter_invalidName_returnTrue() throws Exception {
+        String invalidName = "ass";
+        mockMvc.perform(get("/renovations/tags/profanity-filter").param("tagName", invalidName))
+                .andExpect(content().string(equalTo("true")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void getProfanityFilter_validName_returnFalse() throws Exception {
+        String invalidName = "Bathroom";
+        mockMvc.perform(get("/renovations/tags/profanity-filter").param("tagName", invalidName))
+                .andExpect(content().string(equalTo("false")))
+                .andExpect(status().isOk());
+    }
+
 }

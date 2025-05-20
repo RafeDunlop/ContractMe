@@ -98,9 +98,12 @@ public class Dictionary implements Iterable<Profanity> {
         @Override
         public Profanity find(String input) {
             input = input.toLowerCase();
+            List <String> inputs = Arrays.stream(input.split(" ")).toList();
             for (Pattern pattern : patterns) {
-                if (pattern.matcher(input).matches()) {
-                    return new Profanity(pattern.toString(), 1.0f); // or look up actual score if needed
+                for (String word : inputs) {
+                    if (pattern.matcher(word).matches()) {
+                        return new Profanity(pattern.toString(), 1.0f); // or look up actual score if needed
+                    }
                 }
             }
             return null;

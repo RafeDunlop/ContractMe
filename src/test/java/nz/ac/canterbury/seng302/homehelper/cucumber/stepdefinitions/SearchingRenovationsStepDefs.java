@@ -104,7 +104,7 @@ public class SearchingRenovationsStepDefs {
         List<RenovationRecord> records = (List<RenovationRecord>) Objects.requireNonNull(result.getModelAndView()).getModel().get("renovations");
         int expectedRenovationNumber = DEFAULT_PAGE_SIZE * (page - 1);
         assertEquals(DEFAULT_PAGE_SIZE, result.getModelAndView().getModel().get("itemsPerPage"));
-        assertEquals("MyRenovation" + expectedRenovationNumber, records.getFirst().getName());
+        assertEquals("MyRenovation" + expectedRenovationNumber, records.get(0).getName());
     }
 
     @Then("Page number {int} is currently highlighted")
