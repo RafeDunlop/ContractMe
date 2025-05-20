@@ -170,7 +170,7 @@
                         <li class="page-item" th:if="${totalPages <= 10}"
                             th:each="pageLinkNumber : ${#numbers.sequence(1, totalPages)}"
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'"
-                            th:id="'page' + ${pageLinkNumber}">>
+                            th:id="'page' + ${pageLinkNumber}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/search},
                                 ${pageLinkNumber},
@@ -182,7 +182,7 @@
                         <li class="page-item" th:if="${totalPages > 10}"
                             th:each="pageLinkNumber : ${#numbers.sequence(paginationLinksStart, paginationLinksEnd)}"
                             th:classappend="${pageLinkNumber == pageNumber} ? 'active'"
-                            th:id="'page' + ${pageLinkNumber}">>
+                            th:id="'page' + ${pageLinkNumber}">
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/search},
                                 ${pageLinkNumber},

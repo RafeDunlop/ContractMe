@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Optional;
 
 import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import java.util.List;
+
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
