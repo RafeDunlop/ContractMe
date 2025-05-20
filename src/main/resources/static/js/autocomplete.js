@@ -22,6 +22,13 @@ input.addEventListener("input", function () {
     updateAutocomplete(partialTag);
 });
 
+//Listens for if the user clicks on the page to dismiss the
+//autocomplete suggestions
+document.addEventListener("click", function () {
+
+    resetAutocomplete();
+});
+
 /**
  * Fetches the autocomplete suggestions for a partial tag input then updates the UI.
  * Removes tags that have been added to the renovation from the list of suggestions.
@@ -87,7 +94,8 @@ function setAutoCompleteList(tags) {
                 resetAutocomplete();
             }
 
-        });
+
+        })
 
         list.appendChild(item);
     }
@@ -98,5 +106,6 @@ function setAutoCompleteList(tags) {
  * Clears the autocomplete display list.
  */
 function resetAutocomplete() {
+    console.log("Clearing suggestions")
     document.getElementById("autocomplete-list").innerHTML = "";
 }

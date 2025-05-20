@@ -12,6 +12,11 @@ const tagPattern = /^(?=.*\p{L}).*$/u;
 
 tagInput.addEventListener("input", function () {validateTag(tagInput.value)})
 
+/**
+ * Validates tag input on the frontend
+ * @param input user input from tag search
+ * @returns {boolean}
+ */
 function validateTag(input) {
     input = input.trim().toLowerCase();
     if (tagNamesList.length >= 5) {
