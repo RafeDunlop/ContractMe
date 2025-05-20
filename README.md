@@ -36,7 +36,8 @@ GEOAPIFY_API_KEY=<your geoapify key>
 See [Geoapify](https://www.geoapify.com/) for info on the API and how to create
 a key.
 Note that currently we only support Gmail with the default configuration, but
-`src/main/resources/application.properties` can be modified with email settings
+[application.properties](./src/main/resources/application.properties)
+can be modified with email settings
 for other email servers.
 
 ### 2 - Running the project
@@ -119,6 +120,7 @@ The terms for the license under which this third party software has been used ca
 - Mason Ott
 
 ## License Notice
+The license for Home Helper can be found at [COPYING](./COPYING)
 
 Home Helper, a web application for managing renovations
 Copyright (C) 2025 SENG302 Team 200
