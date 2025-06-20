@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
@@ -43,35 +44,6 @@ public class RenovationRecordService {
     }
 
     /**
-     * Retrieves a list of renovation records associated with the current user that are like the given term
-     * with pagination.
-     * @param user The current user
-     * @param term The term to search for, not case-sensitive
-     * @param pageable The pagination information
-     * @return a list of renovation records from the user that match the term if given
-     */
-    public Page<RenovationRecord> getPaginatedUserRecords(User user, String term,
-                                                        Pageable pageable) {
-        if (term == null || term.trim().isEmpty()) {
-            return renovationRecordRepository.findByUser(user, pageable);
-        }
-        return renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCasePaginated(user, term, pageable);
-    }
-
-    /**
-     * Retrieves a list of renovation records associated with the current user that are like the given term
-     * @param user The current user
-     * @param term The term to search for, not case-sensitive
-     * @return a list of renovation records from the user that match the term if given
-     */
-    public List<RenovationRecord> getUserRecords(User user, String term) {
-        if (term == null || term.trim().isEmpty()) {
-            return renovationRecordRepository.findByUser(user);
-        }
-        return renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(user, term);
-    }
-
-    /**
      * Creates a location and attaches it to the user entity
      * Saves the user with its location to the database
      *
@@ -92,15 +64,38 @@ public class RenovationRecordService {
     }
 
     /**
+     * Retrieves a list of renovation records associated with the current user that are like the given term
+     * with pagination.
+     * @param user The current user
+     * @param term The term to search for, not case-sensitive
+     * @param pageable The pagination information
+     * @return a list of renovation records from the user that match the term if given or tags
+     */
+    public Page<RenovationRecord> getPaginatedUserRecords(User user, String term, List<Tag> tagList, Pageable pageable) {
+        if (term.trim().isEmpty() && tagList == null) {
+            return renovationRecordRepository.findUserRecords(user, pageable);
+        } else if (tagList == null) {
+            return renovationRecordRepository.findUserRecordsBySearch(user, term, pageable);
+        } else if (term.trim().isEmpty()) {
+            return renovationRecordRepository.findUserRecordsByTag(user, tagList, pageable);
+        }
+        return renovationRecordRepository.findUserRecordsBySearchOrTag(user, term, tagList, pageable);
+    }
+
+    /**
      * Retrieves a list of public renovation records that are like the given term
      * @param term The term to search for, not case-sensitive
      * @return a list of public renovation records that match the term if given
      */
-    public List<RenovationRecord> getPublicRecords(String term) {
-        if (term == null || term.trim().isEmpty()) {
-            return renovationRecordRepository.findByIsPublicTrue();
+    public Page<RenovationRecord> getPaginatedPublicRecords(String term, List<Tag> tagList, Pageable pageable) {
+        if (term.trim().isEmpty() && tagList == null) {
+            return renovationRecordRepository.findPublicRecords(pageable);
+        } else if (tagList == null) {
+            return renovationRecordRepository.findPublicRecordsBySearch(term, pageable);
+        } else if (term.trim().isEmpty()) {
+            return renovationRecordRepository.findPublicRecordsByTag(tagList, pageable);
         }
-        return renovationRecordRepository.findByIsPublicTrueSearchContainingNameOrDescriptionIgnoreCase(term);
+        return renovationRecordRepository.findPublicRecordsBySearchOrTag(term, tagList, pageable);
     }
 
     /**
@@ -108,11 +103,15 @@ public class RenovationRecordService {
      * @param term The term to search for, not case-sensitive
      * @return a list of public or users renovation records that match the term if given
      */
-    public List<RenovationRecord> getAllRecords(User user, String term) {
-        if (term == null || term.trim().isEmpty()) {
-            return renovationRecordRepository.findAllVisibleToUser(user);
+    public Page<RenovationRecord> getPaginatedVisibleRecords(User user, String term, List<Tag> tagList, Pageable pageable) {
+        if (term.trim().isEmpty() && tagList == null) {
+            return renovationRecordRepository.findVisibleRecords(user, pageable);
+        } else if (tagList == null) {
+            return renovationRecordRepository.findVisibleRecordsBySearch(user, term, pageable);
+        } else if (term.trim().isEmpty()) {
+            return renovationRecordRepository.findVisibleRecordsByTag(user, tagList, pageable);
         }
-        return renovationRecordRepository.findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(user, term);
+        return renovationRecordRepository.findVisibleRecordsBySearchOrTag(user, term, tagList, pageable);
     }
 
     /**
@@ -216,15 +215,5 @@ public class RenovationRecordService {
 
         recordsSubList = records.subList(startIndex, endIndex);
         return new PageImpl<>(recordsSubList, pageable, records.size());
-    }
-
-    /**
-     * Retrieves a list of all renovation records that are associated with the given tags.
-     * @param tagList the list of tag objects.
-     * @return a list of renovation records associated with the tags in the given list.
-     */
-    public List<RenovationRecord> getAllRecordsByTags(List<Tag> tagList) {
-        // return renovationRecordRepository.findAllByTags(tagList);
-        return renovationRecordRepository.findAllPublicByTagsOrderByTagCountAndDate(tagList);
     }
 }

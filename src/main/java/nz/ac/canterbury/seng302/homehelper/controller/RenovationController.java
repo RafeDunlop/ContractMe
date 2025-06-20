@@ -68,41 +68,46 @@ public class RenovationController {
      * @return thymeleaf renovationsTemplate
      */
     @GetMapping
-    public String renovations(@RequestParam(value = "searchQuery", required = false, defaultValue = "") String searchQuery,
-                              @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+    public String renovations(@RequestParam(value = "searchTerm", required = false, defaultValue = "") String searchTerm,
+                              @RequestParam(defaultValue = "1", name = "page") Integer pageNumber,
                               @RequestParam(defaultValue = "8", name = "itemsPerPage") int itemsPerPage,
                               Model model) {
         logger.info("GET renovations");
-        try {
-            if (itemsPerPage < 1) {
-                itemsPerPage = 8;
-            }
-            if (pageNumber < 1) {
-                return "redirect:/renovations?page=1&itemsPerPage=" + itemsPerPage + (!searchQuery.isEmpty() ? "&searchQuery=" + searchQuery : "");
-            }
 
-            User user = loginService.getUserByEmail();
-            Pageable pageable = PageRequest.of(pageNumber - 1, itemsPerPage);
-            Page<RenovationRecord> renovationRecords = renovationRecordService.getPaginatedUserRecords(user, searchQuery, pageable);
-            int totalPages = renovationRecords.getTotalPages();
-            long totalRenovations = renovationRecords.getTotalElements();
-            int paginationLinksStart = Math.max(pageNumber - 2, 1);
-            int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
-
-            if (pageNumber > totalPages && totalRenovations != 0) {
-                return "redirect:/renovations?page=" + totalPages + "&itemsPerPage=" + itemsPerPage + (!searchQuery.isEmpty() ? "&searchQuery=" + searchQuery : "");
-            }
-            model.addAttribute("renovations", renovationRecords.getContent());
-            model.addAttribute("paginationLinksStart", paginationLinksStart);
-            model.addAttribute("paginationLinksEnd", paginationLinksEnd);
-            model.addAttribute("pageNumber", pageNumber);
-            model.addAttribute("totalPages", totalPages);
-            model.addAttribute("itemsPerPage", itemsPerPage);
-            model.addAttribute("searchQuery", searchQuery);
-            return "renovationsTemplate";
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        if (itemsPerPage < 1) {
+            itemsPerPage = 8;
         }
+        if (pageNumber < 1) {
+            return "redirect:/renovations?page=1&itemsPerPage=" + itemsPerPage + (!searchTerm.isEmpty() ? "&searchQuery=" + searchTerm : "");
+        }
+        if (searchTerm == null) searchTerm = "";
+        if (pageNumber < 1) {
+            return "redirect:/renovations/search?page=1";
+        }
+
+        User user = loginService.getUserByEmail();
+        Page<RenovationRecord> records;
+        Pageable pageable = PageRequest.of(pageNumber - 1, itemsPerPage);
+
+        records = renovationRecordService.getPaginatedUserRecords(user, searchTerm, null, pageable);
+
+        int totalPages = records.getTotalPages();
+        if (pageNumber > totalPages && totalPages > 0) {
+            return "redirect:/renovations/search?page=" + totalPages;
+        }
+
+        int paginationLinksStart = Math.max(pageNumber - 2, 1);
+        int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
+
+        model.addAttribute("searchTerm", searchTerm);
+        model.addAttribute("user", user);
+        model.addAttribute("records", records.getContent());
+        model.addAttribute("pageNumber", pageNumber);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("paginationLinksStart", paginationLinksStart);
+        model.addAttribute("paginationLinksEnd", paginationLinksEnd);
+        model.addAttribute("cardsPerPage", itemsPerPage);
+        return "renovationsTemplate";
     }
 
     /**
@@ -535,29 +540,14 @@ public class RenovationController {
      */
     @GetMapping("/search")
     public String searchRenovations(Model model, HttpSession session,
-                                    @RequestParam(name = "page", required = false) Integer pageNumber) {
+                                    @RequestParam(required = false) String visibility,
+                                    @RequestParam(required = false) String searchTerm,
+                                    @RequestParam(name = "tagNameList", required = false) List<String> tagNameList,
+                                    @RequestParam(name = "page", defaultValue = "1") int pageNumber) {
         logger.info("GET /renovations/search");
-
+        logger.info("tags: {}", tagNameList);
         Map<String, Object> attributes = model.asMap();
 
-        String visibility = (String) attributes.getOrDefault("visibility", session.getAttribute("visibility"));
-        if (visibility == null) visibility = "all";
-        String searchTerm = (String) attributes.getOrDefault("searchTerm", session.getAttribute("searchTerm"));
-        if (searchTerm == null) searchTerm = "";
-
-        List<String> tagNameList = (List<String>) attributes.getOrDefault("tagNameList", session.getAttribute("tagNameList"));
-        if (tagNameList == null) tagNameList = Collections.emptyList();
-
-        logger.info("TAG LIST PASSED : " + tagNameList);
-
-
-
-        boolean isTagSearch = Boolean.TRUE.equals(session.getAttribute("isTagSearch"));
-
-        if (pageNumber == null) {
-            pageNumber = (Integer) session.getAttribute("pageNumber");
-            if (pageNumber == null) pageNumber = 1;
-        }
 
         Object cardsPerPageObj = attributes.get("cardsPerPage");
         if (cardsPerPageObj == null) {
@@ -566,51 +556,44 @@ public class RenovationController {
         Integer cardsPerPage = (cardsPerPageObj instanceof Integer) ? (Integer) cardsPerPageObj : null;
         if (cardsPerPage == null) cardsPerPage = 16;
 
+        if (visibility == null) visibility = "all";
+        if (searchTerm == null) searchTerm = "";
+        List<Tag> tagList = (tagNameList != null) ? tagService.getTags(tagNameList) : null;
+
+        if (pageNumber < 1) {
+            return "redirect:/renovations/search?page=1";
+        }
+        
         User user = loginService.getUserByEmail();
 
-        // Switching between search types
-        List<RenovationRecord> records;
-
-        if (isTagSearch) {
-            List<Tag> tagList = tagService.getTags(tagNameList);
-            records = renovationRecordService.getAllRecordsByTags(tagList);
-
-
-        } else{
-            records = switch (visibility.toLowerCase()) {
-                case "public" -> renovationRecordService.getPublicRecords(searchTerm);
-                case "user" -> renovationRecordService.getUserRecords(user, searchTerm);
-                default -> renovationRecordService.getAllRecords(user, searchTerm);
-            };
-        }
-
-
-        if (pageNumber < 1)
-            return "redirect:/renovations/search?page=1";
-
-        int totalCards = records.size();
-        int totalPages = (totalCards + cardsPerPage - 1) / cardsPerPage;
-
-        if (pageNumber > totalPages && totalCards != 0)
-            return "redirect:/renovations/search?page=" + totalPages;
-
+        Page<RenovationRecord> records;
         Pageable pageable = PageRequest.of(pageNumber - 1, cardsPerPage);
-        Page<RenovationRecord> paginatedRecords = renovationRecordService.returnRecordPages(pageable, records);
+
+        records = switch (visibility.toLowerCase()) {
+            case "public" -> renovationRecordService.getPaginatedPublicRecords(searchTerm, tagList, pageable);
+            case "user" -> renovationRecordService.getPaginatedUserRecords(user, searchTerm, tagList, pageable);
+            default -> renovationRecordService.getPaginatedVisibleRecords(user, searchTerm, tagList, pageable);
+        };
+
+        int totalPages = records.getTotalPages();
+
+        if (pageNumber > totalPages && totalPages > 0) {
+            return "redirect:/renovations/search?page=" + totalPages;
+            }
 
         int paginationLinksStart = Math.max(pageNumber - 2, 1);
         int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
 
         model.addAttribute("visibility", visibility);
         model.addAttribute("searchTerm", searchTerm);
+        model.addAttribute("tagList", tagNameList);
         model.addAttribute("user", user);
-        model.addAttribute("records", paginatedRecords.getContent());
+        model.addAttribute("records", records.getContent());
         model.addAttribute("pageNumber", pageNumber);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("paginationLinksStart", paginationLinksStart);
         model.addAttribute("paginationLinksEnd", paginationLinksEnd);
         model.addAttribute("cardsPerPage", cardsPerPage);
-        model.addAttribute("totalCards", totalCards);
-        model.addAttribute("isTagSearch", isTagSearch);
 
         return "renovationSearchTemplate";
     }
@@ -632,24 +615,29 @@ public class RenovationController {
                                           @RequestParam(defaultValue = "false") boolean isTagSearch,
                                           @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                           @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage,
-                                          HttpSession session) {
+                                          RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/search");
 
+        // Optional: guard against invalid tag search
         if (isTagSearch && (tagNameList == null || tagNameList.isEmpty())) {
-            return "renovationSearchTemplate";
+            redirectAttributes.addFlashAttribute("errorMessage", "No tags selected.");
+            return "redirect:/renovations/search";
         }
 
-        if (visibility == null) visibility = "all";
-        if (searchTerm == null) searchTerm = "";
+        // Preserve all parameters in redirect
+        redirectAttributes.addAttribute("visibility", visibility != null ? visibility : "all");
+        redirectAttributes.addAttribute("searchTerm", searchTerm != null ? searchTerm : "");
+        redirectAttributes.addAttribute("page", pageNumber);
+        redirectAttributes.addAttribute("cardsPerPage", cardsPerPage);
 
-        session.setAttribute("visibility", visibility);
-        session.setAttribute("searchTerm", searchTerm);
-        session.setAttribute("tagNameList", tagNameList);
-        session.setAttribute("isTagSearch", isTagSearch);
-        session.setAttribute("pageNumber", pageNumber);
-        session.setAttribute("cardsPerPage", cardsPerPage);
+        // If tagNameList is not null, add each as repeated query param
+        if (tagNameList != null) {
+            for (String tag : tagNameList) {
+                redirectAttributes.addAttribute("tagNameList", tag); // will auto-repeat param
+            }
+        }
 
-        return "redirect:/renovations/search?page=" + pageNumber;
+        return "redirect:/renovations/search";
     }
 
     @GetMapping("/tags/profanity-filter")

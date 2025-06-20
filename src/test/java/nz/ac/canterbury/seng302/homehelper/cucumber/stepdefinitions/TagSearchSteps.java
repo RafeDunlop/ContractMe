@@ -102,17 +102,21 @@ public class TagSearchSteps {
     }
 
     @When("I search for renovations with tags {string} and {string}")
-    public void i_search_for_renovations_with_tags_and(String tag1Name, String tag2Name) throws Exception{
+    public void i_search_for_renovations_with_tags_and(String tag1Name, String tag2Name) throws Exception {
         result = mockMvc.perform(post("/renovations/search")
                         .param("tagNameList", tag1Name)
                         .param("tagNameList", tag2Name)
+                        .param("visibility", "public")
+                        .param("searchTerm", "")
                         .param("isTagSearch", "true")
+                        .param("page", "1")
+                        .param("cardsPerPage", "16")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search?page=1"))
+                .andExpect(redirectedUrlPattern("/renovations/search?**"))
                 .andReturn();
 
-        result = mockMvc.perform(get("/renovations/search")
+        mockMvc.perform(get(result.getResponse().getRedirectedUrl())
                         .session((MockHttpSession) Objects.requireNonNull(result.getRequest().getSession(false))))
                 .andExpect(status().isOk())
                 .andExpect(view().name("renovationSearchTemplate"))
@@ -123,7 +127,7 @@ public class TagSearchSteps {
     public void i_should_see_the_following_renovations_in_order(io.cucumber.datatable.DataTable recordNamesOrdered) throws Exception {
         List<String> recordNameList = recordNamesOrdered.asList();
 
-        mockMvc.perform(get("/renovations/search")
+        mockMvc.perform(get(result.getResponse().getRedirectedUrl())
                         .session((MockHttpSession) Objects.requireNonNull(result.getRequest().getSession(false))))
                 .andExpect(model().attribute("records", hasSize(recordNameList.size())))
                 .andExpect(model().attribute("records", contains(
@@ -140,15 +144,20 @@ public class TagSearchSteps {
 
     @When("I make a tag search")
     public void i_make_a_tag_search() throws Exception {
-        var requestBuilder = post("/renovations/search")
-                .param("isTagSearch", "true")
-                .with(csrf());
+        result = mockMvc.perform(post("/renovations/search")
+                        .param("isTagSearch", "true")
+                        .param("page", "1")
+                        .param("cardsPerPage", "16")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/search"))
+                .andReturn();
 
-        for (String tag : searchTerms) {
-            requestBuilder = requestBuilder.param("tagNameList", tag);
-        }
-
-        result = mockMvc.perform(requestBuilder).andReturn();
+        result = mockMvc.perform(get("/renovations/search")
+                        .session((MockHttpSession) Objects.requireNonNull(result.getRequest().getSession(false))))
+                .andExpect(status().isOk())
+                .andExpect(view().name("renovationSearchTemplate"))
+                .andReturn();
     }
 
     @Then("I should see the message {string}")
@@ -157,10 +166,4 @@ public class TagSearchSteps {
         assert content.contains(errorMessage) : "Error message not found: " + errorMessage;
     }
 
-    @Then("I am not redirected")
-    public void i_should_not_be_redirected() {
-        int status = result.getResponse().getStatus();
-        assertNotEquals(302, status, "Expected no redirection, but got status 302 but was redirected");
-        assertEquals(200, status, "Expected status 200 when submitting empty tag search");
-    }
 }

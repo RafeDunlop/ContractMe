@@ -41,10 +41,27 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
      * @param user The current user
      * @return A list of all the renovation records from the user
      */
-    @Query("SELECT f FROM RenovationRecord f " +
-            "WHERE f.user = :user " +
-            "ORDER BY f.createdDate DESC")
-    List<RenovationRecord> findByUser(@Param("user") User user);
+    @Query("SELECT r FROM RenovationRecord r " +
+            "WHERE r.user = :user " +
+            "ORDER BY r.createdDate DESC")
+    Page<RenovationRecord> findUserRecords(@Param("user") User user, @Nullable Pageable pageable);
+
+    @Query("SELECT r FROM RenovationRecord r " +
+            "WHERE (" +
+            "LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            "OR LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            ") AND r.user = :user " +
+            "ORDER BY r.createdDate DESC")
+    Page<RenovationRecord> findUserRecordsBySearch(@Param("user") User user, @Param("term") String term,
+                                                   @Nullable Pageable pageable);
+
+    @Query("SELECT r FROM RenovationRecord r " +
+            "JOIN r.tags t " +
+            "WHERE t IN :tags " +
+            "AND r.user = :user " +
+            "ORDER BY r.createdDate DESC")
+    Page<RenovationRecord> findUserRecordsByTag(@Param("user") User user, @Param("tags") List<Tag> tags,
+                                                @Nullable Pageable pageable);
 
     /**
      * Finds all of user's renovation records not case-sensitive that are like the given string
@@ -52,12 +69,19 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
      * @param term to search for records like it
      * @return list of all of user's records containing the string in its name or description
      */
-    @Query("SELECT r FROM RenovationRecord r " +
-            "WHERE " + "(LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
-            "OR " + "LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%'))) " +
-            "AND " + "r.user = :user " +
+    @Query("SELECT DISTINCT r FROM RenovationRecord r " +
+            "LEFT JOIN r.tags t " +
+            "WHERE (" +
+            "LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            "OR LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            "OR t IN :tags" +
+            ") AND r.user = :user " +
             "ORDER BY r.createdDate DESC")
-    List<RenovationRecord> findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(@Param("user") User user, @Param("term") String term);
+    Page<RenovationRecord> findUserRecordsBySearchOrTag(@Param("user") User user,
+                                                        @Param("term") String term,
+                                                        @Param("tags") List<Tag> tags,
+                                                        @Nullable Pageable pageable);
+
 
     @Query("SELECT r FROM RenovationRecord r " +
             "WHERE " + "(LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
@@ -70,45 +94,87 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
      * Finds all public renovation records
      * @return A list of all the public renovation records
      */
-    @Query("SELECT f FROM RenovationRecord f " +
-            "WHERE f.isPublic = true " +
-            "ORDER BY f.createdDate DESC")
-    List<RenovationRecord> findByIsPublicTrue();
+    @Query("SELECT r FROM RenovationRecord r " +
+            "WHERE r.isPublic = true " +
+            "ORDER BY r.createdDate DESC")
+    Page<RenovationRecord> findPublicRecords(@Nullable Pageable pageable);
+
+    @Query("SELECT DISTINCT r FROM RenovationRecord r " +
+            "WHERE (" +
+            "LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            "OR LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            ") AND r.isPublic = true " +
+            "ORDER BY r.createdDate DESC")
+    Page<RenovationRecord> findPublicRecordsBySearch(@Param("term") String term, @Nullable Pageable pageable);
+
+    @Query("SELECT DISTINCT r FROM RenovationRecord r " +
+            "JOIN r.tags t " +
+            "WHERE t IN :tags " +
+            "AND r.isPublic = true " +
+            "ORDER BY r.createdDate DESC")
+    Page<RenovationRecord> findPublicRecordsByTag(@Param("tags") List<Tag> tags, @Nullable Pageable pageable);
+
     /**
      * Finds all public renovation records not case-sensitive that are like the given string
      * @param term to search for records like it
-     * @return list of all public records containing the string in its name
+     * @param tags objects in a list to search for
+     * @return list of all public records containing the string in its name or a tag in the tags list
      */
-    @Query("SELECT r FROM RenovationRecord r " +
-            "WHERE " + "(LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
-            "OR " + "LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%'))) " +
-            "AND " + "r.isPublic = true " +
+    @Query("SELECT DISTINCT r FROM RenovationRecord r " +
+            "LEFT JOIN r.tags t " +
+            "WHERE (" +
+            "LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            "OR LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            "OR t IN :tags" +
+            ") AND r.isPublic = true " +
             "ORDER BY r.createdDate DESC")
-    List<RenovationRecord> findByIsPublicTrueSearchContainingNameOrDescriptionIgnoreCase(@Param("term") String term);
+    Page<RenovationRecord> findPublicRecordsBySearchOrTag(@Param("term") String term, @Param("tags") List<Tag> tags,
+                                                          @Nullable Pageable pageable);
 
     /**
      * Finds all public or user's own renovation records
      * @param user The current user
      * @return A list of all public or user's own renovation records
      */
-    @Query("SELECT f FROM RenovationRecord f " +
-            "WHERE " + "f.isPublic = true OR f.user = :user " +
-            "ORDER BY f.createdDate DESC")
-    List<RenovationRecord> findAllVisibleToUser(@Param("user") User user);
+    @Query("SELECT r FROM RenovationRecord r " +
+            "WHERE " + "r.isPublic = true OR r.user = :user " +
+            "ORDER BY r.createdDate DESC")
+    Page<RenovationRecord> findVisibleRecords(@Param("user") User user, @Nullable Pageable pageable);
+
+    @Query("SELECT r FROM RenovationRecord r " +
+            "WHERE (" +
+            "LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            "OR LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            ") AND (r.isPublic = true OR r.user = :user)" +
+            "ORDER BY r.createdDate DESC")
+    Page<RenovationRecord> findVisibleRecordsBySearch(@Param("user") User user, @Param("term") String term,
+                                                      @Nullable Pageable pageable);
+
+    @Query("SELECT r FROM RenovationRecord r " +
+            "JOIN r.tags t " +
+            "WHERE t IN :tags " +
+            "AND (r.isPublic = true OR r.user = :user)" +
+            "ORDER BY r.createdDate DESC")
+    Page<RenovationRecord> findVisibleRecordsByTag(@Param("user") User user, @Param("tags") List<Tag> tags,
+                                                   @Nullable Pageable pageable);
 
     /**
      * Finds all public or user's own renovation records not case-sensitive that are like the given string
      * @param user The current user
      * @param term to search for records like it
+     * @param tags objects in a list to search for
      * @return list of all public or user's own renovation records containing the string in its name
      */
     @Query("SELECT r FROM RenovationRecord r " +
-            "WHERE " + "(LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
-            "OR " + "LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%'))) " +
-            "AND " + "(r.isPublic = true OR r.user = :user) " +
+            "LEFT JOIN r.tags t " +
+            "WHERE (" +
+            "LOWER(r.name) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            "OR LOWER(r.description) LIKE LOWER(CONCAT('%', :term, '%')) " +
+            "OR t IN :tags" +
+            ") AND (r.isPublic = true OR r.user = :user)" +
             "ORDER BY r.createdDate DESC")
-    List<RenovationRecord> findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(@Param("user") User user, @Param("term") String term);
-
+    Page<RenovationRecord> findVisibleRecordsBySearchOrTag(@Param("user") User user, @Param("term") String term,
+                                                           @Param("tags") List<Tag> tags, @Nullable Pageable pageable);
 
     /**
      * Finds a renovation record with a matching name not case-sensitive if it exists.

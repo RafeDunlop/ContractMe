@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -272,8 +273,8 @@ public class RenovationControllerIntegrationTest {
      */
     @Test
     public void postCreateRecord_validRecordDetails_createRecord() throws Exception {
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertTrue(userRecords.isEmpty());
+        Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertTrue(userRecords.getContent().isEmpty());
 
         // New record has a name with diacritic letters and a description of length 512 to test regex and boundaries.
         mockMvc.perform(post("/renovations/create")
@@ -286,8 +287,8 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("renovation",
                         hasProperty("name", is("Rénövatiôn Onē"))));
 
-        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Rénövatiôn Onē");
-        assertFalse(userRecords.isEmpty());
+        userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertTrue(userRecords.getContent().isEmpty());
     }
 
     /**
@@ -362,15 +363,15 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertFalse(userRecords.isEmpty());
+        Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertFalse(userRecords.getContent().isEmpty());
 
         mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 
-        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertTrue(userRecords.isEmpty());
+        userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertTrue(userRecords.getContent().isEmpty());
     }
 
     /**
@@ -386,15 +387,15 @@ public class RenovationControllerIntegrationTest {
         RenovationTask existingTask = new RenovationTask("Task", "description", List.of(), LocalDate.now(), existingRecord);
         renovationTaskRepository.save(existingTask);
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertFalse(userRecords.isEmpty());
+        Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertFalse(userRecords.getContent().isEmpty());
 
         mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 
-        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertTrue(userRecords.isEmpty());
+        userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertTrue(userRecords.getContent().isEmpty());
     }
 
     /**
@@ -423,8 +424,8 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord existingRecord = new RenovationRecord(anotherUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertTrue(userRecords.isEmpty());
+        Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertTrue(userRecords.getContent().isEmpty());
 
         mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
                         .with(csrf()))
@@ -491,11 +492,11 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId()));
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertTrue(userRecords.isEmpty());
+        Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertTrue(userRecords.getContent().isEmpty());
 
-        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Rénövatiôn Onē");
-        assertFalse(userRecords.isEmpty());
+        userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Rénövatiôn Onē", null);
+        assertFalse(userRecords.getContent().isEmpty());
     }
 
     /**
@@ -575,11 +576,11 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("roomList", List.of("Room 1", "Room 2")));
 
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertFalse(userRecords.isEmpty());
+        Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertFalse(userRecords.getContent().isEmpty());
 
-        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One!");
-        assertTrue(userRecords.isEmpty());
+        userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One!", null);
+        assertTrue(userRecords.getContent().isEmpty());
     }
 
     /**
@@ -608,8 +609,8 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("description", "Some words"))
                 .andExpect(flash().attribute("roomList", List.of("Room 1", "Room 2")));
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertFalse(userRecords.isEmpty());
+        Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertFalse(userRecords.getContent().isEmpty());
     }
 
     /**

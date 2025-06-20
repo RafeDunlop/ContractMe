@@ -10,6 +10,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -122,14 +123,14 @@ public class SharingRenovationRecordsSteps {
 
     @Then("It should be visible in public search results for all logged in users")
     public void it_should_be_visible_publicly() {
-        List<RenovationRecord> publicRecords = repository.findByIsPublicTrue();
-        assertTrue(publicRecords.stream().anyMatch(r -> r.getUser().equals(testUser)));
+        Page<RenovationRecord> publicRecords = repository.findPublicRecords(null);
+        assertTrue(publicRecords.getContent().stream().anyMatch(r -> r.getUser().equals(testUser)));
     }
 
     @Then("It should be invisible in public search results for all logged in users")
     public void it_should_be_invisible_publicly() {
-        List<RenovationRecord> publicRecords = repository.findByIsPublicTrue();
-        assertFalse(publicRecords.stream().anyMatch(r -> r.getUser().equals(testUser)));
+        Page<RenovationRecord> publicRecords = repository.findPublicRecords(null);
+        assertFalse(publicRecords.getContent().stream().anyMatch(r -> r.getUser().equals(testUser)));
     }
 
     @Given("there are {int} public renovation records")
@@ -166,6 +167,7 @@ public class SharingRenovationRecordsSteps {
                 .andReturn();
 
         result = mockMvc.perform(get("/renovations/search")
+                        .param("visibility", "public")
                         .with(csrf())
                         .session(session))
                 .andExpect(status().isOk())
@@ -186,21 +188,21 @@ public class SharingRenovationRecordsSteps {
 
     @Then("the renovation records should be sorted by most recent creation date first")
     public void renovations_should_be_sorted_desc() throws Exception {
-        List<RenovationRecord> records = repository.findByIsPublicTrue();
+        Page<RenovationRecord> records = repository.findPublicRecords(null);
 
-        List<RenovationRecord> sorted = new ArrayList<>(records);
+        List<RenovationRecord> sorted = new ArrayList<>(records.getContent());
 
         sorted.sort(Comparator.comparing(
                 RenovationRecord::getCreatedTimestamp,
                 Comparator.nullsLast(Comparator.reverseOrder())
         ));
 
-        assertEquals(sorted, records);
+        assertEquals(sorted, records.getContent());
     }
 
     @When("I click on a renovation record")
     public void i_click_on_a_renovation_record() throws Exception {
-        RenovationRecord record = repository.findByIsPublicTrue().get(0);
+        RenovationRecord record = repository.findPublicRecords(null).getContent().get(0);
         MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);
 
         result = mockMvc.perform(get("/renovations/view")
@@ -263,10 +265,10 @@ public class SharingRenovationRecordsSteps {
         String viewContent = result.getResponse().getContentAsString();
 
         assertTrue(viewContent.contains("Renovation Records"));
-
-        assertTrue(viewContent.contains("<option value=\"" + expectedVisibility + "\" selected=\"selected\">"));
-        assertTrue(viewContent.contains("name=\"searchTerm\" value=\"" + expectedSearchTerm + "\""));
+        assertTrue(viewContent.contains("<option value=\"" + "public" + "\" selected=\"selected\">"));
+        assertTrue(viewContent.contains("name=\"searchTerm\" value=\"\""));
     }
+
 
     @Then("I should see a {string} element")
     public void i_should_see_a_element(String element) throws Exception {

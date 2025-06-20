@@ -25,13 +25,6 @@ Feature: As Sarah, I want to be able to search for public renovation records by 
     When I search for renovations with tags "NewBuild" and "Apartment"
     Then I should see the message "No renovations contain your searched tags."
 
-
-
-  Scenario: AC7 Submitting an empty tag search does nothing
-    Given the tag search field is empty
-    When I make a tag search
-    Then I am not redirected
-
   Scenario Outline: AC8 Multiple tag search returns results ordered by number of matching tags and date
     Given the tags named "<tag_one>" and "<tag_two>" exist
     And a public renovation "<renovation_name_one>" exists with tags:

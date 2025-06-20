@@ -91,8 +91,8 @@ public class DeleteRenovationRecordSteps {
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("renovationsTemplate"))
-                .andExpect(model().attributeExists("renovations"))
-                .andExpect(model().attribute("renovations", hasItem(
+                .andExpect(model().attributeExists("records"))
+                .andExpect(model().attribute("records", hasItem(
                         hasProperty("name", is("Renovation One")))));
     }
 

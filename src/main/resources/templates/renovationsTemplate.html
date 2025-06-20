@@ -16,21 +16,18 @@
 <div>
 
     <div class="container mt-5">
-
         <div class="jumbotron d-flex justify-content-between align-items-center text-center">
             <h1 class="text-black">My Renovations</h1>
             <a th:href="@{renovations/create}" class="btn btn-primary mt-3 me-3">⊕ Create New Renovation Record
             </a>
         </div>
-
     </div>
 
     <div class="container mt-5">
         <div class="card p-4 shadow-sm">
-
             <form method="get" th:action="@{renovations}" class="mb-3 mt-2">
                 <div class="input-group">
-                    <input type="text" name="searchQuery" th:value="${searchQuery}" class="form-control" placeholder="Search by Name or Description">
+                    <input type="text" name="searchTerm" th:value="${searchTerm}" class="form-control" placeholder="Search by Name or Description">
                     <button type="submit" class="btn btn-primary">Search</button>
                 </div>
             </form>
@@ -42,25 +39,25 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:if="${renovations.empty} and ${#strings.isEmpty(searchQuery)}">
+                <tr th:if="${records == null or #lists.isEmpty(records)} and ${#strings.isEmpty(searchQuery)}">
                     <td colspan="1" class="text">No Renovations have been made yet.</td>
                 </tr>
-                <tr th:if="${renovations.empty} and !${#strings.isEmpty(searchQuery)}">
+                <tr th:if="${records == null or #lists.isEmpty(records)} and !${#strings.isEmpty(searchQuery)}">
                     <td colspan="1" class="text">No renovations match your search.</td>
                 </tr>
-                <tr th:each="renovation : ${renovations}">
+                <tr th:each="record : ${records}">
                     <td class="d-flex justify-content-between align-items-center table-row">
-                        <form th:id="'form-' + ${renovation.id}" method="post" th:action="@{/renovations/view}">
-                            <input type="hidden" name="id" th:value="${renovation.id}" />
+                        <form th:id="'form-' + ${record.id}" method="post" th:action="@{/renovations/view}">
+                            <input type="hidden" name="id" th:value="${record.id}" />
                             <input type="hidden" name="page" value="1" />
                             <input type="hidden" name="cardsPerPage" value="5" />
                             <input type="hidden" name="fromSearch" value="false" />
                             <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
                         </form>
-                        <a href="#" th:text="${renovation.name}" th:onclick="'document.getElementById(\'form-' + ${renovation.id} + '\').submit(); return false;'"
-                           class="truncate-cell" th:title="${renovation.name}"></a>
+                        <a href="#" th:text="${record.name}" th:onclick="'document.getElementById(\'form-' + ${record.id} + '\').submit(); return false;'"
+                           class="truncate-cell" th:title="${record.name}"></a>
                         <button type="button" class="btn btn-outline-danger custom-light-border"
-                                th:attr="data-id=${renovation.id}, data-searchQuery=${searchQuery}, data-csrf=${_csrf.token}"
+                                th:attr="data-id=${record.id}, data-searchQuery=${searchQuery}, data-csrf=${_csrf.token}"
                                 th:onclick="|confirmDelete(this)|">
                             ❌
                         </button>
