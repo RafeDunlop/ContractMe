@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -158,16 +160,9 @@ public class SharingRenovationRecordsSteps {
     public void i_click_the_browse_renovations_button() throws Exception {
         MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);
 
-        result = mockMvc.perform(post("/renovations/search")
-                        .param("visibility", "public")
-                        .param("searchTerm", "")
-                        .with(csrf())
-                        .session(session))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-
         result = mockMvc.perform(get("/renovations/search")
                         .param("visibility", "public")
+                        .param("searchTerm", "")
                         .with(csrf())
                         .session(session))
                 .andExpect(status().isOk())
@@ -207,8 +202,9 @@ public class SharingRenovationRecordsSteps {
 
         result = mockMvc.perform(get("/renovations/view")
                         .param("id", record.getId().toString())
-                        .param("fromSearch", "true")
-                        .session(session))
+                        .param("page", "1")
+                        .session(session)
+                        .header("Referer", "/renovations/search?visibility=" + expectedVisibility + "&searchTerm=" + expectedSearchTerm)) // <-- crucial
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -226,16 +222,9 @@ public class SharingRenovationRecordsSteps {
 
         MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);
 
-        result = mockMvc.perform(post("/renovations/search")
+        result = mockMvc.perform(get("/renovations/search")
                         .param("visibility", visibility)
                         .param("searchTerm", searchTerm)
-                        .with(csrf())
-                        .session(session))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-
-        result = mockMvc.perform(get("/renovations/search")
-                        .with(csrf())
                         .session(session))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -244,9 +233,20 @@ public class SharingRenovationRecordsSteps {
     @When("I click the “Back to search results” button")
     public void i_click_back_to_search_results() throws Exception {
         MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);
+        String viewContent = result.getResponse().getContentAsString();
 
-        result = mockMvc.perform(get("/renovations/search")
-                        .session(session))
+        // Updated regex: more flexible and resilient to attribute ordering
+        Pattern pattern = Pattern.compile("<a[^>]+href=\\\"(/renovations/search[^\\\"]*)\\\"[^>]*>\\s*Back\\s*</a>");
+        Matcher matcher = pattern.matcher(viewContent);
+
+        String backUrl = null;
+        if (matcher.find()) {
+            backUrl = matcher.group(1).replace("&amp;", "&"); // HTML decode
+        }
+
+        assertNotNull(backUrl, "Back to search results link not found in view HTML");
+
+        result = mockMvc.perform(get(backUrl).session(session))
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -264,11 +264,19 @@ public class SharingRenovationRecordsSteps {
     public void i_should_see_same_search_results_page() throws Exception {
         String viewContent = result.getResponse().getContentAsString();
 
+        // Check if we're on the Renovation Records page
         assertTrue(viewContent.contains("Renovation Records"));
-        assertTrue(viewContent.contains("<option value=\"" + "public" + "\" selected=\"selected\">"));
-        assertTrue(viewContent.contains("name=\"searchTerm\" value=\"\""));
-    }
 
+        // Dynamically check the selected visibility option
+        String expectedVisibilityOption = "<option value=\"" + expectedVisibility + "\" selected=\"selected\">";
+        assertTrue(viewContent.contains(expectedVisibilityOption),
+                "Expected visibility option not selected: " + expectedVisibilityOption);
+
+        // Dynamically check the searchTerm input
+        String expectedSearchTermInput = "name=\"searchTerm\" value=\"" + expectedSearchTerm + "\"";
+        assertTrue(viewContent.contains(expectedSearchTermInput),
+                "Expected search term input not matched: " + expectedSearchTermInput);
+    }
 
     @Then("I should see a {string} element")
     public void i_should_see_a_element(String element) throws Exception {

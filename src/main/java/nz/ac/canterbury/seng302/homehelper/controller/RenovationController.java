@@ -1,4 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
@@ -82,7 +83,7 @@ public class RenovationController {
         }
         if (searchTerm == null) searchTerm = "";
         if (pageNumber < 1) {
-            return "redirect:/renovations/search?page=1";
+            return "redirect:/renovations?page=1";
         }
 
         User user = loginService.getUserByEmail();
@@ -93,7 +94,7 @@ public class RenovationController {
 
         int totalPages = records.getTotalPages();
         if (pageNumber > totalPages && totalPages > 0) {
-            return "redirect:/renovations/search?page=" + totalPages;
+            return "redirect:/renovations?page=" + totalPages;
         }
 
         int paginationLinksStart = Math.max(pageNumber - 2, 1);
@@ -383,7 +384,8 @@ public class RenovationController {
     @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id,
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                 Model model) {
+                                 Model model,
+                                 HttpServletRequest request) {
         logger.info("GET /renovations/view");
 
         Object cardsPerPageObj = model.asMap().get("cardsPerPage");
@@ -391,9 +393,6 @@ public class RenovationController {
         if (cardsPerPage == null || cardsPerPage < 1) {
             cardsPerPage = 5;
         }
-
-        Object fromSearchObj = model.asMap().get("fromSearch");
-        Boolean fromSearch = (fromSearchObj instanceof Boolean) ? (Boolean) fromSearchObj : false;
 
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
@@ -420,8 +419,10 @@ public class RenovationController {
         int paginationLinksStart = Math.max(pageNumber - 2, 1);
         int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
 
+        String referer = request.getHeader("referer");
+        model.addAttribute("previousUrl", referer);
+
         model.addAttribute("isOwner", isOwner);
-        model.addAttribute("fromSearch", fromSearch);
         model.addAttribute("tasks", paginatedTasks.getContent());
         model.addAttribute("pageNumber", pageNumber);
         model.addAttribute("totalPages", totalPages);
@@ -452,15 +453,15 @@ public class RenovationController {
     public String postViewRenovation(@RequestParam(name = "id") Long id,
                                      @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                      @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage,
-                                     @RequestParam(name = "fromSearch", required = false, defaultValue = "false") boolean fromSearch,
-                                     @RequestParam(name = "errorMessage", required = false) List<String> errorMessage,
+                                     @RequestParam(name = "previousUrl", required = false) String previousUrl,
                                      RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/view");
-        redirectAttributes.addFlashAttribute("cardsPerPage", cardsPerPage);
-        redirectAttributes.addFlashAttribute("fromSearch", fromSearch);
 
-        if (errorMessage != null && !errorMessage.isEmpty()) {
-            redirectAttributes.addFlashAttribute("errors", errorMessage);
+        redirectAttributes.addFlashAttribute("cardsPerPage", cardsPerPage);
+
+
+        if (previousUrl != null && !previousUrl.isBlank()) {
+            redirectAttributes.addFlashAttribute("previousUrl", previousUrl);
         }
 
         return "redirect:/renovations/view?id=" + id + "&page=" + pageNumber;
@@ -596,48 +597,6 @@ public class RenovationController {
         model.addAttribute("cardsPerPage", cardsPerPage);
 
         return "renovationSearchTemplate";
-    }
-
-    /**
-     * Handles the submission of a renovation search form. Filters renovation records based on the provided
-     * visibility setting and optional search term. The filtered records, search term, and visibility
-     * are added to redirect attributes and redirected to the search view.
-     *
-     * @param visibility         the visibility filter to apply ("public", "user", or "all")
-     * @param searchTerm         an optional term to search within renovation records
-     * @param session            HttpSession for storing attributes of most recent search
-     * @return a redirect to the GET search endpoint with the results stored in flash attributes
-     */
-    @PostMapping("/search")
-    public String submitSearchRenovations(@RequestParam(required = false) String visibility,
-                                          @RequestParam(required = false) String searchTerm,
-                                          @RequestParam(name = "tagNameList", required = false) List<String> tagNameList,
-                                          @RequestParam(defaultValue = "false") boolean isTagSearch,
-                                          @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                          @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage,
-                                          RedirectAttributes redirectAttributes) {
-        logger.info("POST /renovations/search");
-
-        // Optional: guard against invalid tag search
-        if (isTagSearch && (tagNameList == null || tagNameList.isEmpty())) {
-            redirectAttributes.addFlashAttribute("errorMessage", "No tags selected.");
-            return "redirect:/renovations/search";
-        }
-
-        // Preserve all parameters in redirect
-        redirectAttributes.addAttribute("visibility", visibility != null ? visibility : "all");
-        redirectAttributes.addAttribute("searchTerm", searchTerm != null ? searchTerm : "");
-        redirectAttributes.addAttribute("page", pageNumber);
-        redirectAttributes.addAttribute("cardsPerPage", cardsPerPage);
-
-        // If tagNameList is not null, add each as repeated query param
-        if (tagNameList != null) {
-            for (String tag : tagNameList) {
-                redirectAttributes.addAttribute("tagNameList", tag); // will auto-repeat param
-            }
-        }
-
-        return "redirect:/renovations/search";
     }
 
     @GetMapping("/tags/profanity-filter")

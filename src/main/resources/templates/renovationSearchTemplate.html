@@ -35,7 +35,7 @@
             </div>
 
             <!-- Search and Visibility Filter -->
-            <form id="search-form" th:action="@{/renovations/search}" method="post" class="m-0 mb-3">
+            <form id="search-form" th:action="@{/renovations/search}" method="get" class="m-0 mb-3">
                 <input type="hidden" id="pageNumberInput" name="page" th:value="${pageNumber}" />
                 <input type="hidden" id="cardsPerPageInput" name="cardsPerPage" th:value="${cardsPerPage}" />
                 <div class="d-flex align-items-end">
@@ -65,16 +65,20 @@
             </form>
 
             <!-- Renovation Cards Grid -->
+
+            <div th:if="${#lists.isEmpty(records)}" class="alert alert-secondary mt-4">
+                <span th:if="${isTagSearch}">No renovations contain your searched tags.</span>
+                <span th:unless="${isTagSearch}">No renovations match your search.</span>
+            </div>
             <div id="grid" class="task-grid">
                 <div th:each="record : ${records}" class="col-md-3 mb-4">
                     <form th:id="'form-' + ${record.getId()}" method="post" th:action="@{/renovations/view}">
                         <input type="hidden" name="id" th:value="${record.getId()}" />
                         <input type="hidden" name="page" value="1" />
                         <input type="hidden" name="cardsPerPage" value="5" />
-                        <input type="hidden" name="fromSearch" value="true" />
                         <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
                     </form>
-                    <a th:href="@{/renovations/view(id=${record.getId()}, page=${pageNumber}, fromSearch=true)}" class="no-underline">
+                    <a th:href="@{/renovations/view(id=${record.getId()}, page=${pageNumber})}" class="no-underline">
                         <div class="card card-count position-relative" style="width: 18rem;">
                             <!-- Badge if user owns the record -->
                             <span class="badge bg-primary position-absolute top-0 end-0 m-2"
@@ -106,11 +110,6 @@
                     </a>
                 </div>
             </div>
-            <div th:if="${#lists.isEmpty(records)}" class="alert alert-secondary mt-4">
-                <span th:if="${isTagSearch}">No renovations contain your searched tags.</span>
-                <span th:unless="${isTagSearch}">No renovations match your search.</span>
-            </div>
-
             <div id="footer" class="mt-2">
                 <div class="d-flex justify-content-center" th:if="${totalPages > 0}">
                     <ul class="pagination" id="pagination">

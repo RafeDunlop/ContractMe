@@ -51,7 +51,6 @@
                             <input type="hidden" name="id" th:value="${record.id}" />
                             <input type="hidden" name="page" value="1" />
                             <input type="hidden" name="cardsPerPage" value="5" />
-                            <input type="hidden" name="fromSearch" value="false" />
                             <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
                         </form>
                         <a href="#" th:text="${record.name}" th:onclick="'document.getElementById(\'form-' + ${record.id} + '\').submit(); return false;'"
@@ -72,7 +71,7 @@
         </div>
 
         <div class="mt-4">
-            <a th:href="@{/home}" class="btn  btn-primary">Back To Home</a>
+            <a th:href="@{/home}" class="btn btn-primary">Back To Home</a>
         </div>
     </div>
 </div>
