@@ -5,9 +5,9 @@
     <form th:action="@{${address}}" method="get" class="m-0">
         <input type="hidden" name="page" th:value="${pageNum}" />
         <input type="hidden" name="cardsPerPage" th:value="${cardsPerPage}" />
-        <input type="hidden" name="searchTerm" th:value="${searchTerm}" />
-        <input type="hidden" name="visibility" th:value="${visibility}" />
-        <div th:each="tagName : ${tagNameList}">
+        <input type="hidden" name="searchTerm" th:if="${searchTerm != null}" th:value="${searchTerm}" />
+        <input type="hidden" name="visibility" th:if="${visibility != null}" th:value="${visibility}" />
+        <div th:if="${tagNameList != null}" th:each="tagName : ${tagNameList}">
             <input type="hidden" name="tagNameList" th:value="${tagName}" />
         </div>
         <button type="submit" class="page-link" th:text="${label}"></button>

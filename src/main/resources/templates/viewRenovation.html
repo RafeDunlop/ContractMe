@@ -129,7 +129,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/view(id=${renovation.id})},
                                 1,
-                                'First'
+                                'First',
+                                 null,
+                                ${cardsPerPage},
+                                null,
+                                null
                             )}"></div>
                         </li>
 
@@ -138,7 +142,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/view(id=${renovation.id})},
                                 ${pageNumber - 1},
-                                'Prev'
+                                'Prev',
+                                null,
+                                ${cardsPerPage},
+                                null,
+                                null
                             )}"></div>
                         </li>
 
@@ -149,7 +157,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/view(id=${renovation.id})},
                                 ${pageLinkNumber},
-                                ${pageLinkNumber}
+                                ${pageLinkNumber},
+                                null,
+                                ${cardsPerPage},
+                                null,
+                                null
                             )}"></div>
                         </li>
 
@@ -160,7 +172,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/view(id=${renovation.id})},
                                 ${pageLinkNumber},
-                                ${pageLinkNumber}
+                                ${pageLinkNumber},
+                                null,
+                                ${cardsPerPage},
+                                null,
+                                null
                             )}"></div>
                         </li>
 
@@ -169,7 +185,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/view(id=${renovation.id})},
                                 ${pageNumber + 1},
-                                'Next'
+                                'Next',
+                                null,
+                                ${cardsPerPage},
+                                null,
+                                null
                             )}"></div>
                         </li>
 
@@ -178,7 +198,12 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/view(id=${renovation.id})},
                                 ${totalPages},
-                                'Last'
+                                'Last',
+                                null,
+                                null,
+                                ${cardsPerPage},
+                                null,
+                                null
                             )}"></div>
                         </li>
 
