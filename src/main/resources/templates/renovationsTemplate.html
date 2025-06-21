@@ -39,10 +39,10 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:if="${records == null or #lists.isEmpty(records)} and ${#strings.isEmpty(searchQuery)}">
+                <tr th:if="${records == null or #lists.isEmpty(records)} and ${#strings.isEmpty(searchTerm)}">
                     <td colspan="1" class="text">No Renovations have been made yet.</td>
                 </tr>
-                <tr th:if="${records == null or #lists.isEmpty(records)} and !${#strings.isEmpty(searchQuery)}">
+                <tr th:if="${records == null or #lists.isEmpty(records)} and !${#strings.isEmpty(searchTerm)}">
                     <td colspan="1" class="text">No renovations match your search.</td>
                 </tr>
                 <tr th:each="record : ${records}">
@@ -56,7 +56,7 @@
                         <a href="#" th:text="${record.name}" th:onclick="'document.getElementById(\'form-' + ${record.id} + '\').submit(); return false;'"
                            class="truncate-cell" th:title="${record.name}"></a>
                         <button type="button" class="btn btn-outline-danger custom-light-border"
-                                th:attr="data-id=${record.id}, data-searchQuery=${searchQuery}, data-csrf=${_csrf.token}"
+                                th:attr="data-id=${record.id}, data-searchTerm=${searchTerm}, data-csrf=${_csrf.token}"
                                 th:onclick="|confirmDelete(this)|">
                             ❌
                         </button>
@@ -64,7 +64,7 @@
                 </tr>
                 </tbody>
             </table>
-            <div th:replace="~{fragments/paginationFooter.html :: paginationFooter(pageUrl='renovations', searchTerm=${searchQuery})}"></div>
+            <div th:replace="~{fragments/paginationFooter.html :: paginationFooter(pageUrl='renovations', searchTerm=${searchTerm})}"></div>
             <div class="alert alert-danger" id="errorMessage" style="margin-top: 20px; display: none;">
                 <p id="errorText"></p>
             </div>

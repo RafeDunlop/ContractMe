@@ -64,7 +64,7 @@ public class RenovationController {
     /**
      * Gets all renovations
      *
-     * @param searchQuery optional string to search on renovation name (partial matching)
+     * @param searchTerm optional string to search on renovation name (partial matching)
      * @param model       (map-like) representation of results to be used by thymeleaf
      * @return thymeleaf renovationsTemplate
      */
@@ -79,7 +79,7 @@ public class RenovationController {
             itemsPerPage = 8;
         }
         if (pageNumber < 1) {
-            return "redirect:/renovations?page=1&itemsPerPage=" + itemsPerPage + (!searchTerm.isEmpty() ? "&searchQuery=" + searchTerm : "");
+            return "redirect:/renovations?page=1&itemsPerPage=" + itemsPerPage + (!searchTerm.isEmpty() ? "&searchTerm=" + searchTerm : "");
         }
         if (searchTerm == null) searchTerm = "";
         if (pageNumber < 1) {

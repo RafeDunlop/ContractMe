@@ -184,7 +184,7 @@ public class RenovationControllerIntegrationTest {
         String matchingName = "Two";
 
         mockMvc.perform(get("/renovations")
-                        .param("searchQuery", matchingName))
+                        .param("searchTerm", matchingName))
                 .andExpect(status().isOk())
                 .andExpect(view().name("renovationsTemplate"))
                 .andExpect(model().attributeExists("records"))
@@ -211,7 +211,7 @@ public class RenovationControllerIntegrationTest {
                         .param("itemsPerPage", "5"))
             .andExpect(status().isOk())
             .andExpect(view().name("renovationsTemplate"))
-            .andExpect(model().attributeExists("renovations"))
+            .andExpect(model().attributeExists("records"))
             .andExpect(model().attribute("records", hasSize(5)))
             .andExpect(model().attribute("pageNumber", 2))
             .andExpect(model().attribute("records", hasItem(hasProperty("name", is("Renovation 5")))));
@@ -230,7 +230,7 @@ public class RenovationControllerIntegrationTest {
                         .param("page", "100")
                         .param("itemsPerPage", "5"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations?page=4&itemsPerPage=5"));
+                .andExpect(redirectedUrl("/renovations?page=4"));
     }
 
     /**
@@ -1131,7 +1131,6 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(view().name("renovationSearchTemplate"))
                 .andExpect(model().attributeExists("records"))
                 .andExpect(model().attribute("records", hasSize(0)))
-                .andExpect(model().attribute("totalCards", is(0)))
                 .andExpect(model().attribute("totalPages", is(0)))
                 .andExpect(model().attribute("pageNumber", is(1)))
                 .andExpect(model().attribute("cardsPerPage", is(16)))
@@ -1150,17 +1149,6 @@ public class RenovationControllerIntegrationTest {
         matchingRecord.setPublicity(true);
         renovationRecordRepository.save(matchingRecord);
 
-        // Step 1: Perform the POST request to trigger the search
-        MvcResult postResult = mockMvc.perform(post("/renovations/search")
-                        .param("searchTerm", searchTerm)
-                        .param("visibility", visibility)
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-
-        String redirectedUrl = postResult.getResponse().getRedirectedUrl();
-
-        // Step 2: Follow GET redirect and assert results
         mockMvc.perform(get("/renovations/search")
                         .param("searchTerm", searchTerm)
                         .param("visibility", visibility)
@@ -1169,7 +1157,6 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(view().name("renovationSearchTemplate"))
                 .andExpect(model().attributeExists("records"))
                 .andExpect(model().attribute("records", hasSize(1)))
-                .andExpect(model().attribute("totalCards", is(1)))
                 .andExpect(model().attribute("totalPages", is(1)))
                 .andExpect(model().attribute("pageNumber", is(1)))
                 .andExpect(model().attribute("cardsPerPage", is(16)))

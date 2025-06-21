@@ -39,7 +39,7 @@ public class SearchingRenovationsStepDefs {
 
     private final UserContext userContext;
     private MvcResult result;
-    private String searchQuery;
+    private String searchTerm;
 
     public SearchingRenovationsStepDefs(UserContext userContext) {
         this.userContext = userContext;
@@ -59,9 +59,9 @@ public class SearchingRenovationsStepDefs {
 
     @When("I have run a search for {string}")
     public void i_have_run_a_search_for(String searchTerm) throws Exception {
-        searchQuery = searchTerm;
+        searchTerm = searchTerm;
         result = mockMvc.perform(get("/renovations")
-                        .param("searchQuery", searchTerm)
+                        .param("searchTerm", searchTerm)
                 .with(csrf()))
             .andReturn();
     }
@@ -99,7 +99,7 @@ public class SearchingRenovationsStepDefs {
     @When("I click on page number {int}")
     public void i_click_on_page_number(Integer page) throws Exception {
         result = mockMvc.perform(get("/renovations")
-                .param("searchQuery", searchQuery)
+                .param("searchTerm", searchTerm)
                 .param("page", page.toString()))
             .andReturn();
     }
@@ -128,7 +128,7 @@ public class SearchingRenovationsStepDefs {
     public void i_input_page_number_and_confirm_my_choice(int pageNum) throws Exception {
         result = mockMvc.perform(get("/renovations")
                 .param("page", String.valueOf(pageNum))
-                .param("searchQuery", searchQuery))
+                .param("searchTerm", searchTerm))
                 .andExpect(status().isOk())
                 .andReturn();
     }
