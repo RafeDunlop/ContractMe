@@ -328,7 +328,7 @@ public class RenovationController {
             redirectAttributes.addFlashAttribute("name", name);
             redirectAttributes.addFlashAttribute("description", description);
             redirectAttributes.addFlashAttribute("roomList", roomList);
-
+            redirectAttributes.addFlashAttribute("renovation", renovationRecord);
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
             redirectAttributes.addFlashAttribute("locationUsed", locationChanged);
 
