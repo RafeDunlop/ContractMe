@@ -82,9 +82,6 @@ public class RenovationController {
             return "redirect:/renovations?page=1&itemsPerPage=" + itemsPerPage + (!searchTerm.isEmpty() ? "&searchTerm=" + searchTerm : "");
         }
         if (searchTerm == null) searchTerm = "";
-        if (pageNumber < 1) {
-            return "redirect:/renovations?page=1";
-        }
 
         User user = loginService.getUserByEmail();
         Page<RenovationRecord> records;
@@ -94,7 +91,7 @@ public class RenovationController {
 
         int totalPages = records.getTotalPages();
         if (pageNumber > totalPages && totalPages > 0) {
-            return "redirect:/renovations?page=" + totalPages;
+            return "redirect:/renovations?page=" + totalPages + "&itemsPerPage=" + itemsPerPage + (!searchTerm.isEmpty() ? "&searchTerm=" + searchTerm : "");
         }
 
         int paginationLinksStart = Math.max(pageNumber - 2, 1);
@@ -325,8 +322,6 @@ public class RenovationController {
             errors.putAll(locationService.validateLocation(addressDTO));
         }
 
-
-
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
 
@@ -445,7 +440,7 @@ public class RenovationController {
      * @param id                 the ID of the renovation record to view
      * @param pageNumber         the page number to display (default 1)
      * @param cardsPerPage       the number of cards to display per page (defaults 5)
-     * @param fromSearch         a flag indicating whether the view was triggered from a search or not
+     * @param previousUrl        the previous url to return to it with back button
      * @param redirectAttributes used to store flash attributes for the redirect
      * @return a redirect to the GET view endpoint with query parameters for the ID and page number
      */
@@ -516,7 +511,6 @@ public class RenovationController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You don't own this renovation");
         tagService.removeTagFromRenovation(record, tag);
     }
-
 
     /**
      * Gets an autocomplete list of tag names that partially match the input
