@@ -67,8 +67,7 @@
             <!-- Renovation Cards Grid -->
 
             <div th:if="${#lists.isEmpty(records)}" class="alert alert-secondary mt-4">
-                <span th:if="${isTagSearch}">No renovations contain your searched tags.</span>
-                <span th:unless="${isTagSearch}">No renovations match your search.</span>
+                <span>No renovations match your search.</span>
             </div>
             <div id="grid" class="task-grid">
                 <div th:each="record : ${records}" class="col-md-3 mb-4">
@@ -118,7 +117,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{renovations/search},
                                 1,
-                                'First'
+                                'First',
+                                ${searchTerm},
+                                ${cardsPerPage},
+                                ${visibility},
+                                ${tagList}
                             )}"></div>
                         </li>
 
@@ -127,7 +130,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{renovations/search},
                                 ${pageNumber - 1},
-                                'Prev'
+                                'Prev',
+                                ${searchTerm},
+                                ${cardsPerPage},
+                                ${visibility},
+                                ${tagList}
                             )}"></div>
                         </li>
 
@@ -139,7 +146,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{renovations/search},
                                 ${pageLinkNumber},
-                                ${pageLinkNumber}
+                                ${pageLinkNumber},
+                                ${searchTerm},
+                                ${cardsPerPage},
+                                ${visibility},
+                                ${tagList}
                             )}"></div>
                         </li>
 
@@ -151,7 +162,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{renovations/search},
                                 ${pageLinkNumber},
-                                ${pageLinkNumber}
+                                ${pageLinkNumber},
+                                ${searchTerm},
+                                ${cardsPerPage},
+                                ${visibility},
+                                ${tagList}
                             )}"></div>
                         </li>
 
@@ -160,7 +175,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{renovations/search},
                                 ${pageNumber + 1},
-                                'Next'
+                                'Next',
+                                ${searchTerm},
+                                ${cardsPerPage},
+                                ${visibility},
+                                ${tagList}
                             )}"></div>
                         </li>
 
@@ -169,7 +188,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{renovations/search},
                                 ${totalPages},
-                                'Last'
+                                'Last',
+                                ${searchTerm},
+                                ${cardsPerPage},
+                                ${visibility},
+                                ${tagList}
                             )}"></div>
                         </li>
 

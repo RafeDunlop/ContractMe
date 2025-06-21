@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<div th:fragment="paginationButton(address, pageNum, label)">
+<div th:fragment="paginationButton(address, pageNum, label, searchTerm, cardsPerPage, visibility, tagNameList)">
     <form th:action="@{${address}}" method="get" class="m-0">
         <input type="hidden" name="page" th:value="${pageNum}" />
         <input type="hidden" name="cardsPerPage" th:value="${cardsPerPage}" />
+        <input type="hidden" name="searchTerm" th:value="${searchTerm}" />
+        <input type="hidden" name="visibility" th:value="${visibility}" />
+        <div th:each="tagName : ${tagNameList}">
+            <input type="hidden" name="tagNameList" th:value="${tagName}" />
+        </div>
         <button type="submit" class="page-link" th:text="${label}"></button>
     </form>
 </div>
