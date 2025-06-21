@@ -20,12 +20,10 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.*;
@@ -230,7 +228,7 @@ public class RenovationControllerIntegrationTest {
                         .param("page", "100")
                         .param("itemsPerPage", "5"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations?page=4"));
+                .andExpect(redirectedUrl("/renovations?page=4&itemsPerPage=5"));
     }
 
     /**

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="paginationButton(address, pageNum, label)">
-    <form th:action="@{${address}}" method="post" class="m-0">
+    <form th:action="@{${address}}" method="get" class="m-0">
         <input type="hidden" name="page" th:value="${pageNum}" />
         <input type="hidden" name="cardsPerPage" th:value="${cardsPerPage}" />
         <button type="submit" class="page-link" th:text="${label}"></button>

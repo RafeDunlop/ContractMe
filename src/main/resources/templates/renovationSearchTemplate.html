@@ -72,7 +72,7 @@
             </div>
             <div id="grid" class="task-grid">
                 <div th:each="record : ${records}" class="col-md-3 mb-4">
-                    <form th:id="'form-' + ${record.getId()}" method="post" th:action="@{/renovations/view}">
+                    <form th:id="'form-' + ${record.getId()}" method="get" th:action="@{/renovations/view}">
                         <input type="hidden" name="id" th:value="${record.getId()}" />
                         <input type="hidden" name="page" value="1" />
                         <input type="hidden" name="cardsPerPage" value="5" />

@@ -27,7 +27,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Controller for /renovation and subsidiary endpoints, associated with the consuming of renovations
@@ -78,10 +81,14 @@ public class RenovationController {
         if (itemsPerPage < 1) {
             itemsPerPage = 8;
         }
-        if (pageNumber < 1) {
-            return "redirect:/renovations?page=1&itemsPerPage=" + itemsPerPage + (!searchTerm.isEmpty() ? "&searchTerm=" + searchTerm : "");
-        }
+
         if (searchTerm == null) searchTerm = "";
+        String encodedSearchTerm = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
+
+        if (pageNumber < 1) {
+            return "redirect:/renovations?page=1&itemsPerPage=" + itemsPerPage
+                    + (!searchTerm.isEmpty() ? "&searchTerm=" + encodedSearchTerm : "");
+        }
 
         User user = loginService.getUserByEmail();
         Page<RenovationRecord> records;
@@ -91,7 +98,8 @@ public class RenovationController {
 
         int totalPages = records.getTotalPages();
         if (pageNumber > totalPages && totalPages > 0) {
-            return "redirect:/renovations?page=" + totalPages + "&itemsPerPage=" + itemsPerPage + (!searchTerm.isEmpty() ? "&searchTerm=" + searchTerm : "");
+            return "redirect:/renovations?page=" + totalPages + "&itemsPerPage=" + itemsPerPage
+                    + (!searchTerm.isEmpty() ? "&searchTerm=" + encodedSearchTerm : "");
         }
 
         int paginationLinksStart = Math.max(pageNumber - 2, 1);
@@ -379,13 +387,13 @@ public class RenovationController {
     @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id,
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                 @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage,
+                                 @RequestParam(name = "previousUrl", required = false) String previousUrl,
                                  Model model,
                                  HttpServletRequest request) {
         logger.info("GET /renovations/view");
 
-        Object cardsPerPageObj = model.asMap().get("cardsPerPage");
-        Integer cardsPerPage = (cardsPerPageObj instanceof Integer) ? (Integer) cardsPerPageObj : null;
-        if (cardsPerPage == null || cardsPerPage < 1) {
+        if ( cardsPerPage < 1) {
             cardsPerPage = 5;
         }
 
@@ -429,37 +437,6 @@ public class RenovationController {
         model.addAttribute("icons", iconFileNames);
 
         return "viewRenovation";
-    }
-
-    /**
-     * Handles the submission of a renovation view request. Redirects to the GET view endpoint
-     * for a specific renovation record, including the requested page number and cards per page.
-     * The number of cards per page and search origin flag are added as flash attributes for use
-     * in the redirected view.
-     *
-     * @param id                 the ID of the renovation record to view
-     * @param pageNumber         the page number to display (default 1)
-     * @param cardsPerPage       the number of cards to display per page (defaults 5)
-     * @param previousUrl        the previous url to return to it with back button
-     * @param redirectAttributes used to store flash attributes for the redirect
-     * @return a redirect to the GET view endpoint with query parameters for the ID and page number
-     */
-    @PostMapping("/view")
-    public String postViewRenovation(@RequestParam(name = "id") Long id,
-                                     @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                     @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage,
-                                     @RequestParam(name = "previousUrl", required = false) String previousUrl,
-                                     RedirectAttributes redirectAttributes) {
-        logger.info("POST /renovations/view");
-
-        redirectAttributes.addFlashAttribute("cardsPerPage", cardsPerPage);
-
-
-        if (previousUrl != null && !previousUrl.isBlank()) {
-            redirectAttributes.addFlashAttribute("previousUrl", previousUrl);
-        }
-
-        return "redirect:/renovations/view?id=" + id + "&page=" + pageNumber;
     }
 
     /**
@@ -556,8 +533,20 @@ public class RenovationController {
         List<Tag> tagList = (tagNameList != null) ? tagService.getTags(tagNameList) : null;
 
         if (pageNumber < 1) {
-            return "redirect:/renovations/search?page=1";
+            String base = "/renovations/search?page=1"
+                    + "&cardsPerPage=" + URLEncoder.encode(String.valueOf(cardsPerPage), StandardCharsets.UTF_8)
+                    + "&searchTerm=" + URLEncoder.encode(searchTerm, StandardCharsets.UTF_8)
+                    + "&visibility=" + URLEncoder.encode(visibility, StandardCharsets.UTF_8);
+
+            String tagParams = (tagNameList != null)
+                    ? tagNameList.stream()
+                    .map(tag -> "&tagNameList=" + URLEncoder.encode(tag, StandardCharsets.UTF_8))
+                    .collect(Collectors.joining())
+                    : "";
+
+            return "redirect:" + base + tagParams;
         }
+
         
         User user = loginService.getUserByEmail();
 
@@ -573,8 +562,20 @@ public class RenovationController {
         int totalPages = records.getTotalPages();
 
         if (pageNumber > totalPages && totalPages > 0) {
-            return "redirect:/renovations/search?page=" + totalPages;
-            }
+            String base = "/renovations/search?page=" + totalPages
+                    + "&cardsPerPage=" + URLEncoder.encode(String.valueOf(cardsPerPage), StandardCharsets.UTF_8)
+                    + "&searchTerm=" + URLEncoder.encode(searchTerm, StandardCharsets.UTF_8)
+                    + "&visibility=" + URLEncoder.encode(visibility, StandardCharsets.UTF_8);
+
+            String tagParams = (tagNameList != null)
+                    ? tagNameList.stream()
+                    .map(tag -> "&tagNameList=" + URLEncoder.encode(tag, StandardCharsets.UTF_8))
+                    .collect(Collectors.joining())
+                    : "";
+
+            return "redirect:" + base + tagParams;
+        }
+
 
         int paginationLinksStart = Math.max(pageNumber - 2, 1);
         int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
