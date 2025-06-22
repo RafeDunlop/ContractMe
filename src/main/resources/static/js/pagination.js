@@ -68,7 +68,7 @@ function updateLayout() {
     const cards = grid.querySelectorAll('.card-count');
     //const cards = grid.querySelectorAll('.task-card');
     const totalCards = parseInt(document.getElementById("totalCards").value, 10);
-    let pageNumber = parseInt(document.getElementById('pageInput').value, 10);
+    let pageNumber = parseInt(document.getElementById('pageNumberInput').value, 10);
 
     if (cards.length === 0) {
         console.warn("No cards found in grid. Skipping layout update.");
@@ -92,7 +92,7 @@ function updateLayout() {
 
     if (pageNumber > (totalCards / newCardsPerPage))
     {
-        document.getElementById('pageInput').value = Math.ceil(totalCards / newCardsPerPage);
+        document.getElementById('pageNumberInput').value = Math.ceil(totalCards / newCardsPerPage);
     }
 
     if (needsUpdate && newCardsPerPage > 0) {

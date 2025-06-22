@@ -239,13 +239,17 @@ public class RenovationRecordServiceTest {
     public void getUserRecords_withNullTerm_returnsAllUserRecords() {
         User user = mock(User.class);
         List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+        Page<RenovationRecord> mockPage = mock(Page.class);
+        Pageable pageable = PageRequest.of(0, 10);
 
-        Mockito.when(renovationRecordRepository.findByUser(user)).thenReturn(expected);
+        Mockito.when(mockPage.getContent()).thenReturn(expected);
+        Mockito.when(renovationRecordRepository.findUserRecords(Mockito.eq(user), Mockito.any(Pageable.class)))
+                .thenReturn(mockPage);
 
-        List<RenovationRecord> result = toTest.getUserRecords(user, null);
+        Page<RenovationRecord> result = toTest.getPaginatedUserRecords(user, "", null, pageable);
 
-        verify(renovationRecordRepository).findByUser(user);
-        assertSame(result, expected);
+        verify(renovationRecordRepository).findUserRecords(Mockito.eq(user), Mockito.any(Pageable.class));
+        assertEquals(expected, result.getContent());
     }
 
     @Test
@@ -253,51 +257,67 @@ public class RenovationRecordServiceTest {
         User user = mock(User.class);
         String term = "kitchen";
         List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+        Page<RenovationRecord> mockPage = mock(Page.class);
+        Pageable pageable = PageRequest.of(0, 10);
 
-        Mockito.when(renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(user, term)).thenReturn(expected);
+        Mockito.when(mockPage.getContent()).thenReturn(expected);
+        Mockito.when(renovationRecordRepository.findUserRecordsBySearch(Mockito.eq(user), Mockito.eq(term), Mockito.any(Pageable.class)))
+                .thenReturn(mockPage);
 
-        List<RenovationRecord> result = toTest.getUserRecords(user, term);
+        Page<RenovationRecord> result = toTest.getPaginatedUserRecords(user, term, null, pageable);
 
-        verify(renovationRecordRepository).findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(user, term);
-        assertSame(result, expected);
+        verify(renovationRecordRepository).findUserRecordsBySearch(Mockito.eq(user), Mockito.eq(term), Mockito.any(Pageable.class));
+        assertEquals(expected, result.getContent());
     }
 
     @Test
     public void getPublicRecords_withNullTerm_returnsAllPublicRecords() {
         List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+        Page<RenovationRecord> mockPage = mock(Page.class);
+        Pageable pageable = PageRequest.of(0, 10);
 
-        Mockito.when(renovationRecordRepository.findByIsPublicTrue()).thenReturn(expected);
+        Mockito.when(mockPage.getContent()).thenReturn(expected);
+        Mockito.when(renovationRecordRepository.findPublicRecords(Mockito.any(Pageable.class)))
+                .thenReturn(mockPage);
 
-        List<RenovationRecord> result = toTest.getPublicRecords(null);
+        Page<RenovationRecord> result = toTest.getPaginatedPublicRecords("", null, pageable);
 
-        verify(renovationRecordRepository).findByIsPublicTrue();
-        assertSame(result, expected);
+        verify(renovationRecordRepository).findPublicRecords(Mockito.any(Pageable.class));
+        assertEquals(expected, result.getContent());
     }
 
     @Test
     public void getPublicRecords_withSearchTerm_returnsFilteredPublicRecords() {
         String term = "bathroom";
         List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+        Page<RenovationRecord> mockPage = mock(Page.class);
+        Pageable pageable = PageRequest.of(0, 10);
 
-        Mockito.when(renovationRecordRepository.findByIsPublicTrueSearchContainingNameOrDescriptionIgnoreCase(term)).thenReturn(expected);
+        Mockito.when(mockPage.getContent()).thenReturn(expected);
+        Mockito.when(renovationRecordRepository.findPublicRecordsBySearch(Mockito.eq(term), Mockito.any(Pageable.class)))
+                .thenReturn(mockPage);
 
-        List<RenovationRecord> result = toTest.getPublicRecords(term);
+        Page<RenovationRecord> result = toTest.getPaginatedPublicRecords(term, null, pageable);
 
-        verify(renovationRecordRepository).findByIsPublicTrueSearchContainingNameOrDescriptionIgnoreCase(term);
-        assertSame(result, expected);
+        verify(renovationRecordRepository).findPublicRecordsBySearch(Mockito.eq(term), Mockito.any(Pageable.class));
+        assertEquals(expected, result.getContent());
     }
 
     @Test
     public void getAllRecords_withNullTerm_returnsAllVisibleToUser() {
         User user = mock(User.class);
         List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+        Page<RenovationRecord> mockPage = mock(Page.class);
+        Pageable pageable = PageRequest.of(0, 10);
 
-        Mockito.when(renovationRecordRepository.findAllVisibleToUser(user)).thenReturn(expected);
+        Mockito.when(mockPage.getContent()).thenReturn(expected);
+        Mockito.when(renovationRecordRepository.findVisibleRecords(Mockito.eq(user), Mockito.any(Pageable.class)))
+                .thenReturn(mockPage);
 
-        List<RenovationRecord> result = toTest.getAllRecords(user, null);
+        Page<RenovationRecord> result = toTest.getPaginatedVisibleRecords(user, "", null, pageable);
 
-        verify(renovationRecordRepository).findAllVisibleToUser(user);
-        assertSame(result, expected);
+        verify(renovationRecordRepository).findVisibleRecords(Mockito.eq(user), Mockito.any(Pageable.class));
+        assertEquals(expected, result.getContent());
     }
 
     @Test
@@ -305,36 +325,17 @@ public class RenovationRecordServiceTest {
         User user = mock(User.class);
         String term = "garage";
         List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
-
-        Mockito.when(renovationRecordRepository.findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(user, term)).thenReturn(expected);
-
-        List<RenovationRecord> result = toTest.getAllRecords(user, term);
-
-        verify(renovationRecordRepository).findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(user, term);
-        assertSame(result, expected);
-    }
-
-    @Test
-    public void getPaginatedUserRecords_withNullTerm_callsFindByUserMethod() {
-        User user = mock(User.class);
-        String term = null;
-
-
+        Page<RenovationRecord> mockPage = mock(Page.class);
         Pageable pageable = PageRequest.of(0, 10);
-        toTest.getPaginatedUserRecords(user, term, pageable);
 
-        verify(renovationRecordRepository).findByUser(user, pageable);
-    }
+        Mockito.when(mockPage.getContent()).thenReturn(expected);
+        Mockito.when(renovationRecordRepository.findVisibleRecordsBySearch(Mockito.eq(user), Mockito.eq(term), Mockito.any(Pageable.class)))
+                .thenReturn(mockPage);
 
-    @Test
-    public void getPaginatedUserRecords_withSearchTerm_callsSearchMethod() {
-        User user = mock(User.class);
-        String term = "living room";
+        Page<RenovationRecord> result = toTest.getPaginatedVisibleRecords(user, term, null, pageable);
 
-        Pageable pageable = PageRequest.of(0, 10);
-        toTest.getPaginatedUserRecords(user, term, pageable);
-
-        verify(renovationRecordRepository).searchNameOrDescriptionContainingIgnoreCasePaginated(user, term, pageable);
+        verify(renovationRecordRepository).findVisibleRecordsBySearch(Mockito.eq(user), Mockito.eq(term), Mockito.any(Pageable.class));
+        assertEquals(expected, result.getContent());
     }
 
     @Test

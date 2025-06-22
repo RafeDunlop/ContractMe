@@ -10,6 +10,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -122,14 +125,14 @@ public class SharingRenovationRecordsSteps {
 
     @Then("It should be visible in public search results for all logged in users")
     public void it_should_be_visible_publicly() {
-        List<RenovationRecord> publicRecords = repository.findByIsPublicTrue();
-        assertTrue(publicRecords.stream().anyMatch(r -> r.getUser().equals(testUser)));
+        Page<RenovationRecord> publicRecords = repository.findPublicRecords(null);
+        assertTrue(publicRecords.getContent().stream().anyMatch(r -> r.getUser().equals(testUser)));
     }
 
     @Then("It should be invisible in public search results for all logged in users")
     public void it_should_be_invisible_publicly() {
-        List<RenovationRecord> publicRecords = repository.findByIsPublicTrue();
-        assertFalse(publicRecords.stream().anyMatch(r -> r.getUser().equals(testUser)));
+        Page<RenovationRecord> publicRecords = repository.findPublicRecords(null);
+        assertFalse(publicRecords.getContent().stream().anyMatch(r -> r.getUser().equals(testUser)));
     }
 
     @Given("there are {int} public renovation records")
@@ -157,15 +160,9 @@ public class SharingRenovationRecordsSteps {
     public void i_click_the_browse_renovations_button() throws Exception {
         MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);
 
-        result = mockMvc.perform(post("/renovations/search")
+        result = mockMvc.perform(get("/renovations/search")
                         .param("visibility", "public")
                         .param("searchTerm", "")
-                        .with(csrf())
-                        .session(session))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-
-        result = mockMvc.perform(get("/renovations/search")
                         .with(csrf())
                         .session(session))
                 .andExpect(status().isOk())
@@ -186,27 +183,28 @@ public class SharingRenovationRecordsSteps {
 
     @Then("the renovation records should be sorted by most recent creation date first")
     public void renovations_should_be_sorted_desc() throws Exception {
-        List<RenovationRecord> records = repository.findByIsPublicTrue();
+        Page<RenovationRecord> records = repository.findPublicRecords(null);
 
-        List<RenovationRecord> sorted = new ArrayList<>(records);
+        List<RenovationRecord> sorted = new ArrayList<>(records.getContent());
 
         sorted.sort(Comparator.comparing(
                 RenovationRecord::getCreatedTimestamp,
                 Comparator.nullsLast(Comparator.reverseOrder())
         ));
 
-        assertEquals(sorted, records);
+        assertEquals(sorted, records.getContent());
     }
 
     @When("I click on a renovation record")
     public void i_click_on_a_renovation_record() throws Exception {
-        RenovationRecord record = repository.findByIsPublicTrue().get(0);
+        RenovationRecord record = repository.findPublicRecords(null).getContent().get(0);
         MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);
 
         result = mockMvc.perform(get("/renovations/view")
                         .param("id", record.getId().toString())
-                        .param("fromSearch", "true")
-                        .session(session))
+                        .param("page", "1")
+                        .session(session)
+                        .header("Referer", "/renovations/search?visibility=" + expectedVisibility + "&searchTerm=" + expectedSearchTerm)) // <-- crucial
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -224,16 +222,9 @@ public class SharingRenovationRecordsSteps {
 
         MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);
 
-        result = mockMvc.perform(post("/renovations/search")
+        result = mockMvc.perform(get("/renovations/search")
                         .param("visibility", visibility)
                         .param("searchTerm", searchTerm)
-                        .with(csrf())
-                        .session(session))
-                .andExpect(status().is3xxRedirection())
-                .andReturn();
-
-        result = mockMvc.perform(get("/renovations/search")
-                        .with(csrf())
                         .session(session))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -242,9 +233,20 @@ public class SharingRenovationRecordsSteps {
     @When("I click the “Back to search results” button")
     public void i_click_back_to_search_results() throws Exception {
         MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);
+        String viewContent = result.getResponse().getContentAsString();
 
-        result = mockMvc.perform(get("/renovations/search")
-                        .session(session))
+        // Updated regex: more flexible and resilient to attribute ordering
+        Pattern pattern = Pattern.compile("<a[^>]+href=\\\"(/renovations/search[^\\\"]*)\\\"[^>]*>\\s*Back\\s*</a>");
+        Matcher matcher = pattern.matcher(viewContent);
+
+        String backUrl = null;
+        if (matcher.find()) {
+            backUrl = matcher.group(1).replace("&amp;", "&"); // HTML decode
+        }
+
+        assertNotNull(backUrl, "Back to search results link not found in view HTML");
+
+        result = mockMvc.perform(get(backUrl).session(session))
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -262,10 +264,18 @@ public class SharingRenovationRecordsSteps {
     public void i_should_see_same_search_results_page() throws Exception {
         String viewContent = result.getResponse().getContentAsString();
 
+        // Check if we're on the Renovation Records page
         assertTrue(viewContent.contains("Renovation Records"));
 
-        assertTrue(viewContent.contains("<option value=\"" + expectedVisibility + "\" selected=\"selected\">"));
-        assertTrue(viewContent.contains("name=\"searchTerm\" value=\"" + expectedSearchTerm + "\""));
+        // Dynamically check the selected visibility option
+        String expectedVisibilityOption = "<option value=\"" + expectedVisibility + "\" selected=\"selected\">";
+        assertTrue(viewContent.contains(expectedVisibilityOption),
+                "Expected visibility option not selected: " + expectedVisibilityOption);
+
+        // Dynamically check the searchTerm input
+        String expectedSearchTermInput = "name=\"searchTerm\" value=\"" + expectedSearchTerm + "\"";
+        assertTrue(viewContent.contains(expectedSearchTermInput),
+                "Expected search term input not matched: " + expectedSearchTermInput);
     }
 
     @Then("I should see a {string} element")

@@ -3,7 +3,7 @@
  * and options to cancel or delete
  * if the user selects "delete", a delete request is sent for the corresponding renovation record
  * includes the csrf token provided by spring to avoid csrf attacks (required by spring security)
- * @param button the element being clicked, contains data-id, data-searchQuery (optionally null)
+ * @param button the element being clicked, contains data-id, data-searchTerm (optionally null)
  * and data-csrf in a th:attr tag
  */
 function confirmDelete(button) {
@@ -11,7 +11,7 @@ function confirmDelete(button) {
     confirmPrompt(prompt, "Delete", "Cancel", true).then(async (confirm) => {
         if (confirm) {
             const renovationId = button.getAttribute("data-id");
-            const searchQuery = button.getAttribute("data-searchQuery");
+            const searchTerm = button.getAttribute("data-searchTerm");
             const csrfToken = button.getAttribute("data-csrf");
 
             const response = await fetch(`renovations/delete/${renovationId}`, {
@@ -22,7 +22,7 @@ function confirmDelete(button) {
             if (!response.ok) {
                 alert("failed to delete renovation")
             }
-            window.location.assign(`renovations?searchQuery=${encodeURIComponent(searchQuery || '')}`);
+            window.location.assign(`renovations?searchTerm=${encodeURIComponent(searchTerm || '')}`);
         }
     });
 }

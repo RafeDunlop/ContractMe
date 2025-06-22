@@ -27,63 +27,34 @@
     <div class="container mt-2">
         <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
         <input type="hidden" id="totalCards" th:value="${totalCards}"/>
+        <input type="hidden" id="email" th:value="${user.email}">
 
         <div id="content-container" class="card p-4 shadow-sm">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 th:text="${visibility == 'public' ? 'Public Renovation Records' : (visibility == 'user' ? 'Your Renovation Records' : 'Renovation Records')}">Renovation Records</h4>
             </div>
 
-            <!-- Tag Search Bar (Above Visibility Search) -->
-            <form id="tag-search-form" th:action="@{/renovations/search}" method="post" class="m-0 mb-3">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <input type="hidden" th:value="${cardsPerPage}" name="cardsPerPage" />
-                <input type="hidden" th:value="${pageNumber}" name="page" />
-                <input type="hidden" name="isTagSearch" value="true" />
-
+            <!-- Search and Visibility Filter -->
+            <form id="search-form" th:action="@{/renovations/search}" method="get" class="m-0 mb-3">
+                <input type="hidden" id="pageNumberInput" name="page" th:value="${pageNumber}" />
+                <input type="hidden" id="cardsPerPageInput" name="cardsPerPage" th:value="${cardsPerPage}" />
                 <div class="d-flex align-items-end">
                     <div class="col-md-8 me-2">
                         <label class="form-label">Tag Search:</label>
                         <div id="tag-input-container" class="form-control d-flex flex-wrap" style="min-height: 40px; cursor: text;" onclick="focusTagInput()">
-                            <!-- Tags will be added here -->
                             <input type="text" id="tag-input" class="border-0 flex-grow-1" placeholder="Enter tags..." style="outline: none; min-width: 100px;">
                         </div>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">TagSearch</button>
-                    </div>
-                </div>
 
-                <!-- Hidden inputs for each tag -->
-                <div id="hidden-tag-inputs"></div>
-            </form>
-
-
-            <!-- Search and Visibility Filter -->
-            <form id="search-form" th:action="@{/renovations/search}" method="post" class="m-0">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <input type="hidden" th:value="${cardsPerPage}" name="cardsPerPage" id="cardsPerPageInput"/>
-                <input type="hidden" th:value="${pageNumber}" name="page" id="pageInput" />
-                <input type="hidden" th:value="${visibility}" name="visibility"/>
-
-
-                <div class="d-flex align-items-end">
-                    <div class="col-md-8 me-2">
                         <label class="form-label">Search:</label>
                         <input type="text" name="searchTerm" th:value="${searchTerm}" class="form-control" placeholder="Enter keyword..."/>
                     </div>
+                    <div id="hidden-tag-inputs"></div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">Search</button>
                     </div>
                 </div>
-            </form>
 
-            <form id="visibility-search-form" th:action="@{/renovations/search}" method="post" class="m-0">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <input type="hidden" th:value="${cardsPerPage}" name="cardsPerPage" />
-                <input type="hidden" th:value="${pageNumber}" name="page" id="pageNumber" />
-                <input type="hidden" th:value="${searchTerm}" name="searchTerm"/>
-
-                <div class="col-md-4">
+                <div class="col-md-2 ms-2">
                     <label class="form-label">Show:</label>
                     <select name="visibility" class="form-select" onchange="this.form.submit()">
                         <option value="all" th:selected="${visibility == 'all'}">All</option>
@@ -94,16 +65,19 @@
             </form>
 
             <!-- Renovation Cards Grid -->
+
+            <div th:if="${#lists.isEmpty(records)}" class="alert alert-secondary mt-4">
+                <span>No renovations match your search.</span>
+            </div>
             <div id="grid" class="task-grid">
                 <div th:each="record : ${records}" class="col-md-3 mb-4">
-                    <form th:id="'form-' + ${record.getId()}" method="post" th:action="@{/renovations/view}">
+                    <form th:id="'form-' + ${record.getId()}" method="get" th:action="@{/renovations/view}">
                         <input type="hidden" name="id" th:value="${record.getId()}" />
                         <input type="hidden" name="page" value="1" />
                         <input type="hidden" name="cardsPerPage" value="5" />
-                        <input type="hidden" name="fromSearch" value="true" />
                         <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
                     </form>
-                    <a th:href="@{/renovations/view(id=${record.getId()}, page=${pageNumber}, fromSearch=true)}" class="no-underline">
+                    <a th:href="@{/renovations/view(id=${record.getId()}, page=${pageNumber})}" class="no-underline">
                         <div class="card card-count position-relative" style="width: 18rem;">
                             <!-- Badge if user owns the record -->
                             <span class="badge bg-primary position-absolute top-0 end-0 m-2"
@@ -135,11 +109,6 @@
                     </a>
                 </div>
             </div>
-            <div th:if="${#lists.isEmpty(records)}" class="alert alert-secondary mt-4">
-                <span th:if="${isTagSearch}">No renovations contain your searched tags.</span>
-                <span th:unless="${isTagSearch}">No renovations match your search.</span>
-            </div>
-
             <div id="footer" class="mt-2">
                 <div class="d-flex justify-content-center" th:if="${totalPages > 0}">
                     <ul class="pagination" id="pagination">
@@ -148,7 +117,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{renovations/search},
                                 1,
-                                'First'
+                                'First',
+                                ${searchTerm},
+                                ${cardsPerPage},
+                                ${visibility},
+                                ${tagList}
                             )}"></div>
                         </li>
 
@@ -157,7 +130,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{renovations/search},
                                 ${pageNumber - 1},
-                                'Prev'
+                                'Prev',
+                                ${searchTerm},
+                                ${cardsPerPage},
+                                ${visibility},
+                                ${tagList}
                             )}"></div>
                         </li>
 
@@ -169,7 +146,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{renovations/search},
                                 ${pageLinkNumber},
-                                ${pageLinkNumber}
+                                ${pageLinkNumber},
+                                ${searchTerm},
+                                ${cardsPerPage},
+                                ${visibility},
+                                ${tagList}
                             )}"></div>
                         </li>
 
@@ -181,7 +162,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{renovations/search},
                                 ${pageLinkNumber},
-                                ${pageLinkNumber}
+                                ${pageLinkNumber},
+                                ${searchTerm},
+                                ${cardsPerPage},
+                                ${visibility},
+                                ${tagList}
                             )}"></div>
                         </li>
 
@@ -190,7 +175,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{renovations/search},
                                 ${pageNumber + 1},
-                                'Next'
+                                'Next',
+                                ${searchTerm},
+                                ${cardsPerPage},
+                                ${visibility},
+                                ${tagList}
                             )}"></div>
                         </li>
 
@@ -199,7 +188,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{renovations/search},
                                 ${totalPages},
-                                'Last'
+                                'Last',
+                                ${searchTerm},
+                                ${cardsPerPage},
+                                ${visibility},
+                                ${tagList}
                             )}"></div>
                         </li>
 
@@ -218,8 +211,14 @@
     </div>
 </div>
 </body>
+<script th:inline="javascript">
+    window.initialTags = /*[[${tagList}]]*/ [];
+    document.addEventListener("DOMContentLoaded", () => {
+        setupTagSearch();
+    });
+</script>
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
-<script type="text/javascript" th:src="@{/js/pagination.js}"></script>
+<!-- <script type="text/javascript" th:src="@{/js/pagination.js}"></script> -->
 <script type="text/javascript" th:src="@{/js/tagSearch.js}"></script>
 <script type="text/javascript" th:src="@{/js/removeTag.js}"></script>
 </html>

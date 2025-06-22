@@ -11,7 +11,6 @@ const hiddenInputs = document.getElementById("hidden-tag-inputs");
 // Frontend list for tags currently in search bar
 let tags = [];
 
-
 /**
  * Focuses the tag input field.
  */
@@ -38,7 +37,7 @@ function addTag(tag) {
     closeBtn.className = "ms-1";
     closeBtn.style.cursor = "pointer";
     closeBtn.innerHTML = "&times;";
-    closeBtn.onclick = () => removeTag(tag, bubble);
+    closeBtn.onclick = () => removeTagByName(tag);
 
     bubble.appendChild(closeBtn);
     tagInputContainer.insertBefore(bubble, tagInput);
@@ -54,15 +53,30 @@ function addTag(tag) {
 
 
 /**
- * Removes a tag from the tag list and UI.
- * @param {string} tag the tag to remove from the search bar.
- * @param {HTMLElement} bubbleElement the bubble element representing the tag.
+ * Handles removal of tag UI elements and corresponding hidden inputs.
+ * Used by both tag input bubbles and green tag badges.
  */
-function removeTag(tag, bubbleElement) {
-    tags = tags.filter(t => t !== tag);
-    bubbleElement.remove();
-    const hidden = hiddenInputs.querySelector(`input[data-tag="${tag}"]`);
-    if (hidden) hidden.remove();
+
+function removeTagByName(tagName) {
+    const hiddenInputs = document.getElementById("hidden-tag-inputs");
+    const hiddenInput = hiddenInputs.querySelector(`input[data-tag="${tagName}"], input[value="${tagName}"]`);
+    if (hiddenInput) hiddenInput.remove();
+
+    const bubble = [...document.getElementById("tag-input-container").children]
+        .find(el => el.textContent.trim().startsWith(tagName));
+    if (bubble) bubble.remove();
+
+    const greenTags = document.querySelectorAll(".tag-box");
+    greenTags.forEach(tagElement => {
+        const textSpan = tagElement.querySelector(".tag-text-small");
+        if (textSpan && textSpan.textContent.trim() === tagName) {
+            tagElement.remove();
+        }
+    });
+
+    if (typeof tags !== 'undefined') {
+        tags = tags.filter(t => t !== tagName);
+    }
 }
 
 /**
@@ -77,20 +91,27 @@ tagInput.addEventListener("keydown", (e) => {
     } else if (e.key === "Backspace" && tagInput.value === "") {
         const lastTag = tags[tags.length - 1];
         if (lastTag) {
-            const bubble = [...tagInputContainer.children].find(
-                el => el.textContent.startsWith(lastTag)
-            );
-            removeTag(lastTag, bubble);
+            removeTagByName(lastTag);
         }
     }
 });
 
-/**
- * Prevention of submitting post request if the search bar is empty, for AC not allowing empty search.
- */
-document.getElementById("tag-search-form").addEventListener("submit", function(e) {
-    const tags = document.querySelectorAll('input[name="tagNameList"]');
-    if (tags.length === 0) {
-        e.preventDefault();
-    }
-});
+function setupTagSearch() {
+    const tagInput = document.getElementById("tag-input");
+    tagInput.addEventListener("keydown", function (e) {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            const tagValue = tagInput.value.trim();
+            if (tagValue) {
+                addTag(tagValue);
+                tagInput.value = "";
+            }
+        }
+    });
+
+    const initialTags = window.initialTags || [];
+    console.log(initialTags);
+    initialTags.forEach(tag => {
+        if (tag) addTag(tag);
+    });
+}

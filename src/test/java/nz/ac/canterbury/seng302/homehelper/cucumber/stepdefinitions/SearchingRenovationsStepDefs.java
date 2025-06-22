@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -38,7 +39,7 @@ public class SearchingRenovationsStepDefs {
 
     private final UserContext userContext;
     private MvcResult result;
-    private String searchQuery;
+    private String searchTerm;
 
     public SearchingRenovationsStepDefs(UserContext userContext) {
         this.userContext = userContext;
@@ -52,15 +53,15 @@ public class SearchingRenovationsStepDefs {
             renovationRecord.setCreatedTimestamp(java.time.LocalDateTime.now().minusDays(i));
             renovationRecordRepository.save(renovationRecord);
         }
-        List<RenovationRecord> records = renovationRecordRepository.findByUser(user);
-        assertEquals(numRecords, records.size());
+        Page<RenovationRecord> records = renovationRecordRepository.findByUser(user, null);
+        assertEquals(numRecords, records.getSize());
     }
 
     @When("I have run a search for {string}")
     public void i_have_run_a_search_for(String searchTerm) throws Exception {
-        searchQuery = searchTerm;
+        searchTerm = searchTerm;
         result = mockMvc.perform(get("/renovations")
-                        .param("searchQuery", searchTerm)
+                        .param("searchTerm", searchTerm)
                 .with(csrf()))
             .andReturn();
     }
@@ -73,11 +74,16 @@ public class SearchingRenovationsStepDefs {
 
     @Then("I see a list of {int} records")
     public void i_see_a_list_of_records(Integer numRecords) {
-        Object records = Objects.requireNonNull(result.getModelAndView()).getModel().get("renovations");
-        assertInstanceOf(List.class, records, "Expected 'renovations' to be a List");
+        Object records = Objects.requireNonNull(result.getModelAndView())
+                .getModel()
+                .get("records");
+
+        assertInstanceOf(List.class, records, "Expected 'records' to be a List");
+
         @SuppressWarnings("unchecked")
         List<RenovationRecord> renovationRecords = (List<RenovationRecord>) records;
-        assertEquals(numRecords, renovationRecords.size());
+
+        assertEquals(numRecords.intValue(), renovationRecords.size(), "Record count mismatch");
     }
 
     @Given("I see pagination numbers for {int} pages")
@@ -93,7 +99,7 @@ public class SearchingRenovationsStepDefs {
     @When("I click on page number {int}")
     public void i_click_on_page_number(Integer page) throws Exception {
         result = mockMvc.perform(get("/renovations")
-                .param("searchQuery", searchQuery)
+                .param("searchTerm", searchTerm)
                 .param("page", page.toString()))
             .andReturn();
     }
@@ -101,10 +107,15 @@ public class SearchingRenovationsStepDefs {
     @Then("I see the list of records corresponding to page {int}")
     public void i_see_the_list_of_records_corresponding_to_page(Integer page) {
         @SuppressWarnings("unchecked")
-        List<RenovationRecord> records = (List<RenovationRecord>) Objects.requireNonNull(result.getModelAndView()).getModel().get("renovations");
-        int expectedRenovationNumber = DEFAULT_PAGE_SIZE * (page - 1);
-        assertEquals(DEFAULT_PAGE_SIZE, result.getModelAndView().getModel().get("itemsPerPage"));
-        assertEquals("MyRenovation" + expectedRenovationNumber, records.get(0).getName());
+        List<RenovationRecord> records = (List<RenovationRecord>) Objects.requireNonNull(result.getModelAndView())
+                .getModel()
+                .get("records");
+
+        int expectedStartIndex = DEFAULT_PAGE_SIZE * (page - 1);
+        String expectedName = "MyRenovation" + expectedStartIndex;
+
+        assertEquals(DEFAULT_PAGE_SIZE, result.getModelAndView().getModel().get("cardsPerPage"));
+        assertEquals(expectedName, records.get(0).getName());
     }
 
     @Then("Page number {int} is currently highlighted")
@@ -117,7 +128,7 @@ public class SearchingRenovationsStepDefs {
     public void i_input_page_number_and_confirm_my_choice(int pageNum) throws Exception {
         result = mockMvc.perform(get("/renovations")
                 .param("page", String.valueOf(pageNum))
-                .param("searchQuery", searchQuery))
+                .param("searchTerm", searchTerm))
                 .andExpect(status().isOk())
                 .andReturn();
     }

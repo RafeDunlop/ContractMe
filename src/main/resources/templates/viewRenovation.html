@@ -21,12 +21,12 @@
 
         <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
         <input type="hidden" id="totalCards" th:value="${totalCards}" name="totalCards" />
+        <input type="hidden" name="previousUrl" th:value="${previousUrl}" />
 
         <form id="search-form" method="post" th:action="@{/renovations/view}" style="display:none;">
             <input type="hidden" id="renovationId" name="id" th:value="${renovation.getId()}">
             <input type="hidden" id="pageInput" th:value="${pageNumber}" name="page">
             <input type="hidden" id="cardsPerPageInput" th:value="${cardsPerPage}" name="cardsPerPage">
-            <input type="hidden" id="FromSearch" th:value="${fromSearch}" name="fromSearch">
         </form>
 
         <div id="content-container" class="card p-4 shadow-sm">
@@ -76,9 +76,6 @@
                  th:attr="hidden=${errors == null}">
                 <ul><li th:each="msg : ${errors}" th:text="${msg}"></li></ul>
             </div>
-
-            
-
 
             <!-- Display added tags -->
             <div id="tagList" class="mb-3">
@@ -132,7 +129,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/view(id=${renovation.id})},
                                 1,
-                                'First'
+                                'First',
+                                 null,
+                                ${cardsPerPage},
+                                null,
+                                null
                             )}"></div>
                         </li>
 
@@ -141,7 +142,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/view(id=${renovation.id})},
                                 ${pageNumber - 1},
-                                'Prev'
+                                'Prev',
+                                null,
+                                ${cardsPerPage},
+                                null,
+                                null
                             )}"></div>
                         </li>
 
@@ -152,7 +157,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/view(id=${renovation.id})},
                                 ${pageLinkNumber},
-                                ${pageLinkNumber}
+                                ${pageLinkNumber},
+                                null,
+                                ${cardsPerPage},
+                                null,
+                                null
                             )}"></div>
                         </li>
 
@@ -163,7 +172,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/view(id=${renovation.id})},
                                 ${pageLinkNumber},
-                                ${pageLinkNumber}
+                                ${pageLinkNumber},
+                                null,
+                                ${cardsPerPage},
+                                null,
+                                null
                             )}"></div>
                         </li>
 
@@ -172,7 +185,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/view(id=${renovation.id})},
                                 ${pageNumber + 1},
-                                'Next'
+                                'Next',
+                                null,
+                                ${cardsPerPage},
+                                null,
+                                null
                             )}"></div>
                         </li>
 
@@ -181,7 +198,11 @@
                             <div th:replace="~{fragments/paginationButton :: paginationButton(
                                 @{/renovations/view(id=${renovation.id})},
                                 ${totalPages},
-                                'Last'
+                                'Last',
+                                null,
+                                ${cardsPerPage},
+                                null,
+                                null
                             )}"></div>
                         </li>
 
@@ -202,8 +223,7 @@
                 <div class="mt-2 mb-2">
                     <a th:href="@{/renovations/edit(id=${renovation.id}, visibility=${visibility})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
                     <a th:href="@{/renovations/view/create(id=${renovation.id}, visibility=${visibility})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
-                    <a th:href="@{/renovations}" class="btn btn-primary" th:if="${isOwner and not fromSearch}">Back To Renovations</a>
-                    <a th:href="@{/renovations/search}" class="btn btn-secondary" th:if="${fromSearch}">Back to search results</a>
+                    <a th:href="${previousUrl}" class="btn btn-secondary" th:if="${previousUrl != null}">Back</a>
                 </div>
             </div>
         </div>

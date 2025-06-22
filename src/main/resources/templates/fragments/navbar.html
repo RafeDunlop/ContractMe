@@ -20,14 +20,12 @@
                         <li class="nav-item">
                             <a class="nav-link" th:href="@{/renovations}">My Renovations</a>
                         </li>
-                        <form th:action="@{/renovations/search}" method="post" style="display: inline;">
-                            <input type="hidden" name="visibility" value="user"/>
-                            <button type="submit" class="btn btn-link nav-link">Search My Renovations</button>
-                        </form>
-                        <form th:action="@{/renovations/search}" method="post" style="display: inline;">
-                            <input type="hidden" name="visibility" value="public"/>
-                            <button type="submit" class="btn btn-link nav-link">Browse Renovations</button>
-                        </form>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/renovations/search(visibility='user')}">Search My Renovations</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/renovations/search(visibility='public')}">Browse Renovations</a>
+                        </li>
                     </ul>
                 </div>
             </div>
