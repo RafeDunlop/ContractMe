@@ -32,7 +32,6 @@ function validateTaskPageSearch(recordId) {
     });
 }
 
-
 /**
  * Onclick function for the task search button on View Renovation
  * Uses the confirmation prompt before searching
@@ -60,89 +59,99 @@ function validateRenovationPageSearch() {
     });
 }
 
+let cachedCardSize = null;
+
 /**
  * This function updates the layout based on the window size and adjusts the number of tasks to be displayed on the page.
  */
-function updateLayout() {
-    const grid = document.getElementById('grid');
-    const cards = grid.querySelectorAll('.card-count');
-    //const cards = grid.querySelectorAll('.task-card');
-    const totalCards = parseInt(document.getElementById("totalCards").value, 10);
-    let pageNumber = parseInt(document.getElementById('pageNumberInput').value, 10);
+function updateLayout(viewMode = "cards") {
+    const cardWidth = 260;
+    let cardHeight = 140;
 
-    if (cards.length === 0) {
-        console.warn("No cards found in grid. Skipping layout update.");
-        return;
+    const containerHeight = window.innerHeight;
+    const containerMargin =  parseFloat(getComputedStyle(document.getElementById('container')).marginTop);
+
+    const gridContainer = document.getElementById("elements-container");
+    if (gridContainer.style.display === "none") {
+        gridContainer.style.display = "block";
+    }
+    const containerWidth = viewMode === "cards" ?
+        document.getElementById('grid').offsetWidth :
+        document.getElementById('table');
+    const contentHeaderHeight = document.getElementById('content-header').offsetHeight;
+    const footerHeight = document.getElementById('footer').offsetHeight;
+    let columns = Math.max(1, Math.floor(containerWidth / (cardWidth + 15)));
+
+    if (viewMode !== "cards") {
+        columns = 1;
+        cardHeight = 100;
     }
 
-    const card = cards[0];  // Use the first card for size reference
-    const cardStyles = window.getComputedStyle(card);
-    const gridWidth = grid.clientWidth;
-    const cardWidth = card.offsetWidth + parseFloat(cardStyles.marginLeft) + parseFloat(cardStyles.marginRight);
+    const navbarHeight = document.getElementById('navbar').offsetHeight;
 
-    const columns = Math.max(1, Math.floor(gridWidth / cardWidth));
-    const rows = calculateRows();
+    const availableHeight = containerHeight - navbarHeight - containerMargin - contentHeaderHeight - footerHeight - 120;
+    const rows = Math.max(1, Math.floor(availableHeight / cardHeight));
 
-    let newCardsPerPage = columns * rows;
-    const currentCardCount = cards.length;
-    const finalPage = pageNumber === Math.ceil(totalCards / newCardsPerPage);
+    const newCardsPerPage = columns * rows;
+    console.log("Container height: " + containerHeight);
+    console.log("Container width: " + containerWidth);
+    console.log("content header: " + contentHeaderHeight);
+    console.log("Footer height: " + footerHeight);
+    console.log("Navbar height: " + navbarHeight);
+    console.log("Available height: " + availableHeight);
 
-    const layoutChanged = newCardsPerPage !== currentCardCount;
-    const needsUpdate = layoutChanged && !finalPage;
+    console.log("Card width: " + cardWidth + " Card Height: " + cardHeight);
+    console.log("Rows " + rows + " Columns " + columns);
 
-    if (pageNumber > (totalCards / newCardsPerPage))
-    {
-        document.getElementById('pageNumberInput').value = Math.ceil(totalCards / newCardsPerPage);
+    // Only update if cardsPerPage changes
+    const input = document.getElementById('cardsPerPageInput');
+    const oldValue = parseInt(input.value, 10);
+    if (oldValue !== newCardsPerPage && newCardsPerPage > 0) {
+        input.value = newCardsPerPage;
+        fetchCards(viewMode, true);
     }
+}
 
-    if (needsUpdate && newCardsPerPage > 0) {
-        console.info(`Layout change detected: submitting form with cardsPerPage = ${newCardsPerPage}`);
-        const form = document.getElementById('search-form');
-        document.getElementById("cardsPerPageInput").value = newCardsPerPage;
+function createPaginationButtons(viewMode = "cards") {
+    const pagination = document.getElementById('pagination');
+    if (!pagination) return;
 
-        const backendError = document.getElementById('tag-backend-error');
-        if (backendError && backendError.hidden === false) {
-            backendError.querySelectorAll('li').forEach(li => {
-                const text = li.innerText.trim();
-                if (!text) {
-                    return;
-                }
-                const errorInput = document.createElement('input');
-                errorInput.type = 'hidden';
-                errorInput.name = 'errorMessage';
-                errorInput.value = text;
-                form.appendChild(errorInput);
-            });
+    pagination.innerHTML = '';
+    const totalPages = parseInt(document.getElementById('data-total-pages').value, 10);
+    const pageNumber = parseInt(document.getElementById("pageNumberInput").value, 10);
+    const paginationLinksStart = Math.max(pageNumber - 2, 1);
+    const paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
+
+    if (totalPages <= 10) {
+        if (pageNumber > 1) {
+            pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${pageNumber - 1}, '${viewMode}')">Prev</button></li>`;
         }
-        form.submit();
+        for (let i = 1; i <= totalPages; i++) {
+            pagination.innerHTML += `<li class="page-item${i === pageNumber ? ' active' : ''}"><button class="page-link" onclick="navigateToPage(${i}, '${viewMode}')">${i}</button></li>`;
+        }
+        if (pageNumber < totalPages) {
+            pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${pageNumber + 1}, '${viewMode}')">Next</button></li>`;
+        }
     } else {
-        console.debug("No layout change detected. No form submission needed.");
+        pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(1, '${viewMode}')">First</button></li>`;
+        pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${pageNumber - 1}, '${viewMode}')">Prev</button></li>`;
+
+        for (let i = paginationLinksStart; i <= paginationLinksEnd; i++) {
+            pagination.innerHTML += `<li class="page-item${i === pageNumber ? ' active' : ''}"><button class="page-link" onclick="navigateToPage(${i}, '${viewMode}')">${i}</button></li>`;
+        }
+
+        pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${pageNumber + 1}, '${viewMode}')">Next</button></li>`;
+        pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${totalPages}, '${viewMode}')">Last</button></li>`;
+
+        pagination.innerHTML += `
+            <li class="page-item d-flex align-items-center">
+                <input type="number" class="form-control me-2" id="pageSearch" style="min-width: 50px;">
+                <button class="btn btn-primary" onclick="validateRenovationPageSearch()">Search</button>
+            </li>`;
     }
 }
 
-/**
- * This function calculates the number of rows, using the top of task grid minus footer.
- * Returns the number of rows of tasks to be displayed in the grid
- */
-function calculateRows() {
-    // Getting elements needed for sizing
-    const grid = document.getElementById('grid');
-    const card = grid.querySelector('.card');
-    const footer = document.getElementById('footer');
-
-    // Calculating the height of the task cards
-    const cardStyles = window.getComputedStyle(card);
-    const cardHeight = card.offsetHeight + parseFloat(cardStyles.marginTop) + parseFloat(cardStyles.marginBottom);
-
-    // Calculating where the grid of tasks starts relative to page height. Then taking away the footer to get available space
-    const gridTop = grid.getBoundingClientRect().top;
-    const footerHeight = footer.offsetHeight;
-    const pageHeight = window.innerHeight;
-
-    const availableHeight = (pageHeight - gridTop) - footerHeight - 220;
-
-    return Math.max(1, Math.floor(availableHeight / cardHeight));
+function navigateToPage(pageNum, viewMode = "cards") {
+    document.getElementById("pageNumberInput").value = pageNum;
+    fetchCards(viewMode);
 }
-
-updateLayout()
-window.addEventListener('resize', updateLayout);
