@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
@@ -63,7 +64,7 @@ public class RenovationController {
     /**
      * Gets all renovations
      *
-     * @param searchQuery optional string to search on renovation name (partial matching)
+     * @param searchTerm optional string to search on renovation name (partial matching)
      * @param model       (map-like) representation of results to be used by thymeleaf
      * @return thymeleaf renovationsTemplate
      */
@@ -357,15 +358,6 @@ public class RenovationController {
                                  Model model) {
         logger.info("GET /renovations/view");
 
-        Object cardsPerPageObj = model.asMap().get("cardsPerPage");
-        Integer cardsPerPage = (cardsPerPageObj instanceof Integer) ? (Integer) cardsPerPageObj : null;
-        if (cardsPerPage == null || cardsPerPage < 1) {
-            cardsPerPage = 5;
-        }
-
-        Object fromSearchObj = model.asMap().get("fromSearch");
-        Boolean fromSearch = (fromSearchObj instanceof Boolean) ? (Boolean) fromSearchObj : false;
-
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
 
@@ -375,32 +367,11 @@ public class RenovationController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
-        if (pageNumber < 1)
-            return "redirect:/renovations/view?id=" + id + "&page=1";
-
-        int totalCards = record.getRenovationTasks().size();
-        int totalPages = (totalCards + cardsPerPage - 1) / cardsPerPage;
-
-        if (pageNumber > totalPages && totalCards != 0)
-            return "redirect:/renovations/view?id=" + id + "&page=" + totalPages;
-
-        Pageable pageable = PageRequest.of(pageNumber - 1, cardsPerPage);
-        Page<RenovationTask> paginatedTasks = renovationTaskService.returnTaskPages(record, pageable);
         List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
 
-        int paginationLinksStart = Math.max(pageNumber - 2, 1);
-        int paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
-
         model.addAttribute("isOwner", isOwner);
-        model.addAttribute("fromSearch", fromSearch);
-        model.addAttribute("tasks", paginatedTasks.getContent());
-        model.addAttribute("pageNumber", pageNumber);
-        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageNumber", Math.max(pageNumber, 1));
         model.addAttribute("renovation", record);
-        model.addAttribute("paginationLinksStart", paginationLinksStart);
-        model.addAttribute("paginationLinksEnd", paginationLinksEnd);
-        model.addAttribute("cardsPerPage", cardsPerPage);
-        model.addAttribute("totalCards", totalCards);
         model.addAttribute("icons", iconFileNames);
 
         return "viewRenovation";
@@ -408,12 +379,15 @@ public class RenovationController {
 
     @GetMapping("/retrieve/{id}")
     @ResponseBody
-    public Page<RenovationTask> getRenovation(@RequestParam(name = "id") Long id,
-                                              @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                              @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage) {
-
+    public Page<RenovationTaskDTO> getRenovation(@PathVariable("id") Long id,
+                                                 @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                                 @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage) {
         User user = loginService.getUserByEmail();
         RenovationRecord record = renovationRecordService.getRecordById(id);
+
+        if (record == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
+        }
 
         boolean isOwner = user.equals(record.getUser());
         if (!isOwner && !record.isPublic()) {
@@ -424,39 +398,17 @@ public class RenovationController {
             cardsPerPage = 5;
         }
 
-        Pageable pageable = PageRequest.of(pageNumber - 1, cardsPerPage);
-        return renovationTaskService.returnTaskPages(record, pageable);
-    }
+        int requestedPage = Math.max(pageNumber - 1, 0);
+        Pageable pageable = PageRequest.of(requestedPage, cardsPerPage);
+        Page<RenovationTask> page = renovationTaskService.returnTaskPages(record, pageable);
 
-    /**
-     * Handles the submission of a renovation view request. Redirects to the GET view endpoint
-     * for a specific renovation record, including the requested page number and cards per page.
-     * The number of cards per page and search origin flag are added as flash attributes for use
-     * in the redirected view.
-     *
-     * @param id                 the ID of the renovation record to view
-     * @param pageNumber         the page number to display (default 1)
-     * @param cardsPerPage       the number of cards to display per page (defaults 5)
-     * @param fromSearch         a flag indicating whether the view was triggered from a search or not
-     * @param redirectAttributes used to store flash attributes for the redirect
-     * @return a redirect to the GET view endpoint with query parameters for the ID and page number
-     */
-    @PostMapping("/view")
-    public String postViewRenovation(@RequestParam(name = "id") Long id,
-                                     @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                     @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage,
-                                     @RequestParam(name = "fromSearch", required = false, defaultValue = "false") boolean fromSearch,
-                                     @RequestParam(name = "errorMessage", required = false) List<String> errorMessage,
-                                     RedirectAttributes redirectAttributes) {
-        logger.info("POST /renovations/view");
-        redirectAttributes.addFlashAttribute("cardsPerPage", cardsPerPage);
-        redirectAttributes.addFlashAttribute("fromSearch", fromSearch);
-
-        if (errorMessage != null && !errorMessage.isEmpty()) {
-            redirectAttributes.addFlashAttribute("errors", errorMessage);
+        if (requestedPage >= page.getTotalPages() && page.getTotalPages() > 0) {
+            pageable = PageRequest.of(page.getTotalPages() - 1, cardsPerPage);
+            page = renovationTaskService.returnTaskPages(record, pageable);
         }
 
-        return "redirect:/renovations/view?id=" + id + "&page=" + pageNumber;
+        Page<RenovationTaskDTO> dtoPage = page.map(RenovationTaskDTO::new);
+        return dtoPage;
     }
 
     /**
@@ -574,13 +526,24 @@ public class RenovationController {
 
         User user = loginService.getUserByEmail();
 
-        Pageable pageable = PageRequest.of(pageNumber - 1, cardsPerPage);
-
-        return switch (visibility.toLowerCase()) {
+        int requestedPage = Math.max(pageNumber - 1, 0);
+        Pageable pageable = PageRequest.of(requestedPage, cardsPerPage);
+        Page<RenovationRecordDTO> page = switch (visibility.toLowerCase()) {
             case "public" -> renovationRecordService.getPaginatedPublicRecords(searchTerm, tagList, pageable);
             case "user" -> renovationRecordService.getPaginatedUserRecords(user, searchTerm, tagList, pageable);
             default -> renovationRecordService.getPaginatedVisibleRecords(user, searchTerm, tagList, pageable);
         };
+
+        if (requestedPage >= page.getTotalPages() && page.getTotalPages() > 0) {
+            pageable = PageRequest.of(page.getTotalPages() - 1, cardsPerPage);
+            page = switch (visibility.toLowerCase()) {
+                case "public" -> renovationRecordService.getPaginatedPublicRecords(searchTerm, tagList, pageable);
+                case "user" -> renovationRecordService.getPaginatedUserRecords(user, searchTerm, tagList, pageable);
+                default -> renovationRecordService.getPaginatedVisibleRecords(user, searchTerm, tagList, pageable);
+            };
+        }
+
+        return page;
     }
 
     @GetMapping("/tags/profanity-filter")

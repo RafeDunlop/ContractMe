@@ -14,10 +14,10 @@
 <div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
 
 <div id="container" class="card container mt-5 shadow-sm">
-    <input type="hidden" id="data-total-pages" th:value="${totalPages}" aria-label="Total number pages"/>
-    <input type="hidden" id="cardsPerPageInput" th:value="${cardsPerPage}" />
-    <input type="hidden" id="pageNumberInput" th:value="${pageNumber}" name="page" />
-    <input type="hidden" id="userId" th:value="${user.id}">
+    <input type="hidden" id="pageNumber" th:value="${pageNumber}" name="page"/>
+    <input type="hidden" id="totalPages"/>
+    <input type="hidden" id="cardsPerPage"/>
+    <input type="hidden" id="userId" th:value="${user.id}"/>
 
     <div id="content-container" class="content-container m-3">
         <div id="content-header">
@@ -46,7 +46,7 @@
 
             <div class="col-md-4">
                 <label class="form-label">Show:</label>
-                <select name="visibility" class="form-select" onchange="fetchCards(viewmode='cards', resetPage=true)">
+                <select name="visibility" class="form-select" onchange="fetchRenovations(viewmode='cards', resetPage=true)">
                     <option value="all" th:selected="${visibility == 'all'}">All</option>
                     <option value="public" th:selected="${visibility == 'public'}">Public</option>
                     <option value="user" th:selected="${visibility == 'user'}">User</option>
@@ -96,7 +96,7 @@
 
         document.getElementById("search-form").addEventListener("submit", function (e) {
             e.preventDefault();
-            fetchCards("cards", true);
+            fetchRenovations("cards", true);
         });
     });
 

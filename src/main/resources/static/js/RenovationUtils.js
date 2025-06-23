@@ -1,14 +1,13 @@
 let lastSubmittedSearchTerm = "";
 let lastSubmittedTags = [];
 
-function fetchCards(viewMode = "cards", resetPage = false) {
+function fetchRenovations(viewMode = "cards", resetPage = false) {
     if (resetPage) {
-        document.getElementById("pageNumberInput").value = 1;
+        document.getElementById("pageNumber").value = 1;
     }
 
     lastSubmittedSearchTerm = document.querySelector("input[name='searchTerm']").value.trim();
     lastSubmittedTags = Array.from(document.querySelectorAll("#hidden-tag-inputs input[name='tagNameList']")).map(input => input.value);
-    console.log(viewMode);
     const element = viewMode === "cards" ? document.getElementById("grid") : document.getElementById('table');
     const container = document.getElementById("elements-container")
     const loading = document.getElementById("loading-message");
@@ -16,11 +15,11 @@ function fetchCards(viewMode = "cards", resetPage = false) {
     const visibility = document.querySelector("select[name='visibility']")?.value || "all";
     updateHeaderTitle(visibility);
 
-    let pageNumber = parseInt(document.getElementById("pageNumberInput")?.value, 10);
+    let pageNumber = parseInt(document.getElementById("pageNumber")?.value, 10);
     const searchTerm = lastSubmittedSearchTerm || "";
     const tagNameList = lastSubmittedTags || [];
     if (isNaN(pageNumber) || pageNumber < 1) pageNumber = 1;
-    let cardsPerPage = parseInt(document.getElementById("cardsPerPageInput")?.value, 10);
+    let cardsPerPage = parseInt(document.getElementById("cardsPerPage")?.value, 10);
     if (isNaN(cardsPerPage)) cardsPerPage = 16;
     const currentUserId = document.getElementById("userId").value;
 
@@ -62,10 +61,9 @@ function fetchCards(viewMode = "cards", resetPage = false) {
             loading.style.display = "none";
             element.style.display = "grid";
             element.innerHTML = "";
-            console.log(data);
 
-            document.getElementById("data-total-pages").value = data.totalPages;
-            document.getElementById("pageNumberInput").value = data.number + 1;
+            document.getElementById("totalPages").value = data.totalPages;
+            document.getElementById("pageNumber").value = data.number + 1;
 
             if (data.content.length === 0) {
                 container.insertAdjacentHTML('beforeend', `<div class="alert alert-secondary mt-4">No renovations found.</div>`);
@@ -77,13 +75,73 @@ function fetchCards(viewMode = "cards", resetPage = false) {
             document.getElementById("elements-container").style.display = "block";
 
             if (viewMode === "cards") {
-                renderCardView(data, currentUserId, pageNumber);
+                renderRecordCards(data, currentUserId, pageNumber);
             } else {
                 const csrfToken = document.getElementById("globalCsrfToken")?.value || "";
-                renderTableView(data, csrfToken);
+                renderRecordTable(data, pageNumber, csrfToken);
             }
 
             createPaginationButtons(viewMode);
+        })
+        .catch(error => {
+            loading.style.display = "none";
+            element.style.display = "none";
+            container.insertAdjacentHTML('beforeend', `<div class="alert alert-danger mt-4">Failed to load renovations. Please try again.</div>`);
+            console.log(error);
+        });
+}
+
+function fetchRenovation(id, resetPage = false) {
+    if (resetPage) {
+        document.getElementById("pageNumber").value = 1;
+    }
+
+    const element = document.getElementById("grid");
+    const container = document.getElementById("elements-container")
+    const loading = document.getElementById("loading-message");
+    const isOwner = document.getElementById("isOwner");
+
+
+    let pageNumber = parseInt(document.getElementById("pageNumber")?.value, 10);
+    if (isNaN(pageNumber) || pageNumber < 1) pageNumber = 1;
+    let cardsPerPage = parseInt(document.getElementById("cardsPerPage")?.value, 10);
+    if (isNaN(cardsPerPage)) cardsPerPage = 16;
+    let totalPages = parseInt(document.getElementById("totalPages")?.value, 10);
+    if (!isNaN(totalPages) && pageNumber > totalPages && totalPages > 0) {
+        pageNumber = totalPages;
+    }
+
+    const params = new URLSearchParams();
+
+    if (pageNumber && !isNaN(pageNumber)) {
+        params.set("page", pageNumber);
+    }
+    if (!isNaN(cardsPerPage)) {
+        params.set("cardsPerPage", cardsPerPage);
+    }
+
+    fetch("/renovations/retrieve/" + id + "?" + params.toString())
+        .then(response => response.json())
+        .then(data => {
+            loading.style.display = "none";
+            element.style.display = "grid";
+            element.innerHTML = "";
+
+            const correctedPageNumber = data.number + 1;
+            document.getElementById("totalPages").value = data.totalPages;
+            document.getElementById("pageNumber").value = correctedPageNumber;
+
+            if (data.content.length === 0) {
+                container.insertAdjacentHTML('beforeend', `<div class="alert alert-secondary mt-4">No renovations found.</div>`);
+                element.style.display = "none";
+                document.getElementById("pagination").innerHTML = "";
+                return;
+            }
+
+            document.getElementById("elements-container").style.display = "block";
+
+            renderTaskCards(data, isOwner, pageNumber);
+            createPaginationButtons("", id);
         })
         .catch(error => {
             loading.style.display = "none";
@@ -109,14 +167,12 @@ function updateHeaderTitle(visibility) {
     }
 }
 
-function renderCardView(data, currentUserId, pageNumber) {
+function renderRecordCards(data, currentUserId, pageNumber) {
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
     grid.className = "grid-container";
-    console.log(data);
 
     data.content.forEach(record => {
-        console.log(record);
         const tagsHtml = record.sortedTags.map(tag => `
             <span class="tag-box badge bg-success d-flex align-items-center me-2 mb-2">
                 <span class="tag-text-small text-truncate">${tag.tagName}</span>
@@ -127,7 +183,7 @@ function renderCardView(data, currentUserId, pageNumber) {
         card.className = "card card-count position-relative";
 
         card.innerHTML = `
-            <a href="/renovations/view?id=${record.id}&page=${pageNumber}&fromSearch=true" class="no-underline text-reset">
+            <a href="/renovations/view?id=${record.id}&page=${pageNumber}" class="no-underline text-reset">
                 ${(record.userId === currentUserId) ? '<span class="badge bg-primary position-absolute top-0 end-0 m-2">Yours</span>' : ""}
                 <div class="card-body">
                     <h5 class="card-title truncate">${record.name}</h5>
@@ -144,7 +200,7 @@ function renderCardView(data, currentUserId, pageNumber) {
     });
 }
 
-function renderTableView(data, csrfToken) {
+function renderRecordTable(data, pageNumber, csrfToken) {
     const table = document.getElementById("table");
     if (!table) {
         console.error("Table container not found.");
@@ -155,14 +211,7 @@ function renderTableView(data, csrfToken) {
 
     data.content.forEach(record => {
         const rowHtml = `
-            <div class="list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative">
-                <form id="form-${record.id}" method="post" action="/renovations/view">
-                    <input type="hidden" name="id" value="${record.id}" />
-                    <input type="hidden" name="page" value="1" />
-                    <input type="hidden" name="cardsPerPage" value="5" />
-                    <input type="hidden" name="fromSearch" value="false" />
-                    <input type="hidden" name="_csrf" value="${csrfToken}" />
-                </form>
+            <a href="/renovations/view?id=${record.id}&page=${pageNumber}" class="list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative">
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="w-100" onclick="document.getElementById('form-${record.id}').submit();" style="cursor: pointer;">
                         <h5 class="mb-1 text-primary">${record.name}</h5>
@@ -175,13 +224,63 @@ function renderTableView(data, csrfToken) {
                         ❌
                     </button>
                 </div>
-            </div>
+            </a>
         `;
         table.insertAdjacentHTML("beforeend", rowHtml);
+    });
+}
+
+function renderTaskCards(data, isOwner, renovationId) {
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    grid.className = "task-grid";
+
+    data.content.forEach(task => {
+        const iconHtml = `
+            <div class="position-relative">
+                <img src="/images/${task.iconFileName}" alt="Task Icon" class="task-icon"
+                     ${isOwner && task.iconFileName !== 'default-icon.png' ? `onclick="showIconSelector(${task.id})"` : ""} />
+                ${isOwner && task.iconFileName === 'default-icon.png' ? `
+                    <button type="button" class="btn btn-secondary btn-sm rounded-circle opacity-75 top-0 start-100 translate-middle position-absolute"
+                            onclick="showIconSelector(${task.id})">+</button>
+                ` : ""}
+            </div>
+        `;
+
+        const editButton = isOwner ? `
+            <a href="/editTask?taskId=${task.id}&renovationId=${renovationId}" class="btn btn-primary">Edit Task</a>
+        ` : "";
+
+        const cardHtml = `
+            <div class="card card-count" style="width: 18rem;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        ${iconHtml}
+                        <h5 class="card-title truncate ms-2 mb-0">${task.name}</h5>
+                    </div>
+                    <p class="card-text truncate">${task.description}</p>
+                    <p class="card-text"><strong>Due Date:</strong> ${task.dueDate}</p>
+                    <div class="d-flex justify-content-between">${editButton}</div>
+                </div>
+            </div>
+        `;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "card-count";
+        wrapper.innerHTML = cardHtml;
+        grid.appendChild(wrapper);
     });
 }
 
 function clearAlerts() {
     const oldAlerts = document.querySelectorAll("#elements-container .alert");
     oldAlerts.forEach(alert => alert.remove());
+}
+
+function fetchAppropriateRenovationData(viewMode = "cards", id = null, resetPage = false) {
+    if (id) {
+        fetchRenovation(id, resetPage);
+    } else {
+        fetchRenovations(viewMode, resetPage);
+    }
 }

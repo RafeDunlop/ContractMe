@@ -11,9 +11,10 @@ import java.util.List;
  */
 public class RenovationTaskDTO {
     private String name;
-    String description;
-    LocalDate dueDate;
-    List<String> rooms;
+    private String description;
+    private LocalDate dueDate;
+    private List<String> rooms;
+    private String iconFileName;
 
     /**
      * Default constructor for {@code RenovationTaskDTO}.
@@ -25,6 +26,23 @@ public class RenovationTaskDTO {
         this.description = "";
         this.dueDate = null;
         this.rooms = new ArrayList<>();
+        this.iconFileName = "";
+    }
+
+    /**
+     * constructor which accepts an initial state with an iconFileName {@link nz.ac.canterbury.seng302.homehelper.entity.RenovationTask}
+     * @param name The initial name
+     * @param description The initial description
+     * @param dueDate The initial due date
+     * @param rooms the initial subset of rooms
+     * @param iconFileName the name of the icon file
+     */
+    public RenovationTaskDTO(String name, String description, LocalDate dueDate,List<String> rooms, String iconFileName) {
+        this.name = name;
+        this.description = description;
+        this.dueDate = dueDate;
+        this.rooms = rooms;
+        this.iconFileName = iconFileName;
     }
 
     /**
@@ -51,6 +69,7 @@ public class RenovationTaskDTO {
         this.description = task.getDescription();
         this.dueDate = task.getDueDate();
         this.rooms = task.getRoomList();
+        this.iconFileName = task.getIconFileName();
     }
 
 
@@ -112,4 +131,7 @@ public class RenovationTaskDTO {
         this.rooms = rooms;
    }
 
+    public void setIconFileName(String iconFileName) {this.iconFileName = iconFileName;}
+
+    public String getIconFileName() {return iconFileName;}
 }

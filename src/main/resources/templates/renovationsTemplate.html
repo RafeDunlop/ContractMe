@@ -14,8 +14,14 @@
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
 <div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
 
+<input type="hidden" id="cardsPerPage"/>
+<input type="hidden" id="pageNumber" th:value="${pageNumber}" name="page"/>
+<input type="hidden" id="totalPages"/>
+<input type="hidden" id="userId" th:value="${user.id}">
+<input type="hidden" id="globalCsrfToken" name="_csrf" th:value="${_csrf.token}" />
 
 <div id="container" class="card container mt-5 shadow-sm">
+
     <div id="content-container" class="content-container m-3">
         <div id="content-header">
             <div class="jumbotron d-flex justify-content-between align-items-center">
@@ -35,14 +41,6 @@
                 </div>
             </form>
         </div>
-
-
-        <!-- Hidden Inputs for Pagination -->
-        <input type="hidden" id="cardsPerPageInput" value="12"/>
-        <input type="hidden" id="pageNumberInput" value="1"/>
-        <input type="hidden" id="data-total-pages" value="1"/>
-        <input type="hidden" id="userId" th:value="${user.id}">
-        <input type="hidden" id="globalCsrfToken" name="_csrf" th:value="${_csrf.token}" />
 
         <!-- Loading Message -->
         <div id="loading-message" class="text-center my-4" style="display: none;">

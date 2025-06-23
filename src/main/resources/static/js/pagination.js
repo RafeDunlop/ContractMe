@@ -14,7 +14,7 @@ function validateTaskPageSearch(recordId) {
     let desiredPage = document.getElementById("pageSearch").value;
     desiredPage = parseInt(desiredPage, 10);
 
-    const totalPages = parseInt(document.getElementById('data-total-pages').value, 10);
+    const totalPages = parseInt(document.getElementById('totalPages').value, 10);
     const confirmText= "Are you sure you want to go to page " + desiredPage.toString() + "?";
     confirmPrompt(confirmText, "Confirm", "Cancel", false).then((confirm) => {
         if (confirm) {
@@ -42,7 +42,7 @@ function validateRenovationPageSearch() {
     let desiredPage = document.getElementById("pageSearch").value;
     desiredPage = parseInt(desiredPage, 10);
 
-    const totalPages = parseInt(document.getElementById('data-total-pages').value, 10);
+    const totalPages = parseInt(document.getElementById('totalPages').value, 10);
     const confirmText= "Are you sure you want to go to page " + desiredPage.toString() + "?";
     confirmPrompt(confirmText, "Confirm", "Cancel", false).then((confirm) => {
         if (confirm) {
@@ -64,7 +64,7 @@ let cachedCardSize = null;
 /**
  * This function updates the layout based on the window size and adjusts the number of tasks to be displayed on the page.
  */
-function updateLayout(viewMode = "cards") {
+function updateLayout(viewMode = "cards", id = null) {
     const cardWidth = 260;
     let cardHeight = 140;
 
@@ -104,54 +104,55 @@ function updateLayout(viewMode = "cards") {
     console.log("Rows " + rows + " Columns " + columns);
 
     // Only update if cardsPerPage changes
-    const input = document.getElementById('cardsPerPageInput');
+    const input = document.getElementById('cardsPerPage');
     const oldValue = parseInt(input.value, 10);
+
     if (oldValue !== newCardsPerPage && newCardsPerPage > 0) {
         input.value = newCardsPerPage;
-        fetchCards(viewMode, true);
+        fetchAppropriateRenovationData(viewMode, id, true);
     }
 }
 
-function createPaginationButtons(viewMode = "cards") {
+function createPaginationButtons(viewMode = "cards", id = null) {
     const pagination = document.getElementById('pagination');
     if (!pagination) return;
 
     pagination.innerHTML = '';
-    const totalPages = parseInt(document.getElementById('data-total-pages').value, 10);
-    const pageNumber = parseInt(document.getElementById("pageNumberInput").value, 10);
+    const totalPages = parseInt(document.getElementById('totalPages').value, 10);
+    const pageNumber = parseInt(document.getElementById("pageNumber").value, 10);
     const paginationLinksStart = Math.max(pageNumber - 2, 1);
     const paginationLinksEnd = Math.min(pageNumber + 2, totalPages);
 
     if (totalPages <= 10) {
         if (pageNumber > 1) {
-            pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${pageNumber - 1}, '${viewMode}')">Prev</button></li>`;
+            pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${pageNumber - 1}, '${viewMode}', ${id})">Prev</button></li>`;
         }
         for (let i = 1; i <= totalPages; i++) {
-            pagination.innerHTML += `<li class="page-item${i === pageNumber ? ' active' : ''}"><button class="page-link" onclick="navigateToPage(${i}, '${viewMode}')">${i}</button></li>`;
+            pagination.innerHTML += `<li class="page-item${i === pageNumber ? ' active' : ''}"><button class="page-link" onclick="navigateToPage(${i}, '${viewMode}', ${id})">${i}</button></li>`;
         }
         if (pageNumber < totalPages) {
-            pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${pageNumber + 1}, '${viewMode}')">Next</button></li>`;
+            pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${pageNumber + 1}, '${viewMode}', ${id})">Next</button></li>`;
         }
     } else {
-        pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(1, '${viewMode}')">First</button></li>`;
-        pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${pageNumber - 1}, '${viewMode}')">Prev</button></li>`;
+        pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(1, '${viewMode}', ${id})">First</button></li>`;
+        pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${pageNumber - 1}, '${viewMode}', ${id})">Prev</button></li>`;
 
         for (let i = paginationLinksStart; i <= paginationLinksEnd; i++) {
-            pagination.innerHTML += `<li class="page-item${i === pageNumber ? ' active' : ''}"><button class="page-link" onclick="navigateToPage(${i}, '${viewMode}')">${i}</button></li>`;
+            pagination.innerHTML += `<li class="page-item${i === pageNumber ? ' active' : ''}"><button class="page-link" onclick="navigateToPage(${i}, '${viewMode}', ${id})">${i}</button></li>`;
         }
 
-        pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${pageNumber + 1}, '${viewMode}')">Next</button></li>`;
-        pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${totalPages}, '${viewMode}')">Last</button></li>`;
+        pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${pageNumber + 1}, '${viewMode}', ${id})">Next</button></li>`;
+        pagination.innerHTML += `<li class="page-item"><button class="page-link" onclick="navigateToPage(${totalPages}, '${viewMode}', ${id})">Last</button></li>`;
 
         pagination.innerHTML += `
             <li class="page-item d-flex align-items-center">
                 <input type="number" class="form-control me-2" id="pageSearch" style="min-width: 50px;">
-                <button class="btn btn-primary" onclick="validateRenovationPageSearch()">Search</button>
+                <button class="btn btn-primary" onclick="validateRenovationPageSearch(${id})">Search</button>
             </li>`;
     }
 }
 
-function navigateToPage(pageNum, viewMode = "cards") {
-    document.getElementById("pageNumberInput").value = pageNum;
-    fetchCards(viewMode);
+function navigateToPage(pageNum, viewMode = "cards", id = null) {
+    document.getElementById("pageNumber").value = pageNum;
+    fetchAppropriateRenovationData(viewMode, id, false);
 }
