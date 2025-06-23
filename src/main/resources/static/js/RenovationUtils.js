@@ -140,8 +140,8 @@ function fetchRenovation(id, resetPage = false) {
 
             document.getElementById("elements-container").style.display = "block";
 
-            renderTaskCards(data, isOwner, pageNumber);
-            createPaginationButtons("", id);
+            renderTaskCards(data, isOwner, id);
+            createPaginationButtons("cards", id);
         })
         .catch(error => {
             loading.style.display = "none";
@@ -255,7 +255,7 @@ function renderTaskCards(data, isOwner, renovationId) {
         ` : "";
 
         const cardHtml = `
-            <div class="card card-count" style="width: 18rem;">
+            <div class="card card-count">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         ${iconHtml}

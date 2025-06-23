@@ -82,7 +82,9 @@ function updateLayout(viewMode = "cards", id = null) {
     const footerHeight = document.getElementById('footer').offsetHeight;
     let columns = Math.max(1, Math.floor(containerWidth / (cardWidth + 15)));
 
-    if (viewMode !== "cards") {
+    if (id) {
+        cardHeight = 193;
+    } else if (viewMode !== "cards") {
         columns = 1;
         cardHeight = 100;
     }

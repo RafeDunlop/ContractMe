@@ -28,10 +28,6 @@ function showIconSelector(taskId) {
     localStorage.setItem("selectedTaskId", taskId);
 
     const task = window.loadedTasks?.find(t => t.id === taskId);
-    if (!task) {
-        console.error("Task not found for ID:", taskId);
-        return;
-    }
 
     const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
     const modal = document.getElementById("icon-selector-modal");

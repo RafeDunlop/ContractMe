@@ -138,12 +138,12 @@
             return;
         }
 
-        updateLayout("", recordId);
+        updateLayout("cards", recordId);
 
         window.addEventListener('resize', () => {
             clearTimeout(window._resizeTimeout);
             cachedCardSize = null;
-            window._resizeTimeout = setTimeout(() => updateLayout("", recordId), 400);
+            window._resizeTimeout = setTimeout(() => updateLayout("cards", recordId), 400);
         });
     });
 </script>
