@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.unit.service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
@@ -246,7 +247,7 @@ public class RenovationRecordServiceTest {
         Mockito.when(renovationRecordRepository.findUserRecords(Mockito.eq(user), Mockito.any(Pageable.class)))
                 .thenReturn(mockPage);
 
-        Page<RenovationRecord> result = toTest.getPaginatedUserRecords(user, "", null, pageable);
+        Page<RenovationRecordDTO> result = toTest.getPaginatedUserRecords(user, "", null, pageable);
 
         verify(renovationRecordRepository).findUserRecords(Mockito.eq(user), Mockito.any(Pageable.class));
         assertEquals(expected, result.getContent());
@@ -264,7 +265,7 @@ public class RenovationRecordServiceTest {
         Mockito.when(renovationRecordRepository.findUserRecordsBySearch(Mockito.eq(user), Mockito.eq(term), Mockito.any(Pageable.class)))
                 .thenReturn(mockPage);
 
-        Page<RenovationRecord> result = toTest.getPaginatedUserRecords(user, term, null, pageable);
+        Page<RenovationRecordDTO> result = toTest.getPaginatedUserRecords(user, term, null, pageable);
 
         verify(renovationRecordRepository).findUserRecordsBySearch(Mockito.eq(user), Mockito.eq(term), Mockito.any(Pageable.class));
         assertEquals(expected, result.getContent());
@@ -280,7 +281,7 @@ public class RenovationRecordServiceTest {
         Mockito.when(renovationRecordRepository.findPublicRecords(Mockito.any(Pageable.class)))
                 .thenReturn(mockPage);
 
-        Page<RenovationRecord> result = toTest.getPaginatedPublicRecords("", null, pageable);
+        Page<RenovationRecordDTO> result = toTest.getPaginatedPublicRecords("", null, pageable);
 
         verify(renovationRecordRepository).findPublicRecords(Mockito.any(Pageable.class));
         assertEquals(expected, result.getContent());
@@ -297,7 +298,7 @@ public class RenovationRecordServiceTest {
         Mockito.when(renovationRecordRepository.findPublicRecordsBySearch(Mockito.eq(term), Mockito.any(Pageable.class)))
                 .thenReturn(mockPage);
 
-        Page<RenovationRecord> result = toTest.getPaginatedPublicRecords(term, null, pageable);
+        Page<RenovationRecordDTO> result = toTest.getPaginatedPublicRecords(term, null, pageable);
 
         verify(renovationRecordRepository).findPublicRecordsBySearch(Mockito.eq(term), Mockito.any(Pageable.class));
         assertEquals(expected, result.getContent());
@@ -314,7 +315,7 @@ public class RenovationRecordServiceTest {
         Mockito.when(renovationRecordRepository.findVisibleRecords(Mockito.eq(user), Mockito.any(Pageable.class)))
                 .thenReturn(mockPage);
 
-        Page<RenovationRecord> result = toTest.getPaginatedVisibleRecords(user, "", null, pageable);
+        Page<RenovationRecordDTO> result = toTest.getPaginatedVisibleRecords(user, "", null, pageable);
 
         verify(renovationRecordRepository).findVisibleRecords(Mockito.eq(user), Mockito.any(Pageable.class));
         assertEquals(expected, result.getContent());
@@ -332,7 +333,7 @@ public class RenovationRecordServiceTest {
         Mockito.when(renovationRecordRepository.findVisibleRecordsBySearch(Mockito.eq(user), Mockito.eq(term), Mockito.any(Pageable.class)))
                 .thenReturn(mockPage);
 
-        Page<RenovationRecord> result = toTest.getPaginatedVisibleRecords(user, term, null, pageable);
+        Page<RenovationRecordDTO> result = toTest.getPaginatedVisibleRecords(user, term, null, pageable);
 
         verify(renovationRecordRepository).findVisibleRecordsBySearch(Mockito.eq(user), Mockito.eq(term), Mockito.any(Pageable.class));
         assertEquals(expected, result.getContent());

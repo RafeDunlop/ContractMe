@@ -22,7 +22,7 @@ function fetchCards(viewMode = "cards", resetPage = false) {
     if (isNaN(pageNumber) || pageNumber < 1) pageNumber = 1;
     let cardsPerPage = parseInt(document.getElementById("cardsPerPageInput")?.value, 10);
     if (isNaN(cardsPerPage)) cardsPerPage = 16;
-    const currentUserEmail = document.getElementById("email").value;
+    const currentUserId = document.getElementById("userId").value;
 
     const params = new URLSearchParams();
     const userParams = new URLSearchParams();
@@ -56,12 +56,13 @@ function fetchCards(viewMode = "cards", resetPage = false) {
     window.history.replaceState({}, '', newUrl);
     clearAlerts();
 
-    fetch("/renovations/cards?" + params.toString())
+    fetch("/renovations/retrieve?" + params.toString())
         .then(response => response.json())
         .then(data => {
             loading.style.display = "none";
             element.style.display = "grid";
             element.innerHTML = "";
+            console.log(data);
 
             document.getElementById("data-total-pages").value = data.totalPages;
             document.getElementById("pageNumberInput").value = data.number + 1;
@@ -76,7 +77,7 @@ function fetchCards(viewMode = "cards", resetPage = false) {
             document.getElementById("elements-container").style.display = "block";
 
             if (viewMode === "cards") {
-                renderCardView(data, currentUserEmail, pageNumber);
+                renderCardView(data, currentUserId, pageNumber);
             } else {
                 const csrfToken = document.getElementById("globalCsrfToken")?.value || "";
                 renderTableView(data, csrfToken);
@@ -108,12 +109,14 @@ function updateHeaderTitle(visibility) {
     }
 }
 
-function renderCardView(data, currentUserEmail, pageNumber) {
+function renderCardView(data, currentUserId, pageNumber) {
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
     grid.className = "grid-container";
+    console.log(data);
 
     data.content.forEach(record => {
+        console.log(record);
         const tagsHtml = record.sortedTags.map(tag => `
             <span class="tag-box badge bg-success d-flex align-items-center me-2 mb-2">
                 <span class="tag-text-small text-truncate">${tag.tagName}</span>
@@ -125,7 +128,7 @@ function renderCardView(data, currentUserEmail, pageNumber) {
 
         card.innerHTML = `
             <a href="/renovations/view?id=${record.id}&page=${pageNumber}&fromSearch=true" class="no-underline text-reset">
-                ${(record.user.email === currentUserEmail) ? '<span class="badge bg-primary position-absolute top-0 end-0 m-2">Yours</span>' : ""}
+                ${(record.userId === currentUserId) ? '<span class="badge bg-primary position-absolute top-0 end-0 m-2">Yours</span>' : ""}
                 <div class="card-body">
                     <h5 class="card-title truncate">${record.name}</h5>
                     <div class="d-flex flex-wrap">${tagsHtml}</div>

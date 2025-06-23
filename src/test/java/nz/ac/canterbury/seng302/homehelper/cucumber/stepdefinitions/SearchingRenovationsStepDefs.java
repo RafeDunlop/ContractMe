@@ -59,8 +59,7 @@ public class SearchingRenovationsStepDefs {
 
     @When("I have run a search for {string}")
     public void i_have_run_a_search_for(String searchTerm) throws Exception {
-        searchTerm = searchTerm;
-        result = mockMvc.perform(get("/renovations")
+        result = mockMvc.perform(get("/renovations/retrieve")
                         .param("searchTerm", searchTerm)
                 .with(csrf()))
             .andReturn();
@@ -98,7 +97,7 @@ public class SearchingRenovationsStepDefs {
 
     @When("I click on page number {int}")
     public void i_click_on_page_number(Integer page) throws Exception {
-        result = mockMvc.perform(get("/renovations")
+        result = mockMvc.perform(get("/renovations/retrieve")
                 .param("searchTerm", searchTerm)
                 .param("page", page.toString()))
             .andReturn();
@@ -126,7 +125,7 @@ public class SearchingRenovationsStepDefs {
 
     @When("I input page number {int} and confirm my choice")
     public void i_input_page_number_and_confirm_my_choice(int pageNum) throws Exception {
-        result = mockMvc.perform(get("/renovations")
+        result = mockMvc.perform(get("/renovations/retrieve")
                 .param("page", String.valueOf(pageNum))
                 .param("searchTerm", searchTerm))
                 .andExpect(status().isOk())

@@ -1,11 +1,11 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.TagDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
@@ -67,12 +67,13 @@ public class RenovationRecordService {
      * Retrieves a list of renovation records associated with the current user that are like the given term
      * with pagination. The results are sorted by relevance (based on name, description, and tags)
      * and then by creation time in descending order.
-     * @param user The current user
-     * @param term The term to search for, not case-sensitive
+     *
+     * @param user     The current user
+     * @param term     The term to search for, not case-sensitive
      * @param pageable The pagination information
      * @return a list of renovation records from the user that match the term if given or tags
      */
-    public Page<RenovationRecord> getPaginatedUserRecords(User user, String term, List<Tag> tagList, Pageable pageable) {
+    public Page<RenovationRecordDTO> getPaginatedUserRecords(User user, String term, List<Tag> tagList, Pageable pageable) {
         Page<RenovationRecord> rawPage;
 
         if (term.trim().isEmpty() && tagList == null) {
@@ -86,9 +87,7 @@ public class RenovationRecordService {
         }
 
         List<RenovationRecord> sorted = rawPage.getContent().stream()
-                .sorted(Comparator
-                        .comparingInt((RenovationRecord r) -> calculateRelevance(r, term, tagList)).reversed()
-                        .thenComparing(RenovationRecord::getCreatedTimestamp, Comparator.nullsLast(Comparator.reverseOrder())))
+                .sorted(relevanceComparator(term, tagList))
                 .toList();
 
         return toPage(sorted, pageable);
@@ -98,10 +97,11 @@ public class RenovationRecordService {
      * Retrieves a list of public renovation records that are like the given term
      * The results are sorted by relevance (based on name, description, and tags)
      * and then by creation time in descending order.
+     *
      * @param term The term to search for, not case-sensitive
      * @return a list of public renovation records that match the term if given
      */
-    public Page<RenovationRecord> getPaginatedPublicRecords(String term, List<Tag> tagList, Pageable pageable) {
+    public Page<RenovationRecordDTO> getPaginatedPublicRecords(String term, List<Tag> tagList, Pageable pageable) {
         Page<RenovationRecord> rawPage;
 
         if (term.trim().isEmpty() && tagList == null) {
@@ -115,9 +115,7 @@ public class RenovationRecordService {
         }
 
         List<RenovationRecord> sorted = rawPage.getContent().stream()
-                .sorted(Comparator
-                        .comparingInt((RenovationRecord r) -> calculateRelevance(r, term, tagList)).reversed()
-                        .thenComparing(RenovationRecord::getCreatedTimestamp, Comparator.nullsLast(Comparator.reverseOrder())))
+                .sorted(relevanceComparator(term, tagList))
                 .toList();
 
         return toPage(sorted, pageable);
@@ -127,10 +125,11 @@ public class RenovationRecordService {
      * Retrieves a list of public or users renovation records that are like the given term
      * The results are sorted by relevance (based on name, description, and tags)
      * and then by creation time in descending order.
+     *
      * @param term The term to search for, not case-sensitive
      * @return a list of public or users renovation records that match the term if given
      */
-    public Page<RenovationRecord> getPaginatedVisibleRecords(User user, String term, List<Tag> tagList, Pageable pageable) {
+    public Page<RenovationRecordDTO> getPaginatedVisibleRecords(User user, String term, List<Tag> tagList, Pageable pageable) {
         Page<RenovationRecord> rawPage;
 
         if (term.trim().isEmpty() && tagList == null) {
@@ -144,9 +143,7 @@ public class RenovationRecordService {
         }
 
         List<RenovationRecord> sorted = rawPage.getContent().stream()
-                .sorted(Comparator
-                        .comparingInt((RenovationRecord r) -> calculateRelevance(r, term, tagList)).reversed()
-                        .thenComparing(RenovationRecord::getCreatedTimestamp, Comparator.nullsLast(Comparator.reverseOrder())))
+                .sorted(relevanceComparator(term, tagList))
                 .toList();
 
         return toPage(sorted, pageable);
@@ -188,11 +185,50 @@ public class RenovationRecordService {
      * @param pageable The pagination information including offset and page size.
      * @return A {@link PageImpl} containing the appropriate sublist of the input.
      */
-    private Page<RenovationRecord> toPage(List<RenovationRecord> sorted, Pageable pageable) {
+    private Page<RenovationRecordDTO> toPage(List<RenovationRecord> sorted, Pageable pageable) {
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), sorted.size());
-        List<RenovationRecord> pageContent = (start < end) ? sorted.subList(start, end) : Collections.emptyList();
+        List<RenovationRecordDTO> pageContent = (start < end)
+                ? sorted.subList(start, end).stream().map(this::toDTO).toList()
+                : Collections.emptyList();
+
         return new PageImpl<>(pageContent, pageable, sorted.size());
+    }
+
+    /**
+     * Builds a comparator that orders renovation records first by relevance score,
+     * then by creation timestamp in descending order.
+     *
+     * @param term    Search term
+     * @param tagList List of tags
+     * @return A comparator for sorting renovation records
+     */
+    private Comparator<RenovationRecord> relevanceComparator(String term, List<Tag> tagList) {
+        return Comparator
+                .comparingInt((RenovationRecord r) -> calculateRelevance(r, term, tagList)).reversed()
+                .thenComparing(RenovationRecord::getCreatedTimestamp, Comparator.nullsLast(Comparator.reverseOrder()));
+    }
+
+    /**
+     * Converts a {@link RenovationRecord} entity to a {@link RenovationRecordDTO}.
+     *
+     * @param record The entity to convert
+     * @return The corresponding DTO
+     */
+    private RenovationRecordDTO toDTO(RenovationRecord record) {
+        return new RenovationRecordDTO(
+                record.getId(),
+                record.getName(),
+                record.getDescription(),
+                record.isPublic(),
+                record.getCreatedTimestamp().toString(),
+                record.getTags() != null
+                        ? record.getTags().stream()
+                        .map(tag -> new TagDTO(tag.getId(), tag.getTagName()))
+                        .toList()
+                        : Collections.emptyList(),
+                record.getUser() != null ? record.getUser().getId() : null
+        );
     }
 
     /**

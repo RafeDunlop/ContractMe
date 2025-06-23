@@ -1,6 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
-import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
@@ -297,8 +297,6 @@ public class RenovationController {
             errors.putAll(locationService.validateLocation(addressDTO));
         }
 
-
-
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
 
@@ -406,6 +404,28 @@ public class RenovationController {
         model.addAttribute("icons", iconFileNames);
 
         return "viewRenovation";
+    }
+
+    @GetMapping("/retrieve/{id}")
+    @ResponseBody
+    public Page<RenovationTask> getRenovation(@RequestParam(name = "id") Long id,
+                                              @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                              @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage) {
+
+        User user = loginService.getUserByEmail();
+        RenovationRecord record = renovationRecordService.getRecordById(id);
+
+        boolean isOwner = user.equals(record.getUser());
+        if (!isOwner && !record.isPublic()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
+        }
+
+        if (cardsPerPage < 1) {
+            cardsPerPage = 5;
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber - 1, cardsPerPage);
+        return renovationTaskService.returnTaskPages(record, pageable);
     }
 
     /**
@@ -535,13 +555,13 @@ public class RenovationController {
         return "renovationSearchTemplate";
     }
 
-    @GetMapping("/cards")
+    @GetMapping("/retrieve")
     @ResponseBody
-    public Page<RenovationRecord> getCards(@RequestParam(required = false) String visibility,
-                                           @RequestParam(required = false) String searchTerm,
-                                           @RequestParam(name = "tagNameList", required = false) List<String> tagNameList,
-                                           @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                           @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage) {
+    public Page<RenovationRecordDTO> getRenocations(@RequestParam(required = false) String visibility,
+                                              @RequestParam(required = false) String searchTerm,
+                                              @RequestParam(name = "tagNameList", required = false) List<String> tagNameList,
+                                              @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                              @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage) {
 
         if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";
