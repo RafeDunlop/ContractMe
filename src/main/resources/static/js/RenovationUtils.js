@@ -231,16 +231,19 @@ function renderRecordTable(data, pageNumber, csrfToken) {
 }
 
 function renderTaskCards(data, isOwner, renovationId) {
+    window.loadedTasks = data.content; // Store for modal rendering
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
     grid.className = "task-grid";
 
     data.content.forEach(task => {
+        const isDefaultIcon = task.iconFileName === 'default-icon.png';
+
         const iconHtml = `
             <div class="position-relative">
                 <img src="/images/${task.iconFileName}" alt="Task Icon" class="task-icon"
-                     ${isOwner && task.iconFileName !== 'default-icon.png' ? `onclick="showIconSelector(${task.id})"` : ""} />
-                ${isOwner && task.iconFileName === 'default-icon.png' ? `
+                     ${isOwner && !isDefaultIcon ? `onclick="showIconSelector(${task.id})"` : ""} />
+                ${isOwner && isDefaultIcon ? `
                     <button type="button" class="btn btn-secondary btn-sm rounded-circle opacity-75 top-0 start-100 translate-middle position-absolute"
                             onclick="showIconSelector(${task.id})">+</button>
                 ` : ""}
@@ -270,6 +273,38 @@ function renderTaskCards(data, isOwner, renovationId) {
         wrapper.innerHTML = cardHtml;
         grid.appendChild(wrapper);
     });
+}
+
+function renderModalContent(task, csrfToken) {
+    console.log(task.id);
+    return `
+        <div class="d-flex justify-content-center align-items-center vh-100">
+            <div class="card p-4 shadow">
+                <h4>Select Task Icon</h4>
+                <div class="d-flex flex-row justify-content-start flex-wrap center">
+                    ${allIcons.map(icon => `
+                        <button class="icon-btn task-icon-button-colour"
+                                id="${icon}"
+                                type="button"
+                                data-taskid="${task.id}"
+                                data-csrf="${csrfToken}"
+                                onclick="addTaskIcon(this)">
+                            <img src="/images/${icon}"
+                                 class="img-fluid rounded-circle"
+                                 style="width: 100px; height: 100px; object-fit: cover"
+                                 alt="Task Icon">
+                        </button>
+                    `).join('')}
+                </div>
+                <div class="d-flex flex-row justify-content-start flex-wrap center">
+                    <button type="button" class="submit-button btn btn-primary m-2" onclick="submitIcon(${task.id})">Confirm</button>
+                    <button type="button" class="delete-button btn btn-secondary m-2"
+                            data-taskid="${task.id}" data-csrf="${csrfToken}"
+                            onclick="deleteIcon(this)">Delete</button>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function clearAlerts() {

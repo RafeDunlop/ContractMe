@@ -10,6 +10,7 @@ import java.util.List;
  * Creates a RenovationTaskDTO object
  */
 public class RenovationTaskDTO {
+    private Long id;
     private String name;
     private String description;
     private LocalDate dueDate;
@@ -22,6 +23,7 @@ public class RenovationTaskDTO {
      * and an empty list of rooms.
      */
     public RenovationTaskDTO() {
+        this.id = null;
         this.name = "";
         this.description = "";
         this.dueDate = null;
@@ -30,14 +32,16 @@ public class RenovationTaskDTO {
     }
 
     /**
-     * constructor which accepts an initial state with an iconFileName {@link nz.ac.canterbury.seng302.homehelper.entity.RenovationTask}
+     * constructor which accepts an initial state with an iconFileName and id {@link nz.ac.canterbury.seng302.homehelper.entity.RenovationTask}
+     * @param id The tasks id
      * @param name The initial name
      * @param description The initial description
      * @param dueDate The initial due date
      * @param rooms the initial subset of rooms
      * @param iconFileName the name of the icon file
      */
-    public RenovationTaskDTO(String name, String description, LocalDate dueDate,List<String> rooms, String iconFileName) {
+    public RenovationTaskDTO(Long id, String name, String description, LocalDate dueDate,List<String> rooms, String iconFileName) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.dueDate = dueDate;
@@ -65,6 +69,7 @@ public class RenovationTaskDTO {
      * @param task the {@code RenovationTask} to convert into a DTO
      */
     public RenovationTaskDTO(RenovationTask task) {
+        this.id = task.getId();
         this.name = task.getName();
         this.description = task.getDescription();
         this.dueDate = task.getDueDate();
@@ -72,7 +77,10 @@ public class RenovationTaskDTO {
         this.iconFileName = task.getIconFileName();
     }
 
-
+    /**
+     Returns the id
+     */
+    public Long getId() {return id;}
     /**
     Returns the description
      */

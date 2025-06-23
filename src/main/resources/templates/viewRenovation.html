@@ -9,7 +9,6 @@
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="stylesheet" th:href="@{/css/viewRenovationStyles.css}">
     <link rel="stylesheet" th:href="@{/css/tags.css}">
-    <script th:src="@{/js/addTaskIcon.js}"></script>
 </head>
 <body>
 
@@ -24,6 +23,7 @@
         <input type="hidden" name="previousUrl" th:value="${previousUrl}"/>
         <input type="hidden" id="record" th:value="${renovation}"/>
         <input type="hidden" id="recordId" th:value="${renovation.id}"/>
+        <input type="hidden" id="icons" th:value="${icons}"/>
 
         <div id="content-container" class="content-container m-3">
             <div id="content-header">
@@ -117,11 +117,17 @@
             </div>
         </div>
     </div>
+
+    <div id="icon-selector-modal" class="modal" style="display: none">
+        <div id="icon-selector-content"></div>
+    </div>
+
+<script th:inline="javascript">
+    const allIcons = /*[[${icons}]]*/ [];
+</script>
+
 </body>
 
-<div id="icon-selector-modal" class="modal" style="display: none">
-    <div id="icon-selector-content"></div>
-</div>
 
 <script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", () => {
@@ -131,7 +137,6 @@
             console.error("Record ID not found");
             return;
         }
-        console.log(recordId);
 
         updateLayout("", recordId);
 
@@ -142,6 +147,7 @@
         });
     });
 </script>
+<script th:src="@{/js/addTaskIcon.js}"></script>
 <script type="text/javascript" th:src="@{/js/renovationPublicity.js}"></script>
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
