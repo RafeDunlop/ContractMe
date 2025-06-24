@@ -132,7 +132,6 @@ function fetchRenovation(id, resetPage = false) {
             document.getElementById("pageNumber").value = correctedPageNumber;
 
             if (data.content.length === 0) {
-                container.insertAdjacentHTML('beforeend', `<div class="alert alert-secondary mt-4">No renovations found.</div>`);
                 element.style.display = "none";
                 document.getElementById("pagination").innerHTML = "";
                 return;
@@ -276,7 +275,6 @@ function renderTaskCards(data, isOwner, renovationId) {
 }
 
 function renderModalContent(task, csrfToken) {
-    console.log(task.id);
     return `
         <div class="d-flex justify-content-center align-items-center vh-100">
             <div class="card p-4 shadow">

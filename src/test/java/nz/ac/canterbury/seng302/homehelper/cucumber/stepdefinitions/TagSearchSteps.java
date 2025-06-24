@@ -135,16 +135,10 @@ public class TagSearchSteps {
 
     @When("I make a tag search")
     public void i_make_a_tag_search() throws Exception {
-        result = mockMvc.perform(post("/renovations/search")
+        result = mockMvc.perform(get("/renovations/search")
                         .param("isTagSearch", "true")
                         .param("page", "1")
                         .param("cardsPerPage", "16")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search"))
-                .andReturn();
-
-        result = mockMvc.perform(get("/renovations/search")
                         .session((MockHttpSession) Objects.requireNonNull(result.getRequest().getSession(false))))
                 .andExpect(status().isOk())
                 .andExpect(view().name("renovationSearchTemplate"))
