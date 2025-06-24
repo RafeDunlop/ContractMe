@@ -1,4 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
+import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
@@ -355,7 +356,8 @@ public class RenovationController {
     @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id,
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                 Model model) {
+                                 Model model,
+                                 HttpServletRequest request) {
         logger.info("GET /renovations/view");
 
         RenovationRecord record = renovationRecordService.getRecordById(id);
@@ -368,6 +370,10 @@ public class RenovationController {
         }
 
         List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
+
+        String referer = request.getHeader("referer");
+        model.addAttribute("previousUrl", referer);
+
 
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("pageNumber", Math.max(pageNumber, 1));

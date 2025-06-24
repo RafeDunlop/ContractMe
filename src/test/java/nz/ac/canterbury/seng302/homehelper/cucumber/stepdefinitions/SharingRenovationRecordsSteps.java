@@ -44,6 +44,7 @@ public class SharingRenovationRecordsSteps {
     private User testUser;
     private String expectedVisibility;
     private String expectedSearchTerm;
+    private final int DEFAULT_PAGE_SIZE = 16;
 
     @Given("I am logged in")
     public void i_am_logged_in() throws Exception {
@@ -118,21 +119,19 @@ public class SharingRenovationRecordsSteps {
     public void browse_renovations() throws Exception {
         mockMvc.perform(get("/renovations/search")
                         .param("visibility", "public")
-                        .param("searchTerm", "")
                         .session((MockHttpSession) result.getRequest().getSession(false))
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
         result = mockMvc.perform(get("/renovations/retrieve")
                         .param("visibility", "public")
-                        .param("searchTerm", "")
                         .session((MockHttpSession) result.getRequest().getSession(false))
                         .with(csrf()))
                 .andReturn();
     }
 
     @When("I click on page {int}")
-    public void i_click_on_page_number(Integer page) throws Exception {
+    public void i_click_on_page(Integer page) throws Exception {
         result = mockMvc.perform(get("/renovations/retrieve")
                         .param("visibility", "public")
                         .param("page", page.toString()))
@@ -145,6 +144,15 @@ public class SharingRenovationRecordsSteps {
 
         assertTrue(json.contains("\"totalPages\":" + expectedTotalPages));
         assertTrue(json.contains("\"number\":" + (expectedPage - 1)));
+    }
+
+    @When("I input page {int} and confirm my choice")
+    public void i_input_page_and_confirm_my_choice(int pageNum) throws Exception {
+        result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("page", String.valueOf(pageNum))
+                        .param("visibility", "public"))
+                .andExpect(status().isOk())
+                .andReturn();
     }
 
     @Then("I see {int} records on the page")
@@ -189,6 +197,14 @@ public class SharingRenovationRecordsSteps {
         assertTrue(result.getResponse().getContentAsString().contains("View Renovation"));
     }
 
+    @Then("I see the list of public records corresponding to page {int}")
+    public void i_see_the_list_of_public_records_corresponding_to_page(Integer page) throws Exception {
+        String json = result.getResponse().getContentAsString();
+
+        assertTrue(json.contains("\"offset\":" + DEFAULT_PAGE_SIZE *  (page - 1)));
+        assertTrue(json.contains("\"pageNumber\":" + (page - 1)));
+    }
+
     @Given("I have searched for visibility: {string} and search term: {string} renovation records")
     public void set_search_state(String vis, String term) throws Exception {
         this.expectedVisibility = vis;
@@ -205,9 +221,12 @@ public class SharingRenovationRecordsSteps {
     @When("I click the “Back to search results” button")
     public void click_back_button() throws Exception {
         String content = result.getResponse().getContentAsString();
-        Matcher m = Pattern.compile("<a[^>]+href=\\\"(/renovations/search[^\\\"]*)\\\"[^>]*>\\s*Back\\s*</a>").matcher(content);
-        assertTrue(m.find());
-        String backUrl = m.group(1).replace("&amp;", "&");
+
+        Pattern pattern = Pattern.compile("<a[^>]+href=\\\"(/renovations/search[^\\\"]*)\\\"[^>]*>\\s*Back\\s*</a>");
+        Matcher matcher = pattern.matcher(content);
+        assertTrue(matcher.find(), "Could not find 'Back' button in the response HTML");
+
+        String backUrl = matcher.group(1).replace("&amp;", "&");
 
         result = mockMvc.perform(get(backUrl)
                         .session((MockHttpSession) result.getRequest().getSession(false)))
@@ -221,23 +240,5 @@ public class SharingRenovationRecordsSteps {
         assertTrue(content.contains("Renovation Records"));
         assertTrue(content.contains("<option value=\"" + expectedVisibility + "\" selected=\"selected\">"));
         assertTrue(content.contains("name=\"searchTerm\" value=\"" + expectedSearchTerm + "\""));
-    }
-
-    @Given("there is at least {int} pages")
-    public void check_min_pages(int pages) {
-        ModelAndView mav = result.getModelAndView();
-        assertNotNull(mav);
-        Map<String, Object> model = mav.getModel();
-        assertTrue((int) model.get("totalPages") >= pages);
-    }
-
-    @Then("I should see a {string} element")
-    public void see_element(String id) throws Exception {
-        assertTrue(result.getResponse().getContentAsString().contains("id=\"" + id + "\""));
-    }
-
-    @Then("I should not see a {string} element")
-    public void not_see_element(String id) throws Exception {
-        assertFalse(result.getResponse().getContentAsString().contains("id=\"" + id + "\""));
     }
 }

@@ -49,9 +49,9 @@ Feature: U19 - As Inaya, I want to be able to make my renovation record
   Scenario: AC6.1 - User can input page to go to when over 10 pages
     Given I am logged in
     And there are 200 public renovation records
-    When I input page number 5 and confirm my choice
+    When I input page 5 and confirm my choice
     Then I see pagination metadata with page 5 selected and 13 total pages
-    And I see the list of records corresponding to page 5
+    And I see the list of public records corresponding to page 5
 
   Scenario: AC6.2 - User cannot input page if there are less than 10 pages
     Given I am logged in

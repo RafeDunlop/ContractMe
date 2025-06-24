@@ -23,7 +23,7 @@ Feature: As Sarah, I want to be able to search for public renovation records by 
     And a public renovation "HouseRenovation" exists with tags:
       | House |
     When I search for renovations with tags "NewBuild" and "Apartment"
-    Then I should see the message "No renovations match your search."
+    Then I should see no records
 
   Scenario Outline: AC8 Multiple tag search returns results ordered by number of matching tags and date
     Given the tags named "<tag_one>" and "<tag_two>" exist
