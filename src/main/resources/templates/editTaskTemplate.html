@@ -84,11 +84,12 @@
                  th:id="'room-' + ${meta.index}" th:value="${room}"
                  th:checked="${task.getRoomList() != null and #lists.contains(task.getRoomList(), room)}">
         </label>
-        <label class="form-check-label fs-3 ml-3" th:for="'room-' + ${meta.index}" th:text="${room}"></label>
+        <label class="form-check-label ml-3 small" th:for="'room-' + ${meta.index}" th:text="${room}"></label>
       </div>
 
-      <div class="mt-4">
+      <div class="mt-4 d-flex gap-3 ">
         <button type="submit" class="btn btn-primary">Submit</button>
+        <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn btn-secondary">Cancel</a>
       </div>
     </form>
 
@@ -102,9 +103,6 @@
   </div>
 
   <!-- CANCEL BUTTON -->
-  <div class="mt-4">
-    <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn btn-primary">Cancel</a>
-  </div>
 </div>
 </body>
 <script type="module" th:src="@{/js/taskValidation.js}"></script>
