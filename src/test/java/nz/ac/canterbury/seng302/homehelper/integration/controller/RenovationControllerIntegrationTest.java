@@ -261,7 +261,7 @@ public class RenovationControllerIntegrationTest {
      * Tests that requesting 0 items per page will redirect to the default of 8 items per page.
      */
     @Test
-    public void getRenovationRecord_zeroItemsPerPage_returns16ItemsPerPage() throws Exception {
+    public void getRenovationRecord_zeroCardsPerPage_returns16ItemsPerPage() throws Exception {
         for (int i = 0; i < 20; i++) {
             RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
             renovationRecordRepository.save(existingRecord);
@@ -269,7 +269,7 @@ public class RenovationControllerIntegrationTest {
 
         MvcResult result = mockMvc.perform(get("/renovations/retrieve")
                         .param("page", "1")
-                        .param("itemsPerPage", "0"))
+                        .param("cardsPerPage", "0"))
                 .andExpect(status().isOk())
                 .andReturn();
 

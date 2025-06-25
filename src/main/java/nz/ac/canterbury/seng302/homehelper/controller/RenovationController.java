@@ -72,12 +72,16 @@ public class RenovationController {
     @GetMapping
     public String renovations(@RequestParam(value = "searchTerm", required = false, defaultValue = "") String searchTerm,
                               @RequestParam(defaultValue = "1", name = "page") Integer pageNumber,
-                              Model model) {
+                              Model model,
+                              HttpServletRequest request) {
         logger.info("GET renovations");
 
         if (pageNumber == null) pageNumber = 1;
 
         User user = loginService.getUserByEmail();
+
+        request.getSession().setAttribute("lastVisitedRenovationPage", request.getRequestURL().toString());
+        request.getSession().setAttribute("lastVisitedRenovationParameters", request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
         model.addAttribute("user", user);
         model.addAttribute("searchTerm", searchTerm);
@@ -371,9 +375,9 @@ public class RenovationController {
 
         List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
 
-        String referer = request.getHeader("referer");
-        model.addAttribute("previousUrl", referer);
-
+        String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
+        String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
+        model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
 
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("pageNumber", Math.max(pageNumber, 1));
@@ -505,8 +509,8 @@ public class RenovationController {
                                     @RequestParam(required = false) String visibility,
                                     @RequestParam(required = false) String searchTerm,
                                     @RequestParam(name = "tagNameList", required = false) List<String> tagNameList,
-                                    @RequestParam(defaultValue = "1", name = "page") Integer pageNumber
-    ) {
+                                    @RequestParam(defaultValue = "1", name = "page") Integer pageNumber,
+                                    HttpServletRequest request) {
         logger.info("GET /renovations/search");
 
         if (visibility == null) visibility = "all";
@@ -515,6 +519,9 @@ public class RenovationController {
         if (pageNumber == null) pageNumber = 1;
 
         User user = loginService.getUserByEmail();
+
+        request.getSession().setAttribute("lastVisitedRenovationPage", request.getRequestURL().toString());
+        request.getSession().setAttribute("lastVisitedRenovationParameters", request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
         model.addAttribute("visibility", visibility);
         model.addAttribute("searchTerm", searchTerm);
@@ -541,7 +548,8 @@ public class RenovationController {
                                                     @RequestParam(required = false) String searchTerm,
                                                     @RequestParam(name = "tagNameList", required = false) List<String> tagNameList,
                                                     @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                                    @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage) {
+                                                    @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage,
+                                                    HttpServletRequest request) {
 
         // Apply default values
         if (visibility == null) visibility = "all";
@@ -551,6 +559,8 @@ public class RenovationController {
         List<Tag> tagList = (tagNameList != null) ? tagService.getTags(tagNameList) : null;
 
         User user = loginService.getUserByEmail();
+
+        request.getSession().setAttribute("lastVisitedRenovationParameters", request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
         int requestedPage = Math.max(pageNumber - 1, 0); // convert to 0-based index
         Pageable pageable = PageRequest.of(requestedPage, cardsPerPage);

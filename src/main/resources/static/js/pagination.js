@@ -149,7 +149,7 @@ function createPaginationButtons(viewMode = "cards", id = null) {
         pagination.innerHTML += `
             <li class="page-item d-flex align-items-center">
                 <input type="number" class="form-control me-2" id="pageSearch" style="min-width: 50px;">
-                <button class="btn btn-primary" onclick="validateRenovationPageSearch(${id})">Search</button>
+                <button class="btn btn-primary" onclick="validateRenovationPageSearch(${id})">Go</button>
             </li>`;
     }
 }

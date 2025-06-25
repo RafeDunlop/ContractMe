@@ -66,7 +66,7 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
             document.getElementById("pageNumber").value = data.number + 1;
 
             if (data.content.length === 0) {
-                container.insertAdjacentHTML('beforeend', `<div class="alert alert-secondary mt-4">No renovations found.</div>`);
+                container.insertAdjacentHTML('beforeend', `<div class="alert alert-secondary mt-4">No renovations match your search</div>`);
                 element.style.display = "none";
                 document.getElementById("pagination").innerHTML = "";
                 return;
@@ -81,7 +81,9 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
                 renderRecordTable(data, pageNumber, csrfToken);
             }
 
-            createPaginationButtons(viewMode);
+            if (data.totalPages > 1) {
+                createPaginationButtons(viewMode);
+            }
         })
         .catch(error => {
             loading.style.display = "none";
@@ -140,7 +142,11 @@ function fetchRenovation(id, resetPage = false) {
             document.getElementById("elements-container").style.display = "block";
 
             renderTaskCards(data, isOwner, id);
-            createPaginationButtons("cards", id);
+
+            if (data.totalPages > 1) {
+                createPaginationButtons("cards", id);
+            }
+
         })
         .catch(error => {
             loading.style.display = "none";
