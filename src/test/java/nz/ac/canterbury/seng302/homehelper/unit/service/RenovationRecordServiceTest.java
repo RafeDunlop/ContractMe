@@ -18,11 +18,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class RenovationRecordServiceTest {
 
@@ -41,13 +41,13 @@ public class RenovationRecordServiceTest {
         renovationRecordValidation = new RenovationRecordValidation(renovationRecordRepository, loginService);
 
         User mockUser = mock(User.class);
-        Mockito.when(loginService.getUserByEmail()).thenReturn(mockUser);
+        when(loginService.getUserByEmail()).thenReturn(mockUser);
 
-        Mockito.when(loginService.getUserByEmail()).thenReturn(mockUser);
-        Mockito.when(renovationRecordRepository.findExactMatch("already exists", mockUser)).thenReturn(Optional.of(
+        when(loginService.getUserByEmail()).thenReturn(mockUser);
+        when(renovationRecordRepository.findExactMatch("already exists", mockUser)).thenReturn(Optional.of(
                 mock(RenovationRecord.class)));
-        Mockito.when(renovationRecordRepository.findExactMatch("name", mockUser)).thenReturn(Optional.empty());
-        Mockito.when(renovationRecordRepository.findExactMatch("name!", mockUser)).thenReturn(Optional.empty());
+        when(renovationRecordRepository.findExactMatch("name", mockUser)).thenReturn(Optional.empty());
+        when(renovationRecordRepository.findExactMatch("name!", mockUser)).thenReturn(Optional.empty());
 
         toTest = new RenovationRecordService(renovationRecordRepository, renovationTaskRepository, renovationRecordValidation);
     }
@@ -65,10 +65,7 @@ public class RenovationRecordServiceTest {
 
     @Test
     public void testAddRenovationLocation_locationAdded() {
-
         User mockUser = mock(User.class);
-
-
         RenovationRecord renovationRecord = new RenovationRecord(mockUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
 
         AddressDTO addressDTO = new AddressDTO();
@@ -98,11 +95,8 @@ public class RenovationRecordServiceTest {
     
     @Test
     public void setRenovationPublic_isPublic() {
-
         User mockUser = mock(User.class);
-
         RenovationRecord renovationRecord = new RenovationRecord(mockUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
-
 
         toTest.changePublicity(true, renovationRecord);
 
@@ -111,9 +105,7 @@ public class RenovationRecordServiceTest {
 
     @Test
     public void setRenovationNotPublic_isNotPublic() {
-
         User mockUser = mock(User.class);
-
         RenovationRecord renovationRecord = new RenovationRecord(mockUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
 
         toTest.changePublicity(false, renovationRecord);
@@ -141,9 +133,9 @@ public class RenovationRecordServiceTest {
         String name = "name";
         String description = "";
         RenovationRecord renovationRecord = mock(RenovationRecord.class);
-        Mockito.when(renovationRecord.getName()).thenReturn(name);
-        Mockito.when(renovationRecord.getDescription()).thenReturn(description);
-        Mockito.when(renovationRecord.getRooms()).thenReturn(rooms);
+        when(renovationRecord.getName()).thenReturn(name);
+        when(renovationRecord.getDescription()).thenReturn(description);
+        when(renovationRecord.getRooms()).thenReturn(rooms);
         assertTrue(toTest.validateAllInputsEdit(renovationRecord, "differentName").isEmpty());
     }
 
@@ -153,9 +145,9 @@ public class RenovationRecordServiceTest {
         String name = "name";
         String description = "";
         RenovationRecord renovationRecord = mock(RenovationRecord.class);
-        Mockito.when(renovationRecord.getName()).thenReturn(name);
-        Mockito.when(renovationRecord.getDescription()).thenReturn(description);
-        Mockito.when(renovationRecord.getRooms()).thenReturn(rooms);
+        when(renovationRecord.getName()).thenReturn(name);
+        when(renovationRecord.getDescription()).thenReturn(description);
+        when(renovationRecord.getRooms()).thenReturn(rooms);
         assertTrue(toTest.validateAllInputsEdit(renovationRecord, "already exists").isEmpty());
     }
 
@@ -165,9 +157,9 @@ public class RenovationRecordServiceTest {
         String name = "already exists";
         String description = "";
         RenovationRecord renovationRecord = mock(RenovationRecord.class);
-        Mockito.when(renovationRecord.getName()).thenReturn(name);
-        Mockito.when(renovationRecord.getDescription()).thenReturn(description);
-        Mockito.when(renovationRecord.getRooms()).thenReturn(rooms);
+        when(renovationRecord.getName()).thenReturn(name);
+        when(renovationRecord.getDescription()).thenReturn(description);
+        when(renovationRecord.getRooms()).thenReturn(rooms);
         assertTrue(toTest.validateAllInputsEdit(renovationRecord, "already exists").isEmpty());
     }
 
@@ -177,9 +169,9 @@ public class RenovationRecordServiceTest {
         String name = "already exists";
         String description = "a".repeat(513);
         RenovationRecord renovationRecord = mock(RenovationRecord.class);
-        Mockito.when(renovationRecord.getName()).thenReturn(name);
-        Mockito.when(renovationRecord.getDescription()).thenReturn(description);
-        Mockito.when(renovationRecord.getRooms()).thenReturn(rooms);
+        when(renovationRecord.getName()).thenReturn(name);
+        when(renovationRecord.getDescription()).thenReturn(description);
+        when(renovationRecord.getRooms()).thenReturn(rooms);
         assertFalse(toTest.validateAllInputsEdit(renovationRecord, "already exists").isEmpty());
     }
 
@@ -191,13 +183,13 @@ public class RenovationRecordServiceTest {
         String renovationName = "Renovation A";
 
         RenovationRecord existingRenovation = mock(RenovationRecord.class);
-        Mockito.when(existingRenovation.getName()).thenReturn(renovationName);
+        when(existingRenovation.getName()).thenReturn(renovationName);
 
-        Mockito.when(loginService.getUserByEmail()).thenReturn(userA);
-        Mockito.when(renovationRecordRepository.findExactMatch(renovationName, userA)).thenReturn(Optional.of(existingRenovation));
+        when(loginService.getUserByEmail()).thenReturn(userA);
+        when(renovationRecordRepository.findExactMatch(renovationName, userA)).thenReturn(Optional.of(existingRenovation));
 
-        Mockito.when(loginService.getUserByEmail()).thenReturn(userB);
-        Mockito.when(renovationRecordRepository.findExactMatch(renovationName, userB)).thenReturn(Optional.empty());
+        when(loginService.getUserByEmail()).thenReturn(userB);
+        when(renovationRecordRepository.findExactMatch(renovationName, userB)).thenReturn(Optional.empty());
 
         Map<String, List<String>> errorsForUserA = toTest.validateAllInputsCreate(renovationName, "Some description", Arrays.asList("Kitchen", "Living Room"));
         assertTrue(errorsForUserA.isEmpty(), "User A should not have errors when creating a renovation with an existing name.");
@@ -213,10 +205,10 @@ public class RenovationRecordServiceTest {
         String renovationName = "Renovation A";
 
         RenovationRecord existingRenovation = mock(RenovationRecord.class);
-        Mockito.when(existingRenovation.getName()).thenReturn(renovationName);
+        when(existingRenovation.getName()).thenReturn(renovationName);
 
-        Mockito.when(loginService.getUserByEmail()).thenReturn(userA);
-        Mockito.when(renovationRecordRepository.findExactMatch(renovationName, userA)).thenReturn(Optional.of(existingRenovation));
+        when(loginService.getUserByEmail()).thenReturn(userA);
+        when(renovationRecordRepository.findExactMatch(renovationName, userA)).thenReturn(Optional.of(existingRenovation));
 
         Map<String, List<String>> errors = toTest.validateAllInputsCreate(renovationName, "Some description", Arrays.asList("Kitchen", "Living Room"));
         assertFalse(errors.isEmpty(), "User A should get an error when trying to create a renovation with the same name.");
@@ -229,8 +221,8 @@ public class RenovationRecordServiceTest {
 
         String renovationName = "Renovation B";
 
-        Mockito.when(loginService.getUserByEmail()).thenReturn(userA);
-        Mockito.when(renovationRecordRepository.findExactMatch(renovationName, userA)).thenReturn(Optional.empty());
+        when(loginService.getUserByEmail()).thenReturn(userA);
+        when(renovationRecordRepository.findExactMatch(renovationName, userA)).thenReturn(Optional.empty());
 
         Map<String, List<String>> errors = toTest.validateAllInputsCreate(renovationName, "Some description", Arrays.asList("Kitchen"));
         assertTrue(errors.isEmpty(), "User A should not have any errors when creating a new renovation.");
@@ -238,105 +230,146 @@ public class RenovationRecordServiceTest {
 
     @Test
     public void getUserRecords_withNullTerm_returnsAllUserRecords() {
-        User user = mock(User.class);
-        List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+        User user = new User("test@example.com", "pass", "Test", "User");
+        RenovationRecord record = new RenovationRecord(user, "Test Renovation", "Test Desc", List.of());
+        record.setPublicity(true);
+        record.setCreatedTimestamp(LocalDateTime.now());
+
+        List<RenovationRecord> records = List.of(record);
         Page<RenovationRecord> mockPage = mock(Page.class);
         Pageable pageable = PageRequest.of(0, 10);
 
-        Mockito.when(mockPage.getContent()).thenReturn(expected);
-        Mockito.when(renovationRecordRepository.findUserRecords(Mockito.eq(user), Mockito.any(Pageable.class)))
+        when(mockPage.getContent()).thenReturn(records);
+        when(renovationRecordRepository.findUserRecords(eq(user), any(Pageable.class)))
                 .thenReturn(mockPage);
 
         Page<RenovationRecordDTO> result = toTest.getPaginatedUserRecords(user, "", null, pageable);
 
-        verify(renovationRecordRepository).findUserRecords(Mockito.eq(user), Mockito.any(Pageable.class));
-        assertEquals(expected, result.getContent());
+        verify(renovationRecordRepository).findUserRecords(eq(user), any(Pageable.class));
+        assertEquals(1, result.getContent().size());
+
+        RenovationRecordDTO dto = result.getContent().get(0);
+        assertEquals("Test Renovation", dto.getName());
+        assertEquals("Test Desc", dto.getDescription());
+        assertTrue(dto.isPublic());
+        assertEquals(user.getId(), dto.getUserId());
     }
 
     @Test
     public void getUserRecords_withSearchTerm_returnsFilteredRecords() {
-        User user = mock(User.class);
-        String term = "kitchen";
-        List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+        User user = new User("test@example.com", "pass", "Test", "User");
+        RenovationRecord record = new RenovationRecord(user, "Test Renovation", "Kitchen Table", List.of());
+        record.setPublicity(true);
+        record.setCreatedTimestamp(LocalDateTime.now());
+
+        List<RenovationRecord> records = List.of(record);
         Page<RenovationRecord> mockPage = mock(Page.class);
         Pageable pageable = PageRequest.of(0, 10);
 
-        Mockito.when(mockPage.getContent()).thenReturn(expected);
-        Mockito.when(renovationRecordRepository.findUserRecordsBySearch(Mockito.eq(user), Mockito.eq(term), Mockito.any(Pageable.class)))
+        when(mockPage.getContent()).thenReturn(records);
+        when(renovationRecordRepository.findUserRecordsBySearch(eq(user), eq("Kitchen"), any(Pageable.class)))
                 .thenReturn(mockPage);
 
-        Page<RenovationRecordDTO> result = toTest.getPaginatedUserRecords(user, term, null, pageable);
+        Page<RenovationRecordDTO> result = toTest.getPaginatedUserRecords(user, "Kitchen", null, pageable);
 
-        verify(renovationRecordRepository).findUserRecordsBySearch(Mockito.eq(user), Mockito.eq(term), Mockito.any(Pageable.class));
-        assertEquals(expected, result.getContent());
+        verify(renovationRecordRepository).findUserRecordsBySearch(eq(user), eq("Kitchen"), any(Pageable.class));
+        assertEquals(1, result.getContent().size());
+
+        RenovationRecordDTO dto = result.getContent().get(0);
+        assertEquals("Test Renovation", dto.getName());
+        assertEquals("Kitchen Table", dto.getDescription());
+        assertTrue(dto.isPublic());
+        assertEquals(user.getId(), dto.getUserId());
     }
 
     @Test
     public void getPublicRecords_withNullTerm_returnsAllPublicRecords() {
-        List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+        RenovationRecord record = new RenovationRecord();
+        record.setName("Public Renovation");
+        record.setDescription("Open to all");
+        record.setPublicity(true);
+        record.setCreatedTimestamp(LocalDateTime.now());
+        record.setTags(List.of());
+
+        List<RenovationRecord> records = List.of(record);
         Page<RenovationRecord> mockPage = mock(Page.class);
         Pageable pageable = PageRequest.of(0, 10);
 
-        Mockito.when(mockPage.getContent()).thenReturn(expected);
-        Mockito.when(renovationRecordRepository.findPublicRecords(Mockito.any(Pageable.class)))
-                .thenReturn(mockPage);
+        when(mockPage.getContent()).thenReturn(records);
+        when(renovationRecordRepository.findPublicRecords(any(Pageable.class))).thenReturn(mockPage);
 
         Page<RenovationRecordDTO> result = toTest.getPaginatedPublicRecords("", null, pageable);
 
-        verify(renovationRecordRepository).findPublicRecords(Mockito.any(Pageable.class));
-        assertEquals(expected, result.getContent());
+        verify(renovationRecordRepository).findPublicRecords(any(Pageable.class));
+        assertEquals(1, result.getContent().size());
+        assertEquals("Public Renovation", result.getContent().get(0).getName());
     }
 
     @Test
     public void getPublicRecords_withSearchTerm_returnsFilteredPublicRecords() {
         String term = "bathroom";
-        List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+        RenovationRecord record = new RenovationRecord();
+        record.setName("Bathroom Reno");
+        record.setDescription("Full bathroom upgrade");
+        record.setPublicity(true);
+        record.setCreatedTimestamp(LocalDateTime.now());
+        record.setTags(List.of());
+
+        List<RenovationRecord> records = List.of(record);
         Page<RenovationRecord> mockPage = mock(Page.class);
         Pageable pageable = PageRequest.of(0, 10);
 
-        Mockito.when(mockPage.getContent()).thenReturn(expected);
-        Mockito.when(renovationRecordRepository.findPublicRecordsBySearch(Mockito.eq(term), Mockito.any(Pageable.class)))
-                .thenReturn(mockPage);
+        when(mockPage.getContent()).thenReturn(records);
+        when(renovationRecordRepository.findPublicRecordsBySearch(eq(term), any(Pageable.class))).thenReturn(mockPage);
 
         Page<RenovationRecordDTO> result = toTest.getPaginatedPublicRecords(term, null, pageable);
 
-        verify(renovationRecordRepository).findPublicRecordsBySearch(Mockito.eq(term), Mockito.any(Pageable.class));
-        assertEquals(expected, result.getContent());
+        verify(renovationRecordRepository).findPublicRecordsBySearch(eq(term), any(Pageable.class));
+        assertEquals(1, result.getContent().size());
+        assertEquals("Bathroom Reno", result.getContent().get(0).getName());
     }
 
     @Test
     public void getAllRecords_withNullTerm_returnsAllVisibleToUser() {
-        User user = mock(User.class);
-        List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+        User user = new User("test@example.com", "pass", "Test", "User");
+        RenovationRecord record = new RenovationRecord(user, "Shared Reno", "Visible to user", List.of());
+        record.setPublicity(false);
+        record.setCreatedTimestamp(LocalDateTime.now());
+
+        List<RenovationRecord> records = List.of(record);
         Page<RenovationRecord> mockPage = mock(Page.class);
         Pageable pageable = PageRequest.of(0, 10);
 
-        Mockito.when(mockPage.getContent()).thenReturn(expected);
-        Mockito.when(renovationRecordRepository.findVisibleRecords(Mockito.eq(user), Mockito.any(Pageable.class)))
-                .thenReturn(mockPage);
+        when(mockPage.getContent()).thenReturn(records);
+        when(renovationRecordRepository.findVisibleRecords(eq(user), any(Pageable.class))).thenReturn(mockPage);
 
         Page<RenovationRecordDTO> result = toTest.getPaginatedVisibleRecords(user, "", null, pageable);
 
-        verify(renovationRecordRepository).findVisibleRecords(Mockito.eq(user), Mockito.any(Pageable.class));
-        assertEquals(expected, result.getContent());
+        verify(renovationRecordRepository).findVisibleRecords(eq(user), any(Pageable.class));
+        assertEquals(1, result.getContent().size());
+        assertEquals("Shared Reno", result.getContent().get(0).getName());
     }
 
     @Test
     public void getAllRecords_withSearchTerm_returnsFilteredRecords() {
-        User user = mock(User.class);
+        User user = new User("test@example.com", "pass", "Test", "User");
         String term = "garage";
-        List<RenovationRecord> expected = List.of(mock(RenovationRecord.class));
+        RenovationRecord record = new RenovationRecord(user, "Garage Reno", "Converted to office", List.of());
+        record.setPublicity(true);
+        record.setCreatedTimestamp(LocalDateTime.now());
+
+        List<RenovationRecord> records = List.of(record);
         Page<RenovationRecord> mockPage = mock(Page.class);
         Pageable pageable = PageRequest.of(0, 10);
 
-        Mockito.when(mockPage.getContent()).thenReturn(expected);
-        Mockito.when(renovationRecordRepository.findVisibleRecordsBySearch(Mockito.eq(user), Mockito.eq(term), Mockito.any(Pageable.class)))
-                .thenReturn(mockPage);
+        when(mockPage.getContent()).thenReturn(records);
+        when(renovationRecordRepository.findVisibleRecordsBySearch(eq(user), eq(term), any(Pageable.class))).thenReturn(mockPage);
 
         Page<RenovationRecordDTO> result = toTest.getPaginatedVisibleRecords(user, term, null, pageable);
 
-        verify(renovationRecordRepository).findVisibleRecordsBySearch(Mockito.eq(user), Mockito.eq(term), Mockito.any(Pageable.class));
-        assertEquals(expected, result.getContent());
+        verify(renovationRecordRepository).findVisibleRecordsBySearch(eq(user), eq(term), any(Pageable.class));
+        assertEquals(1, result.getContent().size());
+        assertEquals("Garage Reno", result.getContent().get(0).getName());
     }
 
     @Test

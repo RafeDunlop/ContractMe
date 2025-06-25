@@ -23,6 +23,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -200,65 +201,18 @@ public class RenovationControllerIntegrationTest {
 
         MvcResult result = mockMvc.perform(get("/renovations/retrieve")
                         .param("page", "2")
-                        .param("itemsPerPage", "5"))
+                        .param("cardsPerPage", "5"))
                 .andExpect(status().isOk())
                 .andReturn();
 
         JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
         JsonNode content = root.get("content");
+        List<String> names = new ArrayList<>();
+        content.forEach(n -> names.add(n.get("name").asText()));
 
-        assertEquals(4, content.size());
-        assertEquals(1, root.get("number").asInt()); // page 2 means index 1
-        assertTrue(StreamSupport.stream(content.spliterator(), false)
-                .anyMatch(n -> n.get("name").asText().equals("Renovation 5")));
-    }
-
-    /**
-     * Tests that selecting a page that is out of bounds will redirect to the last page.
-     */
-    @Test
-    public void getRenovationRecord_selectOutOfBoundsPage_returnsLastPage() throws Exception {
-        for (int i = 0; i < 20; i++) {
-            renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
-        }
-
-        mockMvc.perform(get("/renovations/retrieve")
-                        .param("page", "100")
-                        .param("itemsPerPage", "5"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/retrieve?page=4&itemsPerPage=5"));
-    }
-
-    /**
-     * Tests that requesting 0 items per page will redirect to the default of 8 items per page.
-     */
-    @Test
-    public void getRenovationRecord_zeroItemsPerPage_returns8ItemsPerPage() throws Exception {
-        for (int i = 0; i < 20; i++) {
-            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
-            renovationRecordRepository.save(existingRecord);
-        }
-        mockMvc.perform(get("/renovations")
-                        .param("page", "1")
-                        .param("itemsPerPage", "0"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(model().attribute("itemsPerPage", 8));
-    }
-
-    /**
-     * Tests that requesting a page number of 0 will redirect to the first page.
-     */
-    @Test
-    public void getRenovationRecord_zeroPageNumber_returnsFirstPage() throws Exception {
-        for (int i = 0; i < 20; i++) {
-            renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
-        }
-
-        mockMvc.perform(get("/renovations")
-                        .param("page", "0")
-                        .param("itemsPerPage", "5"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations?page=1&itemsPerPage=5"));
+        assertEquals(4, root.get("totalPages").asInt());
+        assertEquals(1, root.get("number").asInt());
+        assertTrue(names.contains("Renovation 14"));
     }
 
     /**
@@ -667,7 +621,7 @@ public class RenovationControllerIntegrationTest {
     }
 
     @Test
-    public void getViewRecord_withPagination_returnPaginatedTasks() throws Exception {
+    public void getViewRecord_withPagination_returnPaginatedTasks_JSON() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         List<RenovationTask> renovationTasks = IntStream.range(0, 15)
                 .mapToObj(i -> new RenovationTask(
@@ -681,71 +635,87 @@ public class RenovationControllerIntegrationTest {
         existingRecord.setRenovationTasks(renovationTasks);
         renovationRecordRepository.save(existingRecord);
 
-        // Test first page
-        mockMvc.perform(get("/renovations/view")
-                        .param("id", Long.toString(existingRecord.getId()))
+        ObjectMapper mapper = new ObjectMapper();
+
+        // Page 1
+        MvcResult result1 = mockMvc.perform(get("/renovations/retrieve/" + existingRecord.getId())
                         .param("page", "1")
+                        .param("cardsPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(view().name("viewRenovation"))
-                .andExpect(model().attribute("tasks", hasSize(5)))
-                .andExpect(model().attribute("pageNumber", 1))
-                .andExpect(model().attribute("totalPages", 3));
+                .andReturn();
 
-        // Test second page
-        mockMvc.perform(get("/renovations/view")
-                        .param("id", Long.toString(existingRecord.getId()))
+        JsonNode root1 = mapper.readTree(result1.getResponse().getContentAsString());
+        assertEquals(5, root1.get("content").size());
+        assertEquals(0, root1.get("number").asInt());
+        assertEquals(3, root1.get("totalPages").asInt());
+
+        // Page 2
+        MvcResult result2 = mockMvc.perform(get("/renovations/retrieve/" + existingRecord.getId())
                         .param("page", "2")
+                        .param("cardsPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(view().name("viewRenovation"))
-                .andExpect(model().attribute("tasks", hasSize(5)))
-                .andExpect(model().attribute("pageNumber", 2))
-                .andExpect(model().attribute("totalPages", 3));
+                .andReturn();
 
-        // Test last page
-        mockMvc.perform(get("/renovations/view")
-                        .param("id", Long.toString(existingRecord.getId()))
+        JsonNode root2 = mapper.readTree(result2.getResponse().getContentAsString());
+        assertEquals(5, root2.get("content").size());
+        assertEquals(1, root2.get("number").asInt());
+        assertEquals(3, root2.get("totalPages").asInt());
+
+        // Page 3
+        MvcResult result3 = mockMvc.perform(get("/renovations/retrieve/" + existingRecord.getId())
                         .param("page", "3")
+                        .param("cardsPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(view().name("viewRenovation"))
-                .andExpect(model().attribute("tasks", hasSize(5)))
-                .andExpect(model().attribute("pageNumber", 3))
-                .andExpect(model().attribute("totalPages", 3));
+                .andReturn();
+
+        JsonNode root3 = mapper.readTree(result3.getResponse().getContentAsString());
+        assertEquals(5, root3.get("content").size());
+        assertEquals(2, root3.get("number").asInt());
+        assertEquals(3, root3.get("totalPages").asInt());
     }
 
     @Test
-    public void getViewRecord_invalidPageNumber_returnDefaultPage() throws Exception {
-        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
-        List<RenovationTask> renovationTasks = IntStream.range(0, 10)
+    public void getRenovationTaskPages_withInvalidPageNumber_returnsDefaultOrLastPage() throws Exception {
+        RenovationRecord record = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        List<RenovationTask> tasks = IntStream.range(0, 10)
                 .mapToObj(i -> new RenovationTask(
                         "Task " + i,
-                        "Description for Task " + i,
+                        "Description " + i,
                         List.of("Room 1", "Room 2"),
                         LocalDate.now().plusDays(i),
-                        existingRecord
+                        record
                 ))
                 .toList();
-        existingRecord.setRenovationTasks(renovationTasks);
-        renovationRecordRepository.save(existingRecord);
+        record.setRenovationTasks(tasks);
+        renovationRecordRepository.save(record);
 
-        mockMvc.perform(get("/renovations/view")
-                        .param("id", Long.toString(existingRecord.getId()))
+        long recordId = record.getId();
+
+        MvcResult outOfBoundsResult = mockMvc.perform(get("/renovations/retrieve/" + recordId)
                         .param("page", "34")
+                        .param("cardsPerPage", "5")
                         .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=2"));
+                .andExpect(status().isOk())
+                .andReturn();
 
+        JsonNode root = new ObjectMapper().readTree(outOfBoundsResult.getResponse().getContentAsString());
+        assertEquals(2, root.get("totalPages").asInt());
+        assertEquals(1, root.get("number").asInt());
 
-        mockMvc.perform(get("/renovations/view")
-                        .param("id", Long.toString(existingRecord.getId()))
+        MvcResult negativePageResult = mockMvc.perform(get("/renovations/retrieve/" + recordId)
                         .param("page", "-1")
-                        .param("cardPerPage", "5")
+                        .param("cardsPerPage", "5")
                         .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=1"));
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode negativeRoot = new ObjectMapper().readTree(negativePageResult.getResponse().getContentAsString());
+        assertEquals(0, negativeRoot.get("number").asInt()); // page 1 (0-based)
     }
+
 
     @Test
     @WithMockUser(username = "not.owner@example.com")
@@ -1217,12 +1187,17 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        JsonNode names = (JsonNode) new ObjectMapper().readTree(result.getResponse().getContentAsString())
-                .get("content")
-                .findValues("name");
+        String json = result.getResponse().getContentAsString();
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(json);
+        JsonNode content = root.get("content");
 
-        assertEquals("RenovationTwoTags", names.get(0).asText());
-        assertEquals("RenovationOneTag", names.get(1).asText());
+        List<String> names = new ArrayList<>();
+        for (JsonNode node : content) {
+            names.add(node.get("name").asText());
+        }
+
+        assertEquals(List.of("RenovationTwoTags", "RenovationOneTag"), names);
     }
 
     @Test
@@ -1247,16 +1222,23 @@ public class RenovationControllerIntegrationTest {
         session.setAttribute("visibility", "all");
         session.setAttribute("searchTerm", "NonExistent");
 
-        mockMvc.perform(get("/renovations/search").session(session))
+        ObjectMapper mapper = new ObjectMapper();
+
+        MvcResult result1 = mockMvc.perform(get("/renovations/retrieve")
+                        .session(session))
                 .andExpect(status().isOk())
-                .andExpect(view().name("renovationSearchTemplate"))
-                .andExpect(model().attribute("records", hasSize(0))); // No matching records
+                .andReturn();
+
+        JsonNode root1 = mapper.readTree(result1.getResponse().getContentAsString());
+        assertEquals(0, root1.get("content").size());
+        assertEquals(0, root1.get("number").asInt());
+        assertEquals(0, root1.get("totalPages").asInt());
     }
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
     public void getSearchRenovations_withMatchingRecords_returnsFilteredResults() throws Exception {
-        RenovationRecord record = new RenovationRecord(owner, "Test Renovation", "Description", List.of("Room A"));
+        RenovationRecord record = new RenovationRecord(owner, "Renovation One", "Description", List.of("Room A"));
         record.setPublicity(true);
         renovationRecordRepository.save(record);
 
@@ -1270,14 +1252,14 @@ public class RenovationControllerIntegrationTest {
         content.forEach(n -> names.add(n.get("name").asText()));
 
         assertTrue(names.contains("Renovation One"));
-        assertFalse(names.contains("Renovation Two"));
+        assertEquals(1, content.size());
     }
 
     @Test
     public void tagSearch_withValidPublicRenovation_displaysListOfTags() throws Exception {
-        RenovationRecord testRecord = new RenovationRecord(owner, "Test Renovation", "Room A Renovation", List.of("Room A"));
+        RenovationRecord testRecord = new RenovationRecord(owner, "Test Renovation 1", "Room A Renovation", List.of("Room A"));
         testRecord.setPublicity(true);
-        RenovationRecord testRecord2 = new RenovationRecord(owner, "Test Renovation", "Room A Renovation", List.of("Room A"));
+        RenovationRecord testRecord2 = new RenovationRecord(owner, "Test Renovation 2", "Room A Renovation", List.of("Room A"));
         String tagName ="House";
         Tag testTag = new Tag(tagName);
         tagRepository.save(testTag);
@@ -1299,8 +1281,9 @@ public class RenovationControllerIntegrationTest {
         List<String> names = new ArrayList<>();
         content.forEach(n -> names.add(n.get("name").asText()));
 
-        assertTrue(names.contains("Test Renovation"));
-        assertEquals(0, content.size());
+        assertTrue(names.contains("Test Renovation 1"));
+        assertFalse(names.contains("Test Renovation 2"));
+        assertEquals(1, content.size());
     }
 
     @Test

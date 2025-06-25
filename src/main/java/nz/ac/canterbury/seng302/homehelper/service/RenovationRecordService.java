@@ -216,18 +216,26 @@ public class RenovationRecordService {
      * @return The corresponding DTO
      */
     private RenovationRecordDTO toDTO(RenovationRecord record) {
+        String createdTime = record.getCreatedTimestamp() != null
+                ? record.getCreatedTimestamp().toString()
+                : "Unknown";
+
+        List<TagDTO> tags = record.getTags() != null
+                ? record.getTags().stream()
+                .map(tag -> new TagDTO(tag.getId(), tag.getTagName()))
+                .toList()
+                : Collections.emptyList();
+
+        Long userId = record.getUser() != null ? record.getUser().getId() : null;
+
         return new RenovationRecordDTO(
                 record.getId(),
                 record.getName(),
                 record.getDescription(),
                 record.isPublic(),
-                record.getCreatedTimestamp().toString(),
-                record.getTags() != null
-                        ? record.getTags().stream()
-                        .map(tag -> new TagDTO(tag.getId(), tag.getTagName()))
-                        .toList()
-                        : Collections.emptyList(),
-                record.getUser() != null ? record.getUser().getId() : null
+                createdTime,
+                tags,
+                userId
         );
     }
 
