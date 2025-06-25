@@ -85,8 +85,8 @@ public class CreateTaskController {
 
         if (!model.containsAttribute("renovationTaskDTO")) {
             RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("", "", null, new ArrayList<>());
-            LocalDate dueDate = renovationTaskDTO.getDueDate();
-            String formattedDate = (dueDate != null) ? dueDate.toString() : "";
+            String dueDate = renovationTaskDTO.getDueDate();
+            String formattedDate = (dueDate != null) ? dueDate : "";
             model.addAttribute("renovationTaskDTO", renovationTaskDTO);
             model.addAttribute("dueDate", formattedDate);
         }
@@ -118,13 +118,8 @@ public class CreateTaskController {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
 
         if (renovationTaskDTO.getDueDate() != null) {
-            LocalDate formattedDate = renovationTaskDTO.getDueDate();
-            String formattedDueDate = "";
-            if (formattedDate != null) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                formattedDueDate = formattedDate.format(formatter);
-            }
-            redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
+            String formattedDate = renovationTaskDTO.getDueDate();
+            redirectAttributes.addFlashAttribute("dueDate", formattedDate);
         }
 
         Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);

@@ -74,14 +74,14 @@ public class RenovationTaskValidationTest {
     @Test
     void testValidateDueDate_pastDate_error() {
         LocalDate yesterday = LocalDate.now().minusDays(1);
-        String result = renovationTaskValidation.validateDueDate(yesterday);
+        String result = renovationTaskValidation.validateDueDate(yesterday.toString());
         assertEquals("Due date must be in the future.", result);
     }
 
     @Test
     void testValidateDueDate_futureDate_noError() {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
-        String result = renovationTaskValidation.validateDueDate(tomorrow);
+        String result = renovationTaskValidation.validateDueDate(tomorrow.toString());
         assertNull(result);
     }
 

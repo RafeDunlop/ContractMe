@@ -117,8 +117,7 @@ public class EditTaskController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation task does not exist.");
         }
         if (renovationTaskDTO.getDueDate() != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            String formattedDueDate = renovationTaskDTO.getDueDate().format(formatter);
+            String formattedDueDate = renovationTaskDTO.getDueDate().format("yyyy-MM-dd");
             redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
         }
 

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -46,10 +47,10 @@ public class RenovationTaskService {
      * Adds a new renovation task to the repository
      */
     public void addRenovationTask(RenovationTaskDTO renovationTaskDTO, RenovationRecord renovationRecord) {
-
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String name = renovationTaskDTO.getName();
         String description = renovationTaskDTO.getDescription();
-        LocalDate dueDate = renovationTaskDTO.getDueDate();
+        LocalDate dueDate = LocalDate.parse(renovationTaskDTO.getDueDate(),formatter);
         List<String> roomList = renovationTaskDTO.getRooms();
         RenovationTask renovationTask = new RenovationTask(name, description, roomList, dueDate, renovationRecord);
 
