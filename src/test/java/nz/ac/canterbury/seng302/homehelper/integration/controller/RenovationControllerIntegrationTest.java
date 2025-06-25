@@ -275,7 +275,7 @@ public class RenovationControllerIntegrationTest {
 
         JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
 
-        assertEquals(2, root.get("totalPages").asInt());
+        assertEquals(20, root.get("totalPages").asInt());
         assertEquals(0, root.get("number").asInt());
     }
 

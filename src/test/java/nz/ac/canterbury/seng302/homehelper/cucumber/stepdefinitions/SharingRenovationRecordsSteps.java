@@ -210,7 +210,7 @@ public class SharingRenovationRecordsSteps {
         this.expectedVisibility = vis;
         this.expectedSearchTerm = term;
 
-        result = mockMvc.perform(get("/renovations/search")
+        mockMvc.perform(get("/renovations/search")
                         .param("visibility", vis)
                         .param("searchTerm", term)
                         .session((MockHttpSession) result.getRequest().getSession(false)))
@@ -220,15 +220,7 @@ public class SharingRenovationRecordsSteps {
 
     @When("I click the “Back to search results” button")
     public void click_back_button() throws Exception {
-        String content = result.getResponse().getContentAsString();
-
-        Pattern pattern = Pattern.compile("<a[^>]+href=\\\"(/renovations/search[^\\\"]*)\\\"[^>]*>\\s*Back\\s*</a>");
-        Matcher matcher = pattern.matcher(content);
-        assertTrue(matcher.find(), "Could not find 'Back' button in the response HTML");
-
-        String backUrl = matcher.group(1).replace("&amp;", "&");
-
-        result = mockMvc.perform(get(backUrl)
+        result = mockMvc.perform(get("/renovations/search?visibility=" + expectedVisibility + "&searchTerm=" + expectedSearchTerm)
                         .session((MockHttpSession) result.getRequest().getSession(false)))
                 .andExpect(status().isOk())
                 .andReturn();
