@@ -95,15 +95,6 @@ function updateLayout(viewMode = "cards", id = null) {
     const rows = Math.max(1, Math.floor(availableHeight / cardHeight));
 
     const newCardsPerPage = columns * rows;
-    console.log("Container height: " + containerHeight);
-    console.log("Container width: " + containerWidth);
-    console.log("content header: " + contentHeaderHeight);
-    console.log("Footer height: " + footerHeight);
-    console.log("Navbar height: " + navbarHeight);
-    console.log("Available height: " + availableHeight);
-
-    console.log("Card width: " + cardWidth + " Card Height: " + cardHeight);
-    console.log("Rows " + rows + " Columns " + columns);
 
     // Only update if cardsPerPage changes
     const input = document.getElementById('cardsPerPage');

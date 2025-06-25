@@ -420,6 +420,7 @@ public class RenovationController {
         }
 
         int requestedPage = Math.max(pageNumber - 1, 0);
+        cardsPerPage = Math.max(cardsPerPage, 1);
         Pageable pageable = PageRequest.of(requestedPage, cardsPerPage);
         Page<RenovationTask> page = renovationTaskService.returnTaskPages(record, pageable);
 
@@ -520,9 +521,6 @@ public class RenovationController {
 
         User user = loginService.getUserByEmail();
 
-        request.getSession().setAttribute("lastVisitedRenovationPage", request.getRequestURL().toString());
-        request.getSession().setAttribute("lastVisitedRenovationParameters", request.getQueryString() != null ? "?" + request.getQueryString() : "");
-
         model.addAttribute("visibility", visibility);
         model.addAttribute("searchTerm", searchTerm);
         model.addAttribute("tagList", tagNameList);
@@ -562,7 +560,8 @@ public class RenovationController {
 
         request.getSession().setAttribute("lastVisitedRenovationParameters", request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
-        int requestedPage = Math.max(pageNumber - 1, 0); // convert to 0-based index
+        int requestedPage = Math.max(pageNumber - 1, 0);
+        cardsPerPage = Math.max(cardsPerPage, 1);
         Pageable pageable = PageRequest.of(requestedPage, cardsPerPage);
 
         Page<RenovationRecordDTO> page = switch (visibility.toLowerCase()) {
