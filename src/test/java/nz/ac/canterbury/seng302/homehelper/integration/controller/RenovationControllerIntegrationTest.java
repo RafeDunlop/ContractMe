@@ -216,11 +216,96 @@ public class RenovationControllerIntegrationTest {
     }
 
     /**
-     * Tests posting to the create renovations page which will create a new renovation record under the current user. If all the details
-     * (name, description, rooms) are in the correct format and then posted, the user is taken to the view page for that renovation and the
-     * record is added to the repository.
-     * @throws Exception if the request processing fails
+     * Tests that selecting a page that is out of bounds will redirect to the last page.
      */
+    @Test
+    public void getRenovationRecord_selectOutOfBoundsPage_returnsLastPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
+        }
+
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("page", "100")
+                        .param("cardsPerPage", "5"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
+
+        assertEquals(4, root.get("totalPages").asInt());
+        assertEquals(3, root.get("number").asInt());
+    }
+
+    /**
+     * Tests that selecting a page that is out of bounds will redirect to the last page.
+     */
+    @Test
+    public void getRenovationRecord_selectNegativePage_returnsFirstPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
+        }
+
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("page", "-100")
+                        .param("cardsPerPage", "5"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
+
+        assertEquals(4, root.get("totalPages").asInt());
+        assertEquals(0, root.get("number").asInt());
+    }
+
+    /**
+     * Tests that requesting 0 items per page will redirect to the default of 8 items per page.
+     */
+    @Test
+    public void getRenovationRecord_zeroItemsPerPage_returns16ItemsPerPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
+            renovationRecordRepository.save(existingRecord);
+        }
+
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("page", "1")
+                        .param("itemsPerPage", "0"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
+
+        assertEquals(2, root.get("totalPages").asInt());
+        assertEquals(0, root.get("number").asInt());
+    }
+
+    /**
+     * Tests that requesting a page number of 0 will redirect to the first page.
+     */
+    @Test
+    public void getRenovationRecord_zeroPageNumber_returnsFirstPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
+        }
+
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("page", "0")
+                        .param("cardsPerPage", "5"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
+
+        assertEquals(4, root.get("totalPages").asInt());
+        assertEquals(0, root.get("number").asInt());
+    }
+
+        /**
+         * Tests posting to the create renovations page which will create a new renovation record under the current user. If all the details
+         * (name, description, rooms) are in the correct format and then posted, the user is taken to the view page for that renovation and the
+         * record is added to the repository.
+         * @throws Exception if the request processing fails
+         */
     @Test
     public void postCreateRecord_validRecordDetails_createRecord() throws Exception {
         Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);

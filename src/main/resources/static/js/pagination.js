@@ -111,7 +111,7 @@ function updateLayout(viewMode = "cards", id = null) {
 
     if (oldValue !== newCardsPerPage && newCardsPerPage > 0) {
         input.value = newCardsPerPage;
-        fetchAppropriateRenovationData(viewMode, id, true);
+        fetchAppropriateRenovationData(viewMode, id, false);
     }
 }
 

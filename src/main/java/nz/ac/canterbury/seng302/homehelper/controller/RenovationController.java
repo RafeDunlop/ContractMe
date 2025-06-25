@@ -383,6 +383,17 @@ public class RenovationController {
         return "viewRenovation";
     }
 
+    /**
+     * Retrieves a paginated list of renovation tasks for a given renovation record.
+     * Ensures that only the owner or public records are accessible, and adjusts pagination
+     * if the requested page is out of bounds.
+     *
+     * @param id            the ID of the renovation record
+     * @param pageNumber    the 1-based page number to retrieve (defaults to 1)
+     * @param cardsPerPage  the number of tasks per page (defaults to 5, minimum is 1)
+     * @return a {@link Page} of {@link RenovationTaskDTO} objects
+     * @throws ResponseStatusException if the renovation does not exist or is not accessible
+     */
     @GetMapping("/retrieve/{id}")
     @ResponseBody
     public Page<RenovationTaskDTO> getRenovation(@PathVariable("id") Long id,
@@ -513,33 +524,44 @@ public class RenovationController {
         return "renovationSearchTemplate";
     }
 
+    /**
+     * Retrieves renovation records in a paginated format based on visibility, search term, and selected tags.
+     * Results are filtered, sorted by relevance, and then paginated.
+     *
+     * @param visibility     the scope of visibility ("public", "user", or "all"); defaults to "all"
+     * @param searchTerm     an optional term to search by name or description
+     * @param tagNameList    optional list of tag names used for filtering
+     * @param pageNumber     the 1-based page number to retrieve (defaults to 1)
+     * @param cardsPerPage   number of cards per page (defaults to 16)
+     * @return a {@link Page} of {@link RenovationRecordDTO} matching the filters
+     */
     @GetMapping("/retrieve")
     @ResponseBody
-    public Page<RenovationRecordDTO> getRenocations(@RequestParam(required = false) String visibility,
-                                              @RequestParam(required = false) String searchTerm,
-                                              @RequestParam(name = "tagNameList", required = false) List<String> tagNameList,
-                                              @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                              @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage) {
+    public Page<RenovationRecordDTO> getRenovations(@RequestParam(required = false) String visibility,
+                                                    @RequestParam(required = false) String searchTerm,
+                                                    @RequestParam(name = "tagNameList", required = false) List<String> tagNameList,
+                                                    @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                                    @RequestParam(defaultValue = "16", name = "cardsPerPage") int cardsPerPage) {
 
+        // Apply default values
         if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";
-        List<Tag> tagList;
-        if (tagNameList != null) {
-            tagList = tagService.getTags(tagNameList);
-        } else {
-            tagList = null;
-        }
+
+        // Convert tag names to Tag entities if provided
+        List<Tag> tagList = (tagNameList != null) ? tagService.getTags(tagNameList) : null;
 
         User user = loginService.getUserByEmail();
 
-        int requestedPage = Math.max(pageNumber - 1, 0);
+        int requestedPage = Math.max(pageNumber - 1, 0); // convert to 0-based index
         Pageable pageable = PageRequest.of(requestedPage, cardsPerPage);
+
         Page<RenovationRecordDTO> page = switch (visibility.toLowerCase()) {
             case "public" -> renovationRecordService.getPaginatedPublicRecords(searchTerm, tagList, pageable);
             case "user" -> renovationRecordService.getPaginatedUserRecords(user, searchTerm, tagList, pageable);
             default -> renovationRecordService.getPaginatedVisibleRecords(user, searchTerm, tagList, pageable);
         };
 
+        // If requested page exceeds total pages, return last available page
         if (requestedPage >= page.getTotalPages() && page.getTotalPages() > 0) {
             pageable = PageRequest.of(page.getTotalPages() - 1, cardsPerPage);
             page = switch (visibility.toLowerCase()) {
@@ -551,6 +573,7 @@ public class RenovationController {
 
         return page;
     }
+
 
     @GetMapping("/tags/profanity-filter")
     @ResponseBody
