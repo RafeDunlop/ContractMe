@@ -147,6 +147,17 @@
     </div>
 </div>
 </body>
+
+<script th:inline="javascript">
+    document.getElementById("roomList").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+        event.preventDefault();
+        document.getElementById("create-room-button").click();
+        }
+    });
+</script>
+
+<script type="in" th:src="@{/js/addRoom.js}"></script>
 <script type="module" th:src="@{/js/locationForm.js}"></script>
 <script type="module" th:src="@{/js/renovationValidations.js}"></script>
 <script type="module" th:src="@{/js/individualRenovation.js}"></script>
