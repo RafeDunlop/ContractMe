@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.User;
@@ -60,28 +59,25 @@ public class EditProfileController {
     @GetMapping("user/edit")
     public String editProfile(@ModelAttribute AddressDTO addressDTO,
                               Model model) {
-
-
         logger.info("GET /user/edit");
+
         try {
-            // Sets current user to page
-            User user = loginService.getUserByEmail();
-            model.addAttribute("user", user);
-            model.addAttribute("firstName", user.getFirstName());
-            model.addAttribute("lastName", user.getLastName());
-            model.addAttribute("email", user.getEmail());
-            model.addAttribute("profilePicture", user.getProfilePicture());
+            // Only set user if not already in the model
+            if (!model.containsAttribute("user")) {
+                User user = loginService.getUserByEmail();
+                model.addAttribute("user", user);
 
-            Location location = user.getLocation();
-            if (location != null) {
-                addressDTO.setAddress_line1(location.getAddress());
-                addressDTO.setCountry(location.getCountry());
-                addressDTO.setPostcode(location.getPostcode());
-                addressDTO.setCity(location.getCity());
-                addressDTO.setRegion(location.getSuburb());
+                Location location = user.getLocation();
+                if (location != null) {
+                    addressDTO.setAddress_line1(location.getAddress());
+                    addressDTO.setCountry(location.getCountry());
+                    addressDTO.setPostcode(location.getPostcode());
+                    addressDTO.setCity(location.getCity());
+                    addressDTO.setRegion(location.getSuburb());
+                }
+
+                model.addAttribute("addressDTO", addressDTO);
             }
-
-            model.addAttribute("addressDTO", addressDTO);
 
             return "editProfileTemplate";
         } catch (NoSuchElementException e) {
@@ -127,19 +123,6 @@ public class EditProfileController {
             errors.putAll(locationService.validateLocation(addressDTO));
         }
 
-        if (!errors.isEmpty()) {
-            errors.forEach(redirectAttributes::addFlashAttribute);
-            redirectAttributes.addFlashAttribute("user", newUser);
-            redirectAttributes.addFlashAttribute("firstName", newUser.getFirstName());
-            redirectAttributes.addFlashAttribute("lastName", newUser.getLastName());
-            redirectAttributes.addFlashAttribute("email", newUser.getEmail());
-            redirectAttributes.addFlashAttribute("profilePicture", newUser.getProfilePicture());
-            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
-            redirectAttributes.addFlashAttribute("locationUsed", locationChanged);
-
-            return "redirect:/user/edit";
-        }
-
         newUser.setFirstName(updatedUser.getFirstName());
         newUser.setLastName(updatedUser.getLastName());
         newUser.setEmail(updatedUser.getEmail());
@@ -147,6 +130,15 @@ public class EditProfileController {
         if (locationChanged) {
             newUser.setLocation(formLocation);
         }
+
+        if (!errors.isEmpty()) {
+            errors.forEach(redirectAttributes::addFlashAttribute);
+            redirectAttributes.addFlashAttribute("user", newUser);
+            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
+            redirectAttributes.addFlashAttribute("locationUsed", locationChanged || formLocation != null);
+            return "redirect:/user/edit";
+        }
+
         editProfileService.updateUser(newUser);
 
         return "redirect:/user";
