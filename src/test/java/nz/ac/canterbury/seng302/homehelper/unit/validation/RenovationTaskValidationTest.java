@@ -81,6 +81,20 @@ public class RenovationTaskValidationTest {
     }
 
     @Test
+    void testValidateDueDate_invalidFormatISO_error() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        String yesterday = LocalDate.now().minusDays(1).format(formatter);
+        String result = renovationTaskValidation.validateDueDate(yesterday);
+        assertEquals("Date is not in valid format, DD/MM/YYYY.", result);
+    }
+    @Test
+    void testValidateDueDate_invalidFormatRandomChar_error() {
+        String yesterday = "Today";
+        String result = renovationTaskValidation.validateDueDate(yesterday);
+        assertEquals("Date is not in valid format, DD/MM/YYYY.", result);
+    }
+
+    @Test
     void testValidateDueDate_futureDate_noError() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String tomorrow = LocalDate.now().plusDays(1).format(formatter);

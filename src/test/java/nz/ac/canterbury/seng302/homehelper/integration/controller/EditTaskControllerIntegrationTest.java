@@ -231,6 +231,25 @@ public class EditTaskControllerIntegrationTest {
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void testEditTask_dueDateInvalidFormat_TaskNotEditedStaysOnEditTask() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("name", "@#$%")
+                        .param("description", "Description")
+                        .param("roomList", "Room 1", "Room 2")
+                        .param("taskId", "1")
+                        .param("renovationId", "1")
+                        .param("dueDate", (LocalDate.now().plusDays(5).format(DateTimeFormatter.ofPattern("yyyy/MM/dd"))))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(redirectedUrl("/editTask?taskId=1&renovationId=1"))
+                .andExpect(flash().attribute("dueDateError", hasItem("Date is not in valid format, DD/MM/YYYY.")));
+        Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
+    }
+
     @Test
     @WithMockUser(username = "jane@doe.com", roles = {"USER"})
     public void testEditTask_editTaskIcon_taskIconChangedReturnsToRenovations() throws Exception {

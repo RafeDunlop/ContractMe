@@ -101,7 +101,7 @@ public class RenovationTaskValidation {
                     return "Due date must be in the future.";
                 }
             } catch (DateTimeParseException e) {
-                return "Date is not in valid format, DD/MM/YYYY";
+                return "Date is not in valid format, DD/MM/YYYY.";
             }
 
         }
