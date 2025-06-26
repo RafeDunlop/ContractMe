@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,15 +74,17 @@ public class RenovationTaskValidationTest {
 
     @Test
     void testValidateDueDate_pastDate_error() {
-        LocalDate yesterday = LocalDate.now().minusDays(1);
-        String result = renovationTaskValidation.validateDueDate(yesterday.toString());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String yesterday = LocalDate.now().minusDays(1).format(formatter);
+        String result = renovationTaskValidation.validateDueDate(yesterday);
         assertEquals("Due date must be in the future.", result);
     }
 
     @Test
     void testValidateDueDate_futureDate_noError() {
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
-        String result = renovationTaskValidation.validateDueDate(tomorrow.toString());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String tomorrow = LocalDate.now().plusDays(1).format(formatter);
+        String result = renovationTaskValidation.validateDueDate(tomorrow);
         assertNull(result);
     }
 

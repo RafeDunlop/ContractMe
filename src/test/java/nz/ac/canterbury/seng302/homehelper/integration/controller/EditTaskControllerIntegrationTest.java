@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -222,7 +223,7 @@ public class EditTaskControllerIntegrationTest {
                         .param("roomList", "Room 1", "Room 2")
                         .param("taskId", "1")
                         .param("renovationId", "1")
-                        .param("DueDate", String.valueOf(LocalDate.now().minusDays(1)))
+                        .param("dueDate", String.valueOf(LocalDate.now().minusDays(1).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/editTask?taskId=1&renovationId=1"))

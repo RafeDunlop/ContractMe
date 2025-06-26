@@ -50,7 +50,10 @@ public class RenovationTaskService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String name = renovationTaskDTO.getName();
         String description = renovationTaskDTO.getDescription();
-        LocalDate dueDate = LocalDate.parse(renovationTaskDTO.getDueDate(),formatter);
+        LocalDate dueDate = null;
+        if (renovationTaskDTO.getDueDate() != null && !renovationTaskDTO.getDueDate().isBlank()) {
+            dueDate = LocalDate.parse(renovationTaskDTO.getDueDate(),formatter);
+        }
         List<String> roomList = renovationTaskDTO.getRooms();
         RenovationTask renovationTask = new RenovationTask(name, description, roomList, dueDate, renovationRecord);
 

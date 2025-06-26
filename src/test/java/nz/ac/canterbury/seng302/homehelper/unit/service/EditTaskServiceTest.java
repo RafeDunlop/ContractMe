@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.unit.service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
@@ -28,14 +29,16 @@ public class EditTaskServiceTest {
 
     @Test
     public void updateTask_validDTO_savesTask() {
-        RenovationTaskDTO dto = new RenovationTaskDTO("Task 1", "Desc", LocalDate.now().toString(), new ArrayList<>());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        RenovationTaskDTO dto = new RenovationTaskDTO("Task 1", "Desc", LocalDate.now().format(formatter), new ArrayList<>());
         RenovationTask task = mock(RenovationTask.class);
 
         editTaskService.updateTask(dto, task);
 
         verify(task).setName("Task 1");
         verify(task).setDescription("Desc");
-        verify(task).setDueDate(LocalDate.parse(dto.getDueDate()));
+        verify(task).setDueDate(LocalDate.parse(dto.getDueDate(),formatter));
         verify(task).setRoomList(dto.getRooms());
         verify(renovationTaskRepository, times(1)).save(task);
     }

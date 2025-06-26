@@ -5,7 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.time.format.DateTimeFormatter;
 /**
  * Creates a RenovationTaskDTO object
  */
@@ -49,7 +49,11 @@ public class RenovationTaskDTO {
     public RenovationTaskDTO(RenovationTask task) {
         this.name = task.getName();
         this.description = task.getDescription();
-        this.dueDate = task.getDueDate().toString();
+        if (task.getDueDate() != null) {
+            this.dueDate = task.getDueDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        } else {
+            this.dueDate = "";
+        }
         this.rooms = task.getRoomList();
     }
 

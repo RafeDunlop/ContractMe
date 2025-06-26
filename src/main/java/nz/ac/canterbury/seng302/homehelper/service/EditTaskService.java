@@ -45,7 +45,10 @@ public class EditTaskService {
 
         renovationTask.setName(renovationTaskDTO.getName());
         renovationTask.setDescription(renovationTaskDTO.getDescription());
-        renovationTask.setDueDate(LocalDate.parse(renovationTaskDTO.getDueDate(), formatter));
+        renovationTask.setDueDate(null);
+        if (renovationTaskDTO.getDueDate() != null && !renovationTaskDTO.getDueDate().isBlank()) {
+            renovationTask.setDueDate(LocalDate.parse(renovationTaskDTO.getDueDate(), formatter));
+        }
         renovationTask.setRoomList(renovationTaskDTO.getRooms());
 
         renovationTaskRepository.save(renovationTask);

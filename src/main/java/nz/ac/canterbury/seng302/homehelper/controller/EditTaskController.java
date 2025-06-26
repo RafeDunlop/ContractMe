@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -117,8 +118,14 @@ public class EditTaskController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation task does not exist.");
         }
         if (renovationTaskDTO.getDueDate() != null) {
-            String formattedDueDate = renovationTaskDTO.getDueDate().format("yyyy-MM-dd");
+            LocalDate parsedDate = LocalDate.parse(
+                    renovationTaskDTO.getDueDate(),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            );
+
+            String formattedDueDate = parsedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
+            renovationTaskDTO.setDueDate(formattedDueDate);
         }
 
         Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(

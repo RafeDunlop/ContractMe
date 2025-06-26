@@ -118,8 +118,14 @@ public class CreateTaskController {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
 
         if (renovationTaskDTO.getDueDate() != null) {
-            String formattedDate = renovationTaskDTO.getDueDate();
-            redirectAttributes.addFlashAttribute("dueDate", formattedDate);
+            LocalDate parsedDate = LocalDate.parse(
+                    renovationTaskDTO.getDueDate(),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            );
+
+            String formattedDueDate = parsedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
+            renovationTaskDTO.setDueDate(formattedDueDate);
         }
 
         Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
