@@ -114,13 +114,24 @@ function fetchRenovation(id, resetPage = false) {
     }
 
     const params = new URLSearchParams();
+    const userParams = new URLSearchParams();
+
+    userParams.set("id", id)
 
     if (pageNumber && !isNaN(pageNumber)) {
         params.set("page", pageNumber);
+        userParams.set("page", pageNumber)
     }
     if (!isNaN(cardsPerPage)) {
         params.set("cardsPerPage", cardsPerPage);
     }
+
+    const newUrl = new URL(window.location);
+    console.log(window.location);
+
+    newUrl.search = userParams.toString();
+    console.log(newUrl);
+    window.history.replaceState({}, '', newUrl);
 
     fetch("/renovations/retrieve/" + id + "?" + params.toString())
         .then(response => response.json())
@@ -188,7 +199,7 @@ function renderRecordCards(data, currentUserId, pageNumber) {
         card.className = "card card-count position-relative";
 
         card.innerHTML = `
-            <a href="/renovations/view?id=${record.id}&page=${pageNumber}" class="no-underline text-reset">
+            <a href="/renovations/view?id=${record.id}&page=1" class="no-underline text-reset">
                 ${(record.userId === currentUserId) ? '<span class="badge bg-primary position-absolute top-0 end-0 m-2">Yours</span>' : ""}
                 <div class="card-body">
                     <h5 class="card-title truncate">${record.name}</h5>
@@ -216,7 +227,7 @@ function renderRecordTable(data, pageNumber, csrfToken) {
 
     data.content.forEach(record => {
         const rowHtml = `
-            <a href="/renovations/view?id=${record.id}&page=${pageNumber}" class="list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative">
+            <a href="/renovations/view?id=${record.id}&page=1" class="list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative">
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="w-100" onclick="document.getElementById('form-${record.id}').submit();" style="cursor: pointer;">
                         <h5 class="mb-1 text-primary">${record.name}</h5>

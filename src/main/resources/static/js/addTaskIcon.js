@@ -33,7 +33,6 @@ function showIconSelector(taskId) {
     const modal = document.getElementById("icon-selector-modal");
     const content = document.getElementById("icon-selector-content");
 
-    console.log(task, taskId);
     content.innerHTML = renderModalContent(task, csrfToken);
     modal.style.display = "block";
 }
@@ -44,8 +43,6 @@ function showIconSelector(taskId) {
  * @returns {Promise<void>} a promise of the request to be awaited
  */
 async function submitIcon(taskId) {
-    console.log(taskId);
-    console.log(localStorage.getItem("selectedTaskId"));
     document.getElementById("icon-selector-modal").style.display = 'none';
     const button = document.querySelector(".icon-btn.active");
     const iconFileName = button.id;

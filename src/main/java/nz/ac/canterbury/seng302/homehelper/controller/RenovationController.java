@@ -521,6 +521,9 @@ public class RenovationController {
 
         User user = loginService.getUserByEmail();
 
+        request.getSession().setAttribute("lastVisitedRenovationPage", request.getRequestURL().toString());
+        request.getSession().setAttribute("lastVisitedRenovationParameters", request.getQueryString() != null ? "?" + request.getQueryString() : "");
+
         model.addAttribute("visibility", visibility);
         model.addAttribute("searchTerm", searchTerm);
         model.addAttribute("tagList", tagNameList);
