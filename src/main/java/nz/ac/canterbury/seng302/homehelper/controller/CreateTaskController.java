@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -116,16 +117,26 @@ public class CreateTaskController {
                                 RedirectAttributes redirectAttributes) {
         logger.info("POST renovations/view/create");
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
+        LocalDate parsedDate = null;
 
         if (renovationTaskDTO.getDueDate() != null) {
-            LocalDate parsedDate = LocalDate.parse(
-                    renovationTaskDTO.getDueDate(),
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd")
-            );
+            DateTimeFormatter[] formatters = new DateTimeFormatter[] {
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            };
 
-            String formattedDueDate = parsedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
-            renovationTaskDTO.setDueDate(formattedDueDate);
+            for (DateTimeFormatter formatter : formatters) {
+                try {
+                    parsedDate = LocalDate.parse(renovationTaskDTO.getDueDate(), formatter);
+                    break;
+                } catch (DateTimeParseException ignored) {}
+            }
+
+            if (parsedDate != null) {
+                String formattedDueDate = parsedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
+                renovationTaskDTO.setDueDate(formattedDueDate);
+            }
         }
 
         Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
