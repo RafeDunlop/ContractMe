@@ -27,7 +27,7 @@
         <div class="d-flex justify-content-start align-items-center mb-4">
             <!-- Profile Picture -->
             <div class="me-4 text-center">
-                <img th:src="@{'/profile_pictures/' + ${user.getProfilePicture()}}"
+                <img th:src="@{'/profile_pictures/' + ${profilePicture}}"
                      alt="Profile Picture"
                      class="img-fluid rounded-circle"
                      style="width: 200px; height: 200px; object-fit: cover;">
@@ -51,7 +51,7 @@
             <!-- FIRST NAME -->
             <div class="mb-3">
                 <input type="text" class="form-control" id="first-name" name="firstName"
-                       placeholder="First Name" th:value="${user.getFirstName()}" aria-label="First name">
+                       placeholder="First Name" th:value="${firstName}" aria-label="First name">
 
                 <!-- Frontend JS error -->
                 <div class="alert alert-danger mt-2" role="alert" id="first-name-frontend-error" hidden>
@@ -67,7 +67,7 @@
             <!-- LAST NAME -->
             <div class="mb-3">
                 <input type="text" class="form-control" id="last-name" name="lastName"
-                       placeholder="Last Name" th:value="${user.getLastName()}" aria-label="Last name">
+                       placeholder="Last Name" th:value="${lastName}" aria-label="Last name">
 
                 <!-- Frontend JS error -->
                 <div class="alert alert-danger mt-2" role="alert" id="last-name-frontend-error" hidden>
@@ -83,7 +83,7 @@
             <!-- EMAIL -->
             <div class="mb-3">
                 <input type="email" class="form-control" id="email" name="email"
-                       placeholder="Email" th:value="${user.getEmail()}" aria-label="Email">
+                       placeholder="Email" th:value="${email}" aria-label="Email">
 
                 <!-- Frontend JS error -->
                 <div class="alert alert-danger mt-2" role="alert" id="email-frontend-error" hidden>

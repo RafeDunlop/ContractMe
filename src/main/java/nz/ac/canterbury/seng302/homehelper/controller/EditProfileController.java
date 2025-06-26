@@ -52,21 +52,31 @@ public class EditProfileController {
     /**
      * Displays the editProfileTemplate page under the path "/user/edit" where id
      * is the ID of the user. Sets the current user to the page.
-     * @param addressDTO the dto containing data relating to fields in address form.
      * @param model Model interface
      * @return editProfileTemplate page
      */
     @GetMapping("user/edit")
-    public String editProfile(@ModelAttribute AddressDTO addressDTO,
-                              Model model) {
+    public String editProfile(Model model) {
         logger.info("GET /user/edit");
 
         try {
-            // Only set user if not already in the model
-            if (!model.containsAttribute("user")) {
-                User user = loginService.getUserByEmail();
-                model.addAttribute("user", user);
+            User user = loginService.getUserByEmail();
+            model.addAttribute("user", user);
 
+            if (!model.containsAttribute("firstName")) {
+                model.addAttribute("firstName", user.getFirstName());
+            }
+            if (!model.containsAttribute("lastName")) {
+                model.addAttribute("lastName", user.getLastName());
+            }
+            if (!model.containsAttribute("email")) {
+                model.addAttribute("email", user.getEmail());
+            }
+            model.addAttribute("profilePicture", user.getProfilePicture());
+
+            // Only add addressDTO if not present from flash
+            if (!model.containsAttribute("addressDTO")) {
+                AddressDTO addressDTO = new AddressDTO();
                 Location location = user.getLocation();
                 if (location != null) {
                     addressDTO.setAddress_line1(location.getAddress());
@@ -75,7 +85,6 @@ public class EditProfileController {
                     addressDTO.setCity(location.getCity());
                     addressDTO.setRegion(location.getSuburb());
                 }
-
                 model.addAttribute("addressDTO", addressDTO);
             }
 
@@ -123,6 +132,19 @@ public class EditProfileController {
             errors.putAll(locationService.validateLocation(addressDTO));
         }
 
+        if (!errors.isEmpty()) {
+            errors.forEach(redirectAttributes::addFlashAttribute);
+            redirectAttributes.addFlashAttribute("user", newUser);
+            redirectAttributes.addFlashAttribute("firstName", updatedUser.getFirstName());
+            redirectAttributes.addFlashAttribute("lastName", updatedUser.getLastName());
+            redirectAttributes.addFlashAttribute("email", updatedUser.getEmail());
+            redirectAttributes.addFlashAttribute("profilePicture", newUser.getProfilePicture());
+            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
+            redirectAttributes.addFlashAttribute("locationUsed", locationChanged);
+
+            return "redirect:/user/edit";
+        }
+
         newUser.setFirstName(updatedUser.getFirstName());
         newUser.setLastName(updatedUser.getLastName());
         newUser.setEmail(updatedUser.getEmail());
@@ -130,15 +152,6 @@ public class EditProfileController {
         if (locationChanged) {
             newUser.setLocation(formLocation);
         }
-
-        if (!errors.isEmpty()) {
-            errors.forEach(redirectAttributes::addFlashAttribute);
-            redirectAttributes.addFlashAttribute("user", newUser);
-            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
-            redirectAttributes.addFlashAttribute("locationUsed", locationChanged || formLocation != null);
-            return "redirect:/user/edit";
-        }
-
         editProfileService.updateUser(newUser);
 
         return "redirect:/user";

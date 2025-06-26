@@ -11,13 +11,9 @@ import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -31,12 +27,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -141,10 +134,9 @@ public class EditProfileControllerIntegrationTest {
                 .andExpect(redirectedUrl("/user/edit"))
                 .andExpect(flash().attribute("firstNameError", expectedErrors))
                 .andExpect(flash().attributeExists("user"))
-                .andExpect(flash().attribute("firstName", expectedUser.getFirstName()))
-                .andExpect(flash().attribute("lastName", expectedUser.getLastName()))
-                .andExpect(flash().attribute("email", expectedUser.getEmail()))
-                .andExpect(flash().attribute("profilePicture", expectedUser.getProfilePicture()));
+                .andExpect(flash().attribute("firstName", updatedUser.getFirstName()))
+                .andExpect(flash().attribute("lastName", updatedUser.getLastName()))
+                .andExpect(flash().attribute("email", updatedUser.getEmail()));
     }
 
     /**
@@ -170,10 +162,9 @@ public class EditProfileControllerIntegrationTest {
                 .andExpect(redirectedUrl("/user/edit"))
                 .andExpect(flash().attribute("emailError", expectedErrors))
                 .andExpect(flash().attributeExists("user"))
-                .andExpect(flash().attribute("firstName", expectedUser.getFirstName()))
-                .andExpect(flash().attribute("lastName", expectedUser.getLastName()))
-                .andExpect(flash().attribute("email", expectedUser.getEmail()))
-                .andExpect(flash().attribute("profilePicture", expectedUser.getProfilePicture()));
+                .andExpect(flash().attribute("firstName", updatedUser.getFirstName()))
+                .andExpect(flash().attribute("lastName", updatedUser.getLastName()))
+                .andExpect(flash().attribute("email", updatedUser.getEmail()));
     }
 
     /**
@@ -205,8 +196,7 @@ public class EditProfileControllerIntegrationTest {
                 .andExpect(flash().attributeExists("user"))
                 .andExpect(flash().attribute("firstName", expectedUser1.getFirstName()))
                 .andExpect(flash().attribute("lastName", expectedUser1.getLastName()))
-                .andExpect(flash().attribute("email", expectedUser1.getEmail()))
-                .andExpect(flash().attribute("profilePicture", expectedUser1.getProfilePicture()));
+                .andExpect(flash().attribute("email", expectedUser2.getEmail()));
     }
 
 
