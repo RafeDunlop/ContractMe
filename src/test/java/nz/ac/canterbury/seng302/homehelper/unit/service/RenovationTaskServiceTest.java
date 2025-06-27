@@ -160,9 +160,22 @@ public class RenovationTaskServiceTest {
     }
 
     @Test
-    public void validateTaskDetails_invalidFormat_returnInvalidDueDateError() {
+    public void validateTaskDetails_invalidFormatISO_returnInvalidDueDateError() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "Some description", LocalDate.now().plusDays(1).format(formatter), new ArrayList<>());
+
+        Map<String, List<String>> expectedErrors = new HashMap<>();
+        expectedErrors.put("dueDateError", List.of("Date is not in valid format, DD/MM/YYYY."));
+
+        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
+        assertEquals(expectedErrors, errors);
+    }
+
+
+    @Test
+    public void validateTaskDetails_invalidFormatRandomChar_returnInvalidDueDateError() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "Some description", "NotADate", new ArrayList<>());
 
         Map<String, List<String>> expectedErrors = new HashMap<>();
         expectedErrors.put("dueDateError", List.of("Date is not in valid format, DD/MM/YYYY."));

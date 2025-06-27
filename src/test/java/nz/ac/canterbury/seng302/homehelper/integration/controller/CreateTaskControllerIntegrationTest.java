@@ -173,7 +173,7 @@ public class CreateTaskControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "jane@doe.com")
-    public void testAddTask_dueDateInvalidFormat_TaskNotAddedStaysOnCreateTask() throws Exception {
+    public void testAddTask_dueDateInvalidFormatISO_TaskNotAddedStaysOnCreateTask() throws Exception {
         User user = new User("Jane", "Doe", "jane@doe.com", "Password");
         user.grantAuthority("ROLE_USER");
         Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
@@ -186,6 +186,28 @@ public class CreateTaskControllerIntegrationTest {
                         .param("roomList", "Room 1", "Room 2")
                         .param("renovationId", "1")
                         .param("dueDate", (LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("yyyy/MM/dd"))))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view/create?id=1"))
+                .andExpect(flash().attribute("dueDateError", contains("Date is not in valid format, DD/MM/YYYY.")));
+        Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void testAddTask_dueDateInvalidFormatRandomChar_TaskNotAddedStaysOnCreateTask() throws Exception {
+        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
+        user.grantAuthority("ROLE_USER");
+        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
+        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
+        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
+        mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("name", "Testname")
+                        .param("description", "Description")
+                        .param("roomList", "Room 1", "Room 2")
+                        .param("renovationId", "1")
+                        .param("dueDate",  "NotADate")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view/create?id=1"))
