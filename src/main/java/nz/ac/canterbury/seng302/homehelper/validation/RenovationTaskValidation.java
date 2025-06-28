@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,14 +87,23 @@ public class RenovationTaskValidation {
 
     /**
      * Validates the due date of an object and returns an error message if it's invalid.
-     * @param dueDate Due date of the object being verified
+     * @param dueDateString Due date of the object being verified
      * @return An error from validating the due date
      */
-    public String validateDueDate(LocalDate dueDate) {
-        if (dueDate != null) {
-            if (dueDate.isBefore(LocalDate.now())) {
-                return "Due date must be in the future.";
+    public String validateDueDate(String dueDateString) {
+
+
+        if (dueDateString != null) {
+            try {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                LocalDate dueDate = LocalDate.parse(dueDateString, formatter);
+                if (dueDate.isBefore(LocalDate.now())) {
+                    return "Due date must be in the future.";
+                }
+            } catch (DateTimeParseException e) {
+                return "Date is not in valid format, DD/MM/YYYY.";
             }
+
         }
             return null;
 

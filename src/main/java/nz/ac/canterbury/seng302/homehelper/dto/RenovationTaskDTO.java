@@ -5,14 +5,14 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.time.format.DateTimeFormatter;
 /**
  * Creates a RenovationTaskDTO object
  */
 public class RenovationTaskDTO {
     private String name;
     String description;
-    LocalDate dueDate;
+    String dueDate;
     List<String> rooms;
 
     /**
@@ -34,7 +34,7 @@ public class RenovationTaskDTO {
      * @param dueDate The initial due date
      * @param rooms the initial subset of rooms
      */
-    public RenovationTaskDTO(String name, String description, LocalDate dueDate,List<String> rooms) {
+    public RenovationTaskDTO(String name, String description, String dueDate,List<String> rooms) {
         this.name = name;
         this.description = description;
         this.dueDate = dueDate;
@@ -49,7 +49,11 @@ public class RenovationTaskDTO {
     public RenovationTaskDTO(RenovationTask task) {
         this.name = task.getName();
         this.description = task.getDescription();
-        this.dueDate = task.getDueDate();
+        if (task.getDueDate() != null) {
+            this.dueDate = task.getDueDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        } else {
+            this.dueDate = "";
+        }
         this.rooms = task.getRoomList();
     }
 
@@ -93,14 +97,14 @@ public class RenovationTaskDTO {
     /**
     Gets the due date
      */
-    public LocalDate getDueDate() {
+    public String getDueDate() {
         return dueDate;
     }
 
     /**
     Sets the due date
      */
-    public void setDueDate(LocalDate dueDate) {
+    public void setDueDate(String dueDate) {
         this.dueDate = dueDate;
    }
 
