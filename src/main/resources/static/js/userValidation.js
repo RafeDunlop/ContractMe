@@ -1,6 +1,6 @@
 // Regex patterns
 const emailPattern = /^[A-Za-z0-9]+([+_.-][A-Za-z0-9]+)*@[A-Za-z0-9]+([.-][A-Za-z0-9]+)*(\.[A-Za-z]{2,})$/;
-const namePattern = /^[\p{L}\-'\s]{0,50}$/u;
+const namePattern = /^[\p{L}\-'\s]*$/u;
 
 // Functions
 export function checkEmailField(input, emailFrontendErrorMessage, emailFrontendError, emailBackendError) {
