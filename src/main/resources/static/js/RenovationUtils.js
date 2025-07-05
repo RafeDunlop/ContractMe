@@ -1,58 +1,69 @@
 let lastSubmittedSearchTerm = "";
 let lastSubmittedTags = [];
 
+/**
+ * Fetches renovation records with current filters, pagination, and view mode.
+ * Updates the DOM to display records either as cards or table rows.
+ * @param viewMode - The layout to use for rendering results.
+ * @param resetPage - Whether to reset the page number to 1.
+ */
 function fetchRenovations(viewMode = "cards", resetPage = false) {
     if (resetPage) {
         document.getElementById("pageNumber").value = 1;
     }
 
     lastSubmittedSearchTerm = document.querySelector("input[name='searchTerm']").value.trim();
-    lastSubmittedTags = Array.from(document.querySelectorAll("#hidden-tag-inputs input[name='tagNameList']")).map(input => input.value);
+    lastSubmittedTags = Array.from(document.querySelectorAll("#hidden-tag-inputs input[name='tagNameList']"))
+        .map(input => input.value);
+
     const element = viewMode === "cards" ? document.getElementById("grid") : document.getElementById('table');
-    const container = document.getElementById("elements-container")
+    const container = document.getElementById("elements-container");
     const loading = document.getElementById("loading-message");
 
+    // Get visibility filter
     const visibility = document.querySelector("select[name='visibility']")?.value || "all";
     updateHeaderTitle(visibility);
 
+    // Read pagination and display settings
     let pageNumber = parseInt(document.getElementById("pageNumber")?.value, 10);
-    const searchTerm = lastSubmittedSearchTerm || "";
-    const tagNameList = lastSubmittedTags || [];
     if (isNaN(pageNumber) || pageNumber < 1) pageNumber = 1;
+
     let cardsPerPage = parseInt(document.getElementById("cardsPerPage")?.value, 10);
     if (isNaN(cardsPerPage)) cardsPerPage = 16;
+
     const currentUserId = document.getElementById("userId").value;
 
+    // Build query parameters
     const params = new URLSearchParams();
     const userParams = new URLSearchParams();
 
-    if (pageNumber && !isNaN(pageNumber)) {
-        params.set("page", pageNumber);
-        userParams.set("page", pageNumber);
-    }
-    if (visibility && visibility !== "all") {
+    params.set("page", pageNumber);
+    userParams.set("page", pageNumber);
+
+    if (visibility !== "all") {
         params.set("visibility", visibility);
         userParams.set("visibility", visibility);
     }
-    if (searchTerm && searchTerm.trim() !== "") {
-        params.set("searchTerm", searchTerm.trim());
-        userParams.set("searchTerm", searchTerm.trim())
+
+    if (lastSubmittedSearchTerm) {
+        params.set("searchTerm", lastSubmittedSearchTerm);
+        userParams.set("searchTerm", lastSubmittedSearchTerm);
     }
 
-    tagNameList.forEach(tag => {
-        if (tag && tag.trim() !== "") {
-            params.append("tagNameList", tag.trim());
-            userParams.append("tagNameList", tag.trim());
+    lastSubmittedTags.forEach(tag => {
+        if (tag) {
+            params.append("tagNameList", tag);
+            userParams.append("tagNameList", tag);
         }
     });
 
-    if (!isNaN(cardsPerPage)) {
-        params.set("cardsPerPage", cardsPerPage);
-    }
+    params.set("cardsPerPage", cardsPerPage);
 
+    // Update browser URL to reflect filters
     const newUrl = new URL(window.location);
     newUrl.search = userParams.toString();
     window.history.replaceState({}, '', newUrl);
+
     clearAlerts();
 
     fetch("/renovations/retrieve?" + params.toString())
@@ -72,8 +83,7 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
                 return;
             }
 
-            document.getElementById("elements-container").style.display = "block";
-
+            container.style.display = "block";
             if (viewMode === "cards") {
                 renderRecordCards(data, currentUserId, pageNumber);
             } else {
@@ -89,48 +99,44 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
             loading.style.display = "none";
             element.style.display = "none";
             container.insertAdjacentHTML('beforeend', `<div class="alert alert-danger mt-4">Failed to load renovations. Please try again.</div>`);
-            console.log(error);
+            console.error(error);
         });
 }
 
+/**
+ * Fetches renovation data for a renovation ID, including tasks.
+ * Used when viewing individual renovation details.
+ * @param id - Renovation ID to fetch.
+ * @param resetPage - Whether to reset the page number.
+ */
 function fetchRenovation(id, resetPage = false) {
     if (resetPage) {
         document.getElementById("pageNumber").value = 1;
     }
 
     const element = document.getElementById("grid");
-    const container = document.getElementById("elements-container")
+    const container = document.getElementById("elements-container");
     const loading = document.getElementById("loading-message");
     const isOwner = document.getElementById("isOwner");
 
-
     let pageNumber = parseInt(document.getElementById("pageNumber")?.value, 10);
-    if (isNaN(pageNumber) || pageNumber < 1) pageNumber = 1;
     let cardsPerPage = parseInt(document.getElementById("cardsPerPage")?.value, 10);
-    if (isNaN(cardsPerPage)) cardsPerPage = 16;
     let totalPages = parseInt(document.getElementById("totalPages")?.value, 10);
+
+    if (isNaN(pageNumber) || pageNumber < 1) pageNumber = 1;
+    if (isNaN(cardsPerPage)) cardsPerPage = 16;
     if (!isNaN(totalPages) && pageNumber > totalPages && totalPages > 0) {
         pageNumber = totalPages;
     }
 
     const params = new URLSearchParams();
     const userParams = new URLSearchParams();
-
-    userParams.set("id", id)
-
-    if (pageNumber && !isNaN(pageNumber)) {
-        params.set("page", pageNumber);
-        userParams.set("page", pageNumber)
-    }
-    if (!isNaN(cardsPerPage)) {
-        params.set("cardsPerPage", cardsPerPage);
-    }
+    userParams.set("id", id);
+    params.set("page", pageNumber);
+    params.set("cardsPerPage", cardsPerPage);
 
     const newUrl = new URL(window.location);
-    console.log(window.location);
-
     newUrl.search = userParams.toString();
-    console.log(newUrl);
     window.history.replaceState({}, '', newUrl);
 
     fetch("/renovations/retrieve/" + id + "?" + params.toString())
@@ -150,23 +156,25 @@ function fetchRenovation(id, resetPage = false) {
                 return;
             }
 
-            document.getElementById("elements-container").style.display = "block";
-
+            container.style.display = "block";
             renderTaskCards(data, isOwner, id);
 
             if (data.totalPages > 1) {
                 createPaginationButtons("cards", id);
             }
-
         })
         .catch(error => {
             loading.style.display = "none";
             element.style.display = "none";
             container.insertAdjacentHTML('beforeend', `<div class="alert alert-danger mt-4">Failed to load renovations. Please try again.</div>`);
-            console.log(error);
+            console.error(error);
         });
 }
 
+/**
+ * Updates the header text based on the visibility filter.
+ * @param visibility - The current visibility filter.
+ */
 function updateHeaderTitle(visibility) {
     const header = document.getElementById("header-title");
     if (!header) return;
@@ -183,6 +191,12 @@ function updateHeaderTitle(visibility) {
     }
 }
 
+/**
+ * Renders renovation records in card view.
+ * @param data - The data object from the server containing records.
+ * @param currentUserId - The current logged-in user ID.
+ * @param pageNumber - The current page number.
+ */
 function renderRecordCards(data, currentUserId, pageNumber) {
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
@@ -211,18 +225,19 @@ function renderRecordCards(data, currentUserId, pageNumber) {
                 </div>
             </a>
         `;
-
         grid.appendChild(card);
     });
 }
 
+/**
+ * Renders renovation records in table view.
+ * @param data - Data object containing renovation records.
+ * @param pageNumber - Current page number.
+ * @param csrfToken - CSRF token for secure actions.
+ */
 function renderRecordTable(data, pageNumber, csrfToken) {
     const table = document.getElementById("table");
-    if (!table) {
-        console.error("Table container not found.");
-        return;
-    }
-
+    if (!table) return console.error("Table container not found.");
     table.innerHTML = "";
 
     data.content.forEach(record => {
@@ -246,8 +261,14 @@ function renderRecordTable(data, pageNumber, csrfToken) {
     });
 }
 
+/**
+ * Renders task cards for a renovation.
+ * @param data - Renovation task data object.
+ * @param isOwner - Element indicating if user owns the renovation.
+ * @param renovationId - ID of the renovation the tasks belong to.
+ */
 function renderTaskCards(data, isOwner, renovationId) {
-    window.loadedTasks = data.content; // Store for modal rendering
+    window.loadedTasks = data.content;
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
     grid.className = "task-grid";
@@ -291,6 +312,12 @@ function renderTaskCards(data, isOwner, renovationId) {
     });
 }
 
+/**
+ * Renders modal content for icon selection for a task.
+ * @param task - The task object.
+ * @param csrfToken - CSRF token for secure requests.
+ * @returns string HTML content string for modal.
+ */
 function renderModalContent(task, csrfToken) {
     return `
         <div class="d-flex justify-content-center align-items-center vh-100">
@@ -304,8 +331,7 @@ function renderModalContent(task, csrfToken) {
                                 data-taskid="${task.id}"
                                 data-csrf="${csrfToken}"
                                 onclick="addTaskIcon(this)">
-                            <img src="/images/${icon}"
-                                 class="img-fluid rounded-circle"
+                            <img src="/images/${icon}" class="img-fluid rounded-circle"
                                  style="width: 100px; height: 100px; object-fit: cover"
                                  alt="Task Icon">
                         </button>
@@ -322,11 +348,20 @@ function renderModalContent(task, csrfToken) {
     `;
 }
 
+/**
+ * Removes all alert elements from the renovation container.
+ */
 function clearAlerts() {
     const oldAlerts = document.querySelectorAll("#elements-container .alert");
     oldAlerts.forEach(alert => alert.remove());
 }
 
+/**
+ * Determines which data fetching method to use based on the presence of a renovation ID.
+ * @param viewMode - View mode for rendering.
+ * @param id - ID of the renovation to fetch, or null for list.
+ * @param resetPage - Whether to reset the page number.
+ */
 function fetchAppropriateRenovationData(viewMode = "cards", id = null, resetPage = false) {
     if (id) {
         fetchRenovation(id, resetPage);

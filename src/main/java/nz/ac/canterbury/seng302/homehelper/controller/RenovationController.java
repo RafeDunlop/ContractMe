@@ -510,25 +510,33 @@ public class RenovationController {
                                     @RequestParam(required = false) String visibility,
                                     @RequestParam(required = false) String searchTerm,
                                     @RequestParam(name = "tagNameList", required = false) List<String> tagNameList,
-                                    @RequestParam(defaultValue = "1", name = "page") Integer pageNumber,
+                                    @RequestParam(name = "page", required = false) String page,
                                     HttpServletRequest request) {
         logger.info("GET /renovations/search");
 
         if (visibility == null) visibility = "all";
-        if (searchTerm == null) searchTerm = "";
+        if (searchTerm == null)  searchTerm  = "";
         if (tagNameList == null) tagNameList = Collections.emptyList();
-        if (pageNumber == null) pageNumber = 1;
+
+        int pageNumber;
+        try {
+            pageNumber = Integer.parseInt(page);
+            if (pageNumber < 1) pageNumber = 1;
+        } catch (Exception e) {
+            pageNumber = 1;
+        }
 
         User user = loginService.getUserByEmail();
 
         request.getSession().setAttribute("lastVisitedRenovationPage", request.getRequestURL().toString());
-        request.getSession().setAttribute("lastVisitedRenovationParameters", request.getQueryString() != null ? "?" + request.getQueryString() : "");
+        request.getSession().setAttribute("lastVisitedRenovationParameters",
+                request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
         model.addAttribute("visibility", visibility);
-        model.addAttribute("searchTerm", searchTerm);
-        model.addAttribute("tagList", tagNameList);
-        model.addAttribute("user", user);
-        model.addAttribute("pageNumber", pageNumber);
+        model.addAttribute("searchTerm",  searchTerm);
+        model.addAttribute("tagList",      tagNameList);
+        model.addAttribute("user",         user);
+        model.addAttribute("pageNumber",   pageNumber);
         return "renovationSearchTemplate";
     }
 
