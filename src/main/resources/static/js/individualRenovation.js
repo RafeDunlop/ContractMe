@@ -58,6 +58,13 @@ document.addEventListener("DOMContentLoaded", () => {
     updateCharCounter("description", "description-length-counter");
 });
 
+document.getElementById("roomList").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        document.getElementById("create-room-button").click();
+    }
+});
+
 function checkRoomName(input) {
     roomFieldValid = validateField(input, /^[\p{L}\d .,\-']*$/u, roomFrontendErrorMessage, roomNameErrorMessage);
 }
@@ -107,7 +114,9 @@ function setRoomList(previousRoomList, roomTableId) {
 
         // Also inject hidden inputs for each room from the model
         const hiddenInputsDiv = document.getElementById("room-hidden-inputs");
-        hiddenInputsDiv.innerHTML = ""; // Clear any existing ones
+        if (hiddenInputsDiv) {
+            hiddenInputsDiv.innerHTML = "";
+        }
     }
 }
 
@@ -116,8 +125,8 @@ function getRoomNameError(toAdd) {
     const validCharactersPattern = /^[\p{L}\d .,\-']*$/u;
     if (!validCharactersPattern.test(toAdd)) {
         error = "Renovation record room names must only contain letters, numbers, spaces, dots, hyphens or apostrophes";
-    } else if(toAdd.length >= 255) {
-        error = "Renovation record room names must be less than 255 characters";
+    } else if(toAdd.length >= 100) {
+        error = "Renovation record room names must be less than 100 characters";
     }
     else if (roomList.indexOf(toAdd, 0) !== -1) {
         error = "You already have a room with this name"
