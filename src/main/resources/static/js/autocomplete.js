@@ -1,5 +1,5 @@
 /** Js file used for autocompleting the tag entry field on viewRenovation.html */
-
+let currentTabIndex = -1;
 const input = document.getElementById("tagName");
 
 // Listen for input events on the tag input field
@@ -10,6 +10,33 @@ input.addEventListener("input", function () {
         return
     }
     updateAutocomplete(partialTag);
+});
+
+// Event for navigating the autocomplete with the up/down arrow keys
+document.addEventListener("keydown", function (event) {
+    const listItems = document.querySelectorAll("#autocomplete-list .list-group-item:not(.disabled)");
+
+    if (listItems.length === 0) {
+        return;
+    }
+
+    if (event.key === "ArrowDown") {
+        event.preventDefault();
+        currentTabIndex++;
+        if (currentTabIndex >= listItems.length) {
+            currentTabIndex = 0;
+        }
+        listItems[currentTabIndex].focus();
+    }
+
+    if (event.key === "ArrowUp") {
+        event.preventDefault();
+        currentTabIndex--;
+        if (currentTabIndex < 0) {
+            currentTabIndex = listItems.length - 1;
+        }
+        listItems[currentTabIndex].focus();
+    }
 });
 
 /**
@@ -56,7 +83,9 @@ function setAutoCompleteList(tags) {
         const item = document.createElement("li");
         item.classList.add("list-group-item");
         item.textContent = tag;
+        item.setAttribute("tabindex", "0");
 
+        // Event for submitting the tag clicked on
         item.addEventListener("click", function () {
             input.value = tag;
             resetAutocomplete();
@@ -64,6 +93,15 @@ function setAutoCompleteList(tags) {
             // Submit the form on autocomplete
             document.getElementById("add-tag-form").submit();
 
+        });
+
+        // Event for submitting the current tag selected in dropdown from enter press
+        item.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                input.value = tag;
+                resetAutocomplete();
+                document.getElementById("add-tag-form").submit();
+            }
         });
 
         list.appendChild(item);
@@ -76,4 +114,5 @@ function setAutoCompleteList(tags) {
  */
 function resetAutocomplete() {
     document.getElementById("autocomplete-list").innerHTML = "";
+    currentTabIndex = -1;
 }
