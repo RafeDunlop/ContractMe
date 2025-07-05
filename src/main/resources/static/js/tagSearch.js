@@ -69,12 +69,20 @@ function setSearchAutoCompleteList(tags) {
         const item = document.createElement("li");
         item.classList.add("list-group-item");
         item.textContent = tag;
+        item.tabIndex = 0;
 
         item.addEventListener("click", function () {
             resetAutocomplete();
             tagInput.value = "";
             addTag(tag)
 
+        });
+
+        item.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                item.click();
+            }
         });
 
         list.appendChild(item);
