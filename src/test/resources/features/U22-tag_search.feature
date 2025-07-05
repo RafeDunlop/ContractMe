@@ -1,6 +1,17 @@
 @authoriseUser
 Feature: As Sarah, I want to be able to search for public renovation records by tags so that I can find renovations that are matching my interest.
 
+  Scenario Outline: AC1 Tag autocomplete shows partially matched tags.
+    Given I enter a search <searchQuery> in the search renovation bar
+    When The search partially matches a tag known by the system <tagName>
+    Then I can see a list of matching tags <matchingTag>
+
+    Examples:
+      | searchQuery | tagName    | matchingTag |
+      | "te"        | "test"     | "test"      |
+      | "bath"      | "bathroom" | "bathroom"  |
+      | "bed"       | "bedroom"  | "bedroom"   |
+
   Scenario Outline: AC4 Tag search returns only public records in results.
     Given the tags named "<tag_one>" and "<tag_two>" exist
     And a public renovation "<renovation_name_one>" exists with tags:
