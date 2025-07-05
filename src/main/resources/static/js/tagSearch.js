@@ -18,6 +18,76 @@ function focusTagInput() {
     tagInput.focus();
 }
 
+input.addEventListener("input", function () {
+    const partialTag = tagInput.value.trim();
+    if (partialTag.length < 1) {
+        resetAutocomplete();
+        return
+    }
+    updateAutocomplete(partialTag);
+});
+
+/**
+ * Updates the autocomplete list according to input.
+ * @param partialTag - The input of the user.
+ */
+function updateSearchAutocomplete(partialTag) {
+    const filteredTags = tags.map(t => t.trim());
+    fetch(`/renovations/tags/autocomplete?partialTag=${encodeURIComponent(partialTag)}`)
+    .then(response => response.json())
+    .then(results => {
+        const suggestions = results.filter(tag => !filteredTags.includes(tag));
+        setSearchAutoCompleteList(suggestions);
+    })
+    .catch(error => console.error("Autocomplete fetch failed:", error));
+}
+
+
+
+/**
+ * Displays up to 3 tag suggestions in the autocomplete list.
+ * @param {string[]} tags - The list of tag names returned from the backend.
+ */
+function setSearchAutoCompleteList(tags) {
+    const list = document.getElementById("autocomplete-list");
+
+    list.innerHTML = "";
+
+    // When currently no tags match display the message in place of dropdown
+    if (tags.length === 0) {
+        // No matching tags
+        const noTagsMessage = document.createElement("li");
+        noTagsMessage.classList.add("list-group-item", "disabled");
+        noTagsMessage.textContent = "No matching tags";
+        list.appendChild(noTagsMessage);
+        return;
+    }
+
+    // Loop through each tag with max of 3 and create <li> for each
+    for (let i = 0; i < Math.min(tags.length, 3); i++) {
+        const tag = tags[i];
+        const item = document.createElement("li");
+        item.classList.add("list-group-item");
+        item.textContent = tag;
+
+        item.addEventListener("click", function () {
+            resetAutocomplete();
+            tagInput.value = "";
+            addTag(tag)
+
+        });
+
+        list.appendChild(item);
+    }
+}
+
+/**
+ * Clears the autocomplete display list.
+ */
+function resetAutocomplete() {
+    document.getElementById("autocomplete-list").innerHTML = "";
+}
+
 /**
  * Adds a tag to the tag list and displays on UI.
  * @param {string} tag The tag name to add.
@@ -114,4 +184,21 @@ function setupTagSearch() {
     initialTags.forEach(tag => {
         if (tag) addTag(tag);
     });
+
+
+    tagInput.addEventListener("input", function () {
+        const partial = tagInput.value.trim();
+        if (partial.length < 1) {
+            resetAutocomplete();
+        } else {
+            updateSearchAutocomplete(partial);
+        }
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!tagInputContainer.contains(e.target)) {
+            resetAutocomplete();
+        }
+    });
 }
+
