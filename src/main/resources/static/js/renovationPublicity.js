@@ -5,7 +5,7 @@
 document.getElementById('publicCheckbox').addEventListener('change', async function () {
   const isPublic = this.checked;
   const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-  const renovationId = document.getElementById('renovationId').value;
+  const renovationId = document.getElementById('recordId').value;
   const response = await fetch(`renovations/editPublicity/${renovationId}`, {
     method: "POST",
     headers: {'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json'},

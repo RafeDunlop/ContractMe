@@ -66,25 +66,24 @@ public class RenovationTaskService {
      * @param pageable spring pagination information, including the offset and page size.
      * @return A page of tasks for the renovation record. If there are no tasks an empty page is returned.
      */
-    public Page<RenovationTask> returnTaskPages(RenovationRecord renovationRecord, Pageable pageable ) {
-        List<RenovationTask> taskSubList = new ArrayList<>();
+    public Page<RenovationTask> returnTaskPages(RenovationRecord renovationRecord, Pageable pageable) {
         List<RenovationTask> tasks = renovationRecord.getRenovationTasks();
 
         if (tasks == null || tasks.isEmpty()) {
-            return new PageImpl<>(taskSubList, pageable, 0); // Return an empty page
+            return new PageImpl<>(Collections.emptyList(), pageable, 0);
         }
 
-        int startIndex =(int) pageable.getOffset();
-        if (startIndex < 0) {
-            startIndex = 0;
-        }
-        if (startIndex >= tasks.size()) {
-            startIndex = tasks.size() - pageable.getPageSize();
-        }
-        int endIndex = Math.min(startIndex + pageable.getPageSize(), tasks.size());
+        int totalTasks = tasks.size();
+        int startIndex = (int) pageable.getOffset();
+        int endIndex = Math.min(startIndex + pageable.getPageSize(), totalTasks);
 
-        taskSubList = tasks.subList(startIndex, endIndex);
-        return new PageImpl<>(taskSubList, pageable, tasks.size());
+        // Guard against out-of-bounds start index
+        if (startIndex >= totalTasks) {
+            return new PageImpl<>(Collections.emptyList(), pageable, totalTasks);
+        }
+
+        List<RenovationTask> taskSubList = tasks.subList(startIndex, endIndex);
+        return new PageImpl<>(taskSubList, pageable, totalTasks);
     }
 
     public List<String> getTaskIconFilenames() {

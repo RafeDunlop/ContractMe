@@ -110,7 +110,6 @@ function setupTagSearch() {
     });
 
     const initialTags = window.initialTags || [];
-    console.log(initialTags);
     initialTags.forEach(tag => {
         if (tag) addTag(tag);
     });

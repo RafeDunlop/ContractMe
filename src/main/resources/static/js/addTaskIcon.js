@@ -24,10 +24,17 @@ function getIconSelector(renovationTaskId) {
  * Toggles the modal corresponding to the specified renovation task to be visible
  * @param renovationTaskId The identifier of the renovation task whose icon selector is to be made visible
  */
-function showIconSelector(renovationTaskId) {
-    localStorage.setItem("selectedTaskId", renovationTaskId);
-    const overlay = getIconSelector(renovationTaskId)
-    overlay.style.display = 'block';
+function showIconSelector(taskId) {
+    localStorage.setItem("selectedTaskId", taskId);
+
+    const task = window.loadedTasks?.find(t => t.id === taskId);
+
+    const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+    const modal = document.getElementById("icon-selector-modal");
+    const content = document.getElementById("icon-selector-content");
+
+    content.innerHTML = renderModalContent(task, csrfToken);
+    modal.style.display = "block";
 }
 
 /**
@@ -36,8 +43,7 @@ function showIconSelector(renovationTaskId) {
  * @returns {Promise<void>} a promise of the request to be awaited
  */
 async function submitIcon(taskId) {
-    const overlay = getIconSelector(taskId);
-    overlay.style.display = 'none';
+    document.getElementById("icon-selector-modal").style.display = 'none';
     const button = document.querySelector(".icon-btn.active");
     const iconFileName = button.id;
     const csrfToken = button.getAttribute("data-csrf");
@@ -63,8 +69,7 @@ async function submitIcon(taskId) {
 async function deleteIcon(button) {
     const csrfToken = button.getAttribute("data-csrf");
     const taskId = button.getAttribute("data-taskid");
-    const overlay = getIconSelector(taskId);
-    overlay.style.display = 'none';
+    document.getElementById("icon-selector-modal").style.display = 'none';
     const response = await fetch(`editTask/edit-icon/${taskId}`, {
         method: "POST",
         headers: {'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json'},
