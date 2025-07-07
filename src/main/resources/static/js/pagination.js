@@ -79,7 +79,7 @@ function updateLayout(viewMode = "cards", id = null) {
         document.getElementById('grid').offsetWidth :
         document.getElementById('table');
     const contentHeaderHeight = document.getElementById('content-header').offsetHeight;
-    const footerHeight = document.getElementById('footer').offsetHeight;
+    const footerHeight = 72;
     let columns = Math.max(1, Math.floor(containerWidth / (cardWidth + 15)));
 
     if (id) {
@@ -90,10 +90,8 @@ function updateLayout(viewMode = "cards", id = null) {
     }
 
     const navbarHeight = document.getElementById('navbar').offsetHeight;
-
-    const availableHeight = containerHeight - navbarHeight - containerMargin - contentHeaderHeight - footerHeight - 120;
+    const availableHeight = containerHeight - navbarHeight - containerMargin - contentHeaderHeight - footerHeight - 90;
     const rows = Math.max(1, Math.floor(availableHeight / cardHeight));
-
     const newCardsPerPage = columns * rows;
 
     // Only update if cardsPerPage changes
