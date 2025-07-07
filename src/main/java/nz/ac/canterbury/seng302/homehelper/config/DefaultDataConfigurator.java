@@ -13,6 +13,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
@@ -114,10 +115,12 @@ public class DefaultDataConfigurator {
     }
 
     private void setupDefaultRenovationTasks() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
         RenovationTaskDTO renovationTask = new RenovationTaskDTO(
                 "Build Fabian monument",
                 "at least 100 feet high, pokes out the top of the building",
-                LocalDate.now().plusYears(5),
+                LocalDate.now().plusYears(5).format(formatter),
                 List.of(defaultJERooms.get(2))
         );
         renovationTaskService.addRenovationTask(renovationTask, default2Renovation1);
@@ -125,7 +128,7 @@ public class DefaultDataConfigurator {
         for (int i = 1; i < numGenericTasksToAdd + 1; i++) {
             renovationTask.setName(String.format("Renovation Task %d", i));
             renovationTask.setDescription(String.format("Renovation Task Description %d", i));
-            renovationTask.setDueDate(LocalDate.now().plusDays(i));
+            renovationTask.setDueDate(LocalDate.now().plusDays(i).format(formatter));;
             renovationTask.setRooms(defaultJERooms);
             renovationTaskService.addRenovationTask(renovationTask, default1Renovation1);
         }

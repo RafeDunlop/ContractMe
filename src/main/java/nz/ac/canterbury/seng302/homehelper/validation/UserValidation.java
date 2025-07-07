@@ -45,7 +45,7 @@ public class UserValidation {
         }
 
         // check name only includes letters, spaces, hyphens, or apostrophes
-        else if (!name.matches("^[\\p{L}\\-\\s']*$")) {
+        if (!name.matches("^[\\p{L}\\-\\s']*$")) {
             errors.add(nameType + " name must only include letters, spaces, hyphens, or apostrophes.");
         }
 
