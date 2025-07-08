@@ -69,6 +69,7 @@ public class RenovationRecord {
         this.user = user;
         this.name = name.trim(); //should not be possible to call constructor with empty string
         this.description = (description != null) ? description.trim() : "";
+        this.createdDate = LocalDateTime.now();
         this.rooms = new ArrayList<>();
         this.tags = new ArrayList<>();
         rooms.forEach(room -> this.rooms.add(room.trim()));

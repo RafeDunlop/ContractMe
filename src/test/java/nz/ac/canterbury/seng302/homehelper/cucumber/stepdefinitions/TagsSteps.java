@@ -117,7 +117,11 @@ public class TagsSteps {
 
     @When("I go to the browse renovation page")
     public void i_go_to_the_browse_renovation_page() throws Exception {
-        mvcResult = mockMvc.perform(get("/renovations/search")
+        mockMvc.perform(get("/renovations/search")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+        mvcResult = mockMvc.perform(get("/renovations/retrieve")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -195,8 +199,8 @@ public class TagsSteps {
 
     @Then("The tag {string} is on the list of tags for the renovation")
     public void the_tag_is_on_the_list_of_tags_for_the_renovation(String tagName) throws Exception {
-        String content = mvcResult.getResponse().getContentAsString();
-        assertTrue(content.contains(tagName.trim()));
+        String json = mvcResult.getResponse().getContentAsString();
+        assertTrue(json.contains("\"tagName\":\"" + tagName + "\""));
     }
 
     @Then("The tag {string} is added to the list of tags for the renovation")

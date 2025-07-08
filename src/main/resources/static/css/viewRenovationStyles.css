@@ -4,15 +4,16 @@ html, body {
 }
 
 .container {
-    height: 100%;
     display: flex;
     flex-direction: column;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .card.p-4 {
     display: flex;
     flex-direction: column;
-    height: auto; /
+    height: auto;
 }
 
 #grid {
@@ -27,4 +28,18 @@ html, body {
     flex-shrink: 0;
     padding-top: 1rem;
     background: white;
+}
+
+.card.card-count {
+    height: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* allow flexible widths */
+    gap: 24px;
+    padding: 1rem 0;
 }

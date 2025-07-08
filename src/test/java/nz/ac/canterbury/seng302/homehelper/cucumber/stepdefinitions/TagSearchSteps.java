@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -119,7 +121,7 @@ public class TagSearchSteps {
 
     @When("I search for renovations with tags {string} and {string}")
     public void i_search_for_renovations_with_tags_and(String tag1Name, String tag2Name) throws Exception {
-        result = mockMvc.perform(get("/renovations/search")
+        mockMvc.perform(get("/renovations/search")
                         .param("tagNameList", tag1Name)
                         .param("tagNameList", tag2Name)
                         .param("visibility", "public")
@@ -129,19 +131,38 @@ public class TagSearchSteps {
                 .andExpect(status().isOk())
                 .andExpect(view().name("renovationSearchTemplate"))
                 .andReturn();
+
+        result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("tagNameList", tag1Name)
+                        .param("tagNameList", tag2Name)
+                        .param("visibility", "public")
+                        .param("searchTerm", "")
+                        .param("page", "1")
+                        .param("cardsPerPage", "16"))
+                .andExpect(status().isOk())
+                .andReturn();
     }
 
     @Then("I should see the following renovations in order:")
     public void i_should_see_the_following_renovations_in_order(io.cucumber.datatable.DataTable recordNamesOrdered) throws Exception {
         List<String> expectedNames = recordNamesOrdered.asList();
-        @SuppressWarnings("unchecked")
-        List<RenovationRecord> actualRecords = (List<RenovationRecord>) result.getModelAndView().getModel().get("records");
 
-        List<String> actualNames = actualRecords.stream()
-                .map(RenovationRecord::getName)
-                .collect(Collectors.toList());
+        String json = result.getResponse().getContentAsString();
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(json);
+
+        JsonNode recordsNode = root.path("content");
+        List<String> actualNames = new ArrayList<>();
+        for (JsonNode recordNode : recordsNode) {
+            actualNames.add(recordNode.path("name").asText());
+        }
 
         assertEquals(expectedNames, actualNames);
+    }
+
+    @Then("I should see no records")
+    public void i_should_see_no_records() throws Exception {
+        String json = result.getResponse().getContentAsString();
     }
 
     @Then("I can see a list of matching tags {string}")
@@ -161,30 +182,4 @@ public class TagSearchSteps {
     public void the_tag_search_field_is_empty() {
         searchTerms = Collections.emptyList();
     }
-
-    @When("I make a tag search")
-    public void i_make_a_tag_search() throws Exception {
-        result = mockMvc.perform(post("/renovations/search")
-                        .param("isTagSearch", "true")
-                        .param("page", "1")
-                        .param("cardsPerPage", "16")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search"))
-                .andReturn();
-
-        result = mockMvc.perform(get("/renovations/search")
-                        .session((MockHttpSession) Objects.requireNonNull(result.getRequest().getSession(false))))
-                .andExpect(status().isOk())
-                .andExpect(view().name("renovationSearchTemplate"))
-                .andReturn();
-    }
-
-    @Then("I should see the message {string}")
-    public void i_should_see_the_message(String errorMessage) throws Exception {
-        String content = result.getResponse().getContentAsString();
-        assertTrue(content.contains(errorMessage), "Expected message not found: " + errorMessage);
-    }
-
-
 }

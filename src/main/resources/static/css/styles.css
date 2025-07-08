@@ -20,7 +20,6 @@
     display: inline-block;
 }
 
-
 .shadow-overlay {
     display: none;
     z-index: 1050;
@@ -44,8 +43,6 @@
 .hidden-form-extension {
     display: none;
 }
-
-
 
 .truncate {
     display: -webkit-box;
@@ -99,5 +96,3 @@
     overflow-wrap: break-word;
 
 }
-
-
