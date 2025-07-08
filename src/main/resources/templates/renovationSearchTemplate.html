@@ -30,8 +30,11 @@
                 <div class="d-flex align-items-end">
                     <div class="col-md-8 me-2">
                         <label class="form-label">Tag Search:</label>
-                        <div id="tag-input-container" class="form-control d-flex flex-wrap" style="min-height: 40px; cursor: text;" onclick="focusTagInput()">
+                        <div id="tag-input-container" class="form-control d-flex flex-wrap position-relative" style="min-height: 40px; cursor: text; " onclick="focusTagInput()">
                             <input type="text" id="tag-input" class="border-0 flex-grow-1" placeholder="Enter tags..." style="outline: none; min-width: 100px;">
+                            <ul id="autocomplete-list"
+                                class="list-group position-absolute"
+                                style="top: 100%; left: 0; z-index: 1000;"></ul>
                         </div>
 
                         <label class="form-label">Search:</label>
