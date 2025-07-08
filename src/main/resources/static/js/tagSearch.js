@@ -10,7 +10,7 @@ const hiddenInputs = document.getElementById("hidden-tag-inputs");
 
 // Frontend list for tags currently in search bar
 let tags = [];
-
+let currentTabIndex = -1
 /**
  * Focuses the tag input field.
  */
@@ -18,7 +18,7 @@ function focusTagInput() {
     tagInput.focus();
 }
 
-input.addEventListener("input", function () {
+tagInput.addEventListener("input", function () {
     const partialTag = tagInput.value.trim();
     if (partialTag.length < 1) {
         resetAutocomplete();
@@ -87,6 +87,8 @@ function setSearchAutoCompleteList(tags) {
 
         list.appendChild(item);
     }
+    currentTabIndex = -1;
+
 }
 
 /**
@@ -128,6 +130,32 @@ function addTag(tag) {
     hidden.dataset.tag = tag;
     hiddenInputs.appendChild(hidden);
 }
+
+document.addEventListener("keydown", function (event) {
+    const listItems = document.querySelectorAll("#autocomplete-list .list-group-item:not(.disabled)");
+
+    if (listItems.length === 0) {
+        return;
+    }
+
+    if (event.key === "ArrowDown") {
+        event.preventDefault();
+        currentTabIndex++;
+        if (currentTabIndex >= listItems.length) {
+            currentTabIndex = 0;
+        }
+        listItems[currentTabIndex].focus();
+    }
+
+    if (event.key === "ArrowUp") {
+        event.preventDefault();
+        currentTabIndex--;
+        if (currentTabIndex < 0) {
+            currentTabIndex = listItems.length - 1;
+        }
+        listItems[currentTabIndex].focus();
+    }
+});
 
 
 /**
