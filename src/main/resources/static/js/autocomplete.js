@@ -14,7 +14,7 @@ input.addEventListener("input", function () {
 
 // Event for navigating the autocomplete with the up/down arrow keys
 document.addEventListener("keydown", function (event) {
-    const listItems = document.querySelectorAll("#autocomplete-list .autocomplete-item");
+    const listItems = document.querySelectorAll("#autocomplete-list .list-group-item:not(.disabled)");
 
     if (listItems.length === 0) {
         return;
@@ -81,7 +81,7 @@ function setAutoCompleteList(tags) {
     for (let i = 0; i < Math.min(tags.length, 3); i++) {
         const tag = tags[i];
         const item = document.createElement("li");
-        item.classList.add("list-group-item", "autocomplete-item");
+        item.classList.add("list-group-item");
         item.textContent = tag;
         item.setAttribute("tabindex", "0");
 
