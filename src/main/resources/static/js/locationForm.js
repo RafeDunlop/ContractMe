@@ -46,6 +46,36 @@ document.addEventListener("click", event => {
 })
 addressField.addEventListener("input", triggerUpdateAutocomplete);
 
+let currentTabIndex = -1;
+
+// Event for navigating the autocomplete with the up/down arrow keys
+document.addEventListener("keydown", function (event) {
+    const listItems = document.querySelectorAll("#autocomplete-list .list-group-item:not(.disabled)");
+
+    if (listItems.length === 0) {
+        return;
+    }
+
+    if (event.key === "ArrowDown") {
+        event.preventDefault();
+        currentTabIndex++;
+        if (currentTabIndex >= listItems.length) {
+            currentTabIndex = 0;
+        }
+        listItems[currentTabIndex].focus();
+    }
+
+    if (event.key === "ArrowUp") {
+        event.preventDefault();
+        currentTabIndex--;
+        if (currentTabIndex < 0) {
+            currentTabIndex = listItems.length - 1;
+        }
+        listItems[currentTabIndex].focus();
+    }
+});
+
+
 /**
  * Handles the logic of whether to update the autocomplete list (or hide it).
  * Calls function to commit the address details
@@ -160,6 +190,7 @@ function setAutoCompleteList(addressList) {
 function getAutocompleteOption(address) {
     const item = document.createElement("li");
     item.classList.add("list-group-item");
+    item.setAttribute("tabindex", "0");
     item.textContent = address.formatted;
 
     item.addEventListener("mouseover", () => {
@@ -188,6 +219,7 @@ function getAutocompleteOption(address) {
         autocompleteList.innerHTML = "";
         checkAllLocationFields();
     });
+
 
     return item;
 }
