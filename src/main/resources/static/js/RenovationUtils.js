@@ -66,7 +66,8 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
 
     clearAlerts();
 
-    fetch("/renovations/retrieve?" + params.toString())
+    const basePath = window.contextPath || "";
+    fetch(`${basePath}renovations/retrieve?` + params.toString())
         .then(response => response.json())
         .then(data => {
             loading.style.display = "none";
