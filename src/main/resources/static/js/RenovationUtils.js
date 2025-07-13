@@ -92,8 +92,13 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
                 renderRecordTable(data, pageNumber, csrfToken);
             }
 
+            const pagination = document.getElementById("pagination");
+
             if (data.totalPages > 1) {
                 createPaginationButtons(viewMode);
+            } else {
+                pagination.innerHTML = "";
+                document.getElementById("totalPages").value = 1;
             }
         })
         .catch(error => {
