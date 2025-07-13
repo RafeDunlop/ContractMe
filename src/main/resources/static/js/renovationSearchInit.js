@@ -1,3 +1,8 @@
+/*<![CDATA[*/
+window.initialTags = /*[[${tagList}]]*/ [];
+window.contextPath = /*[[@{/}]]*/ '';
+/*]]>*/
+
 document.addEventListener("DOMContentLoaded", () => {
     setupTagSearch();
     updateLayout();
