@@ -531,7 +531,8 @@ public class RenovationController {
 
         User user = loginService.getUserByEmail();
 
-        String lastVisitedRenovationPage = ServletUriComponentsBuilder.fromCurrentRequest().replaceQuery(null).build().getPath();
+        String lastVisitedRenovationPage = request.getRequestURI().substring(request.getContextPath().length());
+                //ServletUriComponentsBuilder.fromCurrentRequest().replaceQuery(null).build().getPath();
         request.getSession().setAttribute("lastVisitedRenovationPage", lastVisitedRenovationPage);
         logger.info(lastVisitedRenovationPage);
         request.getSession().setAttribute("lastVisitedRenovationParameters",
