@@ -128,7 +128,7 @@ public class DefaultDataConfigurator {
         for (int i = 1; i < numGenericTasksToAdd + 1; i++) {
             renovationTask.setName(String.format("Renovation Task %d", i));
             renovationTask.setDescription(String.format("Renovation Task Description %d", i));
-            renovationTask.setDueDate(LocalDate.now().plusDays(i).format(formatter));;
+            renovationTask.setDueDate(LocalDate.now().plusDays(i).format(formatter));
             renovationTask.setRooms(defaultJERooms);
             renovationTaskService.addRenovationTask(renovationTask, default1Renovation1);
         }
