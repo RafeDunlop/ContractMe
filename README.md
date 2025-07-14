@@ -66,10 +66,10 @@ Known issues are tracked [on GitLab](https://eng-git.canterbury.ac.nz/seng302-20
 The table below has the credentials for default users which can be used for
 testing.
 
-| Account Type | Email | Password | Notes |
-| ------------ | ----- | -------- | ----- |
-| User         | seng302.team200.test@gmail.com | P4$$word | This user has (a renovation with) enough tasks to display many-page pagination |
-| User | seng302.team200.test1@gmail.com | P4$$word | This user has (a renovation with) only 1 task |
+| Account Type  | Email                             | Password | Notes                                                                                                                                                                                                                                                                                                       |
+|---------------|-----------------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| User          | seng302.team200.test@gmail.com    | P4$$word | To test __task pagination__, search for renovation  ["Jack Erskine revamp" on the test server](https://csse-seng302-team200.canterbury.ac.nz/test/renovations/view?id=1) or ["Production Test Record" on the production server](https://csse-seng302-team200.canterbury.ac.nz/prod/renovations/view?id=64)  |
+| User          | seng302.team200.test1@gmail.com   | P4$$word | This user has (a renovation with) only 1 task                                                                                                                                                                                                                                                               |
 
 ## How to run tests
 Ensure that your environment variables are set up correctly to run the tests
