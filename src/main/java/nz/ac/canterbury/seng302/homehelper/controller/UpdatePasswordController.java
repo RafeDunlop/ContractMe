@@ -37,7 +37,8 @@ public class UpdatePasswordController {
      */
     @GetMapping("user/edit/updatePassword")
     public String updatePassword(Model model) {
-        model.addAttribute("updatePasswordDTO", new UpdatePasswordDTO("","",""));
+        if (!model.containsAttribute("updatePasswordDTO"))
+            model.addAttribute("updatePasswordDTO", new UpdatePasswordDTO("","",""));
         logger.info("GET /user/edit/updatePassword");
         try {
             return "updatePasswordTemplate";
