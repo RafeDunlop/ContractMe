@@ -1,5 +1,6 @@
 let lastSubmittedSearchTerm = "";
 let lastSubmittedTags = [];
+const basePath = window.contextPath || "";
 
 /**
  * Fetches renovation records with current filters, pagination, and view mode.
@@ -66,7 +67,7 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
 
     clearAlerts();
 
-    fetch("/renovations/retrieve?" + params.toString())
+    fetch(`${basePath}renovations/retrieve?` + params.toString())
         .then(response => response.json())
         .then(data => {
             loading.style.display = "none";
@@ -91,8 +92,13 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
                 renderRecordTable(data, pageNumber, csrfToken);
             }
 
+            const pagination = document.getElementById("pagination");
+
             if (data.totalPages > 1) {
                 createPaginationButtons(viewMode);
+            } else {
+                pagination.innerHTML = "";
+                document.getElementById("totalPages").value = 1;
             }
         })
         .catch(error => {
@@ -139,7 +145,7 @@ function fetchRenovation(id, resetPage = false) {
     newUrl.search = userParams.toString();
     window.history.replaceState({}, '', newUrl);
 
-    fetch("/renovations/retrieve/" + id + "?" + params.toString())
+    fetch(`${basePath}renovations/retrieve/${id}?${params.toString()}`)
         .then(response => response.json())
         .then(data => {
             loading.style.display = "none";
@@ -213,7 +219,7 @@ function renderRecordCards(data, currentUserId, pageNumber) {
         card.className = "card card-count position-relative";
 
         card.innerHTML = `
-            <a href="/renovations/view?id=${record.id}&page=1" class="no-underline text-reset">
+            <a href="${basePath}renovations/view?id=${record.id}&page=1" class="no-underline text-reset">
                 ${(record.userId === currentUserId) ? '<span class="badge bg-primary position-absolute top-0 end-0 m-2">Yours</span>' : ""}
                 <div class="card-body">
                     <h5 class="card-title truncate">${record.name}</h5>
@@ -242,7 +248,7 @@ function renderRecordTable(data, pageNumber, csrfToken) {
 
     data.content.forEach(record => {
         const rowHtml = `
-            <a href="/renovations/view?id=${record.id}&page=1" class="list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative">
+            <a href="${basePath}renovations/view?id=${record.id}&page=1" class="list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative">
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="w-100" onclick="document.getElementById('form-${record.id}').submit();" style="cursor: pointer;">
                         <h5 class="mb-1 text-primary">${record.name}</h5>
@@ -278,7 +284,7 @@ function renderTaskCards(data, isOwner, renovationId) {
 
         const iconHtml = `
             <div class="position-relative">
-                <img src="/images/${task.iconFileName}" alt="Task Icon" class="task-icon"
+                <img src="${basePath}images/${task.iconFileName}" alt="Task Icon" class="task-icon"
                      ${isOwner && !isDefaultIcon ? `onclick="showIconSelector(${task.id})"` : ""} />
                 ${isOwner && isDefaultIcon ? `
                     <button type="button" class="btn btn-secondary btn-sm rounded-circle opacity-75 top-0 start-100 translate-middle position-absolute"
@@ -288,7 +294,7 @@ function renderTaskCards(data, isOwner, renovationId) {
         `;
 
         const editButton = isOwner ? `
-            <a href="/editTask?taskId=${task.id}&renovationId=${renovationId}" class="btn btn-primary">Edit Task</a>
+            <a href="${basePath}editTask?taskId=${task.id}&renovationId=${renovationId}" class="btn btn-primary">Edit Task</a>
         ` : "";
 
         const cardHtml = `
