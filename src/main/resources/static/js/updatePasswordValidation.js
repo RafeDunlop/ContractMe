@@ -23,6 +23,13 @@ document.addEventListener("DOMContentLoaded", () => {
             newPasswordFrontendErrorMessage,
             newPasswordBackendError
         );
+
+        if (newPasswordRetypedField.textContent !== "") checkPasswordMatch(newPasswordField,
+            newPasswordRetypedField,
+            newPasswordRetypedFrontendError,
+            newPasswordRetypedFrontendErrorMessage,
+            newPasswordRetypedBackendError
+        );
     });
 
     newPasswordRetypedField.addEventListener("input", () => {
