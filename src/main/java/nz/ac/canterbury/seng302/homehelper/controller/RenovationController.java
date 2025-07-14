@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UrlPathHelper;
 
 import java.util.*;
 
@@ -531,7 +532,7 @@ public class RenovationController {
 
         User user = loginService.getUserByEmail();
 
-        String lastVisitedRenovationPage = request.getRequestURI().substring(request.getContextPath().length());
+        String lastVisitedRenovationPage = new UrlPathHelper().getPathWithinApplication(request);
                 //ServletUriComponentsBuilder.fromCurrentRequest().replaceQuery(null).build().getPath();
         request.getSession().setAttribute("lastVisitedRenovationPage", lastVisitedRenovationPage);
         logger.info(lastVisitedRenovationPage);
