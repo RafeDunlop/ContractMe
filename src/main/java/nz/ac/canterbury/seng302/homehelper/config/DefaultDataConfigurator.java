@@ -23,7 +23,7 @@ import java.util.Locale;
  * @author Rafe Dunlop
  */
 @Component
-@Profile("!cucumber & !production")
+@Profile("!test & !cucumber & !production")
 public class DefaultDataConfigurator {
 
     private final RegisterService registerService;
