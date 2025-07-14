@@ -23,12 +23,12 @@ public class CustomAuthFailHandler implements AuthenticationFailureHandler {
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
         if (exception instanceof AccountNotActivatedException) {
             request.getSession().setAttribute("errorMessage", "Please confirm your email address before attempting to login.");
-            response.sendRedirect("/confirm-registration");
+            response.sendRedirect(request.getContextPath() + "/confirm-registration");
         } else {
             String email = request.getParameter("username");
             request.getSession().setAttribute("email", email);
             request.getSession().setAttribute("errorMessage", exception.getMessage());
-            response.sendRedirect("/login");
+            response.sendRedirect(request.getContextPath() + "/login");
         }
     }
 }
