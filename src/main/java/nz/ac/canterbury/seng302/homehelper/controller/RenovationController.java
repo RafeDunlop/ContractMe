@@ -27,6 +27,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.util.UrlPathHelper;
 
 import java.util.*;
 
@@ -80,8 +81,8 @@ public class RenovationController {
 
         User user = loginService.getUserByEmail();
 
-        request.getSession().setAttribute("lastVisitedRenovationPage", request.getRequestURL().toString());
-        logger.info(request.getRequestURL().toString());
+        String lastVisitedRenovationPage = new UrlPathHelper().getPathWithinApplication(request);
+        request.getSession().setAttribute("lastVisitedRenovationPage", lastVisitedRenovationPage);
         request.getSession().setAttribute("lastVisitedRenovationParameters", request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
         model.addAttribute("user", user);
@@ -529,8 +530,8 @@ public class RenovationController {
 
         User user = loginService.getUserByEmail();
 
-        request.getSession().setAttribute("lastVisitedRenovationPage", request.getRequestURL().toString());
-        logger.info(request.getRequestURL().toString());
+        String lastVisitedRenovationPage = new UrlPathHelper().getPathWithinApplication(request);
+        request.getSession().setAttribute("lastVisitedRenovationPage", lastVisitedRenovationPage);
         request.getSession().setAttribute("lastVisitedRenovationParameters",
                 request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
