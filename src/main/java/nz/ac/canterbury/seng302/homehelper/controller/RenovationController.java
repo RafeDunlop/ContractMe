@@ -83,7 +83,6 @@ public class RenovationController {
 
         String lastVisitedRenovationPage = new UrlPathHelper().getPathWithinApplication(request);
         request.getSession().setAttribute("lastVisitedRenovationPage", lastVisitedRenovationPage);
-        logger.info(lastVisitedRenovationPage);
         request.getSession().setAttribute("lastVisitedRenovationParameters", request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
         model.addAttribute("user", user);
@@ -532,9 +531,7 @@ public class RenovationController {
         User user = loginService.getUserByEmail();
 
         String lastVisitedRenovationPage = new UrlPathHelper().getPathWithinApplication(request);
-                //ServletUriComponentsBuilder.fromCurrentRequest().replaceQuery(null).build().getPath();
         request.getSession().setAttribute("lastVisitedRenovationPage", lastVisitedRenovationPage);
-        logger.info(lastVisitedRenovationPage);
         request.getSession().setAttribute("lastVisitedRenovationParameters",
                 request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
