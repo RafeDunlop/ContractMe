@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.ContractorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +27,25 @@ public class ContractorService {
 
     public Contractor registerContractor(UserRegisterDTO userRegisterDTO, AddressDTO addressDTO) {
         //validation here (throw error with map for specific errors)
-        Contractor contractor = new Contractor();
-        contractor.setFirstName(userRegisterDTO.getFirstName());
-        contractor.setLastName(userRegisterDTO.getLastName());
-        contractor.setEmail(userRegisterDTO.getEmail());
-        contractor.setPassword(passwordEncoder.encode(userRegisterDTO.getPassword()));
+        Contractor contractor = new Contractor(
+                userRegisterDTO.getFirstName(),
+                userRegisterDTO.getLastName(),
+                userRegisterDTO.getEmail(),
+                passwordEncoder.encode(userRegisterDTO.getPassword())
+        );
         contractor.setHourlyRate(userRegisterDTO.getHourlyRate());
         contractor.setPhoneNumber(userRegisterDTO.getPhoneNumber());
         userRegisterDTO.getSkills().forEach(contractor::addSkill);
-        contractor = contractorRepository.save(contractor);
         //address validation here
-        registerService.registerLocation(contractor, addressDTO);
+        Location location = new Location(
+                addressDTO.getAddress_line1(),
+                addressDTO.getCountry(),
+                addressDTO.getPostcode(),
+                addressDTO.getCity(),
+                addressDTO.getRegion()
+        );
+        contractor.setLocation(location);
+        contractor = contractorRepository.save(contractor);
         return contractor;
     }
 }

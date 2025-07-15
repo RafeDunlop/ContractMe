@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.entity.users;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,9 +23,12 @@ public class Contractor extends User {
     @Column
     private Boolean available;
 
-    public Contractor() {
+    public Contractor(String firstName, String lastName, String email, String password) {
+        super(firstName, lastName, email, password);
         this.skills = new HashSet<>();
     }
+
+    public Contractor() {}
 
     public Float getHourlyRate() {
         return hourlyRate;

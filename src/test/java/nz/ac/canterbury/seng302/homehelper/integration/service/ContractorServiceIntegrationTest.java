@@ -5,8 +5,11 @@ import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
+import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -17,23 +20,23 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
 public class ContractorServiceIntegrationTest {
 
-    @Autowired
     private ContractorService toTest;
 
     @Autowired
     private ContractorRepository contractorRepository;
+
+    @Autowired
+    private RegisterService registerService;
 
     private UserRegisterDTO userRegisterDTO;
 
     private AddressDTO addressDTO;
 
     private List<Skill> userRegisterDtoSkills;
-
-    @Autowired
-    private ContractorService contractorService;
 
     @BeforeEach
     void setUp() {
@@ -54,11 +57,13 @@ public class ContractorServiceIntegrationTest {
         addressDTO.setCountry("New Zealand");
         addressDTO.setPostcode("8042");
         addressDTO.setRegion("Avonhead");
+
+        toTest = new ContractorService(contractorRepository, registerService);
     }
 
     @Test
     public void saveContractor_allValid_contractorSavedAndAllFieldsCorrect() {
-        contractorService.registerContractor(userRegisterDTO,addressDTO);
+        toTest.registerContractor(userRegisterDTO, addressDTO);
         assertTrue(contractorRepository.findByEmailIgnoreCase("john.doe@gmail.com").isPresent());
     }
 
