@@ -13,8 +13,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 public class HomeHelperApplication {
 
-	public static final String APPLICATION_CONTEXT = "http://localhost:8080";
-
 	/**
 	 * Main entry point, runs the Spring application
 	 * @param args command line arguments
