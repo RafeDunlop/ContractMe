@@ -22,15 +22,7 @@ recordNameField.addEventListener("input", function () {checkNameField(recordName
 recordDescriptionField.addEventListener("input", function () {checkDescriptionField(recordDescriptionField.value)})
 
 document.addEventListener("DOMContentLoaded", function () {
-    if (document.title === "Edit renovation") {
-        checkNameField(recordNameField.value);
-    }
 
-    checkDescriptionField(recordDescriptionField.value);
-
-    if (recordNameField.value !== "") {
-        checkNameField(recordNameField.value);
-    }
 
     const form = document.getElementById("renovation-form");
     if (form) {
