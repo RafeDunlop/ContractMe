@@ -1,6 +1,6 @@
-package nz.ac.canterbury.seng302.homehelper.repository;
+package nz.ac.canterbury.seng302.homehelper.repository.userReposoitories;
 
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
