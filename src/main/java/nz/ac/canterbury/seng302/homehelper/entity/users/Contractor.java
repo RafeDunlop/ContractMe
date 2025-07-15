@@ -7,6 +7,11 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Represents a contractor in the system.
+ * A contractor is a type of {@link User} who can have an hourly rate, phone number,
+ * availability status, and a set of skills.
+ */
 @Entity
 @Table(name = "contractorDetails")
 public class Contractor extends User {
@@ -23,6 +28,14 @@ public class Contractor extends User {
     @Column
     private Boolean available;
 
+    /**
+     * Constructor for RenovationTask object
+     * @param firstName The first name of the contractor
+     * @param lastName the last name of the contractor
+     * @param email The email of the contractor
+     * @param password The password of the contractor
+     */
+
     public Contractor(String firstName, String lastName, String email, String password) {
         super(firstName, lastName, email, password);
         this.skills = new HashSet<>();
@@ -30,38 +43,78 @@ public class Contractor extends User {
 
     public Contractor() {}
 
+    /**
+     * Returns the contractor's hourly rate.
+     *
+     * @return The hourly rate, or {@code null} if not set.
+     */
     public Float getHourlyRate() {
         return hourlyRate;
     }
-
+    /**
+     * Sets the contractor's hourly rate.
+     *
+     * @param hourlyRate The hourly rate to set.
+     */
     public void setHourlyRate(Float hourlyRate) {
         this.hourlyRate = hourlyRate;
     }
 
+    /**
+     * Returns the contractor's phone number.
+     *
+     * @return The phone number, or {@code null} if not set.
+     */
     public String getPhoneNumber() {
         return phoneNumber;
     }
-
+    /**
+     * Sets the contractor's phone number.
+     *
+     * @param phoneNumber The phone number to set.
+     */
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
-
+    /**
+     * Returns the set of skills associated with the contractor.
+     *
+     * @return A {@code Set} of {@code Skill} .
+     */
     public Set<Skill> getSkills() {
         return skills;
     }
-
+    /**
+     * Adds a skill to the contractor's skill set.
+     *
+     * @param skill The skill to add.
+     * @return {@code true} if the skill was added, {@code false} if it was already present.
+     */
     public boolean addSkill(Skill skill) {
         return skills.add(skill);
     }
-
+    /**
+     * Removes a skill from the contractor's skill set.
+     *
+     * @param skill The skill to remove.
+     * @return {@code true} if the skill was removed, {@code false} if it was not found.
+     */
     public boolean removeSkill(Skill skill) {
         return skills.remove(skill);
     }
-
+    /**
+     * Returns whether the contractor is available.
+     *
+     * @return {@code true} if available, {@code false} if not, or {@code null} if undefined.
+     */
     public Boolean getAvailable() {
         return available;
     }
-
+    /**
+     * Sets the contractor's availability status.
+     *
+     * @param available {@code true} if available, {@code false} otherwise.
+     */
     public void setAvailable(Boolean available) {
         this.available = available;
     }
