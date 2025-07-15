@@ -10,6 +10,10 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
+/**
+ * Service for the Contractor entity type.
+ */
 @Service
 public class ContractorService {
 
@@ -18,6 +22,12 @@ public class ContractorService {
     private final RegisterService registerService;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Constructor for the service and links the repository and validator to the
+     * service.
+     * @param contractorRepository ContractorRepository for getting and updating contractor details
+     * @param registerService RegisterService for registering Contractors
+     */
     @Autowired
     public ContractorService(ContractorRepository contractorRepository, RegisterService registerService) {
         this.registerService = registerService;
@@ -25,6 +35,15 @@ public class ContractorService {
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+
+
+    /**
+     * Create a contractor and save it to the database
+     * @param userRegisterDTO Data transfer object for contractor registration
+     * @param addressDTO Data transfer object for contractor registration
+     * @return the contractor if it was saved successfully
+     * @throws IllegalArgumentException if the invalid fields
+     */
     public Contractor registerContractor(UserRegisterDTO userRegisterDTO, AddressDTO addressDTO) {
         //validation here (throw error with map for specific errors)
         Contractor contractor = new Contractor(

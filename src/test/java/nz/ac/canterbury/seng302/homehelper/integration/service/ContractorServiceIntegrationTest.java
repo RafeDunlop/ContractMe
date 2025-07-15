@@ -44,6 +44,8 @@ public class ContractorServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        userRepository.deleteAll();
+        contractorRepository.deleteAll();
         userRegisterDTO = new UserRegisterDTO();
         userRegisterDTO.setFirstName("John");
         userRegisterDTO.setLastName("Doe");
@@ -63,6 +65,8 @@ public class ContractorServiceIntegrationTest {
         addressDTO.setRegion("Avonhead");
 
         toTest = new ContractorService(contractorRepository, registerService);
+
+
     }
 
     @Test

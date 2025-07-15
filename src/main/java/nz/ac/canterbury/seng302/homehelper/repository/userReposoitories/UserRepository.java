@@ -5,10 +5,11 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Repository interface for accessing user data.
- * Extends Spring Data JPA's {@link CrudRepository} to provide basic CRUD operations
- * for the {@link User} entity. Additional methods for retrieving users by email and
- * password are defined here.
+ * Repository interface for managing {@link User} entities.
+ * Extends {@link UserBaseRepository} to inherit common query methods,
+ * basic CRUD operations from {@link CrudRepository}.
+ * This repository handles all users, including any subclasses such as
+ * contractors, since JPA single-table inheritance is used.
  */
 @Repository
 public interface UserRepository extends UserBaseRepository<User> {
