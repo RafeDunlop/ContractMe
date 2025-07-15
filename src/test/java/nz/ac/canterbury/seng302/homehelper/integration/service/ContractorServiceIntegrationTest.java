@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.ContractorRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,9 @@ public class ContractorServiceIntegrationTest {
 
     private List<Skill> userRegisterDtoSkills;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @BeforeEach
     void setUp() {
         userRegisterDTO = new UserRegisterDTO();
@@ -67,5 +71,10 @@ public class ContractorServiceIntegrationTest {
         assertTrue(contractorRepository.findByEmailIgnoreCase("john.doe@gmail.com").isPresent());
     }
 
+    @Test
+    public void saveContractor_allValid_contractorSavedInUserRepository() {
+        toTest.registerContractor(userRegisterDTO, addressDTO);
+        assertTrue(userRepository.findByEmailIgnoreCase("john.doe@gmail.com").isPresent());
+    }
 
 }
