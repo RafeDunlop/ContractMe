@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.*;
@@ -14,18 +16,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -104,21 +109,22 @@ public class RenovationControllerIntegrationTest {
         User anotherUser = new User("John", "Doe", "john@doe.com", "password");
         userRepository.save(anotherUser);
 
-        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation 1", "Some words", List.of("Room 1", "Room 2"));
-        renovationRecordRepository.save(existingRecord);
+        renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation 1", "Some words", List.of("Room 1", "Room 2")));
+        renovationRecordRepository.save(new RenovationRecord(anotherUser, "Renovation 2", "Some words", List.of("Room 3", "Room 4")));
 
-        RenovationRecord hiddenRecord = new RenovationRecord(anotherUser, "Renovation 2", "Some words", List.of("Room 3", "Room 4"));
-        renovationRecordRepository.save(hiddenRecord);
-
-        // Checks if the current user (jane@doe.com) can only see their records and none of the other users' ones.
-        mockMvc.perform(get("/renovations"))
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("renovationsTemplate"))
-                .andExpect(model().attributeExists("renovations"))
-                .andExpect(model().attribute("renovations", hasItem(
-                        hasProperty("name", is("Renovation 1")))))
-                .andExpect(model().attribute("renovations", not(hasItem(
-                        hasProperty("name", is("Renovation 2"))))));
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        JsonNode root = new ObjectMapper().readTree(json);
+        JsonNode records = root.path("content");
+
+        assertTrue(StreamSupport.stream(records.spliterator(), false)
+                .anyMatch(n -> n.get("name").asText().equals("Renovation 1")));
+
+        assertFalse(StreamSupport.stream(records.spliterator(), false)
+                .anyMatch(n -> n.get("name").asText().equals("Renovation 2")));
     }
 
     /**
@@ -129,13 +135,13 @@ public class RenovationControllerIntegrationTest {
      */
     @Test
     public void getRenovationRecord_noUserRecords_showNoRecordExist() throws Exception {
-        mockMvc.perform(get("/renovations"))
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("renovationsTemplate"))
-                .andExpect(model().attributeExists("renovations"))
-                .andExpect(content().string(containsString("No Renovations have been made yet.")))
-                .andExpect(content().string(not(containsString("No Renovations found."))));
+                .andReturn();
 
+        String json = result.getResponse().getContentAsString();
+        JsonNode root = new ObjectMapper().readTree(json);
+        assertTrue(root.get("content").isEmpty());
     }
 
     /**
@@ -145,29 +151,22 @@ public class RenovationControllerIntegrationTest {
      */
     @Test
     public void getRenovationForm_searchByName_returnMatchingRecord() throws Exception {
-        RenovationRecord existingRecord1 = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
-        renovationRecordRepository.save(existingRecord1);
+        renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2")));
+        renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation Two", "Some words", List.of("Room 1", "Room 2")));
+        renovationRecordRepository.save(new RenovationRecord(currentUser, "Tone", "Some words", List.of("Room 1", "Room 2")));
 
-        RenovationRecord existingRecord2 = new RenovationRecord(currentUser, "Renovation Two", "Some words", List.of("Room 1", "Room 2"));
-        renovationRecordRepository.save(existingRecord2);
-
-        RenovationRecord existingRecord3 = new RenovationRecord(currentUser, "Tone", "Some words", List.of("Room 1", "Room 2"));
-        renovationRecordRepository.save(existingRecord3);
-
-        String matchingName = "One";
-
-        // Records that have names with the matching string anywhere within it should only be shown to the user.
-        mockMvc.perform(get("/renovations")
-                        .param("searchQuery", matchingName))
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("searchTerm", "One"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("renovationsTemplate"))
-                .andExpect(model().attributeExists("renovations"))
-                .andExpect(model().attribute("renovations", hasItem(
-                        hasProperty("name", is("Renovation One")))))
-                .andExpect(model().attribute("renovations", hasItem(
-                        hasProperty("name", is("Tone")))))
-                .andExpect(model().attribute("renovations", not(hasItem(
-                        hasProperty("name", is("Renovation Two"))))));
+                .andReturn();
+
+        JsonNode content = new ObjectMapper().readTree(result.getResponse().getContentAsString()).get("content");
+        List<String> names = new ArrayList<>();
+        content.forEach(n -> names.add(n.get("name").asText()));
+
+        assertTrue(names.contains("Renovation One"));
+        assertTrue(names.contains("Tone"));
+        assertFalse(names.contains("Renovation Two"));
     }
 
     /**
@@ -177,20 +176,15 @@ public class RenovationControllerIntegrationTest {
      */
     @Test
     public void getRenovationRecord_searchByName_showNoRecordWithName() throws Exception {
-        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
-        renovationRecordRepository.save(existingRecord);
+        renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2")));
 
-        String matchingName = "Two";
-
-        mockMvc.perform(get("/renovations")
-                        .param("searchQuery", matchingName))
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("searchTerm", "Two"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("renovationsTemplate"))
-                .andExpect(model().attributeExists("renovations"))
-                .andExpect(model().attribute("renovations", not(hasItem(
-                        hasProperty("name", is("Renovation One"))))))
-                .andExpect(content().string(containsString("No renovations match your search.")))
-                .andExpect(content().string(not(containsString("No Renovations have been made yet."))));
+                .andReturn();
+
+        JsonNode content = new ObjectMapper().readTree(result.getResponse().getContentAsString()).get("content");
+        assertTrue(content.isEmpty());
     }
 
     /**
@@ -202,18 +196,23 @@ public class RenovationControllerIntegrationTest {
     @Test
     public void getRenovationRecord_selectPage_returnsCorrectPage() throws Exception {
         for (int i = 0; i < 20; i++) {
-            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
-            renovationRecordRepository.save(existingRecord);
+            renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
         }
-        mockMvc.perform(get("/renovations")
+
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
                         .param("page", "2")
-                        .param("itemsPerPage", "5"))
-            .andExpect(status().isOk())
-            .andExpect(view().name("renovationsTemplate"))
-            .andExpect(model().attributeExists("renovations"))
-            .andExpect(model().attribute("renovations", hasSize(5)))
-            .andExpect(model().attribute("pageNumber", 2))
-            .andExpect(model().attribute("renovations", hasItem(hasProperty("name", is("Renovation 5")))));
+                        .param("cardsPerPage", "5"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
+        JsonNode content = root.get("content");
+        List<String> names = new ArrayList<>();
+        content.forEach(n -> names.add(n.get("name").asText()));
+
+        assertEquals(4, root.get("totalPages").asInt());
+        assertEquals(1, root.get("number").asInt());
+        assertTrue(names.contains("Renovation 14"));
     }
 
     /**
@@ -222,30 +221,62 @@ public class RenovationControllerIntegrationTest {
     @Test
     public void getRenovationRecord_selectOutOfBoundsPage_returnsLastPage() throws Exception {
         for (int i = 0; i < 20; i++) {
-            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
-            renovationRecordRepository.save(existingRecord);
+            renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
         }
-        mockMvc.perform(get("/renovations")
+
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
                         .param("page", "100")
-                        .param("itemsPerPage", "5"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations?page=4&itemsPerPage=5"));
+                        .param("cardsPerPage", "5"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
+
+        assertEquals(4, root.get("totalPages").asInt());
+        assertEquals(3, root.get("number").asInt());
+    }
+
+    /**
+     * Tests that selecting a page that is out of bounds will redirect to the last page.
+     */
+    @Test
+    public void getRenovationRecord_selectNegativePage_returnsFirstPage() throws Exception {
+        for (int i = 0; i < 20; i++) {
+            renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
+        }
+
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("page", "-100")
+                        .param("cardsPerPage", "5"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
+
+        assertEquals(4, root.get("totalPages").asInt());
+        assertEquals(0, root.get("number").asInt());
     }
 
     /**
      * Tests that requesting 0 items per page will redirect to the default of 8 items per page.
      */
     @Test
-    public void getRenovationRecord_zeroItemsPerPage_returns8ItemsPerPage() throws Exception {
+    public void getRenovationRecord_zeroCardsPerPage_returns16ItemsPerPage() throws Exception {
         for (int i = 0; i < 20; i++) {
             RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
             renovationRecordRepository.save(existingRecord);
         }
-        mockMvc.perform(get("/renovations")
+
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
                         .param("page", "1")
-                        .param("itemsPerPage", "0"))
-                .andExpect(status().is2xxSuccessful())
-                .andExpect(model().attribute("itemsPerPage", 8));
+                        .param("cardsPerPage", "0"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
+
+        assertEquals(20, root.get("totalPages").asInt());
+        assertEquals(0, root.get("number").asInt());
     }
 
     /**
@@ -254,26 +285,31 @@ public class RenovationControllerIntegrationTest {
     @Test
     public void getRenovationRecord_zeroPageNumber_returnsFirstPage() throws Exception {
         for (int i = 0; i < 20; i++) {
-            RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
-            renovationRecordRepository.save(existingRecord);
+            renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
         }
-        mockMvc.perform(get("/renovations")
+
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
                         .param("page", "0")
-                        .param("itemsPerPage", "5"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations?page=1&itemsPerPage=5"));
+                        .param("cardsPerPage", "5"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
+
+        assertEquals(4, root.get("totalPages").asInt());
+        assertEquals(0, root.get("number").asInt());
     }
 
-    /**
-     * Tests posting to the create renovations page which will create a new renovation record under the current user. If all the details
-     * (name, description, rooms) are in the correct format and then posted, the user is taken to the view page for that renovation and the
-     * record is added to the repository.
-     * @throws Exception if the request processing fails
-     */
+        /**
+         * Tests posting to the create renovations page which will create a new renovation record under the current user. If all the details
+         * (name, description, rooms) are in the correct format and then posted, the user is taken to the view page for that renovation and the
+         * record is added to the repository.
+         * @throws Exception if the request processing fails
+         */
     @Test
     public void postCreateRecord_validRecordDetails_createRecord() throws Exception {
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertTrue(userRecords.isEmpty());
+        Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertTrue(userRecords.getContent().isEmpty());
 
         // New record has a name with diacritic letters and a description of length 512 to test regex and boundaries.
         mockMvc.perform(post("/renovations/create")
@@ -286,8 +322,8 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("renovation",
                         hasProperty("name", is("Rénövatiôn Onē"))));
 
-        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Rénövatiôn Onē");
-        assertFalse(userRecords.isEmpty());
+        userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertTrue(userRecords.getContent().isEmpty());
     }
 
     /**
@@ -362,15 +398,15 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertFalse(userRecords.isEmpty());
+        Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertFalse(userRecords.getContent().isEmpty());
 
         mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 
-        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertTrue(userRecords.isEmpty());
+        userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertTrue(userRecords.getContent().isEmpty());
     }
 
     /**
@@ -386,15 +422,15 @@ public class RenovationControllerIntegrationTest {
         RenovationTask existingTask = new RenovationTask("Task", "description", List.of(), LocalDate.now(), existingRecord);
         renovationTaskRepository.save(existingTask);
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertFalse(userRecords.isEmpty());
+        Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertFalse(userRecords.getContent().isEmpty());
 
         mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 
-        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertTrue(userRecords.isEmpty());
+        userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertTrue(userRecords.getContent().isEmpty());
     }
 
     /**
@@ -423,8 +459,8 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord existingRecord = new RenovationRecord(anotherUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertTrue(userRecords.isEmpty());
+        Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertTrue(userRecords.getContent().isEmpty());
 
         mockMvc.perform(delete("/renovations/delete/{id}", existingRecord.getId())
                         .with(csrf()))
@@ -491,11 +527,11 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId()));
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertTrue(userRecords.isEmpty());
+        Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertTrue(userRecords.getContent().isEmpty());
 
-        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Rénövatiôn Onē");
-        assertFalse(userRecords.isEmpty());
+        userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Rénövatiôn Onē", null);
+        assertFalse(userRecords.getContent().isEmpty());
     }
 
     /**
@@ -514,7 +550,7 @@ public class RenovationControllerIntegrationTest {
         Long id = existingRecord.getId();
 
         mockMvc.perform(post("/renovations/editPublicity/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content("{\"isPublic\": true}")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
@@ -540,7 +576,7 @@ public class RenovationControllerIntegrationTest {
         Long id = existingRecord.getId();
 
         mockMvc.perform(post("/renovations/editPublicity/{id}", id)
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content("{\"isPublic\": false}")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
@@ -575,11 +611,11 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("roomList", List.of("Room 1", "Room 2")));
 
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertFalse(userRecords.isEmpty());
+        Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertFalse(userRecords.getContent().isEmpty());
 
-        userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One!");
-        assertTrue(userRecords.isEmpty());
+        userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One!", null);
+        assertTrue(userRecords.getContent().isEmpty());
     }
 
     /**
@@ -608,8 +644,8 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("description", "Some words"))
                 .andExpect(flash().attribute("roomList", List.of("Room 1", "Room 2")));
 
-        List<RenovationRecord> userRecords = renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(currentUser, "Renovation One");
-        assertFalse(userRecords.isEmpty());
+        Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
+        assertFalse(userRecords.getContent().isEmpty());
     }
 
     /**
@@ -670,7 +706,7 @@ public class RenovationControllerIntegrationTest {
     }
 
     @Test
-    public void getViewRecord_withPagination_returnPaginatedTasks() throws Exception {
+    public void getViewRecord_withPagination_returnPaginatedTasks_JSON() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         List<RenovationTask> renovationTasks = IntStream.range(0, 15)
                 .mapToObj(i -> new RenovationTask(
@@ -684,72 +720,87 @@ public class RenovationControllerIntegrationTest {
         existingRecord.setRenovationTasks(renovationTasks);
         renovationRecordRepository.save(existingRecord);
 
-        // Test first page
-        mockMvc.perform(get("/renovations/view")
-                        .param("id", Long.toString(existingRecord.getId()))
+        ObjectMapper mapper = new ObjectMapper();
+
+        // Page 1
+        MvcResult result1 = mockMvc.perform(get("/renovations/retrieve/" + existingRecord.getId())
                         .param("page", "1")
+                        .param("cardsPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(view().name("viewRenovation"))
-                .andExpect(model().attribute("renovation", existingRecord))
-                .andExpect(model().attribute("tasks", hasSize(5)))
-                .andExpect(model().attribute("pageNumber", 1))
-                .andExpect(model().attribute("totalPages", 3));
+                .andReturn();
 
-        // Test second page
-        mockMvc.perform(get("/renovations/view")
-                        .param("id", Long.toString(existingRecord.getId()))
+        JsonNode root1 = mapper.readTree(result1.getResponse().getContentAsString());
+        assertEquals(5, root1.get("content").size());
+        assertEquals(0, root1.get("number").asInt());
+        assertEquals(3, root1.get("totalPages").asInt());
+
+        // Page 2
+        MvcResult result2 = mockMvc.perform(get("/renovations/retrieve/" + existingRecord.getId())
                         .param("page", "2")
+                        .param("cardsPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(view().name("viewRenovation"))
-                .andExpect(model().attribute("tasks", hasSize(5)))
-                .andExpect(model().attribute("pageNumber", 2))
-                .andExpect(model().attribute("totalPages", 3));
+                .andReturn();
 
-        // Test last page
-        mockMvc.perform(get("/renovations/view")
-                        .param("id", Long.toString(existingRecord.getId()))
+        JsonNode root2 = mapper.readTree(result2.getResponse().getContentAsString());
+        assertEquals(5, root2.get("content").size());
+        assertEquals(1, root2.get("number").asInt());
+        assertEquals(3, root2.get("totalPages").asInt());
+
+        // Page 3
+        MvcResult result3 = mockMvc.perform(get("/renovations/retrieve/" + existingRecord.getId())
                         .param("page", "3")
+                        .param("cardsPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(view().name("viewRenovation"))
-                .andExpect(model().attribute("tasks", hasSize(5)))
-                .andExpect(model().attribute("pageNumber", 3))
-                .andExpect(model().attribute("totalPages", 3));
+                .andReturn();
+
+        JsonNode root3 = mapper.readTree(result3.getResponse().getContentAsString());
+        assertEquals(5, root3.get("content").size());
+        assertEquals(2, root3.get("number").asInt());
+        assertEquals(3, root3.get("totalPages").asInt());
     }
 
     @Test
-    public void getViewRecord_invalidPageNumber_returnDefaultPage() throws Exception {
-        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
-        List<RenovationTask> renovationTasks = IntStream.range(0, 10)
+    public void getRenovationTaskPages_withInvalidPageNumber_returnsDefaultOrLastPage() throws Exception {
+        RenovationRecord record = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        List<RenovationTask> tasks = IntStream.range(0, 10)
                 .mapToObj(i -> new RenovationTask(
                         "Task " + i,
-                        "Description for Task " + i,
+                        "Description " + i,
                         List.of("Room 1", "Room 2"),
                         LocalDate.now().plusDays(i),
-                        existingRecord
+                        record
                 ))
                 .toList();
-        existingRecord.setRenovationTasks(renovationTasks);
-        renovationRecordRepository.save(existingRecord);
+        record.setRenovationTasks(tasks);
+        renovationRecordRepository.save(record);
 
-        mockMvc.perform(get("/renovations/view")
-                        .param("id", Long.toString(existingRecord.getId()))
+        long recordId = record.getId();
+
+        MvcResult outOfBoundsResult = mockMvc.perform(get("/renovations/retrieve/" + recordId)
                         .param("page", "34")
+                        .param("cardsPerPage", "5")
                         .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=2"));
+                .andExpect(status().isOk())
+                .andReturn();
 
+        JsonNode root = new ObjectMapper().readTree(outOfBoundsResult.getResponse().getContentAsString());
+        assertEquals(2, root.get("totalPages").asInt());
+        assertEquals(1, root.get("number").asInt());
 
-        mockMvc.perform(get("/renovations/view")
-                        .param("id", Long.toString(existingRecord.getId()))
+        MvcResult negativePageResult = mockMvc.perform(get("/renovations/retrieve/" + recordId)
                         .param("page", "-1")
-                        .param("cardPerPage", "5")
+                        .param("cardsPerPage", "5")
                         .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + existingRecord.getId() + "&page=1"));
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode negativeRoot = new ObjectMapper().readTree(negativePageResult.getResponse().getContentAsString());
+        assertEquals(0, negativeRoot.get("number").asInt()); // page 1 (0-based)
     }
+
 
     @Test
     @WithMockUser(username = "not.owner@example.com")
@@ -938,7 +989,6 @@ public class RenovationControllerIntegrationTest {
                 .anyMatch(tag -> tag.getTagName().equals(testTagName)));
     }
 
-
     @Test
     public void testAddNotExistingTagToRenovation() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(currentUser, "Test Renovation", "Some words", List.of("Room1", "Room2"));
@@ -978,7 +1028,6 @@ public class RenovationControllerIntegrationTest {
         assertTrue(testRecord.getTags().stream()
                 .anyMatch(tag -> tag.getTagName().equals("electrician")));
     }
-
 
     @Test
     public void testAddTagInvalidInputs() throws Exception {
@@ -1118,148 +1167,122 @@ public class RenovationControllerIntegrationTest {
     }
 
     @Test
-    public void searchRenovation_withNoMatches_returnsNoResultsMessage() throws Exception {
+    public void searchRenovation_withNoMatches_returnsNoResults() throws Exception {
         String searchTerm = "NonExistentTerm";
         String visibility = "all";
 
-        // Step 1: Perform the POST request to trigger the search
-        MvcResult postResult = mockMvc.perform(post("/renovations/search")
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
                         .param("searchTerm", searchTerm)
                         .param("visibility", visibility)
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
+                        .session(session))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        String redirectedUrl = postResult.getResponse().getRedirectedUrl();
-
-        // Step 2: Follow GET redirect and assert results
-        mockMvc.perform(get(redirectedUrl)
-                        .session((MockHttpSession) postResult.getRequest().getSession(false)))
-                .andExpect(status().isOk())
-                .andExpect(view().name("renovationSearchTemplate"))
-                .andExpect(model().attributeExists("records"))
-                .andExpect(model().attribute("records", hasSize(0)))
-                .andExpect(model().attribute("totalCards", is(0)))
-                .andExpect(model().attribute("totalPages", is(0)))
-                .andExpect(model().attribute("pageNumber", is(1)))
-                .andExpect(model().attribute("cardsPerPage", is(16)))
-                .andExpect(model().attribute("visibility", is(visibility)))
-                .andExpect(model().attribute("searchTerm", is(searchTerm)));
+        JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
+        assertTrue(root.get("content").isEmpty());
+        assertEquals(0, root.get("totalPages").asInt());
+        assertEquals(0, root.get("numberOfElements").asInt());
+        assertEquals(16, root.get("size").asInt());
     }
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
     public void searchRenovation_withMatchingTerm_returnsMatchingRecords() throws Exception {
-        String searchTerm = "Test Renovation";
-        String visibility = "all";
+        RenovationRecord record = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
+        record.setPublicity(true);
+        renovationRecordRepository.save(record);
 
-
-        RenovationRecord matchingRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
-        matchingRecord.setPublicity(true);
-        renovationRecordRepository.save(matchingRecord);
-
-        // Step 1: Perform the POST request to trigger the search
-        MvcResult postResult = mockMvc.perform(post("/renovations/search")
-                        .param("searchTerm", searchTerm)
-                        .param("visibility", visibility)
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("searchTerm", "Test Renovation")
+                        .param("visibility", "all")
+                        .session(session))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        String redirectedUrl = postResult.getResponse().getRedirectedUrl();
-
-        // Step 2: Follow GET redirect and assert results
-        mockMvc.perform(get(redirectedUrl)
-                        .session((MockHttpSession) postResult.getRequest().getSession(false)))
-                .andExpect(status().isOk())
-                .andExpect(view().name("renovationSearchTemplate"))
-                .andExpect(model().attributeExists("records"))
-                .andExpect(model().attribute("records", hasSize(1)))
-                .andExpect(model().attribute("totalCards", is(1)))
-                .andExpect(model().attribute("totalPages", is(1)))
-                .andExpect(model().attribute("pageNumber", is(1)))
-                .andExpect(model().attribute("cardsPerPage", is(16)))
-                .andExpect(model().attribute("visibility", is(visibility)))
-                .andExpect(model().attribute("searchTerm", is(searchTerm)))
-                .andExpect(model().attribute("records", hasItem(
-                        hasProperty("name", is(searchTerm))
-                )));
-
+        JsonNode content = new ObjectMapper().readTree(result.getResponse().getContentAsString()).get("content");
+        assertEquals(1, content.size());
+        assertEquals("Test Renovation", content.get(0).get("name").asText());
     }
+
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
     public void searchRenovation_withVisibilityFilter_returnsFilteredResults() throws Exception {
-        RenovationRecord publicRecord = new RenovationRecord(owner, "Public Renovation", "Public Description", List.of("Room A"));
-        publicRecord.setPublicity(true);
-        renovationRecordRepository.save(publicRecord);
+        RenovationRecord publicRec = new RenovationRecord(owner, "Public Renovation", "Public Desc", List.of("Room A"));
+        publicRec.setPublicity(true);
+        RenovationRecord privateRec = new RenovationRecord(owner, "Private Renovation", "Private Desc", List.of("Room B"));
+        privateRec.setPublicity(false);
+        renovationRecordRepository.saveAll(List.of(publicRec, privateRec));
 
-        RenovationRecord privateRecord = new RenovationRecord(owner, "Private Renovation", "Private Description", List.of("Room B"));
-        privateRecord.setPublicity(false);
-        renovationRecordRepository.save(privateRecord);
-
-        MvcResult postResult = mockMvc.perform(post("/renovations/search")
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
                         .param("searchTerm", "")
                         .param("visibility", "public")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
+                        .session(session))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        String redirectedUrl = postResult.getResponse().getRedirectedUrl();
+        JsonNode content = new ObjectMapper().readTree(result.getResponse().getContentAsString()).get("content");
 
-        // Step 2: Follow GET redirect and assert results
-        mockMvc.perform(get(redirectedUrl)
-                        .session((MockHttpSession) postResult.getRequest().getSession(false)))
-                .andExpect(status().isOk())
-                .andExpect(view().name("renovationSearchTemplate")) // ensure your GET method returns this view
-                .andExpect(model().attributeExists("records"))
-                .andExpect(model().attribute("records", hasSize(1)))
-                .andExpect(model().attribute("records", hasItem(
-                        hasProperty("name", is("Public Renovation")))))
-                .andExpect(model().attribute("records", not(hasItem(
-                        hasProperty("name", is("Private Renovation"))))));
+        assertEquals(1, content.size());
+        assertEquals("Public Renovation", content.get(0).get("name").asText());
     }
+
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
     public void searchRenovation_withTermAndVisibilityFilter_returnsFilteredResults() throws Exception {
-        RenovationRecord publicRecord = new RenovationRecord(owner, "Public Renovation", "Room A Renovation", List.of("Room A"));
-        publicRecord.setPublicity(true);
-        renovationRecordRepository.save(publicRecord);
+        RenovationRecord pub = new RenovationRecord(owner, "Public Renovation", "Room A", List.of("Room A"));
+        pub.setPublicity(true);
+        RenovationRecord priv = new RenovationRecord(owner, "Private Renovation", "Room B", List.of("Room B"));
+        priv.setPublicity(false);
+        renovationRecordRepository.saveAll(List.of(pub, priv));
 
-        RenovationRecord privateRecord = new RenovationRecord(owner, "Private Renovation", "Room B Renovation", List.of("Room B"));
-        privateRecord.setPublicity(false);
-        renovationRecordRepository.save(privateRecord);
-
-        MvcResult postResult = mockMvc.perform(post("/renovations/search")
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
                         .param("searchTerm", "Public")
                         .param("visibility", "public")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search?page=1"))
+                        .session(session))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        mockMvc.perform(get("/renovations/search")
-                        .session((MockHttpSession) postResult.getRequest().getSession(false)))
-                .andExpect(status().isOk())
-                .andExpect(view().name("renovationSearchTemplate"))
-                .andExpect(model().attributeExists("records"))
-                .andExpect(model().attribute("records", hasSize(1)))
-                .andExpect(model().attribute("records", hasItem(
-                        hasProperty("name", is("Public Renovation")))))
-                .andExpect(model().attribute("records", not(hasItem(
-                        hasProperty("name", is("Private Renovation"))))));
+        JsonNode content = new ObjectMapper().readTree(result.getResponse().getContentAsString()).get("content");
+
+        assertEquals(1, content.size());
+        assertEquals("Public Renovation", content.get(0).get("name").asText());
     }
 
     @Test
-    @WithMockUser(username = "not.owner@doe.com")
-    public void getSearchRenovations_withDefaultValues_rendersSearchPageWithDefaultVisibility() throws Exception {
-        mockMvc.perform(get("/renovations/search"))
+    public void tagSearch_withValidPublicRenovation_displaysMoreMatchingTagsFirst() throws Exception {
+        RenovationRecord oneTag = new RenovationRecord(owner, "RenovationOneTag", "A", List.of("Room A"));
+        RenovationRecord twoTags = new RenovationRecord(owner, "RenovationTwoTags", "A", List.of("Room A"));
+        oneTag.setPublicity(true);
+        twoTags.setPublicity(true);
+
+        Tag t1 = new Tag("House");
+        Tag t2 = new Tag("New");
+        tagRepository.saveAll(List.of(t1, t2));
+
+        oneTag.getTags().add(t1);
+        twoTags.getTags().addAll(List.of(t1, t2));
+        renovationRecordRepository.saveAll(List.of(oneTag, twoTags));
+
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("tagNameList", "House")
+                        .param("tagNameList", "New")
+                        .session(session))
                 .andExpect(status().isOk())
-                .andExpect(view().name("renovationSearchTemplate"))
-                .andExpect(model().attribute("visibility", is("all")))
-                .andExpect(model().attribute("searchTerm", is("")))
-                .andExpect(model().attribute("records", hasSize(0)));
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(json);
+        JsonNode content = root.get("content");
+
+        List<String> names = new ArrayList<>();
+        for (JsonNode node : content) {
+            names.add(node.get("name").asText());
+        }
+
+        assertEquals(List.of("RenovationTwoTags", "RenovationOneTag"), names);
     }
 
     @Test
@@ -1268,7 +1291,10 @@ public class RenovationControllerIntegrationTest {
         session.setAttribute("visibility", "user");
         session.setAttribute("searchTerm", "Test Renovation");
 
-        mockMvc.perform(get("/renovations/search").session(session))
+        mockMvc.perform(get("/renovations/search")
+                        .param("visibility", "user")
+                        .param("searchTerm", "Test Renovation")
+                        .session(session))
                 .andExpect(status().isOk())
                 .andExpect(view().name("renovationSearchTemplate"))
                 .andExpect(model().attribute("visibility", is("user")))
@@ -1281,36 +1307,44 @@ public class RenovationControllerIntegrationTest {
         session.setAttribute("visibility", "all");
         session.setAttribute("searchTerm", "NonExistent");
 
-        mockMvc.perform(get("/renovations/search").session(session))
+        ObjectMapper mapper = new ObjectMapper();
+
+        MvcResult result1 = mockMvc.perform(get("/renovations/retrieve")
+                        .session(session))
                 .andExpect(status().isOk())
-                .andExpect(view().name("renovationSearchTemplate"))
-                .andExpect(model().attribute("records", hasSize(0))); // No matching records
+                .andReturn();
+
+        JsonNode root1 = mapper.readTree(result1.getResponse().getContentAsString());
+        assertEquals(0, root1.get("content").size());
+        assertEquals(0, root1.get("number").asInt());
+        assertEquals(0, root1.get("totalPages").asInt());
     }
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
     public void getSearchRenovations_withMatchingRecords_returnsFilteredResults() throws Exception {
-        RenovationRecord record = new RenovationRecord(owner, "Test Renovation", "Description", List.of("Room A"));
+        RenovationRecord record = new RenovationRecord(owner, "Renovation One", "Description", List.of("Room A"));
         record.setPublicity(true);
         renovationRecordRepository.save(record);
 
-        session.setAttribute("visibility", "all");
-        session.setAttribute("searchTerm", "Test Renovation");
-
-        mockMvc.perform(get("/renovations/search").session(session))
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("searchTerm", "One"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("renovationSearchTemplate"))
-                .andExpect(model().attribute("records", hasSize(1)))
-                .andExpect(model().attribute("records", hasItem(
-                        hasProperty("name", is("Test Renovation"))
-                )));
+                .andReturn();
+
+        JsonNode content = new ObjectMapper().readTree(result.getResponse().getContentAsString()).get("content");
+        List<String> names = new ArrayList<>();
+        content.forEach(n -> names.add(n.get("name").asText()));
+
+        assertTrue(names.contains("Renovation One"));
+        assertEquals(1, content.size());
     }
 
     @Test
     public void tagSearch_withValidPublicRenovation_displaysListOfTags() throws Exception {
-        RenovationRecord testRecord = new RenovationRecord(owner, "Test Renovation", "Room A Renovation", List.of("Room A"));
+        RenovationRecord testRecord = new RenovationRecord(owner, "Test Renovation 1", "Room A Renovation", List.of("Room A"));
         testRecord.setPublicity(true);
-        RenovationRecord testRecord2 = new RenovationRecord(owner, "Test Renovation", "Room A Renovation", List.of("Room A"));
+        RenovationRecord testRecord2 = new RenovationRecord(owner, "Test Renovation 2", "Room A Renovation", List.of("Room A"));
         String tagName ="House";
         Tag testTag = new Tag(tagName);
         tagRepository.save(testTag);
@@ -1319,22 +1353,22 @@ public class RenovationControllerIntegrationTest {
         renovationRecordRepository.save(testRecord);
         renovationRecordRepository.save(testRecord2);
 
-        MvcResult postResult = mockMvc.perform(post("/renovations/search")
-                        .param("tagNameList", tagName)
-                        .param("isTagSearch", "true")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search?page=1"))
+        mockMvc.perform(get("/renovations/search")
+                        .session(session))
+                .andExpect(status().isOk());
+
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
+                        .session(session))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        mockMvc.perform(get("/renovations/search")
-                        .session((MockHttpSession) Objects.requireNonNull(postResult.getRequest().getSession(false))))
-                .andExpect(status().isOk())
-                .andExpect(view().name("renovationSearchTemplate"))
-                .andExpect(model().attributeExists("records"))
-                .andExpect(model().attribute("records", hasSize(1)))
-                .andExpect(model().attribute("records", hasItem(
-                        hasProperty("name", is("Test Renovation")))));
+        JsonNode content = new ObjectMapper().readTree(result.getResponse().getContentAsString()).get("content");
+        List<String> names = new ArrayList<>();
+        content.forEach(n -> names.add(n.get("name").asText()));
+
+        assertTrue(names.contains("Test Renovation 1"));
+        assertFalse(names.contains("Test Renovation 2"));
+        assertEquals(1, content.size());
     }
 
     @Test
@@ -1346,20 +1380,20 @@ public class RenovationControllerIntegrationTest {
         testRecord.getTags().add(testTag);
         renovationRecordRepository.save(testRecord);
 
-        MvcResult postResult = mockMvc.perform(post("/renovations/search")
+        mockMvc.perform(get("/renovations/search")
                         .param("tagNameList", tagName)
-                        .param("isTagSearch", "true")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search?page=1"))
+                        .session(session))
+                .andExpect(status().isOk());
+
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("tagNameList", tagName)
+                        .session(session))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        mockMvc.perform(get("/renovations/search")
-                        .session((MockHttpSession) Objects.requireNonNull(postResult.getRequest().getSession(false))))
-                .andExpect(status().isOk())
-                .andExpect(view().name("renovationSearchTemplate"))
-                .andExpect(model().attributeExists("records"))
-                .andExpect(model().attribute("records", hasSize(0)));
+        JsonNode content = new ObjectMapper().readTree(result.getResponse().getContentAsString()).get("content");
+
+        assertEquals(0, content.size());
     }
 
     @Test
@@ -1382,24 +1416,25 @@ public class RenovationControllerIntegrationTest {
         renovationRecordRepository.save(testRecord);
         renovationRecordRepository.save(testRecord2);
 
-        MvcResult postResult = mockMvc.perform(post("/renovations/search")
+        mockMvc.perform(get("/renovations/search")
                         .param("tagNameList", tagName)
                         .param("tagNameList", tagName2)
-                        .param("isTagSearch", "true")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search?page=1"))
+                        .session(session))
+                .andExpect(status().isOk());
+
+        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("tagNameList", tagName)
+                        .param("tagNameList", tagName2)
+                        .session(session))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        mockMvc.perform(get("/renovations/search")
-                        .session((MockHttpSession) Objects.requireNonNull(postResult.getRequest().getSession(false))))
-                .andExpect(status().isOk())
-                .andExpect(view().name("renovationSearchTemplate"))
-                .andExpect(model().attribute("records", hasSize(2)))
-                .andExpect(model().attribute("records", contains(
-                        hasProperty("name", is("RenovationTwoTags")),
-                        hasProperty("name", is("RenovationOneTag"))
-                )));
+        JsonNode content = new ObjectMapper().readTree(result.getResponse().getContentAsString()).get("content");
+        List<String> names = new ArrayList<>();
+        content.forEach(n -> names.add(n.get("name").asText()));
+
+        assertTrue(names.contains("RenovationTwoTags"));
+        assertTrue(names.contains("RenovationOneTag"));
     }
 
 

@@ -90,10 +90,7 @@ public class DeleteRenovationRecordSteps {
         mockMvc.perform(get("/renovations")
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(view().name("renovationsTemplate"))
-                .andExpect(model().attributeExists("renovations"))
-                .andExpect(model().attribute("renovations", hasItem(
-                        hasProperty("name", is("Renovation One")))));
+                .andExpect(view().name("renovationsTemplate"));
     }
 
     @Given("The renovation record has {int} task\\(s)")
@@ -111,7 +108,7 @@ public class DeleteRenovationRecordSteps {
     @When("I click the \"Delete\" button")
     public void i_click_the_delete_button() throws Exception {
         mockMvc.perform(delete("/renovations/delete/{id}", renovationId)
-                        .with(csrf()));
+                .with(csrf()));
     }
 
     @Then("The renovation record is permanently deleted")

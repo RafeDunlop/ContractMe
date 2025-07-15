@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -26,8 +28,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -53,10 +54,20 @@ public class TagSearchSteps {
 
     private MvcResult result;
 
+    private String lastInput;
+
     private List<String> searchTerms;
+
+    private MvcResult mvcResult;
 
     public TagSearchSteps(UserContext userContext) {
         this.userContext = userContext;
+    }
+
+
+    @Given("I enter a search {string} in the search renovation bar")
+    public void i_enter_a_search_in_the_search_renovation_bar(String inputString) {
+        lastInput = inputString;
     }
 
 
@@ -101,66 +112,74 @@ public class TagSearchSteps {
         renovationRecordRepository.save(renovationRecord);
     }
 
+
+    @When("The search partially matches a tag known by the system {string}")
+    public void the_search_partially_matches_a_tag_known_by_the_system(String tagName) {
+        Tag tag = new Tag(tagName);
+        tagRepository.save(tag);
+    }
+
     @When("I search for renovations with tags {string} and {string}")
-    public void i_search_for_renovations_with_tags_and(String tag1Name, String tag2Name) throws Exception{
-        result = mockMvc.perform(post("/renovations/search")
+    public void i_search_for_renovations_with_tags_and(String tag1Name, String tag2Name) throws Exception {
+        mockMvc.perform(get("/renovations/search")
                         .param("tagNameList", tag1Name)
                         .param("tagNameList", tag2Name)
-                        .param("isTagSearch", "true")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/search?page=1"))
-                .andReturn();
-
-        result = mockMvc.perform(get("/renovations/search")
-                        .session((MockHttpSession) Objects.requireNonNull(result.getRequest().getSession(false))))
+                        .param("visibility", "public")
+                        .param("searchTerm", "")
+                        .param("page", "1")
+                        .param("cardsPerPage", "16"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("renovationSearchTemplate"))
+                .andReturn();
+
+        result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("tagNameList", tag1Name)
+                        .param("tagNameList", tag2Name)
+                        .param("visibility", "public")
+                        .param("searchTerm", "")
+                        .param("page", "1")
+                        .param("cardsPerPage", "16"))
+                .andExpect(status().isOk())
                 .andReturn();
     }
 
     @Then("I should see the following renovations in order:")
     public void i_should_see_the_following_renovations_in_order(io.cucumber.datatable.DataTable recordNamesOrdered) throws Exception {
-        List<String> recordNameList = recordNamesOrdered.asList();
+        List<String> expectedNames = recordNamesOrdered.asList();
 
-        mockMvc.perform(get("/renovations/search")
-                        .session((MockHttpSession) Objects.requireNonNull(result.getRequest().getSession(false))))
-                .andExpect(model().attribute("records", hasSize(recordNameList.size())))
-                .andExpect(model().attribute("records", contains(
-                        recordNameList.stream()
-                                .map(name -> hasProperty("name", is(name)))
-                                .collect(Collectors.toList())
-                )));
+        String json = result.getResponse().getContentAsString();
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(json);
+
+        JsonNode recordsNode = root.path("content");
+        List<String> actualNames = new ArrayList<>();
+        for (JsonNode recordNode : recordsNode) {
+            actualNames.add(recordNode.path("name").asText());
+        }
+
+        assertEquals(expectedNames, actualNames);
+    }
+
+    @Then("I should see no records")
+    public void i_should_see_no_records() throws Exception {
+        String json = result.getResponse().getContentAsString();
+    }
+
+    @Then("I can see a list of matching tags {string}")
+    public void i_can_see_a_list_of_matching_tags(String autocompleteTag) throws Exception {
+        mvcResult = mockMvc.perform(get("/renovations/tags/autocomplete")
+                        .param("partialTag", lastInput)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody = mvcResult.getResponse().getContentAsString();
+        assertTrue(responseBody.contains(autocompleteTag),
+                "Expected response to contain tag: " + autocompleteTag);
     }
 
     @Given("the tag search field is empty")
     public void the_tag_search_field_is_empty() {
         searchTerms = Collections.emptyList();
-    }
-
-    @When("I make a tag search")
-    public void i_make_a_tag_search() throws Exception {
-        var requestBuilder = post("/renovations/search")
-                .param("isTagSearch", "true")
-                .with(csrf());
-
-        for (String tag : searchTerms) {
-            requestBuilder = requestBuilder.param("tagNameList", tag);
-        }
-
-        result = mockMvc.perform(requestBuilder).andReturn();
-    }
-
-    @Then("I should see the message {string}")
-    public void i_should_see_the_message(String errorMessage) throws Exception {
-        String content = result.getResponse().getContentAsString();
-        assert content.contains(errorMessage) : "Error message not found: " + errorMessage;
-    }
-
-    @Then("I am not redirected")
-    public void i_should_not_be_redirected() {
-        int status = result.getResponse().getStatus();
-        assertNotEquals(302, status, "Expected no redirection, but got status 302 but was redirected");
-        assertEquals(200, status, "Expected status 200 when submitting empty tag search");
     }
 }

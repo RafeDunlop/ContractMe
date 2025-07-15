@@ -2,6 +2,8 @@ package nz.ac.canterbury.seng302.homehelper.entity;
 
 import jakarta.persistence.Embeddable;
 
+import java.util.Objects;
+
 @Embeddable
 public class Location {
 
@@ -20,6 +22,18 @@ public class Location {
     }
 
     public Location() {}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Location)) return false;
+        Location that = (Location) o;
+        return Objects.equals(address, that.address) &&
+                Objects.equals(country, that.country) &&
+                Objects.equals(postcode, that.postcode) &&
+                Objects.equals(city, that.city) &&
+                Objects.equals(suburb, that.suburb);
+    }
 
     public String getAddress() {
         return address;

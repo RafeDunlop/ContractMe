@@ -29,8 +29,6 @@ export function injectRoomsIntoSubmission(form, event, roomList) {
     let input;
     event.preventDefault();
     form.querySelectorAll("input[name='roomList']").forEach(room => room.remove());
-    console.log("room list upon form submission:");
-    console.log(roomList);
     roomList.forEach(room => {
         input = document.createElement("input");
         input.type = "hidden";
@@ -50,24 +48,10 @@ export function injectRoomsIntoSubmission(form, event, roomList) {
  * @param maxLimit The maximum to display. Default is 512
  */
 export function updateCharCounter(textAreaId, counterId, maxLimit = 512) {
-    console.log("Hello");
     let textArea = document.getElementById(textAreaId);
-    console.log("Text Area ID");
-    console.log(textArea);
     let counter = document.getElementById(counterId);
-    console.log("Counter ID");
-    console.log(counterId);
     let length = textArea.value.length;
-    console.log("Length");
-    console.log(length);
-    console.log("Counter");
-    console.log(counter);
-    console.log("Text Content before update");
-    console.log(counter.textContent);
     counter.textContent = `${length}/${maxLimit}`;
-    console.log("Text Content after update");
-    console.log(counter.textContent);
-
 }
 
 /**
@@ -77,7 +61,6 @@ export function updateCharCounter(textAreaId, counterId, maxLimit = 512) {
  * @param roomTableId The id of the table to render the list into
  */
 export function renderRooms(roomList, roomTableId) {
-    console.log("renderRooms");
     let i, room, roomTable, tableRow, roomCell, buttonCell, button;
     roomTable = document.getElementById(roomTableId);
     roomTable.innerHTML = "";

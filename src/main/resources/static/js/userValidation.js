@@ -1,6 +1,6 @@
 // Regex patterns
 const emailPattern = /^[A-Za-z0-9]+([+_.-][A-Za-z0-9]+)*@[A-Za-z0-9]+([.-][A-Za-z0-9]+)*(\.[A-Za-z]{2,})$/;
-const namePattern = /^[\p{L}\-'\s]{0,50}$/u;
+const namePattern = /^[\p{L}\-'\s]*$/u;
 
 // Functions
 export function checkEmailField(input, emailFrontendErrorMessage, emailFrontendError, emailBackendError) {
@@ -81,7 +81,7 @@ export function checkPasswordMatch(passwordField, confirmPasswordField, confirmP
     const confirmPassword = confirmPasswordField.value;
 
     if (password !== confirmPassword) {
-        confirmPasswordFrontendErrorMessage.textContent = "Passwords do not match.";
+        confirmPasswordFrontendErrorMessage.textContent = "The new passwords do not match";
         confirmPasswordFrontendError.hidden = false;
         confirmPasswordFrontendErrorMessage.hidden = false;
         confirmPasswordBackendError.hidden = true;

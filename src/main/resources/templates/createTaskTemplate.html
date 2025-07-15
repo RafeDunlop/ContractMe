@@ -58,7 +58,7 @@
             <!-- DUE DATE -->
             <div class="mb-3">
                 <label for="dueDate" class="form-label">Due Date (optional):</label>
-                <input type="date" class="form-control" id="dueDate" name="dueDate" th:value="${dueDate}" />
+                <input type="date" class="form-control" id="dueDate" name="dueDate" th:value="${dueDate} " />
 
 
                 <!-- Frontend JS error -->
@@ -80,7 +80,7 @@
                     <input class="form-check-input fs-3" type="checkbox" th:field="*{rooms}"
                            th:id="'room-' + ${meta.index}" th:value="${room}"
                            th:checked="${renovationTaskDTO.getRooms() != null and #lists.contains(renovationTaskDTO.getRooms(), room)}">
-                    <label class="form-check-label fs-3 ms-3" th:for="'room-' + ${meta.index}" th:text="${room}"></label>
+                    <label class="form-check-label ms-3 small" th:for="'room-' + ${meta.index}" th:text="${room}"></label>
                 </div>
 
                 <!-- Frontend JS error -->
@@ -95,9 +95,11 @@
                 </div>
             </div>
 
-            <!-- SUBMIT -->
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Create</button>
+            <div class="mt-4 d-flex gap-3 ">
+                <!-- SUBMIT -->
+                    <button type="submit" class="btn btn-primary">Create</button>
+                <!-- CANCEL BUTTON -->
+                    <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn btn-secondary">Cancel</a>
             </div>
 
             <!-- General error messages -->
@@ -107,10 +109,6 @@
         </form>
     </div>
 
-    <!-- CANCEL BUTTON -->
-    <div class="mt-4">
-        <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn btn-primary">Cancel</a>
-    </div>
 </div>
 </body>
 <script type="module" th:src="@{/js/taskValidation.js}"></script>
