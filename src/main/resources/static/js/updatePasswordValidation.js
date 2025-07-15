@@ -4,9 +4,6 @@ import {
 } from './userValidation.js';
 
 document.addEventListener("DOMContentLoaded", () => {
-more
-    const oldPassword = document.getElementById("old-password")
-    oldPassword.addEventListener("input", () => console.log("old password", oldPassword.textContent))
 
     // Elements
     let newPasswordField = document.getElementById("new-password")
