@@ -1,11 +1,46 @@
 package nz.ac.canterbury.seng302.homehelper.dto;
 
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
+
+import java.util.List;
+
 public class UserRegisterDTO {
     private String firstName;
     private String lastName;
     private String email;
     private String password;
     private String confirmPassword;
+
+    private String phoneNumber;
+
+    private List<Skill> skills;
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public List<Skill> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(List<Skill> skills) {
+        this.skills = skills;
+    }
+
+    public Float getHourlyRate() {
+        return hourlyRate;
+    }
+
+    public void setHourlyRate(Float hourlyRate) {
+        this.hourlyRate = hourlyRate;
+    }
+
+    private Float hourlyRate;
+
 
     public UserRegisterDTO() {}
 
@@ -15,6 +50,17 @@ public class UserRegisterDTO {
         this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
+    }
+
+    public UserRegisterDTO(String firstName, String lastName, String email, String password,String confirmPassword, String phoneNumber, List<Skill> skills, Float hourlyRate) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+        this.confirmPassword = confirmPassword;
+        this.phoneNumber = phoneNumber;
+        this.skills = skills;
+        this.hourlyRate = hourlyRate;
     }
 
     /**

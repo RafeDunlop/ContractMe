@@ -3,8 +3,10 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.ContractorRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +81,6 @@ public class RegisterService {
         return userRepository.save(user);
     }
 
-
     /**
      * Creates a location and attaches it to the user entity
      * Saves the user with its location to the database
@@ -99,6 +100,7 @@ public class RegisterService {
         user.setLocation(userLocation);
         userRepository.save(user);
     }
+
     /**
      * Validates if the email is already in use
      *

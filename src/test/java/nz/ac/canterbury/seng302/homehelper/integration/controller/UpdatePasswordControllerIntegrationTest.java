@@ -7,7 +7,7 @@ import java.util.Locale;
 import nz.ac.canterbury.seng302.homehelper.controller.UpdatePasswordController;
 import nz.ac.canterbury.seng302.homehelper.dto.UpdatePasswordDTO;
 
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.junit.jupiter.api.Test;
