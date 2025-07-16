@@ -26,6 +26,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Controller for the create new task page
@@ -117,6 +118,10 @@ public class CreateTaskController {
                                 RedirectAttributes redirectAttributes) {
         logger.info("POST renovations/view/create");
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
+        if (Objects.equals(renovationTaskDTO.getDueDate(), "")) {
+            renovationTaskDTO.setDueDate(null);
+        }
+
         LocalDate parsedDate = null;
 
         if (renovationTaskDTO.getDueDate() != null) {

@@ -110,8 +110,8 @@
                 </div>
 
                 <div class="mt-2 mb-2">
-                    <a th:href="@{/renovations/edit(id=${renovation.id}, visibility=${visibility})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
-                    <a th:href="@{/renovations/view/create(id=${renovation.id}, visibility=${visibility})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
+                    <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
+                    <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
                     <a th:href="@{${previousUrl}}" class="btn btn-secondary" th:if="${previousUrl != null}">Back</a>
                 </div>
             </div>

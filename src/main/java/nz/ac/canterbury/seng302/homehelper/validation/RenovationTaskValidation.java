@@ -91,8 +91,6 @@ public class RenovationTaskValidation {
      * @return An error from validating the due date
      */
     public String validateDueDate(String dueDateString) {
-
-
         if (dueDateString != null) {
             try {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
