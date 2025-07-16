@@ -24,7 +24,7 @@ tagInput.addEventListener("input", function () {
         resetAutocomplete();
         return
     }
-    updateAutocomplete(partialTag);
+    updateSearchAutocomplete(partialTag)
 });
 
 /**
