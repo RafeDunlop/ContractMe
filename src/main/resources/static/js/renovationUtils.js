@@ -78,7 +78,7 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
             document.getElementById("pageNumber").value = data.number + 1;
 
             if (data.content.length === 0) {
-                container.insertAdjacentHTML('beforeend', `<div class="alert alert-secondary mt-4">No renovations match your search</div>`);
+                container.insertAdjacentHTML('beforeend', `<div class="alert alert-secondary mt-4">No renovations contain your searched tags</div>`);
                 element.style.display = "none";
                 document.getElementById("pagination").innerHTML = "";
                 return;
