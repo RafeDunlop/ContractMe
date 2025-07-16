@@ -16,6 +16,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let newPasswordRetypedFrontendErrorMessage = document.getElementById("new-password-retyped-frontend-error-message")
     let newPasswordRetypedBackendError = document.getElementById("new-password-retyped-backend-error")
 
+    const checkNewPasswordsMatch = () => checkPasswordMatch(newPasswordField,
+        newPasswordRetypedField,
+        newPasswordRetypedFrontendError,
+        newPasswordRetypedFrontendErrorMessage,
+        newPasswordRetypedBackendError
+    );
+
     // Event listeners
     newPasswordField.addEventListener("input", () => {
         checkPasswordStrength(newPasswordField,
@@ -24,20 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
             newPasswordBackendError
         );
 
-        if (newPasswordRetypedField.textContent !== "") checkPasswordMatch(newPasswordField,
-            newPasswordRetypedField,
-            newPasswordRetypedFrontendError,
-            newPasswordRetypedFrontendErrorMessage,
-            newPasswordRetypedBackendError
-        );
+        if (newPasswordRetypedField.value !== "") checkNewPasswordsMatch();
     });
 
-    newPasswordRetypedField.addEventListener("input", () => {
-        checkPasswordMatch(newPasswordField,
-            newPasswordRetypedField,
-            newPasswordRetypedFrontendError,
-            newPasswordRetypedFrontendErrorMessage,
-            newPasswordRetypedBackendError
-        );
-    });
+    newPasswordRetypedField.addEventListener("input", checkNewPasswordsMatch);
 });
