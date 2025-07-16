@@ -49,15 +49,15 @@ function validateName(input) {
     input = input.trim();
     if (input.length > 128) {
         setError(nameFrontendError, nameFrontendErrorMessage, "Task name cannot be greater than 128 characters");
-        nameBackendError.hidden = true;
+        if (nameBackendError) nameBackendError.hidden = true;
         return false;
     } else if (input === "" || !namePattern.test(input)) {
         setError(nameFrontendError, nameFrontendErrorMessage, "Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes");
-        nameBackendError.hidden = true;
+        if (nameBackendError) nameBackendError.hidden = true;
         return false;
     } else {
         clearError(nameFrontendError, nameFrontendErrorMessage);
-        nameBackendError.hidden = true;
+        if (nameBackendError) nameBackendError.hidden = true;
         return true;
     }
 }
@@ -66,15 +66,15 @@ function validateDescription(input) {
     input = input.trim();
     if (input === "") {
         setError(descriptionFrontendError, descriptionFrontendErrorMessage, "Task description cannot be empty.");
-        descriptionBackendError.hidden = true;
+        if (descriptionBackendError) descriptionBackendError.hidden = true;
         return false;
     } else if (input.length > maxDescriptionLength) {
         setError(descriptionFrontendError, descriptionFrontendErrorMessage, `Task description must be ${maxDescriptionLength} characters or less.`);
-        descriptionBackendError.hidden = true;
+        if (descriptionBackendError) descriptionBackendError.hidden = true;
         return false;
     } else {
         clearError(descriptionFrontendError, descriptionFrontendErrorMessage);
-        descriptionBackendError.hidden = true;
+        if (descriptionBackendError) descriptionBackendError.hidden = true;
         return true;
     }
 }
@@ -83,12 +83,12 @@ function validateDueDate(dateValue) {
     if (dateValue && new Date(dateValue) < new Date()) {
         dueDateFrontendError.hidden = false;
         dueDateFrontendErrorMessage.innerText = "Due date must be in the future.";
-        dueDateBackendError.hidden = true; // Hide backend error when frontend validation fails
+        if (dueDateBackendError) dueDateBackendError.hidden = true; // Hide backend error when frontend validation fails
         return false;
     }
 
     dueDateFrontendError.hidden = true;
-    dueDateBackendError.hidden = true; // Show backend error if set (this is only needed when backend validation has issues)
+    if (dueDateBackendError) dueDateBackendError.hidden = true; // Show backend error if set (this is only needed when backend validation has issues)
     return true;
 }
 
