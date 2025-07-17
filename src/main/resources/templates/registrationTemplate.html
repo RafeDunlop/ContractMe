@@ -93,12 +93,12 @@
                 </div>
 
                 <!-- CONTRACTOR FORM FRAGMENT -->
-                <div th:class="${isContractor} ? 'form-extension' : 'hidden-form-extension'" id="contractor-form">
+                <div th:class="'pb-3 ' + (${isContractor} ? 'form-extension' : 'hidden-form-extension')" id="contractor-form">
                     <div th:replace="~{fragments/contractorRegistration.html :: contractor-registration}"></div>
                 </div>
 
                 <!-- LOCATION TOGGLE SWITCH -->
-                <div class="d-flex justify-content-between align-items-center py-4 px-0" style="width: 22%">
+                <div class="d-flex justify-content-between align-items-center pb-4 px-0" style="width: 22%">
                     <div id="location-toggle-switch-label">Enter Location (Optional):</div>
                     <div>
                         <label class="switch">
@@ -109,7 +109,7 @@
                 </div>
 
                 <!-- LOCATION FORM FRAGMENT -->
-                <div th:class="${locationUsed} ? 'form-extension' : 'hidden-form-extension'" id="location-form">
+                <div th:class="'pb-3 ' + (${locationUsed} ? 'form-extension' : 'hidden-form-extension')" id="location-form">
                     <div th:replace="~{fragments/locationForm.html :: locationForm(
                      addressDTO=${addressDTO})}"></div>
                 </div>
