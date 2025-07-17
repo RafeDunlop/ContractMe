@@ -12,4 +12,12 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         fetchRenovations("table", true);
     });
+
+    document.addEventListener('click', function (e) {
+        const card = e.target.closest('.renovation-card');
+        if (card && !e.target.closest('button')) {
+            const url = card.dataset.url;
+            if (url) window.location.href = url;
+        }
+    });
 });

@@ -248,9 +248,10 @@ function renderRecordTable(data, pageNumber, csrfToken) {
 
     data.content.forEach(record => {
         const rowHtml = `
-            <a href="${basePath}renovations/view?id=${record.id}&page=1" class="list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative">
+            <div class="list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative renovation-card"
+                 data-url="${basePath}renovations/view?id=${record.id}&page=1" style="cursor: pointer;">
                 <div class="d-flex justify-content-between align-items-start">
-                    <div class="w-100" onclick="document.getElementById('form-${record.id}').submit();" style="cursor: pointer;">
+                    <div class="w-100">
                         <h5 class="mb-1 text-primary truncate">${record.name}</h5>
                         <p class="mb-0 text-muted truncate">${record.description}</p>
                     </div>
@@ -261,7 +262,7 @@ function renderRecordTable(data, pageNumber, csrfToken) {
                         ❌
                     </button>
                 </div>
-            </a>
+            </div>
         `;
         table.insertAdjacentHTML("beforeend", rowHtml);
     });
