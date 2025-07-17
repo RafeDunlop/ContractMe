@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.entity;
 
 import jakarta.persistence.*;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 
 import java.util.Objects;
 

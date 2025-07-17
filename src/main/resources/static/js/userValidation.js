@@ -81,7 +81,7 @@ export function checkPasswordMatch(passwordField, confirmPasswordField, confirmP
     const confirmPassword = confirmPasswordField.value;
 
     if (password !== confirmPassword) {
-        confirmPasswordFrontendErrorMessage.textContent = "Passwords do not match.";
+        confirmPasswordFrontendErrorMessage.textContent = "The new passwords do not match";
         confirmPasswordFrontendError.hidden = false;
         confirmPasswordFrontendErrorMessage.hidden = false;
         confirmPasswordBackendError.hidden = true;

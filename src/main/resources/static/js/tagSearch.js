@@ -24,7 +24,7 @@ tagInput.addEventListener("input", function () {
         resetAutocomplete();
         return
     }
-    updateAutocomplete(partialTag);
+    updateSearchAutocomplete(partialTag)
 });
 
 /**
@@ -33,7 +33,7 @@ tagInput.addEventListener("input", function () {
  */
 function updateSearchAutocomplete(partialTag) {
     const filteredTags = tags.map(t => t.trim());
-    fetch(`/renovations/tags/autocomplete?partialTag=${encodeURIComponent(partialTag)}`)
+    fetch(`renovations/tags/autocomplete?partialTag=${encodeURIComponent(partialTag)}`)
     .then(response => response.json())
     .then(results => {
         const suggestions = results.filter(tag => !filteredTags.includes(tag));
