@@ -111,6 +111,17 @@ public class DefaultDataConfigurator {
                             defaultJERooms
                     )
             );
+
+        }
+
+        //Add 100 public records to default2, so they can be seen on default1
+        for (int i=0; i<=100; i++) {
+            RenovationRecord record = new RenovationRecord(default2,
+                    "Test Public Renovation " + i,
+                    "Description for renovation: " + 1,
+                    defaultJERooms);
+            record.setPublicity(true);
+            renovationRecordService.addRenovationRecord(record);
         }
     }
 
