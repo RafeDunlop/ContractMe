@@ -116,7 +116,7 @@
                 </div>
             </div>
 
-            <div th:replace="~{fragments/calendar.html ::calendar (${#dates.createNow()}) }"></div>
+            <div th:replace="~{fragments/calendar.html ::calendar (${date}, ${datesArray}) }"></div>
         </div>
     </div>
 
