@@ -1,0 +1,39 @@
+package nz.ac.canterbury.seng302.homehelper.unit.validation;
+
+import nz.ac.canterbury.seng302.homehelper.validation.ContractorValidation;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.List;
+
+public class ContractorValidationTest {
+
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0226450022","12345678","123456789123456"})
+    public void phoneNumberValidation_validPhoneNumber_acceptInput(String phoneNumber) {
+        ContractorValidation contractorValidation = new ContractorValidation();
+        Assertions.assertTrue(contractorValidation.validatePhoneNumber(phoneNumber).isEmpty());
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"123","abc","123456789123456789","a1c"})
+    public void phoneNumberValidation_invalidPhoneNumber_rejectInput(String phoneNumber) {
+        ContractorValidation contractorValidation = new ContractorValidation();
+        List <String> result = contractorValidation.validatePhoneNumber(phoneNumber);
+        Assertions.assertTrue(result.contains("Your phone number is invalid"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {""," "})
+    public void phoneNumberValidation_emptyPhoneNumber_rejectInput(String phoneNumber) {
+        ContractorValidation contractorValidation = new ContractorValidation();
+        List <String> result = contractorValidation.validatePhoneNumber(phoneNumber);
+        Assertions.assertTrue(result.contains("You must enter a valid phone number"));
+    }
+
+
+
+}

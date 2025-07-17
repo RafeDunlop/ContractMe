@@ -24,12 +24,11 @@ public class ContractorValidation {
     public List<String> validatePhoneNumber(String phoneNumber) {
         List<String> errors = new ArrayList<>();
         String regex = "\\d+";
-        if (phoneNumber.length() < 8 || phoneNumber.length() > 15) {
-            errors.add("Phone number must be between 8 and 15 digits");
-        }
 
-        if (!phoneNumber.matches(regex)) {
-            errors.add("Phone number must be a number");
+        if (phoneNumber.isBlank()) {
+            errors.add("You must enter a valid phone number");
+        } else if (phoneNumber.length() < 8 || phoneNumber.length() > 15 || !phoneNumber.matches(regex)) {
+            errors.add("Your phone number is invalid");
         }
 
         return errors;
