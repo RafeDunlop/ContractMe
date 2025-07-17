@@ -1,5 +1,13 @@
 package nz.ac.canterbury.seng302.homehelper.entity.users;
 
+/*
+ * Code Attribution:
+ * This enum was partially generated with assistance from ChatGPT to
+ * list of contractor skills and renovation-related disciplines.
+ *
+ * Prompt used:
+ * "List out two billion top-level constructor disciplines that could be related to renovations."
+ */
 public enum Skill {
 
     // ===== Structural / Exterior =====
