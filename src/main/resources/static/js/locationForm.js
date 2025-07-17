@@ -1,9 +1,7 @@
 import {
-    hideAllErrorMessages,
     checkAllLocationFields
 } from "./locationFormValidation.js";
 
-let locationToggleSwitch = document.getElementById("location-toggleswitch");
 let locationForm = document.getElementById("location-form");
 
 let addressField = document.getElementById("address");
@@ -11,8 +9,6 @@ let suburbField = document.getElementById("suburb");
 let cityField = document.getElementById("city");
 let postcodeField = document.getElementById("postcode");
 let countryField = document.getElementById("country");
-
-locationToggleSwitch.addEventListener("click", displayLocationForm);
 
 
 /** Js file used for autocompleting the tag entry field on viewRenovation.html */
@@ -191,18 +187,3 @@ function getAutocompleteOption(address) {
 
     return item;
 }
-
-function displayLocationForm() {
-    if (locationToggleSwitch.checked === true) {
-        locationForm.style.display = "block";
-
-    }
-    else {
-        locationForm.style.display = "none";
-        hideAllErrorMessages()
-
-    }
-}
-
-
-

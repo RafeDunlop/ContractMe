@@ -81,10 +81,25 @@
                     </div>
                 </div>
 
-                <!-- LOCATION TOGGLE SWITCH -->
-
+                <!-- CONTRACTOR TOGGLE SWITCH -->
                 <div class="d-flex justify-content-between align-items-center py-4 px-0" style="width: 22%">
-                    <div>Enter Location (Optional):</div>
+                    <div>Register as Contractor:</div>
+                    <div>
+                        <label class="switch">
+                            <input type="checkbox" id="contractor-toggleswitch" th:checked="${contractorUsed}">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- CONTRACTOR FORM FRAGMENT -->
+                <div th:class="${isContractor} ? 'form-extension' : 'hidden-form-extension'" id="contractor-form">
+                    <div th:replace="~{fragments/contractorRegistration.html :: contractor-registration}"></div>
+                </div>
+
+                <!-- LOCATION TOGGLE SWITCH -->
+                <div class="d-flex justify-content-between align-items-center py-4 px-0" style="width: 22%">
+                    <div id="location-toggle-switch-label">Enter Location (Optional):</div>
                     <div>
                         <label class="switch">
                             <input type="checkbox" id="location-toggleswitch" th:checked="${locationUsed}">
@@ -148,8 +163,6 @@
                     </ul>
                 </div>
 
-                <div th:replace="~{fragments/contractorRegistration.html :: contractor-registration}"></div>
-
                 <!-- SIGN UP BUTTON -->
                 <button type="submit" class="btn btn-primary">Sign up</button>
 
@@ -165,4 +178,5 @@
 <script type = "module" th:src="@{/js/locationFormValidation.js}"></script>
 <script type="module" th:src="@{/js/userValidation.js}"></script>
 <script type="module" th:src="@{/js/registerValidation.js}"></script>
+<script type="module" th:src="@{/js/registrationToggleSwitch.js}"></script>
 </html>
