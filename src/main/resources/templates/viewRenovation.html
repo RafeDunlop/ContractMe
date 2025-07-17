@@ -115,6 +115,8 @@
                     <a th:href="@{${previousUrl}}" class="btn btn-secondary" th:if="${previousUrl != null}">Back</a>
                 </div>
             </div>
+
+            <div th:replace="~{fragments/calendar.html ::calendar (${date}, ${datesArray}) }"></div>
         </div>
     </div>
 
