@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+    <link th:href="@{/css/inputBoxStyles.css}" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <title></title>
+</head>
+<body>
+<div th:fragment="contractor-registration" id="contractor-form">
+    <div class="mb-3">
+        <div class="input-group">
+            <span class="prefix-span input-group-text">$</span>
+            <input type="number" class="form-control" id="hourly-rate" placeholder="Hourly Rate" aria-label="hourly-rate">
+        </div>
+
+        <!-- Frontend JS Error -->
+        <div class="alert alert-danger mt-2" id="hourly-rate-frontend-error" hidden>
+            <ul>
+                <li><label class="form-label" id="hourly-rate-frontend-error-message"></label></li>
+            </ul>
+        </div>
+
+        <!-- Backend error -->
+        <div class="alert alert-danger mt-2" id="hourly-rate-backend-error"
+             th:attr="hidden=${hourlyRateError == null}">
+            <ul>
+                <li th:each="msg : ${hourlyRateError}" th:text="${msg}"></li>
+            </ul>
+        </div>
+    </div>
+    <div class="mb-3">
+        <div class="input-group">
+            <span class="prefix-span input-group-text">+</span>
+            <input type="text" inputmode="numeric" class="form-control" id="country-code" placeholder="Country Code" maxlength="2"
+                   pattern="\d{1,2}" aria-label="country-code">
+            <input type="text" inputmode="numeric" class="form-control" id="phone-number" placeholder="Phone Number" maxlength="15"
+                   pattern="\d{6,15}" aria-label="phone-number">
+        </div>
+
+        <!-- Frontend JS Error -->
+        <div class="alert alert-danger mt-2" id="phone-number-frontend-error" hidden>
+            <ul>
+                <li><label class="form-label" id="phone-number-frontend-error-message"></label></li>
+            </ul>
+        </div>
+
+        <!-- Backend error -->
+        <div class="alert alert-danger mt-2" id="phone-number-backend-error"
+             th:attr="hidden=${phoneNumberError == null}">
+            <ul>
+                <li th:each="msg : ${phoneNumberError}" th:text="${msg}"></li>
+            </ul>
+        </div>
+    </div>
+    <div class="mb-3">
+
+        <select class="form-select" id="skills" aria-label="skills">
+            <option selected>Skills (Placeholder)</option>
+        </select>
+
+        <!-- Frontend JS Error -->
+        <div class="alert alert-danger mt-2" id="skills-frontend-error" hidden>
+            <ul>
+                <li><label class="form-label" id="skills-frontend-error-message"></label></li>
+            </ul>
+        </div>
+
+        <!-- Backend error -->
+        <div class="alert alert-danger mt-2" id="skills-backend-error"
+             th:attr="hidden=${skillsError == null}">
+            <ul>
+                <li th:each="msg : ${skillsError}" th:text="${msg}"></li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html>
