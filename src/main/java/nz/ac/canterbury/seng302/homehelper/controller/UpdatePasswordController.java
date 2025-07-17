@@ -37,7 +37,8 @@ public class UpdatePasswordController {
      */
     @GetMapping("user/edit/updatePassword")
     public String updatePassword(Model model) {
-        model.addAttribute("updatePasswordDTO", new UpdatePasswordDTO("","",""));
+        if (!model.containsAttribute("updatePasswordDTO"))
+            model.addAttribute("updatePasswordDTO", new UpdatePasswordDTO("","",""));
         logger.info("GET /user/edit/updatePassword");
         try {
             return "updatePasswordTemplate";
@@ -58,6 +59,10 @@ public class UpdatePasswordController {
     public String tryChangePassword(@ModelAttribute("updatePasswordDTO") UpdatePasswordDTO updatePasswordDTO,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes) {
+        logger.info("POST /user/edit/updatePassword");
+        if (updatePasswordDTO.getCurrentPassword() == null) updatePasswordDTO.setCurrentPassword("");
+        if (updatePasswordDTO.getNewPassword() == null) updatePasswordDTO.setNewPassword("");
+        if (updatePasswordDTO.getRetypePassword() == null) updatePasswordDTO.setRetypePassword("");
         if (bindingResult.hasErrors()) {
             bindingResult.getAllErrors().forEach(error -> logger.info(error.getDefaultMessage()));
         }
