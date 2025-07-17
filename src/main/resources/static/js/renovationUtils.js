@@ -251,8 +251,8 @@ function renderRecordTable(data, pageNumber, csrfToken) {
             <a href="${basePath}renovations/view?id=${record.id}&page=1" class="list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative">
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="w-100" onclick="document.getElementById('form-${record.id}').submit();" style="cursor: pointer;">
-                        <h5 class="mb-1 text-primary">${record.name}</h5>
-                        <p class="mb-0 text-muted">${record.description}</p>
+                        <h5 class="mb-1 text-primary truncate">${record.name}</h5>
+                        <p class="mb-0 text-muted truncate">${record.description}</p>
                     </div>
                     <button type="button" class="btn btn-outline-danger custom-light-border ms-3"
                         data-id="${record.id}" data-searchQuery="${lastSubmittedSearchTerm}"
