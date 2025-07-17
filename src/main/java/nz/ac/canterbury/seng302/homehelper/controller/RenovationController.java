@@ -29,6 +29,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UrlPathHelper;
 
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -39,8 +41,6 @@ import java.util.*;
 @RequestMapping("/renovations")
 public class RenovationController {
 
-    private static final int CAL_ROWS = 5;
-    private static final int CAL_COLUMNS = 7;
     private static final Logger logger = LoggerFactory.getLogger(RenovationController.class);
 
     private final RenovationRecordService renovationRecordService;
@@ -364,6 +364,8 @@ public class RenovationController {
     @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id,
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                 @RequestParam(required = false) Integer year,
+                                 @RequestParam(required = false) Integer month,
                                  Model model,
                                  HttpServletRequest request) {
         logger.info("GET /renovations/view");
@@ -382,24 +384,28 @@ public class RenovationController {
         String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
-        /* TODO: This is a rudimentary mockup to get the calendar fragment to work, the person doing the task "Implement
-           Calendar Fragment Design" should implement this properly at service layer, allowing for setting the month.
-        */
-        Calendar date = Calendar.getInstance();
-        Calendar dateCopy = (Calendar) date.clone();
-        dateCopy.set(Calendar.DAY_OF_MONTH, dateCopy.getActualMinimum(Calendar.DAY_OF_MONTH));
-        int weekDayFirst = (dateCopy.get(Calendar.DAY_OF_WEEK) - 2) % 6;
-        dateCopy.add(Calendar.DATE, -weekDayFirst);
-        int[][] datesArray = new int[5][7];
-        for (int i = 0; i < CAL_ROWS; i++) {
-            for (int j = 0; j < CAL_COLUMNS; j++) {
-                datesArray[i][j] = dateCopy.get(Calendar.DATE);
-                dateCopy.add(Calendar.DATE, 1);
+        LocalDate localDate = LocalDate.now();
+        if (year != null && month != null) {
+            try {
+                localDate = LocalDate.of(year, month, 1);
+            } catch (DateTimeException e) {
+                logger.error(e.getMessage());
+            }
+        } else if (month != null) {
+            try {
+                localDate = LocalDate.of(localDate.getYear(), month, 1);
+            } catch (DateTimeException e) {
+                logger.error(e.getMessage());
             }
         }
 
+        int[][] datesArray = renovationRecordService.generateCalendarDate(localDate);
+
+        Calendar calendarDate = Calendar.getInstance();
+        calendarDate.set(localDate.getYear(), localDate.getMonthValue()- 1, localDate.getDayOfMonth());
+
         model.addAttribute("datesArray", datesArray);
-        model.addAttribute("date", date);
+        model.addAttribute("date", calendarDate);
 
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
 
