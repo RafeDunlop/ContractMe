@@ -1,11 +1,14 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Class for contractor validation
  */
+@Service
 public class ContractorValidation {
 
 

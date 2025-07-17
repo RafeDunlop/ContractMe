@@ -5,10 +5,16 @@ import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.ContractorRepository;
+import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
+import nz.ac.canterbury.seng302.homehelper.validation.ContractorValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -21,6 +27,7 @@ public class ContractorService {
 
     private final RegisterService registerService;
     private final PasswordEncoder passwordEncoder;
+    private final ContractorValidation contractorValidation;
 
     /**
      * Constructor for the service and links the repository and validator to the
@@ -29,10 +36,11 @@ public class ContractorService {
      * @param registerService RegisterService for registering Contractors
      */
     @Autowired
-    public ContractorService(ContractorRepository contractorRepository, RegisterService registerService) {
+    public ContractorService(ContractorRepository contractorRepository, RegisterService registerService, ContractorValidation contractorValidation) {
         this.registerService = registerService;
         this.contractorRepository = contractorRepository;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        this.contractorValidation = contractorValidation;
     }
 
 
@@ -66,5 +74,19 @@ public class ContractorService {
         contractor.setLocation(location);
         contractor = contractorRepository.save(contractor);
         return contractor;
+    }
+
+    /**
+     * Validates the contractor specific registration fields provided in the {@link UserRegisterDTO}
+     *
+     * @param userRegisterDTO the user registration data transfer object containing user input fields
+     * @return a map of field name and error lists. If no errors exist for a field, it is not included
+     */
+    public Map<String, List<String>> validateContractor(UserRegisterDTO userRegisterDTO) {
+        Map<String, List<String>> errors = new HashMap<>();
+
+        MapUtil.putIfNotEmpty(errors, "phoneNumberError", contractorValidation.validatePhoneNumber(userRegisterDTO.getPhoneNumber()));
+        MapUtil.putIfNotEmpty(errors, "hourlyRateError", contractorValidation.validateHourlyRate(userRegisterDTO.getHourlyRate()));
+        return errors;
     }
 }
