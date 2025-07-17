@@ -4,7 +4,7 @@
 <!-- month is the month name, numDays is the number of days in the month, rows is the number of rows in the calendar,
 and firstDay is the number of the day of the Week which occurs on the first day of the month,
 from 0 (Monday) to 6 (Sunday) -->
-<div th:fragment="calendar (date, dates)" class="container">
+<div th:fragment="calendar (date, dates)" class="container" id="calendar">
     <div class="row">
         <div class="col">
             <h1 class="display-5 text-center" th:text="|${#calendars.monthName(date)} ${#calendars.year(date)}|"></h1>
