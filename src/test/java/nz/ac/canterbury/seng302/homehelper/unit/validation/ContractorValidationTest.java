@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.unit.validation;
 
 import nz.ac.canterbury.seng302.homehelper.validation.ContractorValidation;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -34,6 +35,19 @@ public class ContractorValidationTest {
         Assertions.assertTrue(result.contains("You must enter a valid phone number"));
     }
 
+    @Test
+    public void hourlyRateValidation_negativeHourlyRate_rejectInput() {
+        ContractorValidation contractorValidation = new ContractorValidation();
+        List<String> result = contractorValidation.validateHourlyRate(-1);
+        List<String> expected = List.of("Invalid hourly rate");
+        Assertions.assertEquals(expected, result);
+    }
 
+    @ParameterizedTest
+    @ValueSource(floats = {27.8f, 1, 1000000000})
+    public void hourlyRateValidation_validHourlyRate_acceptInput(float hourlyRate) {
+        ContractorValidation contractorValidation = new ContractorValidation();
+        Assertions.assertTrue(contractorValidation.validateHourlyRate(hourlyRate).isEmpty());
+    }
 
 }

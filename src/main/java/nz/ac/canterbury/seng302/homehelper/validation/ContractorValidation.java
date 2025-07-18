@@ -12,11 +12,11 @@ import java.util.List;
 public class ContractorValidation {
 
 
-    public List<String> validateHourlyRate(Float hourlyRate) {
+    public List<String> validateHourlyRate(float hourlyRate) {
         List<String> errors = new ArrayList<>();
 
         if (hourlyRate < 0) {
-            errors.add("Hourly rate cannot be negative");
+            errors.add("Invalid hourly rate");
         }
         return errors;
     }
