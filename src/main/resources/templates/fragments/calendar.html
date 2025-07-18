@@ -19,19 +19,21 @@ from 0 (Monday) to 6 (Sunday) -->
         <div class="col border border-secondary">Saturday</div>
         <div class="col border border-secondary">Sunday</div>
     </div>
+
     <div th:each="row : ${dates}" class="row">
         <div th:each="cell : ${row}"
              th:if="${cell != null}"
              class="col py-1 border border-secondary text-start"
              th:classappend="${cell.month != #calendars.month(date)} ? ' bg-body-secondary text-muted' : ''">
-            <div class="d-flex flex-column align-items-center" style="min-height: 120px">
-                <div th:text="${cell.day}" style="padding: 5px 0;"></div>
-                <div class="calendar-task" style="margin: 5px 0;"></div>
-            </div>
-
-
+             <div class="d-flex flex-column align-items-center" style="min-height: 120px">
+                 <div th:text="${cell.day}" style="padding: 5px 0;"></div>
+                 <div class="calendar-task" style="margin: 5px 0;"></div>
+                 <div th:text=" more tasks" style="display: none;"></div>
+             </div>
         </div>
     </div>
+
 </div>
 </body>
+<script type="text/javascript" th:src="@{/js/calendar.js}"></script>
 </html>

@@ -95,7 +95,7 @@
 }
 
 .calendar-task {
-
+    display: none;
     width: 100%;
     height: 45px;
     border-radius: 8px;
