@@ -1,7 +1,7 @@
 import {
     hideAllErrorMessages,
     checkAllLocationFields
-} from "./locationFormValidation.js";
+} from "./validation/locationFormValidation.js";
 
 let locationToggleSwitch = document.getElementById("location-toggleswitch");
 let locationForm = document.getElementById("location-form");

@@ -1,4 +1,4 @@
-import { validateField } from "./renovationCommons.js";
+import { validateField } from "../renovationCommons.js";
 
 let recordNameField = document.getElementById("name")
 let nameFrontendError = document.getElementById("name-frontend-error")
