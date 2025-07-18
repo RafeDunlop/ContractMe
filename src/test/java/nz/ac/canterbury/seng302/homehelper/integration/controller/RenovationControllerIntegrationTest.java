@@ -1712,7 +1712,7 @@ public class RenovationControllerIntegrationTest {
     public void viewRenovation_negativeYear_returnFormWithMonthAndPositiveYear() throws Exception {
         int inputtedMonth = 12;
         int inputtedYear = 0;
-        int expectedYear = Math.abs(inputtedYear - 1);
+        int expectedYear = 1;
 
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation with Calendar 4", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
