@@ -70,7 +70,7 @@ public class RenovationController {
      * Gets all renovations
      *
      * @param searchTerm optional string to search on renovation name (partial matching)
-     * @param model       (map-like) representation of results to be used by thymeleaf
+     * @param model      (map-like) representation of results to be used by thymeleaf
      * @return thymeleaf renovationsTemplate
      */
     @GetMapping
@@ -593,7 +593,7 @@ public class RenovationController {
                                                     HttpServletRequest request) {
 
         // Apply default values
-        if (visibility == null) visibility = "all";
+        if (visibility == null) visibility = "user";
         if (searchTerm == null) searchTerm = "";
 
         // Convert tag names to Tag entities if provided
