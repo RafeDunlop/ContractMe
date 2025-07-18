@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.CalendarCellDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.*;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
@@ -12,6 +13,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
@@ -1622,4 +1622,143 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    public void viewRenovation_validYearAndMonth_returnFormWithInputtedMonthAndYear() throws Exception {
+        int inputtedYear = 2024;
+        int inputtedMonth = 12;
+
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation with Calendar 1", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        MvcResult result = mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .param("year", String.valueOf(inputtedYear))
+                        .param("month", String.valueOf(inputtedMonth))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"))
+                .andReturn();
+
+        GregorianCalendar returnedCalendar = (GregorianCalendar) Objects.requireNonNull(result.getModelAndView()).getModel().get("date");
+        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) Objects.requireNonNull(result.getModelAndView()).getModel().get("datesArray");
+
+        int returnedYear = returnedCalendar.get(Calendar.YEAR);
+        int returnedMonth = returnedCalendar.get(Calendar.MONTH) + 1;
+
+        Assertions.assertEquals(inputtedYear, returnedYear);
+        Assertions.assertEquals(inputtedMonth, returnedMonth);
+        Assertions.assertEquals(6, returnedCalendarCells.size());
+    }
+
+    @Test
+    public void viewRenovation_validMonthNoYear_returnFormWithInputtedMonthAndCurrentYear() throws Exception {
+        int inputtedMonth = 12;
+        int currentYear = LocalDate.now().getYear();
+
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation with Calendar 2", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        MvcResult result = mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .param("month", String.valueOf(inputtedMonth))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"))
+                .andReturn();
+
+        GregorianCalendar returnedCalendar = (GregorianCalendar) Objects.requireNonNull(result.getModelAndView()).getModel().get("date");
+        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) Objects.requireNonNull(result.getModelAndView()).getModel().get("datesArray");
+
+        int returnedYear = returnedCalendar.get(Calendar.YEAR);
+        int returnedMonth = returnedCalendar.get(Calendar.MONTH) + 1;
+
+        Assertions.assertEquals(currentYear, returnedYear);
+        Assertions.assertEquals(inputtedMonth, returnedMonth);
+        Assertions.assertTrue(List.of(5,6).contains(returnedCalendarCells.size()));
+    }
+
+    @Test
+    public void viewRenovation_noMonthAndYear_returnFormWithCurrentMonthAndYear() throws Exception {
+        int currentMonth = LocalDate.now().getMonthValue();
+        int currentYear = LocalDate.now().getYear();
+
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation with Calendar 3", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        MvcResult result = mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"))
+                .andReturn();
+
+        GregorianCalendar returnedCalendar = (GregorianCalendar) Objects.requireNonNull(result.getModelAndView()).getModel().get("date");
+        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) Objects.requireNonNull(result.getModelAndView()).getModel().get("datesArray");
+
+        int returnedYear = returnedCalendar.get(Calendar.YEAR);
+        int returnedMonth = returnedCalendar.get(Calendar.MONTH) + 1;
+
+        Assertions.assertEquals(currentYear, returnedYear);
+        Assertions.assertEquals(currentMonth, returnedMonth);
+        Assertions.assertTrue(List.of(5,6).contains(returnedCalendarCells.size()));
+    }
+
+    @Test
+    public void viewRenovation_negativeYear_returnFormWithMonthAndPositiveYear() throws Exception {
+        int inputtedMonth = 12;
+        int inputtedYear = 0;
+        int expectedYear = Math.abs(inputtedYear - 1);
+
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation with Calendar 4", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        MvcResult result = mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .param("year", String.valueOf(inputtedYear))
+                        .param("month", String.valueOf(inputtedMonth))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"))
+                .andReturn();
+
+        GregorianCalendar returnedCalendar = (GregorianCalendar) Objects.requireNonNull(result.getModelAndView()).getModel().get("date");
+        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) Objects.requireNonNull(result.getModelAndView()).getModel().get("datesArray");
+
+        int returnedYear = returnedCalendar.get(Calendar.YEAR);
+        int returnedMonth = returnedCalendar.get(Calendar.MONTH) + 1;
+
+        Assertions.assertEquals(expectedYear, returnedYear);
+        Assertions.assertEquals(inputtedMonth, returnedMonth);
+        Assertions.assertEquals(5, returnedCalendarCells.size());
+    }
+
+    @Test
+    public void viewRenovation_invalidMonth_returnFormWithCurrentMonthAndYear() throws Exception {
+        int inputtedMonth = 13;
+        int inputtedYear = 2025;
+        int currentMonth = LocalDate.now().getMonthValue();
+        int currentYear = LocalDate.now().getYear();
+
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation with Calendar 5", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        MvcResult result = mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .param("year", String.valueOf(inputtedYear))
+                        .param("month", String.valueOf(inputtedMonth))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"))
+                .andReturn();
+
+        GregorianCalendar returnedCalendar = (GregorianCalendar) Objects.requireNonNull(result.getModelAndView()).getModel().get("date");
+        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) Objects.requireNonNull(result.getModelAndView()).getModel().get("datesArray");
+
+        int returnedYear = returnedCalendar.get(Calendar.YEAR);
+        int returnedMonth = returnedCalendar.get(Calendar.MONTH) + 1;
+
+        Assertions.assertEquals(currentYear, returnedYear);
+        Assertions.assertEquals(currentMonth, returnedMonth);
+        Assertions.assertTrue(List.of(5,6).contains(returnedCalendarCells.size()));
+    }
 }
