@@ -12,7 +12,7 @@
     <div class="mb-3">
         <div class="input-group">
             <span class="prefix-span input-group-text">$</span>
-            <input type="number" class="form-control" id="hourly-rate" placeholder="Hourly Rate" aria-label="hourly-rate">
+            <input type="number" class="form-control" id="hourlyRate" placeholder="Hourly Rate" aria-label="hourly-rate">
         </div>
 
         <!-- Frontend JS Error -->
@@ -33,9 +33,9 @@
     <div class="mb-3">
         <div class="input-group">
             <span class="prefix-span input-group-text">+</span>
-            <input type="text" inputmode="numeric" class="form-control" id="country-code" placeholder="Country Code" maxlength="2"
-                   pattern="\d{1,2}" aria-label="country-code">
-            <input type="text" inputmode="numeric" class="form-control" id="phone-number" placeholder="Phone Number" maxlength="15"
+            <input type="number" max="999" class="form-control" id="countryCode" placeholder="Country Code"
+                   aria-label="country-code">
+            <input type="text" inputmode="numeric" class="form-control" id="phoneNumber" placeholder="Phone Number" maxlength="15"
                    pattern="\d{6,15}" aria-label="phone-number">
         </div>
 
