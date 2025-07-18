@@ -7,8 +7,9 @@ async function removeTag(button) {
     const csrfToken = button.getAttribute("data-csrf");
     const renovationId = button.getAttribute("data-renovationId");
     const tagName = button.getAttribute("data-tagName");
+    const basePath = window.contextPath || "";
 
-    const response = await fetch(`/renovations/tags/remove?renovationId=${renovationId}&tagName=${encodeURIComponent(tagName)}`, {
+    const response = await fetch(`${basePath}renovations/tags/remove?renovationId=${renovationId}&tagName=${encodeURIComponent(tagName)}`, {
         method: 'PATCH',
         headers: {
             'X-CSRF-TOKEN': csrfToken,
