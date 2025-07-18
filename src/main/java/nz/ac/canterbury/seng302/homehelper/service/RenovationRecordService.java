@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.CalendarCellDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.TagDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
@@ -32,9 +33,6 @@ public class RenovationRecordService {
     private final RenovationRecordRepository renovationRecordRepository;
     private final RenovationTaskRepository renovationTaskRepository;
     private final RenovationRecordValidation renovationRecordValidation;
-
-    private static final int CAL_ROWS = 5;
-    private static final int CAL_COLUMNS = 7;
 
     /**
      * Constructor for the RenovationRecordService class
@@ -354,21 +352,22 @@ public class RenovationRecordService {
         return new PageImpl<>(recordsSubList, pageable, records.size());
     }
 
-    public int[][] generateCalendarDate(LocalDate date) {
+    public CalendarCellDTO[][] generateCalendarCells(LocalDate date) {
         LocalDate firstOfMonth = date.withDayOfMonth(1);
         int dayOfWeek = firstOfMonth.getDayOfWeek().getValue();
         int startOffset = dayOfWeek - 1;
 
         LocalDate startDate = firstOfMonth.minusDays(startOffset);
+        CalendarCellDTO[][] cells = new CalendarCellDTO[5][7];
 
-        int[][] datesArray = new int[5][7];
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                datesArray[i][j] = startDate.getDayOfMonth();
+                boolean isCurrent = startDate.getMonthValue() == date.getMonthValue();
+                cells[i][j] = new CalendarCellDTO(startDate.getDayOfMonth(), isCurrent);
                 startDate = startDate.plusDays(1);
             }
         }
 
-        return datesArray;
+        return cells;
     }
 }

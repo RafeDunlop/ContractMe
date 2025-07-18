@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.CalendarCellDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
@@ -399,7 +400,7 @@ public class RenovationController {
             }
         }
 
-        int[][] datesArray = renovationRecordService.generateCalendarDate(localDate);
+        CalendarCellDTO[][] datesArray = renovationRecordService.generateCalendarCells(localDate);
 
         Calendar calendarDate = Calendar.getInstance();
         calendarDate.set(localDate.getYear(), localDate.getMonthValue()- 1, localDate.getDayOfMonth());
