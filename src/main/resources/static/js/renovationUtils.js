@@ -22,7 +22,7 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
     const loading = document.getElementById("loading-message");
 
     // Get visibility filter
-    const visibility = document.querySelector("select[name='visibility']")?.value || "all";
+    const visibility = document.querySelector("select[name='visibility']")?.value || "user";
     updateHeaderTitle(visibility);
 
     // Read pagination and display settings
@@ -41,7 +41,7 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
     params.set("page", pageNumber);
     userParams.set("page", pageNumber);
 
-    if (visibility !== "all") {
+    if (visibility !== "user") {
         params.set("visibility", visibility);
         userParams.set("visibility", visibility);
     }
