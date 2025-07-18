@@ -29,13 +29,12 @@ public class Contractor extends User {
     private Boolean available;
 
     /**
-     * Constructor for RenovationTask object
+     * Constructor for Contractor object
      * @param firstName The first name of the contractor
      * @param lastName the last name of the contractor
      * @param email The email of the contractor
      * @param password The password of the contractor
      */
-
     public Contractor(String firstName, String lastName, String email, String password) {
         super(firstName, lastName, email, password);
         this.skills = new HashSet<>();

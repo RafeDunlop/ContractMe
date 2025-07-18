@@ -134,12 +134,7 @@ public class RenovationController {
         if (roomList == null) roomList = new ArrayList<>(); //cannot be a default value as technically non-constant
         Map<String, List<String>> errors = renovationRecordService.validateAllInputsCreate(name, description, roomList);
 
-        boolean locationProvided = addressDTO != null &&
-                (addressDTO.getAddress_line1() != null && !addressDTO.getAddress_line1().isBlank()
-                        || addressDTO.getRegion() != null && !addressDTO.getRegion().isBlank()
-                        || addressDTO.getCity() != null && !addressDTO.getCity().isBlank()
-                        || addressDTO.getPostcode() != null && !addressDTO.getPostcode().isBlank()
-                        || addressDTO.getCountry() != null && !addressDTO.getCountry().isBlank());
+        boolean locationProvided = locationService.isLocationProvided(addressDTO);
 
         if (locationProvided) {
             errors.putAll(locationService.validateLocation(addressDTO));

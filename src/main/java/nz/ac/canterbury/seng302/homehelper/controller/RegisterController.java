@@ -84,12 +84,7 @@ public class RegisterController {
         Map<String, List<String>> errors = registerService.validateRegistration(userRegisterDTO);
 
 
-        boolean locationProvided = addressDTO != null &&
-                (addressDTO.getAddress_line1() != null && !addressDTO.getAddress_line1().isBlank()
-                        || addressDTO.getRegion() != null && !addressDTO.getRegion().isBlank()
-                        || addressDTO.getCity() != null && !addressDTO.getCity().isBlank()
-                        || addressDTO.getPostcode() != null && !addressDTO.getPostcode().isBlank()
-                        || addressDTO.getCountry() != null && !addressDTO.getCountry().isBlank());
+        boolean locationProvided = locationService.isLocationProvided(addressDTO);
         if (locationProvided) {
             errors.putAll(locationService.validateLocation(addressDTO));
         }
@@ -106,7 +101,7 @@ public class RegisterController {
             User user = registerService.registerUser(userRegisterDTO);
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
             if (locationService.isLocationProvided(addressDTO)) {
-                registerService.registerLocation(user,addressDTO);
+                registerService.registerLocation(user, addressDTO);
             }
             return "redirect:/confirm-registration";
         } catch (MailException e) {
