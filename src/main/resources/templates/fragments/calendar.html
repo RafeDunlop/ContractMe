@@ -6,7 +6,7 @@ and firstDay is the number of the day of the Week which occurs on the first day 
 from 0 (Monday) to 6 (Sunday) -->
 <div th:fragment="calendar (date, dates)" class="container" id="calendar">
     <div class="row">
-        <div class="col">
+        <div class="col" >
             <h1 class="display-5 text-center" th:text="|${#calendars.monthName(date)} ${#calendars.year(date)}|"></h1>
         </div>
     </div>
@@ -22,9 +22,14 @@ from 0 (Monday) to 6 (Sunday) -->
     <div th:each="row : ${dates}" class="row">
         <div th:each="cell : ${row}"
              th:if="${cell != null}"
-             class="col py-5 border border-secondary text-start"
-             th:text="${cell.day}"
+             class="col py-1 border border-secondary text-start"
              th:classappend="${cell.month != #calendars.month(date)} ? ' bg-body-secondary text-muted' : ''">
+            <div class="d-flex flex-column align-items-center" style="min-height: 120px">
+                <div th:text="${cell.day}" style="padding: 5px 0;"></div>
+                <div class="calendar-task" style="margin: 5px 0;"></div>
+            </div>
+
+
         </div>
     </div>
 </div>
