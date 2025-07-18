@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.Contract
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
+import nz.ac.canterbury.seng302.homehelper.validation.ContractorValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +33,8 @@ public class ContractorServiceIntegrationTest {
 
     @Autowired
     private RegisterService registerService;
+    @Autowired
+    private ContractorValidation contractorValidation;
 
     private UserRegisterDTO userRegisterDTO;
 
@@ -64,7 +67,7 @@ public class ContractorServiceIntegrationTest {
         addressDTO.setPostcode("8042");
         addressDTO.setRegion("Avonhead");
 
-        toTest = new ContractorService(contractorRepository, registerService);
+        toTest = new ContractorService(contractorRepository, registerService, contractorValidation);
 
 
     }

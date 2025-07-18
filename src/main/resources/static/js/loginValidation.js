@@ -1,4 +1,4 @@
-import { checkEmailField } from './userValidation.js';
+import { checkEmailField } from './validation/userValidation.js';
 
 document.addEventListener("DOMContentLoaded", () => {
 
