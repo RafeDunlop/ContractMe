@@ -1,5 +1,10 @@
 package nz.ac.canterbury.seng302.homehelper.entity.users;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public enum Skill {
 
     // ===== Structural / Exterior =====
@@ -89,5 +94,9 @@ public enum Skill {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public static List<String> listOfSkills() {
+        return Stream.of(Skill.values()).map(Skill::getDisplayName).sorted().collect(Collectors.toList());
     }
 }
