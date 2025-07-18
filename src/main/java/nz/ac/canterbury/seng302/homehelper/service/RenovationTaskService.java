@@ -39,8 +39,35 @@ public class RenovationTaskService {
         this.renovationTaskValidation = renovationTaskValidation;
     }
 
+    /**
+     * Gets the task with the corresponding id
+     * @param id The id corresponding to the {@code RenovationTask} to be retrieved
+     * @return The {RenovationTask} corresponding to the specified id
+     */
     public RenovationTask getTaskById(Long id) {
         return renovationTaskRepository.findById(id).orElse(null);
+    }
+
+
+    /**
+     * Gets a mapping of dates within the specified range to tasks whose due dates fall on those dates
+     * @param renovationRecord The {@code RenovationRecord} whose tasks are being queried
+     * @param startDate The first date for which to retrieve {@code RenovationTask} objects
+     * @param endDate The last date for which to retrieve {@code RenovationTask} objects
+     * @return A map which contains the {@code RenovationTask} objects associated with each date within the specified range
+     */
+    public Map<LocalDate, List<RenovationTask>> getTasksWithinDates(RenovationRecord renovationRecord, LocalDate startDate, LocalDate endDate) {
+        HashMap<LocalDate, List<RenovationTask>> dateMap = new HashMap<>();
+        renovationTaskRepository.getByDueDateBetween(startDate, endDate, renovationRecord).forEach(renovationTask -> dateMap.merge(
+                renovationTask.getDueDate(),
+                List.of(renovationTask),
+                (existing, toAdd) -> {
+                    ArrayList<RenovationTask> allCorrespondingTasks = new ArrayList<>(existing);
+                    allCorrespondingTasks.addAll(toAdd);
+                    return allCorrespondingTasks;
+                })
+        );
+        return dateMap;
     }
 
     /**
