@@ -1,4 +1,4 @@
-import {hideAllErrorMessages} from "./locationFormValidation.js";
+import {hideAllErrorMessages} from "./validation/locationFormValidation.js";
 
 let locationToggleSwitch = document.getElementById("location-toggleswitch");
 let locationForm = document.getElementById("location-form");
