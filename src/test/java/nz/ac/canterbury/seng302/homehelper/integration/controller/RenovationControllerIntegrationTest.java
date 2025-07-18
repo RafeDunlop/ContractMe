@@ -1267,6 +1267,7 @@ public class RenovationControllerIntegrationTest {
 
         MvcResult result = mockMvc.perform(get("/renovations/retrieve")
                         .param("tagNameList", "House")
+                        .param("visibility", "all")
                         .param("tagNameList", "New")
                         .session(session))
                 .andExpect(status().isOk())
@@ -1328,7 +1329,9 @@ public class RenovationControllerIntegrationTest {
         renovationRecordRepository.save(record);
 
         MvcResult result = mockMvc.perform(get("/renovations/retrieve")
-                        .param("searchTerm", "One"))
+                        .param("searchTerm", "One")
+                        .param("visibility", "all"))
+
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -1358,6 +1361,7 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().isOk());
 
         MvcResult result = mockMvc.perform(get("/renovations/retrieve")
+                        .param("visibility", "all")
                         .session(session))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -1425,6 +1429,7 @@ public class RenovationControllerIntegrationTest {
         MvcResult result = mockMvc.perform(get("/renovations/retrieve")
                         .param("tagNameList", tagName)
                         .param("tagNameList", tagName2)
+                        .param("visibility", "all")
                         .session(session))
                 .andExpect(status().isOk())
                 .andReturn();
