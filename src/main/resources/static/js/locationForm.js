@@ -1,6 +1,6 @@
 import {
     checkAllLocationFields
-} from "./locationFormValidation.js";
+} from "./validation/locationFormValidation.js";
 
 let locationForm = document.getElementById("location-form");
 
