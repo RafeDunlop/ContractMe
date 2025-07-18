@@ -400,7 +400,7 @@ public class RenovationController {
             }
         }
 
-        CalendarCellDTO[][] datesArray = renovationRecordService.generateCalendarCells(localDate);
+        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate);
 
         Calendar calendarDate = Calendar.getInstance();
         calendarDate.set(localDate.getYear(), localDate.getMonthValue()- 1, localDate.getDayOfMonth());

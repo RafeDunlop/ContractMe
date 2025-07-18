@@ -352,26 +352,32 @@ public class RenovationRecordService {
         return new PageImpl<>(recordsSubList, pageable, records.size());
     }
 
-/**
- * Generates a 5-week by 7-day calendar grid as a 2D array of {@link CalendarCellDTO} objects.
- * @param date the {@link LocalDate} representing any day in the target month.
- * @return a 2D array of {@link CalendarCellDTO} objects with dimensions 5 (weeks) by 7 (days),
- */
-public CalendarCellDTO[][] generateCalendarCells(LocalDate date) {
+    /**
+     * Generates a 5-week by 7-day calendar grid as a 2D array of {@link CalendarCellDTO} objects.
+     *
+     * @param date the {@link LocalDate} representing any day in the target month.
+     * @return a 2D array of {@link CalendarCellDTO} objects with dimensions 5 (weeks) by 7 (days),
+     */
+    public List<List<CalendarCellDTO>> generateCalendarCells(LocalDate date) {
         LocalDate firstOfMonth = date.withDayOfMonth(1);
         int dayOfWeek = firstOfMonth.getDayOfWeek().getValue();
         int startOffset = dayOfWeek - 1;
 
         LocalDate startDate = firstOfMonth.minusDays(startOffset);
-        CalendarCellDTO[][] cells = new CalendarCellDTO[5][7];
+        List<List<CalendarCellDTO>> rows = new ArrayList<>();
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 6; i++) {
+            List<CalendarCellDTO> week = new ArrayList<>();
             for (int j = 0; j < 7; j++) {
-                cells[i][j] = new CalendarCellDTO(startDate.getDayOfMonth(), startDate.getMonthValue());
+                if (i == 5 && j == 0 && startDate.getMonthValue() != firstOfMonth.getMonthValue()) {
+                    return rows;
+                }
+                week.add(new CalendarCellDTO(startDate.getDayOfMonth(), startDate.getMonthValue()));
                 startDate = startDate.plusDays(1);
             }
+            rows.add(week);
         }
 
-        return cells;
+        return rows;
     }
 }

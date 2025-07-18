@@ -19,9 +19,9 @@ from 0 (Monday) to 6 (Sunday) -->
         <div class="col border border-secondary">Saturday</div>
         <div class="col border border-secondary">Sunday</div>
     </div>
-    <div th:each="rowIdx : ${#numbers.sequence(0, 4)}" class="row">
-        <div th:each="dayIdx : ${#numbers.sequence(0, 6)}"
-             th:with="cell=${dates[rowIdx][dayIdx]}"
+    <div th:each="row : ${dates}" class="row">
+        <div th:each="cell : ${row}"
+             th:if="${cell != null}"
              class="col py-5 border border-secondary text-start"
              th:text="${cell.day}"
              th:classappend="${cell.month != #calendars.month(date)} ? ' bg-body-secondary text-muted' : ''">
