@@ -100,6 +100,7 @@
                 <p>Loading renovations...</p>
             </div>
 
+
             <div id="footer" class="mt-2">
                 <div class="d-flex justify-content-center">
                     <ul class="pagination" id="pagination"></ul>
@@ -109,6 +110,8 @@
                     <p id="errorText"></p>
                 </div>
 
+
+                <!-- Buttons -->
                 <div class="mt-2 mb-2">
                     <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
                     <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
