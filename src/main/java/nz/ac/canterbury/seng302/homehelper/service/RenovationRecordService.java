@@ -352,7 +352,12 @@ public class RenovationRecordService {
         return new PageImpl<>(recordsSubList, pageable, records.size());
     }
 
-    public CalendarCellDTO[][] generateCalendarCells(LocalDate date) {
+/**
+ * Generates a 5-week by 7-day calendar grid as a 2D array of {@link CalendarCellDTO} objects.
+ * @param date the {@link LocalDate} representing any day in the target month.
+ * @return a 2D array of {@link CalendarCellDTO} objects with dimensions 5 (weeks) by 7 (days),
+ */
+public CalendarCellDTO[][] generateCalendarCells(LocalDate date) {
         LocalDate firstOfMonth = date.withDayOfMonth(1);
         int dayOfWeek = firstOfMonth.getDayOfWeek().getValue();
         int startOffset = dayOfWeek - 1;
@@ -362,8 +367,7 @@ public class RenovationRecordService {
 
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                boolean isCurrent = startDate.getMonthValue() == date.getMonthValue();
-                cells[i][j] = new CalendarCellDTO(startDate.getDayOfMonth(), isCurrent);
+                cells[i][j] = new CalendarCellDTO(startDate.getDayOfMonth(), startDate.getMonthValue());
                 startDate = startDate.plusDays(1);
             }
         }

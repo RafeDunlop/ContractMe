@@ -24,7 +24,7 @@ from 0 (Monday) to 6 (Sunday) -->
              th:with="cell=${dates[rowIdx][dayIdx]}"
              class="col py-5 border border-secondary text-start"
              th:text="${cell.day}"
-             th:classappend="${!cell.isCurrentMonth} ? ' bg-body-secondary text-muted' : ''">
+             th:classappend="${cell.month != #calendars.month(date)} ? ' bg-body-secondary text-muted' : ''">
         </div>
     </div>
 </div>
