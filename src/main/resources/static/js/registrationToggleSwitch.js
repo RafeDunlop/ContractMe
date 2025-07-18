@@ -1,6 +1,4 @@
-import {
-    hideAllErrorMessages
-} from "./locationFormValidation.js";
+import {hideAllErrorMessages} from "./locationFormValidation.js";
 
 let locationToggleSwitch = document.getElementById("location-toggleswitch");
 let locationForm = document.getElementById("location-form");
@@ -12,6 +10,10 @@ let contractorForm = document.getElementById("contractor-form");
 locationToggleSwitch.addEventListener("click", displayLocationForm);
 contractorToggleSwitch.addEventListener("click", displayContractorForm);
 
+/**
+ * Display location form when location toggle switch is activated and hide form when deactivated.
+ * Locks location toggle button if contractor toggle switch is active.
+ */
 function displayLocationForm() {
     if (locationToggleSwitch.checked === true) {
         locationForm.style.display = "block";
@@ -25,6 +27,9 @@ function displayLocationForm() {
     }
 }
 
+/**
+ * Display contractor form and location form when contractor toggle switch is activated and hide both forms when deactivated.
+ */
 function displayContractorForm() {
     if (contractorToggleSwitch.checked === true) {
         locationToggleSwitch.checked = true;
