@@ -10,6 +10,7 @@ public class UserRegisterDTO {
     private String email;
     private String password;
     private String confirmPassword;
+    private int countryCode;
 
     private String phoneNumber;
 
@@ -21,6 +22,10 @@ public class UserRegisterDTO {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public int getCountryCode() {
+        return countryCode;
     }
 
     public List<Skill> getSkills() {
@@ -52,12 +57,13 @@ public class UserRegisterDTO {
         this.confirmPassword = confirmPassword;
     }
 
-    public UserRegisterDTO(String firstName, String lastName, String email, String password,String confirmPassword, String phoneNumber, List<Skill> skills, Float hourlyRate) {
+    public UserRegisterDTO(String firstName, String lastName, String email, String password, String confirmPassword, int countryCode, String phoneNumber, List<Skill> skills, Float hourlyRate) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
+        this.countryCode = countryCode;
         this.phoneNumber = phoneNumber;
         this.skills = skills;
         this.hourlyRate = hourlyRate;

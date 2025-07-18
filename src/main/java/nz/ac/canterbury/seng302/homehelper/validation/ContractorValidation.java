@@ -11,7 +11,12 @@ import java.util.List;
 @Service
 public class ContractorValidation {
 
-
+    /**
+     * Validate the hourly rate field, this must be a positive float.
+     *
+     * @param hourlyRate the contractor's hourly rate
+     * @return a list of errors, empty if valid
+     */
     public List<String> validateHourlyRate(float hourlyRate) {
         List<String> errors = new ArrayList<>();
 
@@ -21,7 +26,14 @@ public class ContractorValidation {
         return errors;
     }
 
-    public List<String> validatePhoneNumber(String phoneNumber) {
+    /**
+     * Validate the phone number field, this must be a valid numerical string between 8 and 15 digits.
+     * It is also a mandatory field
+     *
+     * @param phoneNumber the contractor's phone number
+     * @return a list of errors, empty if valid
+     */
+    public List<String> validatePhoneNumber(String phoneNumber, int countryCode) {
         List<String> errors = new ArrayList<>();
         String regex = "\\d+";
 
@@ -31,8 +43,24 @@ public class ContractorValidation {
             errors.add("Your phone number is invalid");
         }
 
+        errors.addAll(validateCountryCode(countryCode));
+
         return errors;
     }
 
+    /**
+     * Validate the phone number's country code, this must be a positive number 3 digits or fewer.
+     *
+     * @param countryCode the phone number country code
+     * @return a list of errors, empty if valid
+     */
+    private List<String> validateCountryCode(int countryCode) {
+        List<String> errors = new ArrayList<>();
+
+        if (countryCode <= 0 || countryCode > 999) {
+            errors.add("Invalid country code");
+        }
+        return errors;
+    }
 
 }

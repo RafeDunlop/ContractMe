@@ -4,7 +4,7 @@ import {
     checkPasswordStrength,
     checkPasswordMatch
 } from './userValidation.js';
-import {validateHourlyRate, validatePhoneNumber} from "./contractorValidation.js";
+import {validateCountryCode, validateHourlyRate, validatePhoneNumber} from "./contractorValidation.js";
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -35,15 +35,17 @@ document.addEventListener("DOMContentLoaded", () => {
     let confirmPasswordFrontendErrorMessage = document.getElementById("confirmPassword-frontend-error-message");
     let confirmPasswordBackendError = document.getElementById("confirmPassword-backend-error");
 
-    let hourlyRateField = document.getElementById("hourly-rate");
+    let hourlyRateField = document.getElementById("hourlyRate");
     let hourlyRateFrontendError = document.getElementById("hourly-rate-frontend-error");
     let hourlyRateFrontendErrorMessage = document.getElementById("hourly-rate-frontend-error-message");
     let hourlyRateBackendError = document.getElementById("hourly-rate-backend-error");
 
-    let phoneNumberField = document.getElementById("phone-number");
+    let phoneNumberField = document.getElementById("phoneNumber");
     let phoneNumberFrontendError = document.getElementById("phone-number-frontend-error");
     let phoneNumberFrontendErrorMessage = document.getElementById("phone-number-frontend-error-message");
     let phoneNumberBackendError = document.getElementById("phone-number-backend-error");
+
+    let countryCodeField = document.getElementById("countryCode");
 
     // Event listeners
     emailField.addEventListener("input", () =>
@@ -95,6 +97,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     phoneNumberField.addEventListener("input", () => {
         validatePhoneNumber(phoneNumberField.value, phoneNumberFrontendErrorMessage, phoneNumberFrontendError,
+            phoneNumberBackendError);
+    });
+
+    countryCodeField.addEventListener("input", () => {
+        validateCountryCode(countryCodeField.value, phoneNumberFrontendErrorMessage, phoneNumberFrontendError,
             phoneNumberBackendError);
     });
 });

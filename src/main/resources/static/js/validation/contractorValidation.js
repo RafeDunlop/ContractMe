@@ -37,3 +37,18 @@ export function validatePhoneNumber(phoneNumber, phoneNumberFrontendErrorMessage
         phoneNumberFrontendError.hidden = true
     }
 }
+
+export function validateCountryCode(countryCode, countryCodeFrontendErrorMessage, countryCodeFrontendError,
+                                    countryCodeBackendError) {
+    if (countryCode <= 0 || countryCode > 999) {
+        countryCodeFrontendErrorMessage.textContent = "Invalid country code";
+        countryCodeFrontendError.hidden = false;
+        countryCodeFrontendErrorMessage.hidden = false;
+        countryCodeBackendError.hidden = true;
+    } else {
+        countryCodeFrontendErrorMessage.textContent = "";
+        countryCodeFrontendError.hidden = true;
+        countryCodeFrontendErrorMessage.hidden = true;
+        countryCodeBackendError.hidden = true;
+    }
+}

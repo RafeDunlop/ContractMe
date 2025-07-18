@@ -85,7 +85,8 @@ public class ContractorService {
     public Map<String, List<String>> validateContractor(UserRegisterDTO userRegisterDTO) {
         Map<String, List<String>> errors = new HashMap<>();
 
-        MapUtil.putIfNotEmpty(errors, "phoneNumberError", contractorValidation.validatePhoneNumber(userRegisterDTO.getPhoneNumber()));
+        MapUtil.putIfNotEmpty(errors, "phoneNumberError", contractorValidation.validatePhoneNumber(
+                userRegisterDTO.getPhoneNumber(), userRegisterDTO.getCountryCode()));
         MapUtil.putIfNotEmpty(errors, "hourlyRateError", contractorValidation.validateHourlyRate(userRegisterDTO.getHourlyRate()));
         return errors;
     }
