@@ -1,7 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.entity.users;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -94,6 +94,10 @@ public enum Skill {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public Skill getEnum(String displayName) {
+        return Stream.of(Skill.values()).filter(skill -> Objects.equals(skill.getDisplayName(), displayName)).findFirst().orElse(null);
     }
 
     public static List<String> listOfSkills() {
