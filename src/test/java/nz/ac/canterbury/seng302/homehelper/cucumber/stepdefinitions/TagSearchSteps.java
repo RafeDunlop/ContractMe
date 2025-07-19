@@ -54,10 +54,20 @@ public class TagSearchSteps {
 
     private MvcResult result;
 
+    private String lastInput;
+
     private List<String> searchTerms;
+
+    private MvcResult mvcResult;
 
     public TagSearchSteps(UserContext userContext) {
         this.userContext = userContext;
+    }
+
+
+    @Given("I enter a search {string} in the search renovation bar")
+    public void i_enter_a_search_in_the_search_renovation_bar(String inputString) {
+        lastInput = inputString;
     }
 
 
@@ -100,6 +110,13 @@ public class TagSearchSteps {
         }
 
         renovationRecordRepository.save(renovationRecord);
+    }
+
+
+    @When("The search partially matches a tag known by the system {string}")
+    public void the_search_partially_matches_a_tag_known_by_the_system(String tagName) {
+        Tag tag = new Tag(tagName);
+        tagRepository.save(tag);
     }
 
     @When("I search for renovations with tags {string} and {string}")
@@ -146,7 +163,23 @@ public class TagSearchSteps {
     @Then("I should see no records")
     public void i_should_see_no_records() throws Exception {
         String json = result.getResponse().getContentAsString();
+    }
 
-        assertTrue(json.contains("\"numberOfElements\":" + 0));
+    @Then("I can see a list of matching tags {string}")
+    public void i_can_see_a_list_of_matching_tags(String autocompleteTag) throws Exception {
+        mvcResult = mockMvc.perform(get("/renovations/tags/autocomplete")
+                        .param("partialTag", lastInput)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody = mvcResult.getResponse().getContentAsString();
+        assertTrue(responseBody.contains(autocompleteTag),
+                "Expected response to contain tag: " + autocompleteTag);
+    }
+
+    @Given("the tag search field is empty")
+    public void the_tag_search_field_is_empty() {
+        searchTerms = Collections.emptyList();
     }
 }

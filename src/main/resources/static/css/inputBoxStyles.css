@@ -1,0 +1,9 @@
+.prefix-span {
+    width: 30px;
+    justify-content: center;
+}
+
+#countryCode {
+    flex: 0 0 auto;
+    width: 10%;
+}

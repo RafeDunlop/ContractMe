@@ -52,17 +52,6 @@
     text-overflow: ellipsis;
 }
 
-.truncate:hover {
-    overflow: hidden;
-    white-space: normal;
-    word-wrap: break-word;
-    max-width: 100%;
-    background-color: #f8f9fa;
-    border-radius: 5px;
-    padding: 5px;
-    -webkit-line-clamp: unset;
-}
-
 .task-icon-button-colour {
     background-color: transparent;
     border-color: transparent;

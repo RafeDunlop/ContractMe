@@ -110,11 +110,14 @@
                 </div>
 
                 <div class="mt-2 mb-2">
-                    <a th:href="@{/renovations/edit(id=${renovation.id}, visibility=${visibility})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
-                    <a th:href="@{/renovations/view/create(id=${renovation.id}, visibility=${visibility})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
-                    <a th:href="${previousUrl}" class="btn btn-secondary" th:if="${previousUrl != null}">Back</a>
+                    <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
+                    <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
+                    <a th:href="@{${previousUrl}}" class="btn btn-secondary" th:if="${previousUrl != null && !previousUrl.contains('/search')}">Back</a>
+                    <a th:href="@{${previousUrl}}" class="btn btn-secondary" th:if="${previousUrl.contains('/search')}">Back to search results</a>
                 </div>
             </div>
+
+            <div th:replace="~{fragments/calendar.html ::calendar (${date}, ${datesArray}) }"></div>
         </div>
     </div>
 
@@ -152,7 +155,7 @@
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
 <script type="text/javascript" th:src="@{/js/autocomplete.js}"></script>
-<script type="text/javascript" th:src="@{/js/renovationTagValidation.js}"></script>
+<script type="text/javascript" th:src="@{/js/validation/renovationTagValidation.js}"></script>
 <script type="text/javascript" th:src="@{/js/removeTag.js}"></script>
 <script type="text/javascript" th:src="@{/js/renovationUtils.js}"></script>
 </html>

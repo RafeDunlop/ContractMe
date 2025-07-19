@@ -2,8 +2,8 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
 import jakarta.annotation.PostConstruct;
 import nz.ac.canterbury.seng302.homehelper.controller.ProfileController;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +57,7 @@ public class ProfileControllerIntegrationTest {
                 .andExpect(model().attribute("firstName", expectedUser.getFirstName()))
                 .andExpect(model().attribute("lastName", expectedUser.getLastName()))
                 .andExpect(model().attribute("email", expectedUser.getEmail()))
-                .andExpect(model().attribute("dateAdded", expectedUser.getCreatedTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+                .andExpect(model().attribute("dateAdded", expectedUser.getCreatedTimestamp().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))))
                 .andExpect(model().attribute("profilePicture", expectedUser.getProfilePicture()));
     }
 

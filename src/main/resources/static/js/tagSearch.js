@@ -10,12 +10,92 @@ const hiddenInputs = document.getElementById("hidden-tag-inputs");
 
 // Frontend list for tags currently in search bar
 let tags = [];
-
+let currentTabIndex = -1
 /**
  * Focuses the tag input field.
  */
 function focusTagInput() {
     tagInput.focus();
+}
+
+tagInput.addEventListener("input", function () {
+    const partialTag = tagInput.value.trim();
+    if (partialTag.length < 1) {
+        resetAutocomplete();
+        return
+    }
+    updateSearchAutocomplete(partialTag)
+});
+
+/**
+ * Updates the autocomplete list according to input.
+ * @param partialTag - The input of the user.
+ */
+function updateSearchAutocomplete(partialTag) {
+    const filteredTags = tags.map(t => t.trim());
+    fetch(`renovations/tags/autocomplete?partialTag=${encodeURIComponent(partialTag)}`)
+    .then(response => response.json())
+    .then(results => {
+        const suggestions = results.filter(tag => !filteredTags.includes(tag));
+        setSearchAutoCompleteList(suggestions);
+    })
+    .catch(error => console.error("Autocomplete fetch failed:", error));
+}
+
+
+
+/**
+ * Displays up to 3 tag suggestions in the autocomplete list.
+ * @param {string[]} tags - The list of tag names returned from the backend.
+ */
+function setSearchAutoCompleteList(tags) {
+    const list = document.getElementById("autocomplete-list");
+
+    list.innerHTML = "";
+
+    // When currently no tags match display the message in place of dropdown
+    if (tags.length === 0) {
+        // No matching tags
+        const noTagsMessage = document.createElement("li");
+        noTagsMessage.classList.add("list-group-item", "disabled");
+        noTagsMessage.textContent = "No matching tags";
+        list.appendChild(noTagsMessage);
+        return;
+    }
+
+    // Loop through each tag with max of 3 and create <li> for each
+    for (let i = 0; i < Math.min(tags.length, 3); i++) {
+        const tag = tags[i];
+        const item = document.createElement("li");
+        item.classList.add("list-group-item", "autocomplete-item");
+        item.textContent = tag;
+        item.tabIndex = 0;
+
+        item.addEventListener("click", function () {
+            resetAutocomplete();
+            tagInput.value = "";
+            addTag(tag)
+
+        });
+
+        item.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                item.click();
+            }
+        });
+
+        list.appendChild(item);
+    }
+    currentTabIndex = -1;
+
+}
+
+/**
+ * Clears the autocomplete display list.
+ */
+function resetAutocomplete() {
+    document.getElementById("autocomplete-list").innerHTML = "";
 }
 
 /**
@@ -50,6 +130,32 @@ function addTag(tag) {
     hidden.dataset.tag = tag;
     hiddenInputs.appendChild(hidden);
 }
+
+document.addEventListener("keydown", function (event) {
+    const listItems = document.querySelectorAll("#autocomplete-list .autocomplete-item");
+
+    if (listItems.length === 0) {
+        return;
+    }
+
+    if (event.key === "ArrowDown") {
+        event.preventDefault();
+        currentTabIndex++;
+        if (currentTabIndex >= listItems.length) {
+            currentTabIndex = 0;
+        }
+        listItems[currentTabIndex].focus();
+    }
+
+    if (event.key === "ArrowUp") {
+        event.preventDefault();
+        currentTabIndex--;
+        if (currentTabIndex < 0) {
+            currentTabIndex = listItems.length - 1;
+        }
+        listItems[currentTabIndex].focus();
+    }
+});
 
 
 /**
@@ -113,4 +219,21 @@ function setupTagSearch() {
     initialTags.forEach(tag => {
         if (tag) addTag(tag);
     });
+
+
+    tagInput.addEventListener("input", function () {
+        const partial = tagInput.value.trim();
+        if (partial.length < 1) {
+            resetAutocomplete();
+        } else {
+            updateSearchAutocomplete(partial);
+        }
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!tagInputContainer.contains(e.target)) {
+            resetAutocomplete();
+        }
+    });
 }
+

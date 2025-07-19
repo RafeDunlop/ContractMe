@@ -1,15 +1,17 @@
 package nz.ac.canterbury.seng302.homehelper.unit.service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.CalendarCellDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -421,5 +424,45 @@ public class RenovationRecordServiceTest {
             records.add(new RenovationRecord(mock(User.class), "Record " + i, "", Collections.emptyList()));
         }
         return records;
+    }
+
+    @Test
+    void generateCalendarCells_leapYearMonth_includesLeapDay() {
+        LocalDate date = LocalDate.of(2024, 2, 1);
+        CalendarCellDTO twentyNinthOfFebruary = new CalendarCellDTO(29, 2);
+
+        List<List<CalendarCellDTO>> calendarCells = toTest.generateCalendarCells(date);
+
+        Assertions.assertTrue(calendarCells.get(4).contains(twentyNinthOfFebruary));
+    }
+
+    @Test
+    void generateCalendarCells_monthStartingOnSunday_calendarHasSixRows() {
+        LocalDate date = LocalDate.of(2023, 1, 1);
+        CalendarCellDTO firstOfCurrentMonth = new CalendarCellDTO(1, 1);
+        CalendarCellDTO lastDayOfPreviousMonth = new CalendarCellDTO(31, 12);
+        CalendarCellDTO firstOfNextMonth = new CalendarCellDTO(1, 2);
+
+        List<List<CalendarCellDTO>> calendarCells = toTest.generateCalendarCells(date);
+
+        Assertions.assertTrue(calendarCells.get(0).contains(firstOfCurrentMonth));
+        Assertions.assertTrue(calendarCells.get(0).contains(lastDayOfPreviousMonth));
+        Assertions.assertTrue(calendarCells.get(5).contains(firstOfNextMonth));
+        assertEquals(6, calendarCells.size());
+    }
+
+    @Test
+    void generateCalendarCells_monthStartingOnMonday_calendarHasFiveRows() {
+        LocalDate date = LocalDate.of(2021, 2, 1);
+        CalendarCellDTO firstOfCurrentMonth = new CalendarCellDTO(1, 2);
+        CalendarCellDTO lastDayOfPreviousMonth = new CalendarCellDTO(31, 1);
+        CalendarCellDTO firstOfNextMonth = new CalendarCellDTO(1, 3);
+
+        List<List<CalendarCellDTO>> calendarCells = toTest.generateCalendarCells(date);
+
+        Assertions.assertTrue(calendarCells.get(0).contains(firstOfCurrentMonth));
+        Assertions.assertFalse(calendarCells.get(0).contains(lastDayOfPreviousMonth));
+        Assertions.assertTrue(calendarCells.get(4).contains(firstOfNextMonth));
+        assertEquals(5, calendarCells.size());
     }
 }

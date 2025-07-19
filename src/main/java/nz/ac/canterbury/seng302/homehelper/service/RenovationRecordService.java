@@ -2,12 +2,13 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.CalendarCellDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.TagDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -34,6 +36,7 @@ public class RenovationRecordService {
 
     /**
      * Constructor for the RenovationRecordService class
+     *
      * @param renovationRecordRepository initializes with the repository for storing records
      */
     @Autowired
@@ -49,7 +52,6 @@ public class RenovationRecordService {
      *
      * @param renovation The renovation to attach location to
      * @param addressDTO Data transfer object for user registration
-     *
      */
     public void addRenovationLocation(RenovationRecord renovation, AddressDTO addressDTO) {
         Location userLocation = new Location(
@@ -157,9 +159,9 @@ public class RenovationRecordService {
      *   <li>+1 for each tag in the tagList that is present in the record's tag list</li>
      * </ul>
      *
-     * @param record   The {@link RenovationRecord} to evaluate.
-     * @param term     The search term to match against name and description. May be blank.
-     * @param tagList  The list of tags to match against the record’s tags. May be null.
+     * @param record  The {@link RenovationRecord} to evaluate.
+     * @param term    The search term to match against name and description. May be blank.
+     * @param tagList The list of tags to match against the record’s tags. May be null.
      * @return An integer score representing how relevant the record is to the provided term and tags.
      */
     private int calculateRelevance(RenovationRecord record, String term, List<Tag> tagList) {
@@ -167,7 +169,8 @@ public class RenovationRecordService {
         String lowerTerm = term.toLowerCase();
         if (!term.isBlank()) {
             if (record.getName() != null && record.getName().toLowerCase().contains(lowerTerm)) score++;
-            else if (record.getDescription() != null && record.getDescription().toLowerCase().contains(lowerTerm)) score++;
+            else if (record.getDescription() != null && record.getDescription().toLowerCase().contains(lowerTerm))
+                score++;
         }
         if (tagList != null && record.getTags() != null) {
             for (Tag tag : tagList) {
@@ -247,29 +250,35 @@ public class RenovationRecordService {
     public RenovationRecord addRenovationRecord(RenovationRecord renovationRecord) {
         return renovationRecordRepository.save(renovationRecord);
     }
+
     /**
      * Removes a renovation record by its id, but first checks it exists.
+     *
      * @param id of the record to remove
      */
     @Transactional
-    public void removeRenovationRecord(Long id){
+    public void removeRenovationRecord(Long id) {
         Optional<RenovationRecord> recordToRemove = renovationRecordRepository.findById(id);
         if (recordToRemove.isPresent()) {
             renovationTaskRepository.deleteTaskById(id);
             renovationRecordRepository.deleteById(id);
         }
     }
+
     /**
      * Changes publicity flag of the renovation record.
-     * @param isPublic publicity flag of renovation
+     *
+     * @param isPublic         publicity flag of renovation
      * @param renovationRecord to edit the publicity
      */
-    public void changePublicity(Boolean isPublic,RenovationRecord renovationRecord) {
+    public void changePublicity(Boolean isPublic, RenovationRecord renovationRecord) {
         renovationRecord.setPublicity(isPublic);
         renovationRecordRepository.save(renovationRecord);
     }
+
     /**
      * Gets a renovation record by its id
+     *
      * @param id of the record to get
      * @return the record with the same id
      */
@@ -280,11 +289,11 @@ public class RenovationRecordService {
     /**
      * Validates all renovation fields for creating a new renovation record.
      *
-     * @param name The name of the renovation to validate.
+     * @param name        The name of the renovation to validate.
      * @param description The description of the renovation to validate.
-     * @param roomList The list of room names to validate.
+     * @param roomList    The list of room names to validate.
      * @return A map of validation errors, where each key is a field name (e.g., "nameError")
-     *         and the corresponding value is a list of error messages.
+     * and the corresponding value is a list of error messages.
      */
     public Map<String, List<String>> validateAllInputsCreate(String name, String description, List<String> roomList) {
         Map<String, List<String>> errors = new HashMap<>();
@@ -301,9 +310,9 @@ public class RenovationRecordService {
      * Allows the name to match the current name of the provided renovation record.
      *
      * @param renovationRecord The existing renovation record, including its original name, description, and rooms.
-     * @param newName The new name to validate.
+     * @param newName          The new name to validate.
      * @return A map of validation errors, where each key is a field name (e.g., "nameError")
-     *         and the corresponding value is a list of error messages. Returns an empty map if all inputs are valid.
+     * and the corresponding value is a list of error messages. Returns an empty map if all inputs are valid.
      */
     public Map<String, List<String>> validateAllInputsEdit(RenovationRecord renovationRecord, String newName) {
         Map<String, List<String>> errors = new HashMap<>();
@@ -318,7 +327,8 @@ public class RenovationRecordService {
 
     /**
      * Returns a paginated list of tasks for the given record.
-     * @param records The renovation record containing the list of tasks to be paginated.
+     *
+     * @param records  The renovation record containing the list of tasks to be paginated.
      * @param pageable spring pagination information, including the offset and page size.
      * @return A page of tasks for the renovation record. If there are no tasks an empty page is returned.
      */
@@ -329,7 +339,7 @@ public class RenovationRecordService {
             return new PageImpl<>(recordsSubList, pageable, 0); // Return an empty page
         }
 
-        int startIndex =(int) pageable.getOffset();
+        int startIndex = (int) pageable.getOffset();
         if (startIndex < 0) {
             startIndex = 0;
         }
@@ -340,5 +350,34 @@ public class RenovationRecordService {
 
         recordsSubList = records.subList(startIndex, endIndex);
         return new PageImpl<>(recordsSubList, pageable, records.size());
+    }
+
+    /**
+     * Generates a 5-week by 7-day calendar grid as a 2D array of {@link CalendarCellDTO} objects.
+     *
+     * @param date the {@link LocalDate} representing any day in the target month.
+     * @return a 2D array of {@link CalendarCellDTO} objects with dimensions 5 (weeks) by 7 (days),
+     */
+    public List<List<CalendarCellDTO>> generateCalendarCells(LocalDate date) {
+        LocalDate firstOfMonth = date.withDayOfMonth(1);
+        int dayOfWeek = firstOfMonth.getDayOfWeek().getValue();
+        int startOffset = dayOfWeek - 1;
+
+        LocalDate startDate = firstOfMonth.minusDays(startOffset);
+        List<List<CalendarCellDTO>> rows = new ArrayList<>();
+
+        for (int i = 0; i < 6; i++) {
+            List<CalendarCellDTO> week = new ArrayList<>();
+            for (int j = 0; j < 7; j++) {
+                if (i == 5 && j == 0 && startDate.getMonthValue() != firstOfMonth.getMonthValue()) {
+                    return rows;
+                }
+                week.add(new CalendarCellDTO(startDate.getDayOfMonth(), startDate.getMonthValue()));
+                startDate = startDate.plusDays(1);
+            }
+            rows.add(week);
+        }
+
+        return rows;
     }
 }

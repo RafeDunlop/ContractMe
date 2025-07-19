@@ -1,6 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +55,7 @@ public class ProfileController {
 			model.addAttribute("firstName", user.getFirstName());
 			model.addAttribute("lastName", user.getLastName());
 			model.addAttribute("email", user.getEmail());
-			model.addAttribute("dateAdded", user.getCreatedTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+			model.addAttribute("dateAdded", user.getCreatedTimestamp().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 			model.addAttribute("profilePicture", user.getProfilePicture());
 
 			return "profileTemplate";

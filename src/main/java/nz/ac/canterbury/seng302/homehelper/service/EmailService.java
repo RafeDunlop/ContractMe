@@ -2,11 +2,11 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import java.util.Locale;
 
-import nz.ac.canterbury.seng302.homehelper.HomeHelperApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -27,6 +27,9 @@ public class EmailService {
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
     private final JavaMailSender mailSender;
     private final TemplateEngine htmlTemplateEngine;
+
+    @Value("${app.domain}")
+    private String domain;
 
     /**
      * EmailService constructor.
@@ -67,7 +70,7 @@ public class EmailService {
         final Context context = new Context(locale);
         context.setVariable("name", recipientName);
         context.setVariable("token", token);
-        context.setVariable("domain", HomeHelperApplication.APPLICATION_CONTEXT);
+        context.setVariable("domain", domain);
         String subject = "Password reset link";
         final String htmlContent = htmlTemplateEngine.process("html/email-forgot-password", context);
         sendEmail(recipientEmail, subject, htmlContent, "Password reset link send failed");

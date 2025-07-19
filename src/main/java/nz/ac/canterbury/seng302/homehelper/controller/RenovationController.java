@@ -1,12 +1,13 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.CalendarCellDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
@@ -27,7 +28,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.util.UrlPathHelper;
 
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -66,7 +70,7 @@ public class RenovationController {
      * Gets all renovations
      *
      * @param searchTerm optional string to search on renovation name (partial matching)
-     * @param model       (map-like) representation of results to be used by thymeleaf
+     * @param model      (map-like) representation of results to be used by thymeleaf
      * @return thymeleaf renovationsTemplate
      */
     @GetMapping
@@ -80,7 +84,8 @@ public class RenovationController {
 
         User user = loginService.getUserByEmail();
 
-        request.getSession().setAttribute("lastVisitedRenovationPage", request.getRequestURL().toString());
+        String lastVisitedRenovationPage = new UrlPathHelper().getPathWithinApplication(request);
+        request.getSession().setAttribute("lastVisitedRenovationPage", lastVisitedRenovationPage);
         request.getSession().setAttribute("lastVisitedRenovationParameters", request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
         model.addAttribute("user", user);
@@ -310,7 +315,7 @@ public class RenovationController {
             redirectAttributes.addFlashAttribute("name", name);
             redirectAttributes.addFlashAttribute("description", description);
             redirectAttributes.addFlashAttribute("roomList", roomList);
-
+            redirectAttributes.addFlashAttribute("renovation", renovationRecord);
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
             redirectAttributes.addFlashAttribute("locationUsed", locationChanged);
 
@@ -360,6 +365,8 @@ public class RenovationController {
     @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id,
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                 @RequestParam(required = false) Integer year,
+                                 @RequestParam(required = false) Integer month,
                                  Model model,
                                  HttpServletRequest request) {
         logger.info("GET /renovations/view");
@@ -377,6 +384,30 @@ public class RenovationController {
 
         String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
+
+        LocalDate localDate = LocalDate.now();
+        if (year != null && month != null) {
+            try {
+                localDate = LocalDate.of(year, month, 1);
+            } catch (DateTimeException e) {
+                logger.error(e.getMessage());
+            }
+        } else if (month != null) {
+            try {
+                localDate = LocalDate.of(localDate.getYear(), month, 1);
+            } catch (DateTimeException e) {
+                logger.error(e.getMessage());
+            }
+        }
+
+        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate);
+
+        Calendar calendarDate = Calendar.getInstance();
+        calendarDate.set(localDate.getYear(), localDate.getMonthValue()- 1, localDate.getDayOfMonth());
+
+        model.addAttribute("datesArray", datesArray);
+        model.addAttribute("date", calendarDate);
+
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
 
         model.addAttribute("isOwner", isOwner);
@@ -528,7 +559,8 @@ public class RenovationController {
 
         User user = loginService.getUserByEmail();
 
-        request.getSession().setAttribute("lastVisitedRenovationPage", request.getRequestURL().toString());
+        String lastVisitedRenovationPage = new UrlPathHelper().getPathWithinApplication(request);
+        request.getSession().setAttribute("lastVisitedRenovationPage", lastVisitedRenovationPage);
         request.getSession().setAttribute("lastVisitedRenovationParameters",
                 request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
@@ -561,7 +593,7 @@ public class RenovationController {
                                                     HttpServletRequest request) {
 
         // Apply default values
-        if (visibility == null) visibility = "all";
+        if (visibility == null) visibility = "user";
         if (searchTerm == null) searchTerm = "";
 
         // Convert tag names to Tag entities if provided

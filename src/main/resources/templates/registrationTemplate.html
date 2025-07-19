@@ -7,6 +7,7 @@
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
     <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
+    <link rel="stylesheet" th:href="@{/css/inputBoxStyles.css}"/>
 </head>
 
 
@@ -20,7 +21,7 @@
                 <!-- FIRST NAME -->
                 <div class="mb-3">
                     <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First Name"
-                           aria-label="first-name" th:value="${userRegisterDTO.firstName}">
+                           aria-label="first-name" th:value="${userRegisterDTO.firstName}" autocomplete="given-name">
 
                     <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="firstName-frontend-error" hidden>
@@ -41,7 +42,7 @@
                 <!-- LAST NAME -->
                 <div class="mb-3">
                     <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last Name"
-                           aria-label="last-name" th:value="${userRegisterDTO.lastName}">
+                           aria-label="last-name" th:value="${userRegisterDTO.lastName}" autocomplete="family-name">
 
                     <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="lastName-frontend-error" hidden>
@@ -62,7 +63,7 @@
                 <!-- EMAIL -->
                 <div>
                     <input type="text" class="form-control" id="email" name="email" placeholder="Email"
-                           aria-label="email" th:value="${userRegisterDTO.email}">
+                           aria-label="email" th:value="${userRegisterDTO.email}" autocomplete="email">
 
                     <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="email-frontend-error" hidden>
@@ -80,10 +81,25 @@
                     </div>
                 </div>
 
-                <!-- LOCATION TOGGLE SWITCH -->
-
+                <!-- CONTRACTOR TOGGLE SWITCH -->
                 <div class="d-flex justify-content-between align-items-center py-4 px-0" style="width: 22%">
-                    <div>Enter Location (Optional):</div>
+                    <div>Register as Contractor:</div>
+                    <div>
+                        <label class="switch">
+                            <input type="checkbox" id="contractor-toggleswitch" th:checked="${contractorUsed}">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- CONTRACTOR FORM FRAGMENT -->
+                <div th:class="'pb-3 ' + (${isContractor} ? 'form-extension' : 'hidden-form-extension')" id="contractor-form">
+                    <div th:replace="~{fragments/contractorRegistration.html :: contractor-registration}"></div>
+                </div>
+
+                <!-- LOCATION TOGGLE SWITCH -->
+                <div class="d-flex justify-content-between align-items-center pb-4 px-0" style="width: 22%">
+                    <div id="location-toggle-switch-label">Enter Location (Optional):</div>
                     <div>
                         <label class="switch">
                             <input type="checkbox" id="location-toggleswitch" th:checked="${locationUsed}">
@@ -93,7 +109,7 @@
                 </div>
 
                 <!-- LOCATION FORM FRAGMENT -->
-                <div th:class="${locationUsed} ? 'form-extension' : 'hidden-form-extension'" id="location-form">
+                <div th:class="'pb-3 ' + (${locationUsed} ? 'form-extension' : 'hidden-form-extension')" id="location-form">
                     <div th:replace="~{fragments/locationForm.html :: locationForm(
                      addressDTO=${addressDTO})}"></div>
                 </div>
@@ -101,7 +117,7 @@
                 <!-- PASSWORD -->
                 <div class="mb-3">
                     <input type="password" class="form-control" id="password" name="password" placeholder="Password"
-                           aria-label="password">
+                           aria-label="password" autocomplete="new-password">
 
                     <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="password-frontend-error" hidden>
@@ -122,7 +138,7 @@
                 <!-- CONFIRM PASSWORD -->
                 <div class="mb-5">
                     <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
-                           placeholder="Confirm Password" aria-label="confirm-password">
+                           placeholder="Confirm Password" aria-label="confirm-password" autocomplete="new-password">
 
                     <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="confirmPassword-frontend-error" hidden>
@@ -159,7 +175,8 @@
 <div style="height: 50px;"></div>
 </body>
 <script type="module" th:src="@{/js/locationForm.js}"></script>
-<script type = "module" th:src="@{/js/locationFormValidation.js}"></script>
-<script type="module" th:src="@{/js/userValidation.js}"></script>
-<script type="module" th:src="@{/js/registerValidation.js}"></script>
+<script type = "module" th:src="@{/js/validation/locationFormValidation.js}"></script>
+<script type="module" th:src="@{/js/validation/userValidation.js}"></script>
+<script type="module" th:src="@{/js/validation/registerValidation.js}"></script>
+<script type="module" th:src="@{/js/registrationToggleSwitch.js}"></script>
 </html>

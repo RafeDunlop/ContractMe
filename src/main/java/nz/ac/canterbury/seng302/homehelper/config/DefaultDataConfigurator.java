@@ -3,7 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.config;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,6 +111,17 @@ public class DefaultDataConfigurator {
                             defaultJERooms
                     )
             );
+
+        }
+
+        //Add 100 public records to default2, so they can be seen on default1
+        for (int i=0; i<=100; i++) {
+            RenovationRecord record = new RenovationRecord(default2,
+                    "Test Public Renovation " + i,
+                    "Description for renovation: " + 1,
+                    defaultJERooms);
+            record.setPublicity(true);
+            renovationRecordService.addRenovationRecord(record);
         }
     }
 
@@ -128,7 +139,7 @@ public class DefaultDataConfigurator {
         for (int i = 1; i < numGenericTasksToAdd + 1; i++) {
             renovationTask.setName(String.format("Renovation Task %d", i));
             renovationTask.setDescription(String.format("Renovation Task Description %d", i));
-            renovationTask.setDueDate(LocalDate.now().plusDays(i).format(formatter));;
+            renovationTask.setDueDate(LocalDate.now().plusDays(i).format(formatter));
             renovationTask.setRooms(defaultJERooms);
             renovationTaskService.addRenovationTask(renovationTask, default1Renovation1);
         }
