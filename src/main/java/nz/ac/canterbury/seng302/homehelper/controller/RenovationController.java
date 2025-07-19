@@ -401,20 +401,15 @@ public class RenovationController {
         }
 
 
-        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate);
+        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate, record);
 
 
         Calendar calendarDate = Calendar.getInstance();
         calendarDate.set(localDate.getYear(), localDate.getMonthValue()- 1, localDate.getDayOfMonth());
 
-        //Get list of tasks associated with current record with due dates within current month
-        LocalDate startDate = localDate.withDayOfMonth(1);
-        LocalDate endDate = startDate.plusMonths(1).minusDays(1);
-        Map<LocalDate, List<RenovationTask>> calendarTasks = renovationTaskService.getTasksWithinDates(record, startDate, endDate);
 
         model.addAttribute("datesArray", datesArray);
         model.addAttribute("date", calendarDate);
-        model.addAttribute("currentTasks", calendarTasks);
 
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
 

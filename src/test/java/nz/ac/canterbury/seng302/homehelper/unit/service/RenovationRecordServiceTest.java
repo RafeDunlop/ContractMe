@@ -10,6 +10,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
+import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -34,6 +35,7 @@ public class RenovationRecordServiceTest {
     private static RenovationRecordValidation renovationRecordValidation;
     private static RenovationRecordRepository renovationRecordRepository;
     private static RenovationTaskRepository renovationTaskRepository;
+    private static RenovationTaskService renovationTaskService;
     private static LoginService loginService;
 
     @BeforeAll
@@ -42,6 +44,7 @@ public class RenovationRecordServiceTest {
         renovationTaskRepository = mock(RenovationTaskRepository.class);
         loginService = mock(LoginService.class);
         renovationRecordValidation = new RenovationRecordValidation(renovationRecordRepository, loginService);
+        renovationTaskService = mock(RenovationTaskService.class);
 
         User mockUser = mock(User.class);
         when(loginService.getUserByEmail()).thenReturn(mockUser);
@@ -52,7 +55,8 @@ public class RenovationRecordServiceTest {
         when(renovationRecordRepository.findExactMatch("name", mockUser)).thenReturn(Optional.empty());
         when(renovationRecordRepository.findExactMatch("name!", mockUser)).thenReturn(Optional.empty());
 
-        toTest = new RenovationRecordService(renovationRecordRepository, renovationTaskRepository, renovationRecordValidation);
+        toTest = new RenovationRecordService(renovationRecordRepository, renovationTaskRepository, renovationRecordValidation,
+                renovationTaskService);
     }
 
     @Test

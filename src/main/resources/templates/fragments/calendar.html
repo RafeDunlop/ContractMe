@@ -3,8 +3,9 @@
 <body>
 <!-- month is the month name, numDays is the number of days in the month, rows is the number of rows in the calendar,
 and firstDay is the number of the day of the Week which occurs on the first day of the month,
-from 0 (Monday) to 6 (Sunday) -->
-<div th:fragment="calendar (date, dates)" class="container" id="calendar">
+from 0 (Monday) to 6 (Sunday)
+currentTasks is a map of tasks in the current month, key is date and value is the list of tasks-->
+<div th:fragment="calendar (date, dates, currentTasks)" class="container" id="calendar">
     <div class="row">
         <div class="col" >
             <h1 class="display-5 text-center" th:text="|${#calendars.monthName(date)} ${#calendars.year(date)}|"></h1>
@@ -27,7 +28,7 @@ from 0 (Monday) to 6 (Sunday) -->
              th:classappend="${cell.month != #calendars.month(date)} ? ' bg-body-secondary text-muted' : ''">
              <div class="d-flex flex-column align-items-center" style="min-height: 120px">
                  <div th:text="${cell.day}" style="padding: 5px 0;"></div>
-                 <div class="calendar-task" style="margin: 5px 0;"></div>
+                 <div class="calendar-task" th:text="${currentTasks.get()}"style="margin: 5px 0;"></div>
                  <div style="display: none;"></div>
              </div>
         </div>

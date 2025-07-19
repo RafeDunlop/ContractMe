@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.TagDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
@@ -34,16 +35,19 @@ public class RenovationRecordService {
     private final RenovationTaskRepository renovationTaskRepository;
     private final RenovationRecordValidation renovationRecordValidation;
 
+    private final RenovationTaskService renovationTaskService;
+
     /**
      * Constructor for the RenovationRecordService class
      *
      * @param renovationRecordRepository initializes with the repository for storing records
      */
     @Autowired
-    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation) {
+    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation, RenovationTaskService renovationTaskService) {
         this.renovationRecordRepository = renovationRecordRepository;
         this.renovationTaskRepository = renovationTaskRepository;
         this.renovationRecordValidation = renovationRecordValidation;
+        this.renovationTaskService = renovationTaskService;
     }
 
     /**
@@ -356,9 +360,10 @@ public class RenovationRecordService {
      * Generates a 5-week by 7-day calendar grid as a 2D array of {@link CalendarCellDTO} objects.
      *
      * @param date the {@link LocalDate} representing any day in the target month.
+     * @param record the renovation record being displayed
      * @return a 2D array of {@link CalendarCellDTO} objects with dimensions 5 (weeks) by 7 (days),
      */
-    public List<List<CalendarCellDTO>> generateCalendarCells(LocalDate date) {
+    public List<List<CalendarCellDTO>> generateCalendarCells(LocalDate date, RenovationRecord record) {
         LocalDate firstOfMonth = date.withDayOfMonth(1);
         int dayOfWeek = firstOfMonth.getDayOfWeek().getValue();
         int startOffset = dayOfWeek - 1;
@@ -372,7 +377,10 @@ public class RenovationRecordService {
                 if (i == 5 && j == 0 && startDate.getMonthValue() != firstOfMonth.getMonthValue()) {
                     return rows;
                 }
-                week.add(new CalendarCellDTO(startDate.getDayOfMonth(), startDate.getMonthValue()));
+                LocalDate endDate = startDate.plusMonths(1).minusDays(1);
+                Map<LocalDate, List<RenovationTask>> calendarTasks = renovationTaskService.getTasksWithinDates(record, startDate, endDate);
+
+                week.add(new CalendarCellDTO(startDate.getDayOfMonth(), startDate.getMonthValue(), calendarTasks));
                 startDate = startDate.plusDays(1);
             }
             rows.add(week);
