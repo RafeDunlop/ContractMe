@@ -60,7 +60,8 @@ public class ContractorServiceIntegrationTest {
         userRegisterDTO.setHourlyRate(30.0f);
         List<Skill> userRegisterDtoSkills = new ArrayList<>();
         userRegisterDTO.setSkills(userRegisterDtoSkills);
-        userRegisterDTO.setPhoneNumber("0800111111l");
+        userRegisterDTO.setPhoneNumber("0800111111");
+        userRegisterDTO.setCountryCode(64);
 
         invalidUserRegisterDTO = new UserRegisterDTO();
         invalidUserRegisterDTO.setFirstName("John");
@@ -100,6 +101,12 @@ public class ContractorServiceIntegrationTest {
         assertTrue(errors.containsKey("hourlyRateError"));
         assertEquals("Invalid hourly rate", errors.get("hourlyRateError").get(0));
 
+    }
+
+    @Test
+    public void validateContractor_validContractorDetails_noErrors() {
+        Map<String, List<String>> errors = toTest.validateContractor(userRegisterDTO);
+        assertTrue(errors.isEmpty());
     }
 
     @Test

@@ -30,6 +30,10 @@ public class UserRegisterDTO {
         return countryCode;
     }
 
+    public void setCountryCode(int countryCode) {
+        this.countryCode = countryCode;
+    }
+
     public List<Skill> getSkills() {
         return skills;
     }
