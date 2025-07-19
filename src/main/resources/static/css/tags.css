@@ -31,3 +31,41 @@
 .tag-delete-button-small:hover, .tag-delete-button-large:hover {
     color: grey !important;
 }
+
+#skill-input-container {
+    position: relative;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    padding: .375rem .75rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    cursor: text;
+    background: #fff;
+}
+#skills-input {
+    border: none;
+    outline: none;
+    flex: 1 1 auto;
+    min-width: 6rem;
+    background: transparent;
+}
+#skills-dropdown {
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    border: 1px solid #ced4da;
+    border-top: none;
+    background: #fff;
+    max-height: 10rem;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+}
+#skills-dropdown li {
+    padding: .5rem;
+    list-style: none;
+    cursor: pointer;
+}
+#skills-dropdown li:hover {
+    background: #f1f1f1;
+}

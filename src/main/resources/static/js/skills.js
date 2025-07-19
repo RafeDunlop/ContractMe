@@ -1,48 +1,49 @@
-const skillsInput = document.getElementById("skills-input");
-const dataList     = document.getElementById("skills");
-const skillInputContainer = document.getElementById("skill-input-container")
-const validSkills = Array.from(dataList.options).map(skill => skill.value);
+const skillsInput= document.getElementById("skills-input");
+const skillInputContainer= document.getElementById("skill-input-container");
+const dropdown= document.getElementById("skills-dropdown");
+let selectedSkills= [];
 
-let selectedSkills = []
+skillInputContainer.addEventListener("click", () => {
+    dropdown.style.display = "block";
+    skillsInput.focus();
+});
 
-skillsInput.addEventListener("click", () => {
-    dataList.focus();
-
-    if (typeof skillsInput.showPicker === "function") {
-        skillsInput.showPicker();
-    }
-})
-
-skillsInput.addEventListener("input", function () {
-    const selectedSkill = skillsInput.value.trim();
-    if (validSkills.includes(selectedSkill) && !selectedSkills.includes(selectedSkill)) {
-        selectedSkills.push(selectedSkill);
+dropdown.addEventListener("click", e => {
+    if (e.target.tagName !== "LI") return;
+    const skill = e.target.textContent.trim();
+    if (!selectedSkills.includes(skill)) {
+        selectedSkills.push(skill);
         selectedSkills.sort();
-        skillsInput.value = "";
-        createSkillBubble(selectedSkill);
-    } else if (validSkills.includes(selectedSkill)) {
-        skillsInput.value = "";
+        createSkillBubble(skill);
     }
-})
+    dropdown.style.display = "none";
+    skillsInput.value = "";
+});
 
-function createSkillBubble (selectedSkill) {
+document.addEventListener("click", e => {
+    if (!skillInputContainer.contains(e.target)) {
+        dropdown.style.display = "none";
+    }
+});
+
+// your existing bubble logic, unchanged:
+function createSkillBubble(skill) {
     const bubble = document.createElement("span");
     bubble.className = "tag-box badge bg-success d-inline-flex align-items-center me-2 mb-2";
 
     const bubbleText = document.createElement("span");
-    bubbleText.className = "tag-text-large text-truncate ms-1";
-    bubbleText.textContent = selectedSkill;
+    bubbleText.className = "tag-text-large ms-1 text-truncate";
+    bubbleText.textContent = skill;
     bubble.appendChild(bubbleText);
 
-    const deleteButton = document.createElement("button")
-    deleteButton.className = "tag-delete-button-large btn-sm border-0 bg-transparent text-light ms-1"
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "btn-sm border-0 bg-transparent text-light ms-1";
     deleteButton.textContent = "X";
-
     deleteButton.addEventListener("click", () => {
-        skillInputContainer.removeChild(bubble);
-        selectedSkills = selectedSkills.filter(s => s !== selectedSkill);
+        bubble.remove();
+        selectedSkills = selectedSkills.filter(s => s !== skill);
     });
-
     bubble.appendChild(deleteButton);
-    skillInputContainer.appendChild(bubble);
+
+    skillInputContainer.insertBefore(bubble, skillsInput);
 }

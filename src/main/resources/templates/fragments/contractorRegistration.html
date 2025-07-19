@@ -56,11 +56,12 @@
         </div>
     </div>
     <div class="mb-3">
-        <input class="form-select" id="skills-input" type="text" list="skills" aria-label="skills-input">
-        <datalist id="skills" aria-label="skills">
-            <option class="skill-option" th:each="skill : ${skills}" th:text="${skill}"></option>
-        </datalist>
-        <div class="py-3" id="skill-input-container"></div>
+        <div id="skill-input-container">
+            <select class="form-select" id="skills-input" type="text" aria-label="skills-input" autocomplete="off">
+                <option></option>
+                <option th:each="skill : ${skills}" th:text="${skill}"></option>
+            </select>
+        </div>
 
         <!-- Frontend JS Error -->
         <div class="alert alert-danger mt-2" id="skills-frontend-error" hidden>
