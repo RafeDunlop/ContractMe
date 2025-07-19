@@ -1,28 +1,17 @@
-const skillsInput= document.getElementById("skills-input");
+const skillsSelect= document.getElementById("skills-select");
 const skillInputContainer= document.getElementById("skill-input-container");
-const dropdown= document.getElementById("skills-dropdown");
-let selectedSkills= [];
+const validSkills = Array.from(skillsSelect.options).map(skill => skill.value);
 
-skillInputContainer.addEventListener("click", () => {
-    dropdown.style.display = "block";
-    skillsInput.focus();
-});
+let selectedSkills = []
 
-dropdown.addEventListener("click", e => {
-    if (e.target.tagName !== "LI") return;
-    const skill = e.target.textContent.trim();
-    if (!selectedSkills.includes(skill)) {
-        selectedSkills.push(skill);
-        selectedSkills.sort();
-        createSkillBubble(skill);
-    }
-    dropdown.style.display = "none";
-    skillsInput.value = "";
-});
-
-document.addEventListener("click", e => {
-    if (!skillInputContainer.contains(e.target)) {
-        dropdown.style.display = "none";
+skillsSelect.addEventListener("change", () => {
+    const selectedSkill = skillsSelect.value.trim();
+    if (validSkills.includes(selectedSkill)) {
+        if (!selectedSkills.includes(selectedSkill)) {
+            selectedSkills.push(selectedSkill);
+            createSkillBubble(selectedSkill);
+            console.log(selectedSkills);
+        }
     }
 });
 
@@ -37,13 +26,14 @@ function createSkillBubble(skill) {
     bubble.appendChild(bubbleText);
 
     const deleteButton = document.createElement("button");
-    deleteButton.className = "btn-sm border-0 bg-transparent text-light ms-1";
+    deleteButton.className = "tag-delete-button-large btn-sm border-0 bg-transparent text-light ms-1";
     deleteButton.textContent = "X";
     deleteButton.addEventListener("click", () => {
         bubble.remove();
         selectedSkills = selectedSkills.filter(s => s !== skill);
+        console.log(selectedSkills);
     });
     bubble.appendChild(deleteButton);
 
-    skillInputContainer.insertBefore(bubble, skillsInput);
+    skillInputContainer.appendChild(bubble);
 }
