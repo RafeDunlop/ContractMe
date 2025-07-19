@@ -402,11 +402,8 @@ public class RenovationController {
 
         List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate);
 
-        Calendar calendarDate = Calendar.getInstance();
-        calendarDate.set(localDate.getYear(), localDate.getMonthValue()- 1, localDate.getDayOfMonth());
-
         model.addAttribute("datesArray", datesArray);
-        model.addAttribute("date", calendarDate);
+        model.addAttribute("date", localDate);
 
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
 
