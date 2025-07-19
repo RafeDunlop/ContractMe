@@ -220,6 +220,24 @@ function getAutocompleteOption(address) {
         checkAllLocationFields();
     });
 
+    item.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            addressField.value = address.address_line1;
+            suburbField.value = address.region;
+            cityField.value = address.city;
+            postcodeField.value = address.postcode;
+            countryField.value = address.country;
+
+            committedFields.address = address.address_line1;
+            committedFields.suburb = address.region;
+            committedFields.city = address.city;
+            committedFields.postcode = address.postcode;
+            committedFields.country = address.country;
+
+            autocompleteList.innerHTML = "";
+            checkAllLocationFields();
+        }
+    });
 
     return item;
 }
