@@ -101,6 +101,6 @@ public enum Skill {
     }
 
     public static List<String> listOfSkills() {
-        return Stream.of(Skill.values()).map(Skill::getDisplayName).sorted().collect(Collectors.toList());
+        return Stream.of(Skill.values()).map(Skill::getDisplayName).sorted(String::compareToIgnoreCase).collect(Collectors.toList());
     }
 }

@@ -7,3 +7,7 @@
     flex: 0 0 auto;
     width: 10%;
 }
+
+#skills-select {
+    color: grey;
+}
