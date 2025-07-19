@@ -386,7 +386,7 @@ public class RenovationController {
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
         LocalDate localDate = LocalDate.now();
-        if (year != null && month != null) {
+        if (year != null && year >= 1 && month != null) {
             try {
                 localDate = LocalDate.of(year, month, 1);
             } catch (DateTimeException e) {
@@ -413,6 +413,41 @@ public class RenovationController {
         model.addAttribute("icons", iconFileNames);
 
         return "viewRenovation";
+    }
+
+    @GetMapping("/calendar")
+    public String getCalendarFragment(@RequestParam Long id,
+                                      @RequestParam(required = false) Integer year,
+                                      @RequestParam(required = false) Integer month,
+                                      Model model) {
+
+        RenovationRecord record = renovationRecordService.getRecordById(id);
+        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Renovation not found");
+
+        // You can do user/permission checks here if needed
+
+        LocalDate localDate = LocalDate.now();
+        if (year != null && year >= 1 && month != null) {
+            try {
+                localDate = LocalDate.of(year, month, 1);
+            } catch (DateTimeException e) {
+                logger.error(e.getMessage());
+            }
+        } else if (month != null) {
+            try {
+                localDate = LocalDate.of(localDate.getYear(), month, 1);
+            } catch (DateTimeException e) {
+                logger.error(e.getMessage());
+            }
+        }
+
+        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate);
+
+        model.addAttribute("dates", datesArray);
+        model.addAttribute("date", localDate);
+        model.addAttribute("id", id);
+
+        return "fragments/calendar :: calendar";  // return only fragment for partial update
     }
 
     /**

@@ -135,14 +135,8 @@ function fetchRenovation(id, resetPage = false) {
     }
 
     const params = new URLSearchParams();
-    const userParams = new URLSearchParams();
-    userParams.set("id", id);
     params.set("page", pageNumber);
     params.set("cardsPerPage", cardsPerPage);
-
-    const newUrl = new URL(window.location);
-    newUrl.search = userParams.toString();
-    window.history.replaceState({}, '', newUrl);
 
     fetch(`${basePath}renovations/retrieve/${id}?${params.toString()}`)
         .then(response => response.json())

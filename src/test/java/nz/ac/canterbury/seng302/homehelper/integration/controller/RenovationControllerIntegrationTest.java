@@ -1644,14 +1644,11 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(view().name("viewRenovation"))
                 .andReturn();
 
-        GregorianCalendar returnedCalendar = (GregorianCalendar) Objects.requireNonNull(result.getModelAndView()).getModel().get("date");
-        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) Objects.requireNonNull(result.getModelAndView()).getModel().get("datesArray");
+        LocalDate returnedDate = (LocalDate) Objects.requireNonNull(result.getModelAndView()).getModel().get("date");
+        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) result.getModelAndView().getModel().get("datesArray");
 
-        int returnedYear = returnedCalendar.get(Calendar.YEAR);
-        int returnedMonth = returnedCalendar.get(Calendar.MONTH) + 1;
-
-        Assertions.assertEquals(inputtedYear, returnedYear);
-        Assertions.assertEquals(inputtedMonth, returnedMonth);
+        Assertions.assertEquals(inputtedYear, returnedDate.getYear());
+        Assertions.assertEquals(inputtedMonth, returnedDate.getMonthValue());
         Assertions.assertEquals(6, returnedCalendarCells.size());
     }
 
@@ -1671,21 +1668,17 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(view().name("viewRenovation"))
                 .andReturn();
 
-        GregorianCalendar returnedCalendar = (GregorianCalendar) Objects.requireNonNull(result.getModelAndView()).getModel().get("date");
-        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) Objects.requireNonNull(result.getModelAndView()).getModel().get("datesArray");
+        LocalDate returnedDate = (LocalDate) result.getModelAndView().getModel().get("date");
+        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) result.getModelAndView().getModel().get("datesArray");
 
-        int returnedYear = returnedCalendar.get(Calendar.YEAR);
-        int returnedMonth = returnedCalendar.get(Calendar.MONTH) + 1;
-
-        Assertions.assertEquals(currentYear, returnedYear);
-        Assertions.assertEquals(inputtedMonth, returnedMonth);
-        Assertions.assertTrue(List.of(5,6).contains(returnedCalendarCells.size()));
+        Assertions.assertEquals(currentYear, returnedDate.getYear());
+        Assertions.assertEquals(inputtedMonth, returnedDate.getMonthValue());
+        Assertions.assertTrue(List.of(5, 6).contains(returnedCalendarCells.size()));
     }
 
     @Test
     public void viewRenovation_noMonthAndYear_returnFormWithCurrentMonthAndYear() throws Exception {
-        int currentMonth = LocalDate.now().getMonthValue();
-        int currentYear = LocalDate.now().getYear();
+        LocalDate now = LocalDate.now();
 
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation with Calendar 3", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
@@ -1697,22 +1690,18 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(view().name("viewRenovation"))
                 .andReturn();
 
-        GregorianCalendar returnedCalendar = (GregorianCalendar) Objects.requireNonNull(result.getModelAndView()).getModel().get("date");
-        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) Objects.requireNonNull(result.getModelAndView()).getModel().get("datesArray");
+        LocalDate returnedDate = (LocalDate) result.getModelAndView().getModel().get("date");
+        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) result.getModelAndView().getModel().get("datesArray");
 
-        int returnedYear = returnedCalendar.get(Calendar.YEAR);
-        int returnedMonth = returnedCalendar.get(Calendar.MONTH) + 1;
-
-        Assertions.assertEquals(currentYear, returnedYear);
-        Assertions.assertEquals(currentMonth, returnedMonth);
-        Assertions.assertTrue(List.of(5,6).contains(returnedCalendarCells.size()));
+        Assertions.assertEquals(now.getYear(), returnedDate.getYear());
+        Assertions.assertEquals(now.getMonthValue(), returnedDate.getMonthValue());
+        Assertions.assertTrue(List.of(5, 6).contains(returnedCalendarCells.size()));
     }
 
     @Test
     public void viewRenovation_negativeYear_returnFormWithMonthAndPositiveYear() throws Exception {
         int inputtedMonth = 12;
         int inputtedYear = 0;
-        int expectedYear = 1;
 
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation with Calendar 4", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
@@ -1726,14 +1715,11 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(view().name("viewRenovation"))
                 .andReturn();
 
-        GregorianCalendar returnedCalendar = (GregorianCalendar) Objects.requireNonNull(result.getModelAndView()).getModel().get("date");
-        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) Objects.requireNonNull(result.getModelAndView()).getModel().get("datesArray");
+        LocalDate returnedDate = (LocalDate) result.getModelAndView().getModel().get("date");
+        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) result.getModelAndView().getModel().get("datesArray");
 
-        int returnedYear = returnedCalendar.get(Calendar.YEAR);
-        int returnedMonth = returnedCalendar.get(Calendar.MONTH) + 1;
-
-        Assertions.assertEquals(expectedYear, returnedYear);
-        Assertions.assertEquals(inputtedMonth, returnedMonth);
+        Assertions.assertEquals(inputtedYear, returnedDate.getYear());
+        Assertions.assertEquals(inputtedMonth, returnedDate.getMonthValue());
         Assertions.assertEquals(5, returnedCalendarCells.size());
     }
 
@@ -1741,8 +1727,7 @@ public class RenovationControllerIntegrationTest {
     public void viewRenovation_invalidMonth_returnFormWithCurrentMonthAndYear() throws Exception {
         int inputtedMonth = 13;
         int inputtedYear = 2025;
-        int currentMonth = LocalDate.now().getMonthValue();
-        int currentYear = LocalDate.now().getYear();
+        LocalDate now = LocalDate.now();
 
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation with Calendar 5", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
@@ -1756,14 +1741,11 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(view().name("viewRenovation"))
                 .andReturn();
 
-        GregorianCalendar returnedCalendar = (GregorianCalendar) Objects.requireNonNull(result.getModelAndView()).getModel().get("date");
-        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) Objects.requireNonNull(result.getModelAndView()).getModel().get("datesArray");
+        LocalDate returnedDate = (LocalDate) result.getModelAndView().getModel().get("date");
+        List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) result.getModelAndView().getModel().get("datesArray");
 
-        int returnedYear = returnedCalendar.get(Calendar.YEAR);
-        int returnedMonth = returnedCalendar.get(Calendar.MONTH) + 1;
-
-        Assertions.assertEquals(currentYear, returnedYear);
-        Assertions.assertEquals(currentMonth, returnedMonth);
-        Assertions.assertTrue(List.of(5,6).contains(returnedCalendarCells.size()));
+        Assertions.assertEquals(now.getYear(), returnedDate.getYear());
+        Assertions.assertEquals(now.getMonthValue(), returnedDate.getMonthValue());
+        Assertions.assertTrue(List.of(5, 6).contains(returnedCalendarCells.size()));
     }
 }
