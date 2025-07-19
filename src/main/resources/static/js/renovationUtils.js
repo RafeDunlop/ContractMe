@@ -338,7 +338,7 @@ function renderModalContent(task, csrfToken) {
                                 data-taskid="${task.id}"
                                 data-csrf="${csrfToken}"
                                 onclick="addTaskIcon(this)">
-                            <img src="/images/${icon}" class="img-fluid rounded-circle"
+                            <img src="${basePath}images/${icon}" class="img-fluid rounded-circle"
                                  style="width: 100px; height: 100px; object-fit: cover"
                                  alt="Task Icon">
                         </button>
