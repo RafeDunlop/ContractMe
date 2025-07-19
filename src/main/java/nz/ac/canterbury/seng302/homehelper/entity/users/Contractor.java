@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.homehelper.entity.users;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,7 +16,7 @@ import java.util.Set;
 public class Contractor extends User {
 
     @Column
-    private Float hourlyRate;
+    private float hourlyRate;
 
     @Column
     private String phoneNumber;
@@ -26,7 +25,7 @@ public class Contractor extends User {
     private Set<Skill> skills;
 
     @Column
-    private Boolean available;
+    private boolean available;
 
     /**
      * Constructor for Contractor object
@@ -47,7 +46,7 @@ public class Contractor extends User {
      *
      * @return The hourly rate, or {@code null} if not set.
      */
-    public Float getHourlyRate() {
+    public float getHourlyRate() {
         return hourlyRate;
     }
     /**
@@ -55,7 +54,7 @@ public class Contractor extends User {
      *
      * @param hourlyRate The hourly rate to set.
      */
-    public void setHourlyRate(Float hourlyRate) {
+    public void setHourlyRate(float hourlyRate) {
         this.hourlyRate = hourlyRate;
     }
 
@@ -106,7 +105,7 @@ public class Contractor extends User {
      *
      * @return {@code true} if available, {@code false} if not, or {@code null} if undefined.
      */
-    public Boolean getAvailable() {
+    public boolean getAvailable() {
         return available;
     }
     /**
@@ -114,7 +113,7 @@ public class Contractor extends User {
      *
      * @param available {@code true} if available, {@code false} otherwise.
      */
-    public void setAvailable(Boolean available) {
+    public void setAvailable(boolean available) {
         this.available = available;
     }
 
