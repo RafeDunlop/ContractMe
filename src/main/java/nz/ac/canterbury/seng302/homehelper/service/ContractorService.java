@@ -61,7 +61,7 @@ public class ContractorService {
                 passwordEncoder.encode(userRegisterDTO.getPassword())
         );
         contractor.setHourlyRate(userRegisterDTO.getHourlyRate());
-        contractor.setPhoneNumber(userRegisterDTO.getPhoneNumber());
+        contractor.setPhoneNumber(userRegisterDTO.getCountryCode() + userRegisterDTO.getPhoneNumber());
         userRegisterDTO.getSkills().forEach(contractor::addSkill);
         //address validation here
         Location location = new Location(
