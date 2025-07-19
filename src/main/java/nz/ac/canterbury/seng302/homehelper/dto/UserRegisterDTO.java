@@ -11,6 +11,8 @@ public class UserRegisterDTO {
     private String password;
     private String confirmPassword;
     private int countryCode;
+    private boolean isContractor;
+    private float hourlyRate;
 
     private String phoneNumber;
 
@@ -36,16 +38,21 @@ public class UserRegisterDTO {
         this.skills = skills;
     }
 
-    public Float getHourlyRate() {
+    public float getHourlyRate() {
         return hourlyRate;
     }
 
-    public void setHourlyRate(Float hourlyRate) {
+    public void setHourlyRate(float hourlyRate) {
         this.hourlyRate = hourlyRate;
     }
 
-    private Float hourlyRate;
+    public boolean getIsContractor() {
+        return isContractor;
+    }
 
+    public void setIsContractor(boolean isContractor) {
+        this.isContractor = isContractor;
+    }
 
     public UserRegisterDTO() {}
 
@@ -57,7 +64,7 @@ public class UserRegisterDTO {
         this.confirmPassword = confirmPassword;
     }
 
-    public UserRegisterDTO(String firstName, String lastName, String email, String password, String confirmPassword, int countryCode, String phoneNumber, List<Skill> skills, Float hourlyRate) {
+    public UserRegisterDTO(String firstName, String lastName, String email, String password, String confirmPassword, boolean isContractor, int countryCode, String phoneNumber, List<Skill> skills, Float hourlyRate) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -67,6 +74,7 @@ public class UserRegisterDTO {
         this.phoneNumber = phoneNumber;
         this.skills = skills;
         this.hourlyRate = hourlyRate;
+        this.isContractor = isContractor;
     }
 
     /**

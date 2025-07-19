@@ -5,6 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.controller.RegisterController;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
@@ -24,9 +25,10 @@ public class RegisterControllerTest {
         RegisterService registerServiceSpy = Mockito.mock(RegisterService.class);
         VerificationCodeService verificationCodeServiceMock = Mockito.mock(VerificationCodeService.class);
         ApplicationEventPublisher applicationEventPublisher = Mockito.mock(ApplicationEventPublisher.class);
+        ContractorService contractorServiceMock = Mockito.mock(ContractorService.class);
         LocationService locationServiceMock = Mockito.mock(LocationService.class);
         RegisterController registerController = new RegisterController(
-                registerServiceSpy, applicationEventPublisher, verificationCodeServiceMock, locationServiceMock);
+                registerServiceSpy, applicationEventPublisher, verificationCodeServiceMock, locationServiceMock, contractorServiceMock);
 
         RedirectAttributes redirectAttributes = Mockito.mock(RedirectAttributes.class);
         UserRegisterDTO mockedUser = new UserRegisterDTO("","","","","");
@@ -36,7 +38,7 @@ public class RegisterControllerTest {
         Mockito.when(registerServiceSpy.registerUser(mockedUser)).thenReturn((trialUser));
 
         Mockito.when(trialUser.getId()).thenReturn(1L);
-        String viewName = (registerController.submitRegistration(mockedUser, mockedLocation,request, redirectAttributes));
+        String viewName = (registerController.submitRegistration(mockedUser, mockedLocation, request, redirectAttributes));
 
         Assertions.assertEquals("redirect:/confirm-registration", viewName);
 

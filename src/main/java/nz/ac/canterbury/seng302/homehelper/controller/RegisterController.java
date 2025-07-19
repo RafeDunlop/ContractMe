@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ public class RegisterController {
 
     private final ApplicationEventPublisher eventPublisher;
     private final LocationService locationService;
+    private final ContractorService contractorService;
 
     /**
      * Constructor for the register class, links controller and service layers
@@ -44,11 +46,12 @@ public class RegisterController {
     @Autowired
     public RegisterController(RegisterService registerService,
                               ApplicationEventPublisher eventPublisher,
-                              VerificationCodeService verificationCodeService, LocationService locationService) {
+                              VerificationCodeService verificationCodeService, LocationService locationService, ContractorService contractorService) {
         this.registerService = registerService;
         this.verificationCodeService = verificationCodeService;
         this.eventPublisher = eventPublisher;
         this.locationService = locationService;
+        this.contractorService = contractorService;
     }
 
     /**
@@ -89,6 +92,10 @@ public class RegisterController {
             errors.putAll(locationService.validateLocation(addressDTO));
         }
 
+        if (userRegisterDTO.getIsContractor()) {
+            errors.putAll(contractorService.validateContractor(userRegisterDTO));
+        }
+
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
             redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
@@ -98,16 +105,22 @@ public class RegisterController {
         }
 
         try {
-            User user = registerService.registerUser(userRegisterDTO);
-            eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
-            if (locationService.isLocationProvided(addressDTO)) {
-                registerService.registerLocation(user, addressDTO);
+            User user;
+            if (userRegisterDTO.getIsContractor()) {
+                user = contractorService.registerContractor(userRegisterDTO, addressDTO);
+            } else {
+                user = registerService.registerUser(userRegisterDTO);
+                if (locationService.isLocationProvided(addressDTO)) {
+                    registerService.registerLocation(user, addressDTO);
+                }
             }
+            eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
             return "redirect:/confirm-registration";
         } catch (MailException e) {
             redirectAttributes.addFlashAttribute("error", "Error sending confirmation email.");
             redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
+            redirectAttributes.addFlashAttribute("locationUsed", locationProvided);
             return "redirect:/register";
         }
     }
