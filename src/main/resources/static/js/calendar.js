@@ -1,3 +1,11 @@
+/**
+ * Updates the calendar view for a renovation record by fetching new calendar fragment
+ * for the specified month and year, and replacing the existing calendar.
+ *
+ * @param id - The ID of the renovation record.
+ * @param month - The new month to display
+ * @param year - The new year to display
+ */
 window.changeMonth = function(id, month, year) {
     const page = document.getElementById("pageNumber")?.value || "1";
     const cardsPerPage = document.getElementById("cardsPerPage")?.value || "16";
