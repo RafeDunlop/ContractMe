@@ -458,7 +458,7 @@ public class RenovationController {
             }
         }
 
-        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate);
+        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate, record);
 
         model.addAttribute("datesArray", datesArray);
         model.addAttribute("date", localDate);

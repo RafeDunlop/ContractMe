@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="English">
 <body>
 <!-- calendar fragment wrapper -->
-<div th:fragment="calendar (date, dates, id)" th:id="'calendar-' + ${id}">
+<div th:fragment="calendar (date, dates, currentTasks, id)" th:id="'calendar-' + ${id}">
     <!-- inner calendar container retains id="calendar" for JS extraction -->
     <div id="calendar" class="container">
         <div class="row">
@@ -51,7 +51,7 @@
                  th:classappend="${cell.month != date.monthValue} ? ' bg-body-secondary text-muted' : ''">
                  <div class="d-flex flex-column align-items-center" style="min-height: 120px">
                     <div th:text="${cell.day}" style="padding: 5px 0;"></div>
-                    <div class="calendar-task" th:text="${currentTasks.get()}"style="margin: 5px 0;"></div>
+                    <div class="calendar-task" th:text="${currentTasks.get()}" style="margin: 5px 0;"></div>
                     <div style="display: none;"></div>
                  </div>
             </div>
