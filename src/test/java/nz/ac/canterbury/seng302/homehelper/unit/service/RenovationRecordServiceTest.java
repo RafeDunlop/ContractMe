@@ -440,8 +440,8 @@ public class RenovationRecordServiceTest {
 
         LocalDate date = LocalDate.of(2024, 2, 1);
 
-        HashMap<LocalDate, List<RenovationTask>> calendarTasks = new HashMap<>();
-        CalendarCellDTO twentyNinthOfFebruary = new CalendarCellDTO(29, 2, calendarTasks);
+        List<RenovationTask> calendarTasks = List.of();
+        CalendarCellDTO twentyNinthOfFebruary = new CalendarCellDTO(date.withDayOfMonth(29), calendarTasks);
 
         List<List<CalendarCellDTO>> calendarCells = toTest.generateCalendarCells(date, mockRenovationRecord);
 
@@ -452,11 +452,11 @@ public class RenovationRecordServiceTest {
     void generateCalendarCells_monthStartingOnSunday_calendarHasSixRows() {
         LocalDate date = LocalDate.of(2023, 1, 1);
 
-        HashMap<LocalDate, List<RenovationTask>> calendarTasks = new HashMap<>();
+        List<RenovationTask> calendarTasks = List.of();
 
-        CalendarCellDTO firstOfCurrentMonth = new CalendarCellDTO(1, 1, calendarTasks);
-        CalendarCellDTO lastDayOfPreviousMonth = new CalendarCellDTO(31, 12, calendarTasks);
-        CalendarCellDTO firstOfNextMonth = new CalendarCellDTO(1, 2, calendarTasks);
+        CalendarCellDTO firstOfCurrentMonth = new CalendarCellDTO(date.withDayOfMonth(1), calendarTasks);
+        CalendarCellDTO lastDayOfPreviousMonth = new CalendarCellDTO(date.withMonth(12).withDayOfMonth(31), calendarTasks);
+        CalendarCellDTO firstOfNextMonth = new CalendarCellDTO(date.withMonth(2).withDayOfMonth(1), calendarTasks);
 
         List<List<CalendarCellDTO>> calendarCells = toTest.generateCalendarCells(date, mockRenovationRecord);
 
@@ -470,11 +470,11 @@ public class RenovationRecordServiceTest {
     void generateCalendarCells_monthStartingOnMonday_calendarHasFiveRows() {
         LocalDate date = LocalDate.of(2021, 2, 1);
 
-        HashMap<LocalDate, List<RenovationTask>> calendarTasks = new HashMap<>();
+        List<RenovationTask> calendarTasks = List.of();
 
-        CalendarCellDTO firstOfCurrentMonth = new CalendarCellDTO(1, 2, calendarTasks);
-        CalendarCellDTO lastDayOfPreviousMonth = new CalendarCellDTO(31, 1, calendarTasks);
-        CalendarCellDTO firstOfNextMonth = new CalendarCellDTO(1, 3, calendarTasks);
+        CalendarCellDTO firstOfCurrentMonth = new CalendarCellDTO(date.withMonth(2).withDayOfMonth(1), calendarTasks);
+        CalendarCellDTO lastDayOfPreviousMonth = new CalendarCellDTO(date.withMonth(1).withDayOfMonth(31), calendarTasks);
+        CalendarCellDTO firstOfNextMonth = new CalendarCellDTO(date.withMonth(3).withDayOfMonth(1), calendarTasks);
 
         List<List<CalendarCellDTO>> calendarCells = toTest.generateCalendarCells(date, mockRenovationRecord);
 

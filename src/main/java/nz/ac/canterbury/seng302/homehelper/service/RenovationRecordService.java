@@ -369,23 +369,22 @@ public class RenovationRecordService {
         int startOffset = dayOfWeek - 1;
 
         LocalDate startDate = firstOfMonth.minusDays(startOffset);
+        LocalDate endDate = startDate.plusMonths(1).withDayOfMonth(1);
+        Map<LocalDate, List<RenovationTask>> calendarTasks = renovationTaskService.getTasksWithinDates(record, startDate, endDate);
+        Iterator<Map.Entry<LocalDate, List<RenovationTask>>> calendarDays = calendarTasks.entrySet().stream().sorted().toList().iterator();
         List<List<CalendarCellDTO>> rows = new ArrayList<>();
-
         for (int i = 0; i < 6; i++) {
             List<CalendarCellDTO> week = new ArrayList<>();
             for (int j = 0; j < 7; j++) {
                 if (i == 5 && j == 0 && startDate.getMonthValue() != firstOfMonth.getMonthValue()) {
                     return rows;
                 }
-                LocalDate endDate = startDate.plusMonths(1).minusDays(1);
-                Map<LocalDate, List<RenovationTask>> calendarTasks = renovationTaskService.getTasksWithinDates(record, startDate, endDate);
-
-                week.add(new CalendarCellDTO(startDate.getDayOfMonth(), startDate.getMonthValue(), calendarTasks));
+                Map.Entry<LocalDate, List<RenovationTask>> dayTaskData = calendarDays.next();
+                week.add(new CalendarCellDTO(dayTaskData.getKey(), dayTaskData.getValue()));
                 startDate = startDate.plusDays(1);
             }
             rows.add(week);
         }
-
         return rows;
     }
 }
