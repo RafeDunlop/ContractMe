@@ -21,7 +21,7 @@
                 <!-- FIRST NAME -->
                 <div class="mb-3">
                     <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First Name"
-                           aria-label="first-name" th:value="${userRegisterDTO.firstName}">
+                           aria-label="first-name" th:value="${userRegisterDTO.firstName}" autocomplete="given-name">
 
                     <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="firstName-frontend-error" hidden>
@@ -42,7 +42,7 @@
                 <!-- LAST NAME -->
                 <div class="mb-3">
                     <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last Name"
-                           aria-label="last-name" th:value="${userRegisterDTO.lastName}">
+                           aria-label="last-name" th:value="${userRegisterDTO.lastName}" autocomplete="family-name">
 
                     <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="lastName-frontend-error" hidden>
@@ -63,7 +63,7 @@
                 <!-- EMAIL -->
                 <div>
                     <input type="text" class="form-control" id="email" name="email" placeholder="Email"
-                           aria-label="email" th:value="${userRegisterDTO.email}">
+                           aria-label="email" th:value="${userRegisterDTO.email}" autocomplete="email">
 
                     <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="email-frontend-error" hidden>
@@ -117,7 +117,7 @@
                 <!-- PASSWORD -->
                 <div class="mb-3">
                     <input type="password" class="form-control" id="password" name="password" placeholder="Password"
-                           aria-label="password">
+                           aria-label="password" autocomplete="new-password">
 
                     <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="password-frontend-error" hidden>
@@ -138,7 +138,7 @@
                 <!-- CONFIRM PASSWORD -->
                 <div class="mb-5">
                     <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
-                           placeholder="Confirm Password" aria-label="confirm-password">
+                           placeholder="Confirm Password" aria-label="confirm-password" autocomplete="new-password">
 
                     <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="confirmPassword-frontend-error" hidden>

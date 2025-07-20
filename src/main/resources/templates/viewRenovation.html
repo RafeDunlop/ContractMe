@@ -90,16 +90,11 @@
                 </div>
             </div>
 
-            <div id="elements-container" style="display: none;">
+            <div th:if="${not #lists.isEmpty(renovation.getRenovationTasks())}" id="elements-container" style="display: none;">
                 <div id="grid" class="task-grid">
                     <!-- Cards will be injected here by JavaScript -->
                 </div>
             </div>
-
-            <div id="loading-message" class="text-center">
-                <p>Loading renovations...</p>
-            </div>
-
 
             <div id="footer" class="mt-2">
                 <div class="d-flex justify-content-center">
@@ -120,7 +115,7 @@
                 </div>
             </div>
 
-            <div th:replace="~{fragments/calendar.html ::calendar (${date}, ${datesArray}, ${currentTasks}) }"></div>
+            <div th:replace="~{fragments/calendar.html ::calendar (${date}, ${datesArray}, ${currentTasks}, ${renovation.id}) }"></div>
         </div>
     </div>
 

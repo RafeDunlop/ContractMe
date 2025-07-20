@@ -48,7 +48,7 @@ function updateLayout(viewMode = "cards", id = null) {
     const containerMargin =  parseFloat(getComputedStyle(document.getElementById('container')).marginTop);
 
     const gridContainer = document.getElementById("elements-container");
-    if (gridContainer.style.display === "none") {
+    if (gridContainer && gridContainer.style.display === "none") {
         gridContainer.style.display = "block";
     }
     const containerWidth = viewMode === "cards" ?

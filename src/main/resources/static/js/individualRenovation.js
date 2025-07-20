@@ -65,6 +65,12 @@ document.getElementById("roomList").addEventListener("keydown", (event) => {
     }
 });
 
+document.getElementById("name").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+    }
+});
+
 function checkRoomName(input) {
     roomFieldValid = validateField(input, /^[\p{L}\d .,\-']*$/u, roomFrontendErrorMessage, roomNameErrorMessage);
 }

@@ -87,8 +87,6 @@ function validateDueDate(dateValue) {
     return true;
 }
 
-
-
 // === Utility Functions ===
 
 function setError(container, messageElement, message) {
