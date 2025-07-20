@@ -2,15 +2,18 @@
 let currentTabIndex = -1;
 const input = document.getElementById("tagName");
 
+
 // Listen for input events on the tag input field
-input.addEventListener("input", function () {
-    const partialTag = input.value.trim();
-    if (partialTag.length < 1) {
-        resetAutocomplete();
-        return
-    }
-    updateAutocomplete(partialTag);
-});
+if (input) {
+    input.addEventListener("input", function () {
+        const partialTag = input.value.trim();
+        if (partialTag.length < 1) {
+            resetAutocomplete();
+            return
+        }
+        updateAutocomplete(partialTag);
+    });
+}
 
 // Event for navigating the autocomplete with the up/down arrow keys
 document.addEventListener("keydown", function (event) {
