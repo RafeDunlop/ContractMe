@@ -137,7 +137,7 @@ function checkOptionalField(input, frontendError, frontendErrorMessage, errorMes
         frontendErrorMessage.textContent = errorMessageContent;
         frontendError.hidden = false;
         frontendErrorMessage.hidden = false;
-        backendError.hidden = true;
+        if (backendError) backendError.hidden = true;
 
     }
     else {
@@ -168,5 +168,5 @@ function hideSingleErrorMessage(frontendErrorMessage, frontendError, backendErro
     frontendErrorMessage.textContent = "";
     frontendError.hidden = true;
     frontendErrorMessage.hidden = true;
-    backendError.hidden = true;
+    if (backendError) backendError.hidden = true;
 }
