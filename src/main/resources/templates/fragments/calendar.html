@@ -9,12 +9,12 @@
         <div class="row">
             <!-- Previous Month -->
             <div class="col d-flex justify-content-center align-items-center">
-                <a href="#"
+                <button type="button"
                    th:onclick="|changeMonth(${id}, ${date.minusMonths(1).monthValue}, ${date.minusMonths(1).year}); return false;|"
                    class="btn btn-primary btn-lg"
                    style="font-size:clamp(1rem, 2.5vw, 1.5rem); width:80%; white-space:nowrap; overflow:hidden; ">
                     [[${#strings.capitalize(date.minusMonths(1).month.name().toLowerCase())}]]
-                </a>
+                </button>
             </div>
             <!-- Current Month -->
             <div class="col text-center">
@@ -25,12 +25,12 @@
             </div>
             <!-- Next Month -->
             <div class="col d-flex justify-content-center align-items-center">
-                <a href="#"
+                <button type="button"
                    th:onclick="|changeMonth(${id}, ${date.plusMonths(1).monthValue}, ${date.plusMonths(1).year}); return false;|"
                    class="btn btn-primary btn-lg text-nowrap"
                    style="font-size:clamp(1rem, 2.5vw, 1.5rem); width:80%; white-space:nowrap; overflow:hidden;">
                     [[${#strings.capitalize(date.plusMonths(1).month.name().toLowerCase())}]]
-                </a>
+                </button>
             </div>
         </div>
 
