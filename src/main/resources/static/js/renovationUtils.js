@@ -122,7 +122,6 @@ function fetchRenovation(id, resetPage = false) {
 
     const element = document.getElementById("grid");
     const container = document.getElementById("elements-container");
-    const loading = document.getElementById("loading-message");
     const isOwner = document.getElementById("isOwner");
 
     let pageNumber = parseInt(document.getElementById("pageNumber")?.value, 10);
@@ -136,19 +135,12 @@ function fetchRenovation(id, resetPage = false) {
     }
 
     const params = new URLSearchParams();
-    const userParams = new URLSearchParams();
-    userParams.set("id", id);
     params.set("page", pageNumber);
     params.set("cardsPerPage", cardsPerPage);
-
-    const newUrl = new URL(window.location);
-    newUrl.search = userParams.toString();
-    window.history.replaceState({}, '', newUrl);
 
     fetch(`${basePath}renovations/retrieve/${id}?${params.toString()}`)
         .then(response => response.json())
         .then(data => {
-            loading.style.display = "none";
             element.style.display = "grid";
             element.innerHTML = "";
 
@@ -170,7 +162,6 @@ function fetchRenovation(id, resetPage = false) {
             }
         })
         .catch(error => {
-            loading.style.display = "none";
             element.style.display = "none";
             container.insertAdjacentHTML('beforeend', `<div class="alert alert-danger mt-4">Failed to load renovations. Please try again.</div>`);
             console.error(error);

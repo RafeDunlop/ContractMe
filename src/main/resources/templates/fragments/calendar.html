@@ -1,32 +1,58 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="English">
 <body>
-<!-- month is the month name, numDays is the number of days in the month, rows is the number of rows in the calendar,
-and firstDay is the number of the day of the Week which occurs on the first day of the month,
-from 0 (Monday) to 6 (Sunday) -->
-<div th:fragment="calendar (date, dates)" class="container" id="calendar">
-    <div class="row">
-        <div class="col">
-            <h1 class="display-5 text-center" th:text="|${#calendars.monthName(date)} ${#calendars.year(date)}|"></h1>
+<!-- calendar fragment wrapper -->
+<div th:fragment="calendar (date, dates, id)" th:id="'calendar-' + ${id}">
+    <!-- inner calendar container retains id="calendar" for JS extraction -->
+    <div id="calendar" class="container">
+        <div class="row">
+            <!-- Previous Month -->
+            <div class="col d-flex justify-content-center align-items-center">
+                <a href="#"
+                   th:onclick="|changeMonth(${id}, ${date.minusMonths(1).monthValue}, ${date.minusMonths(1).year}); return false;|"
+                   class="btn btn-primary btn-lg"
+                   style="font-size:clamp(1rem, 2.5vw, 1.5rem); width:80%; white-space:nowrap; overflow:hidden; ">
+                    [[${#strings.capitalize(date.minusMonths(1).month.name().toLowerCase())}]]
+                </a>
+            </div>
+            <!-- Current Month -->
+            <div class="col text-center">
+                <h1 th:text="|${#strings.capitalize(date.month.name().toLowerCase())} ${date.year}|"
+                    class="text-center"
+                    style="font-size:3rem;">
+                </h1>
+            </div>
+            <!-- Next Month -->
+            <div class="col d-flex justify-content-center align-items-center">
+                <a href="#"
+                   th:onclick="|changeMonth(${id}, ${date.plusMonths(1).monthValue}, ${date.plusMonths(1).year}); return false;|"
+                   class="btn btn-primary btn-lg text-nowrap"
+                   style="font-size:clamp(1rem, 2.5vw, 1.5rem); width:80%; white-space:nowrap; overflow:hidden;">
+                    [[${#strings.capitalize(date.plusMonths(1).month.name().toLowerCase())}]]
+                </a>
+            </div>
         </div>
-    </div>
-    <div class="row text-center">
-        <div class="col border border-secondary">Monday</div>
-        <div class="col border border-secondary">Tuesday</div>
-        <div class="col border border-secondary">Wednesday</div>
-        <div class="col border border-secondary">Thursday</div>
-        <div class="col border border-secondary">Friday</div>
-        <div class="col border border-secondary">Saturday</div>
-        <div class="col border border-secondary">Sunday</div>
-    </div>
-    <div th:each="row : ${dates}" class="row">
-        <div th:each="cell : ${row}"
-             th:if="${cell != null}"
-             class="col py-5 border border-secondary text-start"
-             th:text="${cell.day}"
-             th:classappend="${cell.month != #calendars.month(date)} ? ' bg-body-secondary text-muted' : ''">
+
+        <div class="row text-center">
+            <div class="col border border-secondary">Monday</div>
+            <div class="col border border-secondary">Tuesday</div>
+            <div class="col border border-secondary">Wednesday</div>
+            <div class="col border border-secondary">Thursday</div>
+            <div class="col border border-secondary">Friday</div>
+            <div class="col border border-secondary">Saturday</div>
+            <div class="col border border-secondary">Sunday</div>
+        </div>
+
+        <div th:each="row : ${datesArray}" class="row">
+            <div th:each="cell : ${row}"
+                 th:if="${cell != null}"
+                 class="col py-5 border border-secondary text-start"
+                 th:text="${cell.day}"
+                 th:classappend="${cell.month != date.monthValue} ? ' bg-body-secondary text-muted' : ''">
+            </div>
         </div>
     </div>
 </div>
 </body>
+<script type="text/javascript" th:src="@{/js/calendar.js}"></script>
 </html>

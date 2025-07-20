@@ -386,13 +386,13 @@ public class RenovationController {
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
         LocalDate localDate = LocalDate.now();
-        if (year != null && month != null) {
+        if (year != null && year >= 1 && month != null) {
             try {
                 localDate = LocalDate.of(year, month, 1);
             } catch (DateTimeException e) {
                 logger.error(e.getMessage());
             }
-        } else if (month != null) {
+        } else if (month != null && year == null) {
             try {
                 localDate = LocalDate.of(localDate.getYear(), month, 1);
             } catch (DateTimeException e) {
@@ -402,11 +402,8 @@ public class RenovationController {
 
         List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate);
 
-        Calendar calendarDate = Calendar.getInstance();
-        calendarDate.set(localDate.getYear(), localDate.getMonthValue()- 1, localDate.getDayOfMonth());
-
         model.addAttribute("datesArray", datesArray);
-        model.addAttribute("date", calendarDate);
+        model.addAttribute("date", localDate);
 
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
 
@@ -416,6 +413,56 @@ public class RenovationController {
         model.addAttribute("icons", iconFileNames);
 
         return "viewRenovation";
+    }
+
+    /**
+     * Retrieves the calendar fragment for a renovation record based on the provided ID and optional year/month.
+     * If the year or month is invalid or not provided, the current month is used
+     *
+     * @param id     ID of the renovation record whose calendar is being viewed
+     * @param year   Optional year to generate the calendar for (>= 1)
+     * @param month  Optional month to generate the calendar for (1–12). If only month is provided, current year is used.
+     * @param model  Model used to pass attributes to the Thymeleaf calendar fragment
+     * @return       Thymeleaf calendar fragment for the given renovation
+     * @throws ResponseStatusException if the renovation record does not exist or is not accessible by the current user
+     */
+    @GetMapping("/calendar")
+    public String getCalendarFragment(@RequestParam Long id,
+                                      @RequestParam(required = false) Integer year,
+                                      @RequestParam(required = false) Integer month,
+                                      Model model) {
+
+        RenovationRecord record = renovationRecordService.getRecordById(id);
+        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Renovation not found");
+
+        User user = loginService.getUserByEmail();
+        boolean isOwner = user.equals(record.getUser());
+        if (!isOwner) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
+        }
+
+        LocalDate localDate = LocalDate.now();
+        if (year != null && year >= 1 && month != null) {
+            try {
+                localDate = LocalDate.of(year, month, 1);
+            } catch (DateTimeException e) {
+                logger.error(e.getMessage());
+            }
+        } else if (month != null && year == null) {
+            try {
+                localDate = LocalDate.of(localDate.getYear(), month, 1);
+            } catch (DateTimeException e) {
+                logger.error(e.getMessage());
+            }
+        }
+
+        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate);
+
+        model.addAttribute("datesArray", datesArray);
+        model.addAttribute("date", localDate);
+        model.addAttribute("id", id);
+
+        return "fragments/calendar :: calendar";  // return only fragment for partial update
     }
 
     /**
