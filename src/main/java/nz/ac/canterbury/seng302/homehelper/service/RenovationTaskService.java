@@ -57,16 +57,22 @@ public class RenovationTaskService {
      * @return A map which contains the {@code RenovationTask} objects associated with each date within the specified range
      */
     public Map<LocalDate, List<RenovationTask>> getTasksWithinDates(RenovationRecord renovationRecord, LocalDate startDate, LocalDate endDate) {
+        LocalDate upperBoundary = endDate.plusDays(1);
         HashMap<LocalDate, List<RenovationTask>> dateMap = new HashMap<>();
-        renovationTaskRepository.getByDueDateBetween(startDate, endDate, renovationRecord).forEach(renovationTask -> dateMap.merge(
-                renovationTask.getDueDate(),
-                List.of(renovationTask),
-                (existing, toAdd) -> {
-                    ArrayList<RenovationTask> allCorrespondingTasks = new ArrayList<>(existing);
-                    allCorrespondingTasks.addAll(toAdd);
-                    return allCorrespondingTasks;
-                })
-        );
+        List<LocalDate> keys = startDate.datesUntil(upperBoundary).toList();
+        keys.forEach(date -> dateMap.put(date, new ArrayList<>()));
+        Iterator<LocalDate> keyItr = keys.iterator();
+        Iterator<RenovationTask> valItr = renovationTaskRepository.getByDueDateBetween(startDate, endDate, renovationRecord).iterator();
+        if (keyItr.hasNext() && valItr.hasNext()) {
+            LocalDate currentKey = keyItr.next();
+            do {
+                RenovationTask renovationTask = valItr.next();
+                while (!currentKey.equals(renovationTask.getDueDate())) {
+                    currentKey = keyItr.next();
+                }
+                dateMap.get(currentKey).add(renovationTask);
+            } while(valItr.hasNext());
+        }
         return dateMap;
     }
 
