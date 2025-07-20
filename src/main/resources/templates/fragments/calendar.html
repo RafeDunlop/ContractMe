@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="English">
 <body>
-<!-- calendar fragment wrapper -->
+<!-- month is the month name, numDays is the number of days in the month, rows is the number of rows in the calendar,
+and firstDay is the number of the day of the Week which occurs on the first day of the month,
+from 0 (Monday) to 6 (Sunday) -->
 <div th:fragment="calendar (date, dates, id)" th:id="'calendar-' + ${id}">
-    <!-- inner calendar container retains id="calendar" for JS extraction -->
     <div id="calendar" class="container">
         <div class="row">
             <!-- Previous Month -->
@@ -28,7 +29,7 @@
                    th:onclick="|changeMonth(${id}, ${date.plusMonths(1).monthValue}, ${date.plusMonths(1).year}); return false;|"
                    class="btn btn-primary btn-lg text-nowrap"
                    style="font-size:clamp(1rem, 2.5vw, 1.5rem); width:80%; white-space:nowrap; overflow:hidden;">
-                    [[${#strings.capitalize(date.plusMonths(1).month.name().toLowerCase())}]]
+                   [[${#strings.capitalize(date.plusMonths(1).month.name().toLowerCase())}]]
                 </a>
             </div>
         </div>
@@ -43,12 +44,19 @@
             <div class="col border border-secondary">Sunday</div>
         </div>
 
-        <div th:each="row : ${datesArray}" class="row">
+        <div th:each="row : ${datesArray}" class="row"
+             th:with="
+             currentDay=${#dates.day(#dates.createNow())},
+             currentMonth=${#dates.month(#dates.createNow())},
+             currentYear=${#dates.year(#dates.createNow())}"
+        >
             <div th:each="cell : ${row}"
                  th:if="${cell != null}"
                  class="col py-5 border border-secondary text-start"
                  th:text="${cell.day}"
-                 th:classappend="${cell.month != date.monthValue} ? ' bg-body-secondary text-muted' : ''">
+                 th:classappend="${cell.month != date.monthValue} ? ' bg-body-secondary text-muted' : ''"
+                 th:style="${(cell.day == currentDay and cell.month == currentMonth and #calendars.year(date) == currentYear) ? 'background-color: #ffff99;' : ''}"
+                >
             </div>
         </div>
     </div>

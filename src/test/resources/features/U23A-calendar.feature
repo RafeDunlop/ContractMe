@@ -58,3 +58,9 @@ Feature: U23A - As Kaia, I want to see a calendar displaying my upcoming tasks, 
           | 45    | 13     |
           | 2020  | 0      |
           | 10000 | -20    |
+
+  Scenario: AC5 - Highlight the current date on calendar
+    Given I have a renovation record
+    When I navigate to my renovation record
+    And I see a calendar for the current month
+    Then today's date is highlighted
