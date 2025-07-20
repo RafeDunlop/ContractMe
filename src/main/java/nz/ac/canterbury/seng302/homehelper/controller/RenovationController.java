@@ -392,7 +392,7 @@ public class RenovationController {
             } catch (DateTimeException e) {
                 logger.error(e.getMessage());
             }
-        } else if (month != null) {
+        } else if (month != null && year == null) {
             try {
                 localDate = LocalDate.of(localDate.getYear(), month, 1);
             } catch (DateTimeException e) {
@@ -424,7 +424,11 @@ public class RenovationController {
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Renovation not found");
 
-        // You can do user/permission checks here if needed
+        User user = loginService.getUserByEmail();
+        boolean isOwner = user.equals(record.getUser());
+        if (!isOwner) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
+        }
 
         LocalDate localDate = LocalDate.now();
         if (year != null && year >= 1 && month != null) {
@@ -433,7 +437,7 @@ public class RenovationController {
             } catch (DateTimeException e) {
                 logger.error(e.getMessage());
             }
-        } else if (month != null) {
+        } else if (month != null && year == null) {
             try {
                 localDate = LocalDate.of(localDate.getYear(), month, 1);
             } catch (DateTimeException e) {

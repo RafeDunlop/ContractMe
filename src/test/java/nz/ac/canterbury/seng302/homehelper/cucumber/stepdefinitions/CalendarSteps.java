@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
@@ -47,6 +48,8 @@ public class CalendarSteps {
     private MvcResult result;
     private User testUser;
     private RenovationRecord renovationRecord;
+    private int calendarMonth;
+    private int calendarYear;
 
     @Given("I have a renovation record")
     public void i_have_a_renovation_record() throws Exception{
@@ -87,4 +90,97 @@ public class CalendarSteps {
         Assertions.assertTrue(html.contains(expectedMonthYear));
     }
 
+    @When("calendar year is {int} and month is {int}")
+    public void calendar_year_is_and_month_is(int year, int month) throws Exception {
+        calendarYear = year;
+        calendarMonth = month;
+        result = mockMvc.perform(get("/renovations/calendar?id=" + renovationRecord.getId()
+                + "&year=" + year + "&month=" + month)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Then("I see a button for the previous and next month")
+    public void i_see_a_button_for_the_previous_and_next_month() throws Exception {
+        String html = result.getResponse().getContentAsString();
+
+        if (calendarYear < 1 || calendarMonth < 1 || calendarMonth > 12) {
+            calendarYear = LocalDate.now().getYear();
+            calendarMonth = LocalDate.now().getMonthValue();
+        }
+
+        Assertions.assertTrue(html.contains("id=\"calendar\""));
+        LocalDate date = LocalDate.of(calendarYear, calendarMonth, 1);
+        String expectedMonthYear = date.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH) + " " + date.getYear();
+        String expectedPrevMonthButton = date.minusMonths(1).getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+        String expectedNextMonthButton = date.plusMonths(1).getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+        Assertions.assertTrue(html.contains(expectedMonthYear));
+        Assertions.assertTrue(html.contains(expectedPrevMonthButton));
+        Assertions.assertTrue(html.contains(expectedNextMonthButton));
+    }
+
+    @When("I click the previous month button")
+    public void i_click_the_previous_month_button() throws Exception {
+        calendarYear = calendarMonth == 1 ? calendarYear - 1 : calendarYear;
+        calendarMonth = calendarMonth == 1 ? 12 : calendarMonth - 1;
+        result = mockMvc.perform(get("/renovations/calendar?id=" + renovationRecord.getId()
+                        + "&year=" + calendarYear + "&month=" + calendarMonth)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Then("I see a calendar for the previous month")
+    public void i_see_a_calendar_for_the_previous_month() throws Exception {
+        String html = result.getResponse().getContentAsString();
+
+        if (calendarYear < 1 || calendarMonth < 1 || calendarMonth > 12) {
+            calendarYear = LocalDate.now().getYear();
+            calendarMonth = LocalDate.now().getMonthValue();
+        }
+
+        Assertions.assertTrue(html.contains("id=\"calendar\""));
+        LocalDate date = LocalDate.of(calendarYear, calendarMonth, 1);
+        String expectedMonthYear = date.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH) + " " + date.getYear();
+        String expectedPrevMonthButton = date.minusMonths(1).getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+        String expectedNextMonthButton = date.plusMonths(1).getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+        Assertions.assertTrue(html.contains(expectedMonthYear));
+        Assertions.assertTrue(html.contains(expectedPrevMonthButton));
+        Assertions.assertTrue(html.contains(expectedNextMonthButton));
+    }
+
+    @When("I click the next month button")
+    public void i_click_the_next_month_button() throws Exception {
+        calendarYear = calendarMonth == 12 ? calendarYear + 1 : calendarYear;
+        calendarMonth = calendarMonth == 12 ? 1 : calendarMonth + 1;
+
+        result = mockMvc.perform(get("/renovations/calendar?id=" + renovationRecord.getId()
+                        + "&year=" + calendarYear + "&month=" + calendarMonth)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Then("I see a calendar for the next month")
+    public void i_see_a_calendar_for_the_next_month() throws Exception {
+        String html = result.getResponse().getContentAsString();
+
+        if (calendarYear < 1 || calendarMonth < 1 || calendarMonth > 12) {
+            calendarYear = LocalDate.now().getYear();
+            calendarMonth = LocalDate.now().getMonthValue();
+        }
+
+        Assertions.assertTrue(html.contains("id=\"calendar\""));
+        LocalDate date = LocalDate.of(calendarYear, calendarMonth, 1);
+        String expectedMonthYear = date.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH) + " " + date.getYear();
+        String expectedPrevMonthButton = date.minusMonths(1).getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+        String expectedNextMonthButton = date.plusMonths(1).getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+        Assertions.assertTrue(html.contains(expectedMonthYear));
+        Assertions.assertTrue(html.contains(expectedPrevMonthButton));
+        Assertions.assertTrue(html.contains(expectedNextMonthButton));
+    }
 }

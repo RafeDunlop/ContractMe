@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -1702,6 +1703,8 @@ public class RenovationControllerIntegrationTest {
     public void viewRenovation_negativeYear_returnFormWithMonthAndPositiveYear() throws Exception {
         int inputtedMonth = 12;
         int inputtedYear = 0;
+        int expectedYear = LocalDate.now().getYear();
+        int expectedMonth = LocalDate.now().getMonthValue();
 
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation with Calendar 4", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
@@ -1718,8 +1721,8 @@ public class RenovationControllerIntegrationTest {
         LocalDate returnedDate = (LocalDate) result.getModelAndView().getModel().get("date");
         List<List<CalendarCellDTO>> returnedCalendarCells = (List<List<CalendarCellDTO>>) result.getModelAndView().getModel().get("datesArray");
 
-        Assertions.assertEquals(inputtedYear, returnedDate.getYear());
-        Assertions.assertEquals(inputtedMonth, returnedDate.getMonthValue());
+        Assertions.assertEquals(expectedYear, returnedDate.getYear());
+        Assertions.assertEquals(expectedMonth, returnedDate.getMonthValue());
         Assertions.assertEquals(5, returnedCalendarCells.size());
     }
 
