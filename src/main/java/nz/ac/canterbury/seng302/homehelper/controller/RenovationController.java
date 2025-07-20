@@ -415,6 +415,17 @@ public class RenovationController {
         return "viewRenovation";
     }
 
+    /**
+     * Retrieves the calendar fragment for a renovation record based on the provided ID and optional year/month.
+     * If the year or month is invalid or not provided, the current month is used
+     *
+     * @param id     ID of the renovation record whose calendar is being viewed
+     * @param year   Optional year to generate the calendar for (>= 1)
+     * @param month  Optional month to generate the calendar for (1–12). If only month is provided, current year is used.
+     * @param model  Model used to pass attributes to the Thymeleaf calendar fragment
+     * @return       Thymeleaf calendar fragment for the given renovation
+     * @throws ResponseStatusException if the renovation record does not exist or is not accessible by the current user
+     */
     @GetMapping("/calendar")
     public String getCalendarFragment(@RequestParam Long id,
                                       @RequestParam(required = false) Integer year,
@@ -447,7 +458,7 @@ public class RenovationController {
 
         List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate);
 
-        model.addAttribute("dates", datesArray);
+        model.addAttribute("datesArray", datesArray);
         model.addAttribute("date", localDate);
         model.addAttribute("id", id);
 

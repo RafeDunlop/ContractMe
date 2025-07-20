@@ -43,7 +43,7 @@
             <div class="col border border-secondary">Sunday</div>
         </div>
 
-        <div th:each="row : ${dates}" class="row">
+        <div th:each="row : ${datesArray}" class="row">
             <div th:each="cell : ${row}"
                  th:if="${cell != null}"
                  class="col py-5 border border-secondary text-start"
