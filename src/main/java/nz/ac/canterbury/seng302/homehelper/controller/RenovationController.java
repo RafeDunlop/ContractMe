@@ -386,6 +386,10 @@ public class RenovationController {
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
         LocalDate localDate = LocalDate.now();
+        model.addAttribute("currentDay", localDate.getDayOfMonth());
+        model.addAttribute("currentMonth", localDate.getMonthValue());
+        model.addAttribute("currentYear", localDate.getYear());
+
         if (year != null && year >= 1 && month != null) {
             try {
                 localDate = LocalDate.of(year, month, 1);
@@ -444,6 +448,10 @@ public class RenovationController {
         }
 
         LocalDate localDate = LocalDate.now();
+        model.addAttribute("currentDay", localDate.getDayOfMonth());
+        model.addAttribute("currentMonth", localDate.getMonthValue());
+        model.addAttribute("currentYear", localDate.getYear());
+
         if (year != null && year >= 1 && month != null) {
             try {
                 localDate = LocalDate.of(year, month, 1);
