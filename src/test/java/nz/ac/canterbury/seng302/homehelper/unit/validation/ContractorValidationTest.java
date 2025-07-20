@@ -38,7 +38,7 @@ public class ContractorValidationTest {
     @Test
     public void hourlyRateValidation_negativeHourlyRate_rejectInput() {
         ContractorValidation contractorValidation = new ContractorValidation();
-        List<String> result = contractorValidation.validateHourlyRate(-1);
+        List<String> result = contractorValidation.validateHourlyRate(-1f);
         List<String> expected = List.of("Invalid hourly rate");
         Assertions.assertEquals(expected, result);
     }

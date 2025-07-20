@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.io.UnsupportedEncodingException;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -34,6 +36,7 @@ public class ContractorRegistrationSteps {
     private MockMvc mockMvc;
 
     private MvcResult result;
+    private ResultActions resultActions;
 
 
 
@@ -65,8 +68,8 @@ public class ContractorRegistrationSteps {
         assertTrue(content.contains("id=\"phoneNumber\""));
     }
 
-    @When("I enter an invalid {string}")
-    public void i_enter_an_invalid(String phoneNumber) throws Exception {
+    @When("I enter an invalid phone number {string}")
+    public void i_enter_an_invalid_phone_number(String phoneNumber) throws Exception {
         MockHttpServletRequestBuilder request = post("/register")
                 .param("firstName", "Jane")
                 .param("lastName", "Doe")
@@ -76,21 +79,22 @@ public class ContractorRegistrationSteps {
                 .param("city", "Christchurch")
                 .param("postcode", "8041")
                 .param("country", "New Zealand")
+                .param("countryCode", "64")
                 .param("phoneNumber", phoneNumber)
                 .param("skills", "HVAC")
                 .param("hourlyRate", "1")
                 .param("password", "P4$$word")
                 .param("confirmPassword", "P4$$word")
+                .param("isContractor", "true")
                 .with(csrf());
 
-        result = mockMvc.perform(request)
-                .andExpect(status().is3xxRedirection()).andReturn();
+        resultActions = mockMvc.perform(request)
+                .andExpect(status().is3xxRedirection());
     }
 
-    @When("an error message tells me {string}")
-    public void an_error_message_tells_me(String errorMessage) throws UnsupportedEncodingException {
-        String content = result.getResponse().getContentAsString();
-        assertTrue(content.contains(errorMessage));
+    @Then("a {string} error message tells me {string}")
+    public void a_error_message_tells_me(String errorName, String errorMessage) throws Exception {
+        resultActions.andExpect(flash().attribute(errorName, errorMessage));
     }
 
 }

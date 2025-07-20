@@ -10,9 +10,9 @@ public class UserRegisterDTO {
     private String email;
     private String password;
     private String confirmPassword;
-    private int countryCode;
+    private Integer countryCode;
     private boolean isContractor;
-    private float hourlyRate;
+    private Float hourlyRate;
 
     private String phoneNumber;
 
@@ -26,11 +26,11 @@ public class UserRegisterDTO {
         this.phoneNumber = phoneNumber;
     }
 
-    public int getCountryCode() {
+    public Integer getCountryCode() {
         return countryCode;
     }
 
-    public void setCountryCode(int countryCode) {
+    public void setCountryCode(Integer countryCode) {
         this.countryCode = countryCode;
     }
 
@@ -42,11 +42,11 @@ public class UserRegisterDTO {
         this.skills = skills;
     }
 
-    public float getHourlyRate() {
+    public Float getHourlyRate() {
         return hourlyRate;
     }
 
-    public void setHourlyRate(float hourlyRate) {
+    public void setHourlyRate(Float hourlyRate) {
         this.hourlyRate = hourlyRate;
     }
 

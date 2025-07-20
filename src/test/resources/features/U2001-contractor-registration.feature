@@ -7,8 +7,8 @@ Feature: U2001 - As Bob, I want to be able to register as a contractor and add m
 
   Scenario Outline: AC2 - Invalid Phone Number
     Given I am on the registration form
-    When I enter an invalid <phone_number>
-    Then an error message tells me "Your phone number is invalid"
+    When I enter an invalid phone number <phone_number>
+    Then a "phoneNumberError" error message tells me "Your phone number is invalid"
     Examples:
     | phone_number     |
     |"0"      |
@@ -20,7 +20,7 @@ Feature: U2001 - As Bob, I want to be able to register as a contractor and add m
     Given I am on the registration form
     When I don't enter a phone number
     And I press the "Sign up" button
-    Then an error message tells me "You must enter a phone number"
+    Then a "phoneNumberError" error message tells me "You must enter a phone number"
 
   Scenario: AC4 - No Location
     Given I am on the registration form

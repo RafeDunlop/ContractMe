@@ -17,10 +17,10 @@ public class ContractorValidation {
      * @param hourlyRate the contractor's hourly rate
      * @return a list of errors, empty if valid
      */
-    public List<String> validateHourlyRate(float hourlyRate) {
+    public List<String> validateHourlyRate(Float hourlyRate) {
         List<String> errors = new ArrayList<>();
 
-        if (hourlyRate < 0) {
+        if (hourlyRate == null || hourlyRate < 0) {
             errors.add("Invalid hourly rate");
         }
         return errors;
@@ -33,7 +33,7 @@ public class ContractorValidation {
      * @param phoneNumber the contractor's phone number
      * @return a list of errors, empty if valid
      */
-    public List<String> validatePhoneNumber(String phoneNumber, int countryCode) {
+    public List<String> validatePhoneNumber(String phoneNumber, Integer countryCode) {
         List<String> errors = new ArrayList<>();
         String regex = "\\d+";
 
@@ -54,10 +54,10 @@ public class ContractorValidation {
      * @param countryCode the phone number country code
      * @return a list of errors, empty if valid
      */
-    private List<String> validateCountryCode(int countryCode) {
+    private List<String> validateCountryCode(Integer countryCode) {
         List<String> errors = new ArrayList<>();
 
-        if (countryCode <= 0 || countryCode > 999) {
+        if (countryCode == null || countryCode <= 0 || countryCode > 999) {
             errors.add("Invalid country code");
         }
         return errors;
