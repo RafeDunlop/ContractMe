@@ -1,10 +1,15 @@
 @authoriseUser
 Feature: U23A - As Kaia, I want to see a calendar displaying my upcoming tasks, so I know which ones need to be prioritised.
 
-  Scenario: AC1 - Display calendar on renovation records
+  Scenario: AC1.1 - Display calendar on renovation records I own
     Given I have a renovation record
     When I navigate to my renovation record
     Then I see a calendar for the current month
+
+  Scenario: AC1.2 - Calender doesn't display on public records I dont own
+    Given I have a public renovation record
+    When second user views my private renovation record
+    Then they do not see a calendar
 
   Scenario Outline: AC3 - Month navigation buttons
     Given I have a renovation record
