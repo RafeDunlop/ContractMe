@@ -94,7 +94,7 @@
     height: 100%;
 }
 
-.calendar-task {
+.calendar-task{
 
     width: 100%;
     min-height: 45px;
@@ -107,7 +107,9 @@
     background-color: #0D6EFD;
     text-decoration-color: #FFFFFF;
     overflow-wrap: break-word;
+
 }
+
 
 .task-text{
     flex: 1;
@@ -115,4 +117,9 @@
     word-break: break-word;
     color: white;
     font-size: 0.9rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
