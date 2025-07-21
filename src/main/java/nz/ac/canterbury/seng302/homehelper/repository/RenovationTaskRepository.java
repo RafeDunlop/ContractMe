@@ -38,6 +38,6 @@ public interface RenovationTaskRepository extends CrudRepository<RenovationTask,
      * @param renovationRecord The {@code RenovationRecord} whose associated {@code RenovationTask} objects should be retrieved
      * @return The list of all {@code RenovationTask} objects whose due dates fall between the specified dates
      */
-    @Query("SELECT rt FROM RenovationTask rt WHERE rt.renovationRecord = :renovationRecord AND rt.dueDate BETWEEN :startDate AND :endDate")
+    @Query("SELECT rt FROM RenovationTask rt WHERE rt.renovationRecord = :renovationRecord AND rt.dueDate BETWEEN :startDate AND :endDate ORDER BY rt.dueDate ASC")
     List<RenovationTask> getByDueDateBetween(LocalDate startDate, LocalDate endDate, RenovationRecord renovationRecord);
 }
