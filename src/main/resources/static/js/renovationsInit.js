@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    updateLayout('table');
+    fetchAppropriateRenovationData('table', null, false);
     window.addEventListener('resize', () => {
         clearTimeout(window._resizeTimeout);
         cachedCardSize = null;
