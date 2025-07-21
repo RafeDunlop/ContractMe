@@ -103,5 +103,7 @@
     margin-right: auto;
     margin-top: 0;
     margin-bottom: 5px;
-    background-color: #0D6EFD
+    background-color: #0D6EFD;
+    text-decoration-color: #FFFFFF;
+    overflow-wrap: break-word;
 }
