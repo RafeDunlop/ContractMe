@@ -41,6 +41,9 @@ let cachedCardSize = null;
  * This function updates the layout based on the window size and adjusts the number of tasks to be displayed on the page.
  */
 function updateLayout(viewMode = "cards", id = null) {
+    // Exit update layout if there is no cards to paginate
+    if (document.getElementById("grid") == null) return;
+
     const cardWidth = 260;
     let cardHeight = 140;
 
