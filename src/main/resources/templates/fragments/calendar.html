@@ -59,7 +59,7 @@
                      </div>
                      <div class="btn-primary calendar-task d-flex flex-row align-items-center" th:each=" task : ${cell.calendarTasks}">
                          <div class="position-relative">
-                             <img th:src="@{'/images/' + ${task.getIconFileName()}}" alt="Task Icon" class="task-icon"
+                             <img th:src="@{'/images/' + ${task.getIconFileName()}}" alt="Task Icon" class="calendar-icon"
                                   th:onclick="showIconSelector(${task.id})" />
                          </div>
                          <div class="task-text" th:text="${task.getName()}"/>

@@ -110,6 +110,15 @@
 
 }
 
+.calendar-icon {
+    flex-shrink: 0;
+    width: 2.5vw;
+    min-width: 10px;
+    max-width: 30px;
+
+    height: auto;
+
+}
 
 .task-text{
     flex: 1;
