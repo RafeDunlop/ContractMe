@@ -41,10 +41,8 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
     params.set("page", pageNumber);
     userParams.set("page", pageNumber);
 
-    if (visibility !== "user") {
-        params.set("visibility", visibility);
-        userParams.set("visibility", visibility);
-    }
+    params.set("visibility", visibility);
+    userParams.set("visibility", visibility);
 
     if (lastSubmittedSearchTerm) {
         params.set("searchTerm", lastSubmittedSearchTerm);

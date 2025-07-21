@@ -631,7 +631,7 @@ public class RenovationController {
                                                     HttpServletRequest request) {
 
         // Apply default values
-        if (visibility == null) visibility = "user";
+        if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";
 
         // Convert tag names to Tag entities if provided
