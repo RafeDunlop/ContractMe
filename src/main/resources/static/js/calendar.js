@@ -1,10 +1,3 @@
-let taskMap = document.getElementById("currentTasks");
-
-document.addEventListener("DOMContentLoaded", loadCalendarTasks)
-
-
-//function loadCalendarTasks()
-
 /**
  * Updates the calendar view for a renovation record by fetching new calendar fragment
  * for the specified month and year, and replacing the existing calendar.
