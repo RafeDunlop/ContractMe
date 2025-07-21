@@ -60,7 +60,7 @@
                 <form th:action="@{/renovations/tags/add}" method="post" id="add-tag-form" class="mb-3" th:if="${isOwner}">
                     <label for="tagName" class="fw-bold">Add Tags:</label>
                     <input type="text" class="form-control" id="tagName" name="tagName" placeholder="Enter a tag"
-                           data-cy="tag" maxlength="129" autocomplete="off" required>
+                           data-cy="tag" maxlength="129" autocomplete="off" th:value="${submittedTag} ?: ''" required>
                     <ul id="autocomplete-list" class="list-group position-absolute" style="z-index: 1000;"></ul>
                     <input type="hidden" name="renovationId" th:value="${renovation.id}">
                 </form>
