@@ -21,6 +21,9 @@ public class Contractor extends User {
     @Column
     private String phoneNumber;
 
+    @Column
+    private int countryCode;
+
     @ElementCollection
     private Set<Skill> skills;
 
@@ -74,6 +77,23 @@ public class Contractor extends User {
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
+
+    /**
+     * Returns the country code for the contractor's phone number.
+     * @return the country code as an integer
+     */
+    public int getCountryCode() {
+        return countryCode;
+    }
+
+    /**
+     * Sets the country code for the contractor's phone number
+     * @param countryCode the country code
+     */
+    public void setCountryCode(int countryCode) {
+        this.countryCode = countryCode;
+    }
+
     /**
      * Returns the set of skills associated with the contractor.
      *

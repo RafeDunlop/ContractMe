@@ -80,7 +80,7 @@ public class ContractorServiceIntegrationTest {
         addressDTO.setPostcode("8042");
         addressDTO.setRegion("Avonhead");
 
-        toTest = new ContractorService(contractorRepository, registerService, contractorValidation);
+        toTest = new ContractorService(contractorRepository, contractorValidation);
 
 
     }

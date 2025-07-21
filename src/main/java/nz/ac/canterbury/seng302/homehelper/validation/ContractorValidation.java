@@ -38,7 +38,7 @@ public class ContractorValidation {
         String regex = "\\d+";
 
         if (phoneNumber.isBlank()) {
-            errors.add("You must enter a valid phone number");
+            errors.add("You must enter a phone number");
         } else if (phoneNumber.length() < 8 || phoneNumber.length() > 15 || !phoneNumber.matches(regex)) {
             errors.add("Your phone number is invalid");
         }

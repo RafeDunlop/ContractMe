@@ -25,7 +25,6 @@ public class ContractorService {
 
     private final ContractorRepository contractorRepository;
 
-    private final RegisterService registerService;
     private final PasswordEncoder passwordEncoder;
     private final ContractorValidation contractorValidation;
 
@@ -33,11 +32,9 @@ public class ContractorService {
      * Constructor for the service and links the repository and validator to the
      * service.
      * @param contractorRepository ContractorRepository for getting and updating contractor details
-     * @param registerService RegisterService for registering Contractors
      */
     @Autowired
-    public ContractorService(ContractorRepository contractorRepository, RegisterService registerService, ContractorValidation contractorValidation) {
-        this.registerService = registerService;
+    public ContractorService(ContractorRepository contractorRepository, ContractorValidation contractorValidation) {
         this.contractorRepository = contractorRepository;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         this.contractorValidation = contractorValidation;
@@ -61,7 +58,8 @@ public class ContractorService {
                 passwordEncoder.encode(userRegisterDTO.getPassword())
         );
         contractor.setHourlyRate(userRegisterDTO.getHourlyRate());
-        contractor.setPhoneNumber(userRegisterDTO.getCountryCode() + userRegisterDTO.getPhoneNumber());
+        contractor.setPhoneNumber(userRegisterDTO.getPhoneNumber());
+        contractor.setCountryCode(userRegisterDTO.getCountryCode());
         userRegisterDTO.getSkills().forEach(contractor::addSkill);
         //address validation here
         Location location = new Location(
