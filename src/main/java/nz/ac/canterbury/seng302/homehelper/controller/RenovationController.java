@@ -547,6 +547,7 @@ public class RenovationController {
             tagService.addTagToRenovation(record, tagName);
         } else {
             redirectAttributes.addFlashAttribute("errors", errors);
+            redirectAttributes.addFlashAttribute("submittedTag",tagName);
         }
         return "redirect:/renovations/view?id=" + renovationId + "&page=" + pageNumber;
     }
