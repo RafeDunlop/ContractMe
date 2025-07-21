@@ -94,7 +94,7 @@ public class RegisterControllerTest {
         Mockito.when(contractorServiceMock.registerContractor(mockedUser, mockedLocation)).thenReturn(contractor);
         String viewName = registerController.submitRegistration(mockedUser, mockedLocation, request, redirectAttributes);
         Assertions.assertEquals("redirect:/confirm-registration", viewName);
-        Mockito.verify(contractorServiceMock).validateContractor(mockedUser);
+        Mockito.verify(contractorServiceMock).validateContractor(mockedUser, true);
     }
 
 

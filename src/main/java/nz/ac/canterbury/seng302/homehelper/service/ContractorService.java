@@ -80,12 +80,13 @@ public class ContractorService {
      * @param userRegisterDTO the user registration data transfer object containing user input fields
      * @return a map of field name and error lists. If no errors exist for a field, it is not included
      */
-    public Map<String, List<String>> validateContractor(UserRegisterDTO userRegisterDTO) {
+    public Map<String, List<String>> validateContractor(UserRegisterDTO userRegisterDTO, boolean locationProvided) {
         Map<String, List<String>> errors = new HashMap<>();
 
         MapUtil.putIfNotEmpty(errors, "phoneNumberError", contractorValidation.validatePhoneNumber(
                 userRegisterDTO.getPhoneNumber(), userRegisterDTO.getCountryCode()));
         MapUtil.putIfNotEmpty(errors, "hourlyRateError", contractorValidation.validateHourlyRate(userRegisterDTO.getHourlyRate()));
+        MapUtil.putIfNotEmpty(errors, "locationError", contractorValidation.validateContractorLocation(locationProvided));
         return errors;
     }
 }

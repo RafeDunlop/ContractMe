@@ -93,7 +93,7 @@ public class RegisterController {
         }
 
         if (userRegisterDTO.getIsContractor()) {
-            errors.putAll(contractorService.validateContractor(userRegisterDTO));
+            errors.putAll(contractorService.validateContractor(userRegisterDTO, locationProvided));
         }
 
         if (!errors.isEmpty()) {

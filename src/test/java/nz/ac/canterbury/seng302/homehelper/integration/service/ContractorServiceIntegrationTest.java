@@ -6,7 +6,6 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
-import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.validation.ContractorValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,8 +32,6 @@ public class ContractorServiceIntegrationTest {
     @Autowired
     private ContractorRepository contractorRepository;
 
-    @Autowired
-    private RegisterService registerService;
     @Autowired
     private ContractorValidation contractorValidation;
 
@@ -94,7 +91,7 @@ public class ContractorServiceIntegrationTest {
     @Test
     public void validateContractor_invalidContractorDetails_throwsError() {
 
-        Map<String, List<String>> errors = toTest.validateContractor(invalidUserRegisterDTO);
+        Map<String, List<String>> errors = toTest.validateContractor(invalidUserRegisterDTO, true);
         assertTrue(errors.containsKey("phoneNumberError"));
         assertEquals("Your phone number is invalid", errors.get("phoneNumberError").get(0));
 
@@ -105,7 +102,7 @@ public class ContractorServiceIntegrationTest {
 
     @Test
     public void validateContractor_validContractorDetails_noErrors() {
-        Map<String, List<String>> errors = toTest.validateContractor(userRegisterDTO);
+        Map<String, List<String>> errors = toTest.validateContractor(userRegisterDTO, true);
         assertTrue(errors.isEmpty());
     }
 

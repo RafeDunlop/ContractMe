@@ -11,6 +11,7 @@ import java.util.List;
 @Service
 public class ContractorValidation {
 
+
     /**
      * Validate the hourly rate field, this must be a positive float.
      *
@@ -48,6 +49,16 @@ public class ContractorValidation {
         return errors;
     }
 
+
+    public List<String> validateContractorLocation(boolean locationProvided) {
+        List<String> errors = new ArrayList<>();
+        if (!locationProvided) {
+            errors.add("You must enter a location");
+        }
+
+        return errors;
+    }
+
     /**
      * Validate the phone number's country code, this must be a positive number 3 digits or fewer.
      *
@@ -62,5 +73,7 @@ public class ContractorValidation {
         }
         return errors;
     }
+
+
 
 }
