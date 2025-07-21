@@ -62,7 +62,7 @@
                              <img th:src="@{'/images/' + ${task.getIconFileName()}}" alt="Task Icon" class="task-icon"
                                   th:onclick="showIconSelector(${task.id})" />
                          </div>
-                         <div style="color:white" th:text="${task.getName()}"/>
+                         <div style="color:white; word-break: break-word" th:text="${task.getName()}"/>
                      </div>
                  </div>
             </div>

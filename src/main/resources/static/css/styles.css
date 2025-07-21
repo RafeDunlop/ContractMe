@@ -95,8 +95,9 @@
 }
 
 .calendar-task {
+
     width: 100%;
-    height: 45px;
+    min-height: 45px;
     border-radius: 8px;
     text-align: center;
     margin-left: auto;
@@ -106,4 +107,12 @@
     background-color: #0D6EFD;
     text-decoration-color: #FFFFFF;
     overflow-wrap: break-word;
+}
+
+.task-text{
+    flex: 1;
+    white-space: normal;
+    word-break: break-word;
+    color: white;
+    font-size: 0.9rem;
 }
