@@ -66,4 +66,20 @@ public class ContractorValidationTest {
         Assertions.assertEquals(expected, result);
     }
 
+    @Test
+    public void validateLocation_locationProvided_acceptInput() {
+        ContractorValidation contractorValidation = new ContractorValidation();
+        List<String> result = contractorValidation.validateContractorLocation(true);
+        Assertions.assertEquals(0, result.size());
+    }
+
+
+    @Test
+    public void validateLocation_locationNotProvided_rejectInput() {
+        ContractorValidation contractorValidation = new ContractorValidation();
+        List<String> result = contractorValidation.validateContractorLocation(false);
+        List<String> expected = List.of("You must enter a location");
+        Assertions.assertEquals(expected, result);
+    }
+
 }
