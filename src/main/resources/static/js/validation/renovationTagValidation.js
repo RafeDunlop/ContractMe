@@ -48,17 +48,16 @@ async function validateTag(input) {
         }
     }
 
+    if (tagBackendError) tagBackendError.hidden = true;
     if (errors.length) {
         tagFrontendErrorMessage.innerHTML =
             errors.map(msg => `<li>${msg}</li>`).join("");
         tagFrontendError.classList.add("show");    // bootstrap’s .show or just remove hidden
         tagFrontendError.hidden = false;
-        tagBackendError.hidden = true;
         return false;
     } else {
         tagFrontendErrorMessage.innerHTML = "";
         tagFrontendError.hidden = true;
-        tagBackendError.hidden = true;
         return true;
     }
 }

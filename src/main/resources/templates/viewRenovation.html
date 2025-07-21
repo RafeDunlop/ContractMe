@@ -76,7 +76,7 @@
                 </div>
 
                 <!-- Display added tags -->
-                <div id="tagList" class="mb-3">
+                <div th:if="${not #lists.isEmpty(renovation.getTags())}" id="tagList" class="mb-3" style="">
                     <label class="fw-bold d-block mb-1">Current Tags:</label>
                     <span th:each="tag : ${renovation.getSortedTags()}" class="tag-box badge bg-success d-inline-flex align-items-center me-2 mb-2">
                         <span class="tag-text-large text-truncate ms-1" th:text="${tag.getTagName()}"></span>
@@ -90,14 +90,10 @@
                 </div>
             </div>
 
-            <div id="elements-container" style="display: none;">
+            <div th:if="${not #lists.isEmpty(renovation.getRenovationTasks())}" id="elements-container" style="display: none;">
                 <div id="grid" class="task-grid">
                     <!-- Cards will be injected here by JavaScript -->
                 </div>
-            </div>
-
-            <div id="loading-message" class="text-center">
-                <p>Loading renovations...</p>
             </div>
 
             <div id="footer" class="mt-2">
@@ -117,7 +113,7 @@
                 </div>
             </div>
 
-            <div th:replace="~{fragments/calendar.html ::calendar (${date}, ${datesArray}) }"></div>
+            <div th:replace="~{fragments/calendar.html ::calendar (${date}, ${datesArray}, ${renovation.id}) }"></div>
         </div>
     </div>
 
@@ -158,4 +154,5 @@
 <script type="text/javascript" th:src="@{/js/validation/renovationTagValidation.js}"></script>
 <script type="text/javascript" th:src="@{/js/removeTag.js}"></script>
 <script type="text/javascript" th:src="@{/js/renovationUtils.js}"></script>
+<script type="text/javascript" th:src="@{/js/calendar.js}"></script>
 </html>

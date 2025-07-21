@@ -57,7 +57,7 @@ public class ProfileControllerIntegrationTest {
                 .andExpect(model().attribute("firstName", expectedUser.getFirstName()))
                 .andExpect(model().attribute("lastName", expectedUser.getLastName()))
                 .andExpect(model().attribute("email", expectedUser.getEmail()))
-                .andExpect(model().attribute("dateAdded", expectedUser.getCreatedTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+                .andExpect(model().attribute("dateAdded", expectedUser.getCreatedTimestamp().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))))
                 .andExpect(model().attribute("profilePicture", expectedUser.getProfilePicture()));
     }
 
