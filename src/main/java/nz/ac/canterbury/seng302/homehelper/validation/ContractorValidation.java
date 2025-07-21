@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -50,6 +51,13 @@ public class ContractorValidation {
     }
 
 
+    /**
+     * Validate that the location has been provided, this method should be passed
+     * the result of {@link nz.ac.canterbury.seng302.homehelper.service.LocationService#isLocationProvided(AddressDTO)}.
+     *
+     * @param locationProvided a boolean specifying whether the location was provided
+     * @return a list of error messages, empty if valid
+     */
     public List<String> validateContractorLocation(boolean locationProvided) {
         List<String> errors = new ArrayList<>();
         if (!locationProvided) {
