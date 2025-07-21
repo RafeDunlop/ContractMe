@@ -32,7 +32,7 @@ public class ContractorValidationTest {
     public void phoneNumberValidation_emptyPhoneNumber_rejectInput(String phoneNumber) {
         ContractorValidation contractorValidation = new ContractorValidation();
         List <String> result = contractorValidation.validatePhoneNumber(phoneNumber, 64);
-        Assertions.assertTrue(result.contains("You must enter a valid phone number"));
+        Assertions.assertTrue(result.contains("You must enter a phone number"));
     }
 
     @Test
