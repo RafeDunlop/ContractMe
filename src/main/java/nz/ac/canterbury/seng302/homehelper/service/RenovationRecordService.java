@@ -357,34 +357,55 @@ public class RenovationRecordService {
     }
 
     /**
-     * Generates a 5-week by 7-day calendar grid as a 2D array of {@link CalendarCellDTO} objects.
+     * Generates a calendar grid as a 2D nested list of {@link CalendarCellDTO} objects.
+     * This represents a minimal list of complete 7-day weeks, starting on Mondays, such that all dates in the month of
+     * the specified date are included
      *
      * @param date the {@link LocalDate} representing any day in the target month.
      * @param record the renovation record being displayed
-     * @return a 2D array of {@link CalendarCellDTO} objects with dimensions 5 (weeks) by 7 (days),
+     * @return a 2D nested list of {@link CalendarCellDTO} objects
      */
     public List<List<CalendarCellDTO>> generateCalendarCells(LocalDate date, RenovationRecord record) {
-        LocalDate firstOfMonth = date.withDayOfMonth(1);
-        int dayOfWeek = firstOfMonth.getDayOfWeek().getValue();
-        int startOffset = dayOfWeek - 1;
+        LocalDate startDate = getFirstDayOfCalendar(date);
+        LocalDate endDate = getLastDayOfCalendar(date);
 
-        LocalDate startDate = firstOfMonth.minusDays(startOffset);
-        LocalDate endDate = startDate.plusMonths(1).withDayOfMonth(1);
         Map<LocalDate, List<RenovationTask>> calendarTasks = renovationTaskService.getTasksWithinDates(record, startDate, endDate);
-        Iterator<Map.Entry<LocalDate, List<RenovationTask>>> calendarDays = calendarTasks.entrySet().stream().sorted().toList().iterator();
+        Iterator<Map.Entry<LocalDate, List<RenovationTask>>> dateEntryItr =
+                calendarTasks.entrySet().stream().sorted(Map.Entry.comparingByKey()).toList().iterator();
+
         List<List<CalendarCellDTO>> rows = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
+        while (dateEntryItr.hasNext()) {
             List<CalendarCellDTO> week = new ArrayList<>();
-            for (int j = 0; j < 7; j++) {
-                if (i == 5 && j == 0 && startDate.getMonthValue() != firstOfMonth.getMonthValue()) {
-                    return rows;
-                }
-                Map.Entry<LocalDate, List<RenovationTask>> dayTaskData = calendarDays.next();
+            for (int i = 0; i < 7; i++) {
+                Map.Entry<LocalDate, List<RenovationTask>> dayTaskData = dateEntryItr.next();
                 week.add(new CalendarCellDTO(dayTaskData.getKey(), dayTaskData.getValue()));
-                startDate = startDate.plusDays(1);
             }
             rows.add(week);
         }
         return rows;
+    }
+
+    /**
+     * Gets the first day to be displayed, always a Monday
+     * @param date any {@code LocalDate} in the target month
+     * @return the first date displayed, always a Monday
+     */
+    private LocalDate getFirstDayOfCalendar(LocalDate date) {
+        LocalDate firstOfMonth = date.withDayOfMonth(1);
+        int dayOfWeek = firstOfMonth.getDayOfWeek().getValue();
+        int offSet = dayOfWeek - 1;
+        return firstOfMonth.minusDays(offSet);
+    }
+
+    /**
+     * Gets the last date to be displayed, always a Sunday
+     * @param date any {@code LocalDate} in the target month
+     * @return the last date to be displayed, always a Sunday
+     */
+    private LocalDate getLastDayOfCalendar(LocalDate date) {
+        LocalDate lastOfMonth = date.plusMonths(1).withDayOfMonth(1).minusDays(1);
+        int dayOfWeek = lastOfMonth.getDayOfWeek().getValue();
+        int offSet = 7 - dayOfWeek;
+        return lastOfMonth.plusDays(offSet);
     }
 }
