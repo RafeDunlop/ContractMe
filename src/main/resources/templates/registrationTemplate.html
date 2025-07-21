@@ -93,7 +93,7 @@
                 </div>
 
                 <!-- CONTRACTOR FORM FRAGMENT -->
-                <div th:class="'pb-3 ' + (${isContractor} ? 'form-extension' : 'hidden-form-extension')" id="contractor-form">
+                <div th:class="'pb-3 ' + (${userRegisterDTO.isContractor} ? 'form-extension' : 'hidden-form-extension')" id="contractor-form">
                     <div th:replace="~{fragments/contractorRegistration.html :: contractor-registration}"></div>
                 </div>
 
@@ -112,6 +112,14 @@
                 <div th:class="'pb-3 ' + (${locationUsed} ? 'form-extension' : 'hidden-form-extension')" id="location-form">
                     <div th:replace="~{fragments/locationForm.html :: locationForm(
                      addressDTO=${addressDTO})}"></div>
+
+                    <!-- Backend error -->
+                    <div class="alert alert-danger mt-2" id="location-backend-error"
+                         th:attr="hidden=${locationError == null}">
+                        <ul>
+                            <li th:each="msg : ${locationError}" th:text="${msg}"></li>
+                        </ul>
+                    </div>
                 </div>
 
                 <!-- PASSWORD -->

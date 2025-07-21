@@ -66,6 +66,7 @@ public class UserRegisterDTO {
         this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
+        this.isContractor = false;
     }
 
     public UserRegisterDTO(String firstName, String lastName, String email, String password, String confirmPassword, boolean isContractor, int countryCode, String phoneNumber, List<Skill> skills, Float hourlyRate) {

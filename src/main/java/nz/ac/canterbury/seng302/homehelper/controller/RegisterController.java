@@ -100,7 +100,7 @@ public class RegisterController {
             errors.forEach(redirectAttributes::addFlashAttribute);
             redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
-            redirectAttributes.addFlashAttribute("locationUsed", locationProvided);
+            redirectAttributes.addFlashAttribute("locationUsed", locationProvided || userRegisterDTO.getIsContractor());
             return "redirect:/register";
         }
 
