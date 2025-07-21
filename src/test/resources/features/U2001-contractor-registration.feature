@@ -15,7 +15,6 @@ Feature: U2001 - As Bob, I want to be able to register as a contractor and add m
     |"1234567899999999999999999999999999999999"        |
     |"a" |
 
-
   Scenario: AC3 - No Phone Number
     Given I am on the registration form
     When I don't enter a phone number

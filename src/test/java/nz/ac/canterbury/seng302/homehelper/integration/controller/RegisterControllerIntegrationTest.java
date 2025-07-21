@@ -196,6 +196,11 @@ public class RegisterControllerIntegrationTest {
                         .param("phoneNumber", "12345678")
                         .param("countryCode", "64")
                         .param("skills", "ELECTRICAL")
+                        .param("address_line1", "62 Ilam Road") // <- IMPORTANT: make sure param name matches controller!
+                        .param("suburb", "Riccarton")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(view().name("redirect:/confirm-registration"));

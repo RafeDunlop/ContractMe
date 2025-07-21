@@ -107,9 +107,18 @@ public class ContractorServiceIntegrationTest {
     }
 
     @Test
+    public void validateContractor_noLocationProvided_throwsError() {
+        Map<String, List<String>> errors = toTest.validateContractor(userRegisterDTO, false);
+        assertTrue(errors.containsKey("locationError"));
+        assertEquals("You must enter a location", errors.get("locationError").get(0));
+    }
+
+    @Test
     public void saveContractor_allValid_contractorSavedInUserRepository() {
         toTest.registerContractor(userRegisterDTO, addressDTO);
         assertTrue(userRepository.findByEmailIgnoreCase("john.doe@gmail.com").isPresent());
     }
+
+
 
 }
