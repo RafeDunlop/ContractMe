@@ -136,12 +136,17 @@ public class DefaultDataConfigurator {
         );
         renovationTaskService.addRenovationTask(renovationTask, default2Renovation1);
 
+        int counter = 1;
         for (int i = 1; i < numGenericTasksToAdd + 1; i++) {
+            if (counter > 8) {
+                counter = 3;
+            }
             renovationTask.setName(String.format("Renovation Task %d", i));
             renovationTask.setDescription(String.format("Renovation Task Description %d", i));
-            renovationTask.setDueDate(LocalDate.now().plusDays(i).format(formatter));
+            renovationTask.setDueDate(LocalDate.now().plusDays(counter).format(formatter));
             renovationTask.setRooms(defaultJERooms);
             renovationTaskService.addRenovationTask(renovationTask, default1Renovation1);
+            counter += 1;
         }
     }
 
