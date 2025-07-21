@@ -12,6 +12,8 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +59,10 @@ public class ContractorService {
                 userRegisterDTO.getEmail(),
                 passwordEncoder.encode(userRegisterDTO.getPassword())
         );
-        contractor.setHourlyRate(userRegisterDTO.getHourlyRate());
+        BigDecimal hourlyRateDecimal = BigDecimal.valueOf(userRegisterDTO.getHourlyRate());
+        BigDecimal roundedHourlyRate = hourlyRateDecimal.setScale(2, RoundingMode.HALF_UP);
+
+        contractor.setHourlyRate(roundedHourlyRate.floatValue());
         contractor.setPhoneNumber(userRegisterDTO.getPhoneNumber());
         contractor.setCountryCode(userRegisterDTO.getCountryCode());
         userRegisterDTO.getSkills().forEach(contractor::addSkill);
