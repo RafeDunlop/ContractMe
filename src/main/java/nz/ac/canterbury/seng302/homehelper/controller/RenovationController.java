@@ -542,6 +542,7 @@ public class RenovationController {
             tagService.addTagToRenovation(record, tagName);
         } else {
             redirectAttributes.addFlashAttribute("errors", errors);
+            redirectAttributes.addFlashAttribute("submittedTag",tagName);
         }
         return "redirect:/renovations/view?id=" + renovationId + "&page=" + pageNumber;
     }
@@ -643,7 +644,7 @@ public class RenovationController {
                                                     HttpServletRequest request) {
 
         // Apply default values
-        if (visibility == null) visibility = "user";
+        if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";
 
         // Convert tag names to Tag entities if provided
