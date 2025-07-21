@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -31,7 +29,6 @@ import java.util.Locale;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -182,5 +179,23 @@ public class CalendarSteps {
         Assertions.assertTrue(html.contains(expectedMonthYear));
         Assertions.assertTrue(html.contains(expectedPrevMonthButton));
         Assertions.assertTrue(html.contains(expectedNextMonthButton));
+    }
+    @Then("today's date is highlighted")
+    public void today_s_date_is_highlighted() throws Exception {
+        String html = result.getResponse().getContentAsString();
+        String noWhitespaceHTML = html.replaceAll("\\s+", " ");
+
+        LocalDate today = LocalDate.now();
+        int day = today.getDayOfMonth();
+
+        String expectedHtml = String.format(
+                "<div class=\"col py-5 border border-secondary text-start\" style=\"background-color: #ffff99;\">%s</div>",
+                day
+        );
+
+        Assertions.assertTrue(
+                noWhitespaceHTML.contains(expectedHtml),
+                "Expected to find current date highlighted: " + expectedHtml
+        );
     }
 }
