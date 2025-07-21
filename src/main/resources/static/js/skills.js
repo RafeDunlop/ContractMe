@@ -1,5 +1,6 @@
 const skillsSelect= document.getElementById("skills-select");
 const skillInputContainer= document.getElementById("skill-input-container");
+const hiddenSkillInputContainer = document.getElementById("hidden-skill-input-container");
 const validSkills = Array.from(skillsSelect.options).map(skill => skill.value);
 
 let selectedSkills = []
@@ -10,10 +11,12 @@ let selectedSkills = []
  */
 skillsSelect.addEventListener("change", () => {
     const selectedSkill = skillsSelect.value.trim();
+    const selectedOption = skillsSelect.selectedOptions[0];
+    const displayName = selectedOption?.getAttribute("display-name") ?? selectedSkill;
     if (validSkills.includes(selectedSkill)) {
         if (!selectedSkills.includes(selectedSkill)) {
             selectedSkills.push(selectedSkill);
-            createSkillBubble(selectedSkill);
+            createSkillBubble(selectedSkill, displayName);
         }
     }
     if (selectedSkill !== "Add Skills") {
@@ -24,15 +27,16 @@ skillsSelect.addEventListener("change", () => {
 /**
  * Creates the skill bubble underneath the selection field with a close button. Removes the skill from the selected skills
  * list if the close button is pressed.
- * @param skill The skill name string
+ * @param selectedSkill The enum value of the skill
+ * @param displayName The string associated with the skill enum value
  */
-function createSkillBubble(skill) {
+function createSkillBubble(selectedSkill, displayName) {
     const bubble = document.createElement("span");
     bubble.className = "tag-box badge bg-success d-inline-flex align-items-center me-2 mb-2";
 
     const bubbleText = document.createElement("span");
     bubbleText.className = "tag-text-large ms-1 text-truncate";
-    bubbleText.textContent = skill;
+    bubbleText.textContent = displayName;
     bubble.appendChild(bubbleText);
 
     const deleteButton = document.createElement("button");
@@ -40,12 +44,19 @@ function createSkillBubble(skill) {
     deleteButton.textContent = "X";
     deleteButton.addEventListener("click", () => {
         bubble.remove();
-        selectedSkills = selectedSkills.filter(s => s !== skill);
+        selectedSkills = selectedSkills.filter(s => s !== selectedSkill);
         skillsSelect.value = "Add Skills";
         skillsSelect.style.color = "grey";
     });
     bubble.appendChild(deleteButton);
 
     skillInputContainer.appendChild(bubble);
+
+    const hiddenSkillInput = document.createElement("input");
+    hiddenSkillInput.type = "hidden";
+    hiddenSkillInput.value = selectedSkill;
+
+    hiddenSkillInputContainer.appendChild(hiddenSkillInput);
+    console.log(hiddenSkillInputContainer);
 }
 

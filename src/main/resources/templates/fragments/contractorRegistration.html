@@ -58,9 +58,11 @@
     <div class="mb-3">
         <select class="form-select" id="skills-select" type="text" aria-label="skills-select" autocomplete="off">
             <option disabled selected hidden>Add Skills</option>
-            <option th:each="skill : ${skills}" th:text="${skill}" class="skill-option"></option>
+            <option th:each="skill : ${skills}" th:value="${skill}" th:text="${skill.getDisplayName()}"
+                    th:attr="display-name=${skill.getDisplayName()}" class="skill-option"></option>
         </select>
         <div id="skill-input-container" class="mt-2"></div>
+        <div id="hidden-skill-input-container"></div>
 
         <!-- Frontend JS Error -->
         <div class="alert alert-danger mt-2" id="skills-frontend-error" hidden>

@@ -2,8 +2,6 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
@@ -66,7 +64,7 @@ public class RegisterController {
     public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO,
                                @ModelAttribute AddressDTO addressDTO, Model model) {
         logger.info("GET /register");
-        List<String> skillList = Skill.listOfSkills();
+        List<Skill> skillList = Skill.listOfSortedSkills();
         model.addAttribute("skills", skillList);
         return "registrationTemplate";
     }
