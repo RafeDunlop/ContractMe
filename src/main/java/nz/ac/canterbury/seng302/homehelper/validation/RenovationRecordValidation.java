@@ -76,7 +76,7 @@ public class RenovationRecordValidation {
      */
     public List<String> validateName(String name) {
         List<String> errors = new ArrayList<>();
-        Pattern pattern = Pattern.compile("^[\\p{L}\\d ,.\\-']*$", Pattern.UNICODE_CHARACTER_CLASS);
+        Pattern pattern = Pattern.compile("^[\\p{L}\\d .\\-']*$", Pattern.UNICODE_CHARACTER_CLASS);
         if (name.trim().length() > 128) {
             errors.add(StringUtils.capitalize(" Name cannot be greater than 128 characters."));
         }
@@ -99,7 +99,7 @@ public class RenovationRecordValidation {
      */
     public List<String> validateRooms(List<String> roomNames) {
         List<String> errors = new ArrayList<>();
-        Pattern pattern = Pattern.compile("^[\\p{L}\\d ,.\\-']*$", Pattern.UNICODE_CHARACTER_CLASS);
+        Pattern pattern = Pattern.compile("^[\\p{L}\\d .\\-']*$", Pattern.UNICODE_CHARACTER_CLASS);
         for (String room : roomNames) {
             Matcher matcher = pattern.matcher(room);
             if (!matcher.matches()) {

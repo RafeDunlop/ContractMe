@@ -72,7 +72,7 @@ document.getElementById("name").addEventListener("keydown", function (event) {
 });
 
 function checkRoomName(input) {
-    roomFieldValid = validateField(input, /^[\p{L}\d .,\-']*$/u, roomFrontendErrorMessage, roomNameErrorMessage);
+    roomFieldValid = validateField(input, /^[\p{L}\d .\-']*$/u, roomFrontendErrorMessage, roomNameErrorMessage);
 }
 
 function addRoom() {
@@ -128,7 +128,7 @@ function setRoomList(previousRoomList, roomTableId) {
 
 function getRoomNameError(toAdd) {
     let error = null;
-    const validCharactersPattern = /^[\p{L}\d .,\-']*$/u;
+    const validCharactersPattern = /^[\p{L}\d .\-']*$/u;
     if (!validCharactersPattern.test(toAdd)) {
         error = "Renovation record room names must only contain letters, numbers, spaces, dots, hyphens or apostrophes";
     } else if(toAdd.length >= 100) {

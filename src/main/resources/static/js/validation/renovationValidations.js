@@ -76,7 +76,7 @@ function checkNameField(input) {
         nameFieldValid = false;
 
     } else {
-        const isValid = validateField(input, /^[\p{L}\d .,\-']*$/u, nameFrontendErrorMessage, roomNameErrorMessage);
+        const isValid = validateField(input, /^[\p{L}\d .\-']*$/u, nameFrontendErrorMessage, roomNameErrorMessage);
         nameFieldValid = isValid;
         nameFrontendError.hidden = isValid;
         if (isValid) {
