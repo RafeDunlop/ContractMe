@@ -7,11 +7,12 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
+import nz.ac.canterbury.seng302.homehelper.service.TaskService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -20,14 +21,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class RenovationTaskServiceIntegrationTest {
+public class TaskServiceIntegrationTest {
 
-    private RenovationTaskService toTest;
+    private TaskService toTest;
 
     @Autowired
     private UserRepository userRepository;
@@ -45,7 +47,7 @@ public class RenovationTaskServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        toTest = new RenovationTaskService(renovationTaskRepository, renovationTaskValidation);
+        toTest = new TaskService(renovationTaskRepository, renovationTaskValidation);
         User testUser = new User(
                 "firstName",
                 "lastName",
@@ -144,5 +146,24 @@ public class RenovationTaskServiceIntegrationTest {
         renovationTaskRepository.save(testTask);
         Map<LocalDate,  List<RenovationTask>> map = this.toTest.getTasksWithinDates(renovationRecord, startDate, endDate);
         assertEquals(testTask, map.get(endDate).getFirst());
+    }
+
+    @Test
+    @Transactional
+    public void updateIcon_fileExists_savesTask() {
+        RenovationTask renovationTask = new RenovationTask("Task 1", "New Task", List.of(), LocalDate.now(), renovationRecord);
+        renovationTaskRepository.save(renovationTask);
+        // Default default-icon.png should exist in test resources
+        assertDoesNotThrow(() -> toTest.updateTaskIcon(renovationTask, "default-icon.png"));
+        verify(renovationTaskRepository, times(1)).save(Mockito.any(RenovationTask.class));
+    }
+
+    @Test
+    @Transactional
+    public void updateIcon_fileDoesNotExist_throwsException() {
+        RenovationTask renovationTask = new RenovationTask("Task 1", "New Task", List.of(), LocalDate.now(), renovationRecord);
+        renovationTaskRepository.save(renovationTask);
+        assertThrows(IllegalArgumentException.class, () -> toTest.updateTaskIcon(renovationTask, "non-existent-file.png"));
+        verify(renovationTaskRepository, never()).save(Mockito.any(RenovationTask.class));
     }
 }

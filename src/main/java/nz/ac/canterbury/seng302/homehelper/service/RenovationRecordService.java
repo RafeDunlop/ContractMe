@@ -35,7 +35,7 @@ public class RenovationRecordService {
     private final RenovationTaskRepository renovationTaskRepository;
     private final RenovationRecordValidation renovationRecordValidation;
 
-    private final RenovationTaskService renovationTaskService;
+    private final TaskService taskService;
 
     /**
      * Constructor for the RenovationRecordService class
@@ -43,11 +43,11 @@ public class RenovationRecordService {
      * @param renovationRecordRepository initializes with the repository for storing records
      */
     @Autowired
-    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation, RenovationTaskService renovationTaskService) {
+    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation, TaskService taskService) {
         this.renovationRecordRepository = renovationRecordRepository;
         this.renovationTaskRepository = renovationTaskRepository;
         this.renovationRecordValidation = renovationRecordValidation;
-        this.renovationTaskService = renovationTaskService;
+        this.taskService = taskService;
     }
 
     /**
@@ -369,7 +369,7 @@ public class RenovationRecordService {
         LocalDate startDate = getFirstDayOfCalendar(date);
         LocalDate endDate = getLastDayOfCalendar(date);
 
-        Map<LocalDate, List<RenovationTask>> calendarTasks = renovationTaskService.getTasksWithinDates(record, startDate, endDate);
+        Map<LocalDate, List<RenovationTask>> calendarTasks = taskService.getTasksWithinDates(record, startDate, endDate);
         Iterator<Map.Entry<LocalDate, List<RenovationTask>>> dateEntryItr =
                 calendarTasks.entrySet().stream().sorted(Map.Entry.comparingByKey()).toList().iterator();
 

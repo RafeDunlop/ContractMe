@@ -11,7 +11,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
-import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
+import nz.ac.canterbury.seng302.homehelper.service.TaskService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,7 +36,7 @@ public class RenovationRecordServiceTest {
     private static RenovationRecordValidation renovationRecordValidation;
     private static RenovationRecordRepository renovationRecordRepository;
     private static RenovationTaskRepository renovationTaskRepository;
-    private static RenovationTaskService renovationTaskService;
+    private static TaskService taskService;
     private static LoginService loginService;
     private static RenovationRecord mockRenovationRecord;
 
@@ -46,7 +46,7 @@ public class RenovationRecordServiceTest {
         renovationTaskRepository = mock(RenovationTaskRepository.class);
         loginService = mock(LoginService.class);
         renovationRecordValidation = new RenovationRecordValidation(renovationRecordRepository, loginService);
-        renovationTaskService = mock(RenovationTaskService.class);
+        taskService = mock(TaskService.class);
 
         User mockUser = mock(User.class);
         when(loginService.getUserByEmail()).thenReturn(mockUser);
@@ -58,10 +58,10 @@ public class RenovationRecordServiceTest {
         when(renovationRecordRepository.findExactMatch("name!", mockUser)).thenReturn(Optional.empty());
 
         toTest = new RenovationRecordService(renovationRecordRepository, renovationTaskRepository, renovationRecordValidation,
-                renovationTaskService);
+                taskService);
 
         mockRenovationRecord = mock(RenovationRecord.class);
-        when(renovationTaskService.getTasksWithinDates(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(new HashMap<>());
+        when(taskService.getTasksWithinDates(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(new HashMap<>());
     }
 
     @Test
@@ -448,7 +448,7 @@ public class RenovationRecordServiceTest {
         LocalDate date = LocalDate.of(2024, 2, 1);
         LocalDate start = LocalDate.of(2024, 1, 28);
         LocalDate end = LocalDate.of(2024, 3, 2);
-        when(renovationTaskService.getTasksWithinDates(any(RenovationRecord.class), any(LocalDate.class), any(LocalDate.class))).
+        when(taskService.getTasksWithinDates(any(RenovationRecord.class), any(LocalDate.class), any(LocalDate.class))).
                 thenReturn(getEmptyMapForRange(start, end));
         List<RenovationTask> calendarTasks = List.of();
 
@@ -465,7 +465,7 @@ public class RenovationRecordServiceTest {
 
         LocalDate start = LocalDate.of(2022, 12, 26);
         LocalDate end = LocalDate.of(2023, 2, 5);
-        when(renovationTaskService.getTasksWithinDates(any(RenovationRecord.class), any(LocalDate.class), any(LocalDate.class))).
+        when(taskService.getTasksWithinDates(any(RenovationRecord.class), any(LocalDate.class), any(LocalDate.class))).
                 thenReturn(getEmptyMapForRange(start, end));
 
         List<RenovationTask> calendarTasks = List.of();
@@ -488,7 +488,7 @@ public class RenovationRecordServiceTest {
 
         LocalDate start = LocalDate.of(2021, 2, 1);
         LocalDate end = LocalDate.of(2021, 2, 28);
-        when(renovationTaskService.getTasksWithinDates(any(RenovationRecord.class), any(LocalDate.class), any(LocalDate.class))).
+        when(taskService.getTasksWithinDates(any(RenovationRecord.class), any(LocalDate.class), any(LocalDate.class))).
                 thenReturn(getEmptyMapForRange(start, end));
 
         List<RenovationTask> calendarTasks = List.of();
@@ -511,7 +511,7 @@ public class RenovationRecordServiceTest {
 
         LocalDate start = LocalDate.of(2021, 3, 1);
         LocalDate end = LocalDate.of(2021, 4, 4);
-        when(renovationTaskService.getTasksWithinDates(any(RenovationRecord.class), any(LocalDate.class), any(LocalDate.class))).
+        when(taskService.getTasksWithinDates(any(RenovationRecord.class), any(LocalDate.class), any(LocalDate.class))).
                 thenReturn(getEmptyMapForRange(start, end));
 
         List<RenovationTask> calendarTasks = List.of();

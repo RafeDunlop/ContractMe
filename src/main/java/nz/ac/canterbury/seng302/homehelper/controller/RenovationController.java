@@ -13,7 +13,7 @@ import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
-import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
+import nz.ac.canterbury.seng302.homehelper.service.TaskService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public class RenovationController {
     private static final Logger logger = LoggerFactory.getLogger(RenovationController.class);
 
     private final RenovationRecordService renovationRecordService;
-    private final RenovationTaskService renovationTaskService;
+    private final TaskService taskService;
     private final LoginService loginService;
     private final TagService tagService;
     private final LocationService locationService;
@@ -58,9 +58,9 @@ public class RenovationController {
      * @param locationService         The location service provides the function to validate the locations
      */
     @Autowired
-    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService,LocationService locationService) {
+    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, TaskService taskService, TagService tagService, LocationService locationService) {
         this.renovationRecordService = renovationRecordService;
-        this.renovationTaskService = renovationTaskService;
+        this.taskService = taskService;
         this.loginService = loginService;
         this.tagService = tagService;
         this.locationService = locationService;
@@ -377,7 +377,7 @@ public class RenovationController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
-        List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
+        List<String> iconFileNames = taskService.getTaskIconFilenames();
 
         String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
@@ -487,11 +487,11 @@ public class RenovationController {
         int requestedPage = Math.max(pageNumber - 1, 0);
         cardsPerPage = Math.max(cardsPerPage, 1);
         Pageable pageable = PageRequest.of(requestedPage, cardsPerPage);
-        Page<RenovationTask> page = renovationTaskService.returnTaskPages(record, pageable);
+        Page<RenovationTask> page = taskService.returnTaskPages(record, pageable);
 
         if (requestedPage >= page.getTotalPages() && page.getTotalPages() > 0) {
             pageable = PageRequest.of(page.getTotalPages() - 1, cardsPerPage);
-            page = renovationTaskService.returnTaskPages(record, pageable);
+            page = taskService.returnTaskPages(record, pageable);
         }
 
         Page<RenovationTaskDTO> dtoPage = page.map(RenovationTaskDTO::new);

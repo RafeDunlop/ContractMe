@@ -22,9 +22,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
-public class RenovationTaskService {
+public class TaskService {
 
-    Logger logger = LoggerFactory.getLogger(RenovationTaskService.class);
+    Logger logger = LoggerFactory.getLogger(TaskService.class);
 
     private final RenovationTaskRepository renovationTaskRepository;
     private final RenovationTaskValidation renovationTaskValidation;
@@ -34,7 +34,7 @@ public class RenovationTaskService {
      * @param renovationTaskRepository initialises the repo for storing tasks
      */
     @Autowired
-    public RenovationTaskService(RenovationTaskRepository renovationTaskRepository, RenovationTaskValidation renovationTaskValidation) {
+    public TaskService(RenovationTaskRepository renovationTaskRepository, RenovationTaskValidation renovationTaskValidation) {
         this.renovationTaskRepository = renovationTaskRepository;
         this.renovationTaskValidation = renovationTaskValidation;
     }
@@ -153,5 +153,46 @@ public class RenovationTaskService {
         MapUtil.putIfNotEmpty(errors, "dueDateError", (dueDateError == null) ? null : List.of(dueDateError));
 
         return errors;
+    }
+
+    /**
+     * Updates the details of an existing renovation task based on the provided {@link RenovationTaskDTO}.
+     *
+     * @param renovationTaskDTO The data transfer object containing updated task details.
+     * @param renovationTask    The existing renovation task to be updated.
+     * @throws IllegalArgumentException If the provided DTO is null or contains validation errors.
+     */
+    public void updateTask(RenovationTaskDTO renovationTaskDTO, RenovationTask renovationTask) throws IllegalArgumentException {
+        if (renovationTaskDTO == null) {
+            throw new IllegalArgumentException("Data integration error");
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        renovationTask.setName(renovationTaskDTO.getName());
+        renovationTask.setDescription(renovationTaskDTO.getDescription());
+        renovationTask.setDueDate(null);
+        if (renovationTaskDTO.getDueDate() != null && !renovationTaskDTO.getDueDate().isBlank()) {
+            renovationTask.setDueDate(LocalDate.parse(renovationTaskDTO.getDueDate(), formatter));
+        }
+        renovationTask.setRoomList(renovationTaskDTO.getRooms());
+
+        renovationTaskRepository.save(renovationTask);
+    }
+
+    /**
+     * Updates the icon of a renovation task with the given file name.
+     *
+     * @param renovationTask The renovation task to be updated.
+     * @param iconFileName The file name of the new icon.
+     * @throws IllegalArgumentException If the file does not exist or is a directory.
+     */
+    public void updateTaskIcon(RenovationTask renovationTask, String iconFileName) throws IllegalArgumentException {
+        if (renovationTaskValidation.validateTaskIconFileName(iconFileName)) {
+            renovationTask.setIconFileName(iconFileName);
+            renovationTaskRepository.save(renovationTask);
+        } else {
+            throw new IllegalArgumentException("File does not exist");
+        }
     }
 }

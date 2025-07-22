@@ -30,7 +30,7 @@ public class DefaultDataConfigurator {
 
     private final RenovationRecordService renovationRecordService;
 
-    private final RenovationTaskService renovationTaskService;
+    private final TaskService taskService;
 
     private final VerificationCodeService verificationCodeService;
     private final TagService tagService;
@@ -50,12 +50,12 @@ public class DefaultDataConfigurator {
     @Autowired
     public DefaultDataConfigurator(RegisterService registerService,
                                    RenovationRecordService renovationRecordService,
-                                   RenovationTaskService renovationTaskService,
+                                   TaskService taskService,
                                    VerificationCodeService verificationCodeService,
                                    TagService tagService) {
         this.registerService = registerService;
         this.renovationRecordService = renovationRecordService;
-        this.renovationTaskService = renovationTaskService;
+        this.taskService = taskService;
         this.verificationCodeService = verificationCodeService;
         this.tagService = tagService;
     }
@@ -138,7 +138,7 @@ public class DefaultDataConfigurator {
                 LocalDate.now().plusYears(5).format(formatter),
                 List.of(defaultJERooms.get(2))
         );
-        renovationTaskService.addRenovationTask(renovationTask, default2Renovation1);
+        taskService.addRenovationTask(renovationTask, default2Renovation1);
 
 
         //Counter is to make multiple tasks on the same day; also so that every so often a
@@ -156,7 +156,7 @@ public class DefaultDataConfigurator {
             renovationTask.setDescription(String.format("Renovation Task Description %d", i));
             renovationTask.setDueDate(LocalDate.now().plusDays(counter).format(formatter));
             renovationTask.setRooms(defaultJERooms);
-            renovationTaskService.addRenovationTask(renovationTask, default1Renovation1);
+            taskService.addRenovationTask(renovationTask, default1Renovation1);
             counter += 1;
         }
     }

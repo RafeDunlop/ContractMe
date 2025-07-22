@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import nz.ac.canterbury.seng302.homehelper.controller.CreateTaskController;
+import nz.ac.canterbury.seng302.homehelper.controller.TaskController;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
@@ -34,12 +34,12 @@ import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepo
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class CreateTaskControllerIntegrationTest {
+public class TaskControllerIntegrationTest {
 
     private MockMvc mockMvc;
 
     @Autowired
-    private CreateTaskController createTaskController;
+    private TaskController taskController;
 
     @MockBean
     private UserRepository userRepository;
@@ -56,7 +56,7 @@ public class CreateTaskControllerIntegrationTest {
 
     @BeforeEach
     public void setup_user() {
-       mockMvc = MockMvcBuilders.standaloneSetup(createTaskController).build();
+       mockMvc = MockMvcBuilders.standaloneSetup(taskController).build();
         MockitoAnnotations.openMocks(this);
     }
 

@@ -1,10 +1,14 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
+
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.service.*;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
+import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
+import nz.ac.canterbury.seng302.homehelper.service.TaskService;
+import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,37 +25,144 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
- * Controller for the edit task page
+ * Controller for the create new task page
  */
 @Controller
-public class EditTaskController {
+public class TaskController {
 
-    private static final Logger logger = LoggerFactory.getLogger(EditTaskController.class);
-    private final RenovationTaskService renovationTaskService;
-    private final EditTaskService editTaskService;
+    private static final Logger logger = LoggerFactory.getLogger(TaskController.class);
+
+    private final TaskService taskService;
+
     private final RenovationRecordService renovationRecordService;
+
     private final RenovationTaskRepository renovationTaskRepository;
+
     private final LoginService loginService;
 
+
     /**
-     * Constructs an {@code EditTaskController} with the specified services and repository.
+     * Induces spring to automatically sets up the {@code RenovationRecordService}
      *
-     * @param renovationTaskService       the service for managing renovation tasks
-     * @param renovationRecordService     the service for managing renovation records
-     * @param editTaskService             the service handling logic specific to editing tasks
-     * @param renovationTaskRepository    the repository for accessing renovation task data
-     * @param loginService               the service for handling logging users in
+     * @param renovationRecordService The service associated with renovation records
+     * @param taskService   the service layer responsible for renovation tasks
+     * @param renovationTaskValidation The validation for validating tasks
+     * @param loginService             the service for handling logging users in
      */
     @Autowired
-    public EditTaskController(RenovationTaskService renovationTaskService, RenovationRecordService renovationRecordService,
-                              EditTaskService editTaskService,
-                              RenovationTaskRepository renovationTaskRepository,
-                              LoginService loginService) {
-        this.renovationTaskService = renovationTaskService;
+    public TaskController(RenovationRecordService renovationRecordService,
+                          TaskService taskService,
+                          RenovationTaskRepository renovationTaskRepository,
+                          LoginService loginService) {
         this.renovationRecordService = renovationRecordService;
-        this.editTaskService = editTaskService;
-        this.renovationTaskRepository = renovationTaskRepository;
+        this.taskService = taskService;
         this.loginService = loginService;
+        this.renovationTaskRepository = renovationTaskRepository;
+    }
+
+    /**
+     * Gets the renovation task creation form
+     *
+     * @param id    Renovation record id
+     * @param model Representations of params for use in thymeleaf
+     * @return the create task HTML page
+     */
+    @GetMapping("renovations/view/create")
+    public String createTask(@RequestParam(name = "id") Long id, Model model) {
+        logger.info("GET renovations/view/create");
+
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
+        if (renovationRecord == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This renovation does not exist");
+        }
+
+        User user = loginService.getUserByEmail();
+        if (renovationRecord.getUser() != user) {
+            return "redirect:/main";
+        }
+
+        model.addAttribute("renovation", renovationRecord);
+        model.addAttribute("roomList", renovationRecord.getRooms());
+
+        if (!model.containsAttribute("renovationTaskDTO")) {
+            RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("", "", null, new ArrayList<>());
+            String dueDate = renovationTaskDTO.getDueDate();
+            String formattedDate = (dueDate != null) ? dueDate : "";
+            model.addAttribute("renovationTaskDTO", renovationTaskDTO);
+            model.addAttribute("dueDate", formattedDate);
+        }
+
+        return "createTaskTemplate";
+    }
+
+
+
+    /**
+     * Handles the submission of the renovation task creation form.
+     * Attempt to create a new renovation task using the provided form data.
+     * If successful, it redirects to the renovation view page.
+     * If an error occurs during task creation, it redirects back to the task creation page
+     * with error messages and previously entered form data.
+     *
+     * @param renovationTaskDTO  The data transfer object containing form data for the new renovation task.
+     * @param roomList           The list of rooms selected from the form. If null, defaults to all rooms from the renovation record.
+     * @param renovationId       The ID of the renovation record this task is associated with.
+     * @param redirectAttributes Flash attributes used to pass data across the redirect in case of form submission errors.
+     * @return A redirect string to either the renovation view page on success or back to the create task page on failure.
+     */
+    @PostMapping("renovations/view/create")
+    public String submitNewTask(@ModelAttribute("renovationTaskDTO") RenovationTaskDTO renovationTaskDTO,
+                                @RequestParam(name = "roomList", required = false) List<String> roomList,
+                                @RequestParam(name = "renovationId") Long renovationId,
+                                RedirectAttributes redirectAttributes) {
+        logger.info("POST renovations/view/create");
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
+        if (Objects.equals(renovationTaskDTO.getDueDate(), "")) {
+            renovationTaskDTO.setDueDate(null);
+        }
+
+        LocalDate parsedDate = null;
+
+        if (renovationTaskDTO.getDueDate() != null) {
+            DateTimeFormatter[] formatters = new DateTimeFormatter[] {
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            };
+
+            for (DateTimeFormatter formatter : formatters) {
+                try {
+                    parsedDate = LocalDate.parse(renovationTaskDTO.getDueDate(), formatter);
+                    break;
+                } catch (DateTimeParseException ignored) {}
+            }
+
+            if (parsedDate != null) {
+                String formattedDueDate = parsedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
+                renovationTaskDTO.setDueDate(formattedDueDate);
+            }
+        }
+
+        Map<String, List<String>> errors = taskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
+
+
+        if (!errors.isEmpty()) {
+            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
+
+            redirectAttributes.addFlashAttribute("renovationTaskDTO", renovationTaskDTO);
+            redirectAttributes.addFlashAttribute("roomList", roomList);
+            redirectAttributes.addFlashAttribute("renovationId", renovationId);
+
+            return "redirect:/renovations/view/create?id=" + renovationId;
+        }
+
+        if (roomList == null) {
+            roomList = renovationRecord.getRooms();
+        }
+
+        taskService.addRenovationTask(renovationTaskDTO, renovationRecord);
+
+        return "redirect:/renovations/view?id=" + renovationId;
     }
 
     /**
@@ -106,11 +217,11 @@ public class EditTaskController {
      */
     @PostMapping("/editTask")
     public String editTask(@ModelAttribute("renovationTaskDTO") RenovationTaskDTO renovationTaskDTO,
-                                @RequestParam(name = "taskId") Long taskId,
-                                @RequestParam(name = "renovationId") Long renovationId,
-                                RedirectAttributes redirectAttributes) {
+                           @RequestParam(name = "taskId") Long taskId,
+                           @RequestParam(name = "renovationId") Long renovationId,
+                           RedirectAttributes redirectAttributes) {
         logger.info("POST renovations/editTask");
-        RenovationTask renovationTask = renovationTaskService.getTaskById(taskId);
+        RenovationTask renovationTask = taskService.getTaskById(taskId);
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
         LocalDate parsedDate = null;
         if (renovationRecord == null || renovationRecord.getUser() != loginService.getUserByEmail()) {
@@ -139,7 +250,7 @@ public class EditTaskController {
             }
         }
 
-        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(
+        Map<String, List<String>> errors = taskService.validateTaskDetails(
                 renovationTaskDTO, renovationTask.getRenovationRecord());
 
         if (!errors.isEmpty()) {
@@ -150,7 +261,7 @@ public class EditTaskController {
         }
 
         try {
-            editTaskService.updateTask(renovationTaskDTO,renovationTask);
+            taskService.updateTask(renovationTaskDTO,renovationTask);
             return "redirect:/renovations/view?id=" + renovationId;
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error {}", e.getMessage());
@@ -176,13 +287,13 @@ public class EditTaskController {
     public String editTaskIcon(@PathVariable("id") Long id, @RequestBody Map<String, String> requestBody) {
         logger.info("POST editTask/edit-icon/{id}");
         String iconName = requestBody.get("iconName");
-        RenovationTask renovationTask = renovationTaskService.getTaskById(id);
+        RenovationTask renovationTask = taskService.getTaskById(id);
         User user = loginService.getUserByEmail();
         if (!renovationTask.getRenovationRecord().getUser().equals(user)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Action not allowed.");
         }
         RenovationRecord renovation = renovationTask.getRenovationRecord();
-        editTaskService.updateTaskIcon(renovationTask, iconName);
+        taskService.updateTaskIcon(renovationTask, iconName);
         return "redirect:/renovations/view?id=" + renovation.getId();
     }
 }
