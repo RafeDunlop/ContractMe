@@ -1,5 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.entity.users;
 
+import java.util.Arrays;
+import java.util.List;
+
 public enum Skill {
 
     // ===== Structural / Exterior =====
@@ -89,5 +92,13 @@ public enum Skill {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    /**
+     * A list of skills sorted by their display names in alphabetical order (case-insensitive).
+     * @return List of sorted skills
+     */
+    public static List<Skill> listOfSortedSkills() {
+        return Arrays.stream(Skill.values()).sorted((a, b) -> a.getDisplayName().compareToIgnoreCase(b.getDisplayName())).toList();
     }
 }

@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
@@ -78,7 +79,7 @@ public class ContractorRegistrationSteps {
 
         assertTrue(content.contains("id=\"contractor-form\""));
         assertTrue(content.contains("id=\"hourlyRate\""));
-        assertTrue(content.contains("id=\"skills\""));
+        assertTrue(content.contains("id=\"skills-select\""));
         assertTrue(content.contains("id=\"phoneNumber\""));
     }
 
@@ -187,6 +188,7 @@ public class ContractorRegistrationSteps {
                 .andExpect(status().is3xxRedirection());
     }
 
+    @Transactional
     @Then("the form is saved with the contractor details I supplied")
     public void the_form_is_saved_with_the_contractor_details_i_supplied() {
         Optional<Contractor> contractor = contractorRepository.findByEmailIgnoreCase(userEmailAddress);
@@ -194,8 +196,7 @@ public class ContractorRegistrationSteps {
         Contractor actualContractor = contractor.get();
         assertEquals(userName, actualContractor.getFirstName());
         assertEquals(userEmailAddress, actualContractor.getEmail());
-        // TODO: Implement skills
-//        assertEquals(userSkills, actualContractor.getSkills());
+        assertEquals(userSkills, actualContractor.getSkills());
         assertEquals(userPhoneNumber, actualContractor.getPhoneNumber());
     }
 
@@ -214,6 +215,30 @@ public class ContractorRegistrationSteps {
                 .param("phoneNumber", "123455786")
                 .param("skills", "HVAC")
                 .param("hourlyRate", String.valueOf(hourlyRate))
+                .param("password", "P4$$word")
+                .param("confirmPassword", "P4$$word")
+                .param("isContractor", "true")
+                .with(csrf());
+
+        resultActions = mockMvc.perform(request)
+                .andExpect(status().is3xxRedirection());
+    }
+
+    @When("I don't enter any skills")
+    public void i_dont_enter_any_skills() throws Exception {
+        MockHttpServletRequestBuilder request = post("/register")
+                .param("firstName", "Jane")
+                .param("lastName", "Doe")
+                .param("email", "jane.doe@example.com")
+                .param("address_line1", "") // <- IMPORTANT: make sure param name matches controller!
+                .param("suburb", "Riccarton")
+                .param("city", "Christchurch")
+                .param("postcode", "8041")
+                .param("country", "New Zealand")
+                .param("countryCode", "64")
+                .param("phoneNumber", "123455786")
+                .param("skills", (String) null)
+                .param("hourlyRate", "1")
                 .param("password", "P4$$word")
                 .param("confirmPassword", "P4$$word")
                 .param("isContractor", "true")

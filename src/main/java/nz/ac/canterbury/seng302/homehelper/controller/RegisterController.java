@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mail.MailException;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -63,8 +65,10 @@ public class RegisterController {
      */
     @GetMapping("/register")
     public String registration(@ModelAttribute UserRegisterDTO userRegisterDTO,
-                               @ModelAttribute AddressDTO addressDTO) {
+                               @ModelAttribute AddressDTO addressDTO, Model model) {
         logger.info("GET /register");
+        List<Skill> skillList = Skill.listOfSortedSkills();
+        model.addAttribute("skills", skillList);
         return "registrationTemplate";
     }
 

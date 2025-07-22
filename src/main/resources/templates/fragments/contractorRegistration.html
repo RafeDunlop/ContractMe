@@ -5,10 +5,11 @@
     <link th:href="@{/css/styles.css}" rel="stylesheet">
     <link th:href="@{/css/inputBoxStyles.css}" rel="stylesheet">
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/tags.css}" rel="stylesheet">
     <title></title>
 </head>
 <body>
-<div th:fragment="contractor-registration" id="contractor-form">
+<div th:fragment="contractor-registration(skills)" id="contractor-form">
     <div class="mb-3">
         <div class="input-group">
             <span class="prefix-span input-group-text">$</span>
@@ -56,10 +57,14 @@
         </div>
     </div>
     <div class="mb-3">
-
-        <select class="form-select" id="skills" aria-label="skills">
-            <option selected>Skills (Placeholder)</option>
+        <select class="form-select" id="skills-select" type="text" aria-label="skills-select" autocomplete="off">
+            <option disabled selected hidden>Add Skills</option>
+            <option th:each="skill : ${skills}" th:value="${skill}" th:text="${skill.getDisplayName()}"
+                    th:attr="display-name=${skill.getDisplayName()}" class="skill-option"></option>
         </select>
+        <div id="skill-input-container" class="mt-2"></div>
+        <div id="hidden-skill-input-container"></div>
+        <div class="previous-input" th:each="skill : ${userRegisterDTO.getSkills()}" th:data-skill="${skill}" th:data-skilldisplayname="${skill.displayName}"></div>
 
         <!-- Frontend JS Error -->
         <div class="alert alert-danger mt-2" id="skills-frontend-error" hidden>
@@ -78,4 +83,5 @@
     </div>
 </div>
 </body>
+<script type="module" th:src="@{/js/skills.js}"></script>
 </html>

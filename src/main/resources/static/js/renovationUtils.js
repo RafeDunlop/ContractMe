@@ -237,10 +237,10 @@ function renderRecordTable(data, pageNumber, csrfToken) {
 
     data.content.forEach(record => {
         const rowHtml = `
-            <div class="list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative renovation-card"
+            <div class="list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative renovation-card truncate"
                  data-url="${basePath}renovations/view?id=${record.id}&page=1" style="cursor: pointer;">
                 <div class="d-flex justify-content-between align-items-start">
-                    <div class="w-100">
+                    <div class="w-100 truncate">
                         <h5 class="mb-1 text-primary truncate">${record.name}</h5>
                         <p class="mb-0 text-muted truncate">${record.description}</p>
                     </div>

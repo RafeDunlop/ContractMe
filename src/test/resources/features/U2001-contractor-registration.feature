@@ -25,6 +25,11 @@ Feature: U2001 - As Bob, I want to be able to register as a contractor and add m
     When I don't enter location details
     Then a "locationError" error message tells me "You must enter a location"
 
+  Scenario: AC8 - No skills
+    Given I am on the registration form
+    And I don't enter any skills
+    Then a "skillsError" error message tells me "You must select one or more skills"
+
   Scenario: AC9 - All Valid Details
     Given I am on the registration form
     And I enter valid user details "Bob", email address "bob@bob.com", skills "JOINERY", a phone number "02121212121", and a location
