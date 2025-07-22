@@ -209,6 +209,11 @@ public class RenovationTaskServiceTest {
         when(renovationTaskRepository.getByDueDateBetween(startDate, endDate, renovationRecord)).thenReturn(List.of());
         Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
         assertEquals(3, toTest.size());
+
+        for (int i = 0; i < toTest.size(); i++) {
+            assertTrue(toTest.get(startDate.plusDays(i)).isEmpty());
+        }
+
     }
 
     @Test
@@ -257,6 +262,9 @@ public class RenovationTaskServiceTest {
         when(renovationTaskRepository.getByDueDateBetween(any(LocalDate.class), any(LocalDate.class), any(RenovationRecord.class))).thenReturn(List.of(dummyTask1, dummyTask2));
         Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
         assertEquals(2, toTest.get(startDate).size());
+        assertEquals(dummyTask1, toTest.get(startDate).get(0));
+        assertEquals(dummyTask2, toTest.get(startDate.plusDays(0)).get(1));
+
     }
 
     @Test
