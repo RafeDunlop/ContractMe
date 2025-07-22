@@ -1,4 +1,4 @@
-const phonePattern = /\d+/;
+const phonePattern = /^\d+$/;
 
 export function validateHourlyRate(hourlyRate, hourlyRateFrontendErrorMessage, hourlyRateFrontendError,
                                    hourlyRateBackendError) {

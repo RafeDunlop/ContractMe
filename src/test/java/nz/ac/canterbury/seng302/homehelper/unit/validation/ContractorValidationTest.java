@@ -32,13 +32,13 @@ public class ContractorValidationTest {
     public void phoneNumberValidation_emptyPhoneNumber_rejectInput(String phoneNumber) {
         ContractorValidation contractorValidation = new ContractorValidation();
         List <String> result = contractorValidation.validatePhoneNumber(phoneNumber, 64);
-        Assertions.assertTrue(result.contains("You must enter a valid phone number"));
+        Assertions.assertTrue(result.contains("You must enter a phone number"));
     }
 
     @Test
     public void hourlyRateValidation_negativeHourlyRate_rejectInput() {
         ContractorValidation contractorValidation = new ContractorValidation();
-        List<String> result = contractorValidation.validateHourlyRate(-1);
+        List<String> result = contractorValidation.validateHourlyRate(-1f);
         List<String> expected = List.of("Invalid hourly rate");
         Assertions.assertEquals(expected, result);
     }
@@ -63,6 +63,22 @@ public class ContractorValidationTest {
         ContractorValidation contractorValidation = new ContractorValidation();
         List<String> result = contractorValidation.validatePhoneNumber("12345678", countryCode);
         List<String> expected = List.of("Invalid country code");
+        Assertions.assertEquals(expected, result);
+    }
+
+    @Test
+    public void validateLocation_locationProvided_acceptInput() {
+        ContractorValidation contractorValidation = new ContractorValidation();
+        List<String> result = contractorValidation.validateContractorLocation(true);
+        Assertions.assertEquals(0, result.size());
+    }
+
+
+    @Test
+    public void validateLocation_locationNotProvided_rejectInput() {
+        ContractorValidation contractorValidation = new ContractorValidation();
+        List<String> result = contractorValidation.validateContractorLocation(false);
+        List<String> expected = List.of("You must enter a location");
         Assertions.assertEquals(expected, result);
     }
 

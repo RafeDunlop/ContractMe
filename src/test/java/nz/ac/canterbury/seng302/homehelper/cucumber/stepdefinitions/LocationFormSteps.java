@@ -13,8 +13,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,7 +35,6 @@ import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository
 @SpringBootTest
 public class LocationFormSteps {
 
-    private static final Logger log = LoggerFactory.getLogger(LocationFormSteps.class);
     @Autowired
     private MockMvc mockMvc;
 
@@ -54,6 +51,7 @@ public class LocationFormSteps {
 
     @Autowired
     private VerificationCodeRepository verificationCodeRepository;
+
 
     @Given("I am on the edit profile form")
     public void i_am_on_the_edit_profile_form() throws Exception {
