@@ -55,7 +55,7 @@ public class ContractorServiceIntegrationTest {
         userRegisterDTO.setPassword("P4$$word");
         userRegisterDTO.setConfirmPassword("P4$$word");
         userRegisterDTO.setHourlyRate(30.0f);
-        List<Skill> userRegisterDtoSkills = new ArrayList<>();
+        List<Skill> userRegisterDtoSkills = List.of(Skill.ELECTRICAL);
         userRegisterDTO.setSkills(userRegisterDtoSkills);
         userRegisterDTO.setPhoneNumber("0800111111");
         userRegisterDTO.setCountryCode(64);
@@ -78,8 +78,6 @@ public class ContractorServiceIntegrationTest {
         addressDTO.setRegion("Avonhead");
 
         toTest = new ContractorService(contractorRepository, contractorValidation);
-
-
     }
 
     @Test
@@ -114,11 +112,24 @@ public class ContractorServiceIntegrationTest {
     }
 
     @Test
+    public void validateContractor_noSkillsProvided_throwsError() {
+        userRegisterDTO.setSkills(List.of());
+        Map<String, List<String>> errors = toTest.validateContractor(userRegisterDTO, true);
+        assertTrue(errors.containsKey("skillsError"));
+        assertEquals("You must select one or more skills", errors.get("skillsError").get(0));
+    }
+
+    @Test
+    public void validateContractor_skillsAreNull_throwsError() {
+        userRegisterDTO.setSkills(null);
+        Map<String, List<String>> errors = toTest.validateContractor(userRegisterDTO, true);
+        assertTrue(errors.containsKey("skillsError"));
+        assertEquals("You must select one or more skills", errors.get("skillsError").get(0));
+    }
+
+    @Test
     public void saveContractor_allValid_contractorSavedInUserRepository() {
         toTest.registerContractor(userRegisterDTO, addressDTO);
         assertTrue(userRepository.findByEmailIgnoreCase("john.doe@gmail.com").isPresent());
     }
-
-
-
 }

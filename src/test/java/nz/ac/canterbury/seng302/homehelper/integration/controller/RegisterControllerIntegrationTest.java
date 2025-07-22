@@ -207,4 +207,37 @@ public class RegisterControllerIntegrationTest {
         verify(emailService, times(1)).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 
+    @Test
+    public void testRegisterContractor_skillsAreNull_rejectInputWithSkillError() throws Exception {
+        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        Contractor expectedUser = Mockito.spy(new Contractor("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
+        expectedUser.setHourlyRate(27.80f);
+        expectedUser.setPhoneNumber("6412345678");
+        Mockito.when(expectedUser.getId()).thenReturn(1L);
+        Mockito.when(verificationCodeRepository.save(Mockito.any(VerificationCode.class))).thenAnswer((InvocationOnMock) -> null);
+        when(contractorRepository.save(Mockito.any(Contractor.class))).thenReturn(expectedUser);
+        Mockito.when(contractorRepository.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(expectedUser));
+        mockMvc.perform(MockMvcRequestBuilders.post("/register")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("firstName", "Jane")
+                        .param("lastName", "Doe")
+                        .param("email", "jane@doe.nz")
+                        .param("password", "Test123!")
+                        .param("confirmPassword", "Test123!")
+                        .param("hourlyRate", "27.80")
+                        .param("isContractor", "true")
+                        .param("phoneNumber", "12345678")
+                        .param("countryCode", "64")
+                        .param("skills", (String) null)
+                        .param("address_line1", "62 Ilam Road") // <- IMPORTANT: make sure param name matches controller!
+                        .param("suburb", "Riccarton")
+                        .param("city", "Christchurch")
+                        .param("postcode", "8041")
+                        .param("country", "New Zealand")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(view().name("redirect:/register"))
+                .andExpect(flash().attribute("skillsError", List.of("You must select one or more skills")));
+        verify(emailService, times(0)).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+    }
 }
