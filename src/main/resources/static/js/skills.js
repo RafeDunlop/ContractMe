@@ -51,6 +51,7 @@ function createSkillBubble(selectedSkill, displayName) {
 
     const hiddenSkillInput = document.createElement("input");
     hiddenSkillInput.type = "hidden";
+    deleteButton.type = "button";
     hiddenSkillInput.name = "skills";
     hiddenSkillInput.id = "hidden" + selectedSkill;
     hiddenSkillInput.value = selectedSkill;
