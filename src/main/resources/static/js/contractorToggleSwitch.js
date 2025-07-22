@@ -19,8 +19,10 @@ function displayContractorForm() {
         locationForm.style.display = "block";
         contractorForm.style.display = "block";
         locationToggleSwitchLabel.innerText = "Enter Location (Required):"
+        locationToggleSwitch.disabled = true;
     }
     else {
+        locationToggleSwitch.disabled = false;
         locationToggleSwitch.checked = false;
         locationForm.style.display = "none";
         contractorForm.style.display = "none";

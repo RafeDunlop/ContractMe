@@ -102,7 +102,7 @@
                     <div id="location-toggle-switch-label">Enter Location (Optional):</div>
                     <div>
                         <label class="switch">
-                            <input type="checkbox" id="location-toggleswitch" th:checked="${locationUsed}">
+                            <input type="checkbox" id="location-toggleswitch" th:disabled="${userRegisterDTO.isContractor}" th:checked="${locationUsed}">
                             <span class="slider"></span>
                         </label>
                     </div>
