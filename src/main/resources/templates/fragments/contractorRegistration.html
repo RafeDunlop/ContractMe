@@ -64,6 +64,7 @@
         </select>
         <div id="skill-input-container" class="mt-2"></div>
         <div id="hidden-skill-input-container"></div>
+        <div class="previous-input" th:each="skill : ${userRegisterDTO.getSkills()}" th:data-skill="${skill}" th:data-skilldisplayname="${skill.displayName}"></div>
 
         <!-- Frontend JS Error -->
         <div class="alert alert-danger mt-2" id="skills-frontend-error" hidden>

@@ -43,10 +43,7 @@ function createSkillBubble(selectedSkill, displayName) {
     deleteButton.className = "tag-delete-button-large btn-sm border-0 bg-transparent text-light ms-1";
     deleteButton.textContent = "X";
     deleteButton.addEventListener("click", () => {
-        bubble.remove();
-        selectedSkills = selectedSkills.filter(s => s !== selectedSkill);
-        skillsSelect.value = "Add Skills";
-        skillsSelect.style.color = "grey";
+        deleteSkill(deleteButton, bubble, selectedSkill);
     });
     bubble.appendChild(deleteButton);
 
@@ -54,9 +51,35 @@ function createSkillBubble(selectedSkill, displayName) {
 
     const hiddenSkillInput = document.createElement("input");
     hiddenSkillInput.type = "hidden";
+    hiddenSkillInput.name = "skills";
     hiddenSkillInput.value = selectedSkill;
 
     hiddenSkillInputContainer.appendChild(hiddenSkillInput);
     console.log(hiddenSkillInputContainer);
 }
 
+/**
+ * Delete skill bubble when delete button is pressed.
+ * @param deleteButton Button getting the event listener
+ * @param bubble Skill bubble to be deleted
+ * @param selectedSkill The skill name on the bubble
+ */
+function deleteSkill(deleteButton, bubble, selectedSkill) {
+    bubble.remove();
+    selectedSkills = selectedSkills.filter(s => s !== selectedSkill);
+    skillsSelect.value = "Add Skills";
+    skillsSelect.style.color = "grey";
+}
+
+/**
+ * Listener to remake all skill bubble that were inputted previously if there was an error when the form was submitted.
+ */
+document.addEventListener("DOMContentLoaded", () => {
+    const previousSkills = document.querySelectorAll(".previous-input");
+
+    previousSkills.forEach(skill => {
+        const selectedSkill = skill.dataset.skill;
+        const displayName = skill.dataset.skilldisplayname;
+        createSkillBubble(selectedSkill, displayName);
+    })
+})
