@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -68,6 +69,16 @@ public class ContractorValidation {
     }
 
     /**
+     * Validates that skill inputs contain at least one skill
+     * @param skills The list of skills selected
+     * @return The errors present, or an empty list if there are not any
+     */
+    public List<String> validateContractorSkillsField(List<Skill> skills) {
+        if (skills == null || skills.isEmpty()) return List.of("You must select one or more skills");
+        return List.of();
+    }
+
+    /**
      * Validate the phone number's country code, this must be a positive number 3 digits or fewer.
      *
      * @param countryCode the phone number country code
@@ -81,7 +92,4 @@ public class ContractorValidation {
         }
         return errors;
     }
-
-
-
 }

@@ -92,6 +92,7 @@ public class ContractorService {
                 userRegisterDTO.getPhoneNumber(), userRegisterDTO.getCountryCode()));
         MapUtil.putIfNotEmpty(errors, "hourlyRateError", contractorValidation.validateHourlyRate(userRegisterDTO.getHourlyRate()));
         MapUtil.putIfNotEmpty(errors, "locationError", contractorValidation.validateContractorLocation(locationProvided));
+        MapUtil.putIfNotEmpty(errors, "skillsError", contractorValidation.validateContractorSkillsField(userRegisterDTO.getSkills()));
         return errors;
     }
 }

@@ -52,10 +52,10 @@ function createSkillBubble(selectedSkill, displayName) {
     const hiddenSkillInput = document.createElement("input");
     hiddenSkillInput.type = "hidden";
     hiddenSkillInput.name = "skills";
+    hiddenSkillInput.id = "hidden" + selectedSkill;
     hiddenSkillInput.value = selectedSkill;
 
     hiddenSkillInputContainer.appendChild(hiddenSkillInput);
-    console.log(hiddenSkillInputContainer);
 }
 
 /**
@@ -69,6 +69,8 @@ function deleteSkill(deleteButton, bubble, selectedSkill) {
     selectedSkills = selectedSkills.filter(s => s !== selectedSkill);
     skillsSelect.value = "Add Skills";
     skillsSelect.style.color = "grey";
+    const hiddenInput = document.getElementById("hidden" + selectedSkill);
+    hiddenInput.remove();
 }
 
 /**
