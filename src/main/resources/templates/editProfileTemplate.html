@@ -97,10 +97,8 @@
             </div>
 
             <!-- LOCATION TOGGLE SWITCH -->
-
-
-            <div class="d-flex justify-content-between align-items-center py-4 px-0" style="width: 25%">
-                <div>Enter Location (Optional):</div>
+            <div class="d-flex justify-content-between align-items-center pb-4 px-0" style="width: 22%">
+                <div id="location-toggle-switch-label">Enter Location (Optional):</div>
                 <div>
                     <label class="switch">
                         <input type="checkbox" id="location-toggleswitch" th:checked="${locationUsed}">
@@ -110,7 +108,7 @@
             </div>
 
             <!-- LOCATION FORM FRAGMENT -->
-            <div th:class="${locationUsed} ? 'form-extension' : 'hidden-form-extension'" id="location-form">
+            <div th:class="'pb-3 ' + (${locationUsed} ? 'form-extension' : 'hidden-form-extension')" id="location-form">
                 <div th:replace="~{fragments/locationForm.html :: locationForm(
                      addressDTO=${addressDTO})}"></div>
             </div>
@@ -131,7 +129,8 @@
 </div>
 </body>
 <script type="module" th:src="@{/js/locationForm.js}"></script>
-<script type="module" th:src="@{/js/userValidation.js}"></script>
-<script type="module" th:src="@{/js/profileValidation.js}"></script>
-<script type="module" th:src="@{/js/profilePictureValidation.js}"></script>
+<script type="module" th:src="@{/js/validation/userValidation.js}"></script>
+<script type="module" th:src="@{/js/validation/profileValidation.js}"></script>
+<script type="module" th:src="@{/js/validation/profilePictureValidation.js}"></script>
+<script type="module" th:src="@{/js/registrationToggleSwitch.js}"></script>
 </html>

@@ -3,9 +3,16 @@
     justify-content: center;
 }
 
-#country-code {
+#countryCode {
     flex: 0 0 auto;
     width: 10%;
+    -moz-appearance: textfield;
+}
+
+#countryCode::-webkit-outer-spin-button,
+#countryCode::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 #skills-select {

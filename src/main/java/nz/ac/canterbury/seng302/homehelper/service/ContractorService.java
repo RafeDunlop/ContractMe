@@ -5,10 +5,18 @@ import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.ContractorRepository;
+import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
+import nz.ac.canterbury.seng302.homehelper.validation.ContractorValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -19,20 +27,19 @@ public class ContractorService {
 
     private final ContractorRepository contractorRepository;
 
-    private final RegisterService registerService;
     private final PasswordEncoder passwordEncoder;
+    private final ContractorValidation contractorValidation;
 
     /**
      * Constructor for the service and links the repository and validator to the
      * service.
      * @param contractorRepository ContractorRepository for getting and updating contractor details
-     * @param registerService RegisterService for registering Contractors
      */
     @Autowired
-    public ContractorService(ContractorRepository contractorRepository, RegisterService registerService) {
-        this.registerService = registerService;
+    public ContractorService(ContractorRepository contractorRepository, ContractorValidation contractorValidation) {
         this.contractorRepository = contractorRepository;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        this.contractorValidation = contractorValidation;
     }
 
 
@@ -52,8 +59,12 @@ public class ContractorService {
                 userRegisterDTO.getEmail(),
                 passwordEncoder.encode(userRegisterDTO.getPassword())
         );
-        contractor.setHourlyRate(userRegisterDTO.getHourlyRate());
+        BigDecimal hourlyRateDecimal = BigDecimal.valueOf(userRegisterDTO.getHourlyRate());
+        BigDecimal roundedHourlyRate = hourlyRateDecimal.setScale(2, RoundingMode.HALF_UP);
+
+        contractor.setHourlyRate(roundedHourlyRate.floatValue());
         contractor.setPhoneNumber(userRegisterDTO.getPhoneNumber());
+        contractor.setCountryCode(userRegisterDTO.getCountryCode());
         userRegisterDTO.getSkills().forEach(contractor::addSkill);
         //address validation here
         Location location = new Location(
@@ -66,5 +77,21 @@ public class ContractorService {
         contractor.setLocation(location);
         contractor = contractorRepository.save(contractor);
         return contractor;
+    }
+
+    /**
+     * Validates the contractor specific registration fields provided in the {@link UserRegisterDTO}
+     *
+     * @param userRegisterDTO the user registration data transfer object containing user input fields
+     * @return a map of field name and error lists. If no errors exist for a field, it is not included
+     */
+    public Map<String, List<String>> validateContractor(UserRegisterDTO userRegisterDTO, boolean locationProvided) {
+        Map<String, List<String>> errors = new HashMap<>();
+
+        MapUtil.putIfNotEmpty(errors, "phoneNumberError", contractorValidation.validatePhoneNumber(
+                userRegisterDTO.getPhoneNumber(), userRegisterDTO.getCountryCode()));
+        MapUtil.putIfNotEmpty(errors, "hourlyRateError", contractorValidation.validateHourlyRate(userRegisterDTO.getHourlyRate()));
+        MapUtil.putIfNotEmpty(errors, "locationError", contractorValidation.validateContractorLocation(locationProvided));
+        return errors;
     }
 }

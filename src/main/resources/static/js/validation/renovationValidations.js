@@ -1,4 +1,4 @@
-import { validateField } from "./renovationCommons.js";
+import { validateField } from "../renovationCommons.js";
 
 let recordNameField = document.getElementById("name")
 let nameFrontendError = document.getElementById("name-frontend-error")
@@ -48,11 +48,11 @@ function checkNameField(input) {
     const isEditMode = document.title === "Edit renovation";
     const existingName = document.getElementById("existingName")?.value;
 
+    if (nameBackendError) nameBackendError.hidden = true;
     if (input === "") {
         nameFrontendErrorMessage.textContent = "Renovation record name cannot be empty.";
         nameFrontendError.hidden = false;
         nameFrontendErrorMessage.hidden = false;
-        nameBackendError.hidden = true;
         nameFieldValid = false;
 
     } else if (!isEditMode && existingName && input.toLowerCase() === existingName.toLowerCase()) {
@@ -60,7 +60,6 @@ function checkNameField(input) {
         nameFrontendErrorMessage.textContent = "You already have a renovation with this name.";
         nameFrontendError.hidden = false;
         nameFrontendErrorMessage.hidden = false;
-        nameBackendError.hidden = true;
         nameFieldValid = false;
 
     } else if (isEditMode && existingName && input.toLowerCase() === existingName.toLowerCase()) {
@@ -68,22 +67,18 @@ function checkNameField(input) {
         nameFieldValid = true;
         nameFrontendError.hidden = true;
         nameFrontendErrorMessage.textContent = "";
-        nameBackendError.hidden = true;
 
     } else if (input.length > 128) {
         // In CREATE mode and name has less than 128 characters, it's valid
         nameFrontendErrorMessage.textContent = " Name cannot be greater than 128 characters.";
         nameFrontendError.hidden = false;
         nameFrontendErrorMessage.hidden = false;
-        nameBackendError.hidden = true;
         nameFieldValid = false;
 
     } else {
         const isValid = validateField(input, /^[\p{L}\d .,\-']*$/u, nameFrontendErrorMessage, roomNameErrorMessage);
         nameFieldValid = isValid;
         nameFrontendError.hidden = isValid;
-        nameBackendError.hidden = true;
-
         if (isValid) {
             nameFrontendErrorMessage.textContent = "";
         }
@@ -96,17 +91,17 @@ function checkNameField(input) {
  * @param input from the form to be checked
  */
 function checkDescriptionField(input) {
+    if (descriptionBackendError) descriptionBackendError.hidden = true;
+
     if (input.length > 512) {
         descriptionFrontendErrorMessage.textContent = "Renovation record description must be 512 characters or less";
         descriptionFrontendError.hidden = false;
         descriptionFrontendErrorMessage.hidden = false;
-        descriptionBackendError.hidden = true;
         descriptionFieldValid = false;
     } else {
         descriptionFrontendErrorMessage.textContent = "";
         descriptionFrontendError.hidden = true;
         descriptionFrontendErrorMessage.hidden = true;
-        descriptionBackendError.hidden = true;
         descriptionFieldValid = true;
     }
 }

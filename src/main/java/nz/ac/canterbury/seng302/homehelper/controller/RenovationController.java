@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.CalendarCellDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
@@ -29,6 +30,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UrlPathHelper;
 
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -39,8 +42,6 @@ import java.util.*;
 @RequestMapping("/renovations")
 public class RenovationController {
 
-    private static final int CAL_ROWS = 5;
-    private static final int CAL_COLUMNS = 7;
     private static final Logger logger = LoggerFactory.getLogger(RenovationController.class);
 
     private final RenovationRecordService renovationRecordService;
@@ -134,12 +135,7 @@ public class RenovationController {
         if (roomList == null) roomList = new ArrayList<>(); //cannot be a default value as technically non-constant
         Map<String, List<String>> errors = renovationRecordService.validateAllInputsCreate(name, description, roomList);
 
-        boolean locationProvided = addressDTO != null &&
-                (addressDTO.getAddress_line1() != null && !addressDTO.getAddress_line1().isBlank()
-                        || addressDTO.getRegion() != null && !addressDTO.getRegion().isBlank()
-                        || addressDTO.getCity() != null && !addressDTO.getCity().isBlank()
-                        || addressDTO.getPostcode() != null && !addressDTO.getPostcode().isBlank()
-                        || addressDTO.getCountry() != null && !addressDTO.getCountry().isBlank());
+        boolean locationProvided = locationService.isLocationProvided(addressDTO);
 
         if (locationProvided) {
             errors.putAll(locationService.validateLocation(addressDTO));
@@ -364,6 +360,8 @@ public class RenovationController {
     @GetMapping("/view")
     public String viewRenovation(@RequestParam(name = "id") Long id,
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
+                                 @RequestParam(required = false) Integer year,
+                                 @RequestParam(required = false) Integer month,
                                  Model model,
                                  HttpServletRequest request) {
         logger.info("GET /renovations/view");
@@ -382,24 +380,29 @@ public class RenovationController {
         String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
-        /* TODO: This is a rudimentary mockup to get the calendar fragment to work, the person doing the task "Implement
-           Calendar Fragment Design" should implement this properly at service layer, allowing for setting the month.
-        */
-        Calendar date = Calendar.getInstance();
-        Calendar dateCopy = (Calendar) date.clone();
-        dateCopy.set(Calendar.DAY_OF_MONTH, dateCopy.getActualMinimum(Calendar.DAY_OF_MONTH));
-        int weekDayFirst = (dateCopy.get(Calendar.DAY_OF_WEEK) - 2) % 6;
-        dateCopy.add(Calendar.DATE, -weekDayFirst);
-        int[][] datesArray = new int[5][7];
-        for (int i = 0; i < CAL_ROWS; i++) {
-            for (int j = 0; j < CAL_COLUMNS; j++) {
-                datesArray[i][j] = dateCopy.get(Calendar.DATE);
-                dateCopy.add(Calendar.DATE, 1);
+        LocalDate localDate = LocalDate.now();
+        model.addAttribute("currentDay", localDate.getDayOfMonth());
+        model.addAttribute("currentMonth", localDate.getMonthValue());
+        model.addAttribute("currentYear", localDate.getYear());
+
+        if (year != null && year >= 1 && month != null) {
+            try {
+                localDate = LocalDate.of(year, month, 1);
+            } catch (DateTimeException e) {
+                logger.error(e.getMessage());
+            }
+        } else if (month != null && year == null) {
+            try {
+                localDate = LocalDate.of(localDate.getYear(), month, 1);
+            } catch (DateTimeException e) {
+                logger.error(e.getMessage());
             }
         }
 
+        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate);
+
         model.addAttribute("datesArray", datesArray);
-        model.addAttribute("date", date);
+        model.addAttribute("date", localDate);
 
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
 
@@ -409,6 +412,60 @@ public class RenovationController {
         model.addAttribute("icons", iconFileNames);
 
         return "viewRenovation";
+    }
+
+    /**
+     * Retrieves the calendar fragment for a renovation record based on the provided ID and optional year/month.
+     * If the year or month is invalid or not provided, the current month is used
+     *
+     * @param id     ID of the renovation record whose calendar is being viewed
+     * @param year   Optional year to generate the calendar for (>= 1)
+     * @param month  Optional month to generate the calendar for (1–12). If only month is provided, current year is used.
+     * @param model  Model used to pass attributes to the Thymeleaf calendar fragment
+     * @return       Thymeleaf calendar fragment for the given renovation
+     * @throws ResponseStatusException if the renovation record does not exist or is not accessible by the current user
+     */
+    @GetMapping("/calendar")
+    public String getCalendarFragment(@RequestParam Long id,
+                                      @RequestParam(required = false) Integer year,
+                                      @RequestParam(required = false) Integer month,
+                                      Model model) {
+
+        RenovationRecord record = renovationRecordService.getRecordById(id);
+        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Renovation not found");
+
+        User user = loginService.getUserByEmail();
+        boolean isOwner = user.equals(record.getUser());
+        if (!isOwner) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
+        }
+
+        LocalDate localDate = LocalDate.now();
+        model.addAttribute("currentDay", localDate.getDayOfMonth());
+        model.addAttribute("currentMonth", localDate.getMonthValue());
+        model.addAttribute("currentYear", localDate.getYear());
+
+        if (year != null && year >= 1 && month != null) {
+            try {
+                localDate = LocalDate.of(year, month, 1);
+            } catch (DateTimeException e) {
+                logger.error(e.getMessage());
+            }
+        } else if (month != null && year == null) {
+            try {
+                localDate = LocalDate.of(localDate.getYear(), month, 1);
+            } catch (DateTimeException e) {
+                logger.error(e.getMessage());
+            }
+        }
+
+        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate);
+
+        model.addAttribute("datesArray", datesArray);
+        model.addAttribute("date", localDate);
+        model.addAttribute("id", id);
+
+        return "fragments/calendar :: calendar";  // return only fragment for partial update
     }
 
     /**
@@ -485,6 +542,7 @@ public class RenovationController {
             tagService.addTagToRenovation(record, tagName);
         } else {
             redirectAttributes.addFlashAttribute("errors", errors);
+            redirectAttributes.addFlashAttribute("submittedTag",tagName);
         }
         return "redirect:/renovations/view?id=" + renovationId + "&page=" + pageNumber;
     }
@@ -586,7 +644,7 @@ public class RenovationController {
                                                     HttpServletRequest request) {
 
         // Apply default values
-        if (visibility == null) visibility = "user";
+        if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";
 
         // Convert tag names to Tag entities if provided
