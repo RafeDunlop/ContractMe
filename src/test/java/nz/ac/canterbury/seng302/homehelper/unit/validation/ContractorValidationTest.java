@@ -82,4 +82,19 @@ public class ContractorValidationTest {
         Assertions.assertEquals(expected, result);
     }
 
+    @Test
+    public void validateLocation_skillsNotProvided_rejectInput() {
+        ContractorValidation contractorValidation = new ContractorValidation();
+        List<String> result = contractorValidation.validateContractorSkillsField(List.of());
+        List<String> expected = List.of("You must select one or more skills");
+        Assertions.assertEquals(expected, result);
+    }
+
+    @Test
+    public void validateLocation_skillsAreNull_rejectInput() {
+        ContractorValidation contractorValidation = new ContractorValidation();
+        List<String> result = contractorValidation.validateContractorSkillsField(null);
+        List<String> expected = List.of("You must select one or more skills");
+        Assertions.assertEquals(expected, result);
+    }
 }

@@ -19,7 +19,7 @@
 
 .tag-delete-button-large {
     font-size: 24px;
-    font-weight: 750;
+    font-weight: 600;
 }
 
 .tag-delete-button-small, .tag-delete-button-large {
@@ -29,5 +29,5 @@
 }
 
 .tag-delete-button-small:hover, .tag-delete-button-large:hover {
-    color: grey !important;
+    color: #afafaf !important;
 }

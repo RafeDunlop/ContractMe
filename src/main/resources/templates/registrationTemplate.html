@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
     <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
     <link rel="stylesheet" th:href="@{/css/inputBoxStyles.css}"/>
+    <link rel="stylesheet" th:href="@{/css/tags.css}">
 </head>
 
 
@@ -94,7 +95,8 @@
 
                 <!-- CONTRACTOR FORM FRAGMENT -->
                 <div th:class="'pb-3 ' + (${userRegisterDTO.isContractor} ? 'form-extension' : 'hidden-form-extension')" id="contractor-form">
-                    <div th:replace="~{fragments/contractorRegistration.html :: contractor-registration}"></div>
+                    <div th:replace="~{fragments/contractorRegistration.html :: contractor-registration(
+                    skills=${skills})}"></div>
                 </div>
 
                 <!-- LOCATION TOGGLE SWITCH -->
@@ -186,6 +188,7 @@
 <script type = "module" th:src="@{/js/validation/locationFormValidation.js}"></script>
 <script type="module" th:src="@{/js/validation/userValidation.js}"></script>
 <script type="module" th:src="@{/js/validation/registerValidation.js}"></script>
+<script type="module" th:src="@{/js/skills.js}"></script>
 <script type="module" th:src="@{/js/contractorToggleSwitch.js}"></script>
 <script type="module" th:src="@{/js/locationToggleSwitch.js}"></script>
 </html>
