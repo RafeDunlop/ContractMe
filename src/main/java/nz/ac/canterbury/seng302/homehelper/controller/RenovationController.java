@@ -135,12 +135,7 @@ public class RenovationController {
         if (roomList == null) roomList = new ArrayList<>(); //cannot be a default value as technically non-constant
         Map<String, List<String>> errors = renovationRecordService.validateAllInputsCreate(name, description, roomList);
 
-        boolean locationProvided = addressDTO != null &&
-                (addressDTO.getAddress_line1() != null && !addressDTO.getAddress_line1().isBlank()
-                        || addressDTO.getRegion() != null && !addressDTO.getRegion().isBlank()
-                        || addressDTO.getCity() != null && !addressDTO.getCity().isBlank()
-                        || addressDTO.getPostcode() != null && !addressDTO.getPostcode().isBlank()
-                        || addressDTO.getCountry() != null && !addressDTO.getCountry().isBlank());
+        boolean locationProvided = locationService.isLocationProvided(addressDTO);
 
         if (locationProvided) {
             errors.putAll(locationService.validateLocation(addressDTO));
@@ -547,6 +542,7 @@ public class RenovationController {
             tagService.addTagToRenovation(record, tagName);
         } else {
             redirectAttributes.addFlashAttribute("errors", errors);
+            redirectAttributes.addFlashAttribute("submittedTag",tagName);
         }
         return "redirect:/renovations/view?id=" + renovationId + "&page=" + pageNumber;
     }
@@ -648,7 +644,7 @@ public class RenovationController {
                                                     HttpServletRequest request) {
 
         // Apply default values
-        if (visibility == null) visibility = "user";
+        if (visibility == null) visibility = "all";
         if (searchTerm == null) searchTerm = "";
 
         // Convert tag names to Tag entities if provided
