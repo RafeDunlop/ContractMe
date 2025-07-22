@@ -224,16 +224,18 @@ public class RenovationController {
             model.addAttribute("renovation", renovationRecord);
         }
 
-        Location location = renovationRecord.getLocation();
-        if (location != null) {
-            addressDTO.setAddress_line1(location.getAddress());
-            addressDTO.setCountry(location.getCountry());
-            addressDTO.setPostcode(location.getPostcode());
-            addressDTO.setCity(location.getCity());
-            addressDTO.setRegion(location.getSuburb());
+        if (!locationService.isLocationProvided(addressDTO)) {
+            Location location = renovationRecord.getLocation();
+            if (location != null) {
+                addressDTO.setAddress_line1(location.getAddress());
+                addressDTO.setCountry(location.getCountry());
+                addressDTO.setPostcode(location.getPostcode());
+                addressDTO.setCity(location.getCity());
+                addressDTO.setRegion(location.getSuburb());
+                model.addAttribute("locationUsed", true);
+            }
+            model.addAttribute("addressDTO", addressDTO);
         }
-
-        model.addAttribute("addressDTO", addressDTO);
 
 
         return "editRenovationTemplate";
