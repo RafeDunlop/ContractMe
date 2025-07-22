@@ -100,8 +100,11 @@ public class RenovationController {
      * @return thymeleaf createRenovationTemplate
      */
     @GetMapping("/create")
-    public String record(@ModelAttribute AddressDTO addressDTO) {
+    public String record(@ModelAttribute AddressDTO addressDTO, Model model, HttpServletRequest request) {
         logger.info("GET /renovations/create");
+        String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
+        String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
+        model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
         return "createRenovationTemplate";
     }
 
