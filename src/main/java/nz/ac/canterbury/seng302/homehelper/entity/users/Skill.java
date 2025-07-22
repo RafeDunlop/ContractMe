@@ -2,8 +2,6 @@ package nz.ac.canterbury.seng302.homehelper.entity.users;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 public enum Skill {
 
@@ -96,10 +94,10 @@ public enum Skill {
         return displayName;
     }
 
-    public Skill getEnum(String displayName) {
-        return Stream.of(Skill.values()).filter(skill -> Objects.equals(skill.getDisplayName(), displayName)).findFirst().orElse(null);
-    }
-
+    /**
+     * A list of skills sorted by their display names in alphabetical order (case-insensitive).
+     * @return List of sorted skills
+     */
     public static List<Skill> listOfSortedSkills() {
         return Arrays.stream(Skill.values()).sorted((a, b) -> a.getDisplayName().compareToIgnoreCase(b.getDisplayName())).toList();
     }

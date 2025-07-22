@@ -74,7 +74,9 @@ public class ContractorValidation {
      * @return The errors present, or an empty list if there are not any
      */
     public List<String> validateContractorSkillsField(List<Skill> skills) {
-        if (skills == null || skills.isEmpty()) return List.of("You must select one or more skills");
+        if (skills == null || skills.isEmpty()) {
+            return List.of("You must select one or more skills");
+        }
         return List.of();
     }
 
