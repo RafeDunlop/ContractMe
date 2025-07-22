@@ -20,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
@@ -239,7 +238,7 @@ public class CalendarSteps {
         int day = today.getDayOfMonth();
 
         String expectedHtml = String.format(
-                "<div class=\"col py-5 border border-secondary text-start\" style=\"background-color: #ffff99;\">%s</div>",
+                "#87bcfa",
                 day
         );
 

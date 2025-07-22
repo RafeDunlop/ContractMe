@@ -382,29 +382,7 @@ public class RenovationController {
         String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
-        LocalDate localDate = LocalDate.now();
-        model.addAttribute("currentDay", localDate.getDayOfMonth());
-        model.addAttribute("currentMonth", localDate.getMonthValue());
-        model.addAttribute("currentYear", localDate.getYear());
-
-        if (year != null && year >= 1 && month != null) {
-            try {
-                localDate = LocalDate.of(year, month, 1);
-            } catch (DateTimeException e) {
-                logger.error(e.getMessage());
-            }
-        } else if (month != null && year == null) {
-            try {
-                localDate = LocalDate.of(localDate.getYear(), month, 1);
-            } catch (DateTimeException e) {
-                logger.error(e.getMessage());
-            }
-        }
-
-        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate);
-
-        model.addAttribute("datesArray", datesArray);
-        model.addAttribute("date", localDate);
+        injectDateElements(year, month, model, record);
 
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
 
@@ -442,6 +420,13 @@ public class RenovationController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
+        injectDateElements(year, month, model, record);
+        model.addAttribute("id", id);
+
+        return "fragments/calendar :: calendar";  // return only fragment for partial update
+    }
+
+    private void injectDateElements(@RequestParam(required = false) Integer year, @RequestParam(required = false) Integer month, Model model, RenovationRecord record) {
         LocalDate localDate = LocalDate.now();
         model.addAttribute("currentDay", localDate.getDayOfMonth());
         model.addAttribute("currentMonth", localDate.getMonthValue());
@@ -461,13 +446,10 @@ public class RenovationController {
             }
         }
 
-        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate);
+        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate, record);
 
         model.addAttribute("datesArray", datesArray);
         model.addAttribute("date", localDate);
-        model.addAttribute("id", id);
-
-        return "fragments/calendar :: calendar";  // return only fragment for partial update
     }
 
     /**

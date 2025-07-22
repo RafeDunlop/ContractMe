@@ -86,13 +86,7 @@ public class DefaultDataConfigurator {
     }
 
     private void setupDefaultRenovations() {
-        default1Renovation1 = renovationRecordService.addRenovationRecord(
-                new RenovationRecord(default1,
-                        "Jack Erskine revamp",
-                    "CSSE building => palace of slay",
-                        defaultJERooms
-                )
-        );
+
 
         default2Renovation1 = renovationRecordService.addRenovationRecord(
                 new RenovationRecord(default2,
@@ -123,7 +117,17 @@ public class DefaultDataConfigurator {
             record.setPublicity(true);
             renovationRecordService.addRenovationRecord(record);
         }
+
+        default1Renovation1 = renovationRecordService.addRenovationRecord(
+                new RenovationRecord(default1,
+                        "Jack Erskine revamp",
+                        "CSSE building => palace of slay",
+                        defaultJERooms
+                )
+        );
     }
+
+
 
     private void setupDefaultRenovationTasks() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -136,12 +140,24 @@ public class DefaultDataConfigurator {
         );
         renovationTaskService.addRenovationTask(renovationTask, default2Renovation1);
 
+
+        //Counter is to make multiple tasks on the same day; also so that every so often a
+        //task generates with a longer name to test text wrapping of task bubble
+        int counter = 1;
         for (int i = 1; i < numGenericTasksToAdd + 1; i++) {
-            renovationTask.setName(String.format("Renovation Task %d", i));
+            if (counter > 18) {
+                counter = 3;
+                renovationTask.setName("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+            }
+            else {
+                renovationTask.setName(String.format("Renovation Task %d: ", i));
+            }
             renovationTask.setDescription(String.format("Renovation Task Description %d", i));
-            renovationTask.setDueDate(LocalDate.now().plusDays(i).format(formatter));
+            renovationTask.setDueDate(LocalDate.now().plusDays(counter).format(formatter));
             renovationTask.setRooms(defaultJERooms);
             renovationTaskService.addRenovationTask(renovationTask, default1Renovation1);
+            counter += 1;
         }
     }
 
