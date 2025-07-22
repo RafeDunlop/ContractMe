@@ -161,10 +161,86 @@ public class DefaultDataConfigurator {
         }
     }
 
+    // ChatGPT was used to generate this list of tags:
+    // Prompt: generate me three tags er letter of the English alphabet that are related to renovations
     private void setupDefaultTags() {
+        tagService.createTag("Architecture");
+        tagService.createTag("Additions");
+        tagService.createTag("Asbestos");
+        tagService.createTag("Basement");
+        tagService.createTag("Blueprints");
+        tagService.createTag("Brickwork");
+        tagService.createTag("Cabinetry");
+        tagService.createTag("Construction");
+        tagService.createTag("CAD");
+        tagService.createTag("Demolition");
+        tagService.createTag("Drywall");
+        tagService.createTag("Decking");
+        tagService.createTag("Electrical");
+        tagService.createTag("Energy Efficiency");
+        tagService.createTag("Excavation");
+        tagService.createTag("Flooring");
+        tagService.createTag("Framing");
+        tagService.createTag("Fixtures");
+        tagService.createTag("Gutters");
+        tagService.createTag("Garage");
+        tagService.createTag("Grouting");
+        tagService.createTag("HVAC");
+        tagService.createTag("Hardwood");
         tagService.createTag("Historic");
-        tagService.createTag("History");
-        tagService.createTag("His");
-        tagService.createTag("histrionic");
+        tagService.createTag("Insulation");
+        tagService.createTag("Interior Design");
+        tagService.createTag("Installation");
+        tagService.createTag("Joists");
+        tagService.createTag("Jackhammering");
+        tagService.createTag("Jambs");
+        tagService.createTag("Kitchen Remodel");
+        tagService.createTag("Knockdown Texture");
+        tagService.createTag("Knobs");
+        tagService.createTag("Landscaping");
+        tagService.createTag("LoadBearing");
+        tagService.createTag("Lighting");
+        tagService.createTag("Masonry");
+        tagService.createTag("Modernization");
+        tagService.createTag("Materials");
+        tagService.createTag("Nailing");
+        tagService.createTag("New Construction");
+        tagService.createTag("Noise Reduction");
+        tagService.createTag("Open Concept");
+        tagService.createTag("Overhang");
+        tagService.createTag("Outdoor Living");
+        tagService.createTag("Plumbing");
+        tagService.createTag("Paint");
+        tagService.createTag("Permits");
+        tagService.createTag("Quartz Countertops");
+        tagService.createTag("Quality Control");
+        tagService.createTag("Quick Dry");
+        tagService.createTag("Renovation");
+        tagService.createTag("Roofing");
+        tagService.createTag("Restoration");
+        tagService.createTag("Siding");
+        tagService.createTag("Skylights");
+        tagService.createTag("Subflooring");
+        tagService.createTag("Tiling");
+        tagService.createTag("Trim Work");
+        tagService.createTag("Texture");
+        tagService.createTag("Upgrades");
+        tagService.createTag("Underlayment");
+        tagService.createTag("Utility Room");
+        tagService.createTag("Vinyl Flooring");
+        tagService.createTag("Ventilation");
+        tagService.createTag("Value");
+        tagService.createTag("Windows");
+        tagService.createTag("Waterproofing");
+        tagService.createTag("Wall Removal");
+        tagService.createTag("Xeriscaping");
+        tagService.createTag("X-Bracing");
+        tagService.createTag("XPS Insulation");
+        tagService.createTag("Yard Renovation");
+        tagService.createTag("Yellow Paint");
+        tagService.createTag("Yield Improvements");
+        tagService.createTag("Zoning");
+        tagService.createTag("Z-Flashing");
+        tagService.createTag("Zero Energy");
     }
 }
