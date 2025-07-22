@@ -10,7 +10,10 @@ const tagNamesList = Array.from(tagNameListElements).map(el => el.textContent.tr
 
 const tagPattern = /^(?=.*\p{L}).*$/u;
 
-tagInput.addEventListener("input", function () {validateTag(tagInput.value)})
+if (tagInput) {
+    tagInput.addEventListener("input", function () {validateTag(tagInput.value)})
+
+}
 
 /**
  * Validates a tag input for renovations.

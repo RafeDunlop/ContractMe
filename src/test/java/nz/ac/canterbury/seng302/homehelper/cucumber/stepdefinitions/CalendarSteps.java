@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -63,6 +64,26 @@ public class CalendarSteps {
         result = mockMvc.perform(get("/main").with(csrf())).andExpect(status().isOk()).andReturn();
 
         renovationRecord = new RenovationRecord(testUser, "Private", "desc", new ArrayList<>());
+        renovationRecordRepository.save(renovationRecord);
+    }
+
+    @Given("I have a public renovation record")
+    public void i_have_a_public_renovation_record() throws Exception {
+        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        testUser = new User("Test", "User", "test" + System.currentTimeMillis() + "@test.com", encoder.encode("Test123!"));
+        testUser.activate();
+        userRepository.save(testUser);
+
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                testUser.getEmail(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
+
+        result = mockMvc.perform(get("/main").with(csrf())).andExpect(status().isOk()).andReturn();
+
+        renovationRecord = new RenovationRecord(testUser, "Private", "desc", new ArrayList<>());
+        renovationRecord.setPublicity(true);
         renovationRecordRepository.save(renovationRecord);
     }
 
@@ -179,6 +200,35 @@ public class CalendarSteps {
         Assertions.assertTrue(html.contains(expectedPrevMonthButton));
         Assertions.assertTrue(html.contains(expectedNextMonthButton));
     }
+
+    @When("second user views my private renovation record")
+    public void second_user_views_my_private_renovation_record() throws Exception {
+        SecurityContextHolder.clearContext();
+
+        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        User secondUser = new User("Second", "User", "seconduser@test.com", encoder.encode("Test12322!"));
+        secondUser.activate();
+        userRepository.save(secondUser);
+
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                secondUser.getEmail(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
+
+        result = mockMvc.perform(get("/renovations/view?id=" + renovationRecord.getId())
+                        .with(user(secondUser.getEmail()).roles("USER")))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Then("they do not see a calendar")
+    public void they_do_not_see_a_calendar() throws Exception {
+        String html = result.getResponse().getContentAsString();
+        System.out.println(html);
+        Assertions.assertFalse(html.contains("id=\"calendar\""), "Calendar should not be visible on private records to other users");
+    }
+
     @Then("today's date is highlighted")
     public void today_s_date_is_highlighted() throws Exception {
         String html = result.getResponse().getContentAsString();

@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.homehelper.entity.users;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,25 +16,27 @@ import java.util.Set;
 public class Contractor extends User {
 
     @Column
-    private Float hourlyRate;
+    private float hourlyRate;
 
     @Column
     private String phoneNumber;
+
+    @Column
+    private int countryCode;
 
     @ElementCollection
     private Set<Skill> skills;
 
     @Column
-    private Boolean available;
+    private boolean available;
 
     /**
-     * Constructor for RenovationTask object
+     * Constructor for Contractor object
      * @param firstName The first name of the contractor
      * @param lastName the last name of the contractor
      * @param email The email of the contractor
      * @param password The password of the contractor
      */
-
     public Contractor(String firstName, String lastName, String email, String password) {
         super(firstName, lastName, email, password);
         this.skills = new HashSet<>();
@@ -48,7 +49,7 @@ public class Contractor extends User {
      *
      * @return The hourly rate, or {@code null} if not set.
      */
-    public Float getHourlyRate() {
+    public float getHourlyRate() {
         return hourlyRate;
     }
     /**
@@ -56,7 +57,7 @@ public class Contractor extends User {
      *
      * @param hourlyRate The hourly rate to set.
      */
-    public void setHourlyRate(Float hourlyRate) {
+    public void setHourlyRate(float hourlyRate) {
         this.hourlyRate = hourlyRate;
     }
 
@@ -76,6 +77,23 @@ public class Contractor extends User {
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
+
+    /**
+     * Returns the country code for the contractor's phone number.
+     * @return the country code as an integer
+     */
+    public int getCountryCode() {
+        return countryCode;
+    }
+
+    /**
+     * Sets the country code for the contractor's phone number
+     * @param countryCode the country code
+     */
+    public void setCountryCode(int countryCode) {
+        this.countryCode = countryCode;
+    }
+
     /**
      * Returns the set of skills associated with the contractor.
      *
@@ -107,7 +125,7 @@ public class Contractor extends User {
      *
      * @return {@code true} if available, {@code false} if not, or {@code null} if undefined.
      */
-    public Boolean getAvailable() {
+    public boolean getAvailable() {
         return available;
     }
     /**
@@ -115,7 +133,7 @@ public class Contractor extends User {
      *
      * @param available {@code true} if available, {@code false} otherwise.
      */
-    public void setAvailable(Boolean available) {
+    public void setAvailable(boolean available) {
         this.available = available;
     }
 

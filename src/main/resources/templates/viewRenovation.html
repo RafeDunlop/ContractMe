@@ -115,8 +115,9 @@
                 </div>
             </div>
 
-            <div th:replace="~{fragments/calendar.html ::calendar (${date}, ${datesArray}, ${renovation.id}) }"></div>
-        </div>
+            <div th:if="${isOwner}">
+                <div th:replace="~{fragments/calendar.html ::calendar (${date}, ${datesArray}, ${renovation.id})}"></div>
+            </div>
     </div>
 
     <div id="icon-selector-modal" class="modal" style="display: none">

@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -11,16 +12,17 @@ import java.util.List;
 @Service
 public class ContractorValidation {
 
+
     /**
      * Validate the hourly rate field, this must be a positive float.
      *
      * @param hourlyRate the contractor's hourly rate
      * @return a list of errors, empty if valid
      */
-    public List<String> validateHourlyRate(float hourlyRate) {
+    public List<String> validateHourlyRate(Float hourlyRate) {
         List<String> errors = new ArrayList<>();
 
-        if (hourlyRate < 0) {
+        if (hourlyRate == null || hourlyRate < 0) {
             errors.add("Invalid hourly rate");
         }
         return errors;
@@ -33,17 +35,34 @@ public class ContractorValidation {
      * @param phoneNumber the contractor's phone number
      * @return a list of errors, empty if valid
      */
-    public List<String> validatePhoneNumber(String phoneNumber, int countryCode) {
+    public List<String> validatePhoneNumber(String phoneNumber, Integer countryCode) {
         List<String> errors = new ArrayList<>();
         String regex = "\\d+";
 
         if (phoneNumber.isBlank()) {
-            errors.add("You must enter a valid phone number");
+            errors.add("You must enter a phone number");
         } else if (phoneNumber.length() < 8 || phoneNumber.length() > 15 || !phoneNumber.matches(regex)) {
             errors.add("Your phone number is invalid");
         }
 
         errors.addAll(validateCountryCode(countryCode));
+
+        return errors;
+    }
+
+
+    /**
+     * Validate that the location has been provided, this method should be passed
+     * the result of {@link nz.ac.canterbury.seng302.homehelper.service.LocationService#isLocationProvided(AddressDTO)}.
+     *
+     * @param locationProvided a boolean specifying whether the location was provided
+     * @return a list of error messages, empty if valid
+     */
+    public List<String> validateContractorLocation(boolean locationProvided) {
+        List<String> errors = new ArrayList<>();
+        if (!locationProvided) {
+            errors.add("You must enter a location");
+        }
 
         return errors;
     }
@@ -54,13 +73,15 @@ public class ContractorValidation {
      * @param countryCode the phone number country code
      * @return a list of errors, empty if valid
      */
-    private List<String> validateCountryCode(int countryCode) {
+    private List<String> validateCountryCode(Integer countryCode) {
         List<String> errors = new ArrayList<>();
 
-        if (countryCode <= 0 || countryCode > 999) {
+        if (countryCode == null || countryCode <= 0 || countryCode > 999) {
             errors.add("Invalid country code");
         }
         return errors;
     }
+
+
 
 }
