@@ -26,11 +26,11 @@
             </div>
 
             <!-- Search and Visibility Filter -->
-            <form id="search-form" class="m-0 mb-3">
+            <form id="search-form" class="m-0 mb-0">
                 <div class="d-flex align-items-end">
                     <div class="col-md-8 me-2">
                         <label class="form-label">Tag Search:</label>
-                        <div id="tag-input-container" class="form-control d-flex flex-wrap position-relative" style="min-height: 40px; cursor: text; " onclick="focusTagInput()">
+                        <div id="tag-input-container" class="form-control d-flex flex-wrap position-relative mb-3" style="min-height: 40px; cursor: text; " onclick="focusTagInput()">
                             <input type="text" id="tag-input" class="border-0 flex-grow-1" placeholder="Enter tags..." style="outline: none; min-width: 100px;">
                             <ul id="autocomplete-list"
                                 class="list-group position-absolute"
@@ -38,10 +38,10 @@
                         </div>
 
                         <label class="form-label">Search:</label>
-                        <input type="text" name="searchTerm" th:value="${searchTerm}" class="form-control" placeholder="Enter keyword..."/>
+                        <input type="text" name="searchTerm" th:value="${searchTerm}" class="form-control mb-3" placeholder="Enter keyword..."/>
                     </div>
                     <div id="hidden-tag-inputs"></div>
-                    <div class="col-md-2">
+                    <div class="col-md-2 mb-3">
                         <button type="submit" class="btn btn-primary w-100">Search</button>
                     </div>
                 </div>
