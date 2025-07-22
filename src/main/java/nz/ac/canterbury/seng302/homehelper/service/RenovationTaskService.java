@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -38,18 +39,54 @@ public class RenovationTaskService {
         this.renovationTaskValidation = renovationTaskValidation;
     }
 
+    /**
+     * Gets the task with the corresponding id
+     * @param id The id corresponding to the {@code RenovationTask} to be retrieved
+     * @return The {RenovationTask} corresponding to the specified id
+     */
     public RenovationTask getTaskById(Long id) {
         return renovationTaskRepository.findById(id).orElse(null);
+    }
+
+
+    /**
+     * Gets a mapping of dates within the specified range to tasks whose due dates fall on those dates
+     * @param renovationRecord The {@code RenovationRecord} whose tasks are being queried
+     * @param startDate The first date for which to retrieve {@code RenovationTask} objects
+     * @param endDate The last date for which to retrieve {@code RenovationTask} objects
+     * @return A map which contains the {@code RenovationTask} objects associated with each date within the specified range
+     */
+    public Map<LocalDate, List<RenovationTask>> getTasksWithinDates(RenovationRecord renovationRecord, LocalDate startDate, LocalDate endDate) {
+        LocalDate upperBoundary = endDate.plusDays(1);
+        HashMap<LocalDate, List<RenovationTask>> dateMap = new HashMap<>();
+        List<LocalDate> keys = startDate.datesUntil(upperBoundary).toList();
+        keys.forEach(date -> dateMap.put(date, new ArrayList<>()));
+        Iterator<LocalDate> keyItr = keys.iterator();
+        Iterator<RenovationTask> valItr = renovationTaskRepository.getByDueDateBetween(startDate, endDate, renovationRecord).iterator();
+        if (keyItr.hasNext() && valItr.hasNext()) {
+            LocalDate currentKey = keyItr.next();
+            do {
+                RenovationTask renovationTask = valItr.next();
+                while (!currentKey.equals(renovationTask.getDueDate())) {
+                    currentKey = keyItr.next();
+                }
+                dateMap.get(currentKey).add(renovationTask);
+            } while(valItr.hasNext());
+        }
+        return dateMap;
     }
 
     /**
      * Adds a new renovation task to the repository
      */
     public void addRenovationTask(RenovationTaskDTO renovationTaskDTO, RenovationRecord renovationRecord) {
-
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String name = renovationTaskDTO.getName();
         String description = renovationTaskDTO.getDescription();
-        LocalDate dueDate = renovationTaskDTO.getDueDate();
+        LocalDate dueDate = null;
+        if (renovationTaskDTO.getDueDate() != null && !renovationTaskDTO.getDueDate().isBlank()) {
+            dueDate = LocalDate.parse(renovationTaskDTO.getDueDate(),formatter);
+        }
         List<String> roomList = renovationTaskDTO.getRooms();
         RenovationTask renovationTask = new RenovationTask(name, description, roomList, dueDate, renovationRecord);
 
@@ -62,25 +99,24 @@ public class RenovationTaskService {
      * @param pageable spring pagination information, including the offset and page size.
      * @return A page of tasks for the renovation record. If there are no tasks an empty page is returned.
      */
-    public Page<RenovationTask> returnTaskPages(RenovationRecord renovationRecord, Pageable pageable ) {
-        List<RenovationTask> taskSubList = new ArrayList<>();
+    public Page<RenovationTask> returnTaskPages(RenovationRecord renovationRecord, Pageable pageable) {
         List<RenovationTask> tasks = renovationRecord.getRenovationTasks();
 
         if (tasks == null || tasks.isEmpty()) {
-            return new PageImpl<>(taskSubList, pageable, 0); // Return an empty page
+            return new PageImpl<>(Collections.emptyList(), pageable, 0);
         }
 
-        int startIndex =(int) pageable.getOffset();
-        if (startIndex < 0) {
-            startIndex = 0;
-        }
-        if (startIndex >= tasks.size()) {
-            startIndex = tasks.size() - pageable.getPageSize();
-        }
-        int endIndex = Math.min(startIndex + pageable.getPageSize(), tasks.size());
+        int totalTasks = tasks.size();
+        int startIndex = (int) pageable.getOffset();
+        int endIndex = Math.min(startIndex + pageable.getPageSize(), totalTasks);
 
-        taskSubList = tasks.subList(startIndex, endIndex);
-        return new PageImpl<>(taskSubList, pageable, tasks.size());
+        // Guard against out-of-bounds start index
+        if (startIndex >= totalTasks) {
+            return new PageImpl<>(Collections.emptyList(), pageable, totalTasks);
+        }
+
+        List<RenovationTask> taskSubList = tasks.subList(startIndex, endIndex);
+        return new PageImpl<>(taskSubList, pageable, totalTasks);
     }
 
     public List<String> getTaskIconFilenames() {

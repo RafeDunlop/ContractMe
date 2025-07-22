@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="English">
+<body>
+<!-- calendar fragment wrapper -->
+<div th:fragment="calendar (date, dates, id)" th:id="'calendar-' + ${id}">
+    <!-- inner calendar container retains id="calendar" for JS extraction -->
+    <div id="calendar" class="container">
+        <!-- Navigation Row -->
+        <div class="row">
+            <!-- Previous Month -->
+            <div class="col d-flex justify-content-center align-items-center">
+                <button type="button"
+                   th:onclick="|changeMonth(${id}, ${date.minusMonths(1).monthValue}, ${date.minusMonths(1).year}); return false;|"
+                   class="btn btn-primary btn-lg"
+                   style="font-size:clamp(1rem, 2.5vw, 1.5rem); width:80%; white-space:nowrap; overflow:hidden; ">
+                    [[${#strings.capitalize(date.minusMonths(1).month.name().toLowerCase())}]]
+                </button>
+            </div>
+            <!-- Current Month -->
+            <div class="col text-center">
+                <h1 th:text="|${#strings.capitalize(date.month.name().toLowerCase())} ${date.year}|"
+                    class="text-center"
+                    style="font-size:3rem;">
+                </h1>
+            </div>
+            <!-- Next Month -->
+            <div class="col d-flex justify-content-center align-items-center">
+                <button type="button"
+                   th:onclick="|changeMonth(${id}, ${date.plusMonths(1).monthValue}, ${date.plusMonths(1).year}); return false;|"
+                   class="btn btn-primary btn-lg text-nowrap"
+                   style="font-size:clamp(1rem, 2.5vw, 1.5rem); width:80%; white-space:nowrap; overflow:hidden;">
+                    [[${#strings.capitalize(date.plusMonths(1).month.name().toLowerCase())}]]
+                </button>
+            </div>
+        </div>
+
+        <!-- Day Headers -->
+        <div class="row text-center">
+            <div class="col border border-secondary calendar-header-text">Monday</div>
+            <div class="col border border-secondary calendar-header-text">Tuesday</div>
+            <div class="col border border-secondary calendar-header-text">Wednesday</div>
+            <div class="col border border-secondary calendar-header-text">Thursday</div>
+            <div class="col border border-secondary calendar-header-text">Friday</div>
+            <div class="col border border-secondary calendar-header-text">Saturday</div>
+            <div class="col border border-secondary calendar-header-text">Sunday</div>
+        </div>
+
+        <!-- Date Cells -->
+        <div th:each="row : ${datesArray}" class="row">
+            <div th:each="cell : ${row}"
+                 th:if="${cell != null}"
+                 class="col border border-secondary text-start"
+                 th:classappend="${cell.day.getMonthValue() != date.monthValue} ? ' bg-body-secondary text-muted' : ''"
+                 th:style="${(cell.day.getDayOfMonth() == currentDay and cell.day.getMonthValue() == currentMonth and date.year == currentYear) ? 'background-color: #87bcfa;' : ''}">
+
+                 <div class="d-flex flex-column align-items-center" style="min-height:120px">
+                     <div class="d-flex flex-column align-items-lg-start">
+                         <div th:text="${cell.day.getDayOfMonth()}"/>
+                     </div>
+                     <div class="btn-primary calendar-task d-flex flex-row align-items-center" th:each=" task : ${cell.calendarTasks}">
+                         <div class="position-relative">
+                             <img th:src="@{'/images/' + ${task.getIconFileName()}}" alt="Task Icon" class="calendar-icon"
+                                  th:onclick="showIconSelector(${task.id})" />
+                         </div>
+                         <div class="task-text" th:text="${task.getName()}"/>
+                     </div>
+                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" th:src="@{/js/calendar.js}"></script>
+</body>
+</html>

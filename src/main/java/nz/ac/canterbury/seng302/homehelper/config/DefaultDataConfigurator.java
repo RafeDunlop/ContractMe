@@ -3,7 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.config;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +13,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
@@ -85,13 +86,7 @@ public class DefaultDataConfigurator {
     }
 
     private void setupDefaultRenovations() {
-        default1Renovation1 = renovationRecordService.addRenovationRecord(
-                new RenovationRecord(default1,
-                        "Jack Erskine revamp",
-                    "CSSE building => palace of slay",
-                        defaultJERooms
-                )
-        );
+
 
         default2Renovation1 = renovationRecordService.addRenovationRecord(
                 new RenovationRecord(default2,
@@ -110,31 +105,142 @@ public class DefaultDataConfigurator {
                             defaultJERooms
                     )
             );
+
         }
+
+        //Add 100 public records to default2, so they can be seen on default1
+        for (int i=0; i<=100; i++) {
+            RenovationRecord record = new RenovationRecord(default2,
+                    "Test Public Renovation " + i,
+                    "Description for renovation: " + 1,
+                    defaultJERooms);
+            record.setPublicity(true);
+            renovationRecordService.addRenovationRecord(record);
+        }
+
+        default1Renovation1 = renovationRecordService.addRenovationRecord(
+                new RenovationRecord(default1,
+                        "Jack Erskine revamp",
+                        "CSSE building => palace of slay",
+                        defaultJERooms
+                )
+        );
     }
 
+
+
     private void setupDefaultRenovationTasks() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
         RenovationTaskDTO renovationTask = new RenovationTaskDTO(
                 "Build Fabian monument",
                 "at least 100 feet high, pokes out the top of the building",
-                LocalDate.now().plusYears(5),
+                LocalDate.now().plusYears(5).format(formatter),
                 List.of(defaultJERooms.get(2))
         );
         renovationTaskService.addRenovationTask(renovationTask, default2Renovation1);
 
+
+        //Counter is to make multiple tasks on the same day; also so that every so often a
+        //task generates with a longer name to test text wrapping of task bubble
+        int counter = 1;
         for (int i = 1; i < numGenericTasksToAdd + 1; i++) {
-            renovationTask.setName(String.format("Renovation Task %d", i));
+            if (counter > 18) {
+                counter = 3;
+                renovationTask.setName("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+            }
+            else {
+                renovationTask.setName(String.format("Renovation Task %d: ", i));
+            }
             renovationTask.setDescription(String.format("Renovation Task Description %d", i));
-            renovationTask.setDueDate(LocalDate.now().plusDays(i));
+            renovationTask.setDueDate(LocalDate.now().plusDays(counter).format(formatter));
             renovationTask.setRooms(defaultJERooms);
             renovationTaskService.addRenovationTask(renovationTask, default1Renovation1);
+            counter += 1;
         }
     }
 
+    // ChatGPT was used to generate this list of tags:
+    // Prompt: generate me three tags er letter of the English alphabet that are related to renovations
     private void setupDefaultTags() {
+        tagService.createTag("Architecture");
+        tagService.createTag("Additions");
+        tagService.createTag("Asbestos");
+        tagService.createTag("Basement");
+        tagService.createTag("Blueprints");
+        tagService.createTag("Brickwork");
+        tagService.createTag("Cabinetry");
+        tagService.createTag("Construction");
+        tagService.createTag("CAD");
+        tagService.createTag("Demolition");
+        tagService.createTag("Drywall");
+        tagService.createTag("Decking");
+        tagService.createTag("Electrical");
+        tagService.createTag("Energy Efficiency");
+        tagService.createTag("Excavation");
+        tagService.createTag("Flooring");
+        tagService.createTag("Framing");
+        tagService.createTag("Fixtures");
+        tagService.createTag("Gutters");
+        tagService.createTag("Garage");
+        tagService.createTag("Grouting");
+        tagService.createTag("HVAC");
+        tagService.createTag("Hardwood");
         tagService.createTag("Historic");
-        tagService.createTag("History");
-        tagService.createTag("His");
-        tagService.createTag("histrionic");
+        tagService.createTag("Insulation");
+        tagService.createTag("Interior Design");
+        tagService.createTag("Installation");
+        tagService.createTag("Joists");
+        tagService.createTag("Jackhammering");
+        tagService.createTag("Jambs");
+        tagService.createTag("Kitchen Remodel");
+        tagService.createTag("Knockdown Texture");
+        tagService.createTag("Knobs");
+        tagService.createTag("Landscaping");
+        tagService.createTag("LoadBearing");
+        tagService.createTag("Lighting");
+        tagService.createTag("Masonry");
+        tagService.createTag("Modernization");
+        tagService.createTag("Materials");
+        tagService.createTag("Nailing");
+        tagService.createTag("New Construction");
+        tagService.createTag("Noise Reduction");
+        tagService.createTag("Open Concept");
+        tagService.createTag("Overhang");
+        tagService.createTag("Outdoor Living");
+        tagService.createTag("Plumbing");
+        tagService.createTag("Paint");
+        tagService.createTag("Permits");
+        tagService.createTag("Quartz Countertops");
+        tagService.createTag("Quality Control");
+        tagService.createTag("Quick Dry");
+        tagService.createTag("Renovation");
+        tagService.createTag("Roofing");
+        tagService.createTag("Restoration");
+        tagService.createTag("Siding");
+        tagService.createTag("Skylights");
+        tagService.createTag("Subflooring");
+        tagService.createTag("Tiling");
+        tagService.createTag("Trim Work");
+        tagService.createTag("Texture");
+        tagService.createTag("Upgrades");
+        tagService.createTag("Underlayment");
+        tagService.createTag("Utility Room");
+        tagService.createTag("Vinyl Flooring");
+        tagService.createTag("Ventilation");
+        tagService.createTag("Value");
+        tagService.createTag("Windows");
+        tagService.createTag("Waterproofing");
+        tagService.createTag("Wall Removal");
+        tagService.createTag("Xeriscaping");
+        tagService.createTag("X-Bracing");
+        tagService.createTag("XPS Insulation");
+        tagService.createTag("Yard Renovation");
+        tagService.createTag("Yellow Paint");
+        tagService.createTag("Yield Improvements");
+        tagService.createTag("Zoning");
+        tagService.createTag("Z-Flashing");
+        tagService.createTag("Zero Energy");
     }
 }

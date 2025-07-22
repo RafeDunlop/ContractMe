@@ -2,11 +2,14 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.CalendarCellDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.TagDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
@@ -17,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -31,44 +35,19 @@ public class RenovationRecordService {
     private final RenovationTaskRepository renovationTaskRepository;
     private final RenovationRecordValidation renovationRecordValidation;
 
+    private final RenovationTaskService renovationTaskService;
+
     /**
      * Constructor for the RenovationRecordService class
+     *
      * @param renovationRecordRepository initializes with the repository for storing records
      */
     @Autowired
-    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation) {
+    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation, RenovationTaskService renovationTaskService) {
         this.renovationRecordRepository = renovationRecordRepository;
         this.renovationTaskRepository = renovationTaskRepository;
         this.renovationRecordValidation = renovationRecordValidation;
-    }
-
-    /**
-     * Retrieves a list of renovation records associated with the current user that are like the given term
-     * with pagination.
-     * @param user The current user
-     * @param term The term to search for, not case-sensitive
-     * @param pageable The pagination information
-     * @return a list of renovation records from the user that match the term if given
-     */
-    public Page<RenovationRecord> getPaginatedUserRecords(User user, String term,
-                                                        Pageable pageable) {
-        if (term == null || term.trim().isEmpty()) {
-            return renovationRecordRepository.findByUser(user, pageable);
-        }
-        return renovationRecordRepository.searchNameOrDescriptionContainingIgnoreCasePaginated(user, term, pageable);
-    }
-
-    /**
-     * Retrieves a list of renovation records associated with the current user that are like the given term
-     * @param user The current user
-     * @param term The term to search for, not case-sensitive
-     * @return a list of renovation records from the user that match the term if given
-     */
-    public List<RenovationRecord> getUserRecords(User user, String term) {
-        if (term == null || term.trim().isEmpty()) {
-            return renovationRecordRepository.findByUser(user);
-        }
-        return renovationRecordRepository.findByUserTrueSearchContainingNameOrDescriptionIgnoreCase(user, term);
+        this.renovationTaskService = renovationTaskService;
     }
 
     /**
@@ -77,7 +56,6 @@ public class RenovationRecordService {
      *
      * @param renovation The renovation to attach location to
      * @param addressDTO Data transfer object for user registration
-     *
      */
     public void addRenovationLocation(RenovationRecord renovation, AddressDTO addressDTO) {
         Location userLocation = new Location(
@@ -92,27 +70,180 @@ public class RenovationRecordService {
     }
 
     /**
+     * Retrieves a list of renovation records associated with the current user that are like the given term
+     * with pagination. The results are sorted by relevance (based on name, description, and tags)
+     * and then by creation time in descending order.
+     *
+     * @param user     The current user
+     * @param term     The term to search for, not case-sensitive
+     * @param pageable The pagination information
+     * @return a list of renovation records from the user that match the term if given or tags
+     */
+    public Page<RenovationRecordDTO> getPaginatedUserRecords(User user, String term, List<Tag> tagList, Pageable pageable) {
+        Page<RenovationRecord> rawPage;
+
+        if (term.trim().isEmpty() && tagList == null) {
+            rawPage = renovationRecordRepository.findUserRecords(user, Pageable.unpaged());
+        } else if (tagList == null) {
+            rawPage = renovationRecordRepository.findUserRecordsBySearch(user, term, Pageable.unpaged());
+        } else if (term.trim().isEmpty()) {
+            rawPage = renovationRecordRepository.findUserRecordsByTag(user, tagList, Pageable.unpaged());
+        } else {
+            rawPage = renovationRecordRepository.findUserRecordsBySearchOrTag(user, term, tagList, Pageable.unpaged());
+        }
+
+        List<RenovationRecord> sorted = rawPage.getContent().stream()
+                .sorted(relevanceComparator(term, tagList))
+                .toList();
+
+        return toPage(sorted, pageable);
+    }
+
+    /**
      * Retrieves a list of public renovation records that are like the given term
+     * The results are sorted by relevance (based on name, description, and tags)
+     * and then by creation time in descending order.
+     *
      * @param term The term to search for, not case-sensitive
      * @return a list of public renovation records that match the term if given
      */
-    public List<RenovationRecord> getPublicRecords(String term) {
-        if (term == null || term.trim().isEmpty()) {
-            return renovationRecordRepository.findByIsPublicTrue();
+    public Page<RenovationRecordDTO> getPaginatedPublicRecords(String term, List<Tag> tagList, Pageable pageable) {
+        Page<RenovationRecord> rawPage;
+
+        if (term.trim().isEmpty() && tagList == null) {
+            rawPage = renovationRecordRepository.findPublicRecords(Pageable.unpaged());
+        } else if (tagList == null) {
+            rawPage = renovationRecordRepository.findPublicRecordsBySearch(term, Pageable.unpaged());
+        } else if (term.trim().isEmpty()) {
+            rawPage = renovationRecordRepository.findPublicRecordsByTag(tagList, Pageable.unpaged());
+        } else {
+            rawPage = renovationRecordRepository.findPublicRecordsBySearchOrTag(term, tagList, Pageable.unpaged());
         }
-        return renovationRecordRepository.findByIsPublicTrueSearchContainingNameOrDescriptionIgnoreCase(term);
+
+        List<RenovationRecord> sorted = rawPage.getContent().stream()
+                .sorted(relevanceComparator(term, tagList))
+                .toList();
+
+        return toPage(sorted, pageable);
     }
 
     /**
      * Retrieves a list of public or users renovation records that are like the given term
+     * The results are sorted by relevance (based on name, description, and tags)
+     * and then by creation time in descending order.
+     *
      * @param term The term to search for, not case-sensitive
      * @return a list of public or users renovation records that match the term if given
      */
-    public List<RenovationRecord> getAllRecords(User user, String term) {
-        if (term == null || term.trim().isEmpty()) {
-            return renovationRecordRepository.findAllVisibleToUser(user);
+    public Page<RenovationRecordDTO> getPaginatedVisibleRecords(User user, String term, List<Tag> tagList, Pageable pageable) {
+        Page<RenovationRecord> rawPage;
+
+        if (term.trim().isEmpty() && tagList == null) {
+            rawPage = renovationRecordRepository.findVisibleRecords(user, Pageable.unpaged());
+        } else if (tagList == null) {
+            rawPage = renovationRecordRepository.findVisibleRecordsBySearch(user, term, Pageable.unpaged());
+        } else if (term.trim().isEmpty()) {
+            rawPage = renovationRecordRepository.findVisibleRecordsByTag(user, tagList, Pageable.unpaged());
+        } else {
+            rawPage = renovationRecordRepository.findVisibleRecordsBySearchOrTag(user, term, tagList, Pageable.unpaged());
         }
-        return renovationRecordRepository.findAllVisibleToUserSearchContainingNameOrDescriptionIgnoreCase(user, term);
+
+        List<RenovationRecord> sorted = rawPage.getContent().stream()
+                .sorted(relevanceComparator(term, tagList))
+                .toList();
+
+        return toPage(sorted, pageable);
+    }
+
+    /**
+     * Calculates a relevance score for a renovation record based on how well it matches
+     * the provided search term and tag list. The score increases as follows:
+     * <ul>
+     *   <li>+1 if the record's name or description contains the search term</li>
+     *   <li>+1 for each tag in the tagList that is present in the record's tag list</li>
+     * </ul>
+     *
+     * @param record  The {@link RenovationRecord} to evaluate.
+     * @param term    The search term to match against name and description. May be blank.
+     * @param tagList The list of tags to match against the record’s tags. May be null.
+     * @return An integer score representing how relevant the record is to the provided term and tags.
+     */
+    private int calculateRelevance(RenovationRecord record, String term, List<Tag> tagList) {
+        int score = 0;
+        String lowerTerm = term.toLowerCase();
+        if (!term.isBlank()) {
+            if (record.getName() != null && record.getName().toLowerCase().contains(lowerTerm)) score++;
+            else if (record.getDescription() != null && record.getDescription().toLowerCase().contains(lowerTerm))
+                score++;
+        }
+        if (tagList != null && record.getTags() != null) {
+            for (Tag tag : tagList) {
+                if (record.getTags().contains(tag)) score++;
+            }
+        }
+        return score;
+    }
+
+    /**
+     * Converts a sorted list of renovation records into a paginated {@link Page} object
+     * using the provided {@link Pageable} information.
+     *
+     * @param sorted   The list of {@link RenovationRecord} objects, already sorted.
+     * @param pageable The pagination information including offset and page size.
+     * @return A {@link PageImpl} containing the appropriate sublist of the input.
+     */
+    private Page<RenovationRecordDTO> toPage(List<RenovationRecord> sorted, Pageable pageable) {
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), sorted.size());
+        List<RenovationRecordDTO> pageContent = (start < end)
+                ? sorted.subList(start, end).stream().map(this::toDTO).toList()
+                : Collections.emptyList();
+
+        return new PageImpl<>(pageContent, pageable, sorted.size());
+    }
+
+    /**
+     * Builds a comparator that orders renovation records first by relevance score,
+     * then by creation timestamp in descending order.
+     *
+     * @param term    Search term
+     * @param tagList List of tags
+     * @return A comparator for sorting renovation records
+     */
+    private Comparator<RenovationRecord> relevanceComparator(String term, List<Tag> tagList) {
+        return Comparator
+                .comparingInt((RenovationRecord r) -> calculateRelevance(r, term, tagList)).reversed()
+                .thenComparing(RenovationRecord::getCreatedTimestamp, Comparator.nullsLast(Comparator.reverseOrder()));
+    }
+
+    /**
+     * Converts a {@link RenovationRecord} entity to a {@link RenovationRecordDTO}.
+     *
+     * @param record The entity to convert
+     * @return The corresponding DTO
+     */
+    private RenovationRecordDTO toDTO(RenovationRecord record) {
+        String createdTime = record.getCreatedTimestamp() != null
+                ? record.getCreatedTimestamp().toString()
+                : "Unknown";
+
+        List<TagDTO> tags = record.getTags() != null
+                ? record.getTags().stream()
+                .map(tag -> new TagDTO(tag.getId(), tag.getTagName()))
+                .toList()
+                : Collections.emptyList();
+
+        Long userId = record.getUser() != null ? record.getUser().getId() : null;
+
+        return new RenovationRecordDTO(
+                record.getId(),
+                record.getName(),
+                record.getDescription(),
+                record.isPublic(),
+                createdTime,
+                tags,
+                userId
+        );
     }
 
     /**
@@ -123,29 +254,35 @@ public class RenovationRecordService {
     public RenovationRecord addRenovationRecord(RenovationRecord renovationRecord) {
         return renovationRecordRepository.save(renovationRecord);
     }
+
     /**
      * Removes a renovation record by its id, but first checks it exists.
+     *
      * @param id of the record to remove
      */
     @Transactional
-    public void removeRenovationRecord(Long id){
+    public void removeRenovationRecord(Long id) {
         Optional<RenovationRecord> recordToRemove = renovationRecordRepository.findById(id);
         if (recordToRemove.isPresent()) {
             renovationTaskRepository.deleteTaskById(id);
             renovationRecordRepository.deleteById(id);
         }
     }
+
     /**
      * Changes publicity flag of the renovation record.
-     * @param isPublic publicity flag of renovation
+     *
+     * @param isPublic         publicity flag of renovation
      * @param renovationRecord to edit the publicity
      */
-    public void changePublicity(Boolean isPublic,RenovationRecord renovationRecord) {
+    public void changePublicity(Boolean isPublic, RenovationRecord renovationRecord) {
         renovationRecord.setPublicity(isPublic);
         renovationRecordRepository.save(renovationRecord);
     }
+
     /**
      * Gets a renovation record by its id
+     *
      * @param id of the record to get
      * @return the record with the same id
      */
@@ -156,11 +293,11 @@ public class RenovationRecordService {
     /**
      * Validates all renovation fields for creating a new renovation record.
      *
-     * @param name The name of the renovation to validate.
+     * @param name        The name of the renovation to validate.
      * @param description The description of the renovation to validate.
-     * @param roomList The list of room names to validate.
+     * @param roomList    The list of room names to validate.
      * @return A map of validation errors, where each key is a field name (e.g., "nameError")
-     *         and the corresponding value is a list of error messages.
+     * and the corresponding value is a list of error messages.
      */
     public Map<String, List<String>> validateAllInputsCreate(String name, String description, List<String> roomList) {
         Map<String, List<String>> errors = new HashMap<>();
@@ -177,9 +314,9 @@ public class RenovationRecordService {
      * Allows the name to match the current name of the provided renovation record.
      *
      * @param renovationRecord The existing renovation record, including its original name, description, and rooms.
-     * @param newName The new name to validate.
+     * @param newName          The new name to validate.
      * @return A map of validation errors, where each key is a field name (e.g., "nameError")
-     *         and the corresponding value is a list of error messages. Returns an empty map if all inputs are valid.
+     * and the corresponding value is a list of error messages. Returns an empty map if all inputs are valid.
      */
     public Map<String, List<String>> validateAllInputsEdit(RenovationRecord renovationRecord, String newName) {
         Map<String, List<String>> errors = new HashMap<>();
@@ -194,7 +331,8 @@ public class RenovationRecordService {
 
     /**
      * Returns a paginated list of tasks for the given record.
-     * @param records The renovation record containing the list of tasks to be paginated.
+     *
+     * @param records  The renovation record containing the list of tasks to be paginated.
      * @param pageable spring pagination information, including the offset and page size.
      * @return A page of tasks for the renovation record. If there are no tasks an empty page is returned.
      */
@@ -205,7 +343,7 @@ public class RenovationRecordService {
             return new PageImpl<>(recordsSubList, pageable, 0); // Return an empty page
         }
 
-        int startIndex =(int) pageable.getOffset();
+        int startIndex = (int) pageable.getOffset();
         if (startIndex < 0) {
             startIndex = 0;
         }
@@ -219,12 +357,55 @@ public class RenovationRecordService {
     }
 
     /**
-     * Retrieves a list of all renovation records that are associated with the given tags.
-     * @param tagList the list of tag objects.
-     * @return a list of renovation records associated with the tags in the given list.
+     * Generates a calendar grid as a 2D nested list of {@link CalendarCellDTO} objects.
+     * This represents a minimal list of complete 7-day weeks, starting on Mondays, such that all dates in the month of
+     * the specified date are included
+     *
+     * @param date the {@link LocalDate} representing any day in the target month.
+     * @param record the renovation record being displayed
+     * @return a 2D nested list of {@link CalendarCellDTO} objects
      */
-    public List<RenovationRecord> getAllRecordsByTags(List<Tag> tagList) {
-        // return renovationRecordRepository.findAllByTags(tagList);
-        return renovationRecordRepository.findAllPublicByTagsOrderByTagCountAndDate(tagList);
+    public List<List<CalendarCellDTO>> generateCalendarCells(LocalDate date, RenovationRecord record) {
+        LocalDate startDate = getFirstDayOfCalendar(date);
+        LocalDate endDate = getLastDayOfCalendar(date);
+
+        Map<LocalDate, List<RenovationTask>> calendarTasks = renovationTaskService.getTasksWithinDates(record, startDate, endDate);
+        Iterator<Map.Entry<LocalDate, List<RenovationTask>>> dateEntryItr =
+                calendarTasks.entrySet().stream().sorted(Map.Entry.comparingByKey()).toList().iterator();
+
+        List<List<CalendarCellDTO>> rows = new ArrayList<>();
+        while (dateEntryItr.hasNext()) {
+            List<CalendarCellDTO> week = new ArrayList<>();
+            for (int i = 0; i < 7; i++) {
+                Map.Entry<LocalDate, List<RenovationTask>> dayTaskData = dateEntryItr.next();
+                week.add(new CalendarCellDTO(dayTaskData.getKey(), dayTaskData.getValue()));
+            }
+            rows.add(week);
+        }
+        return rows;
+    }
+
+    /**
+     * Gets the first day to be displayed, always a Monday
+     * @param date any {@code LocalDate} in the target month
+     * @return the first date displayed, always a Monday
+     */
+    private LocalDate getFirstDayOfCalendar(LocalDate date) {
+        LocalDate firstOfMonth = date.withDayOfMonth(1);
+        int dayOfWeek = firstOfMonth.getDayOfWeek().getValue();
+        int offSet = dayOfWeek - 1;
+        return firstOfMonth.minusDays(offSet);
+    }
+
+    /**
+     * Gets the last date to be displayed, always a Sunday
+     * @param date any {@code LocalDate} in the target month
+     * @return the last date to be displayed, always a Sunday
+     */
+    private LocalDate getLastDayOfCalendar(LocalDate date) {
+        LocalDate lastOfMonth = date.plusMonths(1).withDayOfMonth(1).minusDays(1);
+        int dayOfWeek = lastOfMonth.getDayOfWeek().getValue();
+        int offSet = 7 - dayOfWeek;
+        return lastOfMonth.plusDays(offSet);
     }
 }

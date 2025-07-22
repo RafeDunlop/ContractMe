@@ -2,7 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
@@ -22,9 +22,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Controller for the create new task page
@@ -85,8 +87,8 @@ public class CreateTaskController {
 
         if (!model.containsAttribute("renovationTaskDTO")) {
             RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("", "", null, new ArrayList<>());
-            LocalDate dueDate = renovationTaskDTO.getDueDate();
-            String formattedDate = (dueDate != null) ? dueDate.toString() : "";
+            String dueDate = renovationTaskDTO.getDueDate();
+            String formattedDate = (dueDate != null) ? dueDate : "";
             model.addAttribute("renovationTaskDTO", renovationTaskDTO);
             model.addAttribute("dueDate", formattedDate);
         }
@@ -116,15 +118,30 @@ public class CreateTaskController {
                                 RedirectAttributes redirectAttributes) {
         logger.info("POST renovations/view/create");
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
+        if (Objects.equals(renovationTaskDTO.getDueDate(), "")) {
+            renovationTaskDTO.setDueDate(null);
+        }
+
+        LocalDate parsedDate = null;
 
         if (renovationTaskDTO.getDueDate() != null) {
-            LocalDate formattedDate = renovationTaskDTO.getDueDate();
-            String formattedDueDate = "";
-            if (formattedDate != null) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                formattedDueDate = formattedDate.format(formatter);
+            DateTimeFormatter[] formatters = new DateTimeFormatter[] {
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            };
+
+            for (DateTimeFormatter formatter : formatters) {
+                try {
+                    parsedDate = LocalDate.parse(renovationTaskDTO.getDueDate(), formatter);
+                    break;
+                } catch (DateTimeParseException ignored) {}
             }
-            redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
+
+            if (parsedDate != null) {
+                String formattedDueDate = parsedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
+                renovationTaskDTO.setDueDate(formattedDueDate);
+            }
         }
 
         Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);

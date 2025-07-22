@@ -6,11 +6,16 @@
 async function removeTag(button) {
     const csrfToken = button.getAttribute("data-csrf");
     const renovationId = button.getAttribute("data-renovationId");
-    const tag = button.getAttribute("data-tagName");
-    const response = await fetch(`renovations/tags/remove?renovationId=${renovationId}&tagName=${tag}`, {
+    const tagName = button.getAttribute("data-tagName");
+    const basePath = window.contextPath || "";
+
+    const response = await fetch(`${basePath}renovations/tags/remove?renovationId=${renovationId}&tagName=${encodeURIComponent(tagName)}`, {
         method: 'PATCH',
-        headers: {'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json'}
-    })
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Content-Type': 'application/json'
+        }
+    });
     if (response.ok) {
         window.location.reload();
     }

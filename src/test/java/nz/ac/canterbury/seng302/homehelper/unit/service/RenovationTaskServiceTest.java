@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RenovationTaskServiceTest {
 
@@ -32,7 +36,7 @@ public class RenovationTaskServiceTest {
 
     @BeforeEach
     void setUp() {
-        renovationTaskRepository = Mockito.mock(RenovationTaskRepository.class);
+        renovationTaskRepository = mock(RenovationTaskRepository.class);
         renovationTaskValidation = new RenovationTaskValidation();
         renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationTaskValidation);
         renovationRecord = new RenovationRecord();
@@ -80,17 +84,19 @@ public class RenovationTaskServiceTest {
 
     @Test
     public void addTask_allDetailsValid_callsSaveTask() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task 1", "New Task", LocalDate.now().plusDays(1), new ArrayList<>());
-        RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task 1", "New Task", LocalDate.now().plusDays(1).format(formatter), new ArrayList<>());
+        RenovationRecord renovationRecord = mock(RenovationRecord.class);
 
         renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
 
-        Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(Mockito.any());
+        Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(any());
     }
 
     @Test
     public void validateTaskDetails_allDetailsAreValid_returnEmptyMap() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Tāsk Öné 2-3", "A".repeat(512), LocalDate.now().plusDays(1), new ArrayList<>());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Tāsk Öné 2-3", "A".repeat(512), LocalDate.now().plusDays(1).format(formatter), new ArrayList<>());
 
         Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
         assertTrue(errors.isEmpty());
@@ -98,7 +104,8 @@ public class RenovationTaskServiceTest {
 
     @Test
     public void validateTaskDetails_nameOnlyHasSpaces_returnNameFormatError() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("  ", "Some description", LocalDate.now().plusDays(1), new ArrayList<>());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("  ", "Some description", LocalDate.now().plusDays(1).format(formatter), new ArrayList<>());
 
         Map<String, List<String>> expectedErrors = new HashMap<>();
         expectedErrors.put("nameError", List.of("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes."));
@@ -109,7 +116,8 @@ public class RenovationTaskServiceTest {
 
     @Test
     public void validateTaskDetails_nameHasInvalidCharacters_returnNameFormatError() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One!", "Some description", LocalDate.now().plusDays(1), new ArrayList<>());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One!", "Some description", LocalDate.now().plusDays(1).format(formatter), new ArrayList<>());
 
         Map<String, List<String>> expectedErrors = new HashMap<>();
         expectedErrors.put("nameError", List.of("Task name cannot be empty and must only include letters, numbers, spaces, dots, hyphens or apostrophes."));
@@ -120,7 +128,8 @@ public class RenovationTaskServiceTest {
 
     @Test
     public void validateTaskDetails_descriptionOnlyHasSpaces_returnDescriptionEmptyError() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "  ", LocalDate.now().plusDays(1), new ArrayList<>());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "  ", LocalDate.now().plusDays(1).format(formatter), new ArrayList<>());
 
         Map<String, List<String>> expectedErrors = new HashMap<>();
         expectedErrors.put("descriptionError", List.of("Task description cannot be empty."));
@@ -131,7 +140,8 @@ public class RenovationTaskServiceTest {
 
     @Test
     public void validateTaskDetails_descriptionIsTooLong_returnDescriptionLengthError() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "A".repeat(513), LocalDate.now().plusDays(1), new ArrayList<>());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "A".repeat(513), LocalDate.now().plusDays(1).format(formatter), new ArrayList<>());
 
         Map<String, List<String>> expectedErrors = new HashMap<>();
         expectedErrors.put("descriptionError", List.of("Task description must be 512 characters or less."));
@@ -142,7 +152,8 @@ public class RenovationTaskServiceTest {
 
     @Test
     public void validateTaskDetails_dueDateInPast_returnInvalidDueDateError() {
-        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "Some description", LocalDate.now().minusDays(1), new ArrayList<>());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "Some description", LocalDate.now().minusDays(1).format(formatter), new ArrayList<>());
 
         Map<String, List<String>> expectedErrors = new HashMap<>();
         expectedErrors.put("dueDateError", List.of("Due date must be in the future."));
@@ -152,17 +163,124 @@ public class RenovationTaskServiceTest {
     }
 
     @Test
+    public void validateTaskDetails_invalidFormatISO_returnInvalidDueDateError() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "Some description", LocalDate.now().plusDays(1).format(formatter), new ArrayList<>());
+
+        Map<String, List<String>> expectedErrors = new HashMap<>();
+        expectedErrors.put("dueDateError", List.of("Date is not in valid format, DD/MM/YYYY."));
+
+        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
+        assertEquals(expectedErrors, errors);
+    }
+
+
+    @Test
+    public void validateTaskDetails_invalidFormatRandomChar_returnInvalidDueDateError() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "Some description", "NotADate", new ArrayList<>());
+
+        Map<String, List<String>> expectedErrors = new HashMap<>();
+        expectedErrors.put("dueDateError", List.of("Date is not in valid format, DD/MM/YYYY."));
+
+        Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
+        assertEquals(expectedErrors, errors);
+    }
+
+    @Test
     public void validateTaskDetails_roomsNotInRenovation_returnRoomError() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         renovationRecord.setRooms(List.of("room1", "room2", "room3"));
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO(
                 "Task One",
                 "Some description",
-                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(1).format(formatter),
                 List.of("room1", "room2", "notRoom3")
         );
         Map<String, List<String>> expectedErrors = new HashMap<>();
         expectedErrors.put("roomError", List.of("Whoops, it looks like \"notRoom3\" is not a valid room anymore"));
         assertEquals(expectedErrors, renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord));
+    }
+
+    @Test
+    public void getTasksWithinDates_noTasksBetweenDates_mapContainsEmptyLists() {
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(2);
+        when(renovationTaskRepository.getByDueDateBetween(startDate, endDate, renovationRecord)).thenReturn(List.of());
+        Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
+        assertEquals(3, toTest.size());
+
+        for (int i = 0; i < toTest.size(); i++) {
+            assertTrue(toTest.get(startDate.plusDays(i)).isEmpty());
+        }
+
+    }
+
+    @Test
+    public void getTasksWithinDates_middleDayHasTask_taskInMap() {
+        RenovationTask dummyTask = mock(RenovationTask.class);
+        LocalDate startDate = LocalDate.now();
+        LocalDate middleDate = startDate.plusDays(1);
+        LocalDate endDate = startDate.plusDays(2);
+        when(dummyTask.getDueDate()).thenReturn(startDate.plusDays(1));
+        when(dummyTask.getRenovationRecord()).thenReturn(renovationRecord);
+        when(renovationTaskRepository.getByDueDateBetween(any(LocalDate.class), any(LocalDate.class), any(RenovationRecord.class))).thenReturn(List.of(dummyTask));
+        Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
+        assertEquals(dummyTask, toTest.get(middleDate).getFirst());
+    }
+
+    @Test
+    public void getTasksWithinDates_oneDay_taskInMap() {
+        RenovationTask dummyTask = mock(RenovationTask.class);
+        LocalDate startDate = LocalDate.now();
+        when(dummyTask.getDueDate()).thenReturn(startDate);
+        when(dummyTask.getRenovationRecord()).thenReturn(renovationRecord);
+        when(renovationTaskRepository.getByDueDateBetween(any(LocalDate.class), any(LocalDate.class), any(RenovationRecord.class))).thenReturn(List.of(dummyTask));
+        Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, startDate);
+        assertEquals(dummyTask, toTest.get(startDate).getFirst());
+    }
+
+    @Test
+    public void getTasksWithinDates_endBeforeStart_emptyMap() {
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.minusDays(1);
+        when(renovationTaskRepository.getByDueDateBetween(any(LocalDate.class), any(LocalDate.class), any(RenovationRecord.class))).thenReturn(List.of());
+        Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
+        assertEquals(0, toTest.size());
+    }
+
+    @Test
+    public void getTasksWithinDates_firstDateMultipleTasks_tasksInMap() {
+        RenovationTask dummyTask1 = mock(RenovationTask.class);
+        RenovationTask dummyTask2 = mock(RenovationTask.class);
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(1);
+        when(dummyTask1.getRenovationRecord()).thenReturn(renovationRecord);
+        when(dummyTask2.getRenovationRecord()).thenReturn(renovationRecord);
+        when(dummyTask1.getDueDate()).thenReturn(startDate);
+        when(dummyTask2.getDueDate()).thenReturn(startDate);
+        when(renovationTaskRepository.getByDueDateBetween(any(LocalDate.class), any(LocalDate.class), any(RenovationRecord.class))).thenReturn(List.of(dummyTask1, dummyTask2));
+        Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
+        assertEquals(2, toTest.get(startDate).size());
+        assertEquals(dummyTask1, toTest.get(startDate).get(0));
+        assertEquals(dummyTask2, toTest.get(startDate.plusDays(0)).get(1));
+
+    }
+
+    @Test
+    public void getTasksWithinDates_edgeDatesHaveTasks_allTasksInMap() {
+        RenovationTask dummyTask1 = mock(RenovationTask.class);
+        RenovationTask dummyTask2 = mock(RenovationTask.class);
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(2);
+        when(dummyTask1.getRenovationRecord()).thenReturn(renovationRecord);
+        when(dummyTask2.getRenovationRecord()).thenReturn(renovationRecord);
+        when(dummyTask1.getDueDate()).thenReturn(startDate);
+        when(dummyTask2.getDueDate()).thenReturn(endDate);
+        when(renovationTaskRepository.getByDueDateBetween(any(LocalDate.class), any(LocalDate.class), any(RenovationRecord.class))).thenReturn(List.of(dummyTask1, dummyTask2));
+        Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
+        assertEquals(dummyTask1, toTest.get(startDate).getFirst());
+        assertEquals(dummyTask2, toTest.get(endDate).getFirst());
     }
 }
 

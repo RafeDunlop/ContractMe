@@ -8,6 +8,9 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 @Service
 public class EditTaskService {
 
@@ -38,9 +41,14 @@ public class EditTaskService {
             throw new IllegalArgumentException("Data integration error");
         }
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
         renovationTask.setName(renovationTaskDTO.getName());
         renovationTask.setDescription(renovationTaskDTO.getDescription());
-        renovationTask.setDueDate(renovationTaskDTO.getDueDate());
+        renovationTask.setDueDate(null);
+        if (renovationTaskDTO.getDueDate() != null && !renovationTaskDTO.getDueDate().isBlank()) {
+            renovationTask.setDueDate(LocalDate.parse(renovationTaskDTO.getDueDate(), formatter));
+        }
         renovationTask.setRoomList(renovationTaskDTO.getRooms());
 
         renovationTaskRepository.save(renovationTask);

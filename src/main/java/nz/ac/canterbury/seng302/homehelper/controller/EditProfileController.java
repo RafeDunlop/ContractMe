@@ -1,9 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
@@ -53,35 +52,42 @@ public class EditProfileController {
     /**
      * Displays the editProfileTemplate page under the path "/user/edit" where id
      * is the ID of the user. Sets the current user to the page.
-     * @param addressDTO the dto containing data relating to fields in address form.
      * @param model Model interface
      * @return editProfileTemplate page
      */
     @GetMapping("user/edit")
-    public String editProfile(@ModelAttribute AddressDTO addressDTO,
-                              Model model) {
-
-
+    public String editProfile(Model model) {
         logger.info("GET /user/edit");
+
         try {
-            // Sets current user to page
             User user = loginService.getUserByEmail();
             model.addAttribute("user", user);
-            model.addAttribute("firstName", user.getFirstName());
-            model.addAttribute("lastName", user.getLastName());
-            model.addAttribute("email", user.getEmail());
+
+            if (!model.containsAttribute("firstName")) {
+                model.addAttribute("firstName", user.getFirstName());
+            }
+            if (!model.containsAttribute("lastName")) {
+                model.addAttribute("lastName", user.getLastName());
+            }
+            if (!model.containsAttribute("email")) {
+                model.addAttribute("email", user.getEmail());
+            }
             model.addAttribute("profilePicture", user.getProfilePicture());
 
-            Location location = user.getLocation();
-            if (location != null) {
-                addressDTO.setAddress_line1(location.getAddress());
-                addressDTO.setCountry(location.getCountry());
-                addressDTO.setPostcode(location.getPostcode());
-                addressDTO.setCity(location.getCity());
-                addressDTO.setRegion(location.getSuburb());
+            // Only add addressDTO if not present from flash
+            if (!model.containsAttribute("addressDTO")) {
+                AddressDTO addressDTO = new AddressDTO();
+                Location location = user.getLocation();
+                if (location != null) {
+                    addressDTO.setAddress_line1(location.getAddress());
+                    addressDTO.setCountry(location.getCountry());
+                    addressDTO.setPostcode(location.getPostcode());
+                    addressDTO.setCity(location.getCity());
+                    addressDTO.setRegion(location.getSuburb());
+                    model.addAttribute("locationUsed", true);
+                }
+                model.addAttribute("addressDTO", addressDTO);
             }
-
-            model.addAttribute("addressDTO", addressDTO);
 
             return "editProfileTemplate";
         } catch (NoSuchElementException e) {
@@ -130,9 +136,9 @@ public class EditProfileController {
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
             redirectAttributes.addFlashAttribute("user", newUser);
-            redirectAttributes.addFlashAttribute("firstName", newUser.getFirstName());
-            redirectAttributes.addFlashAttribute("lastName", newUser.getLastName());
-            redirectAttributes.addFlashAttribute("email", newUser.getEmail());
+            redirectAttributes.addFlashAttribute("firstName", updatedUser.getFirstName());
+            redirectAttributes.addFlashAttribute("lastName", updatedUser.getLastName());
+            redirectAttributes.addFlashAttribute("email", updatedUser.getEmail());
             redirectAttributes.addFlashAttribute("profilePicture", newUser.getProfilePicture());
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
             redirectAttributes.addFlashAttribute("locationUsed", locationChanged);

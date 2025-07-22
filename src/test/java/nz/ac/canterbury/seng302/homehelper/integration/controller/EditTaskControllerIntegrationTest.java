@@ -1,11 +1,13 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,9 +37,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @ActiveProfiles("test")
@@ -222,11 +224,48 @@ public class EditTaskControllerIntegrationTest {
                         .param("roomList", "Room 1", "Room 2")
                         .param("taskId", "1")
                         .param("renovationId", "1")
-                        .param("DueDate", String.valueOf(LocalDate.now().minusDays(1)))
+                        .param("dueDate", String.valueOf(LocalDate.now().minusDays(1).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/editTask?taskId=1&renovationId=1"))
                 .andExpect(flash().attribute("dueDateError", hasItem("Due date must be in the future.")));
+        Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
+    }
+
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void testEditTask_dueDateInvalidFormatISO_TaskNotEditedStaysOnEditTask() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("name", "@#$%")
+                        .param("description", "Description")
+                        .param("roomList", "Room 1", "Room 2")
+                        .param("taskId", "1")
+                        .param("renovationId", "1")
+                        .param("dueDate", (LocalDate.now().plusDays(5).format(DateTimeFormatter.ofPattern("yyyy/MM/dd"))))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(redirectedUrl("/editTask?taskId=1&renovationId=1"))
+                .andExpect(flash().attribute("dueDateError", hasItem("Date is not in valid format, DD/MM/YYYY.")));
+        Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void testEditTask_dueDateInvalidFormatRandomChar_TaskNotEditedStaysOnEditTask() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("name", "@#$%")
+                        .param("description", "Description")
+                        .param("roomList", "Room 1", "Room 2")
+                        .param("taskId", "1")
+                        .param("renovationId", "1")
+                        .param("dueDate", "NotADate")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(redirectedUrl("/editTask?taskId=1&renovationId=1"))
+                .andExpect(flash().attribute("dueDateError", hasItem("Date is not in valid format, DD/MM/YYYY.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 

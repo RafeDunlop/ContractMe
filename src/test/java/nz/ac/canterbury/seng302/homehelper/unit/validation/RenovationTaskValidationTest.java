@@ -1,12 +1,13 @@
 package nz.ac.canterbury.seng302.homehelper.unit.validation;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,14 +74,30 @@ public class RenovationTaskValidationTest {
 
     @Test
     void testValidateDueDate_pastDate_error() {
-        LocalDate yesterday = LocalDate.now().minusDays(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String yesterday = LocalDate.now().minusDays(1).format(formatter);
         String result = renovationTaskValidation.validateDueDate(yesterday);
         assertEquals("Due date must be in the future.", result);
     }
 
     @Test
+    void testValidateDueDate_invalidFormatISO_error() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        String yesterday = LocalDate.now().minusDays(1).format(formatter);
+        String result = renovationTaskValidation.validateDueDate(yesterday);
+        assertEquals("Date is not in valid format, DD/MM/YYYY.", result);
+    }
+    @Test
+    void testValidateDueDate_invalidFormatRandomChar_error() {
+        String yesterday = "Today";
+        String result = renovationTaskValidation.validateDueDate(yesterday);
+        assertEquals("Date is not in valid format, DD/MM/YYYY.", result);
+    }
+
+    @Test
     void testValidateDueDate_futureDate_noError() {
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String tomorrow = LocalDate.now().plusDays(1).format(formatter);
         String result = renovationTaskValidation.validateDueDate(tomorrow);
         assertNull(result);
     }

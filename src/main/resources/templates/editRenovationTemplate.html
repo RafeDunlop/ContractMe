@@ -44,7 +44,7 @@
                 </div>
 
                 <!-- Backend error -->
-                <div class="alert alert-danger mb-4" role="alert" id="name-backend-error"  th:attr="hidden=${roomError == null}">
+                <div class="alert alert-danger mb-4" role="alert" id="name-backend-error"  th:attr="hidden=${nameError == null}">
                     <div class="error-box">
                         <ul>
                             <li th:each="msg : ${nameError}" th:text="${msg}"></li>
@@ -88,7 +88,7 @@
                 <div class="input-group">
                     <input type="text" class="form-control" id="roomList" placeholder="Enter a room name"
                            th:name="renovation.rooms" data-cy="roomList">
-                    <button type="button" class="btn btn-primary" id="create-room-button">Add</button>
+                    <button type="button" class="btn btn-primary" id="create-room-button">Add Room</button>
                 </div>
 
                 <!-- Frontend JS error -->
@@ -136,18 +136,20 @@
 
 
 
-
+            <!-- SUBMIT BUTTON -->
             <button type="submit" class="btn btn-primary" id="submit-record">Submit</button>
         </form>
     </div>
 
     <!-- CANCEL BUTTON -->
     <div class="mt-4">
-        <a th:href="@{/renovations}" class="btn  btn-primary">Cancel</a>
+        <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn  btn-primary">Cancel</a>
     </div>
 </div>
 </body>
+
 <script type="module" th:src="@{/js/locationForm.js}"></script>
-<script type="module" th:src="@{/js/renovationValidations.js}"></script>
+<script type="module" th:src="@{/js/validation/renovationValidations.js}"></script>
 <script type="module" th:src="@{/js/individualRenovation.js}"></script>
+<script type="module" th:src="@{/js/locationToggleSwitch.js}"></script>
 </html>
