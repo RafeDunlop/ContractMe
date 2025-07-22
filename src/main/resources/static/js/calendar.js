@@ -24,3 +24,4 @@ window.changeMonth = function(id, month, year) {
             }
         });
 };
+

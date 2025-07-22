@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.TagDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
@@ -34,16 +35,19 @@ public class RenovationRecordService {
     private final RenovationTaskRepository renovationTaskRepository;
     private final RenovationRecordValidation renovationRecordValidation;
 
+    private final RenovationTaskService renovationTaskService;
+
     /**
      * Constructor for the RenovationRecordService class
      *
      * @param renovationRecordRepository initializes with the repository for storing records
      */
     @Autowired
-    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation) {
+    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation, RenovationTaskService renovationTaskService) {
         this.renovationRecordRepository = renovationRecordRepository;
         this.renovationTaskRepository = renovationTaskRepository;
         this.renovationRecordValidation = renovationRecordValidation;
+        this.renovationTaskService = renovationTaskService;
     }
 
     /**
@@ -353,31 +357,55 @@ public class RenovationRecordService {
     }
 
     /**
-     * Generates a 5-week by 7-day calendar grid as a 2D array of {@link CalendarCellDTO} objects.
+     * Generates a calendar grid as a 2D nested list of {@link CalendarCellDTO} objects.
+     * This represents a minimal list of complete 7-day weeks, starting on Mondays, such that all dates in the month of
+     * the specified date are included
      *
      * @param date the {@link LocalDate} representing any day in the target month.
-     * @return a 2D array of {@link CalendarCellDTO} objects with dimensions 5 (weeks) by 7 (days),
+     * @param record the renovation record being displayed
+     * @return a 2D nested list of {@link CalendarCellDTO} objects
      */
-    public List<List<CalendarCellDTO>> generateCalendarCells(LocalDate date) {
-        LocalDate firstOfMonth = date.withDayOfMonth(1);
-        int dayOfWeek = firstOfMonth.getDayOfWeek().getValue();
-        int startOffset = dayOfWeek - 1;
+    public List<List<CalendarCellDTO>> generateCalendarCells(LocalDate date, RenovationRecord record) {
+        LocalDate startDate = getFirstDayOfCalendar(date);
+        LocalDate endDate = getLastDayOfCalendar(date);
 
-        LocalDate startDate = firstOfMonth.minusDays(startOffset);
+        Map<LocalDate, List<RenovationTask>> calendarTasks = renovationTaskService.getTasksWithinDates(record, startDate, endDate);
+        Iterator<Map.Entry<LocalDate, List<RenovationTask>>> dateEntryItr =
+                calendarTasks.entrySet().stream().sorted(Map.Entry.comparingByKey()).toList().iterator();
+
         List<List<CalendarCellDTO>> rows = new ArrayList<>();
-
-        for (int i = 0; i < 6; i++) {
+        while (dateEntryItr.hasNext()) {
             List<CalendarCellDTO> week = new ArrayList<>();
-            for (int j = 0; j < 7; j++) {
-                if (i == 5 && j == 0 && startDate.getMonthValue() != firstOfMonth.getMonthValue()) {
-                    return rows;
-                }
-                week.add(new CalendarCellDTO(startDate.getDayOfMonth(), startDate.getMonthValue()));
-                startDate = startDate.plusDays(1);
+            for (int i = 0; i < 7; i++) {
+                Map.Entry<LocalDate, List<RenovationTask>> dayTaskData = dateEntryItr.next();
+                week.add(new CalendarCellDTO(dayTaskData.getKey(), dayTaskData.getValue()));
             }
             rows.add(week);
         }
-
         return rows;
+    }
+
+    /**
+     * Gets the first day to be displayed, always a Monday
+     * @param date any {@code LocalDate} in the target month
+     * @return the first date displayed, always a Monday
+     */
+    private LocalDate getFirstDayOfCalendar(LocalDate date) {
+        LocalDate firstOfMonth = date.withDayOfMonth(1);
+        int dayOfWeek = firstOfMonth.getDayOfWeek().getValue();
+        int offSet = dayOfWeek - 1;
+        return firstOfMonth.minusDays(offSet);
+    }
+
+    /**
+     * Gets the last date to be displayed, always a Sunday
+     * @param date any {@code LocalDate} in the target month
+     * @return the last date to be displayed, always a Sunday
+     */
+    private LocalDate getLastDayOfCalendar(LocalDate date) {
+        LocalDate lastOfMonth = date.plusMonths(1).withDayOfMonth(1).minusDays(1);
+        int dayOfWeek = lastOfMonth.getDayOfWeek().getValue();
+        int offSet = 7 - dayOfWeek;
+        return lastOfMonth.plusDays(offSet);
     }
 }

@@ -104,7 +104,7 @@
                     <div id="location-toggle-switch-label">Enter Location (Optional):</div>
                     <div>
                         <label class="switch">
-                            <input type="checkbox" id="location-toggleswitch" th:checked="${locationUsed}">
+                            <input type="checkbox" id="location-toggleswitch" th:disabled="${userRegisterDTO.isContractor}" th:checked="${locationUsed}">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -132,7 +132,7 @@
                     <!-- Frontend JS error -->
                     <div class="alert alert-danger mt-2" id="password-frontend-error" hidden>
                         <ul>
-                            <li><label class="form-label" id="password-frontend-error-message"></label></li>
+                            <li id="password-frontend-error-message"></li>
                         </ul>
                     </div>
 
@@ -188,6 +188,7 @@
 <script type = "module" th:src="@{/js/validation/locationFormValidation.js}"></script>
 <script type="module" th:src="@{/js/validation/userValidation.js}"></script>
 <script type="module" th:src="@{/js/validation/registerValidation.js}"></script>
-<script type="module" th:src="@{/js/registrationToggleSwitch.js}"></script>
 <script type="module" th:src="@{/js/skills.js}"></script>
+<script type="module" th:src="@{/js/contractorToggleSwitch.js}"></script>
+<script type="module" th:src="@{/js/locationToggleSwitch.js}"></script>
 </html>

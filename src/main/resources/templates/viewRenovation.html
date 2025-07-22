@@ -76,7 +76,7 @@
                 </div>
 
                 <!-- Display added tags -->
-                <div th:if="${not #lists.isEmpty(renovation.getTags())}" id="tagList" class="mb-3" style="">
+                <div id="tagList" class="mb-3">
                     <label class="fw-bold d-block mb-1">Current Tags:</label>
                     <span th:each="tag : ${renovation.getSortedTags()}" class="tag-box badge bg-success d-inline-flex align-items-center me-2 mb-2">
                         <span class="tag-text-large text-truncate ms-1" th:text="${tag.getTagName()}"></span>
@@ -105,6 +105,8 @@
                     <p id="errorText"></p>
                 </div>
 
+
+                <!-- Buttons -->
                 <div class="mt-2 mb-2">
                     <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
                     <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
@@ -156,4 +158,5 @@
 <script type="text/javascript" th:src="@{/js/removeTag.js}"></script>
 <script type="text/javascript" th:src="@{/js/renovationUtils.js}"></script>
 <script type="text/javascript" th:src="@{/js/calendar.js}"></script>
+
 </html>
