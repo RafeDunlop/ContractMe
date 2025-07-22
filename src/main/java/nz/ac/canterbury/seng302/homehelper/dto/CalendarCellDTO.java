@@ -1,3 +1,10 @@
 package nz.ac.canterbury.seng302.homehelper.dto;
 
-public record CalendarCellDTO(int day, int month) {}
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import java.time.LocalDate;
+import java.util.List;
+
+public record CalendarCellDTO(LocalDate day, List<RenovationTask> calendarTasks) {
+
+
+}
