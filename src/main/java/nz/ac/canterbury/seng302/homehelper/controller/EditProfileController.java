@@ -84,6 +84,7 @@ public class EditProfileController {
                     addressDTO.setPostcode(location.getPostcode());
                     addressDTO.setCity(location.getCity());
                     addressDTO.setRegion(location.getSuburb());
+                    model.addAttribute("locationUsed", true);
                 }
                 model.addAttribute("addressDTO", addressDTO);
             }
