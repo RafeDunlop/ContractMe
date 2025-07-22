@@ -12,10 +12,6 @@ locationToggleSwitch.addEventListener("click", displayLocationForm);
 function displayLocationForm() {
     if (locationToggleSwitch.checked === true) {
         locationForm.style.display = "block";
-    }
-    else if (contractorToggleSwitch.checked === true) {
-        locationToggleSwitch.checked = true;
-        locationForm.style.display = "block";
     } else {
         locationForm.style.display = "none";
         hideAllErrorMessages();
