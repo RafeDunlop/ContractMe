@@ -108,10 +108,11 @@
 
                 <!-- Buttons -->
                 <div class="mt-2 mb-2">
-                    <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
-                    <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
                     <a th:href="@{${previousUrl}}" class="btn btn-secondary" th:if="${previousUrl != null && !previousUrl.contains('/search')}">Back</a>
                     <a th:href="@{${previousUrl}}" class="btn btn-secondary" th:if="${previousUrl.contains('/search')}">Back to search results</a>
+                    <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
+                    <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
+                    <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary float-end" th:if="${isOwner && hasLocation}">Create Team</a>
                 </div>
             </div>
 
