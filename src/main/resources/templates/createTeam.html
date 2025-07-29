@@ -12,9 +12,22 @@
 
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
 
-<div id="container" class="card container mt-5 shadow-sm">
+<div id="container" class="card container mt-5 p-4 shadow-sm">
     <h4 class="card-title mb-4" th:text="|Create Team For ${renovationRecord.getName()}|"/>
     <form th:action="@{/renovations/view/create}" method="post" id="create-task-form" th:object="${createTeamDTO}" novalidate>
-
+        <div class="input-group mb-3">
+            <select class="form-select" id="skills-select" type="text" aria-label="skills-select" autocomplete="off">
+                <option disabled selected hidden>Select skill</option>
+                <option th:each="skill : ${skills}" th:value="${skill}" th:text="${skill.getDisplayName()}"
+                        th:attr="display-name=${skill.getDisplayName()}" class="skill-option"></option>
+            </select>
+            <button type="button" class="btn btn-secondary" onclick="addSkill()">Add</button>
+        </div>
+        <div id="selected-skills" class="mb-3">
+        </div>
+        <input type="submit" class="btn btn-primary float-end" value="Submit"/>
     </form>
 </div>
+</body>
+<script th:src="@{/js/createTeam.js}"></script>
+</html>

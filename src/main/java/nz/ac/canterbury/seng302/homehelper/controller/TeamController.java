@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import nz.ac.canterbury.seng302.homehelper.dto.CreateTeamDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
@@ -39,6 +40,7 @@ public class TeamController {
         //todo check that record doesn't already have a a team!
         model.addAttribute("createTeamDTO", createTeamDTO);
         model.addAttribute("renovationRecord", renovationRecord);
+        model.addAttribute("skills", Skill.values());
         return "createTeam";
     }
 }
