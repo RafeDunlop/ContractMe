@@ -93,6 +93,7 @@ tasks.register("cucumber", Test) {
 }
 
 tasks.register("end2end", Test) {
+    group 'verification'
     testLogging.showStandardStreams = true
     useJUnitPlatform()
     filter {
