@@ -278,7 +278,6 @@ function renderTaskCards(data, isOwner, renovationId) {
     };
 
     data.content.forEach(task => {
-        console.log("Task object:", task);
 
         const stateColor = stateColors[task.state]
         const isDefaultIcon = task.iconFileName === 'default-icon.png';
