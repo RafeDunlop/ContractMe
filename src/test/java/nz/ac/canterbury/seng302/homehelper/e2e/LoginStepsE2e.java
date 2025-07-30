@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.e2e;
 
+import com.microsoft.playwright.options.LoadState;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -29,10 +30,16 @@ public class LoginStepsE2e {
         Assertions.assertEquals(expectedTitle, homeTitle);
     }
 
-    @When("I click the “Sign in” button")
+    @When("I click the \"Sign in\" button")
     public void i_click_the_sign_in_button() {
         RunPlaywrightTests.page.locator("#sign-in-button").click();
     }
+
+    @When("I click a highlighted link with the text \"Not registered? Create an account\"")
+    public void i_click_a_highlighted_link_with_the_text_not_registered_create_an_account() {
+        RunPlaywrightTests.page.locator("#registration-page-link").click();
+    }
+
 
     @Then("It indicates a button labelled \"Sign in\"")
     public void it_indicates_a_button_labelled() {
@@ -47,4 +54,13 @@ public class LoginStepsE2e {
         String errorMessage = RunPlaywrightTests.page.locator("#general-error").innerText();
         Assertions.assertEquals(expectErrorMessage, errorMessage);
     }
+
+    @Then("I am taken to the registration page")
+    public void i_am_taken_to_the_registration_page() {
+        RunPlaywrightTests.page.waitForLoadState(LoadState.DOMCONTENTLOADED);
+        String currentPageUrl = RunPlaywrightTests.page.url();
+        Assertions.assertEquals(RunPlaywrightTests.baseUrl + "/register", currentPageUrl);
+    }
+
+
 }
