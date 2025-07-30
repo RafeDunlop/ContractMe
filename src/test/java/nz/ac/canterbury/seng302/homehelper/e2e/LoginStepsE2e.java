@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.e2e;
 
-import com.microsoft.playwright.options.LoadState;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -16,6 +15,11 @@ public class LoginStepsE2e {
     @Given("I am on the login form")
     public void i_am_on_the_login_form() {
         RunPlaywrightTests.page.navigate(RunPlaywrightTests.baseUrl + "/login");
+    }
+
+    @Given("I enter an email address {string}")
+    public void i_enter_a_malformed_email_address(String email) {
+        RunPlaywrightTests.page.locator("#username").fill(email);
     }
 
     @Given("I enter an email address that is unknown to the system")
@@ -40,6 +44,10 @@ public class LoginStepsE2e {
         RunPlaywrightTests.page.locator("#registration-page-link").click();
     }
 
+    @When("I click the \"Cancel\" button")
+    public void i_click_the_cancel_button() {
+        RunPlaywrightTests.page.locator("#cancel-button").click();
+    }
 
     @Then("It indicates a button labelled \"Sign in\"")
     public void it_indicates_a_button_labelled() {
@@ -48,8 +56,15 @@ public class LoginStepsE2e {
         Assertions.assertEquals(expectButtonName, buttonName);
     }
 
+    @Then("An error message tells me \"Email address must be in the form 'jane@doe.nz'.\"")
+    public void an_error_message_tells_me_email_address_must_be_in_the_form() {
+        String expectedErrorMessage = "Email address must be in the form 'jane@doe.nz'.";
+        String errorMessage = RunPlaywrightTests.page.locator("#email-backend-error").locator("ul").innerText();
+        Assertions.assertEquals(expectedErrorMessage, errorMessage);
+    }
+
     @Then("An error message tells me \"The email address is unknown, or the password is invalid.\"")
-    public void an_error_message_tells_me_the_email_address_is_invalid() {
+    public void an_error_message_tells_me_the_email_address_is_unknown_or_the_password_is_invalid() {
         String expectErrorMessage = "The email address is unknown, or the password is invalid.";
         String errorMessage = RunPlaywrightTests.page.locator("#general-error").innerText();
         Assertions.assertEquals(expectErrorMessage, errorMessage);
@@ -57,10 +72,15 @@ public class LoginStepsE2e {
 
     @Then("I am taken to the registration page")
     public void i_am_taken_to_the_registration_page() {
-        RunPlaywrightTests.page.waitForLoadState(LoadState.DOMCONTENTLOADED);
-        String currentPageUrl = RunPlaywrightTests.page.url();
-        Assertions.assertEquals(RunPlaywrightTests.baseUrl + "/register", currentPageUrl);
+        String registrationUrl = RunPlaywrightTests.baseUrl + "/register";
+        String currentUrl = RunPlaywrightTests.page.url();
+        Assertions.assertEquals(registrationUrl, currentUrl);
     }
 
-
+    @Then("I am taken back to the system’s home page")
+    public void i_am_taken_to_the_system_s_home_page() {
+        String homeUrl = RunPlaywrightTests.baseUrl + "/";
+        String currentUrl = RunPlaywrightTests.page.url();
+        Assertions.assertEquals(homeUrl, currentUrl);
+    }
 }

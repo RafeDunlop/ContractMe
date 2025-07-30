@@ -56,13 +56,13 @@
                     <button id="sign-in-button" type="submit" class="btn btn-primary">Sign in</button>
 
                     <!-- CANCEL BUTTON -->
-                    <a th:href="@{/}" class="btn btn-outline-secondary m-4">Cancel</a>
+                    <a id="cancel-button" th:href="@{/}" class="btn btn-outline-secondary m-4">Cancel</a>
 
                     <!-- REGISTER BUTTON -->
                     <a id="registration-page-link" th:href="@{/register}" class="btn btn-link">Not registered? Create an account</a>
 
                     <!-- FORGOT PASSWORD BUTTON -->
-                    <a th:href="@{/password/forgot}" class="btn btn-link">Forgot your password?</a>
+                    <a id="forgot-password-link" th:href="@{/password/forgot}" class="btn btn-link">Forgot your password?</a>
                 </div>
             </form>
         </div>
