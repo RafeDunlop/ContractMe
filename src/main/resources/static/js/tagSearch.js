@@ -1,3 +1,7 @@
+import {
+    scrollThroughAutoComplete
+} from "./autocomplete.js";
+
 /**
  * Tag search bar input logic, for search renovations html page.
  * Allows users to input tags, displays them as bubbles inside search bar, and adds hidden inputs for form submission.
@@ -134,27 +138,7 @@ function addTag(tag) {
 document.addEventListener("keydown", function (event) {
     const listItems = document.querySelectorAll("#autocomplete-list .autocomplete-item");
 
-    if (listItems.length === 0) {
-        return;
-    }
-
-    if (event.key === "ArrowDown") {
-        event.preventDefault();
-        currentTabIndex++;
-        if (currentTabIndex >= listItems.length) {
-            currentTabIndex = 0;
-        }
-        listItems[currentTabIndex].focus();
-    }
-
-    if (event.key === "ArrowUp") {
-        event.preventDefault();
-        currentTabIndex--;
-        if (currentTabIndex < 0) {
-            currentTabIndex = listItems.length - 1;
-        }
-        listItems[currentTabIndex].focus();
-    }
+    scrollThroughAutoComplete(listItems);
 });
 
 
