@@ -41,6 +41,9 @@ public class RenovationTask {
     @Column
     private String iconFileName;
 
+    @Column
+    private TaskState state;
+
 
     /**
      * JPA required no-args constructor
@@ -96,6 +99,14 @@ public class RenovationTask {
     }
 
     public Long getId() {return task_id;}
+
+    public TaskState getState() {
+        return state;
+    }
+
+    public void setState(TaskState state) {
+        this.state = state;
+    }
 
     public void setIconFileName(String iconFileName) {
         this.iconFileName = iconFileName;
