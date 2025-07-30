@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.entity;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -41,6 +43,7 @@ public class RenovationTask {
     @Column
     private String iconFileName;
 
+    @Enumerated(EnumType.STRING)
     @Column
     private TaskState state;
 
