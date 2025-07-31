@@ -1,18 +1,17 @@
-function showTaskModalById(taskId) {
-    console.log(renovationTasks);
-    const task = renovationTasks.find(t => t.id === Number(taskId));
-    if (!task) {
-        console.error("Task not found for ID:", taskId);
-        return;
-    }
-    showTaskModal(task);
-}
+function showTaskModal(taskElement) {
+    const task = {
+        id: taskElement.dataset.taskId,
+        name: taskElement.dataset.taskName,
+        description: taskElement.dataset.taskDesc,
+        dueDate: taskElement.dataset.taskDate,
+        state: taskElement.dataset.taskState,
+        roomList: taskElement.dataset.roomList
+    };
+    console.log(task);
 
-
-function showTaskModal(task) {
     const modal = document.getElementById("task-modal");
     const content = document.getElementById("task-modal-content");
-    content.innerHTML = renderTaskModalContent(task)
+    content.innerHTML = renderTaskModalContent(task);
     modal.style.display = "block";
 }
 
@@ -31,7 +30,7 @@ function renderTaskModalContent(task) {
                     <h4>${task.description}</h4>
                     <h4>${task.dueDate}</h4>
                     <h4>${task.state}</h4>
-                    <h4>${task.rooms ? task.rooms.join(', ') : ''}</h4>
+                    <h4>${task.roomList ? task.roomList.join(', ') : ''}</h4>
                 </div>
             </div>
         </div>
