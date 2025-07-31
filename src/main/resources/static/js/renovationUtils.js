@@ -208,7 +208,7 @@ function renderRecordCards(data, currentUserId, pageNumber) {
         card.className = "card card-count position-relative";
 
         card.innerHTML = `
-            <a href="${basePath}renovations/view?id=${record.id}&page=1" class="no-underline text-reset">
+            <a href="${basePath}renovations/view?id=${record.id}&page=1" class="no-underline text-reset" style="text-decoration: none; color: black">
                 ${(record.userId === currentUserId) ? '<span class="badge bg-primary position-absolute top-0 end-0 m-2">Yours</span>' : ""}
                 <div class="card-body">
                     <h5 class="card-title truncate">${record.name}</h5>

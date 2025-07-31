@@ -109,7 +109,7 @@ function addTag(tag) {
 
     // Create bubble
     const bubble = document.createElement("span");
-    bubble.className = "badge bg-primary text-white me-1 mb-1";
+    bubble.className = "badge bg-success text-white me-1 mb-1";
     bubble.textContent = tag;
 
     // Remove button
