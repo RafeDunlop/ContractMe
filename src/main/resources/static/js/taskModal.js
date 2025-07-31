@@ -5,15 +5,21 @@ function showTaskModal(taskElement) {
         description: taskElement.dataset.taskDesc,
         dueDate: taskElement.dataset.taskDate,
         state: taskElement.dataset.taskState,
-        roomList: taskElement.dataset.roomList
+        roomList: taskElement.dataset.taskRooms
+            ? JSON.parse(taskElement.dataset.taskRooms)
+            : []
     };
+
     console.log(task);
 
-    const modal = document.getElementById("task-modal");
     const content = document.getElementById("task-modal-content");
     content.innerHTML = renderTaskModalContent(task);
-    modal.style.display = "block";
+
+    const modalElement = document.getElementById("task-modal");
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
 }
+
 
 
 /**
@@ -23,16 +29,16 @@ function showTaskModal(taskElement) {
  */
 function renderTaskModalContent(task) {
     return `
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-4 shadow">
-                <h5 class="modal-title">${task.name}</h5>
-                <div class="modal-body">
-                    <h4>${task.description}</h4>
-                    <h4>${task.dueDate}</h4>
-                    <h4>${task.state}</h4>
-                    <h4>${task.roomList ? task.roomList.join(', ') : ''}</h4>
-                </div>
-            </div>
+        <div class="modal-header">
+            <h5 class="modal-title">${task.name}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <p><strong>Description:</strong> ${task.description}</p>
+            <p><strong>Due Date:</strong> ${task.dueDate}</p>
+            <p><strong>Status:</strong> ${task.state}</p>
+            <p><strong>Rooms:</strong> ${task.roomList ? task.roomList.join(', ') : ''}</p>
         </div>
     `;
 }
+
