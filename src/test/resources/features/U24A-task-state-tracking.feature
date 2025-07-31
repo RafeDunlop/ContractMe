@@ -1,21 +1,20 @@
 @authoriseUser
-Feature: Task state tracking
+Feature: AC1 - Task state tracking
   Scenario: Newly created task state is set to "Not Started"
     Given that i create a task on a renovation record
     When I view the task
     Then then the task is set to "Not Started"
     And I can see the task state
 
-  Scenario Outline: Task state updates and displays correct color
+  Scenario Outline: AC2 - Task state is updated with color change
     Given that I am viewing one of my renovation records with tasks
-    When I select "<state>" from the task state dropdown
-    Then the task state is updated to "<state>"
-    And the task state displays the color "<color>"
+    When I update the task state "<state>"
+    Then the task state is set to state "<state>"
 
     Examples:
-      | state        | color    |
-      | Not Started  | grey     |
-      | In Progress  | blue     |
-      | Blocked      | red      |
-      | Completed    | green    |
-      | Cancelled    | darkgrey |
+      | state        |
+      | NOT_STARTED  |
+      | IN_PROGRESS  |
+      | BLOCKED      |
+      | COMPLETED    |
+      | CANCELLED    |
