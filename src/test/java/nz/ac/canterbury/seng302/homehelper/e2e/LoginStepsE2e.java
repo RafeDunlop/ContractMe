@@ -1,11 +1,24 @@
 package nz.ac.canterbury.seng302.homehelper.e2e;
 
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import nz.ac.canterbury.seng302.homehelper.e2e.context.E2eUserContext;
 import org.junit.jupiter.api.Assertions;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class LoginStepsE2e {
+
+    PasswordEncoder passwordEncoder;
+    E2eUserContext userContext;
+
+    public LoginStepsE2e(E2eUserContext userContext) {
+        this.userContext = userContext;
+        passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
 
     @Given("I connect to the system's main URL")
     public void i_connect_to_the_systems_main_url() {
@@ -27,6 +40,37 @@ public class LoginStepsE2e {
         RunPlaywrightTests.page.locator("#username").fill("this.email@doesnt.exist");
     }
 
+    @And("I enter an email address and its corresponding password for an account that exists in the system")
+    public void i_enter_an_email_address_and_its_corresponding_password_for_an_account_that_exists_in_the_system() {
+        String userEmail = userContext.getUser().getEmail();
+        String password = "Test123!";
+
+        RunPlaywrightTests.page.locator("#username").fill(userEmail);
+        RunPlaywrightTests.page.locator("#password").fill(password);
+    }
+
+
+    @And("I enter the wrong password for the corresponding email address")
+    public void i_enter_the_wrong_password_for_the_corresponding_email_address() {
+        String userEmail = userContext.getUser().getEmail();
+        String incorrectPassword = "Test123!" + "2354y";
+
+        RunPlaywrightTests.page.locator("#username").fill(userEmail);
+        RunPlaywrightTests.page.locator("#password").fill(incorrectPassword);
+
+    }
+
+    @And("I enter an empty password for the corresponding email address")
+    public void i_enter_an_empty_password_for_the_corresponding_email_address() {
+        String userEmail = userContext.getUser().getEmail();
+        String incorrectPassword = "";
+
+        RunPlaywrightTests.page.locator("#username").fill(userEmail);
+        RunPlaywrightTests.page.locator("#password").fill(incorrectPassword);
+
+    }
+
+
     @When("I see the homepage")
     public void i_see_the_homepage() {
         String expectedTitle = "Welcome to Home Helper";
@@ -38,6 +82,8 @@ public class LoginStepsE2e {
     public void i_click_the_sign_in_button() {
         RunPlaywrightTests.page.locator("#sign-in-button").click();
     }
+
+
 
     @When("I click a highlighted link with the text \"Not registered? Create an account\"")
     public void i_click_a_highlighted_link_with_the_text_not_registered_create_an_account() {
@@ -77,10 +123,17 @@ public class LoginStepsE2e {
         Assertions.assertEquals(registrationUrl, currentUrl);
     }
 
-    @Then("I am taken back to the system’s home page")
-    public void i_am_taken_to_the_system_s_home_page() {
+    @Then("I am taken back to the system's home page")
+    public void i_am_taken_to_the_systems_home_page() {
         String homeUrl = RunPlaywrightTests.baseUrl + "/";
         String currentUrl = RunPlaywrightTests.page.url();
         Assertions.assertEquals(homeUrl, currentUrl);
+    }
+
+    @Then("I am taken to the main page of the application")
+    public void i_am_taken_to_the_main_page_of_the_application() {
+        String mainUrl = RunPlaywrightTests.baseUrl + "/main";
+        String currentUrl = RunPlaywrightTests.page.url();
+        Assertions.assertEquals(mainUrl, currentUrl);
     }
 }
