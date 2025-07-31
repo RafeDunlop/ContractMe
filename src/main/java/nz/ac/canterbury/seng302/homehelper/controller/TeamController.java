@@ -35,15 +35,19 @@ public class TeamController {
 
     @GetMapping("/create")
     public String createTeam(@RequestParam Long id, @ModelAttribute CreateTeamDTO createTeamDTO, Model model) {
-        User loggedIn = loginService.getUserByEmail();
-        RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
-        if (loggedIn != renovationRecord.getUser() | ! locationService.hasLocation(renovationRecord)) {
+        try {
+            User loggedIn = loginService.getUserByEmail();
+            RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
+            if (renovationRecord == null || !loggedIn.equals(renovationRecord.getUser()) || !locationService.hasLocation(renovationRecord)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            }
+            //todo check that record doesn't already have a a team!
+            model.addAttribute("createTeamDTO", createTeamDTO);
+            model.addAttribute("renovationRecord", renovationRecord);
+            model.addAttribute("skills", Skill.values());
+            return "createTeam";
+        } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        //todo check that record doesn't already have a a team!
-        model.addAttribute("createTeamDTO", createTeamDTO);
-        model.addAttribute("renovationRecord", renovationRecord);
-        model.addAttribute("skills", Skill.values());
-        return "createTeam";
     }
 }
