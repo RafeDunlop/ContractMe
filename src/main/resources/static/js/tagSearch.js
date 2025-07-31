@@ -22,6 +22,10 @@ function focusTagInput() {
     tagInput.focus();
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    setupTagSearch();
+});
+
 tagInput.addEventListener("input", function () {
     const partialTag = tagInput.value.trim();
     if (partialTag.length < 1) {
@@ -220,4 +224,6 @@ function setupTagSearch() {
         }
     });
 }
+
+window.focusTagInput = focusTagInput;
 
