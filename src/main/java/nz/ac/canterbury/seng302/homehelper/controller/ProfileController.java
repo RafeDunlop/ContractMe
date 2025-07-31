@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 /**
  * Controller for the user profile page.
@@ -57,7 +59,10 @@ public class ProfileController {
 			model.addAttribute("email", user.getEmail());
 			model.addAttribute("dateAdded", user.getCreatedTimestamp().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 			model.addAttribute("profilePicture", user.getProfilePicture());
-
+			if (user instanceof Contractor contractor) {
+				model.addAttribute("userType", "Contractor");
+				model.addAttribute("isAvailable", contractor.getAvailable());
+			}
 			return "profileTemplate";
 		} catch (IllegalArgumentException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());

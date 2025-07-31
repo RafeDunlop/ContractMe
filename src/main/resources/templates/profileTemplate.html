@@ -55,6 +55,11 @@
 								<td class="p-2" th:text="${dateAdded}">date</td>
 							</tr>
 
+							<tr th:if="${userType == 'Contractor'}">
+								<th class="p-2">Availability</th>
+								<td class="p-2" th:text="${isAvailable} ? 'Available' : 'Not Available'">Availability</td>
+							</tr>
+
 						</tbody>
 					</table>
 				</div>
