@@ -20,6 +20,7 @@ public class EditProfileStepsE2e {
         RunPlaywrightTests.page.navigate(RunPlaywrightTests.baseUrl + "/user");
     }
 
+
     @When("I click the Edit button")
     public void i_click_on_edit_button() {
         RunPlaywrightTests.page.locator("#edit-button").click();
@@ -57,6 +58,27 @@ public class EditProfileStepsE2e {
         String countryFieldValue = RunPlaywrightTests.page.locator("#country").inputValue();
         Assertions.assertEquals(userLocation.getCountry(), countryFieldValue);
 
+    }
+
+    @Given("I am on the edit profile form")
+    public void i_am_on_the_edit_profile_form() {
+        RunPlaywrightTests.page.navigate(RunPlaywrightTests.baseUrl + "/user/edit");
+    }
+
+    @When("I enter valid values for my first name,last name, and email address")
+    public void i_enter_valid_values_for_my_first_name_last_name_and_email_address() {
+        RunPlaywrightTests.page.locator("#first-name").fill("John");
+        RunPlaywrightTests.page.locator("#last-name").fill("Smith");
+        RunPlaywrightTests.page.locator("#email").fill("test@example.com");
+    }
+
+    @When("I click the Submit button")
+    public void i_click_the_submit_button() {
+        RunPlaywrightTests.page.locator("#submit-button").click();
+    }
+
+    @Then("my new details are saved")
+    public void my_new_details_are_saved() {
     }
 
 }
