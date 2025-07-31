@@ -49,7 +49,7 @@ public class SetupRegisterUserStepsE2e {
         RunPlaywrightTests.page.locator("#username").fill(uniqueEmail);
         RunPlaywrightTests.page.locator("#password").fill("Test123!");
         RunPlaywrightTests.page.locator("#sign-in-button").click();
-        String homeUrl = RunPlaywrightTests.baseUrl + "/";
+        String homeUrl = RunPlaywrightTests.baseUrl + "/main";
         String currentUrl = RunPlaywrightTests.page.url();
         Assertions.assertEquals(homeUrl, currentUrl);
     }
