@@ -4,6 +4,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.User;
 import org.junit.jupiter.api.Assertions;
 
 public class EditProfileStepsE2e {
@@ -28,6 +30,33 @@ public class EditProfileStepsE2e {
         String registrationUrl = RunPlaywrightTests.baseUrl + "/user/edit";
         String currentUrl = RunPlaywrightTests.page.url();
         Assertions.assertEquals(registrationUrl, currentUrl);
+
+        User user = userContext.getUser();
+
+        String userFirstName = user.getFirstName();
+        String firstNameFieldValue = RunPlaywrightTests.page.locator("#first-name").inputValue();
+        Assertions.assertEquals(userFirstName, firstNameFieldValue);
+
+        String userLastName = user.getLastName();
+        String lastNameFieldValue = RunPlaywrightTests.page.locator("#last-name").inputValue();
+        Assertions.assertEquals(userLastName, lastNameFieldValue);
+
+        String userEmail = user.getEmail();
+        String emailFieldValue = RunPlaywrightTests.page.locator("#email").inputValue();
+        Assertions.assertEquals(userEmail, emailFieldValue);
+
+        Location userLocation = user.getLocation();
+        String addressFieldValue = RunPlaywrightTests.page.locator("#address").inputValue();
+        Assertions.assertEquals(userLocation.getAddress(), addressFieldValue);
+        String suburbFieldValue = RunPlaywrightTests.page.locator("#suburb").inputValue();
+        Assertions.assertEquals(userLocation.getSuburb(), suburbFieldValue);
+        String cityFieldValue = RunPlaywrightTests.page.locator("#city").inputValue();
+        Assertions.assertEquals(userLocation.getCity(), cityFieldValue);
+        String postcodeFieldValue = RunPlaywrightTests.page.locator("#postcode").inputValue();
+        Assertions.assertEquals(userLocation.getPostcode(), postcodeFieldValue);
+        String countryFieldValue = RunPlaywrightTests.page.locator("#country").inputValue();
+        Assertions.assertEquals(userLocation.getCountry(), countryFieldValue);
+
     }
 
 }
