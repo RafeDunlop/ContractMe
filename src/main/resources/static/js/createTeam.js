@@ -1,5 +1,6 @@
 /**
- * todo
+ * Adds a skill field with a hidden input, display and delete button to a specified empty div
+ * input value is enum value, e.g. MANUAL_LABOURER, named skill
  */
 function addSkill() {
     const skillDropdown = document.getElementById("skills-select");
