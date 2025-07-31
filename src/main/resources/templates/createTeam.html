@@ -19,7 +19,7 @@
             <select class="form-select" id="skills-select" type="text" aria-label="skills-select" autocomplete="off">
                 <option disabled selected hidden>Select skill</option>
                 <option th:each="skill : ${skills}" th:value="${skill}" th:text="${skill.getDisplayName()}"
-                        th:attr="display-name=${skill.getDisplayName()}" class="skill-option"></option>
+                        th:attr="data-displayname=${skill.getDisplayName()}" class="skill-option"></option>
             </select>
             <button type="button" class="btn btn-secondary" onclick="addSkill()">Add</button>
         </div>
