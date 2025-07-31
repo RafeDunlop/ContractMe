@@ -10,6 +10,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -91,7 +92,7 @@ public class ProfileControllerIntegrationTest {
 
     @Test
     public void changeAvailability_setTrue_contractorIsAvailable() throws Exception {
-        Contractor contractor = new Contractor("John", "Smith", "john@example.com", "password");
+        Contractor contractor = new Contractor("John", "Smith", "john" + System.currentTimeMillis() + "@example.com", "password");
         Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
         contractor.setLocation(location);
         contractorRepository.save(contractor);
@@ -112,7 +113,7 @@ public class ProfileControllerIntegrationTest {
 
     @Test
     public void changeAvailability_setFalse_contractorIsUnavailable() throws Exception {
-        Contractor contractor = new Contractor("John", "Smith", "john@example.com", "password");
+        Contractor contractor = new Contractor("John", "Smith", "john" + System.currentTimeMillis() + "@example.com", "password");
         Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
         contractor.setLocation(location);
         contractorRepository.save(contractor);
