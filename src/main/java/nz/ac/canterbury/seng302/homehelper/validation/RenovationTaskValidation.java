@@ -118,7 +118,7 @@ public class RenovationTaskValidation {
             TaskState.valueOf(stateName);
             return null;
         } catch (IllegalArgumentException e) {
-            return "Selected task state is not a valid state.";
+            return String.format("\"%s\" is not a valid task state.", stateName);
         }
     }
 }
