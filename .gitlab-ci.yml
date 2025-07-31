@@ -41,10 +41,10 @@ cucumber-acceptance-tests:
     paths:
       - build/jacoco/cucumber.exec
 
-playwright-end-to-end-tests:
+playwright-end2end-tests:
   stage: test
   script:
-    - ./gradlew playwright
+    - ./gradlew end2end
   artifacts:
     paths:
       - build/jacoco/playwright.exec
