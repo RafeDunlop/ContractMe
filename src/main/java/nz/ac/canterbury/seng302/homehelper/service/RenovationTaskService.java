@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
@@ -81,6 +82,7 @@ public class RenovationTaskService {
      */
     public void addRenovationTask(RenovationTaskDTO renovationTaskDTO, RenovationRecord renovationRecord) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        TaskState state = TaskState.NOT_STARTED;
         String name = renovationTaskDTO.getName();
         String description = renovationTaskDTO.getDescription();
         LocalDate dueDate = null;
@@ -89,7 +91,7 @@ public class RenovationTaskService {
         }
         List<String> roomList = renovationTaskDTO.getRooms();
         RenovationTask renovationTask = new RenovationTask(name, description, roomList, dueDate, renovationRecord);
-
+        renovationTask.setState(state);
         renovationTaskRepository.save(renovationTask);
     }
 

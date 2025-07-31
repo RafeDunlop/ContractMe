@@ -208,7 +208,7 @@ function renderRecordCards(data, currentUserId, pageNumber) {
         card.className = "card card-count position-relative";
 
         card.innerHTML = `
-            <a href="${basePath}renovations/view?id=${record.id}&page=1" class="no-underline text-reset">
+            <a href="${basePath}renovations/view?id=${record.id}&page=1" class="no-underline text-reset" style="text-decoration: none; color: black">
                 ${(record.userId === currentUserId) ? '<span class="badge bg-primary position-absolute top-0 end-0 m-2">Yours</span>' : ""}
                 <div class="card-body">
                     <h5 class="card-title truncate">${record.name}</h5>
@@ -269,7 +269,17 @@ function renderTaskCards(data, isOwner, renovationId) {
     grid.innerHTML = "";
     grid.className = "task-grid";
 
+    const stateColors = {
+        "NOT_STARTED": "#6c757d",
+        "IN_PROGRESS": "#0d6efd",
+        "BLOCKED": "#ffc107",
+        "COMPLETED": "#198754",
+        "CANCELLED": "#dc3545"
+    };
+
     data.content.forEach(task => {
+
+        const stateColor = stateColors[task.state]
         const isDefaultIcon = task.iconFileName === 'default-icon.png';
 
         const iconHtml = `
@@ -288,7 +298,7 @@ function renderTaskCards(data, isOwner, renovationId) {
         ` : "";
 
         const cardHtml = `
-            <div class="card card-count">
+            <div class="card card-count" style="border-top: 5px solid ${stateColor};">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         ${iconHtml}

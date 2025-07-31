@@ -3,11 +3,13 @@ package nz.ac.canterbury.seng302.homehelper.unit.service;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -281,6 +283,21 @@ public class RenovationTaskServiceTest {
         Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
         assertEquals(dummyTask1, toTest.get(startDate).getFirst());
         assertEquals(dummyTask2, toTest.get(endDate).getFirst());
+    }
+
+    @Test
+    public void addTask_validDetails_taskStateSetToNotStarted() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task 1", "New Task", LocalDate.now().plusDays(1).format(formatter), new ArrayList<>());
+        RenovationRecord renovationRecord = mock(RenovationRecord.class);
+
+        renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
+
+        ArgumentCaptor<RenovationTask> taskCaptor = ArgumentCaptor.forClass(RenovationTask.class);
+        Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(taskCaptor.capture());
+        RenovationTask savedTask = taskCaptor.getValue();
+
+        assertEquals(TaskState.NOT_STARTED, savedTask.getState(), "Task state should be NOT_STARTED");
     }
 }
 

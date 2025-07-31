@@ -6,11 +6,15 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.format.DateTimeFormatter;
+import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
+
 /**
  * Creates a RenovationTaskDTO object
  */
 public class RenovationTaskDTO {
     private Long id;
+
+    private TaskState state;
     private String name;
     private String description;
     String dueDate;
@@ -79,6 +83,7 @@ public class RenovationTaskDTO {
         }
         this.rooms = task.getRoomList();
         this.iconFileName = task.getIconFileName();
+        this.state = task.getState();
     }
 
     /**
@@ -113,6 +118,13 @@ public class RenovationTaskDTO {
         return rooms;
     }
 
+    /**
+     * gets the state of the task
+     * @return The state of the task
+     */
+    public TaskState getState() {
+        return state;
+    }
     /**
      * Sets the description of this renovation task
      * @param description The description of this renovation task
