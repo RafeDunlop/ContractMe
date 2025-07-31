@@ -57,8 +57,11 @@
                      <div class="d-flex flex-column align-items-lg-start">
                          <div th:text="${cell.day.getDayOfMonth()}"/>
                      </div>
-                     <div class="btn-primary calendar-task d-flex flex-row align-items-center" th:each=" task : ${cell.calendarTasks}">
-                         <div class="position-relative">
+                     <div class="btn-primary calendar-task d-flex flex-row align-items-center"
+                          th:each="task : ${cell.calendarTasks}"
+                          th:attr="data-task-id=${task.id}"
+                          onclick="showTaskModalById(this.dataset.taskId)">
+                        <div class="position-relative">
                              <img th:src="@{'/images/' + ${task.getIconFileName()}}" alt="Task Icon" class="calendar-icon"
                                   th:onclick="showIconSelector(${task.id})" />
                          </div>
@@ -71,5 +74,6 @@
 </div>
 
 <script type="text/javascript" th:src="@{/js/calendar.js}"></script>
+<script type="text/javascript" th:src="@{/js/taskModal.js}"></script>
 </body>
 </html>

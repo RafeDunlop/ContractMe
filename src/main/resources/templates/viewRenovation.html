@@ -118,10 +118,15 @@
             <div th:if="${isOwner}">
                 <div th:replace="~{fragments/calendar.html ::calendar (${date}, ${datesArray}, ${renovation.id})}"></div>
             </div>
+        </div>
     </div>
 
     <div id="icon-selector-modal" class="modal" style="display: none">
         <div id="icon-selector-content"></div>
+    </div>
+
+    <div id="task-modal" class="modal" style="display: none">
+        <div id="task-modal-content"></div>
     </div>
 
 <script th:inline="javascript">
@@ -158,5 +163,5 @@
 <script type="text/javascript" th:src="@{/js/removeTag.js}"></script>
 <script type="text/javascript" th:src="@{/js/renovationUtils.js}"></script>
 <script type="text/javascript" th:src="@{/js/calendar.js}"></script>
-
+<script type="text/javascript" th:src="@{/js/taskModal.js}"></script>
 </html>
