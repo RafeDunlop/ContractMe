@@ -68,17 +68,6 @@ public class TaskStateSteps {
 
     @Given("that i create a task on a renovation record")
     public void that_i_create_a_task_on_a_renovation_record() {
-        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        User user = new User("Test", "User", "uniqueEmail@gmail.com", encoder.encode("Test123!"));
-        user.activate();
-        userRepository.save(user);
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                user.getEmail(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(auth);
-        SecurityContextHolder.setContext(context);
-        userContext.setUser(user);
-
         RenovationRecord record = new RenovationRecord(userContext.getUser(), "Record " + System.currentTimeMillis(), "", List.of());
         renovationRecordRepository.save(record);
         this.renovationId = record.getId();
@@ -121,5 +110,42 @@ public class TaskStateSteps {
                         .param("cardsPerPage", "5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].state").value("NOT_STARTED"));
+    }
+
+
+    @Given("that I am viewing one of my renovation records with tasks")
+    public void that_i_am_viewing_one_of_my_renovation_records_with_tasks() throws Exception {
+        RenovationRecord record = new RenovationRecord(userContext.getUser(), "Record " + System.currentTimeMillis(), "", List.of());
+        renovationRecordRepository.save(record);
+        this.renovationId = record.getId();
+
+        RenovationTask task = new RenovationTask("Task 1", "Desc",new ArrayList<>(), null,record);
+        TaskState state = TaskState.NOT_STARTED;
+        task.setState(state);
+        renovationTaskRepository.save(task);
+        this.taskId = task.getId();
+
+        mockMvc.perform(get("/view")
+                        .param("id", String.valueOf(renovationId))
+                        .sessionAttr("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"));
+    }
+
+    @When("I select {string} from the task state dropdown")
+    public void i_select_from_the_task_state_dropdown(String string) {
+
+    }
+
+    @Then("the task state is updated to {string}")
+    public void the_task_state_is_updated_to(String string) {
+        // Write code here that turns the phrase above into concrete actions
+        throw new io.cucumber.java.PendingException();
+    }
+
+    @Then("the task state displays the color {string}")
+    public void the_task_state_displays_the_color(String string) {
+        // Write code here that turns the phrase above into concrete actions
+        throw new io.cucumber.java.PendingException();
     }
 }
