@@ -6,6 +6,7 @@ function addSkill() {
     const skillDropdown = document.getElementById("skills-select");
     if (skillDropdown.selectedIndex !== 0) {
         const selectedSkill = skillDropdown.value;
+        document.getElementById("skills-list");
         const selectedSkillName = skillDropdown.options[skillDropdown.selectedIndex].dataset.displayname;
         const selectedSkillsDiv = document.getElementById("selected-skills");
 
@@ -16,26 +17,26 @@ function addSkill() {
         const deleteButton = document.createElement("button");
 
         selectedSkillInputHidden.value = selectedSkill;
-        selectedSkillInputHidden.type = "hidden"
+        selectedSkillInputHidden.type = "hidden";
         selectedSkillInputHidden.name = "skill";
 
-        selectedSkillFeedback.className = "flex-grow-1 card d-flex pt-3 align-items-center"
-        selectedSkillText.className = "text-secondary"
+        selectedSkillFeedback.className = "d-flex fustify-content-between align-items-start";
+        selectedSkillText.className = "w-100 text-secondary";
         selectedSkillText.textContent = selectedSkillName;
 
-        selectedSkillDisplay.className = "input-group my-4";
+        selectedSkillDisplay.className = "list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative";
 
-        deleteButton.className = "btn btn-outline-danger custom-light-border ms-3"
-        deleteButton.textContent = "❌"
+        deleteButton.className = "btn btn-outline-danger custom-light-border ms-3";
+        deleteButton.textContent = "❌";
 
         deleteButton.addEventListener("click", () => {
             selectedSkillDisplay.remove();
         });
         selectedSkillsDiv.appendChild(selectedSkillDisplay);
-        selectedSkillFeedback.appendChild(selectedSkillText)
+        selectedSkillFeedback.appendChild(selectedSkillText);
         selectedSkillDisplay.appendChild(selectedSkillFeedback);
         selectedSkillDisplay.appendChild(selectedSkillInputHidden);
-        selectedSkillDisplay.appendChild(deleteButton);
+        selectedSkillFeedback.appendChild(deleteButton);
         skillDropdown.selectedIndex = 0;
     }
 }
