@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * A controller for team management pages
+ */
 @Controller
 @RequestMapping("/renovations/team")
 public class TeamController {
@@ -26,6 +29,13 @@ public class TeamController {
     private final LoginService loginService;
     private final LocationService locationService;
 
+    /**
+     * Autowired constructor for instantiating a TeamController
+     *
+     * @param renovationRecordService the service associated with renovation records
+     * @param loginService the login service for retrieving the logged-in user
+     * @param locationService the location service to check if a record contains a valid location
+     */
     @Autowired
     public TeamController(RenovationRecordService renovationRecordService, LoginService loginService, LocationService locationService) {
         this.renovationRecordService = renovationRecordService;
@@ -33,6 +43,15 @@ public class TeamController {
         this.locationService = locationService;
     }
 
+    /**
+     * Get mapping for the create team page
+     * @param id the renovation record id
+     * @param createTeamDTO the DTO containing the form fields
+     * @param model object containing the model attributes for thymeleaf
+     * @return a string referring to the HTML template for the create team page
+     * @throws ResponseStatusException 404 not found if the record does not have a location, the current user does not
+     *                                 own the renovation, or an argument is missing or invalid
+     */
     @GetMapping("/create")
     public String createTeam(@RequestParam Long id, @ModelAttribute CreateTeamDTO createTeamDTO, Model model) {
         try {
