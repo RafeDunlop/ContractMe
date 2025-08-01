@@ -306,6 +306,17 @@ function renderTaskCards(data, isOwner, renovationId) {
                     </div>
                     <p class="card-text truncate">${task.description}</p>
                     <p class="card-text"><strong>Due Date:</strong> ${task.dueDate}</p>
+                    
+                    <!-- Dropdown to update task state triggers a PATCH that updates border color -->
+                    <div class="d-flex align-items-center mb-3 mt-2">
+                      <p class="card-text mb-0 me-2"><strong>State:</strong></p>
+                      <select id="task-state-${task.id}" class="form-select form-select-sm w-auto" onchange="updateTaskState(${task.id}, this.value, this)">
+                        ${Object.keys(stateColors).map(state =>
+                                `<option value="${state}" ${state === task.state ? 'selected' : ''}>${state.replaceAll('_', ' ')}</option>`
+                            ).join('')}
+                      </select>
+                    </div>
+                    
                     <div class="d-flex justify-content-between">${editButton}</div>
                 </div>
             </div>

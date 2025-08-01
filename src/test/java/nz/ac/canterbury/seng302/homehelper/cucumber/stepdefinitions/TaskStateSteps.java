@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -15,6 +16,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,8 +39,10 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+@SuppressWarnings("ALL")
 @AutoConfigureMockMvc
 @SpringBootTest
 public class TaskStateSteps {
@@ -61,6 +65,7 @@ public class TaskStateSteps {
 
     private Long taskId;
 
+    private MvcResult result;
 
     public TaskStateSteps (UserContext userContext){
         this.userContext = userContext;
@@ -68,17 +73,6 @@ public class TaskStateSteps {
 
     @Given("that i create a task on a renovation record")
     public void that_i_create_a_task_on_a_renovation_record() {
-        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        User user = new User("Test", "User", "uniqueEmail@gmail.com", encoder.encode("Test123!"));
-        user.activate();
-        userRepository.save(user);
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                user.getEmail(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(auth);
-        SecurityContextHolder.setContext(context);
-        userContext.setUser(user);
-
         RenovationRecord record = new RenovationRecord(userContext.getUser(), "Record " + System.currentTimeMillis(), "", List.of());
         renovationRecordRepository.save(record);
         this.renovationId = record.getId();
@@ -121,5 +115,42 @@ public class TaskStateSteps {
                         .param("cardsPerPage", "5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].state").value("NOT_STARTED"));
+    }
+
+    @Given("that I am viewing one of my renovation records with tasks")
+    public void that_i_am_viewing_one_of_my_renovation_records_with_tasks() throws Exception {
+        RenovationRecord record = new RenovationRecord(userContext.getUser(), "Record " + System.currentTimeMillis(), "", List.of());
+        renovationRecordRepository.save(record);
+        this.renovationId = record.getId();
+
+        RenovationTask task = new RenovationTask("Task 1", "Desc", new ArrayList<>(), null, record);
+        TaskState state = TaskState.NOT_STARTED;
+        task.setState(state);
+        renovationTaskRepository.save(task);
+        this.taskId = task.getId();
+
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", String.valueOf(renovationId))
+                        .sessionAttr("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext()))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @When("I update the task state {string}")
+    public void i_update_the_task_state(String stateName) throws Exception {
+        result = result = mockMvc.perform(patch("/task/" + taskId + "/state")
+                        .param("state", stateName)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Then("the task state is set to state {string}")
+    public void the_task_state_is_set_to_state(String expectedState) {
+        Optional<RenovationTask> task = renovationTaskRepository.findById(taskId);
+        assertTrue(task.isPresent(), "Task should exist");
+
+        RenovationTask renovationTask = task.get();
+        assertEquals(TaskState.valueOf(expectedState), renovationTask.getState(), "Task state should match expected state");
     }
 }
