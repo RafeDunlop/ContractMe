@@ -3,7 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 import jakarta.annotation.PostConstruct;
 import nz.ac.canterbury.seng302.homehelper.controller.ProfileController;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
