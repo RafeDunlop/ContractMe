@@ -1,6 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.event;
 
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import org.springframework.context.ApplicationEvent;
 
 import java.util.Locale;

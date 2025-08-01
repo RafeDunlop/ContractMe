@@ -60,7 +60,7 @@
                 <form th:action="@{/renovations/tags/add}" method="post" id="add-tag-form" class="mb-3" th:if="${isOwner}">
                     <label for="tagName" class="fw-bold">Add Tags:</label>
                     <input type="text" class="form-control" id="tagName" name="tagName" placeholder="Enter a tag"
-                           data-cy="tag" maxlength="129" autocomplete="off" required>
+                           data-cy="tag" maxlength="129" autocomplete="off" th:value="${submittedTag} ?: ''" required>
                     <ul id="autocomplete-list" class="list-group position-absolute" style="z-index: 1000;"></ul>
                     <input type="hidden" name="renovationId" th:value="${renovation.id}">
                 </form>
@@ -90,14 +90,10 @@
                 </div>
             </div>
 
-            <div id="elements-container" style="display: none;">
+            <div th:if="${not #lists.isEmpty(renovation.getRenovationTasks())}" id="elements-container" style="display: none;">
                 <div id="grid" class="task-grid">
                     <!-- Cards will be injected here by JavaScript -->
                 </div>
-            </div>
-
-            <div id="loading-message" class="text-center">
-                <p>Loading renovations...</p>
             </div>
 
             <div id="footer" class="mt-2">
@@ -109,13 +105,19 @@
                     <p id="errorText"></p>
                 </div>
 
+
+                <!-- Buttons -->
                 <div class="mt-2 mb-2">
-                    <a th:href="@{/renovations/edit(id=${renovation.id}, visibility=${visibility})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
-                    <a th:href="@{/renovations/view/create(id=${renovation.id}, visibility=${visibility})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
-                    <a th:href="@{${previousUrl}}" class="btn btn-secondary" th:if="${previousUrl != null}">Back</a>
+                    <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
+                    <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
+                    <a th:href="@{${previousUrl}}" class="btn btn-secondary" th:if="${previousUrl != null && !previousUrl.contains('/search')}">Back</a>
+                    <a th:href="@{${previousUrl}}" class="btn btn-secondary" th:if="${previousUrl.contains('/search')}">Back to search results</a>
                 </div>
             </div>
-        </div>
+
+            <div th:if="${isOwner}">
+                <div th:replace="~{fragments/calendar.html ::calendar (${date}, ${datesArray}, ${renovation.id})}"></div>
+            </div>
     </div>
 
     <div id="icon-selector-modal" class="modal" style="display: none">
@@ -152,7 +154,9 @@
 <script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
 <script type="text/javascript" th:src="@{/js/autocomplete.js}"></script>
-<script type="text/javascript" th:src="@{/js/renovationTagValidation.js}"></script>
+<script type="text/javascript" th:src="@{/js/validation/renovationTagValidation.js}"></script>
 <script type="text/javascript" th:src="@{/js/removeTag.js}"></script>
 <script type="text/javascript" th:src="@{/js/renovationUtils.js}"></script>
+<script type="text/javascript" th:src="@{/js/calendar.js}"></script>
+
 </html>

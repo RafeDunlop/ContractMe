@@ -3,11 +3,13 @@ package nz.ac.canterbury.seng302.homehelper.unit.service;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +25,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RenovationTaskServiceTest {
 
@@ -33,7 +38,7 @@ public class RenovationTaskServiceTest {
 
     @BeforeEach
     void setUp() {
-        renovationTaskRepository = Mockito.mock(RenovationTaskRepository.class);
+        renovationTaskRepository = mock(RenovationTaskRepository.class);
         renovationTaskValidation = new RenovationTaskValidation();
         renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationTaskValidation);
         renovationRecord = new RenovationRecord();
@@ -83,11 +88,11 @@ public class RenovationTaskServiceTest {
     public void addTask_allDetailsValid_callsSaveTask() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task 1", "New Task", LocalDate.now().plusDays(1).format(formatter), new ArrayList<>());
-        RenovationRecord renovationRecord = Mockito.mock(RenovationRecord.class);
+        RenovationRecord renovationRecord = mock(RenovationRecord.class);
 
         renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
 
-        Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(Mockito.any());
+        Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(any());
     }
 
     @Test
@@ -197,6 +202,102 @@ public class RenovationTaskServiceTest {
         Map<String, List<String>> expectedErrors = new HashMap<>();
         expectedErrors.put("roomError", List.of("Whoops, it looks like \"notRoom3\" is not a valid room anymore"));
         assertEquals(expectedErrors, renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord));
+    }
+
+    @Test
+    public void getTasksWithinDates_noTasksBetweenDates_mapContainsEmptyLists() {
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(2);
+        when(renovationTaskRepository.getByDueDateBetween(startDate, endDate, renovationRecord)).thenReturn(List.of());
+        Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
+        assertEquals(3, toTest.size());
+
+        for (int i = 0; i < toTest.size(); i++) {
+            assertTrue(toTest.get(startDate.plusDays(i)).isEmpty());
+        }
+
+    }
+
+    @Test
+    public void getTasksWithinDates_middleDayHasTask_taskInMap() {
+        RenovationTask dummyTask = mock(RenovationTask.class);
+        LocalDate startDate = LocalDate.now();
+        LocalDate middleDate = startDate.plusDays(1);
+        LocalDate endDate = startDate.plusDays(2);
+        when(dummyTask.getDueDate()).thenReturn(startDate.plusDays(1));
+        when(dummyTask.getRenovationRecord()).thenReturn(renovationRecord);
+        when(renovationTaskRepository.getByDueDateBetween(any(LocalDate.class), any(LocalDate.class), any(RenovationRecord.class))).thenReturn(List.of(dummyTask));
+        Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
+        assertEquals(dummyTask, toTest.get(middleDate).getFirst());
+    }
+
+    @Test
+    public void getTasksWithinDates_oneDay_taskInMap() {
+        RenovationTask dummyTask = mock(RenovationTask.class);
+        LocalDate startDate = LocalDate.now();
+        when(dummyTask.getDueDate()).thenReturn(startDate);
+        when(dummyTask.getRenovationRecord()).thenReturn(renovationRecord);
+        when(renovationTaskRepository.getByDueDateBetween(any(LocalDate.class), any(LocalDate.class), any(RenovationRecord.class))).thenReturn(List.of(dummyTask));
+        Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, startDate);
+        assertEquals(dummyTask, toTest.get(startDate).getFirst());
+    }
+
+    @Test
+    public void getTasksWithinDates_endBeforeStart_emptyMap() {
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.minusDays(1);
+        when(renovationTaskRepository.getByDueDateBetween(any(LocalDate.class), any(LocalDate.class), any(RenovationRecord.class))).thenReturn(List.of());
+        Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
+        assertEquals(0, toTest.size());
+    }
+
+    @Test
+    public void getTasksWithinDates_firstDateMultipleTasks_tasksInMap() {
+        RenovationTask dummyTask1 = mock(RenovationTask.class);
+        RenovationTask dummyTask2 = mock(RenovationTask.class);
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(1);
+        when(dummyTask1.getRenovationRecord()).thenReturn(renovationRecord);
+        when(dummyTask2.getRenovationRecord()).thenReturn(renovationRecord);
+        when(dummyTask1.getDueDate()).thenReturn(startDate);
+        when(dummyTask2.getDueDate()).thenReturn(startDate);
+        when(renovationTaskRepository.getByDueDateBetween(any(LocalDate.class), any(LocalDate.class), any(RenovationRecord.class))).thenReturn(List.of(dummyTask1, dummyTask2));
+        Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
+        assertEquals(2, toTest.get(startDate).size());
+        assertEquals(dummyTask1, toTest.get(startDate).get(0));
+        assertEquals(dummyTask2, toTest.get(startDate.plusDays(0)).get(1));
+
+    }
+
+    @Test
+    public void getTasksWithinDates_edgeDatesHaveTasks_allTasksInMap() {
+        RenovationTask dummyTask1 = mock(RenovationTask.class);
+        RenovationTask dummyTask2 = mock(RenovationTask.class);
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(2);
+        when(dummyTask1.getRenovationRecord()).thenReturn(renovationRecord);
+        when(dummyTask2.getRenovationRecord()).thenReturn(renovationRecord);
+        when(dummyTask1.getDueDate()).thenReturn(startDate);
+        when(dummyTask2.getDueDate()).thenReturn(endDate);
+        when(renovationTaskRepository.getByDueDateBetween(any(LocalDate.class), any(LocalDate.class), any(RenovationRecord.class))).thenReturn(List.of(dummyTask1, dummyTask2));
+        Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
+        assertEquals(dummyTask1, toTest.get(startDate).getFirst());
+        assertEquals(dummyTask2, toTest.get(endDate).getFirst());
+    }
+
+    @Test
+    public void addTask_validDetails_taskStateSetToNotStarted() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task 1", "New Task", LocalDate.now().plusDays(1).format(formatter), new ArrayList<>());
+        RenovationRecord renovationRecord = mock(RenovationRecord.class);
+
+        renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
+
+        ArgumentCaptor<RenovationTask> taskCaptor = ArgumentCaptor.forClass(RenovationTask.class);
+        Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(taskCaptor.capture());
+        RenovationTask savedTask = taskCaptor.getValue();
+
+        assertEquals(TaskState.NOT_STARTED, savedTask.getState(), "Task state should be NOT_STARTED");
     }
 }
 

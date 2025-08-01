@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
@@ -39,8 +40,41 @@ public class RenovationTaskService {
         this.renovationTaskValidation = renovationTaskValidation;
     }
 
+    /**
+     * Gets the task with the corresponding id
+     * @param id The id corresponding to the {@code RenovationTask} to be retrieved
+     * @return The {RenovationTask} corresponding to the specified id
+     */
     public RenovationTask getTaskById(Long id) {
         return renovationTaskRepository.findById(id).orElse(null);
+    }
+
+
+    /**
+     * Gets a mapping of dates within the specified range to tasks whose due dates fall on those dates
+     * @param renovationRecord The {@code RenovationRecord} whose tasks are being queried
+     * @param startDate The first date for which to retrieve {@code RenovationTask} objects
+     * @param endDate The last date for which to retrieve {@code RenovationTask} objects
+     * @return A map which contains the {@code RenovationTask} objects associated with each date within the specified range
+     */
+    public Map<LocalDate, List<RenovationTask>> getTasksWithinDates(RenovationRecord renovationRecord, LocalDate startDate, LocalDate endDate) {
+        LocalDate upperBoundary = endDate.plusDays(1);
+        HashMap<LocalDate, List<RenovationTask>> dateMap = new HashMap<>();
+        List<LocalDate> keys = startDate.datesUntil(upperBoundary).toList();
+        keys.forEach(date -> dateMap.put(date, new ArrayList<>()));
+        Iterator<LocalDate> keyItr = keys.iterator();
+        Iterator<RenovationTask> valItr = renovationTaskRepository.getByDueDateBetween(startDate, endDate, renovationRecord).iterator();
+        if (keyItr.hasNext() && valItr.hasNext()) {
+            LocalDate currentKey = keyItr.next();
+            do {
+                RenovationTask renovationTask = valItr.next();
+                while (!currentKey.equals(renovationTask.getDueDate())) {
+                    currentKey = keyItr.next();
+                }
+                dateMap.get(currentKey).add(renovationTask);
+            } while(valItr.hasNext());
+        }
+        return dateMap;
     }
 
     /**
@@ -48,6 +82,7 @@ public class RenovationTaskService {
      */
     public void addRenovationTask(RenovationTaskDTO renovationTaskDTO, RenovationRecord renovationRecord) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        TaskState state = TaskState.NOT_STARTED;
         String name = renovationTaskDTO.getName();
         String description = renovationTaskDTO.getDescription();
         LocalDate dueDate = null;
@@ -56,7 +91,7 @@ public class RenovationTaskService {
         }
         List<String> roomList = renovationTaskDTO.getRooms();
         RenovationTask renovationTask = new RenovationTask(name, description, roomList, dueDate, renovationRecord);
-
+        renovationTask.setState(state);
         renovationTaskRepository.save(renovationTask);
     }
 

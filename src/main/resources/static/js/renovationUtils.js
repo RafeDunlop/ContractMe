@@ -22,7 +22,7 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
     const loading = document.getElementById("loading-message");
 
     // Get visibility filter
-    const visibility = document.querySelector("select[name='visibility']")?.value || "all";
+    const visibility = document.querySelector("select[name='visibility']")?.value || "user";
     updateHeaderTitle(visibility);
 
     // Read pagination and display settings
@@ -41,10 +41,8 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
     params.set("page", pageNumber);
     userParams.set("page", pageNumber);
 
-    if (visibility !== "all") {
-        params.set("visibility", visibility);
-        userParams.set("visibility", visibility);
-    }
+    params.set("visibility", visibility);
+    userParams.set("visibility", visibility);
 
     if (lastSubmittedSearchTerm) {
         params.set("searchTerm", lastSubmittedSearchTerm);
@@ -122,7 +120,6 @@ function fetchRenovation(id, resetPage = false) {
 
     const element = document.getElementById("grid");
     const container = document.getElementById("elements-container");
-    const loading = document.getElementById("loading-message");
     const isOwner = document.getElementById("isOwner");
 
     let pageNumber = parseInt(document.getElementById("pageNumber")?.value, 10);
@@ -136,19 +133,12 @@ function fetchRenovation(id, resetPage = false) {
     }
 
     const params = new URLSearchParams();
-    const userParams = new URLSearchParams();
-    userParams.set("id", id);
     params.set("page", pageNumber);
     params.set("cardsPerPage", cardsPerPage);
-
-    const newUrl = new URL(window.location);
-    newUrl.search = userParams.toString();
-    window.history.replaceState({}, '', newUrl);
 
     fetch(`${basePath}renovations/retrieve/${id}?${params.toString()}`)
         .then(response => response.json())
         .then(data => {
-            loading.style.display = "none";
             element.style.display = "grid";
             element.innerHTML = "";
 
@@ -170,7 +160,6 @@ function fetchRenovation(id, resetPage = false) {
             }
         })
         .catch(error => {
-            loading.style.display = "none";
             element.style.display = "none";
             container.insertAdjacentHTML('beforeend', `<div class="alert alert-danger mt-4">Failed to load renovations. Please try again.</div>`);
             console.error(error);
@@ -219,7 +208,7 @@ function renderRecordCards(data, currentUserId, pageNumber) {
         card.className = "card card-count position-relative";
 
         card.innerHTML = `
-            <a href="${basePath}renovations/view?id=${record.id}&page=1" class="no-underline text-reset">
+            <a href="${basePath}renovations/view?id=${record.id}&page=1" class="no-underline text-reset" style="text-decoration: none; color: black">
                 ${(record.userId === currentUserId) ? '<span class="badge bg-primary position-absolute top-0 end-0 m-2">Yours</span>' : ""}
                 <div class="card-body">
                     <h5 class="card-title truncate">${record.name}</h5>
@@ -248,11 +237,12 @@ function renderRecordTable(data, pageNumber, csrfToken) {
 
     data.content.forEach(record => {
         const rowHtml = `
-            <a href="${basePath}renovations/view?id=${record.id}&page=1" class="list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative">
+            <div class="list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative renovation-card truncate"
+                 data-url="${basePath}renovations/view?id=${record.id}&page=1" style="cursor: pointer;">
                 <div class="d-flex justify-content-between align-items-start">
-                    <div class="w-100" onclick="document.getElementById('form-${record.id}').submit();" style="cursor: pointer;">
-                        <h5 class="mb-1 text-primary">${record.name}</h5>
-                        <p class="mb-0 text-muted">${record.description}</p>
+                    <div class="w-100 truncate">
+                        <h5 class="mb-1 text-primary truncate">${record.name}</h5>
+                        <p class="mb-0 text-muted truncate">${record.description}</p>
                     </div>
                     <button type="button" class="btn btn-outline-danger custom-light-border ms-3"
                         data-id="${record.id}" data-searchQuery="${lastSubmittedSearchTerm}"
@@ -261,7 +251,7 @@ function renderRecordTable(data, pageNumber, csrfToken) {
                         ❌
                     </button>
                 </div>
-            </a>
+            </div>
         `;
         table.insertAdjacentHTML("beforeend", rowHtml);
     });
@@ -279,7 +269,17 @@ function renderTaskCards(data, isOwner, renovationId) {
     grid.innerHTML = "";
     grid.className = "task-grid";
 
+    const stateColors = {
+        "NOT_STARTED": "#6c757d",
+        "IN_PROGRESS": "#0d6efd",
+        "BLOCKED": "#ffc107",
+        "COMPLETED": "#198754",
+        "CANCELLED": "#dc3545"
+    };
+
     data.content.forEach(task => {
+
+        const stateColor = stateColors[task.state]
         const isDefaultIcon = task.iconFileName === 'default-icon.png';
 
         const iconHtml = `
@@ -298,7 +298,7 @@ function renderTaskCards(data, isOwner, renovationId) {
         ` : "";
 
         const cardHtml = `
-            <div class="card card-count">
+            <div class="card card-count" style="border-top: 5px solid ${stateColor};">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         ${iconHtml}
@@ -337,7 +337,7 @@ function renderModalContent(task, csrfToken) {
                                 data-taskid="${task.id}"
                                 data-csrf="${csrfToken}"
                                 onclick="addTaskIcon(this)">
-                            <img src="/images/${icon}" class="img-fluid rounded-circle"
+                            <img src="${basePath}images/${icon}" class="img-fluid rounded-circle"
                                  style="width: 100px; height: 100px; object-fit: cover"
                                  alt="Task Icon">
                         </button>

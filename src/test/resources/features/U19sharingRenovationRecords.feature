@@ -1,4 +1,4 @@
-@autoriseUser
+@authoriseUser
 Feature: U19 - As Inaya, I want to be able to make my renovation record
   public so that I can share my progress with others.
 

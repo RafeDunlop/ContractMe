@@ -1,6 +1,9 @@
-package nz.ac.canterbury.seng302.homehelper.entity;
+package nz.ac.canterbury.seng302.homehelper.entity.users;
 
 import jakarta.persistence.*;
+import nz.ac.canterbury.seng302.homehelper.entity.Authority;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 

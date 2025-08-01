@@ -1,15 +1,14 @@
 package nz.ac.canterbury.seng302.homehelper.unit.service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.UpdatePasswordDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.UpdatePasswordService;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 

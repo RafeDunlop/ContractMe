@@ -4,11 +4,14 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
 
+import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,16 +30,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import nz.ac.canterbury.seng302.homehelper.controller.CreateTaskController;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
 
 @SpringBootTest
 @ActiveProfiles("test")
 public class CreateTaskControllerIntegrationTest {
 
     private MockMvc mockMvc;
+
 
     @Autowired
     private CreateTaskController createTaskController;
@@ -78,6 +82,31 @@ public class CreateTaskControllerIntegrationTest {
             .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
             .andExpect(view().name("redirect:/renovations/view?id=1"));
         Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(Mockito.any(RenovationTask.class));
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void testAddTask_validTask_taskHasTheNotStartedState() throws Exception {
+        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
+        user.grantAuthority("ROLE_USER");
+        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
+        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
+        Mockito.when(renovationRecordRepository.findById(1)).thenReturn(Optional.of(renovationRecord));
+        mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("name", "Demolish walls")
+                        .param("description", "Demolish all the stuff")
+                        .param("roomList", "Room 1", "Room 2")
+                        .param("renovationId", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(view().name("redirect:/renovations/view?id=1"));
+
+        ArgumentCaptor<RenovationTask> taskCaptor = ArgumentCaptor.forClass(RenovationTask.class);
+        Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(taskCaptor.capture());
+
+        RenovationTask savedTask = taskCaptor.getValue();
+        assertEquals(TaskState.NOT_STARTED, savedTask.getState(), "The task state should be NOT_STARTED");
     }
 
 

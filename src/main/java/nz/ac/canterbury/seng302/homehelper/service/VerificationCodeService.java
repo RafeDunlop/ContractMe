@@ -2,8 +2,8 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import jakarta.annotation.PreDestroy;
 import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.security.SecureRandomCodeGenerator;

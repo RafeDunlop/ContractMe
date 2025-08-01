@@ -1,9 +1,7 @@
 import {
-    hideAllErrorMessages,
     checkAllLocationFields
-} from "./locationFormValidation.js";
+} from "./validation/locationFormValidation.js";
 
-let locationToggleSwitch = document.getElementById("location-toggleswitch");
 let locationForm = document.getElementById("location-form");
 
 let addressField = document.getElementById("address");
@@ -11,8 +9,6 @@ let suburbField = document.getElementById("suburb");
 let cityField = document.getElementById("city");
 let postcodeField = document.getElementById("postcode");
 let countryField = document.getElementById("country");
-
-locationToggleSwitch.addEventListener("click", displayLocationForm);
 
 
 /** Js file used for autocompleting the tag entry field on viewRenovation.html */
@@ -45,6 +41,36 @@ document.addEventListener("click", event => {
     }
 })
 addressField.addEventListener("input", triggerUpdateAutocomplete);
+
+let currentTabIndex = -1;
+
+// Event for navigating the autocomplete with the up/down arrow keys
+document.addEventListener("keydown", function (event) {
+    const listItems = document.querySelectorAll("#autocomplete-list .list-group-item:not(.disabled)");
+
+    if (listItems.length === 0) {
+        return;
+    }
+
+    if (event.key === "ArrowDown") {
+        event.preventDefault();
+        currentTabIndex++;
+        if (currentTabIndex >= listItems.length) {
+            currentTabIndex = 0;
+        }
+        listItems[currentTabIndex].focus();
+    }
+
+    if (event.key === "ArrowUp") {
+        event.preventDefault();
+        currentTabIndex--;
+        if (currentTabIndex < 0) {
+            currentTabIndex = listItems.length - 1;
+        }
+        listItems[currentTabIndex].focus();
+    }
+});
+
 
 /**
  * Handles the logic of whether to update the autocomplete list (or hide it).
@@ -160,6 +186,7 @@ function setAutoCompleteList(addressList) {
 function getAutocompleteOption(address) {
     const item = document.createElement("li");
     item.classList.add("list-group-item");
+    item.setAttribute("tabindex", "0");
     item.textContent = address.formatted;
 
     item.addEventListener("mouseover", () => {
@@ -189,20 +216,24 @@ function getAutocompleteOption(address) {
         checkAllLocationFields();
     });
 
+    item.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            addressField.value = address.address_line1;
+            suburbField.value = address.region;
+            cityField.value = address.city;
+            postcodeField.value = address.postcode;
+            countryField.value = address.country;
+
+            committedFields.address = address.address_line1;
+            committedFields.suburb = address.region;
+            committedFields.city = address.city;
+            committedFields.postcode = address.postcode;
+            committedFields.country = address.country;
+
+            autocompleteList.innerHTML = "";
+            checkAllLocationFields();
+        }
+    });
+
     return item;
 }
-
-function displayLocationForm() {
-    if (locationToggleSwitch.checked === true) {
-        locationForm.style.display = "block";
-
-    }
-    else {
-        locationForm.style.display = "none";
-        hideAllErrorMessages()
-
-    }
-}
-
-
-

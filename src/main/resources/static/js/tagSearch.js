@@ -24,7 +24,7 @@ tagInput.addEventListener("input", function () {
         resetAutocomplete();
         return
     }
-    updateAutocomplete(partialTag);
+    updateSearchAutocomplete(partialTag)
 });
 
 /**
@@ -33,7 +33,7 @@ tagInput.addEventListener("input", function () {
  */
 function updateSearchAutocomplete(partialTag) {
     const filteredTags = tags.map(t => t.trim());
-    fetch(`/renovations/tags/autocomplete?partialTag=${encodeURIComponent(partialTag)}`)
+    fetch(`renovations/tags/autocomplete?partialTag=${encodeURIComponent(partialTag)}`)
     .then(response => response.json())
     .then(results => {
         const suggestions = results.filter(tag => !filteredTags.includes(tag));
@@ -109,7 +109,7 @@ function addTag(tag) {
 
     // Create bubble
     const bubble = document.createElement("span");
-    bubble.className = "badge bg-primary text-white me-1 mb-1";
+    bubble.className = "badge bg-success text-white me-1 mb-1";
     bubble.textContent = tag;
 
     // Remove button
