@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -184,5 +185,30 @@ public class EditTaskController {
         RenovationRecord renovation = renovationTask.getRenovationRecord();
         editTaskService.updateTaskIcon(renovationTask, iconName);
         return "redirect:/renovations/view?id=" + renovation.getId();
+    }
+
+
+    /**
+     * Handles a PATCH request to update the state of a task.
+     * @param id of the task to update.
+     * @param state The new state to assign to the task
+     * @return A ResponseEntity with HTTP 200 if successful, or 400/403 if there is an error.
+     */
+    @PatchMapping("/task/{id}/state")
+    public ResponseEntity<String> changeTaskState(@PathVariable Long id, @RequestParam String state) {
+        logger.info("PATCH /task/{}/state", id);
+
+        RenovationTask renovationTask = renovationTaskService.getTaskById(id);
+        User user = loginService.getUserByEmail();
+        if (!renovationTask.getRenovationRecord().getUser().equals(user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Action not allowed.");
+        }
+
+        try {
+            editTaskService.updateTaskState(renovationTask, state);
+            return ResponseEntity.ok("State updated");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
