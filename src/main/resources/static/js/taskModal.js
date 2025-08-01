@@ -32,14 +32,14 @@ function showTaskModal(taskElement, room) {
 function renderTaskModalContent(task) {
     return `
         <div class="modal-header">
-            <h5 class="modal-title">${task.name}</h5>
+            <h5 class="modal-title truncate">${task.name}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <p><strong>Description:</strong> ${task.description}</p>
-            <p><strong>Due Date:</strong> ${task.dueDate}</p>
-            <p><strong>Status:</strong> ${task.state}</p>
-            <p><strong>Rooms:</strong> ${task.roomList ? task.roomList.join(', ') : ''}</p>
+            <p class="truncate"><strong>Description:</strong> ${task.description}</p>
+            <p class="truncate"><strong>Due Date:</strong> ${task.dueDate}</p>
+            <p class="truncate"><strong>Status:</strong> ${task.state}</p>
+            <p class="truncate"><strong>Rooms:</strong> ${task.roomList ? task.roomList.join(', ') : ''}</p>
         </div>
     `;
 }
