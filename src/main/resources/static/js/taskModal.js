@@ -1,16 +1,18 @@
-function showTaskModal(taskElement) {
+function showTaskModal(taskElement, room) {
+    // Remove brackets and split by comma
+    const roomList = taskElement.dataset.taskRoomlist
+        ? taskElement.dataset.taskRoomlist.replace(/^\[|\]$/g, '').split(',').map(s => s.trim())
+        : [];
+
+
     const task = {
         id: taskElement.dataset.taskId,
         name: taskElement.dataset.taskName,
         description: taskElement.dataset.taskDesc,
         dueDate: taskElement.dataset.taskDate,
         state: taskElement.dataset.taskState,
-        roomList: taskElement.dataset.taskRooms
-            ? JSON.parse(taskElement.dataset.taskRooms)
-            : []
+        roomList: roomList
     };
-
-    console.log(task);
 
     const content = document.getElementById("task-modal-content");
     content.innerHTML = renderTaskModalContent(task);

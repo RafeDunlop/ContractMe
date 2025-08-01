@@ -59,14 +59,14 @@
                      </div>
                      <div class="btn-primary calendar-task d-flex flex-row align-items-center"
                           th:each="task : ${cell.calendarTasks}"
+                          th:onclick="|showTaskModal(this, '${task.id}')|"
                           th:attr="
          data-task-id=${task.id},
          data-task-name=${task.name},
          data-task-desc=${task.description},
          data-task-date=${task.dueDate},
          data-task-state=${task.state},
-         data-task-roomList=${task.roomList}"
-                     onclick="showTaskModal(this)">
+         data-task-roomList=${task.roomList}">
 
                         <div class="position-relative">
                              <img th:src="@{'/images/' + ${task.getIconFileName()}}" alt="Task Icon" class="calendar-icon"
