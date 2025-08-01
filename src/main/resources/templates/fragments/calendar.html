@@ -57,13 +57,18 @@
                      <div class="d-flex flex-column align-items-lg-start">
                          <div th:text="${cell.day.getDayOfMonth()}"/>
                      </div>
-                     <div class="btn-primary calendar-task d-flex flex-row align-items-center" th:each=" task : ${cell.calendarTasks}">
+                     <div class="calendar-task d-flex flex-row align-items-center px-1 rounded-1 text-white"
+                          th:each="task : ${cell.calendarTasks}"
+                          th:style="'background-color: ' + ${task.state.colorHex}"
+                          th:classappend="${task.state.name() == 'BLOCKED'} ? ' text-dark' : ''">
+
                          <div class="position-relative">
                              <img th:src="@{'/images/' + ${task.getIconFileName()}}" alt="Task Icon" class="calendar-icon"
                                   th:onclick="showIconSelector(${task.id})" />
                          </div>
                          <div class="task-text" th:text="${task.getName()}"/>
                      </div>
+
                  </div>
             </div>
         </div>

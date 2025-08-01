@@ -7,24 +7,25 @@ package nz.ac.canterbury.seng302.homehelper.entity;
  */
 public enum TaskState {
 
-    NOT_STARTED("Not Started"),
-    IN_PROGRESS("In Progress"),
+    NOT_STARTED("Not Started", "#c2cad1"),
+    IN_PROGRESS("In Progress", "#1982C4"),
 
-    BLOCKED("Blocked"),
+    BLOCKED("Blocked", "#FFCA3A"),
 
-    COMPLETED("Completed"),
+    COMPLETED("Completed", "#8AC926"),
 
-    CANCELLED("Cancelled");
+    CANCELLED("Cancelled", "#FF595E");
 
-    private String displayState;
-
+    private final String displayState;
+    private final String colorHex;
     /**
      * Constructs a new TaskState with the specified display string.
      *
      * @param displayState the human-readable name for this task state
      */
-    TaskState(String displayState) {
+    TaskState(String displayState, String colorHex) {
         this.displayState = displayState;
+        this.colorHex = colorHex;
     }
 
     /**
@@ -37,4 +38,7 @@ public enum TaskState {
     }
 
 
+    public String getColorHex() {
+        return colorHex;
+    }
 }

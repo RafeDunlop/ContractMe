@@ -9,11 +9,11 @@ function updateTaskState(taskId, newState, cardSelect) {
     const card = cardSelect.closest('.card');
 
     const stateColors = {
-        "NOT_STARTED": "#6c757d",
-        "IN_PROGRESS": "#0d6efd",
-        "BLOCKED": "#ffc107",
-        "COMPLETED": "#198754",
-        "CANCELLED": "#dc3545"
+        "NOT_STARTED": "#c2cad1",
+        "IN_PROGRESS": "#1982C4",
+        "BLOCKED": "#FFCA3A",
+        "COMPLETED": "#8AC926",
+        "CANCELLED": "#FF595E"
     };
 
     const newColor = stateColors[newState];
