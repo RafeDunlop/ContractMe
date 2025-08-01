@@ -19,5 +19,9 @@ if (availabilityCheckbox) {
             },
             body: JSON.stringify({ isAvailable: isAvailable })
         });
+        if (response.ok) {
+            location.reload();
+        }
     });
+
 }

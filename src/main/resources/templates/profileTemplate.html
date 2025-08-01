@@ -27,7 +27,7 @@
 			<form id="contractorForm" class="d-flex align-items-center" th:if="${userType == 'Contractor'}">
 				<input type="hidden" id="contractor" th:value="${contractor.id}">
 				<input type="checkbox" id="availabilityCheckbox" name="isAvailable" th:checked="${contractor.available}" class="me-1">
-				<label for="availabilityCheckbox" class="mb-0">Job Availability</label>
+				<label for="availabilityCheckbox" class="mb-0">Available for jobs</label>
 			</form>
             <a th:href="@{/user/edit}" class="btn btn-primary ">
                 Edit
