@@ -1,5 +1,10 @@
-function showTaskModal(taskElement, room) {
-    // Remove brackets and split by comma
+/**
+ * creates task object from click selection and shows task modal with content
+ * @param taskElement calendar task object
+ */
+function showTaskModal(taskElement) {
+    // Chatgpt used for generating regex - Jake
+    // PROMPT: please help me Split the Room list
     const roomList = taskElement.dataset.taskRoomlist
         ? taskElement.dataset.taskRoomlist.replace(/^\[|\]$/g, '').split(',').map(s => s.trim())
         : [];
@@ -28,10 +33,8 @@ function showTaskModal(taskElement, room) {
     modal.show();
 }
 
-
-
 /**
- * Renders modal content for icon selection for a task.
+ * Renders modal content for displaying task details
  * @param task - The task object.
  * @returns string HTML content string for modal.
  */
@@ -42,10 +45,10 @@ function renderTaskModalContent(task) {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <p class="truncate"><strong>Description:</strong> ${task.description}</p>
-            <p class="truncate"><strong>Due Date:</strong> ${task.dueDate}</p>
-            <p class="truncate"><strong>Status:</strong> ${task.state}</p>
-            <p class="truncate"><strong>Rooms:</strong> ${task.roomList ? task.roomList.join(', ') : ''}</p>
+            <p class="modal-content-truncate"><strong>Description:</strong> ${task.description}</p>
+            <p class="modal-content-truncate"><strong>Due Date:</strong> ${task.dueDate}</p>
+            <p class="modal-content-truncate"><strong>Status:</strong> ${task.state}</p>
+            <p class="modal-content-truncate"><strong>Rooms:</strong> ${task.roomList ? task.roomList.join(', ') : ''}</p>
         </div>
     `;
 }

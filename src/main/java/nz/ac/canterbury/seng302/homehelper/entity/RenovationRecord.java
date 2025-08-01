@@ -35,7 +35,7 @@ public class RenovationRecord {
     @Column(nullable = false)
     private String name;
 
-    @Embedded
+    @Column
     private Location location;
 
     @Column(nullable = false, length = 513)
