@@ -7,7 +7,7 @@ import java.util.Optional;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.ContractorContext;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.ContractorRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
