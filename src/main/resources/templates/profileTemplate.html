@@ -74,9 +74,21 @@
 								<th class="p-2">Availability</th>
 								<td class="p-2" th:text="${isAvailable} ? 'Available' : 'Not Available'">Availability</td>
 							</tr>
-
-<!--							todo skills, location-->
-
+							<tr th:if="${userType == 'Contractor'}">
+								<th class="p-2">Skills</th>
+								<td class="p-2">
+									<span th:each="skill : ${skills}"
+										  class="tag-box badge bg-success d-inline-flex align-items-center me-2 mb-2">
+										<span class="tag-text-large ms-1 text-truncate" th:text="${skill.getDisplayName()}"/>
+									</span>
+								</td>
+							</tr>
+							<tr th:if="${location}">
+								<th class="p-2">Address</th>
+								<td class="p-2">
+									<div th:replace="~{fragments/addressDisplay.html :: addressDisplay (${location})}"></div>
+								</td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
