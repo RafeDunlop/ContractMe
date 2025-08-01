@@ -21,7 +21,7 @@ Feature: As Sarah, I want to log into the system so that I can have a personalis
     Given I am on the login form
     And I enter an email address <email>
     When I click the "Sign in" button
-    Then An error message tells me "Email address must be in the form 'jane@doe.nz'."
+    Then An error message tells me that "Email address must be in the form 'jane@doe.nz'."
     Examples:
       | email          |
       | ""             |

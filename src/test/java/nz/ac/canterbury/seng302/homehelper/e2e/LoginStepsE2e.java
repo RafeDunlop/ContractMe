@@ -101,7 +101,7 @@ public class LoginStepsE2e {
         Assertions.assertEquals(expectedButtonName, buttonName);
     }
 
-    @Then("An error message tells me {string}")
+    @Then("An error message tells me that {string}")
     public void an_error_message_tells_me_email_address_must_be_in_the_form(String expectedErrorMessage) {
         String errorMessage = RunPlaywrightTests.page.locator("#email-backend-error").locator("ul").innerText();
         Assertions.assertEquals(expectedErrorMessage, errorMessage);
