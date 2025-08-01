@@ -58,15 +58,23 @@
 								<th class="p-2">Email</th>
 								<td class="p-2" th:text="${email}">email</td>
 							</tr>
+							<tr th:if="${userType == 'Contractor'}">
+								<th class="p-2">Phone Number</th>
+								<td class="p-2" th:text="|+${Integer.toString(contractor.getCountryCode())} ${contractor.getPhoneNumber()}|"/>
+							</tr>
+							<tr th:if="${userType == 'Contractor'}">
+								<th class="p-2">Hourly Rate</th>
+								<td class="p-2" th:text="${contractor.getHourlyRate()}"/>
+							</tr>
 							<tr>
 								<th class="p-2">Account created</th>
 								<td class="p-2" th:text="${dateAdded}">date</td>
 							</tr>
-
 							<tr th:if="${userType == 'Contractor'}">
 								<th class="p-2">Availability</th>
 								<td class="p-2" th:text="${isAvailable} ? 'Available' : 'Not Available'">Availability</td>
 							</tr>
+<!--							todo skills, location-->
 
 						</tbody>
 					</table>
