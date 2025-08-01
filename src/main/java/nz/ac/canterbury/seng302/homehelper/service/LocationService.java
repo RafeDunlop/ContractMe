@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.GeocodingCoordsDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
@@ -36,6 +37,8 @@ public class LocationService {
     private static final String LOCALHOST_IP_IPV6 = "0:0:0:0:0:0:0:1";
 
     private static final String GEOAPIFY_BASE_URL = "https://api.geoapify.com/v1/";
+
+    private static final double CONFIDENCE_LEVEL = 0.95d;
 
     private static final String IP_API = "ipinfo";
 
@@ -78,7 +81,7 @@ public class LocationService {
                 addressDTO.getLatitude(),
                 addressDTO.getLongitude()
         );
-        Location location = new Location(
+        return new Location(
                 addressDTO.getAddress_line1(),
                 addressDTO.getCountry(),
                 addressDTO.getPostcode(),
@@ -87,7 +90,6 @@ public class LocationService {
                 addressDTO.getLatitude(),
                 addressDTO.getLongitude()
         );
-        return location;
     }
 
     /**
@@ -98,6 +100,22 @@ public class LocationService {
      */
     public void injectCoordsViaGeocoding(AddressDTO addressDTO) throws IllegalArgumentException {
         logger.debug("Attempting to retrieve coordinates via geocoding for address {}", addressDTO.getAddress_line1());
+        ResponseEntity<String> response = restTemplate.getForEntity(getGeocodingCompleteUrl(addressDTO), String.class);
+        try {
+            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode results = root.get("results");
+            List<GeocodingCoordsDTO> coordResultList = objectMapper.readValue(results.toString(), new TypeReference<>() {});
+            if (coordResultList.isEmpty()) {
+                throw new IllegalArgumentException("No coordinates found");
+            } else if (coordResultList.get(0).getConfidence() < CONFIDENCE_LEVEL) {
+                throw new IllegalArgumentException("No results with satisfactory confidence found");
+            } else {
+                addressDTO.setLatitude(coordResultList.get(0).getLat());
+                addressDTO.setLongitude(coordResultList.get(0).getLon());
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to parse geocoding results", e);
+        }
     }
 
     /**
@@ -111,6 +129,9 @@ public class LocationService {
                 addressDTO.getAddress_line1(),
                 ipAddress
         );
+        LocalisationDTO localisationDTO = getRoughLocation(ipAddress);
+        addressDTO.setLatitude(localisationDTO.getLocation().getLatitude());
+        addressDTO.setLongitude(localisationDTO.getLocation().getLongitude());
     }
 
     /**
@@ -231,8 +252,29 @@ public class LocationService {
         return sb.toString();
     }
 
-    private String getGeocodingCompleteUrl(AddressDTO address) throws IllegalArgumentException {
-        return "";
+    /**
+     * Gets the URL to call to retrieve geocoding information about the custom supplied location
+     * todo null entries?
+     * @param address The {@link AddressDTO} which contains the address
+     * @return The URL to call to retrieve geocoding information about the custom supplied location
+     */
+    private String getGeocodingCompleteUrl(AddressDTO address) {
+        String addressEntry = String.join("",
+                address.getAddress_line1(),
+                address.getRegion(),
+                address.getCity(),
+                address.getPostcode(),
+                address.getCountry()
+        );
+        StringBuilder sb = new StringBuilder();
+        sb.append(GEOAPIFY_BASE_URL);
+        sb.append(AUTOCOMPLETE_API);
+        sb.append(String.format("?text=%s", URLEncoder.encode(addressEntry, StandardCharsets.UTF_8)));
+        sb.append("&lang=en");
+        sb.append("&format=json");
+        logger.debug("calling geocoding API: {}", sb);
+        sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
+        return sb.toString();
     }
 
     /**
