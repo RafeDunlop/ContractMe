@@ -60,11 +60,11 @@
 							</tr>
 							<tr th:if="${userType == 'Contractor'}">
 								<th class="p-2">Phone Number</th>
-								<td class="p-2" th:text="|+${Integer.toString(contractor.getCountryCode())} ${contractor.getPhoneNumber()}|"/>
+								<td class="p-2" th:text="${phoneNumber}"/>
 							</tr>
 							<tr th:if="${userType == 'Contractor'}">
 								<th class="p-2">Hourly Rate</th>
-								<td class="p-2" th:text="${contractor.getHourlyRate()}"/>
+								<td class="p-2" th:text="${hourlyRate}"/>
 							</tr>
 							<tr>
 								<th class="p-2">Account created</th>
@@ -74,6 +74,7 @@
 								<th class="p-2">Availability</th>
 								<td class="p-2" th:text="${isAvailable} ? 'Available' : 'Not Available'">Availability</td>
 							</tr>
+
 <!--							todo skills, location-->
 
 						</tbody>
