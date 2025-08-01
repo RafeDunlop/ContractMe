@@ -208,7 +208,7 @@ function renderRecordCards(data, currentUserId, pageNumber) {
         card.className = "card card-count position-relative";
 
         card.innerHTML = `
-            <a href="${basePath}renovations/view?id=${record.id}&page=1" class="no-underline text-reset">
+            <a href="${basePath}renovations/view?id=${record.id}&page=1" class="no-underline text-reset" style="text-decoration: none; color: black">
                 ${(record.userId === currentUserId) ? '<span class="badge bg-primary position-absolute top-0 end-0 m-2">Yours</span>' : ""}
                 <div class="card-body">
                     <h5 class="card-title truncate">${record.name}</h5>
@@ -306,6 +306,17 @@ function renderTaskCards(data, isOwner, renovationId) {
                     </div>
                     <p class="card-text truncate">${task.description}</p>
                     <p class="card-text"><strong>Due Date:</strong> ${task.dueDate}</p>
+                    
+                    <!-- Dropdown to update task state triggers a PATCH that updates border color -->
+                    <div class="d-flex align-items-center mb-3 mt-2">
+                      <p class="card-text mb-0 me-2"><strong>State:</strong></p>
+                      <select id="task-state-${task.id}" class="form-select form-select-sm w-auto" onchange="updateTaskState(${task.id}, this.value, this)">
+                        ${Object.keys(stateColors).map(state =>
+                                `<option value="${state}" ${state === task.state ? 'selected' : ''}>${state.replaceAll('_', ' ')}</option>`
+                            ).join('')}
+                      </select>
+                    </div>
+                    
                     <div class="d-flex justify-content-between">${editButton}</div>
                 </div>
             </div>
