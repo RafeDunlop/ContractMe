@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.LocationValidation;
 import org.slf4j.Logger;
@@ -56,6 +57,60 @@ public class LocationService {
         this.locationValidation = locationValidation;
         this.objectMapper = new ObjectMapper();
         this.restTemplate = new RestTemplate();
+    }
+
+    /**
+     * This method calls Geoapify API endpoints. These should be mocked for testing.
+     * @param addressDTO address data object passed from frontend
+     * @return fully-formed {@link Location} object guaranteed to be supplied coordinates
+     */
+    public Location locate(AddressDTO addressDTO, String ipAddress) {
+        if (!hasCoords(addressDTO)) {
+            try {
+                injectCoordsViaGeocoding(addressDTO);
+            } catch (IllegalArgumentException e) {
+                logger.warn("failed to acquire location coordinates via geocoding {}", e.getMessage());
+                injectCoordsViaIpGeolocation(addressDTO, ipAddress);
+            }
+        }
+        logger.debug("Creating location for address {} with coords {}, {}",
+                addressDTO.getAddress_line1(),
+                addressDTO.getLatitude(),
+                addressDTO.getLongitude()
+        );
+        Location location = new Location(
+                addressDTO.getAddress_line1(),
+                addressDTO.getCountry(),
+                addressDTO.getPostcode(),
+                addressDTO.getCity(),
+                addressDTO.getRegion(),
+                addressDTO.getLatitude(),
+                addressDTO.getLongitude()
+        );
+        return location;
+    }
+
+    /**
+     * Attempts to inject the co-ordinates of a custom-input address via the Geoapify Geocoding service.
+     * @param addressDTO The {@link AddressDTO} to be edited inline with the co-ordinates supplied by Geoapify
+     * @throws IllegalArgumentException if the specified address does not exist or is not present or if Geoapify
+     * cannot identify coordinates for it
+     */
+    public void injectCoordsViaGeocoding(AddressDTO addressDTO) throws IllegalArgumentException {
+        logger.debug("Attempting to retrieve coordinates via geocoding for address {}", addressDTO.getAddress_line1());
+    }
+
+    /**
+     * Injects the co-ordinates of a malformed custom-input address via Geoapify's IP geolocation service. This is
+     * less precise than geolocation or autocomplete
+     * @param addressDTO The {@link AddressDTO} to be edited inline with the co-ordinates supplied by Geoapify
+     * @param ipAddress The ip address of the request to be forwarded to Geopaify
+     */
+    public void injectCoordsViaIpGeolocation(AddressDTO addressDTO, String ipAddress) {
+        logger.info("Retrieve rough coordinates for address {} via request ip {}",
+                addressDTO.getAddress_line1(),
+                ipAddress
+        );
     }
 
     /**
@@ -113,6 +168,8 @@ public class LocationService {
     }
 
 
+
+
     /**
      * Runs validation on each of the user input params
      * @param dto the addressdto containing the user inputted location data
@@ -157,8 +214,8 @@ public class LocationService {
     private String getAutoCompleteUrl(String prompt, String countryCode, double latitude, double longitude) {
         for (String input : List.of(prompt, countryCode, String.valueOf(latitude), String.valueOf(longitude))) {
             if (input == null || input.isEmpty()) {
-                logger.warn("A required input is missing");
-                throw new IllegalArgumentException();
+                logger.warn("A required input is missing {}", input);
+                throw new IllegalArgumentException(String.format("A required input is missing: %s", input));
             }
         }
         StringBuilder sb = new StringBuilder();
@@ -172,6 +229,10 @@ public class LocationService {
         logger.debug("calling autocomplete API: {}", sb);
         sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
         return sb.toString();
+    }
+
+    private String getGeocodingCompleteUrl(AddressDTO address) throws IllegalArgumentException {
+        return "";
     }
 
     /**
@@ -211,5 +272,16 @@ public class LocationService {
             }
         }
         return addresses;
+    }
+
+    /**
+     * Performs a simple values-based check to check whether a location has co-ordinates provided
+     * note: 0, 0 is null island (middle of sea). Nobody lives or works there
+     * @param address The DTO which contains fields for co-ordinates
+     * @return Whether the co-ordinates provided in the specified address are null-equivalent (returns false)
+     */
+    private boolean hasCoords(AddressDTO address) {
+        return address.getLongitude() == 0d &&
+                address.getLatitude() == 0d;
     }
 }
