@@ -1,7 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;

@@ -6,7 +6,7 @@ import nz.ac.canterbury.seng302.homehelper.controller.EditProfileController;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
