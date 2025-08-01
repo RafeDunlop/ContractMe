@@ -53,7 +53,7 @@ public class LoginStepsE2e {
     @And("I enter the wrong password for the corresponding email address")
     public void i_enter_the_wrong_password_for_the_corresponding_email_address() {
         String userEmail = userContext.getUser().getEmail();
-        String incorrectPassword = "Test123!" + "2354y";
+        String incorrectPassword = "Test123!2354y";
 
         RunPlaywrightTests.page.locator("#username").fill(userEmail);
         RunPlaywrightTests.page.locator("#password").fill(incorrectPassword);
@@ -95,25 +95,22 @@ public class LoginStepsE2e {
         RunPlaywrightTests.page.locator("#cancel-button").click();
     }
 
-    @Then("It indicates a button labelled \"Sign in\"")
-    public void it_indicates_a_button_labelled() {
-        String expectButtonName = "Sign in";
+    @Then("It indicates a button labelled {string}")
+    public void it_indicates_a_button_labelled(String expectedButtonName) {
         String buttonName = RunPlaywrightTests.page.locator("#login-button").innerText();
-        Assertions.assertEquals(expectButtonName, buttonName);
+        Assertions.assertEquals(expectedButtonName, buttonName);
     }
 
-    @Then("An error message tells me \"Email address must be in the form 'jane@doe.nz'.\"")
-    public void an_error_message_tells_me_email_address_must_be_in_the_form() {
-        String expectedErrorMessage = "Email address must be in the form 'jane@doe.nz'.";
+    @Then("An error message tells me {string}")
+    public void an_error_message_tells_me_email_address_must_be_in_the_form(String expectedErrorMessage) {
         String errorMessage = RunPlaywrightTests.page.locator("#email-backend-error").locator("ul").innerText();
         Assertions.assertEquals(expectedErrorMessage, errorMessage);
     }
 
-    @Then("An error message tells me \"The email address is unknown, or the password is invalid.\"")
-    public void an_error_message_tells_me_the_email_address_is_unknown_or_the_password_is_invalid() {
-        String expectErrorMessage = "The email address is unknown, or the password is invalid.";
+    @Then("An error message tells me {string}")
+    public void an_error_message_tells_me_the_email_address_is_unknown_or_the_password_is_invalid(String expectedErrorMessage) {
         String errorMessage = RunPlaywrightTests.page.locator("#general-error").innerText();
-        Assertions.assertEquals(expectErrorMessage, errorMessage);
+        Assertions.assertEquals(expectedErrorMessage, errorMessage);
     }
 
     @Then("I am taken to the registration page")

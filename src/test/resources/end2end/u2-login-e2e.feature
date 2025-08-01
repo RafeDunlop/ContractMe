@@ -17,13 +17,14 @@ Feature: As Sarah, I want to log into the system so that I can have a personalis
     When I click a highlighted link with the text "Not registered? Create an account"
     Then I am taken to the registration page
 
-  Scenario Outline: AC4.1
+  Scenario Outline: AC4
     Given I am on the login form
     And I enter an email address <email>
     When I click the "Sign in" button
     Then An error message tells me "Email address must be in the form 'jane@doe.nz'."
     Examples:
       | email          |
+      | ""             |
       | "hello"        |
       | "@gmail.com"   |
       | "!@gmail.com"  |
@@ -31,11 +32,6 @@ Feature: As Sarah, I want to log into the system so that I can have a personalis
       | "jane@doe"     |
       | "jane@doe.c"   |
 
-  Scenario: AC4.2
-    Given I am on the login form
-    And I enter an email address ""
-    When I click the "Sign in" button
-    Then An error message tells me "Email address must be in the form 'jane@doe.nz'."
 
   Scenario: AC5
     Given I am on the login form
