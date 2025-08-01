@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.unit.validation;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.junit.jupiter.api.BeforeAll;
@@ -155,5 +156,19 @@ public class RenovationTaskValidationTest {
                 rooms
         );
         assertEquals("Whoops, it looks like \"notRoom2\" is not a valid room anymore", renovationTaskValidation.validateRooms(renovation, List.of("room1", "notRoom2", "room3")));
+    }
+
+    @Test
+    void validStateName_allEnumValues_noError() {
+        for (TaskState state : TaskState.values()) {
+            assertNull(renovationTaskValidation.validateStateName(state.name()));
+        }
+    }
+
+    @Test
+    void invalidStateName_returnsError() {
+        String invalidState = "not-starte";
+        String result = renovationTaskValidation.validateStateName(invalidState);
+        assertEquals("\"not-starte\" is not a valid task state.", result);
     }
 }
