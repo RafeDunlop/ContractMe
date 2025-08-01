@@ -14,6 +14,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,10 +29,11 @@ import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepos
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import org.springframework.security.core.context.SecurityContextHolder;
-
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.Optional;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -53,6 +56,8 @@ public class TaskStateSteps {
     private Long renovationId;
 
     private Long taskId;
+
+    private MvcResult result;
 
 
     public TaskStateSteps (UserContext userContext){
@@ -144,4 +149,30 @@ public class TaskStateSteps {
         assertEquals(TaskState.valueOf(expectedState), renovationTask.getState(), "Task state should match expected state");
     }
 
+    @Given("the task has the state {string} and is due today")
+    public void the_task_has_the_state_and_is_due_today(String stateName) {
+        RenovationTask renovationTask = renovationTaskRepository.findById(taskId).orElseThrow();
+
+        TaskState state = TaskState.valueOf(stateName);
+        renovationTask.setState(state);
+        renovationTask.setDueDate(LocalDate.now());
+
+        renovationTaskRepository.save(renovationTask);
+    }
+
+    @When("I view the task in the calendar")
+    public void i_view_the_task_in_the_calendar() throws Exception {
+        result = mockMvc.perform(get("/renovations/view")
+                        .param("id", String.valueOf(renovationId))
+                        .sessionAttr("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext()))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Then("the task should be highlighted with the colour {string} corresponding to the it's state")
+    public void the_task_should_be_highlighted_with_the_colour_corresponding_to_the_it_s_state(String expectedHexColour) throws Exception {
+        String html = result.getResponse().getContentAsString().toLowerCase();
+
+        assertTrue(html.contains("background-color: " + expectedHexColour),"Expected calendar task with background-color: " + expectedHexColour);
+    }
 }
