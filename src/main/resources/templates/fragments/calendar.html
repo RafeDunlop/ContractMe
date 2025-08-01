@@ -61,12 +61,13 @@
                           th:each="task : ${cell.calendarTasks}"
                           th:onclick="|showTaskModal(this)|"
                           th:attr="
-         data-task-id=${task.id},
-         data-task-name=${task.name},
-         data-task-desc=${task.description},
-         data-task-date=${task.dueDate},
-         data-task-state=${task.state},
-         data-task-roomList=${task.roomList}">
+                             data-task-id=${task.id},
+                             data-task-name=${task.name},
+                             data-task-desc=${task.description},
+                             data-task-date=${task.dueDate},
+                             data-task-state=${task.state},
+                             data-task-roomList=${task.roomList},
+                             data-task-iconFileName=${task.iconFileName}">
 
                         <div class="position-relative">
                              <img th:src="@{'/images/' + ${task.getIconFileName()}}" alt="Task Icon" class="calendar-icon"

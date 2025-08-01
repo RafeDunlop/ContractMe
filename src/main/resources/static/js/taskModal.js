@@ -22,8 +22,11 @@ function showTaskModal(taskElement) {
         description: taskElement.dataset.taskDesc,
         dueDate: taskElement.dataset.taskDate,
         state: state,
-        roomList: roomList
+        roomList: roomList,
+        iconFileName: taskElement.dataset.taskIconfilename
     };
+
+    console.log(task);
 
     const content = document.getElementById("task-modal-content");
     content.innerHTML = renderTaskModalContent(task);
@@ -40,7 +43,8 @@ function showTaskModal(taskElement) {
  */
 function renderTaskModalContent(task) {
     return `
-        <div class="modal-header">
+        <div class="modal-header" style="gap: 16px">
+            <img src="${basePath}images/${task.iconFileName}" alt="Task Icon" class="calendar-icon" />
             <h5 class="modal-title truncate">${task.name}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>

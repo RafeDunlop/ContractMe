@@ -1,6 +1,5 @@
 let lastSubmittedSearchTerm = "";
 let lastSubmittedTags = [];
-let renovationTasks = [];
 const basePath = window.contextPath || "";
 
 /**
@@ -155,7 +154,6 @@ function fetchRenovation(id, resetPage = false) {
 
             container.style.display = "block";
             renderTaskCards(data, isOwner, id);
-            renovationTasks = data.content;
 
             if (data.totalPages > 1) {
                 createPaginationButtons("cards", id);
