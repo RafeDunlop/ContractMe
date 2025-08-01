@@ -4,13 +4,19 @@ function showTaskModal(taskElement, room) {
         ? taskElement.dataset.taskRoomlist.replace(/^\[|\]$/g, '').split(',').map(s => s.trim())
         : [];
 
+    const state = taskElement.dataset.taskState
+        .toLowerCase()
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
 
     const task = {
         id: taskElement.dataset.taskId,
         name: taskElement.dataset.taskName,
         description: taskElement.dataset.taskDesc,
         dueDate: taskElement.dataset.taskDate,
-        state: taskElement.dataset.taskState,
+        state: state,
         roomList: roomList
     };
 
