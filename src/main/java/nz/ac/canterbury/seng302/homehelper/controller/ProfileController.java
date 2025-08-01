@@ -114,7 +114,7 @@ public class ProfileController {
 	@PostMapping("/editAvailability/{id}")
 	public String submitAvailability(@PathVariable("id") Long id,
 									 @RequestBody Map<String, Boolean> payload) {
-		logger.info("editAvailability/{}", id);
+		logger.info("POST editAvailability/{}", id);
 		boolean isAvailable = payload.get("isAvailable");
 
 		Contractor contractor = contractorRepository.findById(id).orElse(null);
