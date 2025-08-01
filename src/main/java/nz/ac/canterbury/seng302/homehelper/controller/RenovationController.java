@@ -229,7 +229,7 @@ public class RenovationController {
 
         if (!locationService.isLocationProvided(addressDTO)) {
             Location location = renovationRecord.getLocation();
-            if (location != null) {
+            if (locationService.hasLocation(renovationRecord)) {
                 addressDTO.setAddress_line1(location.getAddress());
                 addressDTO.setCountry(location.getCountry());
                 addressDTO.setPostcode(location.getPostcode());
@@ -388,7 +388,7 @@ public class RenovationController {
         injectDateElements(year, month, model, record);
 
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
-
+        model.addAttribute("hasLocation", locationService.hasLocation(record));
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("pageNumber", Math.max(pageNumber, 1));
         model.addAttribute("renovation", record);

@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.config;
 
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
@@ -86,15 +87,13 @@ public class DefaultDataConfigurator {
     }
 
     private void setupDefaultRenovations() {
-
-
-        default2Renovation1 = renovationRecordService.addRenovationRecord(
-                new RenovationRecord(default2,
-                        "Jack Erskine revamp",
-                        "CSSE building => palace of slay",
-                        defaultJERooms
-                )
+        default2Renovation1 = new RenovationRecord(default2,
+                "Jack Erskine revamp",
+                "CSSE building => palace of slay",
+                defaultJERooms
         );
+        default2Renovation1.setLocation(new Location("Jack Erskine", "", "", "", ""));
+        default2Renovation1 = renovationRecordService.addRenovationRecord(default2Renovation1);
 
         // Add 200 test renovations for default1
         for (int i = 1; i <= 200; i++) {

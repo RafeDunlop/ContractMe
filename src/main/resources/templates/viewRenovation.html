@@ -108,16 +108,22 @@
 
                 <!-- Buttons -->
                 <div class="mt-2 mb-2">
-                    <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
-                    <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
                     <a th:href="@{${previousUrl}}" class="btn btn-secondary" th:if="${previousUrl != null && !previousUrl.contains('/search')}">Back</a>
                     <a th:href="@{${previousUrl}}" class="btn btn-secondary" th:if="${previousUrl.contains('/search')}">Back to search results</a>
+                    <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
+                    <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
+                    <div class="float-end align-items-end d-flex flex-column" th:if="${isOwner}">
+                        <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" th:if="${hasLocation}">Create Team</a>
+                        <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-secondary disabled flex-grow-0"  th:unless="${hasLocation}">Create Team</a>
+                        <p class="mt-2 text-secondary flex-grow-0" th:unless="${hasLocation}" th:text="|Add a location to ${renovation.name} to create a team|"/>
+                    </div>
                 </div>
             </div>
 
             <div th:if="${isOwner}">
                 <div th:replace="~{fragments/calendar.html ::calendar (${date}, ${datesArray}, ${renovation.id})}"></div>
             </div>
+        </div>
     </div>
 
     <div id="icon-selector-modal" class="modal" style="display: none">
