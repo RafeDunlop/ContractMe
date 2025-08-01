@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -60,7 +57,7 @@ public class TeamController {
             if (renovationRecord == null || !loggedIn.equals(renovationRecord.getUser()) || !locationService.hasLocation(renovationRecord)) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             }
-            //todo check that record doesn't already have a a team!
+            //todo check that record doesn't already have a a team! This should be implemented by task "Implement form submission"
             model.addAttribute("createTeamDTO", createTeamDTO);
             model.addAttribute("renovationRecord", renovationRecord);
             model.addAttribute("skills", Skill.values());
@@ -68,5 +65,11 @@ public class TeamController {
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PostMapping("/create")
+    public String submitTeamRequest(@RequestParam Long id, @ModelAttribute CreateTeamDTO createTeamDTO, Model model) {
+        // TODO this is a stub POST mapping to be implemented in task "Implement form submission"
+        return "redirect:/renovations/team/create?id=" + id;
     }
 }
