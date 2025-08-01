@@ -1,7 +1,7 @@
-package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
+package nz.ac.canterbury.seng302.homehelper.e2e;
 
 import io.cucumber.java.Before;
-import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
+import nz.ac.canterbury.seng302.homehelper.e2e.context.E2eUserContext;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +16,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 
 @SpringBootTest
-public class SetupRegisterUserSteps {
+public class SetupRegisterUserHookE2e {
 
     @Autowired
     private UserRepository userRepository;
 
-    private final UserContext userContext;
+    private final E2eUserContext userContext;
 
-    public SetupRegisterUserSteps(UserContext userContext) {
+    public SetupRegisterUserHookE2e(E2eUserContext userContext) {
         this.userContext = userContext;
     }
 
@@ -45,5 +45,4 @@ public class SetupRegisterUserSteps {
         context.setAuthentication(auth);
         SecurityContextHolder.setContext(context);
     }
-
 }
