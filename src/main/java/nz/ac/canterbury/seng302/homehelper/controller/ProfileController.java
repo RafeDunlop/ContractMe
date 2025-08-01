@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,15 +14,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 /**
  * Controller for the user profile page.
@@ -31,14 +32,16 @@ public class ProfileController {
 	private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
 
 	private final LoginService loginService;
+	private final ContractorRepository contractorRepository;
 
 	/**
 	 * Induces spring to automatically set up the LoginService
 	 * @param loginService The login service provides the function to get the current user
 	 */
 	@Autowired
-	public ProfileController(LoginService loginService) {
+	public ProfileController(LoginService loginService, ContractorRepository contractorRepository) {
 		this.loginService = loginService;
+		this.contractorRepository = contractorRepository;
 	}
 
 	/**
@@ -57,7 +60,11 @@ public class ProfileController {
 			model.addAttribute("email", user.getEmail());
 			model.addAttribute("dateAdded", user.getCreatedTimestamp().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 			model.addAttribute("profilePicture", user.getProfilePicture());
-
+			if (user instanceof Contractor contractor) {
+				model.addAttribute("userType", "Contractor");
+				model.addAttribute("isAvailable", contractor.getAvailable());
+				model.addAttribute("contractor",contractor);
+			}
 			return "profileTemplate";
 		} catch (IllegalArgumentException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
@@ -94,5 +101,25 @@ public class ProfileController {
 			// Return 404 not found error
 			return ResponseEntity.notFound().build();
 		}
+	}
+
+
+	/**
+	 * Updates the availability status of a contractor.
+	 *
+	 * @param id      the contractor id
+	 * @param payload a JSON map containing the new contractor availability status
+	 * @return a redirect URL to the updated profile view
+	 */
+	@PostMapping("/editAvailability/{id}")
+	public String submitAvailability(@PathVariable("id") Long id,
+									 @RequestBody Map<String, Boolean> payload) {
+		logger.info("editAvailability/{}", id);
+		boolean isAvailable = payload.get("isAvailable");
+
+		Contractor contractor = contractorRepository.findById(id).orElse(null);
+        contractor.setAvailable(isAvailable);
+		contractorRepository.save(contractor);
+		return "redirect:/user";
 	}
 }
