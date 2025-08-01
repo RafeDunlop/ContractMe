@@ -2,6 +2,11 @@ import {
     checkAllLocationFields
 } from "./validation/locationFormValidation.js";
 
+import {
+    scrollThroughAutoComplete
+} from "./autocomplete.js";
+
+
 let locationForm = document.getElementById("location-form");
 
 let addressField = document.getElementById("address");
@@ -48,27 +53,7 @@ let currentTabIndex = -1;
 document.addEventListener("keydown", function (event) {
     const listItems = document.querySelectorAll("#autocomplete-list .list-group-item:not(.disabled)");
 
-    if (listItems.length === 0) {
-        return;
-    }
-
-    if (event.key === "ArrowDown") {
-        event.preventDefault();
-        currentTabIndex++;
-        if (currentTabIndex >= listItems.length) {
-            currentTabIndex = 0;
-        }
-        listItems[currentTabIndex].focus();
-    }
-
-    if (event.key === "ArrowUp") {
-        event.preventDefault();
-        currentTabIndex--;
-        if (currentTabIndex < 0) {
-            currentTabIndex = listItems.length - 1;
-        }
-        listItems[currentTabIndex].focus();
-    }
+    scrollThroughAutoComplete(listItems);
 });
 
 
