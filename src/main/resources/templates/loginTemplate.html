@@ -13,8 +13,6 @@
             <form th:action="@{/login}" method="post">
                 <div class="form-group mb-3">
 
-                    <div hidden id="profile-picture" th:value="${profilePicture}"></div>
-
                     <!-- EMAIL -->
                     <div class="mb-3">
                         <input type="text" class="form-control" id="username" name="username" placeholder="Email"
@@ -74,5 +72,4 @@
 </body>
 <script type="module" th:src="@{/js/validation/userValidation.js}"></script>
 <script type="module" th:src="@{/js/loginValidation.js}"></script>
-<script type="module" th:src="@{/js/profilePicture.js}"></script>
 </html>

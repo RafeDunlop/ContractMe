@@ -6,9 +6,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import jakarta.servlet.http.HttpServletRequest;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,10 +27,6 @@ public class LoginController {
 
         Object email = request.getSession().getAttribute("email");
         model.addAttribute("email", email);
-
-
-
-        model.addAttribute("profilePicture", "/profile_pictures/default/default.jpg");
         request.getSession().removeAttribute("email");
 
         Object error = request.getSession().getAttribute("errorMessage");
@@ -66,7 +59,4 @@ public class LoginController {
     }
 
 
-    private void getDefaultProfilePicture() {
-        Paths.get("profile_pictures/default").resolve("default.jpg").normalize();
-    }
 }
