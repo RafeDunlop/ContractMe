@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
+import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -68,5 +69,21 @@ public class EditTaskService {
         } else {
             throw new IllegalArgumentException("File does not exist");
         }
+    }
+
+    /**
+     * Updates the state of the given renovation task.
+     * @param renovationTask The task to be updated.
+     * @param stateName The name of the state to update the task to.
+     */
+    public void updateTaskState(RenovationTask renovationTask, String stateName) {
+        String error = renovationTaskValidation.validateStateName(stateName);
+
+        if (error != null) {
+            throw new IllegalArgumentException(error);
+        }
+
+        renovationTask.setState(TaskState.valueOf(stateName));
+        renovationTaskRepository.save(renovationTask);
     }
 }

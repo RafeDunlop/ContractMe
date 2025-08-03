@@ -1,4 +1,4 @@
-package nz.ac.canterbury.seng302.homehelper.repository.userReposoitories;
+package nz.ac.canterbury.seng302.homehelper.repository.userRepositories;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;

@@ -1,3 +1,5 @@
+
+
 /** Js file used for autocompleting the tag entry field on viewRenovation.html */
 let currentTabIndex = -1;
 const input = document.getElementById("tagName");
@@ -19,27 +21,7 @@ if (input) {
 document.addEventListener("keydown", function (event) {
     const listItems = document.querySelectorAll("#autocomplete-list .list-group-item:not(.disabled)");
 
-    if (listItems.length === 0) {
-        return;
-    }
-
-    if (event.key === "ArrowDown") {
-        event.preventDefault();
-        currentTabIndex++;
-        if (currentTabIndex >= listItems.length) {
-            currentTabIndex = 0;
-        }
-        listItems[currentTabIndex].focus();
-    }
-
-    if (event.key === "ArrowUp") {
-        event.preventDefault();
-        currentTabIndex--;
-        if (currentTabIndex < 0) {
-            currentTabIndex = listItems.length - 1;
-        }
-        listItems[currentTabIndex].focus();
-    }
+   scrollThroughAutoComplete(listItems);
 });
 
 /**
@@ -118,4 +100,28 @@ function setAutoCompleteList(tags) {
 function resetAutocomplete() {
     document.getElementById("autocomplete-list").innerHTML = "";
     currentTabIndex = -1;
+}
+
+export function scrollThroughAutoComplete(listItems) {
+    if (listItems.length === 0) {
+        return;
+    }
+
+    if (event.key === "ArrowDown") {
+        event.preventDefault();
+        currentTabIndex++;
+        if (currentTabIndex >= listItems.length) {
+            currentTabIndex = 0;
+        }
+        listItems[currentTabIndex].focus();
+    }
+
+    if (event.key === "ArrowUp") {
+        event.preventDefault();
+        currentTabIndex--;
+        if (currentTabIndex < 0) {
+            currentTabIndex = listItems.length - 1;
+        }
+        listItems[currentTabIndex].focus();
+    }
 }

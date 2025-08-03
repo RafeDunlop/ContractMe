@@ -40,6 +40,15 @@ cucumber-acceptance-tests:
   artifacts:
     paths:
       - build/jacoco/cucumber.exec
+
+playwright-end2end-tests:
+  stage: test
+  script:
+    - ./gradlew end2end
+  artifacts:
+    paths:
+      - build/jacoco/playwright.exec
+
 generate-test-coverage-reports:
   stage: test
   dependencies:

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EditTaskService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
@@ -11,6 +12,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -66,4 +68,35 @@ public class EditTaskServiceTest {
         editTaskService.updateTaskIcon(task, "goodfile.png");
         verify(renovationTaskRepository, times(1)).save(task);
     }
+
+    @Test
+    public void updateTaskState_validState_setsStateSavesTask() {
+        RenovationTask renovationTask = mock(RenovationTask.class);
+        String validState = "IN_PROGRESS";
+
+        when(renovationTaskValidation.validateStateName(validState)).thenReturn(null);
+
+        editTaskService.updateTaskState(renovationTask, validState);
+
+        verify(renovationTask).setState(TaskState.IN_PROGRESS);
+        verify(renovationTaskRepository).save(renovationTask);
+    }
+
+    @Test
+    public void updateTaskState_invalidState_throwsException() {
+        RenovationTask renovationTask = mock(RenovationTask.class);
+        String invalidState = "INPROGRESS";
+        String errorMessage = "\"INPROGRESS\" is not a valid task state.";
+
+        when(renovationTaskValidation.validateStateName(invalidState)).thenReturn(errorMessage);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            editTaskService.updateTaskState(renovationTask, invalidState);
+        });
+
+        assertEquals(errorMessage, exception.getMessage());
+        verify(renovationTask, never()).setState(any());
+        verify(renovationTaskRepository, never()).save(any());
+    }
+
 }

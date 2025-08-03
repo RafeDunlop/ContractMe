@@ -1,11 +1,14 @@
 package nz.ac.canterbury.seng302.homehelper.config;
 
-import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
+import java.util.ArrayList;
+import java.util.Arrays;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.service.*;
@@ -36,7 +39,9 @@ public class DefaultDataConfigurator {
     private final RenovationTaskService renovationTaskService;
 
     private final VerificationCodeService verificationCodeService;
+
     private final TagService tagService;
+
     private final ContractorService contractorService;
 
     private User default1;
@@ -63,8 +68,8 @@ public class DefaultDataConfigurator {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.verificationCodeService = verificationCodeService;
-        this.tagService = tagService;
         this.contractorService = contractorService;
+        this.tagService = tagService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -87,7 +92,21 @@ public class DefaultDataConfigurator {
         verificationCodeService.consumeSignupCode(code);
 
         user.setEmail("seng302.team200.test1@gmail.com");
-        default2 = registerService.registerUser(user);
+        List<Skill> skills = new ArrayList<>(
+                Arrays.asList(Skill.ACOUSTIC_INSULATION, Skill.ANTIQUE_RESTORATION)
+        );
+        user.setHourlyRate(22.33f);
+        user.setSkills(skills);
+        user.setCountryCode(64);
+        user.setPhoneNumber("226430022");
+        Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
+        AddressDTO addressDTO = new AddressDTO();
+        addressDTO.setAddress_line1(location.getAddress());
+        addressDTO.setCity(location.getCity());
+        addressDTO.setCountry(location.getCountry());
+        addressDTO.setPostcode(location.getPostcode());
+        addressDTO.setRegion(location.getSuburb());
+        default2 = contractorService.registerContractor(user,addressDTO);
         code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, default2, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);
 
@@ -109,15 +128,13 @@ public class DefaultDataConfigurator {
     }
 
     private void setupDefaultRenovations() {
-
-
-        default2Renovation1 = renovationRecordService.addRenovationRecord(
-                new RenovationRecord(default2,
-                        "Jack Erskine revamp",
-                        "CSSE building => palace of slay",
-                        defaultJERooms
-                )
+        default2Renovation1 = new RenovationRecord(default2,
+                "Jack Erskine revamp",
+                "CSSE building => palace of slay",
+                defaultJERooms
         );
+        default2Renovation1.setLocation(new Location("Jack Erskine", "", "", "", ""));
+        default2Renovation1 = renovationRecordService.addRenovationRecord(default2Renovation1);
 
         // Add 200 test renovations for default1
         for (int i = 1; i <= 200; i++) {

@@ -67,6 +67,7 @@ public class RenovationTask {
         this.roomList = roomList;
         this.dueDate = dueDate;
         this.iconFileName = "default-icon.png";
+        this.state = TaskState.NOT_STARTED;
     }
 
     public String getName() {
