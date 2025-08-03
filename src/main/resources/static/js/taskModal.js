@@ -26,8 +26,6 @@ function showTaskModal(taskElement) {
         iconFileName: taskElement.dataset.taskIconfilename
     };
 
-    console.log(task);
-
     const content = document.getElementById("task-modal-content");
     content.innerHTML = renderTaskModalContent(task);
 

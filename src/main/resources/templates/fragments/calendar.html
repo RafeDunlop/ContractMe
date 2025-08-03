@@ -67,14 +67,16 @@
                              data-task-date=${task.dueDate},
                              data-task-state=${task.state},
                              data-task-roomList=${task.roomList},
-                             data-task-iconFileName=${task.iconFileName}">
-
+                             data-task-iconFileName=${task.iconFileName}"
+                           th:style="'background-color: ' + ${task.state.colorHex}"
+                           th:classappend="${task.state.name() == 'BLOCKED'} ? ' text-dark' : ''">
                         <div class="position-relative">
                              <img th:src="@{'/images/' + ${task.getIconFileName()}}" alt="Task Icon" class="calendar-icon"
                                   th:onclick="showIconSelector(${task.id})" />
                          </div>
                          <div class="task-text" th:text="${task.getName()}"/>
                      </div>
+
                  </div>
             </div>
         </div>
