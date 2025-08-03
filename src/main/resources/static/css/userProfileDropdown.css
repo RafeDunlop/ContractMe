@@ -1,11 +1,13 @@
-.dropdown-box {
-    display: block;
-}
-
-
 .dropdown-content {
     display: none;
     position: absolute;
+    color: #989898;
+    background-color: #1e1e1e;
     min-width: 80px;
     z-index: 1;
 }
+
+.show-dropdown-box {
+    display: block;
+}
+

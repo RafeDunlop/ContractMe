@@ -4,7 +4,6 @@
     <meta charset="UTF-8"/>
     <link th:href="@{/css/styles.css}" rel="stylesheet">
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link rel="stylesheet" th:href="@{/css/userProfileDropdown.css}"/>
     <title>Home Helper navigation bar</title>
 </head>
 <body>
@@ -30,17 +29,17 @@
                         <li class="nav-item" style="line-height:38px;">
                             <a class="nav-link">View Requests</a>
                         </li>
-                        <li class=>
-                            <a class="nav-link dropdown-toggle" onclick="displayUserMenus()" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <li>
+                            <div onclick="toggleUserMenus()">
                                 <img th:src="@{'/profile_pictures/' + ${session.profilePicture}}"
                                      alt="Profile Picture"
                                      class="img-fluid rounded-circle"
                                      style="width: 40px; height: 40px; object-fit: cover;">
-                            </a>
-                                <div class="dropdown-content" id="user-menus">
+                                <div class="dropdown-content" id="dropdown">
                                     <a class="dropdown-item" th:href="@{/user}">Profile</a>
                                     <a class="dropdown-item">Logout</a>
                                 </div>
+                            </div>
                         </li>
 
                     </ul>
