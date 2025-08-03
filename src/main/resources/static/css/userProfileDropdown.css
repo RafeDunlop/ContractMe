@@ -1,10 +1,18 @@
 .dropdown-content {
     display: none;
     position: absolute;
+    right: 0;
     color: #989898;
-    background-color: #1e1e1e;
-    min-width: 80px;
+    background-color: #232323;
+    min-width: 120px;
+    margin-top: 20px;
+    padding-right: 10px;
     z-index: 1;
+    text-align: right;
+
+
+
+
 }
 
 .show-dropdown-box {

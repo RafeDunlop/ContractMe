@@ -12,7 +12,7 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
                 <a class="navbar-brand" th:href="@{/main}">Home</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" onclick="toggleMinimisedMenu()" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse" id="navbarNav" style="justify-content: right;">
@@ -29,19 +29,17 @@
                         <li class="nav-item" style="line-height:38px;">
                             <a class="nav-link">View Requests</a>
                         </li>
-                        <li>
-                            <div onclick="toggleUserMenus()">
-                                <img th:src="@{'/profile_pictures/' + ${session.profilePicture}}"
-                                     alt="Profile Picture"
-                                     class="img-fluid rounded-circle"
-                                     style="width: 40px; height: 40px; object-fit: cover;">
-                                <div class="dropdown-content" id="dropdown">
-                                    <a class="dropdown-item" th:href="@{/user}">Profile</a>
-                                    <a class="dropdown-item">Logout</a>
-                                </div>
+                        <li id="profile-image" onclick="toggleUserMenus()">
+                            <img th:src="@{'/profile_pictures/' + ${session.profilePicture}}"
+                                 alt="Profile Picture"
+                                 class="img-fluid rounded-circle"
+                                 style="width: 40px; height: 40px; object-fit: cover;">
+                            <div class="dropdown-content" id="dropdown">
+                                <a class="dropdown-item" th:href="@{/user}">Profile</a>
+                                <a class="dropdown-item">Logout</a>
                             </div>
-                        </li>
 
+                        </li>
                     </ul>
                 </div>
             </div>
