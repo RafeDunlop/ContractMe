@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
@@ -8,7 +9,6 @@ import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
@@ -50,10 +50,11 @@ public class ProfileController {
 	 * Takes the user to the profile page when the "/user" URL is entered. Gets the information of the current user and displays
 	 * it on the profileTemplate.html form.
 	 * @param model Representation of results to be used by Thymeleaf
+	 * @param request network request included to extract {@code Locale} of the request
 	 * @return Thymeleaf profileTemplate
 	 */
 	@GetMapping("/user")
-	public String userProfile(Model model) {
+	public String userProfile(Model model, HttpServletRequest request) {
 		logger.info("GET /user/");
 		try {
 			User user = loginService.getUserByEmail();
@@ -67,9 +68,8 @@ public class ProfileController {
 			model.addAttribute("location", location);
 			if (user instanceof Contractor contractor) {
 				model.addAttribute("userType", "Contractor");
-				model.addAttribute("phoneNumber",
-						String.format("%d %s", contractor.getCountryCode(), contractor.getPhoneNumber()));
-				model.addAttribute("hourlyRate", contractor.getHourlyRate());
+				model.addAttribute("phoneNumber", contractor.getPhoneNumberFormatted());
+				model.addAttribute("hourlyRate", contractor.getHourlyRateFormatted(request.getLocale()));
 				model.addAttribute("skills", contractor.getSkills());
 				model.addAttribute("isAvailable", contractor.getAvailable());
 				model.addAttribute("contractor", contractor);
