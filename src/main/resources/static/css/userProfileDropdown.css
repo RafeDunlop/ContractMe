@@ -1,0 +1,11 @@
+.dropdown-box {
+    display: block;
+}
+
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    min-width: 80px;
+    z-index: 1;
+}
