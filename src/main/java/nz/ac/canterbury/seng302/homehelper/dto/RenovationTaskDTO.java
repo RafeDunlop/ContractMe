@@ -13,11 +13,10 @@ import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
  */
 public class RenovationTaskDTO {
     private Long id;
-
-    private TaskState state;
     private String name;
     private String description;
     String dueDate;
+    private TaskState state;
     private List<String> rooms;
     private String iconFileName;
 
