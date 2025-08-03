@@ -57,12 +57,20 @@
                      <div class="d-flex flex-column align-items-lg-start">
                          <div th:text="${cell.day.getDayOfMonth()}"/>
                      </div>
-                     <div class="calendar-task d-flex flex-row align-items-center px-1 rounded-1 text-white"
+                     <div class="btn-primary calendar-task d-flex flex-row align-items-center"
                           th:each="task : ${cell.calendarTasks}"
-                          th:style="'background-color: ' + ${task.state.colorHex}"
-                          th:classappend="${task.state.name() == 'BLOCKED'} ? ' text-dark' : ''">
-
-                         <div class="position-relative">
+                          th:onclick="|showTaskModal(this)|"
+                          th:attr="
+                             data-task-id=${task.id},
+                             data-task-name=${task.name},
+                             data-task-desc=${task.description},
+                             data-task-date=${task.dueDate},
+                             data-task-state=${task.state},
+                             data-task-roomList=${task.roomList},
+                             data-task-iconFileName=${task.iconFileName}"
+                           th:style="'background-color: ' + ${task.state.colorHex}"
+                           th:classappend="${task.state.name() == 'BLOCKED'} ? ' text-dark' : ''">
+                        <div class="position-relative">
                              <img th:src="@{'/images/' + ${task.getIconFileName()}}" alt="Task Icon" class="calendar-icon"
                                   th:onclick="showIconSelector(${task.id})" />
                          </div>
@@ -75,6 +83,8 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script type="text/javascript" th:src="@{/js/calendar.js}"></script>
+<script type="text/javascript" th:src="@{/js/taskModal.js}"></script>
 </body>
 </html>
