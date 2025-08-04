@@ -26,8 +26,12 @@ junit:
     - ./gradlew test
     - ls ./build/jacoco
   artifacts:
+    when: always
     paths:
+      - build/test-results/test/*.xml
       - build/jacoco/test-report.xml
+    reports:
+      junit: build/test-results/test/*.xml
 
 sonarqube-report:
   stage: sonarqube
@@ -39,15 +43,23 @@ integration-tests:
   script:
     - ./gradlew integration
   artifacts:
+    when: always
     paths:
+      - build/test-results/integration/*.xml
       - build/jacoco/integration.exec
+    reports:
+      junit: build/test-results/integration/*.xml
 cucumber-acceptance-tests:
   stage: test
   script:
     - ./gradlew cucumber
   artifacts:
+    when: always
     paths:
       - build/jacoco/cucumber.exec
+      - build/test-results/cucumber/*.xml
+    reports:
+      junit: build/test-results/cucumber/*.xml
 generate-test-coverage-reports:
   stage: test
   dependencies:

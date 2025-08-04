@@ -88,18 +88,13 @@ tasks.register("cucumber", Test) {
 }
 
 jacocoTestReport { // Generate a report for all generated test data
-    onlyIf { // Allow the report to be skipped when -PskipTestReport is passed via commandline
-        return !project.hasProperty('skipTestReport')
-    }
-    mustRunAfter test, integration, cucumber
-    executionData fileTree(project.rootDir) {
-        include '**/*.exec'
-    }
+    dependsOn test
+
     reports {
         xml.required = true
-            xml.destination file("${buildDir}/jacoco/test-report.xml")
-            csv.required = false
-            html.destination file("${buildDir}/reports/coverage/overall")
+        xml.destination file("${buildDir}/jacoco/test-report.xml")
+        csv.required = false
+        html.destination file("${buildDir}/reports/coverage/overall")
     }
 }
 
@@ -133,8 +128,8 @@ tasks.register("unitTestReport", JacocoReport) { // Generate a report for unit t
     reports {
         // The jacoco coverage report will ge generated in the destination below
         html.destination file("${buildDir}/reports/coverage/test")
-            xml.required = true
-            xml.destination file("${buildDir}/reports/coverage/test.xml")
+        xml.required = true
+        xml.destination file("${buildDir}/reports/coverage/test.xml")
     }
 }
 tasks.register("integrationTestReport", JacocoReport) { // Generate a report for integration tests
@@ -149,8 +144,8 @@ tasks.register("integrationTestReport", JacocoReport) { // Generate a report for
     reports {
         // The jacoco coverage report will ge generated in the destination below
         html.destination file("${buildDir}/reports/coverage/integration")
-            xml.required = true
-            xml.destination file("${buildDir}/reports/coverage/integration.xml")
+        xml.required = true
+        xml.destination file("${buildDir}/reports/coverage/integration.xml")
     }
 
 }
@@ -166,8 +161,8 @@ tasks.register("cucumberTestReport", JacocoReport) { // Generate a report for cu
     reports {
         // The jacoco coverage report will ge generated in the destination below
         html.destination file("${buildDir}/reports/coverage/cucumber")
-            xml.required = true
-            xml.destination file("${buildDir}/reports/coverage/cucumber.xml")
+        xml.required = true
+        xml.destination file("${buildDir}/reports/coverage/cucumber.xml")
     }
 }
 tasks.named("unitTestReport").configure { finalizedBy 'jacocoTestReport' }
