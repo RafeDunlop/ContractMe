@@ -72,7 +72,6 @@ public class TeamController {
             if (renovationRecord == null || !loggedIn.equals(renovationRecord.getUser()) || !locationService.hasLocation(renovationRecord) || teamsService.teamExists(renovationRecord.getId())) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             }
-            //todo check that record doesn't already have a a team! This should be implemented by task "Implement form submission"
             model.addAttribute("teamRequestDTO", teamRequestDTO);
             model.addAttribute("renovationRecord", renovationRecord);
             model.addAttribute("skills", Skill.values());
