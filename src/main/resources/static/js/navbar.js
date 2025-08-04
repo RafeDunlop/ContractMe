@@ -1,6 +1,4 @@
-function toggleMinimisedMenu() {
 
-}
 
 
 /**
@@ -9,7 +7,7 @@ function toggleMinimisedMenu() {
 function toggleUserMenus() {
     console.log("funct loaded")
 
-    document.getElementById("dropdown").classList.toggle("show-dropdown-box");
+    document.getElementById("dropdown").classList.toggle("show-hidden-element");
 }
 
 
@@ -22,8 +20,8 @@ window.onclick = function closeDropdownMenu(event) {
     let profileDropdown = document.getElementById("dropdown");
     let profileImage = document.getElementById("profile-image");
     if (!profileImage.contains(event.target)) {
-        if (profileDropdown.classList.contains("show-dropdown-box")) {
-            profileDropdown.classList.remove('show-dropdown-box');
+        if (profileDropdown.classList.contains("show-hidden-element")) {
+            profileDropdown.classList.remove('show-hidden-element');
         }
     }
 }
