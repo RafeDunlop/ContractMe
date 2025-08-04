@@ -68,18 +68,4 @@ public class LocationController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-
-    /**
-     * Gets the IP address of the request, principally from the original client that submitted the request
-     * if forwarded
-     * @param request The request received by the localisation controller
-     * @return The IP address of the client
-     */
-    private String getIpFromRequest(HttpServletRequest request) {
-        String forwardingHeader = request.getHeader("X-Forwarded-For");
-        if (forwardingHeader == null || forwardingHeader.isEmpty()) {
-            return request.getRemoteAddr();
-        }
-        return forwardingHeader.split(",")[0];
-    }
 }

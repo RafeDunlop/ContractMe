@@ -12,8 +12,12 @@ import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.support.ArgumentConvertingMethodInvoker;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,6 +33,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -46,7 +51,6 @@ public class RegisterControllerIntegrationTest {
      */
     private MockMvc mockMvc;
 
-
     /**
      * Mocked repository to avoid actual database interactions.
      */
@@ -58,6 +62,23 @@ public class RegisterControllerIntegrationTest {
     private VerificationCodeRepository verificationCodeRepository;
     @MockBean
     private EmailService emailService;
+
+    private User expectedUser;
+    private String expectedPassword;
+
+    private static Stream<Arguments> streamValidLocationInputsWithCoordinates() {
+        return Stream.of(
+                Arguments.of("1 Address", "Suburb", "1111", "Country", "City", 45L, 90L),
+                Arguments.of("1 Address", "", "", "", "", 45L, 90L),
+                Arguments.of("", "", "", "", "", 45L, 90L)
+        );
+    }
+
+    private void createValidUser() {
+        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        expectedPassword = "Test123!";
+        expectedUser = Mockito.spy(new User("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode(expectedPassword)));
+    }
 
     /**
      * Initializes the {@link MockMvc} instance with a new setup of the {@link RegisterController}.
@@ -239,5 +260,27 @@ public class RegisterControllerIntegrationTest {
                 .andExpect(view().name("redirect:/register"))
                 .andExpect(flash().attribute("skillsError", List.of("You must select one or more skills")));
         verify(emailService, times(0)).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+    }
+
+    @ParameterizedTest
+    @MethodSource("streamValidLocationInputsWithCoordinates")
+    public void submitRegistration_inputValidLocations_return(String address, String suburb, String city, String postcode,
+                                                              String country, Long lat, Long lon) throws Exception {
+        createValidUser();
+        mockMvc.perform(MockMvcRequestBuilders.post("/register")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("firstName", expectedUser.getFirstName())
+                        .param("lastName", expectedUser.getLastName())
+                        .param("email", expectedUser.getEmail())
+                        .param("password", expectedPassword)
+                        .param("address_line1", address)
+                        .param("suburb", suburb)
+                        .param("city", city)
+                        .param("postcode", postcode)
+                        .param("country", country)
+                        .param("lat", Long.toString(lat))
+                        .param("lon", Long.toString(lon)))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(view().name("redirect:/confirm-registration"));
     }
 }
