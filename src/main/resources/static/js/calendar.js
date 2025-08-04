@@ -25,3 +25,11 @@ window.changeMonth = function(id, month, year) {
         });
 };
 
+/**
+ * Open the task creation form
+ * @param renovationId the id of the renovation
+ */
+function addTask(renovationId) {
+    window.location.assign(`/renovations/view/create?id=${renovationId}`);
+}
+
