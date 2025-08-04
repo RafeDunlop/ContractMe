@@ -8,42 +8,35 @@
 </head>
 <body>
 <div th:fragment="nav-bar">
-    <div class="container pt-5" id="navbar">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container-fluid">
-                <a class="navbar-brand" th:href="@{/main}">Home</a>
-                <span class="hamburger" onclick="toggleMenu()"></span>
-                <ul class="navbar-nav">
-                    <li  id="my-renovations" style="line-height:38px;">
-                        <a class="nav-link" th:href="@{/renovations}">My Renovations</a>
-                    </li>
-
-                    <li id="search-renovations" style="line-height:38px;">
-                        <a class="nav-link" th:href="@{/renovations/search(visibility='user')}">Search My Renovations</a>
-                    </li>
-
-                    <li id="browse-renovations" style="line-height:38px;">
-                        <a class="nav-link" th:href="@{/renovations/search(visibility='public')}">Browse Renovations</a>
-                    </li>
-
-                    <li id="view-requests" style="line-height:38px;">
-                        <a class="nav-link">View Requests</a>
-                    </li>
-                    <li id="profile-image" onclick="toggleUserMenus()">
-                        <img th:src="@{'/profile_pictures/' + ${session.profilePicture}}"
-                             alt="Profile Picture"
-                             class="img-fluid rounded-circle"
-                             style="width: 40px; height: 40px; object-fit: cover;">
-                        <div class="dropdown-content" id="dropdown">
-                            <a class="dropdown-item" th:href="@{/user}">Profile</a>
-                            <a class="dropdown-item">Logout</a>
-                        </div>
-
-                    </li>
-                </ul>
-            </div>
-        </nav>
+    <div class="navbar" id="navbar">
+        <a class="navbar-brand" th:href="@{/main}">Home</a>
+        <span class="hamburger" onclick="toggleMenu()">☰</span>
+        <ul>
+            <li id="my-renovations" style="line-height:38px;">
+                <a class="nav-link" th:href="@{/renovations}">My Renovations</a>
+            </li>
+            <li id="search-renovations" style="line-height:38px;">
+                <a class="nav-link" th:href="@{/renovations/search(visibility='user')}">Search My Renovations</a>
+            </li>
+            <li id="browse-renovations" style="line-height:38px;">
+                <a class="nav-link" th:href="@{/renovations/search(visibility='public')}">Browse Renovations</a>
+            </li>
+            <li id="view-requests" style="line-height:38px;">
+                <a class="nav-link">View Requests</a>
+            </li>
+            <li id="profile-image" onclick="toggleUserMenus()">
+                <img th:src="@{'/profile_pictures/' + ${session.profilePicture}}"
+                     alt="Profile Picture"
+                     class="img-fluid rounded-circle"
+                     style="width: 40px; height: 40px; object-fit: cover;">
+                <div class="dropdown-content" id="dropdown">
+                    <a class="dropdown-item" th:href="@{/user}">Profile</a>
+                    <a class="dropdown-item">Logout</a>
+                </div>
+            </li>
+        </ul>
     </div>
 </div>
+
 </body>
 </html>
