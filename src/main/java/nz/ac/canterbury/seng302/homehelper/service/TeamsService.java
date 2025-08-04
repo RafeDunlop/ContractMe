@@ -19,4 +19,8 @@ public class TeamsService {
     public void saveTeam(Teams team) {
         teamsRepository.save(team);
     }
+
+    public boolean teamExists(Long id) {
+        return teamsRepository.existsByRenovationRecordId(id);
+    }
 }
