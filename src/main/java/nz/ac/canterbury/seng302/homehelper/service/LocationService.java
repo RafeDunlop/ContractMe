@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.GeocodingCoordsDTO;
@@ -101,6 +102,7 @@ public class LocationService {
     public void injectCoordsViaGeocoding(AddressDTO addressDTO) throws IllegalArgumentException {
         logger.debug("Attempting to retrieve coordinates via geocoding for address {}", addressDTO.getAddress_line1());
         ResponseEntity<String> response = restTemplate.getForEntity(getGeocodingCompleteUrl(addressDTO), String.class);
+        logger.debug(response.getBody());
         try {
             JsonNode root = objectMapper.readTree(response.getBody());
             JsonNode results = root.get("results");
@@ -323,7 +325,21 @@ public class LocationService {
      * @return Whether the co-ordinates provided in the specified address are null-equivalent (returns false)
      */
     private boolean hasCoords(AddressDTO address) {
-        return address.getLon() == 0d &&
-                address.getLat() == 0d;
+        return !(address.getLon() == 0d &&
+                address.getLat() == 0d);
+    }
+
+    /**
+     * Gets the IP address of the request, principally from the original client that submitted the request
+     * if forwarded
+     * @param request The request received by the localisation controller
+     * @return The IP address of the client
+     */
+    public String getIpFromRequest(HttpServletRequest request) {
+        String forwardingHeader = request.getHeader("X-Forwarded-For");
+        if (forwardingHeader == null || forwardingHeader.isEmpty()) {
+            return request.getRemoteAddr();
+        }
+        return forwardingHeader.split(",")[0];
     }
 }

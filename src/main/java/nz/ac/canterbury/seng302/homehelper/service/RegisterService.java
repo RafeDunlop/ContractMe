@@ -26,6 +26,7 @@ public class RegisterService {
     private final UserRepository userRepository;
     private final UserValidation userValidation;
     private final PasswordEncoder passwordEncoder;
+    private final LocationService locationService;
 
     /**
      * Constructs a {@code RegisterService} with the given dependencies.
@@ -34,10 +35,11 @@ public class RegisterService {
      * @param userValidation the utility used to validate user input fields
      */
     @Autowired
-    public RegisterService(UserRepository userRepository, UserValidation userValidation) {
+    public RegisterService(UserRepository userRepository, UserValidation userValidation, LocationService locationService) {
         this.userRepository = userRepository;
         this.userValidation = userValidation;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        this.locationService = locationService;
     }
 
     /**
@@ -89,15 +91,8 @@ public class RegisterService {
      * @param addressDTO Data transfer object for user registration
      *
      */
-    public void registerLocation(User user, AddressDTO addressDTO) {
-        Location userLocation = new Location(
-                addressDTO.getAddress_line1(),
-                addressDTO.getCountry(),
-                addressDTO.getPostcode(),
-                addressDTO.getCity(),
-                addressDTO.getRegion()
-        );
-        user.setLocation(userLocation);
+    public void registerLocation(User user, AddressDTO addressDTO, String ip) {
+        user.setLocation(locationService.locate(addressDTO, ip));
         userRepository.save(user);
     }
 
