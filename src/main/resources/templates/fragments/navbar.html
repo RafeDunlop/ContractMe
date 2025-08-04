@@ -12,40 +12,35 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
                 <a class="navbar-brand" th:href="@{/main}">Home</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav" style="justify-content: right;">
-                    <ul class="navbar-nav">
+                <span class="hamburger" onclick="toggleMenu()"></span>
+                <ul class="navbar-nav">
+                    <li  id="my-renovations" style="line-height:38px;">
+                        <a class="nav-link" th:href="@{/renovations}">My Renovations</a>
+                    </li>
 
-                        <li class="nav-item" id="my-renovations" style="line-height:38px;">
-                            <a class="nav-link" th:href="@{/renovations}">My Renovations</a>
-                        </li>
+                    <li id="search-renovations" style="line-height:38px;">
+                        <a class="nav-link" th:href="@{/renovations/search(visibility='user')}">Search My Renovations</a>
+                    </li>
 
-                        <li class="nav-item" id="search-renovations" style="line-height:38px;">
-                            <a class="nav-link" th:href="@{/renovations/search(visibility='user')}">Search My Renovations</a>
-                        </li>
+                    <li id="browse-renovations" style="line-height:38px;">
+                        <a class="nav-link" th:href="@{/renovations/search(visibility='public')}">Browse Renovations</a>
+                    </li>
 
-                        <li class="nav-item" id="browse-renovations" style="line-height:38px;">
-                            <a class="nav-link" th:href="@{/renovations/search(visibility='public')}">Browse Renovations</a>
-                        </li>
+                    <li id="view-requests" style="line-height:38px;">
+                        <a class="nav-link">View Requests</a>
+                    </li>
+                    <li id="profile-image" onclick="toggleUserMenus()">
+                        <img th:src="@{'/profile_pictures/' + ${session.profilePicture}}"
+                             alt="Profile Picture"
+                             class="img-fluid rounded-circle"
+                             style="width: 40px; height: 40px; object-fit: cover;">
+                        <div class="dropdown-content" id="dropdown">
+                            <a class="dropdown-item" th:href="@{/user}">Profile</a>
+                            <a class="dropdown-item">Logout</a>
+                        </div>
 
-                        <li class="nav-item" id="view-requests" style="line-height:38px;">
-                            <a class="nav-link">View Requests</a>
-                        </li>
-                        <li id="profile-image" onclick="toggleUserMenus()">
-                            <img th:src="@{'/profile_pictures/' + ${session.profilePicture}}"
-                                 alt="Profile Picture"
-                                 class="img-fluid rounded-circle"
-                                 style="width: 40px; height: 40px; object-fit: cover;">
-                            <div class="dropdown-content" id="dropdown">
-                                <a class="dropdown-item" th:href="@{/user}">Profile</a>
-                                <a class="dropdown-item">Logout</a>
-                            </div>
-
-                        </li>
-                    </ul>
-                </div>
+                    </li>
+                </ul>
             </div>
         </nav>
     </div>
