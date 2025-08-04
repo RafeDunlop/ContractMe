@@ -78,8 +78,8 @@ public class LocationService {
         }
         logger.debug("Creating location for address {} with coords {}, {}",
                 addressDTO.getAddress_line1(),
-                addressDTO.getLatitude(),
-                addressDTO.getLongitude()
+                addressDTO.getLat(),
+                addressDTO.getLon()
         );
         return new Location(
                 addressDTO.getAddress_line1(),
@@ -87,8 +87,8 @@ public class LocationService {
                 addressDTO.getPostcode(),
                 addressDTO.getCity(),
                 addressDTO.getRegion(),
-                addressDTO.getLatitude(),
-                addressDTO.getLongitude()
+                addressDTO.getLat(),
+                addressDTO.getLon()
         );
     }
 
@@ -110,8 +110,8 @@ public class LocationService {
             } else if (coordResultList.get(0).getConfidence() < CONFIDENCE_LEVEL) {
                 throw new IllegalArgumentException("No results with satisfactory confidence found");
             } else {
-                addressDTO.setLatitude(coordResultList.get(0).getLat());
-                addressDTO.setLongitude(coordResultList.get(0).getLon());
+                addressDTO.setLat(coordResultList.get(0).getLat());
+                addressDTO.setLon(coordResultList.get(0).getLon());
             }
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to parse geocoding results", e);
@@ -130,8 +130,8 @@ public class LocationService {
                 ipAddress
         );
         LocalisationDTO localisationDTO = getRoughLocation(ipAddress);
-        addressDTO.setLatitude(localisationDTO.getLocation().getLatitude());
-        addressDTO.setLongitude(localisationDTO.getLocation().getLongitude());
+        addressDTO.setLat(localisationDTO.getLocation().getLatitude());
+        addressDTO.setLon(localisationDTO.getLocation().getLongitude());
     }
 
     /**
@@ -323,7 +323,7 @@ public class LocationService {
      * @return Whether the co-ordinates provided in the specified address are null-equivalent (returns false)
      */
     private boolean hasCoords(AddressDTO address) {
-        return address.getLongitude() == 0d &&
-                address.getLatitude() == 0d;
+        return address.getLon() == 0d &&
+                address.getLat() == 0d;
     }
 }

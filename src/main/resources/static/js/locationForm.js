@@ -9,6 +9,8 @@ let suburbField = document.getElementById("suburb");
 let cityField = document.getElementById("city");
 let postcodeField = document.getElementById("postcode");
 let countryField = document.getElementById("country");
+let latField = document.getElementById("lat");
+let lonField = document.getElementById("lon")
 
 
 /** Js file used for autocompleting the tag entry field on viewRenovation.html */
@@ -23,7 +25,9 @@ let committedFields = {
     suburb: suburbField.value,
     city: cityField.value,
     postcode: postcodeField.value,
-    country: countryField.value
+    country: countryField.value,
+    lat: latField.value,
+    lon: lonField.value
 }
 
 document.addEventListener("DOMContentLoaded", getLocalisation);
@@ -195,6 +199,8 @@ function getAutocompleteOption(address) {
         cityField.value = address.city
         postcodeField.value = address.postcode
         countryField.value = address.country
+        latField.value = address.lat
+        lonField.value = address.lon
     })
 
     item.addEventListener("mouseout", () => {
@@ -203,6 +209,8 @@ function getAutocompleteOption(address) {
         cityField.value = committedFields.city
         postcodeField.value = committedFields.postcode
         countryField.value = committedFields.country
+        latField.value = committedFields.lat
+        lonField.value = committedFields.lon
     })
 
     item.addEventListener("click", function () {
@@ -211,6 +219,8 @@ function getAutocompleteOption(address) {
         committedFields.city = address.city
         committedFields.postcode = address.postcode
         committedFields.country = address.country
+        committedFields.lat = address.lat
+        committedFields.lon = address.lon
 
         autocompleteList.innerHTML = "";
         checkAllLocationFields();
@@ -223,12 +233,16 @@ function getAutocompleteOption(address) {
             cityField.value = address.city;
             postcodeField.value = address.postcode;
             countryField.value = address.country;
+            latField.value = address.lat;
+            lonField.value = address.lon;
 
             committedFields.address = address.address_line1;
             committedFields.suburb = address.region;
             committedFields.city = address.city;
             committedFields.postcode = address.postcode;
             committedFields.country = address.country;
+            committedFields.lat = address.lat;
+            committedFields.lon = address.lon;
 
             autocompleteList.innerHTML = "";
             checkAllLocationFields();
