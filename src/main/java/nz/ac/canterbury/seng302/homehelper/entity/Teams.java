@@ -31,7 +31,7 @@ public class Teams {
 
     protected Teams() {}
 
-    public Teams(RenovationRecord renovationRecord, List<Role> roles) {
+    public Teams(RenovationRecord renovationRecord) {
         this.renovationRecord = renovationRecord;
     }
 

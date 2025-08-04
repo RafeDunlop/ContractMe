@@ -18,7 +18,7 @@ public class Role {
 
     private boolean accepted;
 
-    protected Role() {}
+    public Role() {}
 
     public Role(Contractor contractor, Skill skill, boolean accepted) {
         this.contractor = contractor;

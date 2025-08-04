@@ -2,12 +2,17 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 
 import nz.ac.canterbury.seng302.homehelper.dto.CreateTeamDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.TeamRoleDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.Teams;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
+import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -25,6 +30,8 @@ public class TeamController {
     private final RenovationRecordService renovationRecordService;
     private final LoginService loginService;
     private final LocationService locationService;
+    private final TeamsService teamsService;
+
 
     /**
      * Autowired constructor for instantiating a TeamController
@@ -34,10 +41,11 @@ public class TeamController {
      * @param locationService the location service to check if a record contains a valid location
      */
     @Autowired
-    public TeamController(RenovationRecordService renovationRecordService, LoginService loginService, LocationService locationService) {
+    public TeamController(RenovationRecordService renovationRecordService, LoginService loginService, LocationService locationService,TeamsService teamsService) {
         this.renovationRecordService = renovationRecordService;
         this.loginService = loginService;
         this.locationService = locationService;
+        this.teamsService = teamsService;
     }
 
     /**
@@ -68,8 +76,14 @@ public class TeamController {
     }
 
     @PostMapping("/create")
-    public String submitTeamRequest(@RequestParam Long id, @ModelAttribute CreateTeamDTO createTeamDTO, Model model) {
-        // TODO this is a stub POST mapping to be implemented in task "Implement form submission"
+    public String submitTeamRequest(@RequestParam Long id, @ModelAttribute TeamRequestDTO teamRequestDTO) {
+        Teams team = new Teams(renovationRecordService.getRecordById(id));
+        for (TeamRoleDTO roleDTO : teamRequestDTO.getRoles()) {
+            Role role = new Role();
+            role.setSkill(roleDTO.getSkill());
+            team.addRole(role);
+            teamsService.saveTeam(team);
+        }
         return "redirect:/renovations/team/create?id=" + id;
     }
 }
