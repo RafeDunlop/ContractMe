@@ -4,10 +4,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -17,15 +20,20 @@ import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepo
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 
+@SpringBootTest
 public class RegisterServiceIntegrationTest {
+
     private RegisterService registerService;
     private UserRepository userRepositoryMock;
+
+    @MockBean
+    private LocationService locationServiceMock;
 
     @BeforeEach
     void setUp() {
         userRepositoryMock = Mockito.mock(UserRepository.class);
         UserValidation userValidation = new UserValidation();
-        registerService = new RegisterService(userRepositoryMock, userValidation);
+        registerService = new RegisterService(userRepositoryMock, userValidation, locationServiceMock);
     }
 
     @Test
