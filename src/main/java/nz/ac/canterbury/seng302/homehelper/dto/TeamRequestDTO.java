@@ -12,12 +12,18 @@ public class TeamRequestDTO {
     private Long renovationRecordId;
     private List <TeamRoleDTO> roles;
 
+    public TeamRequestDTO() {}
+
     public TeamRequestDTO(Long renovationRecordId, List<TeamRoleDTO> teamRoles) {
         this.roles = teamRoles;
     }
 
     public Long getRenovationRecordId() {
         return renovationRecordId;
+    }
+
+    public void setRenovationRecordId(Long renovationRecordId) {
+        this.renovationRecordId = renovationRecordId;
     }
 
     public List<TeamRoleDTO> getRoles() {

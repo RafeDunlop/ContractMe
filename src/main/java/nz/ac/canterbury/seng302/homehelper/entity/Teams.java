@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.entity;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,6 +18,7 @@ import org.checkerframework.checker.units.qual.A;
  * and comprising a collection of roles. Each role defines a specific contractor,
  * skill, and accepted status, representing various roles within the team.
  */
+@Entity
 public class Teams {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

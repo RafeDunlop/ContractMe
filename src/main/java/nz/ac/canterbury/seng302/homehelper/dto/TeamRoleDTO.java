@@ -15,6 +15,8 @@ public class TeamRoleDTO {
     private Long contractorId;
     private boolean accepted;
 
+    public TeamRoleDTO() {}
+
     public TeamRoleDTO(Skill skill) {
         this.skill = skill;
         this.accepted = false;

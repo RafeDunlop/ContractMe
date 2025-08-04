@@ -13,8 +13,11 @@ import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +29,9 @@ import org.springframework.web.server.ResponseStatusException;
 @Controller
 @RequestMapping("/renovations/team")
 public class TeamController {
+
+    private static final Logger logger = LoggerFactory.getLogger(TeamController.class);
+
 
     private final RenovationRecordService renovationRecordService;
     private final LoginService loginService;
@@ -51,14 +57,15 @@ public class TeamController {
     /**
      * Get mapping for the create team page
      * @param id the renovation record id
-     * @param createTeamDTO the DTO containing the form fields
+     * @param teamRequestDTO the DTO containing the form fields
      * @param model object containing the model attributes for thymeleaf
      * @return a string referring to the HTML template for the create team page
      * @throws ResponseStatusException 404 not found if the record does not have a location, the current user does not
      *                                 own the renovation, or an argument is missing or invalid
      */
     @GetMapping("/create")
-    public String createTeam(@RequestParam Long id, @ModelAttribute CreateTeamDTO createTeamDTO, Model model) {
+    public String createTeam(@RequestParam Long id, @ModelAttribute TeamRequestDTO teamRequestDTO, Model model) {
+        logger.info("GET /renovations/team/create");
         try {
             User loggedIn = loginService.getUserByEmail();
             RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
@@ -66,7 +73,7 @@ public class TeamController {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             }
             //todo check that record doesn't already have a a team! This should be implemented by task "Implement form submission"
-            model.addAttribute("createTeamDTO", createTeamDTO);
+            model.addAttribute("teamRequestDTO", teamRequestDTO);
             model.addAttribute("renovationRecord", renovationRecord);
             model.addAttribute("skills", Skill.values());
             return "createTeam";
@@ -76,14 +83,16 @@ public class TeamController {
     }
 
     @PostMapping("/create")
-    public String submitTeamRequest(@RequestParam Long id, @ModelAttribute TeamRequestDTO teamRequestDTO) {
-        Teams team = new Teams(renovationRecordService.getRecordById(id));
+    public ResponseEntity<Void> submitTeamRequest(@RequestBody TeamRequestDTO teamRequestDTO) {
+        logger.info("POST /renovations/team/create");
+        Teams team = new Teams(renovationRecordService.getRecordById(teamRequestDTO.getRenovationRecordId()));
         for (TeamRoleDTO roleDTO : teamRequestDTO.getRoles()) {
             Role role = new Role();
             role.setSkill(roleDTO.getSkill());
             team.addRole(role);
             teamsService.saveTeam(team);
         }
-        return "redirect:/renovations/team/create?id=" + id;
+
+       return ResponseEntity.ok().build();
     }
 }

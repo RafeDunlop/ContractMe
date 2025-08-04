@@ -14,8 +14,8 @@
 
 <div id="container" class="card container mt-5 p-4 shadow-sm">
     <h4 class="card-title mb-4" th:text="|Create Team For ${renovationRecord.getName()}|"/>
-    <form th:action="@{/renovations/team/create(id=${renovationRecord.getId()})}" method="post" id="create-task-form" th:object="${createTeamDTO}" novalidate>
-        <div class="input-group mb-3">
+    <form id="create-team-form" novalidate>
+    <div class="input-group mb-3">
             <select class="form-select" id="skills-select" type="text" aria-label="skills-select" autocomplete="off">
                 <option disabled selected hidden>Select skill</option>
                 <option th:each="skill : ${skills}" th:value="${skill}" th:text="${skill.getDisplayName()}"
