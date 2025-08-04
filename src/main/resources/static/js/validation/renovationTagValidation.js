@@ -10,7 +10,10 @@ const tagNamesList = Array.from(tagNameListElements).map(el => el.textContent.tr
 
 const tagPattern = /^(?=.*\p{L}).*$/u;
 
-tagInput.addEventListener("input", function () {validateTag(tagInput.value)})
+if (tagInput) {
+    tagInput.addEventListener("input", function () {validateTag(tagInput.value)})
+
+}
 
 /**
  * Validates a tag input for renovations.
@@ -48,17 +51,16 @@ async function validateTag(input) {
         }
     }
 
+    if (tagBackendError) tagBackendError.hidden = true;
     if (errors.length) {
         tagFrontendErrorMessage.innerHTML =
             errors.map(msg => `<li>${msg}</li>`).join("");
         tagFrontendError.classList.add("show");    // bootstrap’s .show or just remove hidden
         tagFrontendError.hidden = false;
-        tagBackendError.hidden = true;
         return false;
     } else {
         tagFrontendErrorMessage.innerHTML = "";
         tagFrontendError.hidden = true;
-        tagBackendError.hidden = true;
         return true;
     }
 }

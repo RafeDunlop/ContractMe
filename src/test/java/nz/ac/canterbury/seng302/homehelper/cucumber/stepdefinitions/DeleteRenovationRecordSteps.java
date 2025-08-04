@@ -6,10 +6,10 @@ import io.cucumber.java.en.When;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -27,11 +27,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 
 @SpringBootTest
 @WithMockUser

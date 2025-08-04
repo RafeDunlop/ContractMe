@@ -3,6 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
 	<base th:href="@{/}"/>
+	<meta name="_csrf" th:content="${_csrf.token}"/>
 	<title th:text="|User ${firstName}|">User Details</title>
 	<link rel="stylesheet" th:href="@{/css/styles.css}">
 	<link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
@@ -22,11 +23,16 @@
 <div class="container mt-5">
 	<div class="card p-4 shadow position-relative">
         <div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
+			<form id="contractorForm" class="d-flex align-items-center" th:if="${userType == 'Contractor'}">
+				<input type="hidden" id="contractor" th:value="${contractor.id}">
+				<input type="checkbox" id="availabilityCheckbox" name="isAvailable" th:checked="${contractor.available}" class="me-1">
+				<label for="availabilityCheckbox" class="mb-0">Available for jobs</label>
+			</form>
             <a th:href="@{/user/edit}" class="btn btn-primary" id="edit-button">
                 Edit
             </a>
-					<button class="btn btn-danger" onclick="confirmLogout()">Logout</button>
-				</div>
+			<button class="btn btn-danger" onclick="confirmLogout()">Logout</button>
+		</div>
 
 		<!-- Use Bootstrap Grid for Layout -->
 		<div class="row align-items-center">
@@ -50,11 +56,37 @@
 								<th class="p-2">Email</th>
 								<td class="p-2" th:text="${email}">email</td>
 							</tr>
+							<tr th:if="${userType == 'Contractor'}">
+								<th class="p-2">Phone Number</th>
+								<td class="p-2" th:text="${phoneNumber}"/>
+							</tr>
+							<tr th:if="${userType == 'Contractor'}">
+								<th class="p-2">Hourly Rate</th>
+								<td class="p-2" th:text="${hourlyRate}"/>
+							</tr>
 							<tr>
 								<th class="p-2">Account created</th>
 								<td class="p-2" th:text="${dateAdded}">date</td>
 							</tr>
-
+							<tr th:if="${userType == 'Contractor'}">
+								<th class="p-2">Availability</th>
+								<td class="p-2" th:text="${isAvailable} ? 'Available' : 'Not Available'">Availability</td>
+							</tr>
+							<tr th:if="${userType == 'Contractor'}">
+								<th class="p-2">Skills</th>
+								<td class="p-2">
+									<span th:each="skill : ${skills}"
+										  class="tag-box badge bg-success d-inline-flex align-items-center me-2 mb-2">
+										<span class="tag-text-large ms-1 text-truncate" th:text="${skill.getDisplayName()}"/>
+									</span>
+								</td>
+							</tr>
+							<tr th:if="${location}">
+								<th class="p-2">Address</th>
+								<td class="p-2">
+									<div th:replace="~{fragments/addressDisplay.html :: addressDisplay (${location})}"></div>
+								</td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
@@ -76,4 +108,6 @@
 	</div>
 </div>
 </body>
+
+<script type="text/javascript" th:src="@{/js/contractorAvailability.js}"></script>
 </html>

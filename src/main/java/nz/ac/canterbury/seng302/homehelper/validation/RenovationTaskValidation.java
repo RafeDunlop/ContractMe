@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -91,8 +92,6 @@ public class RenovationTaskValidation {
      * @return An error from validating the due date
      */
     public String validateDueDate(String dueDateString) {
-
-
         if (dueDateString != null) {
             try {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -107,5 +106,19 @@ public class RenovationTaskValidation {
         }
             return null;
 
+    }
+
+    /**
+     * Validates that the provided state name matches the states in the TaskState enum.
+     * @param stateName The name of the state to validate
+     * @return Null if valid; otherwise an error message.
+     */
+    public String validateStateName(String stateName) {
+        try {
+            TaskState.valueOf(stateName);
+            return null;
+        } catch (IllegalArgumentException e) {
+            return String.format("\"%s\" is not a valid task state.", stateName);
+        }
     }
 }

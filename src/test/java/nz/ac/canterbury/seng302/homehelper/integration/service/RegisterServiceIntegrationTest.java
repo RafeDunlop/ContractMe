@@ -12,8 +12,8 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 
@@ -62,8 +62,6 @@ public class RegisterServiceIntegrationTest {
     @Test
     public void testRegister_validUser_accountCreated() {
         Mockito.when(userRepositoryMock.save(Mockito.any())).thenAnswer(i -> i.getArgument(0));
-        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        User expectedUser = new User("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "Smith", "email@email.com", passwordEncoder.encode("Password1!"));
         UserRegisterDTO userRegisterDTO = new UserRegisterDTO();
         userRegisterDTO.setEmail("email@email.com");
         userRegisterDTO.setFirstName("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");

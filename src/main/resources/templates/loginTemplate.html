@@ -16,7 +16,7 @@
                     <!-- EMAIL -->
                     <div class="mb-3">
                         <input type="text" class="form-control" id="username" name="username" placeholder="Email"
-                               aria-label="username" th:value="${email}">
+                               aria-label="username" th:value="${email}" autocomplete="email">
 
                         <!-- Frontend JS error -->
                         <div class="alert alert-danger mt-2" id="email-frontend-error" hidden>
@@ -37,7 +37,7 @@
                     <!-- Password -->
                     <div class="mb-3">
                         <input type="password" class="form-control" id="password" name="password" placeholder="Password"
-                               aria-label="password">
+                               aria-label="password" autocomplete="current-password">
                     </div>
 
                     <!-- Backend error -->
@@ -70,6 +70,6 @@
     </div>
 
 </body>
-<script type="module" th:src="@{/js/userValidation.js}"></script>
+<script type="module" th:src="@{/js/validation/userValidation.js}"></script>
 <script type="module" th:src="@{/js/loginValidation.js}"></script>
 </html>

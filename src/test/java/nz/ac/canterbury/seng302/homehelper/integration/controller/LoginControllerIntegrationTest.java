@@ -1,7 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
-import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;

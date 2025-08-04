@@ -2,7 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
@@ -84,6 +84,7 @@ public class EditProfileController {
                     addressDTO.setPostcode(location.getPostcode());
                     addressDTO.setCity(location.getCity());
                     addressDTO.setRegion(location.getSuburb());
+                    model.addAttribute("locationUsed", true);
                 }
                 model.addAttribute("addressDTO", addressDTO);
             }

@@ -1,11 +1,62 @@
 package nz.ac.canterbury.seng302.homehelper.dto;
 
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
+
+import java.util.List;
+
 public class UserRegisterDTO {
     private String firstName;
     private String lastName;
     private String email;
     private String password;
     private String confirmPassword;
+    private Integer countryCode;
+    private boolean isContractor;
+    private Float hourlyRate;
+
+    private String phoneNumber;
+
+    private List<Skill> skills;
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public Integer getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(Integer countryCode) {
+        this.countryCode = countryCode;
+    }
+
+    public List<Skill> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(List<Skill> skills) {
+        this.skills = skills;
+    }
+
+    public Float getHourlyRate() {
+        return hourlyRate;
+    }
+
+    public void setHourlyRate(Float hourlyRate) {
+        this.hourlyRate = hourlyRate;
+    }
+
+    public boolean getIsContractor() {
+        return isContractor;
+    }
+
+    public void setIsContractor(boolean isContractor) {
+        this.isContractor = isContractor;
+    }
 
     public UserRegisterDTO() {}
 
@@ -15,6 +66,20 @@ public class UserRegisterDTO {
         this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
+        this.isContractor = false;
+    }
+
+    public UserRegisterDTO(String firstName, String lastName, String email, String password, String confirmPassword, boolean isContractor, int countryCode, String phoneNumber, List<Skill> skills, Float hourlyRate) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+        this.confirmPassword = confirmPassword;
+        this.countryCode = countryCode;
+        this.phoneNumber = phoneNumber;
+        this.skills = skills;
+        this.hourlyRate = hourlyRate;
+        this.isContractor = isContractor;
     }
 
     /**

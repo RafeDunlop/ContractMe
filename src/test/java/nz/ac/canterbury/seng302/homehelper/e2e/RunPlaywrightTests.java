@@ -16,7 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @Suite
 @IncludeEngines("cucumber")
-@SelectClasspathResource("features/end2end")
+@SelectClasspathResource("end2end")
 @ConfigurationParameters({
         @ConfigurationParameter(key = Constants.GLUE_PROPERTY_NAME, value = "nz.ac.canterbury.seng302.homehelper.e2e"),
         @ConfigurationParameter(key = Constants.PLUGIN_PROPERTY_NAME,value = "pretty, html:target/cucumber-report/cucumber.html"),
@@ -39,7 +39,7 @@ public class RunPlaywrightTests {
     @BeforeAll
     public static void openResources() {
         playwright = Playwright.create();
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
 
     }
 

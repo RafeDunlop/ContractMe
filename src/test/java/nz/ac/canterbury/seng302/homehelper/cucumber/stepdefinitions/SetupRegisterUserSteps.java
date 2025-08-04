@@ -2,8 +2,8 @@ package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
 import io.cucumber.java.Before;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
-import nz.ac.canterbury.seng302.homehelper.entity.User;
-import nz.ac.canterbury.seng302.homehelper.repository.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

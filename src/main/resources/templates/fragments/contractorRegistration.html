@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+    <link th:href="@{/css/inputBoxStyles.css}" rel="stylesheet">
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/css/tags.css}" rel="stylesheet">
+    <title></title>
+</head>
+<body>
+<div th:fragment="contractor-registration(skills)" id="contractor-form">
+    <div class="mb-3">
+        <div class="input-group">
+            <span class="prefix-span input-group-text">$</span>
+            <input type="number" step="0.01" class="form-control" id="hourlyRate" name="hourlyRate" placeholder="Hourly Rate"
+                   th:value="${userRegisterDTO.hourlyRate}" aria-label="hourly-rate">
+        </div>
+
+        <!-- Frontend JS Error -->
+        <div class="alert alert-danger mt-2" id="hourly-rate-frontend-error" hidden>
+            <ul>
+                <li><label class="form-label" id="hourly-rate-frontend-error-message"></label></li>
+            </ul>
+        </div>
+
+        <!-- Backend error -->
+        <div class="alert alert-danger mt-2" id="hourly-rate-backend-error"
+             th:attr="hidden=${hourlyRateError == null}">
+            <ul>
+                <li th:each="msg : ${hourlyRateError}" th:text="${msg}"></li>
+            </ul>
+        </div>
+    </div>
+    <div class="mb-3">
+        <div class="input-group">
+            <span class="prefix-span input-group-text">+</span>
+            <input type="number" max="999" min="0" class="form-control" id="countryCode" name="countryCode" placeholder="Country Code"
+                   aria-label="country-code" th:value="${userRegisterDTO.countryCode}">
+            <input type="text" inputmode="numeric" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" maxlength="15"
+                   pattern="\d{6,15}" aria-label="phone-number" th:value="${userRegisterDTO.phoneNumber}">
+        </div>
+
+        <!-- Frontend JS Error -->
+        <div class="alert alert-danger mt-2" id="phone-number-frontend-error" hidden>
+            <ul>
+                <li><label class="form-label" id="phone-number-frontend-error-message"></label></li>
+            </ul>
+        </div>
+
+        <!-- Backend error -->
+        <div class="alert alert-danger mt-2" id="phone-number-backend-error"
+             th:attr="hidden=${phoneNumberError == null}">
+            <ul>
+                <li th:each="msg : ${phoneNumberError}" th:text="${msg}"></li>
+            </ul>
+        </div>
+    </div>
+    <div class="mb-3">
+        <select class="form-select" id="skills-select" type="text" aria-label="skills-select" autocomplete="off">
+            <option disabled selected hidden>Add Skills</option>
+            <option th:each="skill : ${skills}" th:value="${skill}" th:text="${skill.getDisplayName()}"
+                    th:attr="display-name=${skill.getDisplayName()}" class="skill-option"></option>
+        </select>
+        <div id="skill-input-container" class="mt-2"></div>
+        <div id="hidden-skill-input-container"></div>
+        <div class="previous-input" th:each="skill : ${userRegisterDTO.getSkills()}" th:data-skill="${skill}" th:data-skilldisplayname="${skill.displayName}"></div>
+
+        <!-- Frontend JS Error -->
+        <div class="alert alert-danger mt-2" id="skills-frontend-error" hidden>
+            <ul>
+                <li><label class="form-label" id="skills-frontend-error-message"></label></li>
+            </ul>
+        </div>
+
+        <!-- Backend error -->
+        <div class="alert alert-danger mt-2" id="skills-backend-error"
+             th:attr="hidden=${skillsError == null}">
+            <ul>
+                <li th:each="msg : ${skillsError}" th:text="${msg}"></li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+<script type="module" th:src="@{/js/skills.js}"></script>
+</html>
