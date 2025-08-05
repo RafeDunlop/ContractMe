@@ -85,6 +85,7 @@ public class EditProfileStepsE2e {
     @When("I click the Submit button")
     public void i_click_the_submit_button() {
         RunPlaywrightTests.page.locator("#submit-button").click();
+        RunPlaywrightTests.page.waitForURL(RunPlaywrightTests.baseUrl + "/user/edit");
     }
 
     @Then("my new details are saved")
