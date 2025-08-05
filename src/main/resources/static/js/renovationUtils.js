@@ -113,7 +113,7 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
  * @param id - Renovation ID to fetch.
  * @param resetPage - Whether to reset the page number.
  */
-window.fetchRenovation = function(id, resetPage = false) {
+function fetchRenovation(id, resetPage = false) {
     if (resetPage) {
         document.getElementById("pageNumber").value = 1;
     }
