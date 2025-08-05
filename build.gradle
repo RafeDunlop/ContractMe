@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.2'
@@ -40,6 +42,9 @@ dependencies {
     testImplementation 'io.cucumber:cucumber-spring:7.15.0'
     testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.15.0'
     testImplementation 'org.junit.platform:junit-platform-suite:1.10.2'
+
+    testImplementation "com.microsoft.playwright:playwright:1.45.0"
+
 }
 
 tasks.named("check") {
@@ -85,6 +90,23 @@ tasks.register("cucumber", Test) {
     }
     // The cucumberTestReport will be run after the cucumber test task has completed
     finalizedBy "cucumberTestReport"
+}
+
+tasks.register("end2end", Test) {
+    group 'verification'
+    testLogging.showStandardStreams = true
+    useJUnitPlatform()
+    filter {
+        // Ensure this lines up with the package your end2end tests are located in
+        includeTestsMatching "nz.ac.canterbury.seng302.homehelper.e2e.*"
+    }
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+        exceptionFormat TestExceptionFormat.FULL
+    }
+
+    // The end2endTestReport will be run after the cucumber test task has completed
+    finalizedBy "end2endTestReport"
 }
 
 jacocoTestReport { // Generate a report for all generated test data
@@ -165,7 +187,30 @@ tasks.register("cucumberTestReport", JacocoReport) { // Generate a report for cu
         xml.destination file("${buildDir}/reports/coverage/cucumber.xml")
     }
 }
+
+tasks.register("end2endTestReport", JacocoReport) { // Generate a report for cucumber tests
+    group = 'verification'
+
+    onlyIf { // Allow the report to be skipped when -PskipTestReport is passed via commandline
+        return !project.hasProperty('skipTestReport')
+    }
+
+    dependsOn end2end
+
+    executionData project.tasks.end2end
+
+    sourceDirectories.setFrom(project.files(project.sourceSets.main.allSource.srcDirs))
+    classDirectories.setFrom(project.sourceSets.main.output)
+
+    reports {
+        // The jacoco coverage report will ge generated in the destination below
+        html.destination file("${buildDir}/reports/coverage/end2end")
+    }
+}
+
 tasks.named("unitTestReport").configure { finalizedBy 'jacocoTestReport' }
 tasks.named("integrationTestReport").configure { finalizedBy 'jacocoTestReport' }
 tasks.named("cucumberTestReport").configure { finalizedBy 'jacocoTestReport' }
+tasks.named("end2endTestReport").configure { finalizedBy "jacocoTestReport" }
+
 

@@ -60,6 +60,15 @@ cucumber-acceptance-tests:
       - build/test-results/cucumber/*.xml
     reports:
       junit: build/test-results/cucumber/*.xml
+
+playwright-end2end-tests:
+  stage: test
+  script:
+    - ./gradlew end2end
+  artifacts:
+    paths:
+      - build/jacoco/playwright.exec
+
 generate-test-coverage-reports:
   stage: test
   dependencies:

@@ -6,7 +6,7 @@ import io.cucumber.java.en.When;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -225,7 +225,7 @@ public class CalendarSteps {
     @Then("they do not see a calendar")
     public void they_do_not_see_a_calendar() throws Exception {
         String html = result.getResponse().getContentAsString();
-        System.out.println(html);
+
         Assertions.assertFalse(html.contains("id=\"calendar\""), "Calendar should not be visible on private records to other users");
     }
 

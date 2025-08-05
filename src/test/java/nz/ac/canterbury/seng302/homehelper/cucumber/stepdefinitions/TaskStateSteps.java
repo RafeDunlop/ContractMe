@@ -1,43 +1,39 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import io.cucumber.spring.CucumberContextConfiguration;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
+
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.Optional;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -61,6 +57,8 @@ public class TaskStateSteps {
 
     private Long taskId;
 
+    private MvcResult result;
+
 
     public TaskStateSteps (UserContext userContext){
         this.userContext = userContext;
@@ -68,16 +66,6 @@ public class TaskStateSteps {
 
     @Given("that i create a task on a renovation record")
     public void that_i_create_a_task_on_a_renovation_record() {
-        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        User user = new User("Test", "User", "uniqueEmail@gmail.com", encoder.encode("Test123!"));
-        user.activate();
-        userRepository.save(user);
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                user.getEmail(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(auth);
-        SecurityContextHolder.setContext(context);
-        userContext.setUser(user);
 
         RenovationRecord record = new RenovationRecord(userContext.getUser(), "Record " + System.currentTimeMillis(), "", List.of());
         renovationRecordRepository.save(record);
@@ -121,5 +109,70 @@ public class TaskStateSteps {
                         .param("cardsPerPage", "5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].state").value("NOT_STARTED"));
+    }
+
+
+    @Given("that I am viewing one of my renovation records with tasks")
+    public void that_i_am_viewing_one_of_my_renovation_records_with_tasks() throws Exception {
+        RenovationRecord record = new RenovationRecord(userContext.getUser(), "Record " + System.currentTimeMillis(), "", List.of());
+        renovationRecordRepository.save(record);
+        this.renovationId = record.getId();
+
+        RenovationTask task = new RenovationTask("Task 1", "Desc", new ArrayList<>(), null, record);
+        TaskState state = TaskState.NOT_STARTED;
+        task.setState(state);
+        renovationTaskRepository.save(task);
+        this.taskId = task.getId();
+
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", String.valueOf(renovationId))
+                        .sessionAttr("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext()))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @When("I update the task state {string}")
+    public void i_update_the_task_state(String stateName) throws Exception {
+        mockMvc.perform(patch("/task/" + taskId + "/state")
+                        .param("state", stateName)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Then("the task state is set to state {string}")
+    public void the_task_state_is_set_to_state(String expectedState) {
+        Optional<RenovationTask> task = renovationTaskRepository.findById(taskId);
+        assertTrue(task.isPresent(), "Task should exist");
+
+        RenovationTask renovationTask = task.get();
+        assertEquals(TaskState.valueOf(expectedState), renovationTask.getState(), "Task state should match expected state");
+    }
+
+    @Given("the task has the state {string} and is due today")
+    public void the_task_has_the_state_and_is_due_today(String stateName) {
+        RenovationTask renovationTask = renovationTaskRepository.findById(taskId).orElseThrow();
+
+        TaskState state = TaskState.valueOf(stateName);
+        renovationTask.setState(state);
+        renovationTask.setDueDate(LocalDate.now());
+
+        renovationTaskRepository.save(renovationTask);
+    }
+
+    @When("I view the task in the calendar")
+    public void i_view_the_task_in_the_calendar() throws Exception {
+        result = mockMvc.perform(get("/renovations/view")
+                        .param("id", String.valueOf(renovationId))
+                        .sessionAttr("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext()))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Then("the task should be highlighted with the colour {string} corresponding to the it's state")
+    public void the_task_should_be_highlighted_with_the_colour_corresponding_to_the_it_s_state(String expectedHexColour) throws Exception {
+        String html = result.getResponse().getContentAsString().toLowerCase();
+
+        assertTrue(html.contains("background-color: " + expectedHexColour),"Expected calendar task with background-color: " + expectedHexColour);
     }
 }
