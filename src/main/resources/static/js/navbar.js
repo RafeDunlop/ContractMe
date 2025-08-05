@@ -53,7 +53,6 @@ window.addEventListener("resize", closeHamburgerBar);
  */
 function closeHamburgerBar() {
     if (window.innerWidth > 900) {
-        console.log("element styles changed")
         document.getElementById("navbar").classList.remove("responsive");
         document.getElementById('navbar-home').classList.remove("mobile-brand");
         document.getElementById("navbar-links").classList.remove("mobile-navbar-links");

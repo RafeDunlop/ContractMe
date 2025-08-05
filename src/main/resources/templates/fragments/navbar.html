@@ -8,19 +8,19 @@
 </head>
 <body>
 <div th:fragment="nav-bar">
-    <div class="custom-navbar navbar" id="navbar">
-        <a class=" navbar-brand nav-link custom-navbar-brand" id="navbar-home" th:href="@{/main}">Home</a>
+    <div class="navbar custom-navbar" id="navbar">
+        <a class="navbar-brand custom-navbar-brand" id="navbar-home" th:href="@{/main}">Home</a>
         <ul id="navbar-links" style="justify-content: right;">
-            <li id="my-renovations" style="line-height:38px;">
+            <li id="my-renovations" style="line-height:37px;">
                 <a class="nav-link" th:href="@{/renovations}">My Renovations</a>
             </li>
-            <li id="search-renovations" style="line-height:38px;">
+            <li id="search-renovations" style="line-height:37px;">
                 <a class="nav-link" th:href="@{/renovations/search(visibility='user')}">Search My Renovations</a>
             </li>
-            <li id="browse-renovations" style="line-height:38px;">
+            <li id="browse-renovations" style="line-height:37px;">
                 <a class="nav-link" th:href="@{/renovations/search(visibility='public')}">Browse Renovations</a>
             </li>
-            <li id="view-requests" style="line-height:38px;">
+            <li id="view-requests" style="line-height:37px;">
                 <a class="nav-link">View Requests</a>
             </li>
             <li id="profile-image" onclick="toggleUserMenus()">
@@ -28,7 +28,7 @@
                     <img th:src="@{'/profile_pictures/' + ${session.profilePicture}}"
                          alt="Profile Picture"
                          class="img-fluid rounded-circle"
-                         style="width: 50px; height: 50px; object-fit: cover;">
+                         style="width: 47px; height: 47px; object-fit: cover;">
                 </div>
                     <div class="dropdown-content" id="dropdown">
                         <a class="dropdown-item" th:href="@{/user}">Profile</a>

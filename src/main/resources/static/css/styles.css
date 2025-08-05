@@ -146,7 +146,7 @@
     top: 80px;
     color: #989898;
     background-color: #333;
-    min-width: 150px;
+    min-width: 250px;
     z-index: 1;
     text-align: right;
 }
@@ -163,14 +163,15 @@
     flex-direction: row;
     padding-left: 25px;
     padding-right: 25px;
-    min-height: 75px;
+    min-height: 82px;
 
 }
 
 .custom-navbar-brand {
-    line-height: 37px;
+    line-height: 36px;
     color: white;
-    margin-right: 0;
+    margin-right: 50px;
+    padding: 12px 18px;
 }
 
 .custom-navbar ul {
@@ -181,7 +182,6 @@
 .custom-navbar li {
     float: left;
 }
-
 
 .nav-left {
     float: left;
@@ -198,9 +198,14 @@
 
 .custom-navbar li a:hover {
     background-color: #111;
-    color: white;
+    color: white !important;
 }
 
+.custom-navbar-brand:hover {
+    background-color: #111;
+    color: white !important;
+
+}
 
 .hamburger {
     display: none;
@@ -214,13 +219,12 @@
 
 .mobile-brand {
     position: absolute;
-    top: 15px;
-    left: 48px;
-    padding-left: 0;
+    top: 11px;
+
 }
 
 .mobile-navbar-links {
-    padding-top: 55px;
+    padding-top: 65px;
     padding-left: 0;
 }
 
