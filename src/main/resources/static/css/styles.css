@@ -143,10 +143,10 @@
     display: none;
     position: absolute;
     right: 0;
+    top: 80px;
     color: #989898;
     background-color: #333;
-    min-width: 120px;
-    padding-right: 10px;
+    min-width: 150px;
     z-index: 1;
     text-align: right;
 }
@@ -158,13 +158,12 @@
 
 .navbar {
     background-color: #333;
-    overflow: hidden;
     position: relative;
     display: flex;
     flex-direction: row;
     padding-left: 25px;
     padding-right: 25px;
-    min-height: 70px;
+    min-height: 75px;
 
 }
 
@@ -201,6 +200,7 @@
     background-color: #111;
 }
 
+
 .hamburger {
     display: none;
     position: absolute;
@@ -214,11 +214,24 @@
 .mobile-brand {
     position: absolute;
     top: 15px;
-    left: 78px;
+    left: 48px;
+    padding-left: 0;
 }
 
 .mobile-navbar-links {
-    padding-top: 50px;
+    padding-top: 55px;
+    padding-left: 0;
+}
+
+.mobile-dropdown {
+    left: 0;
+    top: 100%;
+    max-width: 150px;
+}
+
+.mobile-profile {
+    padding-left: 15px;
+    padding-bottom: 15px;
 }
 
 @media screen and (max-width: 900px) {
@@ -240,7 +253,6 @@
         display: none;
 
     }
-
 
     .navbar.responsive ul {
         display: block;

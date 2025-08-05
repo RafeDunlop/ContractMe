@@ -24,14 +24,16 @@
                 <a class="nav-link">View Requests</a>
             </li>
             <li id="profile-image" onclick="toggleUserMenus()">
-                <img th:src="@{'/profile_pictures/' + ${session.profilePicture}}"
-                     alt="Profile Picture"
-                     class="img-fluid rounded-circle"
-                     style="width: 50px; height: 50px; object-fit: cover;">
-                <div class="dropdown-content" id="dropdown">
-                    <a class="dropdown-item" th:href="@{/user}">Profile</a>
-                    <a class="dropdown-item">Logout</a>
+                <div id="profile-container" style="padding-top:10px">
+                    <img th:src="@{'/profile_pictures/' + ${session.profilePicture}}"
+                         alt="Profile Picture"
+                         class="img-fluid rounded-circle"
+                         style="width: 50px; height: 50px; object-fit: cover;">
                 </div>
+                    <div class="dropdown-content" id="dropdown">
+                        <a class="dropdown-item" th:href="@{/user}">Profile</a>
+                        <a class="dropdown-item">Logout</a>
+                    </div>
             </li>
 
         </ul>
