@@ -1,9 +1,19 @@
+import {
+    confirmPrompt,
+    confirmDelete,
+    confirmLogout
+} from "./confirmPrompt.js";
+
+window.confirmPrompt = confirmPrompt;
+window.confirmDelete = confirmDelete;
+window.confirmLogout = confirmLogout;
+window.toggleUserMenus = toggleUserMenus;
+window.toggleNavbarMenu = toggleNavbarMenu;
 
 /**
  * Opens or closes the dropdown menu when the user clicks on the profile image
  */
 function toggleUserMenus() {
-        console.log("sanity check");
     document.getElementById("dropdown").classList.toggle("show-hidden-element");
 }
 
@@ -27,7 +37,7 @@ window.onclick = function closeDropdownMenu(event) {
  * Toggles the hamburger display menu to show navbar links on
  * minimised page
  */
-function toggleMenu() {
+function toggleNavbarMenu() {
     document.getElementById("navbar").classList.toggle("responsive");
     document.getElementById('navbar-home').classList.toggle("mobile-brand");
     document.getElementById("navbar-links").classList.toggle("mobile-navbar-links");
@@ -42,7 +52,6 @@ window.addEventListener("resize", closeHamburgerBar);
  * back to the size where navbar elements can display normally
  */
 function closeHamburgerBar() {
-    console.log("function called");
     if (window.innerWidth > 900) {
         console.log("element styles changed")
         document.getElementById("navbar").classList.remove("responsive");

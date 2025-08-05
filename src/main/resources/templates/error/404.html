@@ -8,6 +8,7 @@
 </head>
 <body>
     <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+<div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
     <div class="container mt-5">
         <h1>404 Not Found</h1>
         <p th:text=${message}></p>
@@ -15,5 +16,6 @@
         <a th:href="@{/main}" class="btn btn-primary">Go to Home</a>
     </div>
 </body>
-<script type="text/javascript" th:src="@{/js/navbar.js}"></script>
+<script type="module" th:src="@{/js/navbar.js}"></script>
+
 </html>
