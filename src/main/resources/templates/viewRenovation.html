@@ -88,6 +88,19 @@
                         </button>
                     </span>
                 </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="status-filter" class="fw-bold">Show:</label>
+                    <select id="status-filter" name="status" class="form-select"
+                            th:attr="onchange=|fetchRenovation(${renovation.id})|">
+                    <option value="all" th:selected="${status == 'all'}">All</option>
+                        <option value="notStarted" th:selected="${status == 'notStarted'}">Not Started</option>
+                        <option value="inProgress" th:selected="${status == 'inProgress'}">In Progress</option>
+                        <option value="blocked" th:selected="${status == 'blocked'}">Blocked</option>
+                        <option value="completed" th:selected="${status == 'completed'}">Completed</option>
+                        <option value="cancelled" th:selected="${status == 'cancelled'}">Cancelled</option>
+                    </select>
+                </div>
             </div>
 
             <div th:if="${not #lists.isEmpty(renovation.getRenovationTasks())}" id="elements-container" style="display: none;">
@@ -104,7 +117,6 @@
                 <div class="alert alert-danger" id="errorMessage" style="margin-top: 20px; display: none;">
                     <p id="errorText"></p>
                 </div>
-
 
                 <!-- Buttons -->
                 <div class="mt-2 mb-2">
@@ -161,8 +173,6 @@
         });
     });
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script th:src="@{/js/addTaskIcon.js}"></script>
 <script type="text/javascript" th:src="@{/js/renovationPublicity.js}"></script>
