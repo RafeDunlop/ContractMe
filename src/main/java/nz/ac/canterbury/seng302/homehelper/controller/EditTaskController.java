@@ -16,9 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
@@ -113,38 +110,22 @@ public class EditTaskController {
         logger.info("POST renovations/editTask");
         RenovationTask renovationTask = renovationTaskService.getTaskById(taskId);
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
-        LocalDate parsedDate = null;
         if (renovationRecord == null || renovationRecord.getUser() != loginService.getUserByEmail()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation record was not found.");
         }
         if (renovationTask == null || renovationTask.getRenovationRecord() != renovationRecord) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation task does not exist.");
         }
-        if (renovationTaskDTO.getDueDate() != null) {
-            DateTimeFormatter[] formatters = new DateTimeFormatter[] {
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd"),
-                    DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            };
-
-            for (DateTimeFormatter formatter : formatters) {
-                try {
-                    parsedDate = LocalDate.parse(renovationTaskDTO.getDueDate(), formatter);
-                    break;
-                } catch (DateTimeParseException ignored) {}
-            }
-
-            if (parsedDate != null) {
-                String formattedDueDate = parsedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
-                renovationTaskDTO.setDueDate(formattedDueDate);
-            }
+        String formattedDueDate = renovationTaskService.parseDueDate(renovationTaskDTO);
+        if (formattedDueDate != null) {
+            redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
         }
 
         Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(
                 renovationTaskDTO, renovationTask.getRenovationRecord());
 
         if (!errors.isEmpty()) {
-            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
+            errors.forEach(redirectAttributes::addFlashAttribute);
 
             redirectAttributes.addFlashAttribute("renovationTaskDTO", renovationTaskDTO);
             return "redirect:/editTask?taskId=" + taskId + "&renovationId=" + renovationId;
