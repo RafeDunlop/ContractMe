@@ -43,7 +43,7 @@ public class RunPlaywrightTests {
 
     }
 
-    @Before
+    @Before(order = 0)
     public void openContext() {
         baseUrl = "http://localhost:" + port;
         browserContext = browser.newContext();

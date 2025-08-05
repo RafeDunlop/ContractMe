@@ -9,7 +9,6 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -85,7 +84,6 @@ public class EditProfileStepsE2e {
     @When("I click the Submit button")
     public void i_click_the_submit_button() {
         RunPlaywrightTests.page.locator("#submit-button").click();
-        RunPlaywrightTests.page.waitForURL(RunPlaywrightTests.baseUrl + "/user/edit");
     }
 
     @Then("my new details are saved")

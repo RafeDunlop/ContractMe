@@ -5,7 +5,6 @@ import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
-import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -50,7 +49,7 @@ public class SetupRegisterUserHookE2e {
         SecurityContextHolder.setContext(context);
     }
 
-    @Before("@loginUser")
+    @Before(value = "@loginUser", order = 2)
     public void i_login() {
         i_am_an_existing_user();
         User user = userContext.getUser();
@@ -60,8 +59,6 @@ public class SetupRegisterUserHookE2e {
         RunPlaywrightTests.page.locator("#password").fill("Test123!");
 
         RunPlaywrightTests.page.locator("#sign-in-button").click();
-        String homeUrl = RunPlaywrightTests.baseUrl + "/main";
-        String currentUrl = RunPlaywrightTests.page.url();
-        Assertions.assertEquals(homeUrl, currentUrl);
+        RunPlaywrightTests.page.waitForURL("**/main");
     }
 }
