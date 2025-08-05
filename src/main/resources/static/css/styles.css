@@ -156,7 +156,7 @@
 }
 
 
-.navbar {
+.custom-navbar {
     background-color: #333;
     position: relative;
     display: flex;
@@ -167,18 +167,18 @@
 
 }
 
-.navbar-brand {
+.custom-navbar-brand {
     color: white;
     line-height: 38px;
 
 }
 
-.navbar ul {
+.custom-navbar ul {
     list-style: none;
     margin: 0;
 }
 
-.navbar li {
+.custom-navbar li {
     float: left;
 }
 
@@ -188,7 +188,7 @@
     display: block;
 }
 
-.navbar li a {
+.custom-navbar li a {
     display: block;
     color: white;
     padding: 14px 20px;
@@ -196,7 +196,7 @@
     text-align: center;
 }
 
-.navbar li a:hover {
+.custom-navbar li a:hover {
     background-color: #111;
 }
 
@@ -235,13 +235,13 @@
 }
 
 @media screen and (max-width: 900px) {
-    .navbar li {
+    .custom-navbar li {
         float: none;
         width: 100%;
         text-align: left;
     }
 
-    .navbar li a {
+    .custom-navbar li a {
         text-align: left;
     }
 
@@ -249,16 +249,16 @@
         display: block;
     }
 
-    .navbar ul {
+    .custom-navbar ul {
         display: none;
 
     }
 
-    .navbar.responsive ul {
+    .custom-navbar.responsive ul {
         display: block;
     }
 
-    .navbar.responsive .hamburger {
+    .custom-navbar.responsive .hamburger {
         position: absolute;
         right: 0;
         top: 0;

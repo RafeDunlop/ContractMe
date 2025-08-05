@@ -5,19 +5,10 @@
 	<base th:href="@{/}"/>
 	<meta name="_csrf" th:content="${_csrf.token}"/>
 	<title th:text="|User ${firstName}|">User Details</title>
-	<link rel="stylesheet" th:href="@{/css/styles.css}">
 	<link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+	<link rel="stylesheet" th:href="@{/css/styles.css}">
 	<script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
 </head>
-
-<style>
-    .col-md-25 {
-        flex: 0 0 18%;
-        max-width: 22%;
-    }
-</style>
-
-
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
 <div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
@@ -39,7 +30,7 @@
 		<!-- Use Bootstrap Grid for Layout -->
 		<div class="row align-items-center">
 			<!-- Profile Picture Column -->
-			<div class="col-md-25  text-center">
+			<div class="col-md-25  text-center" style="flex: 0 0 18%; max-width: 22%;">
 				<img th:src="@{'/profile_pictures/' + ${profilePicture}}"
 					 alt="Profile Picture"
 					 class="img-fluid rounded-circle"

@@ -26,4 +26,8 @@ function toggleMenu() {
     document.getElementById("navbar").classList.toggle("responsive");
     document.getElementById('navbar-home').classList.toggle("mobile-brand");
     document.getElementById("navbar-links").classList.toggle("mobile-navbar-links");
+    document.getElementById("dropdown").classList.toggle("mobile-dropdown");
+    document.getElementById("profile-container").classList.toggle("mobile-profile");
+
+
 }
