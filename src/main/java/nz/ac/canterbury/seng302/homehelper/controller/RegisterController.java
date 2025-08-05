@@ -115,8 +115,7 @@ public class RegisterController {
             } else {
                 user = registerService.registerUser(userRegisterDTO);
                 if (locationService.isLocationProvided(addressDTO)) {
-                    String ip = locationService.getIpFromRequest(request);
-                    registerService.registerLocation(user, addressDTO, ip);
+                    registerService.registerLocation(user, addressDTO);
                 }
             }
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));

@@ -11,14 +11,17 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
@@ -28,13 +31,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -65,9 +68,11 @@ public class RenovationControllerIntegrationTest {
     @Autowired
     private TagService tagService;
 
-
     @Autowired
     private RenovationRecordService renovationRecordService;
+
+    @MockBean
+    private LocationService locationService;
 
     private User currentUser;
     private User owner;
@@ -79,6 +84,7 @@ public class RenovationControllerIntegrationTest {
 
     @BeforeEach
     public void setupUser() {
+
         currentUser = new User("Jane", "Doe", "jane@doe.com", "password");
         userRepository.save(currentUser);
 
@@ -1455,6 +1461,14 @@ public class RenovationControllerIntegrationTest {
         addressDTO.setCity("Christchurch");
         addressDTO.setRegion("Beckenham");
 
+        when(locationService.locate(Mockito.any())).thenReturn(new Location(
+                addressDTO.getAddress_line1(),
+                addressDTO.getCountry(),
+                addressDTO.getPostcode(),
+                addressDTO.getCity(),
+                addressDTO.getRegion()
+        ));
+
         mockMvc.perform(post("/renovations/create")
                 .param("name", testRecord.getName())
                 .param("description", testRecord.getDescription())
@@ -1493,6 +1507,14 @@ public class RenovationControllerIntegrationTest {
         addressDTO.setCity("Christchurch");
         addressDTO.setRegion("Sydenham");
 
+        when(locationService.locate(Mockito.any())).thenReturn(new Location(
+                addressDTO.getAddress_line1(),
+                addressDTO.getCountry(),
+                addressDTO.getPostcode(),
+                addressDTO.getCity(),
+                addressDTO.getRegion()
+        ));
+
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
                     .param("address_line1", addressDTO.getAddress_line1())
                     .param("country", addressDTO.getCountry())
@@ -1529,6 +1551,14 @@ public class RenovationControllerIntegrationTest {
         addressDTO.setCity("Christ)(*)( church");
         addressDTO.setRegion("Foo$bar");
 
+        when(locationService.locate(addressDTO)).thenReturn(new Location(
+                addressDTO.getAddress_line1(),
+                addressDTO.getCountry(),
+                addressDTO.getPostcode(),
+                addressDTO.getCity(),
+                addressDTO.getRegion()
+        ));
+
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
                         .param("address_line1", addressDTO.getAddress_line1())
                         .param("country", addressDTO.getCountry())
@@ -1561,6 +1591,8 @@ public class RenovationControllerIntegrationTest {
         testRecord.setLocation(initialLocation);
         renovationRecordRepository.save(testRecord);
 
+        when(locationService.locate(Mockito.any())).thenReturn(new Location("","","","",""));
+
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
                         .param("address_line1", "33 Fendylton Ave")
                         .param("country", "New Zealand")
@@ -1588,9 +1620,10 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "jane@doe.com")
-    public void getForm_renovationWitoutLocation_locationNotAdded() throws Exception {
+    public void getForm_renovationWithoutLocation_locationNotAdded() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
 
+        when(locationService.locate(Mockito.any())).thenReturn(new Location());
 
         mockMvc.perform(post("/renovations/create")
                         .param("name", testRecord.getName())

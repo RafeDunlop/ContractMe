@@ -18,6 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -65,15 +68,18 @@ public class LocationService {
 
     /**
      * This method calls Geoapify API endpoints. These should be mocked for testing.
+     * If the addressDTO is empty, this will still create and return an empty Location without co-ordinates in order to
+     * maintain consistent data
      * @param addressDTO address data object passed from frontend
      * @return fully-formed {@link Location} object guaranteed to be supplied coordinates
      */
-    public Location locate(AddressDTO addressDTO, String ipAddress) {
-        if (!hasCoords(addressDTO)) {
+    public Location locate(AddressDTO addressDTO) {
+        if (!hasCoords(addressDTO) && isLocationProvided(addressDTO)) {
             try {
                 injectCoordsViaGeocoding(addressDTO);
             } catch (IllegalArgumentException e) {
                 logger.warn("failed to acquire location coordinates via geocoding {}", e.getMessage());
+                String ipAddress = getIpFromRequest();
                 injectCoordsViaIpGeolocation(addressDTO, ipAddress);
             }
         }
@@ -256,7 +262,6 @@ public class LocationService {
 
     /**
      * Gets the URL to call to retrieve geocoding information about the custom supplied location
-     * todo null entries?
      * @param address The {@link AddressDTO} which contains the address
      * @return The URL to call to retrieve geocoding information about the custom supplied location
      */
@@ -332,14 +337,19 @@ public class LocationService {
     /**
      * Gets the IP address of the request, principally from the original client that submitted the request
      * if forwarded
-     * @param request The request received by the localisation controller
+     * Uses {@link RequestContextHolder} from Spring to statically extract the web request, via {@link ServletRequestAttributes}
      * @return The IP address of the client
      */
-    public String getIpFromRequest(HttpServletRequest request) {
-        String forwardingHeader = request.getHeader("X-Forwarded-For");
-        if (forwardingHeader == null || forwardingHeader.isEmpty()) {
-            return request.getRemoteAddr();
+    public String getIpFromRequest() {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes instanceof ServletRequestAttributes servletAttributes) {
+            HttpServletRequest request = servletAttributes.getRequest();
+            String forwardingHeader = request.getHeader("X-Forwarded-For");
+            if (forwardingHeader == null || forwardingHeader.isEmpty()) {
+                return request.getRemoteAddr();
+            }
+            return forwardingHeader.split(",")[0];
         }
-        return forwardingHeader.split(",")[0];
+        throw new IllegalStateException("Method called illegally outside web request context");
     }
 }
