@@ -228,7 +228,7 @@ public class RenovationTaskServiceTest {
         when(dummyTask.getRenovationRecord()).thenReturn(renovationRecord);
         when(renovationTaskRepository.getByDueDateBetween(any(LocalDate.class), any(LocalDate.class), any(RenovationRecord.class))).thenReturn(List.of(dummyTask));
         Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
-        assertEquals(dummyTask, toTest.get(middleDate).getFirst());
+        assertEquals(dummyTask, toTest.get(middleDate).get(0));
     }
 
     @Test
@@ -239,7 +239,7 @@ public class RenovationTaskServiceTest {
         when(dummyTask.getRenovationRecord()).thenReturn(renovationRecord);
         when(renovationTaskRepository.getByDueDateBetween(any(LocalDate.class), any(LocalDate.class), any(RenovationRecord.class))).thenReturn(List.of(dummyTask));
         Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, startDate);
-        assertEquals(dummyTask, toTest.get(startDate).getFirst());
+        assertEquals(dummyTask, toTest.get(startDate).get(0));
     }
 
     @Test
@@ -281,8 +281,8 @@ public class RenovationTaskServiceTest {
         when(dummyTask2.getDueDate()).thenReturn(endDate);
         when(renovationTaskRepository.getByDueDateBetween(any(LocalDate.class), any(LocalDate.class), any(RenovationRecord.class))).thenReturn(List.of(dummyTask1, dummyTask2));
         Map<LocalDate,  List<RenovationTask>> toTest = renovationTaskService.getTasksWithinDates(renovationRecord, startDate, endDate);
-        assertEquals(dummyTask1, toTest.get(startDate).getFirst());
-        assertEquals(dummyTask2, toTest.get(endDate).getFirst());
+        assertEquals(dummyTask1, toTest.get(startDate).get(0));
+        assertEquals(dummyTask2, toTest.get(endDate).get(0));
     }
 
     @Test
