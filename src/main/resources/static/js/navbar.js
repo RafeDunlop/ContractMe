@@ -28,6 +28,16 @@ function toggleMenu() {
     document.getElementById("navbar-links").classList.toggle("mobile-navbar-links");
     document.getElementById("dropdown").classList.toggle("mobile-dropdown");
     document.getElementById("profile-container").classList.toggle("mobile-profile");
+}
 
+document.addEventListener("resize", closeHamburgerBar)
 
+function closeHamburgerBar() {
+    if (window.innerWidth > 900) {
+        document.getElementById("navbar").classList.remove("responsive");
+        document.getElementById('navbar-home').classList.remove("mobile-brand");
+        document.getElementById("navbar-links").classList.remove("mobile-navbar-links");
+        document.getElementById("dropdown").classList.remove("mobile-dropdown");
+        document.getElementById("profile-container").classList.remove("mobile-profile");
+    }
 }
