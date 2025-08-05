@@ -151,6 +151,10 @@
     text-align: right;
 }
 
+.dropdown-item {
+    text-align: right !important;
+}
+
 .show-hidden-element {
     display: block;
 }
@@ -170,7 +174,7 @@
 .custom-navbar-brand {
     line-height: 36px;
     color: white;
-    margin-right: 50px;
+
     padding: 12px 18px;
 }
 
@@ -239,7 +243,7 @@
     padding-bottom: 15px;
 }
 
-@media screen and (min-width: 900px) {
+@media screen and (min-width: 990px) {
     .custom-navbar li {
         float: left;
     }
@@ -259,7 +263,7 @@
 
 }
 
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 990px) {
     .custom-navbar li {
         float: none;
         width: 100%;
@@ -287,5 +291,9 @@
         position: absolute;
         right: 0;
         top: 0;
+    }
+
+    .dropdown-item {
+        text-align: left !important;
     }
 }
