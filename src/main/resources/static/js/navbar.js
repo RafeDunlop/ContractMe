@@ -23,6 +23,10 @@ window.onclick = function closeDropdownMenu(event) {
     }
 }
 
+/**
+ * Toggles the hamburger display menu to show navbar links on
+ * minimised page
+ */
 function toggleMenu() {
     document.getElementById("navbar").classList.toggle("responsive");
     document.getElementById('navbar-home').classList.toggle("mobile-brand");
@@ -33,6 +37,10 @@ function toggleMenu() {
 
 window.addEventListener("resize", closeHamburgerBar);
 
+/**
+ * Closes the hamburger display menu when screen is resized
+ * back to the size where navbar elements can display normally
+ */
 function closeHamburgerBar() {
     console.log("function called");
     if (window.innerWidth > 900) {

@@ -168,9 +168,9 @@
 }
 
 .custom-navbar-brand {
+    line-height: 37px;
     color: white;
-    line-height: 38px;
-
+    margin-right: 0;
 }
 
 .custom-navbar ul {
@@ -198,6 +198,7 @@
 
 .custom-navbar li a:hover {
     background-color: #111;
+    color: white;
 }
 
 
