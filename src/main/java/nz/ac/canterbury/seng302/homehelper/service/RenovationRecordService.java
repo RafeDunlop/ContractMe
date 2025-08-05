@@ -36,6 +36,7 @@ public class RenovationRecordService {
     private final RenovationRecordValidation renovationRecordValidation;
 
     private final RenovationTaskService renovationTaskService;
+    private final LocationService locationService;
 
     /**
      * Constructor for the RenovationRecordService class
@@ -43,29 +44,24 @@ public class RenovationRecordService {
      * @param renovationRecordRepository initializes with the repository for storing records
      */
     @Autowired
-    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation, RenovationTaskService renovationTaskService) {
+    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation, RenovationTaskService renovationTaskService, LocationService locationService) {
         this.renovationRecordRepository = renovationRecordRepository;
         this.renovationTaskRepository = renovationTaskRepository;
         this.renovationRecordValidation = renovationRecordValidation;
         this.renovationTaskService = renovationTaskService;
+        this.locationService = locationService;
     }
 
     /**
      * Creates a location and attaches it to the user entity
-     * Saves the user with its location to the database
+     * Saves the renovation with its location to the database
      *
      * @param renovation The renovation to attach location to
      * @param addressDTO Data transfer object for user registration
      */
     public void addRenovationLocation(RenovationRecord renovation, AddressDTO addressDTO) {
-        Location userLocation = new Location(
-                addressDTO.getAddress_line1(),
-                addressDTO.getCountry(),
-                addressDTO.getPostcode(),
-                addressDTO.getCity(),
-                addressDTO.getRegion()
-        );
-        renovation.setLocation(userLocation);
+        Location renovationLocation = locationService.locate(addressDTO);
+        renovation.setLocation(renovationLocation);
         renovationRecordRepository.save(renovation);
     }
 
