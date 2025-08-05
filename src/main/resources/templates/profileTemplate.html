@@ -5,6 +5,7 @@
 	<base th:href="@{/}"/>
 	<meta name="_csrf" th:content="${_csrf.token}"/>
 	<title th:text="|User ${firstName}|">User Details</title>
+	<link rel="stylesheet" th:href="@{/css/styles.css}">
 	<link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
 	<link rel="stylesheet" th:href="@{/css/styles.css}">
 
@@ -25,13 +26,14 @@
             <a th:href="@{/user/edit}" class="btn btn-primary ">
                 Edit
             </a>
+			<button class="btn btn-danger" onclick="confirmLogout()">Logout</button>
 		</div>
 
 
 		<!-- Use Bootstrap Grid for Layout -->
 		<div class="row align-items-center">
 			<!-- Profile Picture Column -->
-			<div class="col-md-25  text-center" style="flex: 0 0 18%; max-width: 22%;">
+			<div class="col-md-25  text-center">
 				<img th:src="@{'/profile_pictures/' + ${profilePicture}}"
 					 alt="Profile Picture"
 					 class="img-fluid rounded-circle"
@@ -50,16 +52,37 @@
 								<th class="p-2">Email</th>
 								<td class="p-2" th:text="${email}">email</td>
 							</tr>
+							<tr th:if="${userType == 'Contractor'}">
+								<th class="p-2">Phone Number</th>
+								<td class="p-2" th:text="${phoneNumber}"/>
+							</tr>
+							<tr th:if="${userType == 'Contractor'}">
+								<th class="p-2">Hourly Rate</th>
+								<td class="p-2" th:text="${hourlyRate}"/>
+							</tr>
 							<tr>
 								<th class="p-2">Account created</th>
 								<td class="p-2" th:text="${dateAdded}">date</td>
 							</tr>
-
 							<tr th:if="${userType == 'Contractor'}">
 								<th class="p-2">Availability</th>
 								<td class="p-2" th:text="${isAvailable} ? 'Available' : 'Not Available'">Availability</td>
 							</tr>
-
+							<tr th:if="${userType == 'Contractor'}">
+								<th class="p-2">Skills</th>
+								<td class="p-2">
+									<span th:each="skill : ${skills}"
+										  class="tag-box badge bg-success d-inline-flex align-items-center me-2 mb-2">
+										<span class="tag-text-large ms-1 text-truncate" th:text="${skill.getDisplayName()}"/>
+									</span>
+								</td>
+							</tr>
+							<tr th:if="${location}">
+								<th class="p-2">Address</th>
+								<td class="p-2">
+									<div th:replace="~{fragments/addressDisplay.html :: addressDisplay (${location})}"></div>
+								</td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
@@ -81,7 +104,6 @@
 	</div>
 </div>
 </body>
-<script type="module" th:src="@{/js/navbar.js}"></script>
 
 <script type="text/javascript" th:src="@{/js/contractorAvailability.js}"></script>
 </html>

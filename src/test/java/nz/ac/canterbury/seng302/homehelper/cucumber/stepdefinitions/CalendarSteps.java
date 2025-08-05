@@ -225,7 +225,7 @@ public class CalendarSteps {
     @Then("they do not see a calendar")
     public void they_do_not_see_a_calendar() throws Exception {
         String html = result.getResponse().getContentAsString();
-        System.out.println(html);
+
         Assertions.assertFalse(html.contains("id=\"calendar\""), "Calendar should not be visible on private records to other users");
     }
 

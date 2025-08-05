@@ -126,6 +126,15 @@ function fetchRenovation(id, resetPage = false) {
     let cardsPerPage = parseInt(document.getElementById("cardsPerPage")?.value, 10);
     let totalPages = parseInt(document.getElementById("totalPages")?.value, 10);
 
+    let statusElement = document.getElementById("status-filter");
+    let selectedStatus = statusElement.value;
+    const validStatuses = ["all", "notStarted", "inProgress", "blocked", "completed", "cancelled"];
+
+    if (!validStatuses.includes(selectedStatus)) {
+        selectedStatus = "all";
+        statusElement.value = "all";
+    }
+
     if (isNaN(pageNumber) || pageNumber < 1) pageNumber = 1;
     if (isNaN(cardsPerPage)) cardsPerPage = 16;
     if (!isNaN(totalPages) && pageNumber > totalPages && totalPages > 0) {
@@ -135,6 +144,7 @@ function fetchRenovation(id, resetPage = false) {
     const params = new URLSearchParams();
     params.set("page", pageNumber);
     params.set("cardsPerPage", cardsPerPage);
+    params.set("status", selectedStatus);
 
     fetch(`${basePath}renovations/retrieve/${id}?${params.toString()}`)
         .then(response => response.json())
@@ -269,17 +279,16 @@ function renderTaskCards(data, isOwner, renovationId) {
     grid.innerHTML = "";
     grid.className = "task-grid";
 
-    const stateColors = {
-        "NOT_STARTED": "#6c757d",
-        "IN_PROGRESS": "#0d6efd",
-        "BLOCKED": "#ffc107",
-        "COMPLETED": "#198754",
-        "CANCELLED": "#dc3545"
+    const states = {
+        "NOT_STARTED": "Not Started",
+        "IN_PROGRESS": "In Progress",
+        "BLOCKED": "Blocked",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
     };
 
     data.content.forEach(task => {
-
-        const stateColor = stateColors[task.state]
+        const stateColor = task.stateColour
         const isDefaultIcon = task.iconFileName === 'default-icon.png';
 
         const iconHtml = `
@@ -311,10 +320,10 @@ function renderTaskCards(data, isOwner, renovationId) {
                     <div class="d-flex align-items-center mb-3 mt-2">
                       <p class="card-text mb-0 me-2"><strong>State:</strong></p>
                       <select id="task-state-${task.id}" class="form-select form-select-sm w-auto" onchange="updateTaskState(${task.id}, this.value, this)">
-                        ${Object.keys(stateColors).map(state =>
-                                `<option value="${state}" ${state === task.state ? 'selected' : ''}>${state.replaceAll('_', ' ')}</option>`
-                            ).join('')}
-                      </select>
+                          ${Object.entries(states).map(([key, display]) =>
+                          `<option value="${key}" ${key === task.state ? 'selected' : ''}>${display}</option>`
+                          ).join('')}
+                        </select>
                     </div>
                     
                     <div class="d-flex justify-content-between">${editButton}</div>

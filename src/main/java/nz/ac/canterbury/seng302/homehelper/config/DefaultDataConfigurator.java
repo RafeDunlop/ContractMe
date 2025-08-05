@@ -1,13 +1,14 @@
 package nz.ac.canterbury.seng302.homehelper.config;
 
+import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import java.util.ArrayList;
 import java.util.Arrays;
-import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
-import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
-import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.service.*;
@@ -39,12 +40,15 @@ public class DefaultDataConfigurator {
 
     private final VerificationCodeService verificationCodeService;
 
-    private final ContractorService contractorService;
     private final TagService tagService;
+
+    private final ContractorService contractorService;
 
     private User default1;
 
     private User default2;
+
+    private Contractor defaultContractor1;
 
     private RenovationRecord default1Renovation1;
 
@@ -59,7 +63,7 @@ public class DefaultDataConfigurator {
                                    RenovationRecordService renovationRecordService,
                                    RenovationTaskService renovationTaskService,
                                    VerificationCodeService verificationCodeService,
-                                   TagService tagService,ContractorService contractorService) {
+                                   TagService tagService, ContractorService contractorService) {
         this.registerService = registerService;
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
@@ -104,6 +108,22 @@ public class DefaultDataConfigurator {
         addressDTO.setRegion(location.getSuburb());
         default2 = contractorService.registerContractor(user,addressDTO);
         code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, default2, Locale.ENGLISH);
+        verificationCodeService.consumeSignupCode(code);
+
+        user.setIsContractor(true);
+        user.setEmail("seng302.team200.contractor@gmail.com");
+        user.setSkills(List.of(Skill.SCAFFOLDING, Skill.RESOURCE_CONSENT_COMPLIANCE, Skill.CARPENTRY));
+        user.setHourlyRate(30.0f);
+        user.setCountryCode(64);
+        user.setPhoneNumber("33692888");
+        AddressDTO address = new AddressDTO();
+        address.setAddress_line1("Jack Erskine");
+        address.setCity("Christchurch");
+        address.setRegion("Ilam");
+        address.setCountry("New Zealand");
+        address.setPostcode("");
+        defaultContractor1 = contractorService.registerContractor(user, address);
+        code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, defaultContractor1, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);
     }
 

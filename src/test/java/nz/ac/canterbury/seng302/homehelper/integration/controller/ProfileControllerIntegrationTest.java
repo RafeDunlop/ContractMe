@@ -1,20 +1,22 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
 import jakarta.annotation.PostConstruct;
-import java.util.List;
+
+import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.controller.ProfileController;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -24,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -47,6 +50,8 @@ public class ProfileControllerIntegrationTest {
     @Autowired
     private ContractorRepository contractorRepository;
 
+    private Contractor contractor;
+
 
     @PostConstruct
     public void setup() {
@@ -61,6 +66,19 @@ public class ProfileControllerIntegrationTest {
 
     }
 
+    @BeforeEach
+    public void before() {
+        contractor = new Contractor("John", "Smith", "john@example.com", "password");
+        Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
+        contractor.setLocation(location);
+        contractor.setHourlyRate(0f);
+        contractor.setCountryCode(64);
+        contractor.addSkill(Skill.ACOUSTIC_INSULATION);
+        contractor.setPhoneNumber("12 345 6789");
+        contractor = contractorRepository.save(contractor);
+    }
+
+    @Transactional
     @Test
     public void testGetProfile_validId_dataAdded() throws Exception {
         User expectedUser = new User("John", "Smith", "john@example.com", "password");
@@ -77,56 +95,59 @@ public class ProfileControllerIntegrationTest {
     }
 
     @Test
+    @Transactional
     public void testGetProfile_invalidId_errorResponse() throws Exception {
         mockMvc.perform(get("/user"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
+    @Transactional
     public void testGetProfile_validIdNoUser_errorResponse() throws Exception {
         Mockito.when(userRepository.findById(1L)).thenReturn(Optional.empty());
         mockMvc.perform(get("/user"))
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    @Transactional
+    public void testGetProfile_validContractor_profileFieldsAdded() throws Exception {
+        Mockito.when(userRepository.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.of(contractor));
+        mockMvc.perform(get("/user/")
+                        .header(HttpHeaders.ACCEPT_LANGUAGE, Locale.US.toLanguageTag()))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("phoneNumber", "+64 12 345 6789"))
+                .andExpect(model().attribute("hourlyRate", "$0.00"))
+                .andExpect(model().attributeExists("skills"))
+                .andExpect(model().attributeExists("location"));
+
+    }
 
     @Test
+    @Transactional
     public void changeAvailability_setTrue_contractorIsAvailable() throws Exception {
-        Contractor contractor = new Contractor("John", "Smith", "john" + System.currentTimeMillis() + "@example.com", "password");
-        Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
-        contractor.setLocation(location);
-        contractorRepository.save(contractor);
-        Long id = contractor.getId();
-
-        mockMvc.perform(post("/editAvailability/{id}", id)
+        mockMvc.perform(post("/editAvailability/{id}", contractor.getId())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content("{\"isAvailable\": true}")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user"));
 
-        Contractor updated = contractorRepository.findById(id).orElseThrow();
+        Contractor updated = contractorRepository.findById(contractor.getId()).orElseThrow();
         assertTrue(updated.getAvailable(), "Publicity flag should be updated to true");
     }
 
-
-
     @Test
+    @Transactional
     public void changeAvailability_setFalse_contractorIsUnavailable() throws Exception {
-        Contractor contractor = new Contractor("John", "Smith", "john" + System.currentTimeMillis() + "@example.com", "password");
-        Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
-        contractor.setLocation(location);
-        contractorRepository.save(contractor);
-        Long id = contractor.getId();
-
-        mockMvc.perform(post("/editAvailability/{id}", id)
+        mockMvc.perform(post("/editAvailability/{id}", contractor.getId())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content("{\"isAvailable\": false}")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user"));
 
-        Contractor updated = contractorRepository.findById(id).orElseThrow();
+        Contractor updated = contractorRepository.findById(contractor.getId()).orElseThrow();
         assertFalse(updated.getAvailable(), "Publicity flag should be updated to false");
     }
 }

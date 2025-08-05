@@ -126,7 +126,7 @@ public class RenovationTaskServiceIntegrationTest {
         );
         renovationTaskRepository.save(testTask);
         Map<LocalDate,  List<RenovationTask>> map = this.toTest.getTasksWithinDates(renovationRecord, startDate, endDate);
-        assertEquals(testTask, map.get(startDate).getFirst());
+        assertEquals(testTask, map.get(startDate).get(0));
     }
 
     @Test
@@ -143,6 +143,6 @@ public class RenovationTaskServiceIntegrationTest {
         );
         renovationTaskRepository.save(testTask);
         Map<LocalDate,  List<RenovationTask>> map = this.toTest.getTasksWithinDates(renovationRecord, startDate, endDate);
-        assertEquals(testTask, map.get(endDate).getFirst());
+        assertEquals(testTask, map.get(endDate).get(0));
     }
 }

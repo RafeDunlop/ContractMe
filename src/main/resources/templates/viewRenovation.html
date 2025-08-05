@@ -88,6 +88,19 @@
                         </button>
                     </span>
                 </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="status-filter" class="fw-bold">Show:</label>
+                    <select id="status-filter" name="status" class="form-select"
+                            th:attr="onchange=|fetchRenovation(${renovation.id})|">
+                    <option value="all" th:selected="${status == 'all'}">All</option>
+                        <option value="notStarted" th:selected="${status == 'notStarted'}">Not Started</option>
+                        <option value="inProgress" th:selected="${status == 'inProgress'}">In Progress</option>
+                        <option value="blocked" th:selected="${status == 'blocked'}">Blocked</option>
+                        <option value="completed" th:selected="${status == 'completed'}">Completed</option>
+                        <option value="cancelled" th:selected="${status == 'cancelled'}">Cancelled</option>
+                    </select>
+                </div>
             </div>
 
             <div th:if="${not #lists.isEmpty(renovation.getRenovationTasks())}" id="elements-container" style="display: none;">
@@ -104,7 +117,6 @@
                 <div class="alert alert-danger" id="errorMessage" style="margin-top: 20px; display: none;">
                     <p id="errorText"></p>
                 </div>
-
 
                 <!-- Buttons -->
                 <div class="mt-2 mb-2">
@@ -128,6 +140,12 @@
 
     <div id="icon-selector-modal" class="modal" style="display: none">
         <div id="icon-selector-content"></div>
+    </div>
+
+    <div class="modal fade" id="task-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div id="task-modal-content" class="modal-content"></div>
+        </div>
     </div>
 
 <script th:inline="javascript">
@@ -155,6 +173,7 @@
         });
     });
 </script>
+
 <script th:src="@{/js/addTaskIcon.js}"></script>
 <script type="module" th:src="@{/js/navbar.js}"></script>
 

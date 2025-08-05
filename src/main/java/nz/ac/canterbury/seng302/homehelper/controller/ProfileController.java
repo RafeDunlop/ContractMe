@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
@@ -48,10 +50,11 @@ public class ProfileController {
 	 * Takes the user to the profile page when the "/user" URL is entered. Gets the information of the current user and displays
 	 * it on the profileTemplate.html form.
 	 * @param model Representation of results to be used by Thymeleaf
+	 * @param request network request included to extract {@code Locale} of the request
 	 * @return Thymeleaf profileTemplate
 	 */
 	@GetMapping("/user")
-	public String userProfile(Model model) {
+	public String userProfile(Model model, HttpServletRequest request) {
 		logger.info("GET /user/");
 		try {
 			User user = loginService.getUserByEmail();
@@ -60,10 +63,16 @@ public class ProfileController {
 			model.addAttribute("email", user.getEmail());
 			model.addAttribute("dateAdded", user.getCreatedTimestamp().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 			model.addAttribute("profilePicture", user.getProfilePicture());
+			Location location = user.getLocation();
+			model.addAttribute("hasLocation", location != null);
+			model.addAttribute("location", location);
 			if (user instanceof Contractor contractor) {
 				model.addAttribute("userType", "Contractor");
+				model.addAttribute("phoneNumber", contractor.getPhoneNumberFormatted());
+				model.addAttribute("hourlyRate", contractor.getHourlyRateFormatted(request.getLocale()));
+				model.addAttribute("skills", contractor.getSkills());
 				model.addAttribute("isAvailable", contractor.getAvailable());
-				model.addAttribute("contractor",contractor);
+				model.addAttribute("contractor", contractor);
 			}
 			return "profileTemplate";
 		} catch (IllegalArgumentException e) {

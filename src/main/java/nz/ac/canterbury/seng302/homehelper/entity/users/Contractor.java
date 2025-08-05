@@ -3,7 +3,9 @@ package nz.ac.canterbury.seng302.homehelper.entity.users;
 
 import jakarta.persistence.*;
 
+import java.text.NumberFormat;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -43,6 +45,26 @@ public class Contractor extends User {
     }
 
     public Contractor() {}
+
+    /**
+     * Formats the phone number entry into a standard format
+     * @return The representation of the phone number supplied by the {@code Contractor}
+     */
+    public String getPhoneNumberFormatted() {
+        return String.format("+%d %s",
+                countryCode,
+                phoneNumber
+        );
+    }
+
+    /**
+     * Formats the hourly rate specified for this contractor according to their {@link Locale}
+     * @param locale The {@link Locale} associated with a region, i.e. the request locale
+     * @return The formatted hourly rate
+     */
+    public String getHourlyRateFormatted(Locale locale) {
+        return NumberFormat.getCurrencyInstance(locale).format(hourlyRate);
+    }
 
     /**
      * Returns the contractor's hourly rate.
