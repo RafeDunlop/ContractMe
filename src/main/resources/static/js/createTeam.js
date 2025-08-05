@@ -42,6 +42,15 @@ function addSkill() {
 }
 
 /**
+ * Controls the enabled state of the "Add" button based on skill selection.
+*/
+document.getElementById('skills-select').addEventListener('change', function() {
+    const addButton = document.getElementById('addSkillButton');
+    addButton.disabled = this.selectedIndex === 0;
+});
+
+
+/**
  * Creates a post request attaching the input to a TeamRequestDTO to the endpoint in the TeamsController.
  * Also creates TeamRoleDTO's within the DTO which has a null field for contractor and not accepted field for accepted.
  */

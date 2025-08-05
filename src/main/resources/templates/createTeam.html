@@ -11,6 +11,7 @@
 <body>
 
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+<div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
 
 <div id="container" class="card container mt-5 p-4 shadow-sm">
     <h4 class="card-title mb-4" th:text="|Create Team For ${renovationRecord.getName()}|"/>
@@ -21,7 +22,8 @@
                 <option th:each="skill : ${skills}" th:value="${skill}" th:text="${skill.getDisplayName()}"
                         th:attr="data-displayname=${skill.getDisplayName()}" class="skill-option"></option>
             </select>
-            <button type="button" class="btn btn-secondary" onclick="addSkill()">Add</button>
+        <button type="button" id="addSkillButton" class="btn btn-secondary"
+                onclick="confirmRole()" disabled>Add</button>
         </div>
         <div id="selected-skills" class="list-group">
         </div>
@@ -29,5 +31,6 @@
     </form>
 </div>
 </body>
+<script th:src="@{/js/confirmPrompt.js}"></script>
 <script th:src="@{/js/createTeam.js}"></script>
 </html>
