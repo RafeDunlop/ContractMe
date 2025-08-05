@@ -5,6 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,6 +13,7 @@ public class TeamsService {
 
     private final TeamsRepository teamsRepository;
 
+    @Autowired
     public TeamsService(TeamsRepository teamsRepository) {
         this.teamsRepository = teamsRepository;
     }

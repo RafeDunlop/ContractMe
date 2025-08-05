@@ -7,4 +7,6 @@ import org.springframework.data.repository.CrudRepository;
 public interface TeamsRepository extends CrudRepository<Teams, Long>{
 
     boolean existsByRenovationRecordId(Long id);
+
+    Teams findByRenovationRecord(RenovationRecord renovationRecord);
 }
