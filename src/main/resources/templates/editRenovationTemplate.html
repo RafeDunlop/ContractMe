@@ -73,8 +73,7 @@
                 </div>
 
                 <!-- Backend error -->
-                <div class="alert alert-danger mb-4" role="alert" id="description-backend-error" hidden
-                     th:if="${descriptionError}">
+                <div class="alert alert-danger mb-4" role="alert" id="description-backend-error" th:attr="hidden=${descriptionError == null}">
                     <div class="error-box">
                         <ul>
                             <li th:each="msg : ${descriptionError}" th:text="${msg}"></li>
