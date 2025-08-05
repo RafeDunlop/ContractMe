@@ -90,7 +90,6 @@ function checkNameField(input) {
  * @param input from the form to be checked
  */
 function checkDescriptionField(input) {
-    console.log("BE")
     if (descriptionBackendError) descriptionBackendError.hidden = true;
 
     if (input.length > 512) {
