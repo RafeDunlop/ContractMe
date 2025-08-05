@@ -39,9 +39,9 @@ public class LocationController {
      * @return The localisation of the client, packaged into a {@link LocalisationDTO} object
      */
     @GetMapping("/localisation")
-    public ResponseEntity<LocalisationDTO> getLocalisation(HttpServletRequest request) {
+    public ResponseEntity<LocalisationDTO> getLocalisation() {
         logger.info("GET /localisation");
-        String ipAddress = locationService.getIpFromRequest(request);
+        String ipAddress = locationService.getIpFromRequest();
         logger.debug("IP: {}", ipAddress);
         try {
             return new ResponseEntity<>(locationService.getRoughLocation(ipAddress), HttpStatus.OK);
