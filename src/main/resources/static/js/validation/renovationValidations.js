@@ -94,7 +94,7 @@ function checkDescriptionField(input) {
     if (descriptionBackendError) descriptionBackendError.hidden = true;
 
     if (input.length > 512) {
-        descriptionFrontendErrorMessage.textContent = "Renovation record description must be 512 characters or less";
+        descriptionFrontendErrorMessage.textContent = "Renovation record description must be 512 characters or less.";
         descriptionFrontendError.hidden = false;
         descriptionFrontendErrorMessage.hidden = false;
         descriptionFieldValid = false;
