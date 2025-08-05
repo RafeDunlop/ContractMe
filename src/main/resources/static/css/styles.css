@@ -164,24 +164,24 @@
     flex-direction: row;
     padding-left: 25px;
     padding-right: 25px;
+    min-height: 70px;
 
 }
 
 .navbar-brand {
     color: white;
+    line-height: 38px;
 
 }
 
 .navbar ul {
     list-style: none;
     margin: 0;
-    padding: 0;
 }
 
 .navbar li {
     float: left;
 }
-
 
 
 .nav-left {
@@ -203,11 +203,22 @@
 
 .hamburger {
     display: none;
-    float: right;
+    position: absolute;
+    right: 0;
     font-size: 26px;
     color: white;
     padding: 14px 20px;
     cursor: pointer;
+}
+
+.mobile-brand {
+    position: absolute;
+    top: 15px;
+    left: 78px;
+}
+
+.mobile-navbar-links {
+    padding-top: 50px;
 }
 
 @media screen and (max-width: 900px) {
@@ -227,8 +238,9 @@
 
     .navbar ul {
         display: none;
-        padding-top: 50px;
+
     }
+
 
     .navbar.responsive ul {
         display: block;

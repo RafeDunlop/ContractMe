@@ -2,7 +2,6 @@
  * Opens or closes the dropdown menu when the user clicks on the profile image
  */
 function toggleUserMenus() {
-    console.log("function loaded");
 
     document.getElementById("dropdown").classList.toggle("show-hidden-element");
 }
@@ -25,4 +24,6 @@ window.onclick = function closeDropdownMenu(event) {
 
 function toggleMenu() {
     document.getElementById("navbar").classList.toggle("responsive");
+    document.getElementById('navbar-home').classList.toggle("mobile-brand");
+    document.getElementById("navbar-links").classList.toggle("mobile-navbar-links");
 }
