@@ -17,24 +17,22 @@
     }
 </style>
 
-
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
 <div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
 <div class="container mt-5">
 	<div class="card p-4 shadow position-relative">
-        <div class="position-absolute top-0 end-0 m-3 d-flex gap-4">
+        <div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
 			<form id="contractorForm" class="d-flex align-items-center" th:if="${userType == 'Contractor'}">
 				<input type="hidden" id="contractor" th:value="${contractor.id}">
 				<input type="checkbox" id="availabilityCheckbox" name="isAvailable" th:checked="${contractor.available}" class="me-1">
 				<label for="availabilityCheckbox" class="mb-0">Available for jobs</label>
 			</form>
-            <a th:href="@{/user/edit}" class="btn btn-primary ">
+            <a th:href="@{/user/edit}" class="btn btn-primary" id="edit-button">
                 Edit
             </a>
 			<button class="btn btn-danger" onclick="confirmLogout()">Logout</button>
 		</div>
-
 
 		<!-- Use Bootstrap Grid for Layout -->
 		<div class="row align-items-center">
