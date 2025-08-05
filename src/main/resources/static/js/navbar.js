@@ -1,8 +1,9 @@
+
 /**
  * Opens or closes the dropdown menu when the user clicks on the profile image
  */
 function toggleUserMenus() {
-
+        console.log("sanity check");
     document.getElementById("dropdown").classList.toggle("show-hidden-element");
 }
 
@@ -30,10 +31,12 @@ function toggleMenu() {
     document.getElementById("profile-container").classList.toggle("mobile-profile");
 }
 
-document.addEventListener("resize", closeHamburgerBar)
+window.addEventListener("resize", closeHamburgerBar);
 
 function closeHamburgerBar() {
+    console.log("function called");
     if (window.innerWidth > 900) {
+        console.log("element styles changed")
         document.getElementById("navbar").classList.remove("responsive");
         document.getElementById('navbar-home').classList.remove("mobile-brand");
         document.getElementById("navbar-links").classList.remove("mobile-navbar-links");
