@@ -68,11 +68,13 @@ public class LocationService {
 
     /**
      * This method calls Geoapify API endpoints. These should be mocked for testing.
+     * If the addressDTO is empty, this will still create and return an empty Location without co-ordinates in order to
+     * maintain consistent data
      * @param addressDTO address data object passed from frontend
      * @return fully-formed {@link Location} object guaranteed to be supplied coordinates
      */
     public Location locate(AddressDTO addressDTO) {
-        if (!hasCoords(addressDTO)) {
+        if (!hasCoords(addressDTO) && isLocationProvided(addressDTO)) {
             try {
                 injectCoordsViaGeocoding(addressDTO);
             } catch (IllegalArgumentException e) {
