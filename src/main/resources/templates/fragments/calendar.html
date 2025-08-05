@@ -50,7 +50,8 @@
             <div th:each="cell : ${row}"
                  th:if="${cell != null}"
                  class="col border border-secondary text-start"
-                 th:ondblclick="|addTask(${id})|"
+                 th:ondblclick="|addTask(${id}, this)|"
+                 th:attr="data-cell-date=${cell.day.toString()}"
                  th:classappend="${cell.day.getMonthValue() != date.monthValue} ? ' bg-body-secondary text-muted' : ''"
                  th:style="${(cell.day.getDayOfMonth() == currentDay and cell.day.getMonthValue() == currentMonth and date.year == currentYear) ? 'background-color: #87bcfa;' : ''}">
 

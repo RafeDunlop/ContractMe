@@ -28,8 +28,10 @@ window.changeMonth = function(id, month, year) {
 /**
  * Open the task creation form
  * @param renovationId the id of the renovation
+ * @param cell the cell element which was clicked on
  */
-function addTask(renovationId) {
-    window.location.assign(`/renovations/view/create?id=${renovationId}`);
+function addTask(renovationId, cell) {
+    const date = cell.dataset.cellDate;
+    window.location.assign(`/renovations/view/create?id=${renovationId}&date=${date}`);
 }
 
