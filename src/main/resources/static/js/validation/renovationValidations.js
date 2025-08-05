@@ -7,8 +7,7 @@ let nameBackendError = document.getElementById("name-backend-error")
 let recordDescriptionField = document.getElementById("description")
 let descriptionFrontendError = document.getElementById("description-frontend-error")
 let descriptionFrontendErrorMessage = document.getElementById("description-frontend-error-message")
-let descriptionBackendError = document.getElementById("description-backend-error-message")
-
+let descriptionBackendError = document.getElementById("description-backend-error")
 
 let nameFieldValid = false;
 let descriptionFieldValid = true;
@@ -91,6 +90,7 @@ function checkNameField(input) {
  * @param input from the form to be checked
  */
 function checkDescriptionField(input) {
+    console.log("BE")
     if (descriptionBackendError) descriptionBackendError.hidden = true;
 
     if (input.length > 512) {
