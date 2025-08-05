@@ -330,7 +330,7 @@ public class LocationService {
      * @return Whether the co-ordinates provided in the specified address are null-equivalent (returns false)
      */
     private boolean hasCoords(AddressDTO address) {
-        return !(address.getLon() == 0d &&
+        return !(address.getLon() == 0d ||
                 address.getLat() == 0d);
     }
 
