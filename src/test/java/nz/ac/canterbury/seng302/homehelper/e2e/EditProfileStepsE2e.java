@@ -29,12 +29,6 @@ public class EditProfileStepsE2e {
         RunPlaywrightTests.page.navigate(RunPlaywrightTests.baseUrl + "/user");
     }
 
-
-    @When("I click the Edit button")
-    public void i_click_on_edit_button() {
-        RunPlaywrightTests.page.locator("#edit-button").click();
-    }
-
     @Then("I see the edit profile form with all my details prepopulated except my password")
     public void i_see_the_edit_profile_form_with_all_my_details_prepopulated_except_my_password() {
         String editProfileUrl = RunPlaywrightTests.baseUrl + "/user/edit";
@@ -81,9 +75,9 @@ public class EditProfileStepsE2e {
         RunPlaywrightTests.page.locator("#email").fill("test@example.com");
     }
 
-    @When("I click the Submit button")
-    public void i_click_the_submit_button() {
-        RunPlaywrightTests.page.locator("#submit-button").click();
+    @When("I click on the {string} button")
+    public void i_click_on_the_button(String buttonName) {
+        RunPlaywrightTests.page.locator("#" + buttonName.toLowerCase() + "-button").click();
     }
 
     @Then("my new details are saved")
@@ -198,11 +192,6 @@ public class EditProfileStepsE2e {
         String expectedErrorMessage = "This email address is already in use.";
         String errorMessage = RunPlaywrightTests.page.locator("#email-backend-error").locator("ul").innerText();
         Assertions.assertEquals(expectedErrorMessage, errorMessage);
-    }
-
-    @When("I click the Cancel button")
-    public void i_click_the_cancel_button() {
-        RunPlaywrightTests.page.locator("#cancel-button").click();
     }
 
 }
