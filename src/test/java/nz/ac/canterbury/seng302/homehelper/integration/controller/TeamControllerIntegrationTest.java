@@ -6,8 +6,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRoleDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.Teams;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
@@ -16,6 +15,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepos
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -65,21 +65,26 @@ public class TeamControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private TestInfo testInfo;
+
     @BeforeEach
-    public void setup() {
+    public void setup(TestInfo testInfo) {
         user = new User("Jane", "Doe", "jane@doe.nz", "password");
         user = userRepository.save(user);
         renovationRecord = new RenovationRecord(user, "test renovation", "test description", List.of());
         renovationRecord = renovationRecordRepository.save(renovationRecord);
+
+        if (testInfo.getDisplayName().contains("hasLocation")) {
+            Location location = new Location();
+            location.setAddress("nonNull");
+            renovationRecord.setLocation(location);
+            renovationRecordRepository.save(renovationRecord);
+        }
+
     }
 
     @Test
     public void teamController_hasLocationOwnsRecord_getsForm() throws Exception {
-        Location location = new Location();
-        location.setAddress("nonNull");
-        renovationRecord.setLocation(location);
-        renovationRecordRepository.save(renovationRecord);
-
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/create")
                         .param("id", Long.toString(renovationRecord.getId()))
                 )
@@ -89,10 +94,6 @@ public class TeamControllerIntegrationTest {
     @Test
     @WithMockUser(username = "different@user.nz")
     public void teamController_hasLocationDoesNotOwnRecord_returns404() throws Exception {
-        Location location = new Location();
-        renovationRecord.setLocation(location);
-        location.setAddress("nonNull");
-        renovationRecordRepository.save(renovationRecord);
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/create")
                         .param("id", Long.toString(renovationRecord.getId())))
                 .andExpect(status().isNotFound());
@@ -109,10 +110,7 @@ public class TeamControllerIntegrationTest {
     }
 
     @Test
-    public void createTeam_submitsTeamWithRoles_createsTeam() throws Exception {
-        Location location = new Location();
-        location.setAddress("nonNull");
-        renovationRecord.setLocation(location);
+    public void createTeam_submitsTeamWithRolesAndHasLocation_createsTeam() throws Exception {
         TeamRequestDTO teamRequestDTO = new TeamRequestDTO();
         teamRequestDTO.setRenovationRecordId(renovationRecord.getId());
         TeamRoleDTO role1 = new TeamRoleDTO();
@@ -133,12 +131,8 @@ public class TeamControllerIntegrationTest {
     }
 
     @Test
-    public void createTeam_renovationHasTeam_returns404() throws Exception {
-        Location location = new Location();
-        location.setAddress("nonNull");
-        renovationRecord.setLocation(location);
-        renovationRecordRepository.save(renovationRecord);
-        Teams existingTeam = new Teams(renovationRecord);
+    public void createTeam_renovationHasTeamAndHasLocation_returns404() throws Exception {
+        Team existingTeam = new Team(renovationRecord);
         teamsRepository.save(existingTeam);
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/create")
                         .param("id", Long.toString(renovationRecord.getId())))

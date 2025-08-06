@@ -126,7 +126,6 @@
                     <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
                     <div class="float-end align-items-end d-flex flex-column" th:if="${isOwner}">
                         <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" th:if="${hasLocation && !hasTeam}">Create Team</a>
-                        <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-secondary disabled flex-grow-0"  th:unless="${hasLocation && !hasTeam}">Create Team</a>
                         <p class="mt-2 text-secondary flex-grow-0" th:unless="${hasLocation}" th:text="|Add a location to ${renovation.name} to create a team|"/>
                         <p class="mt-2 text-secondary flex-grow-0" th:if="${hasTeam}" th:text="|A team for ${renovation.name} already exists|"/>
                     </div>

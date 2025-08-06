@@ -1,12 +1,12 @@
 package nz.ac.canterbury.seng302.homehelper.repository;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.Teams;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import org.springframework.data.repository.CrudRepository;
 
-public interface TeamsRepository extends CrudRepository<Teams, Long>{
+public interface TeamsRepository extends CrudRepository<Team, Long>{
 
     boolean existsByRenovationRecordId(Long id);
 
-    Teams findByRenovationRecord(RenovationRecord renovationRecord);
+    Team findByRenovationRecord(RenovationRecord renovationRecord);
 }

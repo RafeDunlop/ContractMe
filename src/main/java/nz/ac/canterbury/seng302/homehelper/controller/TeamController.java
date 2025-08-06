@@ -1,11 +1,10 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
 
-import nz.ac.canterbury.seng302.homehelper.dto.CreateTeamDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRoleDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.Teams;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
@@ -84,12 +83,16 @@ public class TeamController {
     @PostMapping("/create")
     public ResponseEntity<Void> submitTeamRequest(@RequestBody TeamRequestDTO teamRequestDTO) {
         logger.info("POST /renovations/team/create");
-        Teams team = new Teams(renovationRecordService.getRecordById(teamRequestDTO.getRenovationRecordId()));
+        Team team = new Team(renovationRecordService.getRecordById(teamRequestDTO.getRenovationRecordId()));
         for (TeamRoleDTO roleDTO : teamRequestDTO.getRoles()) {
             Role role = new Role();
             role.setSkill(roleDTO.getSkill());
             team.addRole(role);
+        }
+        try {
             teamsService.saveTeam(team);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
 
        return ResponseEntity.ok().build();

@@ -6,12 +6,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import java.util.ArrayList;
 import java.util.List;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import org.checkerframework.checker.units.qual.A;
 
 /**
  * Represents a team entity, associated with a renovation record
@@ -19,7 +17,7 @@ import org.checkerframework.checker.units.qual.A;
  * skill, and accepted status, representing various roles within the team.
  */
 @Entity
-public class Teams {
+public class Team {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -31,9 +29,9 @@ public class Teams {
     @CollectionTable(name = "roles")
     private List<Role> roles = new ArrayList<>();
 
-    protected Teams() {}
+    protected Team() {}
 
-    public Teams(RenovationRecord renovationRecord) {
+    public Team(RenovationRecord renovationRecord) {
         this.renovationRecord = renovationRecord;
     }
 
