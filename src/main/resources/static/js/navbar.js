@@ -14,7 +14,6 @@ window.toggleNavbarMenu = toggleNavbarMenu;
  * Opens or closes the dropdown menu when the user clicks on the profile image
  */
 function toggleUserMenus() {
-
     document.getElementById("dropdown").classList.toggle("show-hidden-element");
 }
 
@@ -53,10 +52,8 @@ window.addEventListener("resize", closeHamburgerBar);
  * back to the size where navbar elements can display normally
  */
 function closeHamburgerBar() {
-
-    document.getElementById("dropdown").classList.remove("show-hidden-element");
-
-    if (window.innerWidth > 990) {
+    if (window.innerWidth > 900) {
+        console.log("element styles changed")
         document.getElementById("navbar").classList.remove("responsive");
         document.getElementById('navbar-home').classList.remove("mobile-brand");
         document.getElementById("navbar-links").classList.remove("mobile-navbar-links");
