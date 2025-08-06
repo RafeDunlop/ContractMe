@@ -8,6 +8,7 @@
 </head>
 <body>
 <div th:fragment="nav-bar">
+    <div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
     <div class="navbar custom-navbar" id="navbar">
         <a class="navbar-brand custom-navbar-brand" id="navbar-home" th:href="@{/main}">Home</a>
         <ul id="navbar-links" style="justify-content: right;">

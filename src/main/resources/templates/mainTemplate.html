@@ -5,13 +5,12 @@
     <base th:href="@{/}"/>
     <title> Home Helper </title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link th:href="@{/css/confirmationPopup.css}" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/styles.css}"/>
 
 </head>
 <body>
     <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
-<div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
+
 </body>
 <script type="module" th:src="@{/js/navbar.js}"></script>
 
