@@ -4,9 +4,11 @@
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
     <title>404 Not Found</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
 </head>
 <body>
     <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+
     <div class="container mt-5">
         <h1>404 Not Found</h1>
         <p th:text=${message}></p>
@@ -14,3 +16,6 @@
         <a th:href="@{/main}" class="btn btn-primary">Go to Home</a>
     </div>
 </body>
+<script type="module" th:src="@{/js/navbar.js}"></script>
+
+</html>

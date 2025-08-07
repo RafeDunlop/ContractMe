@@ -9,6 +9,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import java.util.NoSuchElementException;
 
@@ -20,6 +22,9 @@ import java.util.NoSuchElementException;
 public class CustomAuthenticationProvider implements AuthenticationProvider {
     @Autowired
     private LoginService loginService;
+
+    @Autowired
+    private HttpServletRequest request;
 
     public CustomAuthenticationProvider() {
         super();
@@ -42,14 +47,18 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         try {
             User user = loginService.getUserByEmailAndPassword(email, password);
             if (!user.isActivated()) {
-                throw new AccountNotActivatedException("Account not activated.") {
-                };
+                throw new AccountNotActivatedException("Account not activated.") {};
             }
+
+            HttpSession session = request.getSession();
+            session.setAttribute("profilePicture", user.getProfilePicture());
+
             return new UsernamePasswordAuthenticationToken(user.getEmail(), null, user.getAuthorities());
         } catch (IllegalArgumentException | NoSuchElementException e) {
             throw new BadCredentialsException(e.getMessage());
         }
     }
+
 
     /**
      * Returns true if this AuthenticationProvider supports the given authentication type.

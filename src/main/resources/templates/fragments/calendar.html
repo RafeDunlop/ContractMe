@@ -50,6 +50,8 @@
             <div th:each="cell : ${row}"
                  th:if="${cell != null}"
                  class="col border border-secondary text-start"
+                 th:ondblclick="|addTask(${id}, this)|"
+                 th:attr="data-cell-date=${cell.day.toString()}"
                  th:classappend="${cell.day.getMonthValue() != date.monthValue} ? ' bg-body-secondary text-muted' : ''"
                  th:style="${(cell.day.getDayOfMonth() == currentDay and cell.day.getMonthValue() == currentMonth and date.year == currentYear) ? 'background-color: #87bcfa;' : ''}">
 
@@ -59,7 +61,8 @@
                      </div>
                      <div class="btn-primary calendar-task d-flex flex-row align-items-center"
                           th:each="task : ${cell.calendarTasks}"
-                          th:onclick="|showTaskModal(this)|"
+                          th:onclick="|handleTaskClick(this)|"
+                          th:ondblclick="|handleTaskDoubleClick(${id}, this)|"
                           th:attr="
                              data-task-id=${task.id},
                              data-task-name=${task.name},
@@ -83,8 +86,6 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script type="text/javascript" th:src="@{/js/calendar.js}"></script>
-<script type="text/javascript" th:src="@{/js/taskModal.js}"></script>
 </body>
 </html>

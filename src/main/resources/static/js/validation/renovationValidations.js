@@ -7,8 +7,7 @@ let nameBackendError = document.getElementById("name-backend-error")
 let recordDescriptionField = document.getElementById("description")
 let descriptionFrontendError = document.getElementById("description-frontend-error")
 let descriptionFrontendErrorMessage = document.getElementById("description-frontend-error-message")
-let descriptionBackendError = document.getElementById("description-backend-error-message")
-
+let descriptionBackendError = document.getElementById("description-backend-error")
 
 let nameFieldValid = false;
 let descriptionFieldValid = true;
@@ -94,7 +93,7 @@ function checkDescriptionField(input) {
     if (descriptionBackendError) descriptionBackendError.hidden = true;
 
     if (input.length > 512) {
-        descriptionFrontendErrorMessage.textContent = "Renovation record description must be 512 characters or less";
+        descriptionFrontendErrorMessage.textContent = "Renovation record description must be 512 characters or less.";
         descriptionFrontendError.hidden = false;
         descriptionFrontendErrorMessage.hidden = false;
         descriptionFieldValid = false;

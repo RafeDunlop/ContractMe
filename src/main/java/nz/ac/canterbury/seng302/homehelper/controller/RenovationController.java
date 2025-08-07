@@ -15,6 +15,7 @@ import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
+import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ public class RenovationController {
     private static final Logger logger = LoggerFactory.getLogger(RenovationController.class);
 
     private final RenovationRecordService renovationRecordService;
+    private final TeamsService teamsService;
     private final RenovationTaskService renovationTaskService;
     private final LoginService loginService;
     private final TagService tagService;
@@ -58,12 +60,13 @@ public class RenovationController {
      * @param locationService         The location service provides the function to validate the locations
      */
     @Autowired
-    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService,LocationService locationService) {
+    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService,LocationService locationService,TeamsService teamsService) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.loginService = loginService;
         this.tagService = tagService;
         this.locationService = locationService;
+        this.teamsService = teamsService;
     }
 
     /**
@@ -389,6 +392,7 @@ public class RenovationController {
 
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
         model.addAttribute("hasLocation", locationService.hasLocation(record));
+        model.addAttribute("hasTeam",teamsService.teamExists(record.getId()));
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("pageNumber", Math.max(pageNumber, 1));
         model.addAttribute("renovation", record);
@@ -470,7 +474,8 @@ public class RenovationController {
     @ResponseBody
     public Page<RenovationTaskDTO> getRenovation(@PathVariable("id") Long id,
                                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                                 @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage) {
+                                                 @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage,
+                                                 @RequestParam(defaultValue = "all") String status) {
         User user = loginService.getUserByEmail();
         RenovationRecord record = renovationRecordService.getRecordById(id);
 
