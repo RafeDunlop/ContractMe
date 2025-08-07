@@ -34,9 +34,14 @@ junit:
       junit: build/test-results/test/*.xml
 
 sonarqube-report:
-  variables:
-    GIT_DEPTH: "0"
   stage: sonarqube
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
   script:
     - ./gradlew sonar -Dsonar.qualitygate.wait=true
 
