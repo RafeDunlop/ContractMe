@@ -139,6 +139,4 @@ public class TeamControllerIntegrationTest {
                 .param("skills", "Electrical", "Plumbing"))
                 .andExpect(status().isNotFound());
     }
-
-
 }
