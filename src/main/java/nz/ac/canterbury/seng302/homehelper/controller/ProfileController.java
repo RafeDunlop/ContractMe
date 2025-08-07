@@ -121,7 +121,7 @@ public class ProfileController {
 	 * @return a redirect URL to the updated profile view
 	 */
 	@PostMapping("/editAvailability/{id}")
-	public String submitAvailability(@PathVariable("id") Long id,
+	public ResponseEntity<Void> submitAvailability(@PathVariable("id") Long id,
 									 @RequestBody Map<String, Boolean> payload) {
 		logger.info("POST editAvailability/{}", id);
 		boolean isAvailable = payload.get("isAvailable");
@@ -129,6 +129,6 @@ public class ProfileController {
 		Contractor contractor = contractorRepository.findById(id).orElse(null);
         contractor.setAvailable(isAvailable);
 		contractorRepository.save(contractor);
-		return "redirect:/user";
+		return ResponseEntity.ok().build();
 	}
 }
