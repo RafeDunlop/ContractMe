@@ -28,6 +28,36 @@ export function confirmDelete(button) {
 }
 
 
+/**
+ * Asks the user for confirmation before adding a selected skill to the team.
+ * If the user confirms, the skill is added and the selection is reset.
+ *
+ */
+async function confirmRole() {
+    const skillSelect = document.getElementById('skills-select');
+    const selectedOption = skillSelect.options[skillSelect.selectedIndex];
+
+    if (selectedOption.value === "") {
+        return;
+    }
+
+    const skillName = selectedOption.getAttribute('data-displayname');
+    const confirmed = await confirmPrompt(
+        `Are you sure you want to add ${skillName} to the team?`,
+        'Add',
+        'Cancel',
+        false
+    );
+
+    if (confirmed) {
+        addSkill();
+        skillSelect.selectedIndex = 0;
+        const addButton = document.getElementById('addSkillButton');
+        addButton.disabled = true
+    }
+}
+
+
 export function confirmLogout() {
     const prompt = "Are you sure you want to log out?";
     confirmPrompt(prompt, "Confirm", "Cancel", true).then(async (confirm) => {
