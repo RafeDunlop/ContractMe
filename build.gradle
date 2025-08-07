@@ -51,7 +51,7 @@ tasks.named("check") {
     dependsOn test, integration, cucumber
 }
 
-tasks.named('test') {
+tasks.named('test', Test) {
     useJUnitPlatform()
     filter {
         includeTestsMatching "nz.ac.canterbury.seng302.homehelper.unit.*"
@@ -110,7 +110,13 @@ tasks.register("end2end", Test) {
 }
 
 jacocoTestReport { // Generate a report for all generated test data
-    dependsOn test
+    onlyIf { // Allow the report to be skipped when -PskipTestReport is passed via commandline
+        return !project.hasProperty('skipTestReport')
+    }
+    mustRunAfter test, integration, cucumber, end2end
+    executionData fileTree(project.rootDir) {
+        include '**/*.exec'
+    }
 
     reports {
         xml.required = true
