@@ -80,16 +80,20 @@ public class TeamController {
         }
     }
 
+    /**
+     * Handles POST requests for creating a team for a renovation.
+     * @param teamRequestDTO The DTO representing the creation request.
+     * @param id Of the renovation record to create a team for.
+     * @param model The model used to pass data back to the view in case of validation errors.
+     * @return A redirect to the renovation view page if the team is successfully created, or the create team page with errors displaying.
+     */
     @PostMapping("/create")
     public String submitTeamRequest(TeamRequestDTO teamRequestDTO,
                                     @RequestParam(name = "id") Long id,
                                     Model model) {
-
         logger.info("POST /renovations/team/create");
 
         List<String> errors = teamsService.validateTeam(teamRequestDTO);
-        Team team = new Team(renovationRecordService.getRecordById(id));
-
         if (!errors.isEmpty()) {
             model.addAttribute("errors", errors);
             model.addAttribute("teamRequestDTO", teamRequestDTO);
@@ -98,13 +102,14 @@ public class TeamController {
             return "createTeam";
         }
 
-        List<Role> roles = teamsService.createRoles(teamRequestDTO.getSkills());
+        Team team = new Team(renovationRecordService.getRecordById(id));
 
+        List<Role> roles = teamsService.createRoles(teamRequestDTO.getSkills());
         for(Role role : roles) {
             team.addRole(role);
         }
-        teamsService.saveTeam(team);
 
+        teamsService.saveTeam(team);
         return "redirect:/renovations/view?id=" + id;
     }
 }

@@ -36,7 +36,7 @@ public class TeamsService {
     /**
      * Constructs a list of roles for the team entity.
      * @param skillNames The list of skills selected by the user
-     * @return an array of roles created from each skill
+     * @return An array of roles created from each skill
      */
     public List<Role> createRoles(List<String> skillNames) {
         List<Role> roles = new ArrayList<>();
@@ -74,11 +74,11 @@ public class TeamsService {
     public List<String> validateTeam(TeamRequestDTO teamRequestDTO) {
         List<String> errors = new ArrayList<>();
 
-        String  notEmptyError = teamValidation.validateNotEmpty(teamRequestDTO);
-        if (notEmptyError != null) errors.add(notEmptyError);
+        String  skillsTypeError =  teamValidation.validateSkills(teamRequestDTO);
+        if (skillsTypeError != null) errors.add(skillsTypeError);
 
-        String  skillError =  teamValidation.validateAllRolesHaveSkill(teamRequestDTO);
-        if (skillError != null) errors.add(skillError);
+        String  teamSizeError = teamValidation.validateTeamSize(teamRequestDTO);
+        if (teamSizeError != null) errors.add(teamSizeError);
 
         return errors;
     }
