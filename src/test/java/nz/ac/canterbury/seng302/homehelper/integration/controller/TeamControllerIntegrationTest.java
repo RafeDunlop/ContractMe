@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nz.ac.canterbury.seng302.homehelper.controller.TeamController;
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
-import nz.ac.canterbury.seng302.homehelper.dto.TeamRoleDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
@@ -31,7 +30,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
@@ -111,22 +113,20 @@ public class TeamControllerIntegrationTest {
 
     @Test
     public void createTeam_submitsTeamWithRolesAndHasLocation_createsTeam() throws Exception {
-        TeamRequestDTO teamRequestDTO = new TeamRequestDTO();
-        teamRequestDTO.setRenovationRecordId(renovationRecord.getId());
-        TeamRoleDTO role1 = new TeamRoleDTO();
-        role1.setSkill(Skill.CARPENTRY);
-        teamRequestDTO.setRoles(List.of(role1));
-
+        TeamRequestDTO dto = new TeamRequestDTO();
+        dto.setSkills(List.of("Electrical","Electrical"));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(teamRequestDTO))
+                        .param("id", renovationRecord.getId().toString())
+                        .param("skills", "Electrical", "Plumbing")
                         .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()));
 
         boolean exists = teamsRepository.existsByRenovationRecordId(renovationRecord.getId());
         assertTrue(exists);
-        assertEquals(1,teamsRepository.findByRenovationRecord(renovationRecord).getRoles().size());
+        assertEquals(2,teamsRepository.findByRenovationRecord(renovationRecord).getRoles().size());
+
 
     }
 
@@ -135,7 +135,8 @@ public class TeamControllerIntegrationTest {
         Team existingTeam = new Team(renovationRecord);
         teamsRepository.save(existingTeam);
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/create")
-                        .param("id", Long.toString(renovationRecord.getId())))
+                        .param("id", Long.toString(renovationRecord.getId()))
+                .param("skills", "Electrical", "Plumbing"))
                 .andExpect(status().isNotFound());
     }
 

@@ -33,6 +33,11 @@ public class TeamsService {
         this.teamValidation = teamValidation;
     }
 
+    /**
+     * Constructs a list of roles for the team entity.
+     * @param skillNames The list of skills selected by the user
+     * @return an array of roles created from each skill
+     */
     public List<Role> createRoles(List<String> skillNames) {
         List<Role> roles = new ArrayList<>();
         for (String skillName : skillNames) {
