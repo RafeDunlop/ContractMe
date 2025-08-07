@@ -52,12 +52,12 @@ window.addEventListener("resize", closeHamburgerBar);
  * back to the size where navbar elements can display normally
  */
 function closeHamburgerBar() {
-    if (window.innerWidth > 900) {
-        console.log("element styles changed")
+    if (window.innerWidth > 990) {
         document.getElementById("navbar").classList.remove("responsive");
         document.getElementById('navbar-home').classList.remove("mobile-brand");
         document.getElementById("navbar-links").classList.remove("mobile-navbar-links");
         document.getElementById("dropdown").classList.remove("mobile-dropdown");
         document.getElementById("profile-container").classList.remove("mobile-profile");
     }
+    document.getElementById("dropdown").classList.remove("show-hidden-element");
 }
