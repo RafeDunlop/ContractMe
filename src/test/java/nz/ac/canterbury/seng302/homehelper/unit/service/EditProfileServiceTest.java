@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.unit.service;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,8 @@ public class EditProfileServiceTest {
     void setUp() {
         userRepository = Mockito.mock(UserRepository.class);
         userValidation = Mockito.mock(UserValidation.class);
-        editProfileService = new EditProfileService(userRepository, userValidation);
+        LocationService locationService = Mockito.mock(LocationService.class);
+        editProfileService = new EditProfileService(userRepository, userValidation, locationService);
 
         // Set up mock authentication for tests
         User currentUser = new User("John", "Smith", "john@smith.com", "password");

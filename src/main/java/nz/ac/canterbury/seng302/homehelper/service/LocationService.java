@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -269,13 +270,13 @@ public class LocationService {
      * @return The URL to call to retrieve geocoding information about the custom supplied location
      */
     private String getGeocodingCompleteUrl(AddressDTO address) {
-        String addressEntry = String.join(",",
+        String addressEntry = Stream.of(
                 address.getAddress_line1(),
                 address.getRegion(),
                 address.getCity(),
                 address.getPostcode(),
                 address.getCountry()
-        );
+        ).filter(s -> s != null && !s.isBlank()).collect(Collectors.joining(", "));
         StringBuilder sb = new StringBuilder();
         sb.append(GEOAPIFY_BASE_URL);
         sb.append(AUTOCOMPLETE_API);

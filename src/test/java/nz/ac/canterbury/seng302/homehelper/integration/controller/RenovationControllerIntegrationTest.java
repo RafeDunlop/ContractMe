@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
@@ -71,7 +72,7 @@ public class RenovationControllerIntegrationTest {
     @Autowired
     private RenovationRecordService renovationRecordService;
 
-    @MockBean
+    @SpyBean
     private LocationService locationService;
 
     private User currentUser;
@@ -1460,14 +1461,8 @@ public class RenovationControllerIntegrationTest {
         addressDTO.setPostcode("8023");
         addressDTO.setCity("Christchurch");
         addressDTO.setRegion("Beckenham");
-
-        when(locationService.locate(Mockito.any())).thenReturn(new Location(
-                addressDTO.getAddress_line1(),
-                addressDTO.getCountry(),
-                addressDTO.getPostcode(),
-                addressDTO.getCity(),
-                addressDTO.getRegion()
-        ));
+        addressDTO.setLat(1D);
+        addressDTO.setLon(1D);
 
         mockMvc.perform(post("/renovations/create")
                 .param("name", testRecord.getName())
@@ -1478,6 +1473,8 @@ public class RenovationControllerIntegrationTest {
                 .param("postcode", addressDTO.getPostcode())
                 .param("city", addressDTO.getCity())
                 .param("region", addressDTO.getRegion())
+                .param("lat", Double.toString(addressDTO.getLat()))
+                .param("lon", Double.toString(addressDTO.getLon()))
                 .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
@@ -1591,8 +1588,6 @@ public class RenovationControllerIntegrationTest {
         testRecord.setLocation(initialLocation);
         renovationRecordRepository.save(testRecord);
 
-        when(locationService.locate(Mockito.any())).thenReturn(new Location("","","","",""));
-
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
                         .param("address_line1", "33 Fendylton Ave")
                         .param("country", "New Zealand")
@@ -1607,8 +1602,6 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
 
-        RenovationRecord record = renovationRecordRepository.findById(testRecord.getId())
-                .orElseThrow(() -> new AssertionError("Optional null"));
         Location location = testRecord.getLocation();
 
         assertEquals(initialLocation.getAddress(), location.getAddress(), "Address should not change");

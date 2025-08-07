@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -313,6 +315,8 @@ public class EditProfileControllerIntegrationTest {
         addressDTO.setPostcode("8023");
         addressDTO.setCity("Christchurch");
         addressDTO.setRegion("Beckenham");
+        addressDTO.setLat(1D);
+        addressDTO.setLon(1D);
 
         mockMvc.perform(post("/user/edit")
                         .param("firstName", "Jane")
@@ -322,7 +326,9 @@ public class EditProfileControllerIntegrationTest {
                         .param("country", addressDTO.getCountry())
                         .param("postcode", addressDTO.getPostcode())
                         .param("city", addressDTO.getCity())
-                        .param("region", addressDTO.getRegion()))
+                        .param("region", addressDTO.getRegion())
+                        .param("lat", Double.toString(addressDTO.getLat()))
+                        .param("lon", Double.toString(addressDTO.getLon())))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user"));
 
