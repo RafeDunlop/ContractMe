@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
+import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
@@ -169,7 +170,11 @@ public class EditProfileController {
      * @return Redirect users back to the user profile page
      */
     @PostMapping("/user/edit/profile-picture")
-    public String uploadProfilePicture(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+    public String uploadProfilePicture(
+            @RequestParam("file") MultipartFile file,
+            RedirectAttributes redirectAttributes,
+            HttpSession session
+    ) {
         User user = loginService.getUserByEmail();
         List<String> errors = editProfileService.updateProfilePicture(user, file);
 
@@ -177,6 +182,8 @@ public class EditProfileController {
             redirectAttributes.addFlashAttribute("profilePictureError", errors);
             return "redirect:/user/edit";
         }
+
+        session.setAttribute("profilePicture", user.getProfilePicture());
 
         return "redirect:/user";
     }
