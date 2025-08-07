@@ -65,7 +65,7 @@ document.getElementById('create-team-form').addEventListener('submit', function(
             accepted: false
         }))
     };
-    fetch('/renovations/team/create', {
+    fetch('renovations/team/create', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
