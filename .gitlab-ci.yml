@@ -24,12 +24,11 @@ junit:
   stage: test
   script:
     - ./gradlew test
-    - ls ./build/jacoco
   artifacts:
     when: always
     paths:
       - build/test-results/test/*.xml
-      - build/jacoco/test-report.xml
+      - build/jacoco/test.exec
     reports:
       junit: build/test-results/test/*.xml
 
@@ -76,7 +75,8 @@ generate-test-coverage-reports:
     - integration-tests
     - cucumber-acceptance-tests
   script:
-    ./gradlew jacocoTestReport
+    - ./gradlew jacocoTestReport
+    - ls ./build/jacoco
   artifacts:
     paths:
       - build/jacoco/*
