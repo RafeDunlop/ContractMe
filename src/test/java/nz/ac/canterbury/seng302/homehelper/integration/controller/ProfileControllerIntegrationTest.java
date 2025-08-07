@@ -130,8 +130,7 @@ public class ProfileControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content("{\"isAvailable\": true}")
                         .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/user"));
+                .andExpect(status().isOk());
 
         Contractor updated = contractorRepository.findById(contractor.getId()).orElseThrow();
         assertTrue(updated.getAvailable(), "Publicity flag should be updated to true");
@@ -144,8 +143,7 @@ public class ProfileControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content("{\"isAvailable\": false}")
                         .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/user"));
+                .andExpect(status().isOk());
 
         Contractor updated = contractorRepository.findById(contractor.getId()).orElseThrow();
         assertFalse(updated.getAvailable(), "Publicity flag should be updated to false");

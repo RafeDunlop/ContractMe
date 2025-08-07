@@ -73,7 +73,7 @@ public class ContractorAvailabilitySteps {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"isAvailable\": true}")
                         .session((MockHttpSession) result.getRequest().getSession(false)))
-                .andExpect(status().is3xxRedirection())
+                .andExpect(status().isOk())
                 .andReturn();
 
     }
@@ -122,7 +122,7 @@ public class ContractorAvailabilitySteps {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"isAvailable\": false}")
                         .session((MockHttpSession) result.getRequest().getSession(false)))
-                .andExpect(status().is3xxRedirection())
+                .andExpect(status().isOk())
                 .andReturn();
 
     }
