@@ -73,8 +73,12 @@ playwright-end2end-tests:
   script:
     - ./gradlew end2end
   artifacts:
+    when: always
     paths:
       - build/jacoco/playwright.exec
+      - build/test-results/end2end/*.xml
+    reports:
+      junit: build/test-results/end2end/*.xml
 
 generate-test-coverage-reports:
   stage: coverage
