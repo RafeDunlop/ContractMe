@@ -22,6 +22,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -83,29 +84,30 @@ public class TeamController {
     }
 
     @PostMapping("/create")
-    public String submitTeamRequest(@RequestBody TeamRequestDTO teamRequestDTO, Model model) {
+    public String submitTeamRequest(TeamRequestDTO teamRequestDTO,
+                                    @RequestParam(name = "id") Long id,
+                                    Model model) {
+
         logger.info("POST /renovations/team/create");
 
         List<String> errors = teamsService.validateTeam(teamRequestDTO);
+        Team team = new Team(renovationRecordService.getRecordById(id));
 
         if (!errors.isEmpty()) {
             model.addAttribute("errors", errors);
             model.addAttribute("teamRequestDTO", teamRequestDTO);
-            model.addAttribute("renovationRecord", renovationRecordService.getRecordById(teamRequestDTO.getRenovationRecordId()));
+            model.addAttribute("renovationRecord", renovationRecordService.getRecordById(id));
             model.addAttribute("skills", Skill.values());
-
             return "createTeam";
         }
 
-        Team team = new Team(renovationRecordService.getRecordById(teamRequestDTO.getRenovationRecordId()));
-        for (TeamRoleDTO roleDTO : teamRequestDTO.getRoles()) {
-            Role role = new Role();
-            role.setSkill(roleDTO.getSkill());
+        List<Role> roles = teamsService.createRoles(teamRequestDTO.getSkills());
+
+        for(Role role : roles) {
             team.addRole(role);
         }
-
         teamsService.saveTeam(team);
 
-        return "redirect:/renovations/view?id=" + teamRequestDTO.getRenovationRecordId();
+        return "redirect:/renovations/view?id=" + id;
     }
 }

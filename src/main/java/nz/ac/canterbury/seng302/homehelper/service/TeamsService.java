@@ -2,6 +2,8 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,17 @@ public class TeamsService {
         this.teamsRepository = teamsRepository;
         this.teamValidation = teamValidation;
     }
+
+    public List<Role> createRoles(List<String> skillNames) {
+        List<Role> roles = new ArrayList<>();
+        for (String skillName : skillNames) {
+            Skill skill = Skill.valueOf(skillName);
+            Role role = new Role(skill);
+            roles.add(role);
+        }
+        return roles;
+    }
+
 
     /**
      * Saves a team to the repository.

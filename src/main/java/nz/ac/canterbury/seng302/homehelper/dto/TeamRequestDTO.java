@@ -8,30 +8,15 @@ import java.util.List;
  * including a reference to a renovation record and a list of roles associated with the team.
  */
 public class TeamRequestDTO {
-
-    private Long renovationRecordId;
-    private List <TeamRoleDTO> roles;
-
     public TeamRequestDTO() {}
 
-    public TeamRequestDTO(Long renovationRecordId, List<TeamRoleDTO> teamRoles) {
-        this.roles = teamRoles;
+    public List<String> getSkills() {
+        return skills;
     }
 
-    public Long getRenovationRecordId() {
-        return renovationRecordId;
+    public void setSkills(List<String> skills) {
+        this.skills = skills;
     }
 
-    public void setRenovationRecordId(Long renovationRecordId) {
-        this.renovationRecordId = renovationRecordId;
-    }
-
-    public List<TeamRoleDTO> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<TeamRoleDTO> roles) {
-        this.roles = roles;
-    }
-
+    private List<String> skills;
 }

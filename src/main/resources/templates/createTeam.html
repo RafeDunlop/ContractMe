@@ -16,7 +16,7 @@
 <div id="container" class="card container mt-5 p-4 shadow-sm">
     <h4 class="card-title mb-4" th:text="|Create Team For ${renovationRecord.getName()}|"/>
 
-    <form th:action="@{/renovations/view/create}" method="post" id="create-team-form" th:object="${teamRequestDTO}" novalidate>
+    <form th:action="@{/renovations/team/create(id=${renovationRecord.id})}" method="post" id="create-team-form" th:object="${teamRequestDTO}" novalidate>
 
         <div class="input-group mb-3">
             <select class="form-select" id="skills-select" type="text" aria-label="skills-select" autocomplete="off">
@@ -27,7 +27,7 @@
             <button type="button" id="addSkillButton" class="btn btn-secondary"
                     onclick="confirmRole()" disabled>Add</button>
             </div>
-            <div id="selected-skills" class="list-group">
+                <div id="selected-skills" class="list-group">
             </div>
 
             <!-- Frontend JS error -->

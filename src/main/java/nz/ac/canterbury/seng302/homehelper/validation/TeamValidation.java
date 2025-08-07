@@ -17,9 +17,9 @@ public class TeamValidation {
      * @return An error message if team is empty, otherwise null if valid.
      */
     public String validateNotEmpty(TeamRequestDTO teamRequestDTO) {
-        if (teamRequestDTO.getRoles() == null || teamRequestDTO.getRoles().isEmpty()) {
-            return "Team must contain at least one role";
-        }
+//        if (teamRequestDTO.getRoles() == null || teamRequestDTO.getRoles().isEmpty()) {
+//            return "Team must contain at least one role";
+//        }
         return null;
     }
 
@@ -29,14 +29,14 @@ public class TeamValidation {
      * @return An error message if a role is missing a skill, null if valid.
      */
     public String validateAllRolesHaveSkill(TeamRequestDTO teamRequestDTO) {
-        List<TeamRoleDTO> roles =  teamRequestDTO.getRoles();
-
-        for (int i = 0; i < roles.size(); i++) {
-            TeamRoleDTO teamRoleDTO = roles.get(i);
-            if (teamRoleDTO.getSkill() == null) {
-                return String.format("Role %d must have a skill selected.", i + 1);
-            }
-        }
+//        List<TeamRoleDTO> roles =  teamRequestDTO.getRoles();
+//
+//        for (int i = 0; i < roles.size(); i++) {
+//            TeamRoleDTO teamRoleDTO = roles.get(i);
+//            if (teamRoleDTO.getSkill() == null) {
+//                return String.format("Role %d must have a skill selected.", i + 1);
+//            }
+//        }
         return null;
     }
 }
