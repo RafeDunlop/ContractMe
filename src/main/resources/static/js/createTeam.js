@@ -65,7 +65,7 @@ document.getElementById('create-team-form').addEventListener('submit', function(
             accepted: false
         }))
     };
-    fetch('/renovations/team/create', {
+    fetch('renovations/team/create', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ document.getElementById('create-team-form').addEventListener('submit', function(
         body: JSON.stringify(requestBody)
     }).then(response => {
         if (response.ok) {
-            window.location.href = `/renovations/view?id=${new URLSearchParams(window.location.search).get('id')}`;
+            window.location.href = `renovations/view?id=${new URLSearchParams(window.location.search).get('id')}`;
         }
     })
     .catch(error => {
