@@ -1,7 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.e2e;
 
 import io.cucumber.java.Before;
-import nz.ac.canterbury.seng302.homehelper.e2e.context.E2eUserContext;
+import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,9 @@ public class SetupRegisterUserHookE2e {
     @Autowired
     private UserRepository userRepository;
 
-    private final E2eUserContext userContext;
+    private final UserContext userContext;
 
-    public SetupRegisterUserHookE2e(E2eUserContext userContext) {
+    public SetupRegisterUserHookE2e(UserContext userContext) {
         this.userContext = userContext;
     }
 
@@ -33,6 +34,8 @@ public class SetupRegisterUserHookE2e {
         PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         String uniqueEmail = "test" + System.currentTimeMillis() + "@user.nz";
         User user = new User("Test", "User", uniqueEmail, encoder.encode("Test123!"));
+        Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
+        user.setLocation(location);
         user.activate();
         userRepository.save(user);
         userContext.setUser(user);
@@ -44,5 +47,18 @@ public class SetupRegisterUserHookE2e {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(auth);
         SecurityContextHolder.setContext(context);
+    }
+
+    @Before(value = "@loginUser", order = 2)
+    public void i_login() {
+        i_am_an_existing_user();
+        User user = userContext.getUser();
+
+        RunPlaywrightTests.page.navigate(RunPlaywrightTests.baseUrl + "/login");
+        RunPlaywrightTests.page.locator("#username").fill(user.getEmail());
+        RunPlaywrightTests.page.locator("#password").fill("Test123!");
+
+        RunPlaywrightTests.page.locator("#sign-in-button").click();
+        RunPlaywrightTests.page.waitForURL("**/main");
     }
 }

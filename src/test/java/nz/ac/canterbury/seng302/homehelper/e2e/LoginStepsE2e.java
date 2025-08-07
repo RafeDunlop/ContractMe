@@ -4,7 +4,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import nz.ac.canterbury.seng302.homehelper.e2e.context.E2eUserContext;
+import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,9 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class LoginStepsE2e {
 
     PasswordEncoder passwordEncoder;
-    E2eUserContext userContext;
+    UserContext userContext;
 
-    public LoginStepsE2e(E2eUserContext userContext) {
+    public LoginStepsE2e(UserContext userContext) {
         this.userContext = userContext;
         passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }

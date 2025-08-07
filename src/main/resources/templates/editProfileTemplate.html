@@ -6,11 +6,14 @@
     <title>Edit Profile</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
+
+
     <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
 </head>
 
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+
 <div class="container mt-5">
     <div class="card p-4 shadow">
         <h4 class="card-title mb-5">Edit profile</h4>
@@ -117,8 +120,8 @@
             <!-- Form submission buttons -->
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <a th:href="@{/user}" class="btn btn-outline-secondary m-2">Cancel</a>
+                    <button type="submit" id="submit-button" class="btn btn-primary">Submit</button>
+                    <a th:href="@{/user}" id="cancel-button" class="btn btn-outline-secondary m-2">Cancel</a>
                 </div>
                 <div>
                     <a th:href="@{/user/edit/updatePassword}" class="btn btn-primary">Change Password</a>
@@ -133,4 +136,5 @@
 <script type="module" th:src="@{/js/validation/profileValidation.js}"></script>
 <script type="module" th:src="@{/js/validation/profilePictureValidation.js}"></script>
 <script type="module" th:src="@{/js/locationToggleSwitch.js}"></script>
+<script type="module" th:src="@{/js/navbar.js}"></script>
 </html>

@@ -61,7 +61,8 @@
                      </div>
                      <div class="btn-primary calendar-task d-flex flex-row align-items-center"
                           th:each="task : ${cell.calendarTasks}"
-                          th:onclick="|showTaskModal(this)|"
+                          th:onclick="|handleTaskClick(this)|"
+                          th:ondblclick="|handleTaskDoubleClick(${id}, this)|"
                           th:attr="
                              data-task-id=${task.id},
                              data-task-name=${task.name},
@@ -86,6 +87,5 @@
 </div>
 
 <script type="text/javascript" th:src="@{/js/calendar.js}"></script>
-<script type="text/javascript" th:src="@{/js/taskModal.js}"></script>
 </body>
 </html>

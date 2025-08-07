@@ -126,6 +126,15 @@ function fetchRenovation(id, resetPage = false) {
     let cardsPerPage = parseInt(document.getElementById("cardsPerPage")?.value, 10);
     let totalPages = parseInt(document.getElementById("totalPages")?.value, 10);
 
+    let statusElement = document.getElementById("status-filter");
+    let selectedStatus = statusElement.value;
+    const validStatuses = ["all", "notStarted", "inProgress", "blocked", "completed", "cancelled"];
+
+    if (!validStatuses.includes(selectedStatus)) {
+        selectedStatus = "all";
+        statusElement.value = "all";
+    }
+
     if (isNaN(pageNumber) || pageNumber < 1) pageNumber = 1;
     if (isNaN(cardsPerPage)) cardsPerPage = 16;
     if (!isNaN(totalPages) && pageNumber > totalPages && totalPages > 0) {
@@ -135,6 +144,7 @@ function fetchRenovation(id, resetPage = false) {
     const params = new URLSearchParams();
     params.set("page", pageNumber);
     params.set("cardsPerPage", cardsPerPage);
+    params.set("status", selectedStatus);
 
     fetch(`${basePath}renovations/retrieve/${id}?${params.toString()}`)
         .then(response => response.json())

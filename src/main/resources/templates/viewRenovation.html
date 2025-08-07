@@ -13,7 +13,7 @@
 <body>
 
     <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
-    <div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
+
 
     <div id="container" class="card container mt-5 shadow-sm">
         <input type="hidden" id="pageNumber" th:value="${pageNumber}" name="page"/>
@@ -88,6 +88,19 @@
                         </button>
                     </span>
                 </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="status-filter" class="fw-bold">Show:</label>
+                    <select id="status-filter" name="status" class="form-select"
+                            th:attr="onchange=|fetchRenovation(${renovation.id})|">
+                    <option value="all" th:selected="${status == 'all'}">All</option>
+                        <option value="notStarted" th:selected="${status == 'notStarted'}">Not Started</option>
+                        <option value="inProgress" th:selected="${status == 'inProgress'}">In Progress</option>
+                        <option value="blocked" th:selected="${status == 'blocked'}">Blocked</option>
+                        <option value="completed" th:selected="${status == 'completed'}">Completed</option>
+                        <option value="cancelled" th:selected="${status == 'cancelled'}">Cancelled</option>
+                    </select>
+                </div>
             </div>
 
             <div th:if="${not #lists.isEmpty(renovation.getRenovationTasks())}" id="elements-container" style="display: none;">
@@ -105,7 +118,6 @@
                     <p id="errorText"></p>
                 </div>
 
-
                 <!-- Buttons -->
                 <div class="mt-2 mb-2">
                     <a th:href="@{${previousUrl}}" class="btn btn-secondary" th:if="${previousUrl != null && !previousUrl.contains('/search')}">Back</a>
@@ -113,9 +125,9 @@
                     <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
                     <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
                     <div class="float-end align-items-end d-flex flex-column" th:if="${isOwner}">
-                        <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" th:if="${hasLocation}">Create Team</a>
-                        <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-secondary disabled flex-grow-0"  th:unless="${hasLocation}">Create Team</a>
+                        <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" th:if="${hasLocation && !hasTeam}">Create Team</a>
                         <p class="mt-2 text-secondary flex-grow-0" th:unless="${hasLocation}" th:text="|Add a location to ${renovation.name} to create a team|"/>
+                        <p class="mt-2 text-secondary flex-grow-0" th:if="${hasTeam}" th:text="|A team for ${renovation.name} already exists|"/>
                     </div>
                 </div>
             </div>
@@ -162,17 +174,16 @@
     });
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script th:src="@{/js/addTaskIcon.js}"></script>
+<script type="module" th:src="@{/js/navbar.js}"></script>
+
 <script type="text/javascript" th:src="@{/js/renovationPublicity.js}"></script>
-<script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
+<script type="module" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
 <script type="module" th:src="@{/js/autocomplete.js}"></script>
 <script type="text/javascript" th:src="@{/js/validation/renovationTagValidation.js}"></script>
 <script type="text/javascript" th:src="@{/js/removeTag.js}"></script>
 <script type="text/javascript" th:src="@{/js/renovationUtils.js}"></script>
 <script type="text/javascript" th:src="@{/js/calendar.js}"></script>
-<script type="text/javascript" th:src="@{/js/taskModal.js}"></script>
 <script type="text/javascript" th:src="@{/js/taskState.js}"></script>
 </html>
