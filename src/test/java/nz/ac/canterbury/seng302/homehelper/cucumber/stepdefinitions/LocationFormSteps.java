@@ -243,6 +243,8 @@ public class LocationFormSteps {
                 .param("city", "Christchurch")
                 .param("postcode", "8041")
                 .param("country", "New Zealand")
+                .param("lat", "1")
+                .param("lon", "1")
                 .with(csrf());
 
         // Endpoint specific params

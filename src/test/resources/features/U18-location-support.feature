@@ -157,6 +157,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
       |  "/register"            |
       |  "/user/edit"           |
       |  "/renovations/create"  |
+
   Scenario: AC11.2: Given I supply a fully compliant address, when I submit the form,
   then the form is saved with the address I supplied.
     Given I have an existing renovation record

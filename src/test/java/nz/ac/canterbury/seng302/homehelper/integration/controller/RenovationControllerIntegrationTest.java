@@ -220,7 +220,7 @@ public class RenovationControllerIntegrationTest {
 
         assertEquals(4, root.get("totalPages").asInt());
         assertEquals(1, root.get("number").asInt());
-        assertTrue(names.contains("Renovation 14"));
+        assertEquals(5, content.size());
     }
 
     /**
@@ -1497,42 +1497,38 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         renovationRecordRepository.save(testRecord);
 
-        AddressDTO addressDTO = new AddressDTO();
-        addressDTO.setAddress_line1("33 Moorhouse Ave");
-        addressDTO.setCountry("New Zealand");
-        addressDTO.setPostcode("8043");
-        addressDTO.setCity("Christchurch");
-        addressDTO.setRegion("Sydenham");
-
-        when(locationService.locate(Mockito.any())).thenReturn(new Location(
-                addressDTO.getAddress_line1(),
-                addressDTO.getCountry(),
-                addressDTO.getPostcode(),
-                addressDTO.getCity(),
-                addressDTO.getRegion()
-        ));
+        String address = "33 Moorhouse Ave";
+        String country = "New Zealand";
+        String postcode = "8043";
+        String city = "Christchurch";
+        String region = "Sydenham";
+        Double lat = 1D;
+        Double lon = 1D;
 
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
-                    .param("address_line1", addressDTO.getAddress_line1())
-                    .param("country", addressDTO.getCountry())
-                    .param("postcode", addressDTO.getPostcode())
-                    .param("city", addressDTO.getCity())
-                    .param("region", addressDTO.getRegion())
+                        .param("address_line1", address)
+                        .param("country", country)
+                        .param("postcode", postcode)
+                        .param("city", city)
+                        .param("region", region)
                         .param("name", "Renovation")
                         .param("description", "Some words")
                         .param("roomList", "Room 1", "Room 2")
-
-                    .with(csrf()))
+                        .param("lat", Double.toString(lat))
+                        .param("lon", Double.toString(lon))
+                        .with(csrf()))
                     .andExpect(status().is3xxRedirection())
                     .andReturn();
 
         Location location = testRecord.getLocation();
         assertNotNull(location, "Location should be set on renovation");
-        assertEquals(addressDTO.getAddress_line1(), location.getAddress());
-        assertEquals(addressDTO.getCountry(), location.getCountry());
-        assertEquals(addressDTO.getCity(), location.getCity());
-        assertEquals(addressDTO.getRegion(), location.getSuburb());
-        assertEquals(addressDTO.getPostcode(), location.getPostcode());
+        assertEquals(address, location.getAddress());
+        assertEquals(country, location.getCountry());
+        assertEquals(city, location.getCity());
+        assertEquals(region, location.getSuburb());
+        assertEquals(postcode, location.getPostcode());
+        assertEquals(lat, location.getLatitude());
+        assertEquals(lon, location.getLongitude());
     }
 
     @Test
@@ -1541,27 +1537,12 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         renovationRecordRepository.save(testRecord);
 
-        AddressDTO addressDTO = new AddressDTO();
-        addressDTO.setAddress_line1("1 Cool Street");
-        addressDTO.setCountry("New  Zealand");
-        addressDTO.setPostcode("|}{)(*)&*&%");
-        addressDTO.setCity("Christ)(*)( church");
-        addressDTO.setRegion("Foo$bar");
-
-        when(locationService.locate(addressDTO)).thenReturn(new Location(
-                addressDTO.getAddress_line1(),
-                addressDTO.getCountry(),
-                addressDTO.getPostcode(),
-                addressDTO.getCity(),
-                addressDTO.getRegion()
-        ));
-
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
-                        .param("address_line1", addressDTO.getAddress_line1())
-                        .param("country", addressDTO.getCountry())
-                        .param("postcode", addressDTO.getPostcode())
-                        .param("city", addressDTO.getCity())
-                        .param("region", addressDTO.getRegion())
+                        .param("address_line1", "1 Cool Street")
+                        .param("country", "New  Zealand")
+                        .param("postcode", "|}{)(*)&*&%")
+                        .param("city", "Christ)(*)( church")
+                        .param("region", "Foo$bar")
                         .param("name", "Renovation")
                         .param("description", "Some words")
                         .param("roomList", "Room 1", "Room 2")
@@ -1615,8 +1596,6 @@ public class RenovationControllerIntegrationTest {
     @WithMockUser(username = "jane@doe.com")
     public void getForm_renovationWithoutLocation_locationNotAdded() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
-
-        when(locationService.locate(Mockito.any())).thenReturn(new Location());
 
         mockMvc.perform(post("/renovations/create")
                         .param("name", testRecord.getName())
