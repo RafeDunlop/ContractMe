@@ -235,6 +235,8 @@ public class RenovationController {
                 addressDTO.setPostcode(location.getPostcode());
                 addressDTO.setCity(location.getCity());
                 addressDTO.setRegion(location.getSuburb());
+                addressDTO.setLat(location.getLatitude());
+                addressDTO.setLon(location.getLongitude());
                 model.addAttribute("locationUsed", true);
             }
             model.addAttribute("addressDTO", addressDTO);
@@ -295,18 +297,7 @@ public class RenovationController {
         Map<String, List<String>> errors = renovationRecordService.validateAllInputsEdit(renovationRecord, name);
 
         Location currentLocation = renovationRecord.getLocation();
-        Location formLocation = locationService.isLocationProvided(addressDTO)
-                ? new Location(addressDTO.getAddress_line1(),
-                addressDTO.getCountry(),
-                addressDTO.getPostcode(),
-                addressDTO.getCity(),
-                addressDTO.getRegion()
-        )
-                : null;
-        boolean locationChanged = !Objects.equals(currentLocation, formLocation);
-        if (locationChanged) {
-            errors.putAll(locationService.validateLocation(addressDTO));
-        }
+        errors.putAll(locationService.validateLocation(addressDTO));
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
@@ -317,7 +308,9 @@ public class RenovationController {
             redirectAttributes.addFlashAttribute("roomList", roomList);
             redirectAttributes.addFlashAttribute("renovation", renovationRecord);
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
-            redirectAttributes.addFlashAttribute("locationUsed", locationChanged);
+            if (currentLocation != null || locationService.isLocationProvided(addressDTO)) {
+                redirectAttributes.addFlashAttribute("locationUsed", true);
+            }
 
             return "redirect:/renovations/edit?id=" + renovationRecord.getId();
         }
@@ -326,10 +319,7 @@ public class RenovationController {
 
         redirectAttributes.addFlashAttribute("renovation", renovationRecord);
 
-        if (locationChanged) {
-            renovationRecord.setLocation(formLocation);
-        }
-        renovationRecordService.addRenovationRecord(renovationRecord); //updates existing record (identified by id)
+        renovationRecordService.updateRenovationLocation(renovationRecord, addressDTO); //updates existing record (identified by id)
         return "redirect:/renovations/view?id=" + renovationRecord.getId();
     }
 

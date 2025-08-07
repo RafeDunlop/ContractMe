@@ -9,6 +9,8 @@ import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.GeocodingCoordsDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.LocationValidation;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -266,7 +269,7 @@ public class LocationService {
      * @return The URL to call to retrieve geocoding information about the custom supplied location
      */
     private String getGeocodingCompleteUrl(AddressDTO address) {
-        String addressEntry = String.join("",
+        String addressEntry = String.join(",",
                 address.getAddress_line1(),
                 address.getRegion(),
                 address.getCity(),
@@ -351,5 +354,33 @@ public class LocationService {
             return forwardingHeader.split(",")[0];
         }
         throw new IllegalStateException("Method called illegally outside web request context");
+    }
+
+    /**
+     * Gets the current location and edited location DTO and returns a list of errors from the edited location.
+     * @param currentLocation The current location of the object
+     * @param editedAddressDTO The DTO of the edited location
+     * @return A list of errors in the edited location
+     */
+    public Map<String, List<String>> validateEditLocation(AddressDTO editedAddressDTO) {
+        Location editedLocation = new Location(editedAddressDTO.getAddress_line1(), editedAddressDTO.getCountry(),
+                editedAddressDTO.getPostcode(), editedAddressDTO.getCity(), editedAddressDTO.getRegion());
+
+        return validateLocation(editedAddressDTO);
+    }
+
+    public AddressDTO updateEditedLocation(Location currentLocation, AddressDTO editedAddressDTO) {
+        if (currentLocation != null) {
+            Location editedLocation = new Location(editedAddressDTO.getAddress_line1(), editedAddressDTO.getCountry(),
+                    editedAddressDTO.getPostcode(), editedAddressDTO.getCity(), editedAddressDTO.getRegion(),
+                    editedAddressDTO.getLat(), editedAddressDTO.getLon());
+            boolean sameCoordinates = currentLocation.getLatitude() == editedLocation.getLatitude() &&
+                    currentLocation.getLongitude() == editedLocation.getLongitude();
+            if (!Objects.equals(currentLocation, editedLocation) && sameCoordinates) {
+                editedAddressDTO.setLat(0L);
+                editedAddressDTO.setLon(0L);
+            }
+        }
+        return editedAddressDTO;
     }
 }

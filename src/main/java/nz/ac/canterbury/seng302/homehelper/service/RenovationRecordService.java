@@ -404,4 +404,11 @@ public class RenovationRecordService {
         int offSet = 7 - dayOfWeek;
         return lastOfMonth.plusDays(offSet);
     }
+
+    public void updateRenovationLocation(RenovationRecord currentRenovation, AddressDTO addressDTO) {
+        Location currentLocation = currentRenovation.getLocation();
+        addressDTO = locationService.updateEditedLocation(currentLocation, addressDTO);
+        currentRenovation.setLocation(locationService.locate(addressDTO));
+        addRenovationRecord(currentRenovation);
+    }
 }

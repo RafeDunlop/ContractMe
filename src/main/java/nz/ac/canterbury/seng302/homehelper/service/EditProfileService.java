@@ -12,6 +12,8 @@ import java.util.*;
 
 import javax.imageio.ImageIO;
 
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,6 +33,7 @@ public class EditProfileService {
 
     private final UserRepository userRepository;
     private final UserValidation userValidation;
+    private final LocationService locationService;
     private final String UPLOAD_DIR = "profile_pictures/";
 
     /**
@@ -40,9 +43,10 @@ public class EditProfileService {
      * @param userValidation UserValidation for validating updated user details
      */
     @Autowired
-    public EditProfileService(UserRepository userRepository, UserValidation userValidation) {
+    public EditProfileService(UserRepository userRepository, UserValidation userValidation, LocationService locationService) {
         this.userRepository = userRepository;
         this.userValidation = userValidation;
+        this.locationService = locationService;
     }
 
     /**
@@ -65,6 +69,13 @@ public class EditProfileService {
                 currentAuth.getAuthorities()
         );
         SecurityContextHolder.getContext().setAuthentication(newAuth);
+    }
+
+    public User updateUserLocation(User currentUser, AddressDTO addressDTO) {
+        Location currentLocation = currentUser.getLocation();
+        addressDTO = locationService.updateEditedLocation(currentLocation, addressDTO);
+        currentUser.setLocation(locationService.locate(addressDTO));
+        return currentUser;
     }
 
     /**
