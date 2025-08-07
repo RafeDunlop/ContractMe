@@ -2,6 +2,7 @@ stages:
   - tagChecking
   - build
   - test
+  - coverage
   - sonarqube
   - deploy
 
@@ -69,7 +70,7 @@ playwright-end2end-tests:
       - build/jacoco/playwright.exec
 
 generate-test-coverage-reports:
-  stage: test
+  stage: coverage
   dependencies:
     - junit
     - integration-tests
