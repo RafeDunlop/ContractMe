@@ -34,9 +34,11 @@ junit:
       junit: build/test-results/test/*.xml
 
 sonarqube-report:
+  variables:
+    GIT_DEPTH: "0"
   stage: sonarqube
   script:
-    - ./gradlew sonar
+    - ./gradlew sonar -Dsonar.qualitygate.wait=true
 
 integration-tests:
   stage: test
