@@ -36,7 +36,7 @@ public class TeamsService {
     public List<Role> createRoles(List<String> skillNames) {
         List<Role> roles = new ArrayList<>();
         for (String skillName : skillNames) {
-            Skill skill = Skill.valueOf(skillName);
+            Skill skill = Skill.valueOf(skillName.toUpperCase());
             Role role = new Role(skill);
             roles.add(role);
         }

@@ -1,9 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.validation;
 
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
-import nz.ac.canterbury.seng302.homehelper.dto.TeamRoleDTO;
 import org.springframework.stereotype.Service;
-import java.util.List;
 
 /**
  * Service class responsible for validating team creation requests.
