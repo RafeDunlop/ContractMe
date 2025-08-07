@@ -1,3 +1,4 @@
+
 /**
  * Opens a popup with the prompt: "Are you sure you want to delete this renovation record?"
  * and options to cancel or delete
