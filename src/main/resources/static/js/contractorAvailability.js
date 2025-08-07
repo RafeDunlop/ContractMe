@@ -11,7 +11,7 @@ if (availabilityCheckbox) {
         const isAvailable = this.checked;
         const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
         const contractorId = document.getElementById("contractor").value;
-        const response = await fetch(`/editAvailability/${contractorId}`, {
+        const response = await fetch(`editAvailability/${contractorId}`, {
             method: "POST",
             headers: {
                 'X-CSRF-TOKEN': csrfToken,
