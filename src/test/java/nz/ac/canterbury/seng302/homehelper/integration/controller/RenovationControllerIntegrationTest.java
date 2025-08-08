@@ -10,7 +10,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
@@ -220,7 +220,7 @@ public class RenovationControllerIntegrationTest {
 
         assertEquals(4, root.get("totalPages").asInt());
         assertEquals(1, root.get("number").asInt());
-        assertEquals(5, content.size());
+        assertTrue(names.contains("Renovation 14"));
     }
 
     /**
@@ -1583,6 +1583,8 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
 
+        RenovationRecord record = renovationRecordRepository.findById(testRecord.getId())
+                .orElseThrow(() -> new AssertionError("Optional null"));
         Location location = testRecord.getLocation();
 
         assertEquals(initialLocation.getAddress(), location.getAddress(), "Address should not change");

@@ -7,8 +7,8 @@ import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.ContractorRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 

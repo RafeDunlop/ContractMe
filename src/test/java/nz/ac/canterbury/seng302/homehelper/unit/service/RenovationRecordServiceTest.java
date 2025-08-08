@@ -511,9 +511,9 @@ public class RenovationRecordServiceTest {
 
         List<List<CalendarCellDTO>> calendarCells = toTest.generateCalendarCells(date, mockRenovationRecord);
 
-        Assertions.assertTrue(calendarCells.getFirst().contains(firstOfCurrentMonth));
-        Assertions.assertFalse(calendarCells.getFirst().contains(lastDayOfPreviousMonth));
-        Assertions.assertFalse(calendarCells.getLast().contains(firstOfNextMonth));
+        Assertions.assertTrue(calendarCells.get(0).contains(firstOfCurrentMonth));
+        Assertions.assertFalse(calendarCells.get(0).contains(lastDayOfPreviousMonth));
+        Assertions.assertFalse(calendarCells.get(calendarCells.size() - 1).contains(firstOfNextMonth));
         assertEquals(4, calendarCells.size());
     }
 

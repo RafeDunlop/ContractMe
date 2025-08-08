@@ -109,6 +109,14 @@ public class User {
     }
 
     /**
+     *  Gets the user type
+     * @return the type of the user
+     */
+    public String getDiscriminatorType() {
+        return this.getClass().getSimpleName();
+    }
+
+    /**
      * Gets the first name of the user
      * @return First name of user
      */

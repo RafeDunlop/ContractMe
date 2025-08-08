@@ -6,7 +6,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.junit.jupiter.api.AfterEach;
@@ -126,7 +126,7 @@ public class RenovationTaskServiceIntegrationTest {
         );
         renovationTaskRepository.save(testTask);
         Map<LocalDate,  List<RenovationTask>> map = this.toTest.getTasksWithinDates(renovationRecord, startDate, endDate);
-        assertEquals(testTask, map.get(startDate).getFirst());
+        assertEquals(testTask, map.get(startDate).get(0));
     }
 
     @Test
@@ -143,6 +143,6 @@ public class RenovationTaskServiceIntegrationTest {
         );
         renovationTaskRepository.save(testTask);
         Map<LocalDate,  List<RenovationTask>> map = this.toTest.getTasksWithinDates(renovationRecord, startDate, endDate);
-        assertEquals(testTask, map.get(endDate).getFirst());
+        assertEquals(testTask, map.get(endDate).get(0));
     }
 }

@@ -7,6 +7,8 @@
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
     <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
+
+
 </head>
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
@@ -73,8 +75,7 @@
                 </div>
 
                 <!-- Backend error -->
-                <div class="alert alert-danger mb-4" role="alert" id="description-backend-error" hidden
-                     th:if="${descriptionError}">
+                <div class="alert alert-danger mb-4" role="alert" id="description-backend-error" th:attr="hidden=${descriptionError == null}">
                     <div class="error-box">
                         <ul>
                             <li th:each="msg : ${descriptionError}" th:text="${msg}"></li>
@@ -147,7 +148,7 @@
     </div>
 </div>
 </body>
-
+<script type="module" th:src="@{/js/navbar.js}"></script>
 <script type="module" th:src="@{/js/locationForm.js}"></script>
 <script type="module" th:src="@{/js/validation/renovationValidations.js}"></script>
 <script type="module" th:src="@{/js/individualRenovation.js}"></script>

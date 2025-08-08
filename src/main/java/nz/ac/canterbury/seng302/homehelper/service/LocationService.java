@@ -4,11 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.GeocodingCoordsDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.LocationValidation;
 import org.slf4j.Logger;
@@ -199,8 +200,6 @@ public class LocationService {
     }
 
 
-
-
     /**
      * Runs validation on each of the user input params
      * @param dto the addressdto containing the user inputted location data
@@ -231,6 +230,16 @@ public class LocationService {
         return dto != null &&
                 Stream.of(dto.getAddress_line1(), dto.getCountry(), dto.getPostcode(), dto.getCity(), dto.getRegion())
                         .anyMatch(field -> field != null && !field.trim().isEmpty());
+    }
+
+    /**
+     * Gets whether a location is provided by a renovation record
+     * @param record The renovation record to check
+     * @return Whether a location is provided by a renovation record
+     */
+    public boolean hasLocation(RenovationRecord record) {
+        Location location = record.getLocation();
+        return location != null && location.getAddress() != null && !location.getAddress().isEmpty();
     }
 
 

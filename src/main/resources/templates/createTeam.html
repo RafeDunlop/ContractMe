@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+    <base th:href="@{/}"/>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <title>Create Team</title>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+<div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
+
+<div id="container" class="card container mt-5 p-4 shadow-sm">
+    <h4 class="card-title mb-4" th:text="|Create Team For ${renovationRecord.getName()}|"/>
+    <form id="create-team-form" novalidate>
+    <div class="input-group mb-3">
+            <select class="form-select" id="skills-select" type="text" aria-label="skills-select" autocomplete="off">
+                <option disabled selected hidden>Select skill</option>
+                <option th:each="skill : ${skills}" th:value="${skill}" th:text="${skill.getDisplayName()}"
+                        th:attr="data-displayname=${skill.getDisplayName()}" class="skill-option"></option>
+            </select>
+        <button type="button" id="addSkillButton" class="btn btn-secondary"
+                onclick="confirmRole()" disabled>Add</button>
+        </div>
+        <div id="selected-skills" class="list-group">
+        </div>
+        <input type="submit" class="btn btn-primary float-end" value="Submit"/>
+    </form>
+</div>
+</body>
+<script th:src="@{/js/confirmPrompt.js}"></script>
+<script type="module" th:src="@{/js/navbar.js}"></script>
+<script th:src="@{/js/createTeam.js}"></script>
+</html>

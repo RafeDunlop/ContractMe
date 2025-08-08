@@ -1,12 +1,13 @@
+
 /**
- * opens a popup with the prompt: "Are you sure you want to delete this renovation record?"
+ * Opens a popup with the prompt: "Are you sure you want to delete this renovation record?"
  * and options to cancel or delete
  * if the user selects "delete", a delete request is sent for the corresponding renovation record
  * includes the csrf token provided by spring to avoid csrf attacks (required by spring security)
  * @param button the element being clicked, contains data-id, data-searchTerm (optionally null)
  * and data-csrf in a th:attr tag
  */
-function confirmDelete(button) {
+export function confirmDelete(button) {
     const prompt = "Are you sure you want to delete this renovation record?";
     confirmPrompt(prompt, "Delete", "Cancel", true).then(async (confirm) => {
         if (confirm) {
@@ -28,7 +29,37 @@ function confirmDelete(button) {
 }
 
 
-function confirmLogout() {
+/**
+ * Asks the user for confirmation before adding a selected skill to the team.
+ * If the user confirms, the skill is added and the selection is reset.
+ *
+ */
+async function confirmRole() {
+    const skillSelect = document.getElementById('skills-select');
+    const selectedOption = skillSelect.options[skillSelect.selectedIndex];
+
+    if (selectedOption.value === "") {
+        return;
+    }
+
+    const skillName = selectedOption.getAttribute('data-displayname');
+    const confirmed = await confirmPrompt(
+        `Are you sure you want to add ${skillName} to the team?`,
+        'Add',
+        'Cancel',
+        false
+    );
+
+    if (confirmed) {
+        addSkill();
+        skillSelect.selectedIndex = 0;
+        const addButton = document.getElementById('addSkillButton');
+        addButton.disabled = true
+    }
+}
+
+
+export function confirmLogout() {
     const prompt = "Are you sure you want to log out?";
     confirmPrompt(prompt, "Confirm", "Cancel", true).then(async (confirm) => {
         if (confirm) {
@@ -53,11 +84,12 @@ function confirmLogout() {
  * or a regular blue button
  * @returns {Promise<unknown>} a promise containing a boolean which returns when the user clicks cancel or delete
  */
-function confirmPrompt(promptText, confirmText, cancelText, confirmButtonIsDanger) {
+export function confirmPrompt(promptText, confirmText, cancelText, confirmButtonIsDanger) {
     const confirmButton = document.getElementById("confirmButton");
     const cancelButton = document.getElementById("cancelButton");
     const promptTextField = document.getElementById("promptText");
     const overlay = document.getElementById("overlay");
+
 
     overlay.style.display = 'block';
     confirmButton.className = (confirmButtonIsDanger) ? "btn btn-danger m-3 h-5" : "btn btn-primary m-3 h-5"

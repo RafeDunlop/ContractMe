@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.unit.service;
 import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.validation.LocationValidation;
 import org.junit.jupiter.api.Assertions;
@@ -12,6 +13,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.stream.Stream;
 
@@ -117,5 +121,27 @@ public class LocationServiceTest {
         Location actualLocation = locationServiceSpy.locate(inputtedAddressDTO);
 
         Assertions.assertEquals(expectedLocation, actualLocation);
+    }
+
+    @Test
+    public void testHasLocation_locationValid_returnsTrue() {
+        Location location = new Location("Jack Erskine", "", "", "", "");
+        RenovationRecord renovationRecord = new RenovationRecord();
+        renovationRecord.setLocation(location);
+        assertTrue(locationService.hasLocation(renovationRecord));
+    }
+
+    @Test
+    public void testHasLocation_locationNull_returnsFalse() {
+        RenovationRecord renovationRecord = new RenovationRecord();
+        assertFalse(locationService.hasLocation(renovationRecord));
+    }
+
+    @Test
+    public void testHasLocation_addressEmpty_returnsFalse() {
+        RenovationRecord renovationRecord = new RenovationRecord();
+        Location location = new Location("", "", "", "", "");
+        renovationRecord.setLocation(location);
+        assertFalse(locationService.hasLocation(renovationRecord));
     }
 }

@@ -15,6 +15,7 @@ public class RenovationTaskDTO {
     private Long id;
 
     private TaskState state;
+    private String stateColour;
     private String name;
     private String description;
     String dueDate;
@@ -33,6 +34,8 @@ public class RenovationTaskDTO {
         this.dueDate = null;
         this.rooms = new ArrayList<>();
         this.iconFileName = "";
+        this.state = TaskState.NOT_STARTED;
+        this.stateColour = this.state.getColorHex();
     }
 
     /**
@@ -51,6 +54,9 @@ public class RenovationTaskDTO {
         this.dueDate = dueDate;
         this.rooms = rooms;
         this.iconFileName = iconFileName;
+        this.state = TaskState.NOT_STARTED;
+        this.stateColour = this.state.getColorHex();
+
     }
 
     /**
@@ -65,6 +71,8 @@ public class RenovationTaskDTO {
         this.description = description;
         this.dueDate = dueDate;
         this.rooms = rooms;
+        this.state = TaskState.NOT_STARTED;
+        this.stateColour = this.state.getColorHex();
     }
 
     /**
@@ -84,6 +92,7 @@ public class RenovationTaskDTO {
         this.rooms = task.getRoomList();
         this.iconFileName = task.getIconFileName();
         this.state = task.getState();
+        this.stateColour = this.state.getColorHex();
     }
 
     /**
@@ -158,4 +167,12 @@ public class RenovationTaskDTO {
     public void setIconFileName(String iconFileName) {this.iconFileName = iconFileName;}
 
     public String getIconFileName() {return iconFileName;}
+
+    public String getStateColour() {
+        return stateColour;
+    }
+
+    public void setStateColour(String stateColour) {
+        this.stateColour = stateColour;
+    }
 }
