@@ -75,7 +75,7 @@ public class LocationValidation {
         if (postcode == null || postcode.isBlank()) return errors;
 
         String trimmed = postcode.trim();
-        if (!trimmed.matches("^(?!.* {2})[\\p{L}\\p{N} ]*$")) {
+        if (!trimmed.matches("^[\\p{L}\\p{N}]+(?: [\\p{L}\\p{N}]+)?$")) {
             errors.add("Postcode contains invalid characters.");
         }
 
@@ -93,7 +93,7 @@ public class LocationValidation {
         if (country == null || country.isBlank()) return errors;
 
         String trimmed = country.trim();
-        if (!trimmed.matches("^(?!.* {2})[\\p{L}\\-' ]*$")) {
+        if (!trimmed.matches("^[\\p{L}-']+(?: [\\p{L}-']+)?$")) {
             errors.add("Country contains invalid characters.");
         }
 
