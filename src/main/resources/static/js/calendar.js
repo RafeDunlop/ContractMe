@@ -42,8 +42,10 @@ function handleTaskClick(taskElement) {
  * handle double click on task, navigate user to task edit page
  * @param renovationId the id of the renovation
  * @param taskElement calendar task object
+ * @param event the event that fired this handler
  */
-function handleTaskDoubleClick(renovationId, taskElement) {
+function handleTaskDoubleClick(renovationId, taskElement, event) {
+    event.stopPropagation();
     // Cancel the single-click modal if double-clicked
     if (clickTimer) {
         clearTimeout(clickTimer);
@@ -114,8 +116,10 @@ function renderTaskModalContent(task) {
  * Open the task creation form
  * @param renovationId the id of the renovation
  * @param cell the cell element which was clicked on
+ * @param event the event that fired this function
  */
-function addTask(renovationId, cell) {
+function addTask(renovationId, cell, event) {
+    event.stopPropagation();
     const date = cell.dataset.cellDate;
     window.location.assign(`/renovations/view/create?id=${renovationId}&date=${date}`);
 }

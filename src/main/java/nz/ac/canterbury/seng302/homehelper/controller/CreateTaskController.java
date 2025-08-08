@@ -80,7 +80,7 @@ public class CreateTaskController {
 
         if (!model.containsAttribute("renovationTaskDTO")) {
             RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("", "", date, new ArrayList<>());
-            String dueDate = renovationTaskService.parseDueDate(renovationTaskDTO);
+            String dueDate = renovationTaskDTO.getDueDate();
             String formattedDate = (dueDate != null) ? dueDate : "";
             model.addAttribute("renovationTaskDTO", renovationTaskDTO);
             model.addAttribute("dueDate", formattedDate);
