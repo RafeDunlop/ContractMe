@@ -81,12 +81,12 @@ public class LocationService {
             try {
                 injectCoordsViaGeocoding(addressDTO);
             } catch (IllegalArgumentException e) {
-                logger.warn("failed to acquire location coordinates via geocoding {}", e.getMessage());
+                logger.warn("Failed to acquire location coordinates via geocoding: {}", e.getMessage());
                 String ipAddress = getIpFromRequest();
                 injectCoordsViaIpGeolocation(addressDTO, ipAddress);
             }
         }
-        logger.debug("Creating location for address {} with coords {}, {}",
+        logger.info("Creating location for address {} with coords {}, {}",
                 addressDTO.getAddress_line1(),
                 addressDTO.getLat(),
                 addressDTO.getLon()
@@ -136,7 +136,7 @@ public class LocationService {
      * @param ipAddress The ip address of the request to be forwarded to Geopaify
      */
     public void injectCoordsViaIpGeolocation(AddressDTO addressDTO, String ipAddress) {
-        logger.info("Retrieve rough coordinates for address {} via request ip {}",
+        logger.info("Retrieving rough coordinates for address {} via request ip: {}",
                 addressDTO.getAddress_line1(),
                 ipAddress
         );
