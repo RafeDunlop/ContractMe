@@ -257,6 +257,6 @@ public class CreateTaskControllerIntegrationTest {
                 .param("id", "1")
                 .param("date", "2020-01-01"))
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("dueDate", "01/01/2020"));
+                .andExpect(model().attribute("dueDate", "2020-01-01"));
     }
 }
