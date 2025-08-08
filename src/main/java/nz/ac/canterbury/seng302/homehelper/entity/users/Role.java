@@ -20,6 +20,12 @@ public class Role {
 
     public Role() {}
 
+    public Role(Skill skill) {
+        this.contractor = null;
+        this.skill = skill;
+        this.accepted = false;
+    }
+
     public Role(Contractor contractor, Skill skill, boolean accepted) {
         this.contractor = contractor;
         this.skill = skill;
