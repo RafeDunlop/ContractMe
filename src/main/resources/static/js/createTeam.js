@@ -43,7 +43,7 @@ function addSkill() {
 
 /**
  * Controls the enabled state of the "Add" button based on skill selection.
-*/
+ */
 document.getElementById('skills-select').addEventListener('change', function() {
     const addButton = document.getElementById('addSkillButton');
     addButton.disabled = this.selectedIndex === 0;

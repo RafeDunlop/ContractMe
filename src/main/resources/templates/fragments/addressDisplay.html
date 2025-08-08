@@ -8,7 +8,7 @@
 </head>
 <body>
 <div th:fragment="addressDisplay (address)" id="address-display" class="p-2 d-flex">
-    <img src="/icons/address-pin.svg" alt="address-pin" width="30" />
+    <img src="icons/address-pin.svg" alt="address-pin" width="30" />
     <div class="d-flex flex-column ps-3">
         <div th:if="|${address.getAddress()} != ''|" th:text="|${address.getAddress()}|"></div>
         <div th:if="|${address.getSuburb()} != ''|" th:text="|${address.getSuburb()}|"></div>

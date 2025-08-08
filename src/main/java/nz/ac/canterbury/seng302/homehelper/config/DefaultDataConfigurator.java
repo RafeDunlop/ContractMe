@@ -202,7 +202,7 @@ public class DefaultDataConfigurator {
     }
 
     // ChatGPT was used to generate this list of tags:
-    // Prompt: generate me three tags er letter of the English alphabet that are related to renovations
+    // Prompt: generate me three tags per letter of the English alphabet that are related to renovations
     private void setupDefaultTags() {
         tagService.createTag("Architecture");
         tagService.createTag("Additions");
