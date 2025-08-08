@@ -24,7 +24,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -75,6 +76,19 @@ public class RenovationTaskServiceTest {
 
         assertEquals(3, result.getContent().size());
         assertEquals(3, result.getTotalElements());
+    }
+
+    @Test
+    void returnTaskPages_filterByState_returnsCorrectPage() {
+        TaskState state = TaskState.COMPLETED;
+        List<RenovationTask> tasks = createDummyTasks(3);
+        RenovationTask renovationTask = new RenovationTask("Test task", "Test task with state", List.of("A room"), null, renovationRecord);
+        renovationTask.setState(state);
+        tasks.add(renovationTask);
+        renovationRecord.setRenovationTasks(tasks);
+        Pageable pageable = PageRequest.of(0, 5);
+        renovationTaskService.returnTaskPages(renovationRecord, pageable, "completed");
+        Mockito.verify(renovationTaskRepository, Mockito.times(1)).findByRenovationRecordAndState(renovationRecord, state);
     }
 
     private List<RenovationTask> createDummyTasks(int count) {
