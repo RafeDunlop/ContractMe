@@ -48,7 +48,7 @@ dependencies {
 }
 
 tasks.named("check") {
-    dependsOn test, integration, cucumber
+    dependsOn test, integration, cucumber, end2end
 }
 
 tasks.named('test') {
