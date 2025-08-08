@@ -81,8 +81,9 @@ public class TeamSteps {
                 .andReturn();
     }
 
-    @Then("I must select at least one skill for the request")
-    public void i_must_select_at_least_one_skill_for_the_request() throws Exception {
+
+    @Then("An error message displays, telling me I must have at least one role")
+    public void an_error_message_displays_telling_me_i_must_have_at_least_one_role() throws Exception {
         String html = mvcResult.getResponse().getContentAsString();
 
         assertTrue(html.contains("Your team request must have at least one role."),

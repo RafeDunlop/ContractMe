@@ -10,7 +10,7 @@ Feature: U2003 - As Sarah, I want to be able to create a team for my renovation 
     Given I am on the view renovation page for a renovation I own that has a location listed and that doesn't have a team
     And I click the create team button
     When I add zero roles
-    Then I must select at least one skill for the request
+    Then An error message displays, telling me I must have at least one role
 
   Scenario Outline: AC5 -
     Given I am on the view renovation page for a renovation I own that has a location listed and that doesn't have a team

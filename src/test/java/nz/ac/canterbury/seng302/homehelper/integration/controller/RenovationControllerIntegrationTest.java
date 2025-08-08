@@ -725,7 +725,7 @@ public class RenovationControllerIntegrationTest {
         // Page 1
         MvcResult result1 = mockMvc.perform(get("/renovations/retrieve/" + existingRecord.getId())
                         .param("page", "1")
-                        .param("W", "5")
+                        .param("cardsPerPage", "5")
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
