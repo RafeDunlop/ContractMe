@@ -63,6 +63,12 @@ document.addEventListener('DOMContentLoaded', function () {
         originalInput.removeAttribute("name");
     });
 
+    /**
+     * Convert svg file to png file
+     * This is needed as svg files can not be read in the backend
+     * @param svgFile svg file
+     * @returns {Promise<unknown>} Returns promise for png file
+     */
     async function convertSvgToPng(svgFile) {
         const text = await svgFile.text();
 
@@ -101,7 +107,10 @@ document.addEventListener('DOMContentLoaded', function () {
         originalInput.remove();
     });
 
-
+    /**
+     * display profile picture error
+     * @param message error message
+     */
     function showError(message) {
         const li = document.createElement('li');
         li.textContent = message;
