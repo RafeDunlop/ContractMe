@@ -370,6 +370,7 @@ public class RenovationController {
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                  @RequestParam(required = false) Integer year,
                                  @RequestParam(required = false) Integer month,
+                                 @RequestAttribute(required = false) LocalDate dateEdited,
                                  Model model,
                                  HttpServletRequest request) {
         logger.info("GET /renovations/view");
@@ -389,6 +390,8 @@ public class RenovationController {
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
         injectDateElements(year, month, model, record);
+        model.addAttribute("dateEdited", dateEdited);
+
 
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
         model.addAttribute("hasLocation", locationService.hasLocation(record));
@@ -416,6 +419,7 @@ public class RenovationController {
     public String getCalendarFragment(@RequestParam Long id,
                                       @RequestParam(required = false) Integer year,
                                       @RequestParam(required = false) Integer month,
+                                      @RequestAttribute(required = false) LocalDate dateEdited,
                                       Model model) {
 
         RenovationRecord record = renovationRecordService.getRecordById(id);
@@ -429,6 +433,7 @@ public class RenovationController {
 
         injectDateElements(year, month, model, record);
         model.addAttribute("id", id);
+        model.addAttribute("dateEdited", dateEdited);
 
         return "fragments/calendar :: calendar";  // return only fragment for partial update
     }

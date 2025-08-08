@@ -51,7 +51,8 @@
                  th:if="${cell != null}"
                  class="col border border-secondary text-start"
                  th:classappend="${cell.day.getMonthValue() != date.monthValue} ? ' bg-body-secondary text-muted' : ''"
-                 th:style="${(cell.day.getDayOfMonth() == currentDay and cell.day.getMonthValue() == currentMonth and date.year == currentYear) ? 'background-color: #87bcfa;' : ''}">
+                 th:style="${(cell.day.getDayOfMonth() == currentDay and cell.day.getMonthValue() == currentMonth and date.year == currentYear) ? 'background-color: #87bcfa;' : (dateEdited != null && dateEdited.equals(cell.day) ? 'background-color: #fafa91' : '')}">
+
 
                  <div class="d-flex flex-column align-items-center" style="min-height:120px">
                      <div class="d-flex flex-column align-items-lg-start">
