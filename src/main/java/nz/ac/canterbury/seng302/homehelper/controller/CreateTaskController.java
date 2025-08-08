@@ -6,7 +6,6 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
-import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +36,6 @@ public class CreateTaskController {
 
     private final RenovationRecordService renovationRecordService;
 
-    private final RenovationTaskValidation renovationTaskValidation;
-
     private final LoginService loginService;
 
 
@@ -50,14 +44,12 @@ public class CreateTaskController {
      *
      * @param renovationRecordService The service associated with renovation records
      * @param renovationTaskService   the service layer responsible for renovation tasks
-     * @param renovationTaskValidation The validation for validating tasks
      * @param loginService             the service for handling logging users in
      */
     @Autowired
-    public CreateTaskController(RenovationRecordService renovationRecordService, RenovationTaskService renovationTaskService, RenovationTaskValidation renovationTaskValidation, LoginService loginService) {
+    public CreateTaskController(RenovationRecordService renovationRecordService, RenovationTaskService renovationTaskService, LoginService loginService) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
-        this.renovationTaskValidation = renovationTaskValidation;
         this.loginService = loginService;
     }
 
@@ -69,7 +61,8 @@ public class CreateTaskController {
      * @return the create task HTML page
      */
     @GetMapping("renovations/view/create")
-    public String createTask(@RequestParam(name = "id") Long id, Model model) {
+    public String createTask(@RequestParam(name = "id") Long id,
+                             @RequestParam(name = "date", required = false) String date, Model model) {
         logger.info("GET renovations/view/create");
 
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
@@ -86,7 +79,7 @@ public class CreateTaskController {
         model.addAttribute("roomList", renovationRecord.getRooms());
 
         if (!model.containsAttribute("renovationTaskDTO")) {
-            RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("", "", null, new ArrayList<>());
+            RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("", "", date, new ArrayList<>());
             String dueDate = renovationTaskDTO.getDueDate();
             String formattedDate = (dueDate != null) ? dueDate : "";
             model.addAttribute("renovationTaskDTO", renovationTaskDTO);
@@ -122,33 +115,17 @@ public class CreateTaskController {
             renovationTaskDTO.setDueDate(null);
         }
 
-        LocalDate parsedDate = null;
 
-        if (renovationTaskDTO.getDueDate() != null) {
-            DateTimeFormatter[] formatters = new DateTimeFormatter[] {
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd"),
-                    DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            };
-
-            for (DateTimeFormatter formatter : formatters) {
-                try {
-                    parsedDate = LocalDate.parse(renovationTaskDTO.getDueDate(), formatter);
-                    break;
-                } catch (DateTimeParseException ignored) {}
-            }
-
-            if (parsedDate != null) {
-                String formattedDueDate = parsedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
-                renovationTaskDTO.setDueDate(formattedDueDate);
-            }
+        String formattedDueDate = renovationTaskService.parseDueDate(renovationTaskDTO);
+        if (formattedDueDate != null) {
+            redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
         }
 
         Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(renovationTaskDTO, renovationRecord);
 
 
         if (!errors.isEmpty()) {
-            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
+            errors.forEach(redirectAttributes::addFlashAttribute);
 
             redirectAttributes.addFlashAttribute("renovationTaskDTO", renovationTaskDTO);
             redirectAttributes.addFlashAttribute("roomList", roomList);
@@ -157,12 +134,9 @@ public class CreateTaskController {
             return "redirect:/renovations/view/create?id=" + renovationId;
         }
 
-        if (roomList == null) {
-            roomList = renovationRecord.getRooms();
-        }
-
         renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
 
         return "redirect:/renovations/view?id=" + renovationId;
     }
+
 }

@@ -13,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -59,19 +58,20 @@ public class CreateTaskControllerIntegrationTest {
 
 
     @BeforeEach
-    public void setup_user() {
-       mockMvc = MockMvcBuilders.standaloneSetup(createTaskController).build();
-        MockitoAnnotations.openMocks(this);
+    public void setup() {
+        mockMvc = MockMvcBuilders.standaloneSetup(createTaskController).build();
+        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
+        user.grantAuthority("ROLE_USER");
+        user.activate();
+        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
+        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
+        Mockito.when(renovationRecordRepository.findById(1)).thenReturn(Optional.of(renovationRecord));
+        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
     }
 
     @Test
     @WithMockUser(username = "jane@doe.com")
     public void testAddTask_validTask_TaskAddedAndRedirect() throws Exception {
-        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
-        user.grantAuthority("ROLE_USER");
-        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
-        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        Mockito.when(renovationRecordRepository.findById(1)).thenReturn(Optional.of(renovationRecord));
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("name", "Demolish walls")
@@ -87,11 +87,6 @@ public class CreateTaskControllerIntegrationTest {
     @Test
     @WithMockUser(username = "jane@doe.com")
     public void testAddTask_validTask_taskHasTheNotStartedState() throws Exception {
-        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
-        user.grantAuthority("ROLE_USER");
-        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
-        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        Mockito.when(renovationRecordRepository.findById(1)).thenReturn(Optional.of(renovationRecord));
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "Demolish walls")
@@ -113,11 +108,6 @@ public class CreateTaskControllerIntegrationTest {
     @Test
     @WithMockUser(username = "jane@doe.com")
     public void testAddTask_invalidTaskName_TaskNotAddedStaysOnCreateTask() throws Exception {
-        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
-        user.grantAuthority("ROLE_USER");
-        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
-        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("name", "@#$%")
@@ -135,11 +125,6 @@ public class CreateTaskControllerIntegrationTest {
     @Test
     @WithMockUser(username = "jane@doe.com")
     public void testAddTask_noTaskDescription_TaskNotAddedStaysOnCreateTask() throws Exception {
-        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
-        user.grantAuthority("ROLE_USER");
-        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
-        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "Task name")
@@ -156,11 +141,6 @@ public class CreateTaskControllerIntegrationTest {
     @Test
     @WithMockUser(username = "jane@doe.com")
     public void testAddTask_taskDescriptionTooLong_TaskNotAddedStaysOnCreateTask() throws Exception {
-        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
-        user.grantAuthority("ROLE_USER");
-        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
-        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "Task name")
@@ -181,18 +161,13 @@ public class CreateTaskControllerIntegrationTest {
     @Test
     @WithMockUser(username = "jane@doe.com")
     public void testAddTask_dueDateInPast_TaskNotAddedStaysOnCreateTask() throws Exception {
-        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
-        user.grantAuthority("ROLE_USER");
-        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
-        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "Testname")
                         .param("description", "Description")
                         .param("roomList", "Room 1", "Room 2")
                         .param("renovationId", "1")
-                        .param("dueDate", String.valueOf(LocalDate.now().minusDays(1).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))))
+                        .param("dueDate", LocalDate.now().minusDays(1).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view/create?id=1"))
@@ -203,11 +178,6 @@ public class CreateTaskControllerIntegrationTest {
     @Test
     @WithMockUser(username = "jane@doe.com")
     public void testAddTask_dueDateInvalidFormatISO_TaskNotAddedStaysOnCreateTask() throws Exception {
-        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
-        user.grantAuthority("ROLE_USER");
-        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
-        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "Testname")
@@ -225,11 +195,6 @@ public class CreateTaskControllerIntegrationTest {
     @Test
     @WithMockUser(username = "jane@doe.com")
     public void testAddTask_dueDateInvalidFormatRandomChar_TaskNotAddedStaysOnCreateTask() throws Exception {
-        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
-        user.grantAuthority("ROLE_USER");
-        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
-        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "Testname")
@@ -247,11 +212,6 @@ public class CreateTaskControllerIntegrationTest {
     @Test
     @WithMockUser(username = "jane@doe.com")
     public void testAddTask_roomsInvalid_TaskNotAddedStaysOnCreateTask() throws Exception {
-        User user = new User("Jane", "Doe", "jane@doe.com", "Password");
-        user.grantAuthority("ROLE_USER");
-        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
-        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
-        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "Test name")
@@ -281,11 +241,22 @@ public class CreateTaskControllerIntegrationTest {
         Mockito.when(userRepository.findByEmailIgnoreCase(notOwner.getEmail())).thenReturn(Optional.of(notOwner));
 
         RenovationRecord renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
-        Mockito.when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
+        Mockito.when(renovationRecordRepository.findById(2)).thenReturn(Optional.of(renovationRecord));
+        Mockito.when(renovationRecordService.getRecordById(2L)).thenReturn(renovationRecord);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/view/create")
-                        .param("id", "1"))
+                        .param("id", "2"))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/main"));
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
+    public void testViewCreatePage_dateProvided_dateSet() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/renovations/view/create")
+                .param("id", "1")
+                .param("date", "2020-01-01"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("dueDate", "2020-01-01"));
     }
 }
