@@ -34,12 +34,11 @@ public class RenovationTaskServiceTest {
     private RenovationTaskService renovationTaskService;
     private RenovationRecord renovationRecord;
     private RenovationTaskRepository renovationTaskRepository;
-    private RenovationTaskValidation renovationTaskValidation;
 
     @BeforeEach
     void setUp() {
         renovationTaskRepository = mock(RenovationTaskRepository.class);
-        renovationTaskValidation = new RenovationTaskValidation();
+        RenovationTaskValidation renovationTaskValidation = new RenovationTaskValidation();
         renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationTaskValidation);
         renovationRecord = new RenovationRecord();
     }
@@ -49,7 +48,7 @@ public class RenovationTaskServiceTest {
         renovationRecord.setRenovationTasks(List.of());
         Pageable pageable = PageRequest.of(0, 5);
 
-        Page<RenovationTask> result = renovationTaskService.returnTaskPages(renovationRecord, pageable);
+        Page<RenovationTask> result = renovationTaskService.returnTaskPages(renovationRecord, pageable, "all");
 
         assertEquals(0L, result.getTotalElements());
         assertTrue(result.getContent().isEmpty());
@@ -60,7 +59,7 @@ public class RenovationTaskServiceTest {
         renovationRecord.setRenovationTasks(createDummyTasks(10));
         Pageable pageable = PageRequest.of(1, 5);
 
-        Page<RenovationTask> result = renovationTaskService.returnTaskPages(renovationRecord, pageable);
+        Page<RenovationTask> result = renovationTaskService.returnTaskPages(renovationRecord, pageable, "all");
 
         assertEquals(5, result.getContent().size());
         assertEquals(10, result.getTotalElements());
@@ -72,7 +71,7 @@ public class RenovationTaskServiceTest {
 
         Pageable pageable = PageRequest.of(0, 5);
 
-        Page<RenovationTask> result = renovationTaskService.returnTaskPages(renovationRecord, pageable);
+        Page<RenovationTask> result = renovationTaskService.returnTaskPages(renovationRecord, pageable, "all");
 
         assertEquals(3, result.getContent().size());
         assertEquals(3, result.getTotalElements());
@@ -179,7 +178,6 @@ public class RenovationTaskServiceTest {
 
     @Test
     public void validateTaskDetails_invalidFormatRandomChar_returnInvalidDueDateError() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "Some description", "NotADate", new ArrayList<>());
 
         Map<String, List<String>> expectedErrors = new HashMap<>();

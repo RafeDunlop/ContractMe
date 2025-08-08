@@ -101,8 +101,15 @@ public class RenovationTaskService {
      * @param pageable spring pagination information, including the offset and page size.
      * @return A page of tasks for the renovation record. If there are no tasks an empty page is returned.
      */
-    public Page<RenovationTask> returnTaskPages(RenovationRecord renovationRecord, Pageable pageable) {
-        List<RenovationTask> tasks = renovationRecord.getRenovationTasks();
+    public Page<RenovationTask> returnTaskPages(RenovationRecord renovationRecord, Pageable pageable, String status) {
+        TaskState state;
+        List<RenovationTask> tasks;
+        try {
+            state = TaskState.fromCamelCaseName(status);
+            tasks = renovationTaskRepository.findByRenovationRecordAndState(renovationRecord, state);
+        } catch (IllegalArgumentException e) {
+            tasks = renovationRecord.getRenovationTasks();
+        }
 
         if (tasks == null || tasks.isEmpty()) {
             return new PageImpl<>(Collections.emptyList(), pageable, 0);

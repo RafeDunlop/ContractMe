@@ -495,11 +495,11 @@ public class RenovationController {
         int requestedPage = Math.max(pageNumber - 1, 0);
         cardsPerPage = Math.max(cardsPerPage, 1);
         Pageable pageable = PageRequest.of(requestedPage, cardsPerPage);
-        Page<RenovationTask> page = renovationTaskService.returnTaskPages(record, pageable);
+        Page<RenovationTask> page = renovationTaskService.returnTaskPages(record, pageable, status);
 
         if (requestedPage >= page.getTotalPages() && page.getTotalPages() > 0) {
             pageable = PageRequest.of(page.getTotalPages() - 1, cardsPerPage);
-            page = renovationTaskService.returnTaskPages(record, pageable);
+            page = renovationTaskService.returnTaskPages(record, pageable, status);
         }
 
         Page<RenovationTaskDTO> dtoPage = page.map(RenovationTaskDTO::new);

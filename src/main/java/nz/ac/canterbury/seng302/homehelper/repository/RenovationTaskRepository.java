@@ -2,12 +2,12 @@ package nz.ac.canterbury.seng302.homehelper.repository;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,4 +40,12 @@ public interface RenovationTaskRepository extends CrudRepository<RenovationTask,
      */
     @Query("SELECT rt FROM RenovationTask rt WHERE rt.renovationRecord = :renovationRecord AND rt.dueDate BETWEEN :startDate AND :endDate ORDER BY rt.dueDate ASC")
     List<RenovationTask> getByDueDateBetween(LocalDate startDate, LocalDate endDate, RenovationRecord renovationRecord);
+
+    /**
+     * Finds tasks with the matching renovation record and state.
+     * @param renovationRecord the renovation record the tasks belong to
+     * @param state the state to match
+     * @return the list of matching tasks
+     */
+    List<RenovationTask> findByRenovationRecordAndState(RenovationRecord renovationRecord, TaskState state);
 }

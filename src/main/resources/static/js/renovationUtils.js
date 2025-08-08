@@ -164,9 +164,11 @@ function fetchRenovation(id, resetPage = false) {
 
             container.style.display = "block";
             renderTaskCards(data, isOwner, id);
-
+            const pagination = document.getElementById("pagination")
             if (data.totalPages > 1) {
                 createPaginationButtons("cards", id);
+            } else if (data.totalPages === 1) {
+                pagination.innerHTML = "";
             }
         })
         .catch(error => {
