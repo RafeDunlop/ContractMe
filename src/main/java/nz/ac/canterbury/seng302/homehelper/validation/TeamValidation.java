@@ -35,17 +35,16 @@ public class TeamValidation {
      */
     public String validateSkills(TeamRequestDTO teamRequestDTO) {
         List<String> skills = teamRequestDTO.getSkills();
-
         if (skills == null) {
             return null;
         }
-
         for (String skillName : skills) {
-            if (Skill.findEnumValueFromDisplayName(skillName) == null) return "Error: '" + skillName + "' is not a valid skill.";
-
-            return null;
+            try {
+                Skill.valueOf(skillName.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return "Error: '" + skillName + "' is not a valid skill.";
+            }
         }
-
         return null;
     }
 }

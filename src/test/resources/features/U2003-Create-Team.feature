@@ -18,8 +18,8 @@ Feature: U2003 - As Sarah, I want to be able to create a team for my renovation 
     Then I can add the skill "<skill>" twice to the same team
 
     Examples:
-      | skill                |
-      | Electrical           |
-      | Drywall / Plastering |
-      | Joinery              |
-      | Gas Fitting          |
+      | skill                   |
+      | ELECTRICAL              |
+      | DRYWALL_PLASTERING      |
+      | SPLASHBACK_INSTALLATION |
+      | TILING                  |

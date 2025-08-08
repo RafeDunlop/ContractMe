@@ -114,7 +114,7 @@ public class TeamControllerIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"Estimating / Quantity Surveying","Insulation","Cabinet Making"})
+    @ValueSource(strings = {"DRYWALL_PLASTERING","PAINTING","HVAC"})
     public void createTeam_submitsTeamWithRoles_createsTeam(String skillName) throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
@@ -132,7 +132,7 @@ public class TeamControllerIntegrationTest {
     public void createTeam_submitsTeamWithDuplicateRoles_createsTeam() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
-                        .param("skills", "Electrical", "Electrical")
+                        .param("skills", "ELECTRICAL", "ELECTRICAL")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()));
@@ -148,7 +148,7 @@ public class TeamControllerIntegrationTest {
         teamsRepository.save(existingTeam);
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/create")
                         .param("id", Long.toString(renovationRecord.getId()))
-                .param("skills", "Electrical", "Plumbing"))
+                .param("skills", "ELECTRICAL", "PLUMBING"))
                 .andExpect(status().isNotFound());
     }
 }

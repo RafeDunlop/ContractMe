@@ -34,7 +34,7 @@ public class TeamServiceTest {
 
     @Test
     void teamDoesNotExist_createRoles_rolesAreCreated() {
-        List<Role> roles = teamsService.createRoles(List.of("Electrical", "Plumbing"));
+        List<Role> roles = teamsService.createRoles(List.of("ELECTRICAL", "PLUMBING"));
         assertEquals(2, roles.size());
     }
 
