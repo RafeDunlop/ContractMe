@@ -1,8 +1,8 @@
 const addressPattern = /^[\p{L}\-'\d\s.\/]*$/u;
 const suburbPattern = /^[\p{L}\d\-'\s]*$/u;
 const cityPattern = /^[\p{L}\-'\s]*$/u;
-const postcodePattern = /^(?!.* {2})[\p{L}\p{N} ]*$/u;
-const countryPattern = /^(?!.* {2})[\p{L}\-' ]*$/u;
+const postcodePattern = /^[A-Za-z0-9]+(?: [A-Za-z0-9]+)?$/u;
+const countryPattern = /^[A-Za-z-']+(?: [A-Za-z-']+)?$/u;
 
 
 let addressField = document.getElementById("address");
