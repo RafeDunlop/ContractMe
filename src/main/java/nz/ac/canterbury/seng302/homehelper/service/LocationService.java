@@ -365,18 +365,6 @@ public class LocationService {
     }
 
     /**
-     * Returns a list of errors from the edited location.
-     * @param editedAddressDTO The DTO of the edited location
-     * @return A list of errors in the edited location
-     */
-    public Map<String, List<String>> validateEditLocation(AddressDTO editedAddressDTO) {
-        new Location(editedAddressDTO.getAddress_line1(), editedAddressDTO.getCountry(),
-                editedAddressDTO.getPostcode(), editedAddressDTO.getCity(), editedAddressDTO.getRegion());
-
-        return validateLocation(editedAddressDTO);
-    }
-
-    /**
      * Gets an {@link AddressDTO} which represents the merging of an AddressDTO with an existing location.
      * Nullifies co-ordinates if they correspond to the stored Location (so they may be recalculated)
      * @param currentLocation The saved {@link Location}

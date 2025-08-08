@@ -21,7 +21,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 
 /**
  * Controller for the edit profile page
@@ -123,7 +122,7 @@ public class EditProfileController {
 
         // Checks if the users location has been modified in the form and compares to their old location.
         Location currentLocation = newUser.getLocation();
-        errors.putAll(locationService.validateEditLocation(addressDTO));
+        errors.putAll(locationService.validateLocation(addressDTO));
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
