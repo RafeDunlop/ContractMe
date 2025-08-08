@@ -1,10 +1,8 @@
 const addressPattern = /^[\p{L}\-'\d\s.\/]*$/u;
 const suburbPattern = /^[\p{L}\d\-'\s]*$/u;
 const cityPattern = /^[\p{L}\-'\s]*$/u;
-const postcodePattern = /^(?:\p{L}|\p{N})+(?: (?:\p{L}|\p{N})+)?$/u;
-const countryPattern = /^(?:\p{L}|[-'])+(?: (?:\p{L}|[-'])+)?$/u;
-
-
+const postcodePattern = /^(?:(?:\p{L}|\p{N})+(?: (?:\p{L}|\p{N})+)?)?$/u;
+const countryPattern = /^(?:(?:\p{L}|[-'])+(?: (?:\p{L}|[-'])+)?)?$/u;
 
 let addressField = document.getElementById("address");
 let addressFrontendError = document.getElementById("address-frontend-error");
