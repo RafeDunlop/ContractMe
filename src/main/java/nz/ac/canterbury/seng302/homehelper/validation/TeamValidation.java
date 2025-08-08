@@ -41,11 +41,9 @@ public class TeamValidation {
         }
 
         for (String skillName : skills) {
-            try {
-                Skill.valueOf(skillName.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                return "Error: '" + skillName + "' is not a valid skill.";
-            }
+            if (Skill.findEnumValueFromDisplayName(skillName) == null) return "Error: '" + skillName + "' is not a valid skill.";
+
+            return null;
         }
 
         return null;

@@ -15,6 +15,8 @@ import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -111,14 +113,26 @@ public class TeamControllerIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
-    @Test
-    public void createTeam_submitsTeamWithRolesAndHasLocation_createsTeam() throws Exception {
-        TeamRequestDTO dto = new TeamRequestDTO();
-        dto.setSkills(List.of("Electrical","Electrical"));
-
+    @ParameterizedTest
+    @ValueSource(strings = {"Estimating / Quantity Surveying","Insulation","Cabinet Making"})
+    public void createTeam_submitsTeamWithRoles_createsTeam(String skillName) throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
-                        .param("skills", "Electrical", "Plumbing")
+                        .param("skills", skillName)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()));
+
+        boolean exists = teamsRepository.existsByRenovationRecordId(renovationRecord.getId());
+        assertTrue(exists);
+        assertEquals(1,teamsRepository.findByRenovationRecord(renovationRecord).getRoles().size());
+    }
+
+    @Test
+    public void createTeam_submitsTeamWithDuplicateRoles_createsTeam() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create")
+                        .param("id", renovationRecord.getId().toString())
+                        .param("skills", "Electrical", "Electrical")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()));
@@ -126,8 +140,6 @@ public class TeamControllerIntegrationTest {
         boolean exists = teamsRepository.existsByRenovationRecordId(renovationRecord.getId());
         assertTrue(exists);
         assertEquals(2,teamsRepository.findByRenovationRecord(renovationRecord).getRoles().size());
-
-
     }
 
     @Test
