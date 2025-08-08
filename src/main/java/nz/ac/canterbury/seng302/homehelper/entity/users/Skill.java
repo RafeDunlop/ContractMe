@@ -101,20 +101,4 @@ public enum Skill {
     public static List<Skill> listOfSortedSkills() {
         return Arrays.stream(Skill.values()).sorted((a, b) -> a.getDisplayName().compareToIgnoreCase(b.getDisplayName())).toList();
     }
-
-    /**
-     * Checks to see if a given skill name exists in the enum.
-     * @param skillName the sting representation of a skill to look for.
-     * @return Null if nothing is found, the skill associated with the display name if found.
-     */
-    public static Skill findEnumValueFromDisplayName(String skillName) {
-        if (skillName == null) return null;
-
-        for (Skill skill : Skill.values()) {
-            if (skill.displayName.equals(skillName)) return skill;
-        }
-        return null;
-    }
-
-
 }
