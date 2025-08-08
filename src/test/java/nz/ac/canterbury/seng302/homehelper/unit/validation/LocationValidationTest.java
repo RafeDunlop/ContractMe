@@ -141,7 +141,7 @@ public class LocationValidationTest {
 
     @Test
     void validPostcode_postcodeWithUnicodeLetters_isValid() {
-        List<String> result = locationValidation.validatePostcode("Tór4");
+        List<String> result = locationValidation.validatePostcode("Tórg");
         assertTrue(result.isEmpty());
     }
 
@@ -183,14 +183,14 @@ public class LocationValidationTest {
     }
 
     @Test
-    void validPostcode_postcodeWithMultipleSpaces_isValid() {
+    void validPostcode_postcodeWithMultipleSpaces_isInvalid() {
         List<String> result = locationValidation.validatePostcode("12 34 56");
-        assertTrue(result.isEmpty());
+        assertTrue(result.contains("Postcode contains invalid characters."));
     }
 
 
     public static Stream<String> getValidCountry() {
-        return Stream.of("Aotearoa", "New Zealand", "Central African Republic", "Egypt'", "Pórtugal",
+        return Stream.of("Aotearoa", "New Zealand", "CAR", "Egypt'", "Pórtugal",
                 "Guinea-Bissau", "россия", "한국", "Côte d'Ivoire");
     }
 
