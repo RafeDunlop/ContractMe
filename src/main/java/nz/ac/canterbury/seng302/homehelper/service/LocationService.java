@@ -9,8 +9,6 @@ import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.GeocodingCoordsDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.LocationValidation;
 import org.slf4j.Logger;
@@ -358,18 +356,24 @@ public class LocationService {
     }
 
     /**
-     * Gets the current location and edited location DTO and returns a list of errors from the edited location.
-     * @param currentLocation The current location of the object
+     * Returns a list of errors from the edited location.
      * @param editedAddressDTO The DTO of the edited location
      * @return A list of errors in the edited location
      */
     public Map<String, List<String>> validateEditLocation(AddressDTO editedAddressDTO) {
-        Location editedLocation = new Location(editedAddressDTO.getAddress_line1(), editedAddressDTO.getCountry(),
+        new Location(editedAddressDTO.getAddress_line1(), editedAddressDTO.getCountry(),
                 editedAddressDTO.getPostcode(), editedAddressDTO.getCity(), editedAddressDTO.getRegion());
 
         return validateLocation(editedAddressDTO);
     }
 
+    /**
+     * Gets an {@link AddressDTO} which represents the merging of an AddressDTO with an existing location.
+     * Nullifies co-ordinates if they correspond to the stored Location (so they may be recalculated)
+     * @param currentLocation The saved {@link Location}
+     * @param editedAddressDTO The edited address fields
+     * @return The specified locations merged into one {@link AddressDTO}
+     */
     public AddressDTO updateEditedLocation(Location currentLocation, AddressDTO editedAddressDTO) {
         if (currentLocation != null) {
             Location editedLocation = new Location(editedAddressDTO.getAddress_line1(), editedAddressDTO.getCountry(),
