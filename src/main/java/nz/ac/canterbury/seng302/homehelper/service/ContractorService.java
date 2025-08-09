@@ -87,8 +87,4 @@ public class ContractorService {
         MapUtil.putIfNotEmpty(errors, "skillsError", contractorValidation.validateContractorSkillsField(userRegisterDTO.getSkills()));
         return errors;
     }
-
-    public Contractor getContractorById(Long id) {
-        return contractorRepository.findById(id).orElse(null);
-    }
 }
