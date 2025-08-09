@@ -120,6 +120,11 @@
                      addressDTO=${addressDTO})}"></div>
             </div>
 
+            <!-- CONTRACTOR FORM FRAGMENT -->
+            <div th:class="'pb-3 ' + (${isContractor} ? 'form-extension' : 'hidden-form-extension')" id="contractor-form">
+                <div th:replace="~{fragments/contractorRegistration.html :: contractor-registration(skills=${skills})}"></div>
+            </div>
+
 
             <!-- Form submission buttons -->
             <div class="d-flex justify-content-between align-items-center">
@@ -141,4 +146,6 @@
 <script type="module" th:src="@{/js/validation/profilePictureValidation.js}"></script>
 <script type="module" th:src="@{/js/locationToggleSwitch.js}"></script>
 <script type="module" th:src="@{/js/navbar.js}"></script>
+<script type="module" th:src="@{/js/skills.js}"></script>
+
 </html>

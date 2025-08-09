@@ -2,8 +2,10 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
@@ -20,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -70,11 +73,19 @@ public class EditProfileController {
             Contractor contractor = contractorService.getContractorById(user.getId());
             if(contractor != null) {
                 model.addAttribute("isContractor", true);
+                List<Skill> skillList = Skill.listOfSortedSkills();
+                model.addAttribute("skills", skillList);
+                if(!model.containsAttribute("userRegisterDTO")) {
+                    UserRegisterDTO userRegisterDTO = new UserRegisterDTO();
+                    userRegisterDTO.setCountryCode(contractor.getCountryCode());
+                    userRegisterDTO.setPhoneNumber(contractor.getPhoneNumber());
+                    userRegisterDTO.setHourlyRate(contractor.getHourlyRate());
+                    userRegisterDTO.setSkills(new ArrayList<>(contractor.getSkills()));
+                    model.addAttribute("userRegisterDTO", userRegisterDTO);
+                }
             } else {
                 model.addAttribute("isContractor", false);
             }
-
-
             if (!model.containsAttribute("firstName")) {
                 model.addAttribute("firstName", user.getFirstName());
             }
@@ -124,14 +135,13 @@ public class EditProfileController {
     @PostMapping("user/edit")
     public String updateProfile(@ModelAttribute User updatedUser,
                                 @ModelAttribute AddressDTO addressDTO,
+                                @ModelAttribute UserRegisterDTO userRegisterDTO,
                                 RedirectAttributes redirectAttributes) {
         logger.info("POST /user/edit");
 
         User newUser = loginService.getUserByEmail();
         boolean sameEmail = newUser.getEmail().equals(updatedUser.getEmail());
-
         Map<String, List<String>> errors = editProfileService.validateUpdate(updatedUser, sameEmail);
-
         // Checks if the users location has been modified in the form and compares to their old location.
         Location currentLocation = newUser.getLocation();
         errors.putAll(locationService.validateLocation(addressDTO));
@@ -144,6 +154,7 @@ public class EditProfileController {
             redirectAttributes.addFlashAttribute("email", updatedUser.getEmail());
             redirectAttributes.addFlashAttribute("profilePicture", newUser.getProfilePicture());
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
+            redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
             if (currentLocation != null || locationService.isLocationProvided(addressDTO)) {
                 redirectAttributes.addFlashAttribute("locationUsed", true);
             }
@@ -154,7 +165,14 @@ public class EditProfileController {
         newUser.setLastName(updatedUser.getLastName());
         newUser.setEmail(updatedUser.getEmail());
         newUser = editProfileService.updateUserLocation(newUser, addressDTO);
-        editProfileService.updateUser(newUser);
+        Contractor contractor = contractorService.getContractorById(newUser.getId());
+        if(contractor != null) {
+            contractor = editProfileService.updateContractor(userRegisterDTO,contractor);
+            editProfileService.updateUser(contractor);
+        } else {
+            editProfileService.updateUser(newUser);
+        }
+
 
         return "redirect:/user";
     }

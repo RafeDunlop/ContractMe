@@ -13,7 +13,9 @@ import java.util.*;
 import javax.imageio.ImageIO;
 
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -76,6 +78,13 @@ public class EditProfileService {
         addressDTO = locationService.updateEditedLocation(currentLocation, addressDTO);
         currentUser.setLocation(locationService.locate(addressDTO));
         return currentUser;
+    }
+
+    public Contractor updateContractor(UserRegisterDTO userRegisterDTO, Contractor contractor) {
+        contractor.setCountryCode(userRegisterDTO.getCountryCode());
+        contractor.setPhoneNumber(userRegisterDTO.getPhoneNumber());
+        contractor.setHourlyRate(userRegisterDTO.getHourlyRate());
+        return contractor;
     }
 
     /**
