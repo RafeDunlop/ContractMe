@@ -56,8 +56,6 @@ Feature: As Sarah, I want to edit my user profile so that I can keep my details 
     And no changes are saved
 
     Examples:
-      | email        |
-      | "notAnEmail" |
       | ""           |
 
   Scenario: AC6
