@@ -38,6 +38,7 @@ public class ContractorValidation {
      */
     public List<String> validatePhoneNumber(String phoneNumber, Integer countryCode) {
         List<String> errors = new ArrayList<>();
+        phoneNumber = phoneNumber.replaceAll("\\s+", "");
         String regex = "\\d+";
 
         if (phoneNumber.isBlank()) {
