@@ -109,3 +109,4 @@ export function confirmPrompt(promptText, confirmText, cancelText, confirmButton
         }
     });
 }
+window.confirmRole = confirmRole;
