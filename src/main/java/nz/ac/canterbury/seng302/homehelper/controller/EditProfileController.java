@@ -3,7 +3,9 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
@@ -35,6 +37,8 @@ public class EditProfileController {
     private final LoginService loginService;
     private final LocationService locationService;
 
+    private final ContractorService contractorService;
+
     /**
      * Constructor for the controller and links the services to the controller.
      * @param editProfileService EditProfileService for validating updated user
@@ -43,10 +47,11 @@ public class EditProfileController {
      * @param loginService LoginService for getting user by ID
      */
     @Autowired
-    public EditProfileController(EditProfileService editProfileService, LoginService loginService, LocationService locationService) {
+    public EditProfileController(EditProfileService editProfileService, LoginService loginService, LocationService locationService,ContractorService contractorService) {
         this.editProfileService = editProfileService;
         this.loginService = loginService;
         this.locationService = locationService;
+        this.contractorService = contractorService;
     }
 
     /**
@@ -61,8 +66,14 @@ public class EditProfileController {
 
         try {
             User user = loginService.getUserByEmail();
+            Contractor contractor = contractorService.getContractorById(user.getId());
             model.addAttribute("user", user);
 
+            if(contractor != null) {
+                model.addAttribute("isContractor", true);
+            } else {
+                model.addAttribute("isContractor", false);
+            }
             if (!model.containsAttribute("firstName")) {
                 model.addAttribute("firstName", user.getFirstName());
             }
