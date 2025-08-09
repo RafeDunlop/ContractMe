@@ -22,10 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * Controller for the edit profile page
@@ -68,9 +65,13 @@ public class EditProfileController {
         logger.info("GET /user/edit");
 
         try {
+
             User user = loginService.getUserByEmail();
             model.addAttribute("user", user);
             Contractor contractor = contractorService.getContractorById(user.getId());
+            Locale locale = Locale.getDefault();
+            Currency currency = Currency.getInstance(locale);
+            model.addAttribute("currencySymbol", currency.getSymbol(locale));
             if(contractor != null) {
                 model.addAttribute("isContractor", true);
                 List<Skill> skillList = Skill.listOfSortedSkills();
@@ -129,6 +130,7 @@ public class EditProfileController {
      *
      * @param updatedUser The user containing the edited profile details.
      * @param addressDTO the dto containing data relating to fields in address form.
+     * @param userRegisterDTO the dto containing data relating to the contractor
      * @param redirectAttributes Flash attributes used to pass data across the redirect in case of form submission errors.
      * @return A redirect string to either the profile view page on success or back to the edit profile page on failure.
      */
@@ -138,7 +140,6 @@ public class EditProfileController {
                                 @ModelAttribute UserRegisterDTO userRegisterDTO,
                                 RedirectAttributes redirectAttributes) {
         logger.info("POST /user/edit");
-
         User newUser = loginService.getUserByEmail();
         Contractor contractor = contractorService.getContractorById(newUser.getId());
         boolean sameEmail = newUser.getEmail().equals(updatedUser.getEmail());

@@ -12,7 +12,7 @@
 <div th:fragment="contractor-registration(skills)" id="contractor-form">
     <div class="mb-3">
         <div class="input-group">
-            <span class="prefix-span input-group-text">$</span>
+            <span class="prefix-span input-group-text" th:text="${currencySymbol}">$</span>
             <input type="number" step="0.01" class="form-control" id="hourlyRate" name="hourlyRate" placeholder="Hourly Rate"
                    th:value="${userRegisterDTO.hourlyRate}" aria-label="hourly-rate">
         </div>
