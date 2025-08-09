@@ -126,7 +126,7 @@ public class ProfileController {
 		logger.info("POST editAvailability/{}", id);
 		boolean isAvailable = payload.get("isAvailable");
 
-		Contractor contractor = contractorRepository.findById(id).orElse(null);
+		Contractor contractor = contractorRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contractor not found"));
         contractor.setAvailable(isAvailable);
 		contractorRepository.save(contractor);
 		return "redirect:/user";

@@ -106,6 +106,8 @@ public class DefaultDataConfigurator {
         addressDTO.setCountry(location.getCountry());
         addressDTO.setPostcode(location.getPostcode());
         addressDTO.setRegion(location.getSuburb());
+        addressDTO.setLat(1d);
+        addressDTO.setLon(1d);
         default2 = contractorService.registerContractor(user,addressDTO);
         code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, default2, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);
@@ -122,6 +124,8 @@ public class DefaultDataConfigurator {
         address.setRegion("Ilam");
         address.setCountry("New Zealand");
         address.setPostcode("");
+        address.setLat(-43.522345);
+        address.setLon(172.580907);
         defaultContractor1 = contractorService.registerContractor(user, address);
         code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, defaultContractor1, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);

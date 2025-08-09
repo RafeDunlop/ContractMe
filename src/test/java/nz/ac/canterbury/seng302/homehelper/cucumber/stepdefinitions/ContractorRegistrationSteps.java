@@ -182,6 +182,8 @@ public class ContractorRegistrationSteps {
                 .param("password", "P4$$word")
                 .param("confirmPassword", "P4$$word")
                 .param("isContractor", "true")
+                .param("lat", "1d")
+                .param("lon", "1d")
                 .with(csrf());
 
         resultActions = mockMvc.perform(request)
