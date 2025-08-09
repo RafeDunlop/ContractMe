@@ -6,7 +6,6 @@ import io.cucumber.java.en.When;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,11 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest
 public class TeamSteps {
-
     UserContext userContext;
-
     private RenovationRecord renovationRecord;
-
     private MvcResult mvcResult;
     private ResultActions result;
 
@@ -72,8 +67,8 @@ public class TeamSteps {
         ));
     }
 
-    @When("I add zero roles")
-    public void i_add_zero_roles() throws Exception {
+    @When("I add zero skills")
+    public void i_add_zero_skills() throws Exception {
         mvcResult =  mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create?id=" + renovationRecord.getId())
                         .param("id", renovationRecord.getId().toString())
                         .with(csrf()))
@@ -81,13 +76,21 @@ public class TeamSteps {
                 .andReturn();
     }
 
+    @When("I submit with more then five skills")
+    public void i_submit_with_more_then_five_skills() throws Exception {
+        mvcResult =  mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create?id=" + renovationRecord.getId())
+                        .param("id", renovationRecord.getId().toString())
+                        .param("skills", "ELECTRICAL", "ELECTRICAL", "ELECTRICAL", "ELECTRICAL", "ELECTRICAL", "ELECTRICAL")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
 
-    @Then("An error message displays, telling me I must have at least one role")
-    public void an_error_message_displays_telling_me_i_must_have_at_least_one_role() throws Exception {
+    @Then("An error message displays, {string}")
+    public void an_error_message_displays(String errorMessage) throws Exception {
         String html = mvcResult.getResponse().getContentAsString();
 
-        assertTrue(html.contains("Your team request must have at least one role."),
-                "Expected error message from validation");
+        assertTrue(html.contains(errorMessage), "Expected error message from validation");
     }
 
     @Then("I can add the skill {string} twice to the same team")
@@ -101,4 +104,17 @@ public class TeamSteps {
                 .andReturn();
     }
 
+    @When("I add a valid amount of skills")
+    public void i_add_a_valid_amount_of_skills() throws Exception {
+        result =  mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create?id=" + renovationRecord.getId())
+                .param("id", renovationRecord.getId().toString())
+                .param("skills", "GAS_FITTING", "CNC_MACHINING")
+                .with(csrf()));
+    }
+    @Then("My team request is successfully created")
+    public void my_team_request_is_successfully_created() throws Exception {
+        result
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()));
+    }
 }
