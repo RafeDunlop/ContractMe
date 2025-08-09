@@ -6,13 +6,13 @@ Feature: U2003 - As Sarah, I want to be able to create a team for my renovation 
     When I click the create team button
     Then I can select roles for my renovation
 
-  Scenario: AC2.1 - I can submit with a valid number of roles which is between 1 and 5
+  Scenario: AC3.1 - I can submit with a valid number of roles which is between 1 and 5
     Given I am on the view renovation page for a renovation I own that has a location listed and that doesn't have a team
     And I click the create team button
     When I add a valid amount of skills
     Then My team request is successfully created
 
-  Scenario: AC2.2 - Submission fails when I submit with more then 5 roles and it shows an error message
+  Scenario: AC3.2 - Submission fails when I submit with more then 5 roles and it shows an error message
     Given I am on the view renovation page for a renovation I own that has a location listed and that doesn't have a team
     And I click the create team button
     When I submit with more then five skills
