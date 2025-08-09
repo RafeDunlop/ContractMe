@@ -39,8 +39,12 @@ public class UserValidation {
     public List<String> validateNameString(String name, String nameType) {
         List<String> errors = new ArrayList<>();
 
+        if (name == null) {
+            errors.add(nameType + " name cannot be empty.");
+            return errors;
+        }
         // Check name is not empty
-        if (Objects.equals(nameType, "First") && (name == null || name.trim().isEmpty())) {
+        if (Objects.equals(nameType, "First") && (name.trim().isEmpty())) {
             errors.add(nameType + " name cannot be empty.");
         }
 

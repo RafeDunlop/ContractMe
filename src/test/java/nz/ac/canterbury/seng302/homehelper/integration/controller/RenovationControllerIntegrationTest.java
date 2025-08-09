@@ -11,14 +11,18 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
@@ -34,6 +38,7 @@ import java.util.stream.StreamSupport;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -64,9 +69,11 @@ public class RenovationControllerIntegrationTest {
     @Autowired
     private TagService tagService;
 
-
     @Autowired
     private RenovationRecordService renovationRecordService;
+
+    @SpyBean
+    private LocationService locationService;
 
     private User currentUser;
     private User owner;
@@ -78,6 +85,7 @@ public class RenovationControllerIntegrationTest {
 
     @BeforeEach
     public void setupUser() {
+
         currentUser = new User("Jane", "Doe", "jane@doe.com", "password");
         userRepository.save(currentUser);
 
@@ -1453,6 +1461,8 @@ public class RenovationControllerIntegrationTest {
         addressDTO.setPostcode("8023");
         addressDTO.setCity("Christchurch");
         addressDTO.setRegion("Beckenham");
+        addressDTO.setLat(1D);
+        addressDTO.setLon(1D);
 
         mockMvc.perform(post("/renovations/create")
                 .param("name", testRecord.getName())
@@ -1463,6 +1473,8 @@ public class RenovationControllerIntegrationTest {
                 .param("postcode", addressDTO.getPostcode())
                 .param("city", addressDTO.getCity())
                 .param("region", addressDTO.getRegion())
+                .param("lat", Double.toString(addressDTO.getLat()))
+                .param("lon", Double.toString(addressDTO.getLon()))
                 .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
@@ -1485,34 +1497,38 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         renovationRecordRepository.save(testRecord);
 
-        AddressDTO addressDTO = new AddressDTO();
-        addressDTO.setAddress_line1("33 Moorhouse Ave");
-        addressDTO.setCountry("New Zealand");
-        addressDTO.setPostcode("8043");
-        addressDTO.setCity("Christchurch");
-        addressDTO.setRegion("Sydenham");
+        String address = "33 Moorhouse Ave";
+        String country = "New Zealand";
+        String postcode = "8043";
+        String city = "Christchurch";
+        String region = "Sydenham";
+        Double lat = 1D;
+        Double lon = 1D;
 
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
-                    .param("address_line1", addressDTO.getAddress_line1())
-                    .param("country", addressDTO.getCountry())
-                    .param("postcode", addressDTO.getPostcode())
-                    .param("city", addressDTO.getCity())
-                    .param("region", addressDTO.getRegion())
+                        .param("address_line1", address)
+                        .param("country", country)
+                        .param("postcode", postcode)
+                        .param("city", city)
+                        .param("region", region)
                         .param("name", "Renovation")
                         .param("description", "Some words")
                         .param("roomList", "Room 1", "Room 2")
-
-                    .with(csrf()))
+                        .param("lat", Double.toString(lat))
+                        .param("lon", Double.toString(lon))
+                        .with(csrf()))
                     .andExpect(status().is3xxRedirection())
                     .andReturn();
 
         Location location = testRecord.getLocation();
         assertNotNull(location, "Location should be set on renovation");
-        assertEquals(addressDTO.getAddress_line1(), location.getAddress());
-        assertEquals(addressDTO.getCountry(), location.getCountry());
-        assertEquals(addressDTO.getCity(), location.getCity());
-        assertEquals(addressDTO.getRegion(), location.getSuburb());
-        assertEquals(addressDTO.getPostcode(), location.getPostcode());
+        assertEquals(address, location.getAddress());
+        assertEquals(country, location.getCountry());
+        assertEquals(city, location.getCity());
+        assertEquals(region, location.getSuburb());
+        assertEquals(postcode, location.getPostcode());
+        assertEquals(lat, location.getLatitude());
+        assertEquals(lon, location.getLongitude());
     }
 
     @Test
@@ -1521,19 +1537,12 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         renovationRecordRepository.save(testRecord);
 
-        AddressDTO addressDTO = new AddressDTO();
-        addressDTO.setAddress_line1("1 Cool Street");
-        addressDTO.setCountry("New  Zealand");
-        addressDTO.setPostcode("|}{)(*)&*&%");
-        addressDTO.setCity("Christ)(*)( church");
-        addressDTO.setRegion("Foo$bar");
-
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
-                        .param("address_line1", addressDTO.getAddress_line1())
-                        .param("country", addressDTO.getCountry())
-                        .param("postcode", addressDTO.getPostcode())
-                        .param("city", addressDTO.getCity())
-                        .param("region", addressDTO.getRegion())
+                        .param("address_line1", "1 Cool Street")
+                        .param("country", "New  Zealand")
+                        .param("postcode", "|}{)(*)&*&%")
+                        .param("city", "Christ)(*)( church")
+                        .param("region", "Foo$bar")
                         .param("name", "Renovation")
                         .param("description", "Some words")
                         .param("roomList", "Room 1", "Room 2")
@@ -1587,9 +1596,8 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "jane@doe.com")
-    public void getForm_renovationWitoutLocation_locationNotAdded() throws Exception {
+    public void getForm_renovationWithoutLocation_locationNotAdded() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
-
 
         mockMvc.perform(post("/renovations/create")
                         .param("name", testRecord.getName())

@@ -21,7 +21,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 
 /**
  * Controller for the edit profile page
@@ -85,6 +84,8 @@ public class EditProfileController {
                     addressDTO.setPostcode(location.getPostcode());
                     addressDTO.setCity(location.getCity());
                     addressDTO.setRegion(location.getSuburb());
+                    addressDTO.setLat(location.getLatitude());
+                    addressDTO.setLon(location.getLongitude());
                     model.addAttribute("locationUsed", true);
                 }
                 model.addAttribute("addressDTO", addressDTO);
@@ -121,18 +122,7 @@ public class EditProfileController {
 
         // Checks if the users location has been modified in the form and compares to their old location.
         Location currentLocation = newUser.getLocation();
-        Location formLocation = locationService.isLocationProvided(addressDTO)
-                ? new Location(addressDTO.getAddress_line1(),
-                addressDTO.getCountry(),
-                addressDTO.getPostcode(),
-                addressDTO.getCity(),
-                addressDTO.getRegion()
-        )
-                : null;
-        boolean locationChanged = !Objects.equals(currentLocation, formLocation);
-        if (locationChanged) {
-            errors.putAll(locationService.validateLocation(addressDTO));
-        }
+        errors.putAll(locationService.validateLocation(addressDTO));
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
@@ -142,18 +132,16 @@ public class EditProfileController {
             redirectAttributes.addFlashAttribute("email", updatedUser.getEmail());
             redirectAttributes.addFlashAttribute("profilePicture", newUser.getProfilePicture());
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
-            redirectAttributes.addFlashAttribute("locationUsed", locationChanged);
-
+            if (currentLocation != null || locationService.isLocationProvided(addressDTO)) {
+                redirectAttributes.addFlashAttribute("locationUsed", true);
+            }
             return "redirect:/user/edit";
         }
 
         newUser.setFirstName(updatedUser.getFirstName());
         newUser.setLastName(updatedUser.getLastName());
         newUser.setEmail(updatedUser.getEmail());
-
-        if (locationChanged) {
-            newUser.setLocation(formLocation);
-        }
+        newUser = editProfileService.updateUserLocation(newUser, addressDTO);
         editProfileService.updateUser(newUser);
 
         return "redirect:/user";

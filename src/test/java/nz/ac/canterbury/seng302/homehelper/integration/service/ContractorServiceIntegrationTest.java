@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.validation.ContractorValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -33,6 +35,9 @@ public class ContractorServiceIntegrationTest {
 
     @Autowired
     private ContractorValidation contractorValidation;
+
+    @SpyBean
+    private LocationService locationService;
 
     private UserRegisterDTO userRegisterDTO;
 
@@ -75,8 +80,10 @@ public class ContractorServiceIntegrationTest {
         addressDTO.setCountry("New Zealand");
         addressDTO.setPostcode("8042");
         addressDTO.setRegion("Avonhead");
+        addressDTO.setLat(1d);
+        addressDTO.setLon(1d);
 
-        toTest = new ContractorService(contractorRepository, contractorValidation);
+        toTest = new ContractorService(contractorRepository, contractorValidation, locationService);
     }
 
     @Test

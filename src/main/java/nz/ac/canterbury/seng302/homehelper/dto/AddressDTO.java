@@ -23,9 +23,9 @@ public class AddressDTO {
 
     private String formatted;
 
-    private double latitude;
+    private double lat;
 
-    private double longitude;
+    private double lon;
 
     private String address_line1;
 
@@ -95,20 +95,20 @@ public class AddressDTO {
         this.formatted = formatted;
     }
 
-    public double getLatitude() {
-        return latitude;
+    public double getLat() {
+        return lat;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    public void setLat(double lat) {
+        this.lat = lat;
     }
 
-    public double getLongitude() {
-        return longitude;
+    public double getLon() {
+        return lon;
     }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+    public void setLon(double lon) {
+        this.lon = lon;
     }
 
     public String getAddress_line1() {

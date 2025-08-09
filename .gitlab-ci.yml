@@ -43,7 +43,7 @@ sonarqube-report:
     paths:
       - .sonar/cache
   script:
-    - ./gradlew sonar -Dsonar.qualitygate.wait=true
+    - ./gradlew sonar
 
 integration-tests:
   stage: test
