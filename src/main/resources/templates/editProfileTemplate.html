@@ -121,8 +121,9 @@
             </div>
 
             <!-- CONTRACTOR FORM FRAGMENT -->
-            <div th:class="'pb-3 ' + (${isContractor} ? 'form-extension' : 'hidden-form-extension')" id="contractor-form">
-                <div th:replace="~{fragments/contractorRegistration.html :: contractor-registration(skills=${skills})}"></div>
+            <div th:if="${isContractor}" class="pb-3 form-extension" id="contractor-form">
+                <div th:replace="~{fragments/contractorRegistration.html ::
+                    contractor-registration(skills=${skills}, userRegisterDTO=${userRegisterDTO})}"></div>
             </div>
 
 
