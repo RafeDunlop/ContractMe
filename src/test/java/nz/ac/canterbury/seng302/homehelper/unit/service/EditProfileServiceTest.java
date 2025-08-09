@@ -73,7 +73,7 @@ public class EditProfileServiceTest {
     }
 
     @Test
-    public void validateUser_invalidName_returnsErrors() {
+    public void validateUser_invalidCharactersName_returnsErrors() {
         User user = new User("J@hn!", "Sm1th#", "john@smith.com", "password");
         userValidation = new UserValidation();
 
@@ -85,6 +85,22 @@ public class EditProfileServiceTest {
 
         assertEquals("First name must only include letters, spaces, hyphens, or apostrophes.", firstNameErrors.get(0));
         assertEquals("Last name must only include letters, spaces, hyphens, or apostrophes.", lastNameErrors.get(0));
+
+    }
+
+    @Test
+    public void validateUser_nullName_returnsErrors() {
+        User user = new User(null, null, "john@smith.com", "password");
+        userValidation = new UserValidation();
+
+        List<String> firstNameErrors = userValidation.validateNameString(user.getFirstName(), "First");
+        List<String> lastNameErrors = userValidation.validateNameString(user.getLastName(), "Last");
+
+        assertFalse(firstNameErrors.isEmpty());
+        assertFalse(lastNameErrors.isEmpty());
+
+        assertEquals("First name cannot be empty.", firstNameErrors.get(0));
+        assertEquals("Last name cannot be empty.", lastNameErrors.get(0));
     }
 
     @Test
