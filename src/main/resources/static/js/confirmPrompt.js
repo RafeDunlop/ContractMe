@@ -30,33 +30,28 @@ export function confirmDelete(button) {
 
 
 /**
- * Asks the user for confirmation before adding a selected skill to the team.
- * If the user confirms, the skill is added and the selection is reset.
- *
+ * Used for the team request form.
+ * Asks the user for confirmation before submission and lists the skills in the current team request
+ * If the user confirms, the team request form is submitted.
  */
-async function confirmRole() {
-    const skillSelect = document.getElementById('skills-select');
-    const selectedOption = skillSelect.options[skillSelect.selectedIndex];
+function confirmTeamRequest(e) {
+    e.preventDefault();
 
-    if (selectedOption.value === "") {
-        return;
-    }
+    const form = document.getElementById('create-team-form');
+    const skills = Array.from(
+        document.querySelectorAll('#selected-skills p.w-100.text-secondary')
+    ).map(el => `• ${el.textContent}`).join('\n');
 
-    const skillName = selectedOption.getAttribute('data-displayname');
-    const confirmed = await confirmPrompt(
-        `Are you sure you want to add ${skillName} to the team?`,
-        'Add',
-        'Cancel',
-        false
-    );
+    const promptText = `Do you want to create this team request?\n\nRoles:\n\n${skills}\n\n`;
 
-    if (confirmed) {
-        addSkill();
-        skillSelect.selectedIndex = 0;
-        const addButton = document.getElementById('addSkillButton');
-        addButton.disabled = true
-    }
+    (window.confirmPrompt || confirmPrompt)(promptText, "Confirm", "Cancel", false)
+        .then((ok) => {
+            if (ok) {
+                form.submit();
+            }
+        });
 }
+
 
 
 export function confirmLogout() {
@@ -109,4 +104,4 @@ export function confirmPrompt(promptText, confirmText, cancelText, confirmButton
         }
     });
 }
-window.confirmRole = confirmRole;
+window.confirmTeamRequest = confirmTeamRequest;
