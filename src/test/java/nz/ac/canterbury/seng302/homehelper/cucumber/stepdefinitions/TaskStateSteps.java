@@ -124,7 +124,7 @@ public class TaskStateSteps {
         renovationTaskRepository.save(task);
         this.taskId = task.getId();
 
-        mockMvc.perform(get("/renovations/view")
+        result = mockMvc.perform(get("/renovations/view")
                         .param("id", String.valueOf(renovationId))
                         .sessionAttr("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext()))
                 .andExpect(status().isOk())
@@ -174,5 +174,17 @@ public class TaskStateSteps {
         String html = result.getResponse().getContentAsString().toLowerCase();
 
         assertTrue(html.contains("background-color: " + expectedHexColour),"Expected calendar task with background-color: " + expectedHexColour);
+    }
+
+    @When("I view the tasks section")
+    public void i_view_the_tasks_section() throws UnsupportedEncodingException {
+        String html = result.getResponse().getContentAsString().toLowerCase();
+        assertTrue(html.contains("task-grid"));
+    }
+
+    @Then("I can select option {string} to filter tasks by task state")
+    public void i_can_select_option_to_filter_tasks_by_task_state(String state) throws UnsupportedEncodingException {
+        String html = result.getResponse().getContentAsString();
+        assertTrue(html.contains(state));
     }
 }
