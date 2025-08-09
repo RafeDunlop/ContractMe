@@ -1,3 +1,5 @@
+/** Class for creating team requests on the createTeam template, accessed from viewRenovation template */
+
 /**
  * Adds a skill field with a hidden input, display and delete button to a specified empty div
  * input value is enum value, e.g. MANUAL_LABOURER, named skill
@@ -31,6 +33,7 @@ function addSkill() {
 
         deleteButton.addEventListener("click", () => {
             selectedSkillDisplay.remove();
+            updateErrorMessageLabels()
         });
         selectedSkillsDiv.appendChild(selectedSkillDisplay);
         selectedSkillFeedback.appendChild(selectedSkillText);
@@ -38,6 +41,8 @@ function addSkill() {
         selectedSkillDisplay.appendChild(selectedSkillInputHidden);
         selectedSkillFeedback.appendChild(deleteButton);
         skillDropdown.selectedIndex = 0;
+
+        updateErrorMessageLabels()
     }
 }
 
@@ -49,3 +54,27 @@ document.getElementById('skills-select').addEventListener('change', function() {
     addButton.disabled = this.selectedIndex === 0;
 });
 
+/** Used for front end validation for checking amount of skills selected */
+function getSkillCount() {
+    return document.querySelectorAll('#selected-skills input[name="skills"]').length;
+}
+
+/** Update error message labels*/
+function updateErrorMessageLabels() {
+    const count = getSkillCount();
+
+    let sizeFrontendError = document.getElementById("skill-frontend-error");
+    let sizeFrontendErrorMessage = document.getElementById("skill-frontend-error-message");
+
+    if (count === 0) {
+        sizeFrontendErrorMessage.textContent = "Your team request must have at least one role.";
+        sizeFrontendError.hidden = false;
+    } else if (count > 5) {
+        sizeFrontendErrorMessage.textContent = "Your team request cannot have more than 5 roles.";
+        sizeFrontendError.hidden = false;
+    } else {
+        sizeFrontendErrorMessage.textContent = "";
+        sizeFrontendError.hidden = true;
+    }
+    return count;
+}

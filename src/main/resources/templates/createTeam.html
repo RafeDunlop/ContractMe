@@ -38,11 +38,11 @@
         </div>
 
         <!-- Frontend JS error -->
-        <div class="alert alert-danger mt-2" role="alert" id="tag-frontend-error" hidden>
-            <ul><li><label class="form-label" id="tag-frontend-error-message"></label></li></ul>
+        <div class="alert alert-danger mt-2" role="alert" id="skill-frontend-error" hidden>
+            <ul><li><label class="form-label" id="skill-frontend-error-message"></label></li></ul>
         </div>
         <!-- Backend error -->
-        <div class="alert alert-danger mt-2" role="alert" id="tag-backend-error"
+        <div class="alert alert-danger mt-2" role="alert" id="skill-backend-error"
              th:attr="hidden=${errors == null}">
             <ul><li th:each="msg : ${errors}" th:text="${msg}"></li></ul>
         </div>

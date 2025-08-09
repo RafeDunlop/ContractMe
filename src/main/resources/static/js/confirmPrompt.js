@@ -1,4 +1,3 @@
-
 /**
  * Opens a popup with the prompt: "Are you sure you want to delete this renovation record?"
  * and options to cancel or delete
@@ -28,7 +27,6 @@ export function confirmDelete(button) {
     });
 }
 
-
 /**
  * Used for the team request form.
  * Asks the user for confirmation before submission and lists the skills in the current team request
@@ -38,21 +36,19 @@ function confirmTeamRequest(e) {
     e.preventDefault();
 
     const form = document.getElementById('create-team-form');
+
+    const skillCount = updateErrorMessageLabels();
+    if (skillCount < 1 || skillCount > 5) return;
+
     const skills = Array.from(
         document.querySelectorAll('#selected-skills p.w-100.text-secondary')
     ).map(el => `• ${el.textContent}`).join('\n');
 
     const promptText = `Do you want to create this team request?\n\nRoles:\n\n${skills}\n\n`;
 
-    (window.confirmPrompt || confirmPrompt)(promptText, "Confirm", "Cancel", false)
-        .then((ok) => {
-            if (ok) {
-                form.submit();
-            }
-        });
+    confirmPrompt(promptText, "Confirm", "Cancel", false)
+        .then((ok) => { if (ok) form.submit(); });
 }
-
-
 
 export function confirmLogout() {
     const prompt = "Are you sure you want to log out?";
