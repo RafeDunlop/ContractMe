@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
@@ -29,6 +28,7 @@ public class ContractorService {
 
     private final PasswordEncoder passwordEncoder;
     private final ContractorValidation contractorValidation;
+    private final LocationService locationService;
 
     /**
      * Constructor for the service and links the repository and validator to the
@@ -36,10 +36,11 @@ public class ContractorService {
      * @param contractorRepository ContractorRepository for getting and updating contractor details
      */
     @Autowired
-    public ContractorService(ContractorRepository contractorRepository, ContractorValidation contractorValidation) {
+    public ContractorService(ContractorRepository contractorRepository, ContractorValidation contractorValidation, LocationService locationService) {
         this.contractorRepository = contractorRepository;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         this.contractorValidation = contractorValidation;
+        this.locationService = locationService;
     }
 
 
@@ -52,7 +53,6 @@ public class ContractorService {
      * @throws IllegalArgumentException if the invalid fields
      */
     public Contractor registerContractor(UserRegisterDTO userRegisterDTO, AddressDTO addressDTO) {
-        //validation here (throw error with map for specific errors)
         Contractor contractor = new Contractor(
                 userRegisterDTO.getFirstName(),
                 userRegisterDTO.getLastName(),
@@ -66,15 +66,7 @@ public class ContractorService {
         contractor.setPhoneNumber(userRegisterDTO.getPhoneNumber());
         contractor.setCountryCode(userRegisterDTO.getCountryCode());
         userRegisterDTO.getSkills().forEach(contractor::addSkill);
-        //address validation here
-        Location location = new Location(
-                addressDTO.getAddress_line1(),
-                addressDTO.getCountry(),
-                addressDTO.getPostcode(),
-                addressDTO.getCity(),
-                addressDTO.getRegion()
-        );
-        contractor.setLocation(location);
+        contractor.setLocation(locationService.locate(addressDTO));
         contractor = contractorRepository.save(contractor);
         return contractor;
     }
