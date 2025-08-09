@@ -5,23 +5,37 @@ import static org.mockito.Mockito.*;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
+import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.lang.reflect.Array;
+import java.util.List;
+
 @ExtendWith(MockitoExtension.class)
 public class TeamServiceTest {
 
     @Mock
     private TeamsRepository teamsRepository;
     private TeamsService teamsService;
+    @Mock
+    private TeamValidation teamValidation;
 
     @BeforeEach
     void setUp() {
-        teamsService = new TeamsService(teamsRepository);
+        teamsService = new TeamsService(teamsRepository, teamValidation);
+    }
+
+    @Test
+    void teamDoesNotExist_createRoles_rolesAreCreated() {
+        List<Role> roles = teamsService.createRoles(List.of("ELECTRICAL", "PLUMBING"));
+        assertEquals(2, roles.size());
     }
 
     @Test

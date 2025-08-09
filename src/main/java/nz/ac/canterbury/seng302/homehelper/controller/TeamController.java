@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
-import nz.ac.canterbury.seng302.homehelper.dto.TeamRoleDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
@@ -16,11 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 /**
  * A controller for team management pages
@@ -80,21 +80,36 @@ public class TeamController {
         }
     }
 
+    /**
+     * Handles POST requests for creating a team for a renovation.
+     * @param teamRequestDTO The DTO representing the creation request.
+     * @param id Of the renovation record to create a team for.
+     * @param model The model used to pass data back to the view in case of validation errors.
+     * @return A redirect to the renovation view page if the team is successfully created, or the create team page with errors displaying.
+     */
     @PostMapping("/create")
-    public ResponseEntity<Void> submitTeamRequest(@RequestBody TeamRequestDTO teamRequestDTO) {
+    public String submitTeamRequest(TeamRequestDTO teamRequestDTO,
+                                    @RequestParam(name = "id") Long id,
+                                    Model model) {
         logger.info("POST /renovations/team/create");
-        Team team = new Team(renovationRecordService.getRecordById(teamRequestDTO.getRenovationRecordId()));
-        for (TeamRoleDTO roleDTO : teamRequestDTO.getRoles()) {
-            Role role = new Role();
-            role.setSkill(roleDTO.getSkill());
-            team.addRole(role);
-        }
-        try {
-            teamsService.saveTeam(team);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+
+        List<String> errors = teamsService.validateTeam(teamRequestDTO);
+        if (!errors.isEmpty()) {
+            model.addAttribute("errors", errors);
+            model.addAttribute("teamRequestDTO", teamRequestDTO);
+            model.addAttribute("renovationRecord", renovationRecordService.getRecordById(id));
+            model.addAttribute("skills", Skill.values());
+            return "createTeam";
         }
 
-       return ResponseEntity.ok().build();
+        Team team = new Team(renovationRecordService.getRecordById(id));
+
+        List<Role> roles = teamsService.createRoles(teamRequestDTO.getSkills());
+        for(Role role : roles) {
+            team.addRole(role);
+        }
+
+        teamsService.saveTeam(team);
+        return "redirect:/renovations/view?id=" + id;
     }
 }

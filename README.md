@@ -1,3 +1,10 @@
+[![pipeline status](https://eng-git.canterbury.ac.nz/seng302-2025/team-200/badges/dev/pipeline.svg)](https://eng-git.canterbury.ac.nz/seng302-2025/team-200/-/commits/dev)
+[![Quality Gate Status](https://sonarqube.csse.canterbury.ac.nz/api/project_badges/measure?project=seng302-2025-team200&metric=alert_status&token=sqb_e5c224dbd13d4de93a0187f8d754ae5f34482591)](https://sonarqube.csse.canterbury.ac.nz/dashboard?id=seng302-2025-team200)
+[![Coverage](https://sonarqube.csse.canterbury.ac.nz/api/project_badges/measure?project=seng302-2025-team200&metric=coverage&token=sqb_e5c224dbd13d4de93a0187f8d754ae5f34482591)](https://sonarqube.csse.canterbury.ac.nz/dashboard?id=seng302-2025-team200)
+[![Maintainability Rating](https://sonarqube.csse.canterbury.ac.nz/api/project_badges/measure?project=seng302-2025-team200&metric=sqale_rating&token=sqb_e5c224dbd13d4de93a0187f8d754ae5f34482591)](https://sonarqube.csse.canterbury.ac.nz/dashboard?id=seng302-2025-team200)
+[![Reliability Rating](https://sonarqube.csse.canterbury.ac.nz/api/project_badges/measure?project=seng302-2025-team200&metric=reliability_rating&token=sqb_e5c224dbd13d4de93a0187f8d754ae5f34482591)](https://sonarqube.csse.canterbury.ac.nz/dashboard?id=seng302-2025-team200)
+[![Security Rating](https://sonarqube.csse.canterbury.ac.nz/api/project_badges/measure?project=seng302-2025-team200&metric=security_rating&token=sqb_e5c224dbd13d4de93a0187f8d754ae5f34482591)](https://sonarqube.csse.canterbury.ac.nz/dashboard?id=seng302-2025-team200)
+
 ## Description
 Welcome to Home Helper! Home Helper makes organising your renovations easy.
 You will be able to create an account, create and manage your renovations,
