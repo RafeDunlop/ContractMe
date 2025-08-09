@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,13 +24,15 @@ public class TeamServiceTest {
 
     @Mock
     private TeamsRepository teamsRepository;
+    @Mock
+    private ContractorRepository contractorRepository;
     private TeamsService teamsService;
     @Mock
     private TeamValidation teamValidation;
 
     @BeforeEach
     void setUp() {
-        teamsService = new TeamsService(teamsRepository, teamValidation);
+        teamsService = new TeamsService(teamsRepository, teamValidation, contractorRepository);
     }
 
     @Test

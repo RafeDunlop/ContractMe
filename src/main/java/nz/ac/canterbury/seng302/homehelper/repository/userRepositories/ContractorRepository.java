@@ -1,7 +1,10 @@
 package nz.ac.canterbury.seng302.homehelper.repository.userRepositories;
 
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Repository interface for managing {@link Contractor} entities.
@@ -10,5 +13,29 @@ import org.springframework.data.repository.CrudRepository;
  * This repository handles Contractors
  */
 public interface ContractorRepository extends UserBaseRepository<Contractor> {
+
+    @Query(value = """
+    SELECT c.*, 
+    (6371 * acos(
+        cos(radians(:lat)) * cos(radians(c.latitude)) *
+        cos(radians(c.longitude) - radians(:lon)) +
+        sin(radians(:lat)) * sin(radians(c.latitude))
+    )) AS distance
+    FROM contractor_details c
+    JOIN contractor_skills s ON c.user_id = s.contractor_id
+    WHERE s.skill_name = :requiredSkill
+      AND c.available = true
+      AND c.user_id NOT IN (:excludedIds)
+    HAVING distance <= :maxDistance
+    ORDER BY distance ASC
+    LIMIT 1
+""", nativeQuery = true)
+    Contractor findNearestWithinDistanceExcluding(
+            @Param("lat") double lat,
+            @Param("lon") double lon,
+            @Param("requiredSkill") String skillName,
+            @Param("maxDistance") double maxDistance,
+            @Param("excludedIds") java.util.List<Long> excludedIds
+    );
 
 }
