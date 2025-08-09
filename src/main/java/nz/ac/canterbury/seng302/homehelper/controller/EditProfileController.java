@@ -140,11 +140,15 @@ public class EditProfileController {
         logger.info("POST /user/edit");
 
         User newUser = loginService.getUserByEmail();
+        Contractor contractor = contractorService.getContractorById(newUser.getId());
         boolean sameEmail = newUser.getEmail().equals(updatedUser.getEmail());
         Map<String, List<String>> errors = editProfileService.validateUpdate(updatedUser, sameEmail);
         // Checks if the users location has been modified in the form and compares to their old location.
         Location currentLocation = newUser.getLocation();
         errors.putAll(locationService.validateLocation(addressDTO));
+        if (contractor != null) {
+            errors.putAll(contractorService.validateContractor(userRegisterDTO, locationService.isLocationProvided(addressDTO)));
+        }
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
@@ -165,7 +169,6 @@ public class EditProfileController {
         newUser.setLastName(updatedUser.getLastName());
         newUser.setEmail(updatedUser.getEmail());
         newUser = editProfileService.updateUserLocation(newUser, addressDTO);
-        Contractor contractor = contractorService.getContractorById(newUser.getId());
         if(contractor != null) {
             contractor = editProfileService.updateContractor(userRegisterDTO,contractor);
             editProfileService.updateUser(contractor);
