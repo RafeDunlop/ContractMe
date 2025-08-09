@@ -50,6 +50,8 @@
             <div th:each="cell : ${row}"
                  th:if="${cell != null}"
                  class="col border border-secondary text-start"
+                 th:ondblclick="|addTask(${id}, this, event)|"
+                 th:attr="data-cell-date=${cell.day.toString()}, data-reno-id=${id}"
                  th:classappend="${cell.day.getMonthValue() != date.monthValue} ? ' bg-body-secondary text-muted' : ''"
                  th:style="${(cell.day.getDayOfMonth() == currentDay and cell.day.getMonthValue() == currentMonth and date.year == currentYear) ? 'background-color: #87bcfa;' : ''}">
 
@@ -60,7 +62,7 @@
                      <div class="btn-primary calendar-task d-flex flex-row align-items-center"
                           th:each="task : ${cell.calendarTasks}"
                           th:onclick="|handleTaskClick(this)|"
-                          th:ondblclick="|handleTaskDoubleClick(${id}, this)|"
+                          th:ondblclick="|handleTaskDoubleClick(${id}, this, event)|"
                           th:attr="
                              data-task-id=${task.id},
                              data-task-name=${task.name},

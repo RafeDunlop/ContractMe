@@ -311,5 +311,29 @@ public class RenovationTaskServiceTest {
 
         assertEquals(TaskState.NOT_STARTED, savedTask.getState(), "Task state should be NOT_STARTED");
     }
+
+    @Test
+    public void parseDate_invalidDate_returnsNullNoSetDTODate() {
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO();
+        renovationTaskDTO.setDueDate("lsdkfjldskfj");
+        assertNull(renovationTaskService.parseDueDate(renovationTaskDTO));
+        assertEquals("lsdkfjldskfj", renovationTaskDTO.getDueDate());
+    }
+
+    @Test
+    public void parseDueDate_validDateISO_returnsFormattedDate() {
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO();
+        renovationTaskDTO.setDueDate("2020-01-01");
+        assertEquals("01/01/2020", renovationTaskService.parseDueDate(renovationTaskDTO));
+        assertEquals("01/01/2020", renovationTaskDTO.getDueDate());
+    }
+
+    @Test
+    public void parseDueDate_validDateNZ_returnsFormattedDate() {
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO();
+        renovationTaskDTO.setDueDate("01/01/2020");
+        assertEquals("01/01/2020", renovationTaskService.parseDueDate(renovationTaskDTO));
+        assertEquals("01/01/2020", renovationTaskDTO.getDueDate());
+    }
 }
 

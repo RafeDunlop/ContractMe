@@ -15,18 +15,38 @@
 
 <div id="container" class="card container mt-5 p-4 shadow-sm">
     <h4 class="card-title mb-4" th:text="|Create Team For ${renovationRecord.getName()}|"/>
-    <form id="create-team-form" novalidate>
-    <div class="input-group mb-3">
+
+    <form th:action="@{/renovations/team/create(id=${renovationRecord.id})}" method="post" id="create-team-form" th:object="${teamRequestDTO}" novalidate>
+
+        <div class="input-group mb-3">
             <select class="form-select" id="skills-select" type="text" aria-label="skills-select" autocomplete="off">
                 <option disabled selected hidden>Select skill</option>
                 <option th:each="skill : ${skills}" th:value="${skill}" th:text="${skill.getDisplayName()}"
                         th:attr="data-displayname=${skill.getDisplayName()}" class="skill-option"></option>
             </select>
-        <button type="button" id="addSkillButton" class="btn btn-secondary"
-                onclick="confirmRole()" disabled>Add</button>
+            <button type="button" id="addSkillButton" class="btn btn-secondary"
+                    onclick="confirmRole()" disabled>Add</button>
         </div>
         <div id="selected-skills" class="list-group">
+            <div th:each="skill : ${teamRequestDTO.skills}" class="list-group-item p-3 mb-3 shadow-sm rounded bg-white position-relative">
+                <div class="d-flex justify-content-between align-items-start">
+                    <p class="w-100 text-secondary" th:text="${#strings.capitalize(skill.replace('_', ' ').toLowerCase())}">Skill Name</p>
+                    <button type="button" class="btn btn-outline-danger custom-light-border ms-3" onclick="this.closest('.list-group-item').remove()">❌</button>
+                </div>
+                <input type="hidden" name="skills" th:value="${skill}" />
+            </div>
         </div>
+
+        <!-- Frontend JS error -->
+        <div class="alert alert-danger mt-2" role="alert" id="tag-frontend-error" hidden>
+            <ul><li><label class="form-label" id="tag-frontend-error-message"></label></li></ul>
+        </div>
+        <!-- Backend error -->
+        <div class="alert alert-danger mt-2" role="alert" id="tag-backend-error"
+             th:attr="hidden=${errors == null}">
+            <ul><li th:each="msg : ${errors}" th:text="${msg}"></li></ul>
+        </div>
+
         <input type="submit" class="btn btn-primary float-end" value="Submit"/>
     </form>
 </div>

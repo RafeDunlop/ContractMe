@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
@@ -39,9 +38,9 @@ public class LocationController {
      * @return The localisation of the client, packaged into a {@link LocalisationDTO} object
      */
     @GetMapping("/localisation")
-    public ResponseEntity<LocalisationDTO> getLocalisation(HttpServletRequest request) {
+    public ResponseEntity<LocalisationDTO> getLocalisation() {
         logger.info("GET /localisation");
-        String ipAddress = getIpFromRequest(request);
+        String ipAddress = locationService.getIpFromRequest();
         logger.debug("IP: {}", ipAddress);
         try {
             return new ResponseEntity<>(locationService.getRoughLocation(ipAddress), HttpStatus.OK);
@@ -67,19 +66,5 @@ public class LocationController {
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-    }
-
-    /**
-     * Gets the IP address of the request, principally from the original client that submitted the request
-     * if forwarded
-     * @param request The request received by the localisation controller
-     * @return The IP address of the client
-     */
-    private String getIpFromRequest(HttpServletRequest request) {
-        String forwardingHeader = request.getHeader("X-Forwarded-For");
-        if (forwardingHeader == null || forwardingHeader.isEmpty()) {
-            return request.getRemoteAddr();
-        }
-        return forwardingHeader.split(",")[0];
     }
 }

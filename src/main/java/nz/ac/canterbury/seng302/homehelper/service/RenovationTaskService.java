@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Service
@@ -38,6 +39,36 @@ public class RenovationTaskService {
     public RenovationTaskService(RenovationTaskRepository renovationTaskRepository, RenovationTaskValidation renovationTaskValidation) {
         this.renovationTaskRepository = renovationTaskRepository;
         this.renovationTaskValidation = renovationTaskValidation;
+    }
+
+    /**
+     * Parse a due date from a renovation task DTO.
+     * Note that this modifies the DTO in place!
+     * @param renovationTaskDTO the DTO from the form submission
+     * @return the formatted due date as a string to be added to the model if necessary
+     */
+    public String parseDueDate(RenovationTaskDTO renovationTaskDTO) {
+        LocalDate parsedDate = null;
+        if (renovationTaskDTO.getDueDate() != null) {
+            DateTimeFormatter[] formatters = new DateTimeFormatter[] {
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            };
+
+            for (DateTimeFormatter formatter : formatters) {
+                try {
+                    parsedDate = LocalDate.parse(renovationTaskDTO.getDueDate(), formatter);
+                    break;
+                } catch (DateTimeParseException ignored) {}
+            }
+
+            if (parsedDate != null) {
+                String formattedDueDate = parsedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                renovationTaskDTO.setDueDate(formattedDueDate);
+                return formattedDueDate;
+            }
+        }
+        return null;
     }
 
     /**
