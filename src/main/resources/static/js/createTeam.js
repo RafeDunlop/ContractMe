@@ -1,3 +1,5 @@
+/** Class for creating team requests on the createTeam template, accessed from viewRenovation template */
+
 /**
  * Adds a skill field with a hidden input, display and delete button to a specified empty div
  * input value is enum value, e.g. MANUAL_LABOURER, named skill
@@ -31,6 +33,7 @@ function addSkill() {
 
         deleteButton.addEventListener("click", () => {
             selectedSkillDisplay.remove();
+            updateErrorMessageLabels()
         });
         selectedSkillsDiv.appendChild(selectedSkillDisplay);
         selectedSkillFeedback.appendChild(selectedSkillText);
@@ -38,14 +41,8 @@ function addSkill() {
         selectedSkillDisplay.appendChild(selectedSkillInputHidden);
         selectedSkillFeedback.appendChild(deleteButton);
         skillDropdown.selectedIndex = 0;
+
+        updateErrorMessageLabels()
     }
 }
-
-/**
- * Controls the enabled state of the "Add" button based on skill selection.
- */
-document.getElementById('skills-select').addEventListener('change', function() {
-    const addButton = document.getElementById('addSkillButton');
-    addButton.disabled = this.selectedIndex === 0;
-});
 
