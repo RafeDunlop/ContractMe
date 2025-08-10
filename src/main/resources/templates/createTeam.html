@@ -47,7 +47,7 @@
             <ul><li th:each="msg : ${errors}" th:text="${msg}"></li></ul>
         </div>
 
-        <input type="submit" onclick="confirmTeamRequest(event)" class="btn btn-primary float-end" value="Submit"/>
+        <input type="submit" id="form-submit" onclick="confirmTeamRequest(event)" class="btn btn-primary float-end" value="Submit" />
 
     </form>
 </div>
@@ -55,4 +55,6 @@
 <script type="module" src="/js/confirmPrompt.js"></script>
 <script type="module" th:src="@{/js/navbar.js}"></script>
 <script th:src="@{/js/createTeam.js}"></script>
+<script th:src="@{/js/validation/createTeamValidation.js}"></script>
+
 </html>
