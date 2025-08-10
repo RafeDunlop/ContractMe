@@ -12,7 +12,9 @@ import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Service class for handling teams.
@@ -88,27 +90,43 @@ public class TeamsService {
     }
 
     /**
+     * Assigns available contractors to the given team's roles based on proximity
+     * to a specified renovation location, ensuring that no contractor is assigned
+     * more than once.
+     * @param team               the team whose roles need contractors assigned
+     * @param renovationLocation the location of the renovation used to determine contractor proximity
+     * @return an empty string if all roles were successfully assigned contractors,
+     *         or an error message if one or more roles could not be filled
+     */
+    public String assignContractorsToTeam(Team team, Location renovationLocation) {
+        // Store all contractor's id in list to prevent duplicates
+        Set<Long> assignedContractors = new HashSet<>();
+
+        for (Role role : team.getRoles()) {
+            Contractor availableContractor = findContractor(role, renovationLocation, assignedContractors);
+
+            if (availableContractor != null) {
+                team.replaceRoleContractor(role, availableContractor);
+                assignedContractors.add(availableContractor.getId());
+            } else {
+                return "Unable to find available contractors to fill team";
+            }
+        }
+        return "";
+    }
+
+    /**
      * Find the closest available and suitable contractor for a given role
      * @param role the desired role for the position in the team
-     * @param currentTeam the current team
      * @param renovationLocation location of the renovation
      * @return the closest available and suitable contractor for a given role
      */
-    private Contractor findContractor(Role role, Team currentTeam, Location renovationLocation) {
+    private Contractor findContractor(Role role, Location renovationLocation, Set<Long> blacklist) {
         double renovationLat = renovationLocation.getLatitude();
         double renovationLon = renovationLocation.getLongitude();
-
-        // Create blacklist of current Contractors in team to prevent duplicates
-        List<Long> blacklist = new ArrayList<>();
-        for (Role teamMember : currentTeam.getRoles()) {
-            if (teamMember.getContractor() != null) {
-                blacklist.add(teamMember.getContractor().getId());
-            }
-        }
 
         return contractorRepository.findNearestWithinDistanceExcluding(
                 renovationLat, renovationLon, role.getSkill().getDisplayName(), 200, blacklist
         );
     }
-
 }

@@ -35,7 +35,7 @@ public interface ContractorRepository extends UserBaseRepository<Contractor> {
             @Param("lon") double lon,
             @Param("requiredSkill") String skillName,
             @Param("maxDistance") double maxDistance,
-            @Param("excludedIds") java.util.List<Long> excludedIds
+            @Param("excludedIds") java.util.Set<Long> excludedIds
     );
 
 }

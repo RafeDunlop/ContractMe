@@ -9,6 +9,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.util.ArrayList;
 import java.util.List;
+
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 
 /**
@@ -55,6 +57,17 @@ public class Team {
         roles.remove(role);
     }
 
-
+    /**
+     * Replaces the contractor for a specific role in the team.
+     * @param existingRole   the role to update
+     * @param newContractor  the contractor to assign to the role
+     */
+    public void replaceRoleContractor(Role existingRole, Contractor newContractor) {
+        int index = roles.indexOf(existingRole);
+        if (index != -1) {
+            Role updatedRole = new Role(newContractor, existingRole.getSkill(), existingRole.isAccepted());
+            roles.set(index, updatedRole);
+        }
+    }
 
 }
