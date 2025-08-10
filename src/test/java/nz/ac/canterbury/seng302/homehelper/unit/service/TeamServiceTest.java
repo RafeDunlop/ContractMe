@@ -3,9 +3,12 @@ package nz.ac.canterbury.seng302.homehelper.unit.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
@@ -14,10 +17,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.lang.reflect.Array;
 import java.util.List;
+import java.util.Set;
 
 @ExtendWith(MockitoExtension.class)
 public class TeamServiceTest {
@@ -73,5 +80,158 @@ public class TeamServiceTest {
         boolean result = teamsService.teamExists(null);
         assertFalse(result);
         verify(teamsRepository).existsByRenovationRecordId(null);
+    }
+
+    @Test
+    void validTeamAndLocation_assignContractorsToTeam_returnEmptyString() {
+        Team team = new Team(new RenovationRecord());
+        Role role1 = new Role(Skill.PLUMBING);
+        Role role2 = new Role(Skill.ELECTRICAL);
+        team.addRole(role1);
+        team.addRole(role2);
+
+        Location location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", 43.53, 172.63);
+
+        Contractor contractor1 = spy(new Contractor("Alice", "Doe", "alice@doe.com", "encoded"));
+        contractor1.addSkill(Skill.PLUMBING);
+        when(contractor1.getId()).thenReturn(1L);
+
+        Contractor contractor2 = spy(new Contractor("Bob", "Doe", "bob@doe.com", "encoded"));
+        contractor2.addSkill(Skill.ELECTRICAL);
+        when(contractor2.getId()).thenReturn(2L);
+
+        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("Plumbing"), anyDouble(), anySet()))
+                .thenReturn(contractor1);
+        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("Electrical"), anyDouble(), argThat(set -> set.contains(1L))))
+                .thenReturn(contractor2);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("", result);
+        assertEquals(contractor1, team.getRoles().get(0).getContractor());
+        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+    }
+
+    @Test
+    void teamWithNoRoles_assignContractorsToTeam_returnEmptyString() {
+        Team team = new Team(new RenovationRecord());
+        Location location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", 43.53, 172.63);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("", result);
+        verify(contractorRepository, never()).findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), anyString(), anyDouble(), anySet());
+    }
+
+    @Test
+    void contractorAtExactDistanceLimit_shouldBeAssigned() {
+        Team team = new Team(new RenovationRecord());
+        Role role = new Role(Skill.PLUMBING);
+        team.addRole(role);
+        Location location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", 43.53, 172.63);
+
+        Contractor contractor = spy(new Contractor("Alice", "Doe", "alice@doe.com", "encoded"));
+        contractor.addSkill(Skill.PLUMBING);
+        when(contractor.getId()).thenReturn(1L);
+
+        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("Plumbing"), eq(200.0), anySet()))
+                .thenReturn(contractor);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("", result);
+        assertEquals(contractor, team.getRoles().get(0).getContractor());
+    }
+
+    @Test
+    void contractorOutsideDistanceLimit_shouldNotBeAssigned() {
+        Team team = new Team(new RenovationRecord());
+        Role role = new Role(Skill.PLUMBING);
+        team.addRole(role);
+        Location location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", 43.53, 172.63);
+
+        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("Plumbing"), eq(200.0), anySet()))
+                .thenReturn(null);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("Unable to find available contractors to fill team", result);
+        assertNull(team.getRoles().get(0).getContractor());
+    }
+
+    @Test
+    void duplicateContractorNotAssignedToMultipleRoles() {
+        Team team = new Team(new RenovationRecord());
+        Role role1 = new Role(Skill.PLUMBING);
+        Role role2 = new Role(Skill.PLUMBING);
+        team.addRole(role1);
+        team.addRole(role2);
+
+        Location location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", 43.53, 172.63);
+
+        Contractor contractor1 = spy(new Contractor("Alice", "Doe", "alice@doe.com", "encoded"));
+        contractor1.addSkill(Skill.PLUMBING);
+        when(contractor1.getId()).thenReturn(1L);
+
+        Contractor contractor2 = spy(new Contractor("Bob", "Doe", "bob@doe.com", "encoded"));
+        contractor2.addSkill(Skill.PLUMBING);
+        when(contractor2.getId()).thenReturn(2L);
+
+        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("Plumbing"), anyDouble(), argThat(Set::isEmpty)))
+                .thenReturn(contractor1);
+        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("Plumbing"), anyDouble(), argThat(set -> set.contains(1L))))
+                .thenReturn(contractor2);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("", result);
+        assertEquals(contractor1, team.getRoles().get(0).getContractor());
+        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+    }
+
+    @Test
+    void findContractorReturnsNull_shouldReturnError() {
+        Team team = new Team(new RenovationRecord());
+        Role role = new Role(Skill.PLUMBING);
+        team.addRole(role);
+        Location location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", 43.53, 172.63);
+
+        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), anyString(), anyDouble(), anySet()))
+                .thenReturn(null);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("Unable to find available contractors to fill team", result);
+        assertNull(team.getRoles().get(0).getContractor());
+    }
+
+    @Test
+    void multipleSkillsOneContractor_notAssignedTwice() {
+        Team team = new Team(new RenovationRecord());
+        Role role1 = new Role(Skill.PLUMBING);
+        Role role2 = new Role(Skill.ELECTRICAL);
+        team.addRole(role1);
+        team.addRole(role2);
+
+        Location location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", 43.53, 172.63);
+
+        Contractor contractor = spy(new Contractor("Alice", "Doe", "alice@doe.com", "encoded"));
+        contractor.addSkill(Skill.PLUMBING);
+        contractor.addSkill(Skill.ELECTRICAL);
+        when(contractor.getId()).thenReturn(1L);
+
+        Contractor contractor2 = spy(new Contractor("Bob", "Doe", "bob@doe.com", "encoded"));
+        when(contractor2.getId()).thenReturn(2L);
+
+        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("Plumbing"), anyDouble(), anySet()))
+                .thenReturn(contractor);
+        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("Electrical"), anyDouble(), argThat(set -> set.contains(1L))))
+                .thenReturn(contractor2);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("", result);
+        assertEquals(contractor, team.getRoles().get(0).getContractor());
+        assertEquals(contractor2, team.getRoles().get(1).getContractor());
     }
 }
