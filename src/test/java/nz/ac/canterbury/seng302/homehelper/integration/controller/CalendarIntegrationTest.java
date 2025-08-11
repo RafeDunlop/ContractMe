@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import java.util.List;
 @SpringBootTest
 @Transactional
 @AutoConfigureMockMvc
+@WithMockUser(username = "jane@doe.com")
 public class CalendarIntegrationTest {
 
     @Autowired
@@ -45,11 +47,6 @@ public class CalendarIntegrationTest {
     @Autowired
     private RenovationRecordService renovationRecordService;
 
-    private User currentUser;
-    private User owner;
-    private User notOwner;
-    private User testUser;
-
 
     private RenovationRecord renovationRecord;
 
@@ -57,22 +54,15 @@ public class CalendarIntegrationTest {
 
     @BeforeEach
     public void setupUser() {
-        currentUser = new User("Jane", "Doe", "jane@doe.com", "password");
+        User currentUser = new User("Jane", "Doe", "jane@doe.com", "password");
+        currentUser.grantAuthority("ROLE_USER");
         userRepository.save(currentUser);
 
-        owner = new User("Owner", "User", "owner@doe.com", "Password");
-        owner.grantAuthority("ROLE_USER");
-        userRepository.save(owner);
-
-        notOwner = new User("Not", "Owner", "not.owner@doe.com", "Password");
-        notOwner.grantAuthority("ROLE_USER");
-        userRepository.save(notOwner);
-
-        testUser = new User("Test", "User", "test@doe.com", "Password");
+        User testUser = new User("Test", "User", "test@doe.com", "Password");
         testUser.grantAuthority("ROLE_USER");
         userRepository.save(testUser);
 
-        renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
+        renovationRecord = new RenovationRecord(currentUser, "Test Renovation", "Test Desc", List.of("Room A"));
         renovationRecord = renovationRecordRepository.save(renovationRecord);
 
         session = new MockHttpSession();
