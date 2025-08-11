@@ -106,4 +106,17 @@ public class CalendarIntegrationTest {
         assertTrue(result.getResponse().getContentAsString().contains("cellEdited"));
         assertFalse(result.getResponse().getContentAsString().contains("#fafa91"));
     }
+
+    @Test
+    public void viewRenovation_dateEditedLastMonthAndNoSpecifiedYearOrMonth_SnapsToLastMonth() throws Exception {
+        LocalDate dateEdited = LocalDate.now().minusMonths(1);
+        MvcResult result = mockMvc.perform(get("/renovations/view")
+                        .session(session)
+                        .param("dateEdited", dateEdited.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+                        .param("id", Long.toString(renovationRecord.getId())))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertTrue(result.getResponse().getContentAsString().contains("cellEdited"));
+        assertTrue(result.getResponse().getContentAsString().contains("#fafa91"));
+    }
 }
