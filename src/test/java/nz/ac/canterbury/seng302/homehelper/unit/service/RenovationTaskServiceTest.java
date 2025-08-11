@@ -34,12 +34,11 @@ public class RenovationTaskServiceTest {
     private RenovationTaskService renovationTaskService;
     private RenovationRecord renovationRecord;
     private RenovationTaskRepository renovationTaskRepository;
-    private RenovationTaskValidation renovationTaskValidation;
 
     @BeforeEach
     void setUp() {
         renovationTaskRepository = mock(RenovationTaskRepository.class);
-        renovationTaskValidation = new RenovationTaskValidation();
+        RenovationTaskValidation renovationTaskValidation = new RenovationTaskValidation();
         renovationTaskService = new RenovationTaskService(renovationTaskRepository, renovationTaskValidation);
         renovationRecord = new RenovationRecord();
     }
@@ -179,7 +178,6 @@ public class RenovationTaskServiceTest {
 
     @Test
     public void validateTaskDetails_invalidFormatRandomChar_returnInvalidDueDateError() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
         RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("Task One", "Some description", "NotADate", new ArrayList<>());
 
         Map<String, List<String>> expectedErrors = new HashMap<>();
@@ -298,6 +296,30 @@ public class RenovationTaskServiceTest {
         RenovationTask savedTask = taskCaptor.getValue();
 
         assertEquals(TaskState.NOT_STARTED, savedTask.getState(), "Task state should be NOT_STARTED");
+    }
+
+    @Test
+    public void parseDate_invalidDate_returnsNullNoSetDTODate() {
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO();
+        renovationTaskDTO.setDueDate("lsdkfjldskfj");
+        assertNull(renovationTaskService.parseDueDate(renovationTaskDTO));
+        assertEquals("lsdkfjldskfj", renovationTaskDTO.getDueDate());
+    }
+
+    @Test
+    public void parseDueDate_validDateISO_returnsFormattedDate() {
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO();
+        renovationTaskDTO.setDueDate("2020-01-01");
+        assertEquals("01/01/2020", renovationTaskService.parseDueDate(renovationTaskDTO));
+        assertEquals("01/01/2020", renovationTaskDTO.getDueDate());
+    }
+
+    @Test
+    public void parseDueDate_validDateNZ_returnsFormattedDate() {
+        RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO();
+        renovationTaskDTO.setDueDate("01/01/2020");
+        assertEquals("01/01/2020", renovationTaskService.parseDueDate(renovationTaskDTO));
+        assertEquals("01/01/2020", renovationTaskDTO.getDueDate());
     }
 }
 

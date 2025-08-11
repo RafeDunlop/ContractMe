@@ -195,7 +195,7 @@ public class UserValidationTest {
     public void ProfilePictureValidation_ValidProfilePicture_Success() {
         UserValidation userValidation = new UserValidation();
         MultipartFile profilePicture = Mockito.mock(MultipartFile.class);
-        when(profilePicture.getContentType()).thenReturn("image/svg+xml");
+        when(profilePicture.getContentType()).thenReturn("image/jpeg");
         when(profilePicture.getSize()).thenReturn(0L);
 
         Assertions.assertTrue(userValidation.validateProfilePicture(profilePicture).isEmpty());

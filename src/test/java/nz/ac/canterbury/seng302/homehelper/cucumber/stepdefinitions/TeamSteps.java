@@ -13,22 +13,23 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
 @SpringBootTest
 public class TeamSteps {
-
     UserContext userContext;
-
     private RenovationRecord renovationRecord;
-
     private MvcResult mvcResult;
+    private ResultActions result;
 
     @Autowired
     private MockMvc mockMvc;
@@ -64,5 +65,56 @@ public class TeamSteps {
         assertTrue(mvcResult.getResponse().getContentAsString().contains(
                 "skills-select"
         ));
+    }
+
+    @When("I add zero skills")
+    public void i_add_zero_skills() throws Exception {
+        mvcResult =  mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create?id=" + renovationRecord.getId())
+                        .param("id", renovationRecord.getId().toString())
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @When("I submit with more then five skills")
+    public void i_submit_with_more_then_five_skills() throws Exception {
+        mvcResult =  mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create?id=" + renovationRecord.getId())
+                        .param("id", renovationRecord.getId().toString())
+                        .param("skills", "ELECTRICAL", "ELECTRICAL", "ELECTRICAL", "ELECTRICAL", "ELECTRICAL", "ELECTRICAL")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Then("An error message displays, {string}")
+    public void an_error_message_displays(String errorMessage) throws Exception {
+        String html = mvcResult.getResponse().getContentAsString();
+
+        assertTrue(html.contains(errorMessage), "Expected error message from validation");
+    }
+
+    @Then("I can add the skill {string} twice to the same team")
+    public void i_can_add_the_skill_twice_to_the_same_team(String skillName) throws Exception {
+        mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create")
+                        .param("id", renovationRecord.getId().toString())
+                        .param("skills", skillName, skillName)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()))
+                .andReturn();
+    }
+
+    @When("I add a valid amount of skills")
+    public void i_add_a_valid_amount_of_skills() throws Exception {
+        result =  mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create?id=" + renovationRecord.getId())
+                .param("id", renovationRecord.getId().toString())
+                .param("skills", "GAS_FITTING", "CNC_MACHINING")
+                .with(csrf()));
+    }
+    @Then("My team request is successfully created")
+    public void my_team_request_is_successfully_created() throws Exception {
+        result
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()));
     }
 }

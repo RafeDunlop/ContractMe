@@ -3,7 +3,6 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nz.ac.canterbury.seng302.homehelper.controller.TeamController;
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
-import nz.ac.canterbury.seng302.homehelper.dto.TeamRoleDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
@@ -16,6 +15,8 @@ import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,7 +32,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
@@ -109,25 +113,33 @@ public class TeamControllerIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
-    @Test
-    public void createTeam_submitsTeamWithRolesAndHasLocation_createsTeam() throws Exception {
-        TeamRequestDTO teamRequestDTO = new TeamRequestDTO();
-        teamRequestDTO.setRenovationRecordId(renovationRecord.getId());
-        TeamRoleDTO role1 = new TeamRoleDTO();
-        role1.setSkill(Skill.CARPENTRY);
-        teamRequestDTO.setRoles(List.of(role1));
-
-
+    @ParameterizedTest
+    @ValueSource(strings = {"DRYWALL_PLASTERING","PAINTING","HVAC"})
+    public void createTeam_submitsTeamWithRoles_createsTeam(String skillName) throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(teamRequestDTO))
+                        .param("id", renovationRecord.getId().toString())
+                        .param("skills", skillName)
                         .with(csrf()))
-                .andExpect(status().isOk());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()));
 
         boolean exists = teamsRepository.existsByRenovationRecordId(renovationRecord.getId());
         assertTrue(exists);
         assertEquals(1,teamsRepository.findByRenovationRecord(renovationRecord).getRoles().size());
+    }
 
+    @Test
+    public void createTeam_submitsTeamWithDuplicateRoles_createsTeam() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create")
+                        .param("id", renovationRecord.getId().toString())
+                        .param("skills", "ELECTRICAL", "ELECTRICAL")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()));
+
+        boolean exists = teamsRepository.existsByRenovationRecordId(renovationRecord.getId());
+        assertTrue(exists);
+        assertEquals(2,teamsRepository.findByRenovationRecord(renovationRecord).getRoles().size());
     }
 
     @Test
@@ -135,9 +147,8 @@ public class TeamControllerIntegrationTest {
         Team existingTeam = new Team(renovationRecord);
         teamsRepository.save(existingTeam);
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/create")
-                        .param("id", Long.toString(renovationRecord.getId())))
+                        .param("id", Long.toString(renovationRecord.getId()))
+                .param("skills", "ELECTRICAL", "PLUMBING"))
                 .andExpect(status().isNotFound());
     }
-
-
 }

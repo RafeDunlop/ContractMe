@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.e2e;
 
+import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -18,9 +20,10 @@ import java.util.List;
 
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class TaskCalendarInteractionsStepsE2e {
-    private UserContext userContext;
+    private final UserContext userContext;
     private RenovationTask renovationTask;
     private RenovationRecord renovationRecord;
+    private final LocalDate today = LocalDate.now();
 
     @Autowired
     private RenovationRecordRepository renovationRecordRepository;
@@ -32,13 +35,19 @@ public class TaskCalendarInteractionsStepsE2e {
         this.userContext = userContext;
     }
 
-    @Given("I have a renovation with a task due tomorrow")
-    public void i_have_have_a_renovation_with_a_task_due_tomorrow() {
+
+    @Before
+    public void beforeEach() {
         User user = userContext.getUser();
         renovationRecord = new RenovationRecord(user, "Test Renovation", "desc", new ArrayList<>());
         renovationRecordRepository.save(renovationRecord);
+    }
 
-        renovationTask = new RenovationTask("Task", "desc", new ArrayList<>(), LocalDate.now().plusDays(1), renovationRecord);
+    @Given("I have a renovation with a task due tomorrow")
+    public void i_have_have_a_renovation_with_a_task_due_tomorrow() {
+
+
+        renovationTask = new RenovationTask("Task", "desc", new ArrayList<>(), today.plusDays(1), renovationRecord);
         renovationTaskRepository.save(renovationTask);
         renovationRecord.setRenovationTasks(List.of(renovationTask));
     }
@@ -48,9 +57,17 @@ public class TaskCalendarInteractionsStepsE2e {
         RunPlaywrightTests.page.navigate(RunPlaywrightTests.baseUrl + "/renovations/view?id=" + renovationRecord.getId());
     }
 
+
     @When("I double click on the task in the calendar")
     public void i_double_click_on_the_task_in_the_calendar() {
         RunPlaywrightTests.page.locator("[data-task-id='" + renovationTask.getId() + "']").dblclick();
+    }
+
+
+    @When("I double click an empty space on a day")
+    public void i_double_click_an_empty_space_on_a_day() {
+
+        RunPlaywrightTests.page.locator("[data-cell-date='" + today.plusDays(1) + "']").dblclick();
     }
 
     @Then("I see the edit task page")
@@ -58,5 +75,19 @@ public class TaskCalendarInteractionsStepsE2e {
         String profileUrl = RunPlaywrightTests.baseUrl + "/editTask?taskId=" + renovationTask.getId() + "&renovationId=" + renovationRecord.getId();
         String currentUrl = RunPlaywrightTests.page.url();
         Assertions.assertEquals(profileUrl, currentUrl);
+    }
+
+
+    @Then("I see the add task form")
+    public void i_see_the_add_task_form() {
+        String createTaskUrl = RunPlaywrightTests.baseUrl + "/renovations/view/create?id=" + renovationRecord.getId() + "&date=" + today.plusDays(1);
+        String currentUrl = RunPlaywrightTests.page.url();
+        Assertions.assertEquals(createTaskUrl, currentUrl);
+    }
+
+    @And("the due date is set to the date I clicked")
+    public void the_due_date_is_set_to_the_date_i_clicked() {
+        String dueDate = RunPlaywrightTests.page.locator("#dueDate").inputValue();
+        Assertions.assertEquals(today.plusDays(1).toString(), dueDate);
     }
 }
