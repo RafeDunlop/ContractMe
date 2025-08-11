@@ -187,4 +187,23 @@ public class TaskStateSteps {
         String html = result.getResponse().getContentAsString();
         assertTrue(html.contains(state));
     }
+
+    @Then("I see the option {string} pre-selected")
+    public void i_see_the_option_pre_selected(String stateOption) {
+        assertEquals(stateOption, result.getRequest().getParameter("state"));
+    }
+
+    @When("I select the option {string} to filter tasks by state")
+    public void i_select_the_option_to_filter_tasks_by_state(String stateOption) throws Exception {
+        result = mockMvc.perform(get("/renovations/retrieve/" + renovationId)
+                        .param("state", stateOption))
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+    @Then("The page is reloaded with only {string} tasks shown")
+    public void the_page_is_reloaded_with_only_tasks_shown(String state) {
+        // Write code here that turns the phrase above into concrete actions
+        throw new io.cucumber.java.PendingException();
+    }
 }

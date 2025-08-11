@@ -16,12 +16,14 @@ Feature: As Lei, I want to be able to filter the tasks on one of my renovation r
 
     Scenario: AC2 - Default state filter
         Given that I am viewing one of my renovation records with tasks
-        And I have not selected a filter option
         When I view the tasks section
         Then I see the option "All" pre-selected
 
     Scenario Outline: AC3 - Task state filter
         Given that I am viewing one of my renovation records with tasks
+        And I have tasks
+            | name | state |
+            | "Task 1" | "Not Started" |
         When I select the option <state> to filter tasks by state
         Then The page is reloaded with only <state> tasks shown
 
