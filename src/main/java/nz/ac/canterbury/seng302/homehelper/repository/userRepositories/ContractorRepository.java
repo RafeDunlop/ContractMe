@@ -21,11 +21,11 @@ public interface ContractorRepository extends UserBaseRepository<Contractor> {
         cos(radians(c.longitude) - radians(:lon)) +
         sin(radians(:lat)) * sin(radians(c.latitude))
     )) AS distance
-    FROM contractor_details c
-    JOIN contractor_skills s ON c.user_id = s.contractor_id
-    WHERE s.skill_name = :requiredSkill
+    FROM user_details c
+    JOIN contractor_skills s ON c.user_id = s.contractor_user_id
+    WHERE s.skills = :requiredSkill
       AND c.available = true
-      AND c.user_id NOT IN (:excludedIds)
+      AND (:excludedIds IS NULL OR c.user_id NOT IN (:excludedIds))
     HAVING distance <= :maxDistance
     ORDER BY distance ASC
     LIMIT 1
@@ -33,7 +33,7 @@ public interface ContractorRepository extends UserBaseRepository<Contractor> {
     Contractor findNearestWithinDistanceExcluding(
             @Param("lat") double lat,
             @Param("lon") double lon,
-            @Param("requiredSkill") String skillName,
+            @Param("requiredSkillId") int skillId,
             @Param("maxDistance") double maxDistance,
             @Param("excludedIds") java.util.Set<Long> excludedIds
     );

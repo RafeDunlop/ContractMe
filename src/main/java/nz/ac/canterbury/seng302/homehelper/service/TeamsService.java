@@ -103,13 +103,15 @@ public class TeamsService {
         Set<Long> assignedContractors = new HashSet<>();
 
         for (Role role : team.getRoles()) {
-            Contractor availableContractor = findContractor(role, renovationLocation, assignedContractors);
+            if (role.getContractor() == null) {
+                Contractor availableContractor = findContractor(role, renovationLocation, assignedContractors);
 
-            if (availableContractor != null) {
-                team.replaceRoleContractor(role, availableContractor);
-                assignedContractors.add(availableContractor.getId());
-            } else {
-                return "Unable to find available contractors to fill team";
+                if (availableContractor != null) {
+                    team.replaceRoleContractor(role, availableContractor);
+                    assignedContractors.add(availableContractor.getId());
+                } else {
+                    return "Unable to find available contractors to fill team";
+                }
             }
         }
         return "";
@@ -126,7 +128,7 @@ public class TeamsService {
         double renovationLon = renovationLocation.getLongitude();
 
         return contractorRepository.findNearestWithinDistanceExcluding(
-                renovationLat, renovationLon, role.getSkill().getDisplayName(), 200, blacklist
+                renovationLat, renovationLon, role.getSkill(), 200, blacklist
         );
     }
 }
