@@ -9,9 +9,18 @@
 function changeMonth(id, month, year) {
     const page = document.getElementById("pageNumber")?.value || "1";
     const cardsPerPage = document.getElementById("cardsPerPage")?.value || "16";
-    const params = new URLSearchParams({ id, page, cardsPerPage, month, year });
+    let params = new URLSearchParams(window.location.search);
+    let urlToFetch;
+    if (params.has('dateEdited')) {
+        const dateEdited = params.get('dateEdited')
+        params = new URLSearchParams({id, page, cardsPerPage, month, year, dateEdited})
+        urlToFetch = `${basePath}renovations/calendar?${params.toString()}#cellEdited`
+    } else {
+        params = new URLSearchParams({ id, page, cardsPerPage, month, year });
+        urlToFetch = `${basePath}renovations/calendar?${params.toString()}`
+    }
 
-    fetch(`${basePath}renovations/calendar?${params.toString()}`)
+    fetch(urlToFetch)
         .then(r => r.text())
         .then(html => {
             const container = document.getElementById(`calendar-${id}`);

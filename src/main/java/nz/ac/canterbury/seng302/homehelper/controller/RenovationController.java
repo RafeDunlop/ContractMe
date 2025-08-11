@@ -391,7 +391,7 @@ public class RenovationController {
         String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
-        injectDateElements(year, month, model, record);
+        injectDateElements(year, month, dateEdited, model, record);
         model.addAttribute("dateEdited", dateEdited);
 
 
@@ -434,14 +434,18 @@ public class RenovationController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
-        injectDateElements(year, month, model, record);
+        injectDateElements(year, month, dateEdited, model, record);
         model.addAttribute("id", id);
         model.addAttribute("dateEdited", dateEdited);
 
         return "fragments/calendar :: calendar";  // return only fragment for partial update
     }
 
-    private void injectDateElements(@RequestParam(required = false) Integer year, @RequestParam(required = false) Integer month, Model model, RenovationRecord record) {
+    private void injectDateElements(@RequestParam(required = false) Integer year,
+                                    @RequestParam(required = false) Integer month,
+                                    @RequestParam(required = false) @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate dateEdited,
+                                    Model model,
+                                    RenovationRecord record) {
         LocalDate localDate = LocalDate.now();
         model.addAttribute("currentDay", localDate.getDayOfMonth());
         model.addAttribute("currentMonth", localDate.getMonthValue());
@@ -459,6 +463,8 @@ public class RenovationController {
             } catch (DateTimeException e) {
                 logger.error(e.getMessage());
             }
+        } else if (dateEdited != null) {
+            localDate = dateEdited;
         }
 
         List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate, record);
