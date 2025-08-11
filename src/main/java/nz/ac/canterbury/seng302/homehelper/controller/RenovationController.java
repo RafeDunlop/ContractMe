@@ -233,13 +233,7 @@ public class RenovationController {
         if (!locationService.isLocationProvided(addressDTO)) {
             Location location = renovationRecord.getLocation();
             if (locationService.hasLocation(renovationRecord)) {
-                addressDTO.setAddress_line1(location.getAddress());
-                addressDTO.setCountry(location.getCountry());
-                addressDTO.setPostcode(location.getPostcode());
-                addressDTO.setCity(location.getCity());
-                addressDTO.setRegion(location.getSuburb());
-                addressDTO.setLat(location.getLatitude());
-                addressDTO.setLon(location.getLongitude());
+                addressDTO.setFromLocation(location);
                 model.addAttribute("locationUsed", true);
             }
             model.addAttribute("addressDTO", addressDTO);
@@ -483,7 +477,6 @@ public class RenovationController {
         }
 
         int requestedPage = Math.max(pageNumber - 1, 0);
-        cardsPerPage = Math.max(cardsPerPage, 1);
         Pageable pageable = PageRequest.of(requestedPage, cardsPerPage);
         Page<RenovationTask> page = renovationTaskService.returnTaskPages(record, pageable, status);
 
@@ -492,8 +485,7 @@ public class RenovationController {
             page = renovationTaskService.returnTaskPages(record, pageable, status);
         }
 
-        Page<RenovationTaskDTO> dtoPage = page.map(RenovationTaskDTO::new);
-        return dtoPage;
+        return page.map(RenovationTaskDTO::new);
     }
 
     /**

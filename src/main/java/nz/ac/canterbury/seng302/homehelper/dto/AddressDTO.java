@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AddressDTO {
@@ -133,5 +134,19 @@ public class AddressDTO {
 
     public void setRegion(String region) {
         this.region = region;
+    }
+
+    /**
+     * Set the fields of this AddressDTO from the location provided.
+     * @param location location object to set this DTO to match
+     */
+    public void setFromLocation(Location location) {
+        setAddress_line1(location.getAddress());
+        setCountry(location.getCountry());
+        setPostcode(location.getPostcode());
+        setCity(location.getCity());
+        setRegion(location.getSuburb());
+        setLat(location.getLatitude());
+        setLon(location.getLongitude());
     }
 }
