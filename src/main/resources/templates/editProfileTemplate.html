@@ -5,7 +5,8 @@
     <base th:href="@{/}"/>
     <title>Edit Profile</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+    <link th:href="@{/css/tags.css}" rel="stylesheet">
 
 
     <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
@@ -103,6 +104,17 @@
                 </div>
             </div>
 
+            <div th:if="${isContractor}">
+                <select class="form-select" id="skills-select" type="text" aria-label="skills-select" autocomplete="off">
+                    <option disabled selected hidden>Add Skills</option>
+                    <option th:each="skill : ${skills}" th:value="${skill}" th:text="${skill.getDisplayName()}"
+                            th:attr="display-name=${skill.getDisplayName()}" class="skill-option"></option>
+                </select>
+                <div id="skill-input-container" class="mt-2"></div>
+                <div id="hidden-skill-input-container"></div>
+                <div class="previous-input" th:each="skill : ${contractorSkills}" th:data-skill="${skill}" th:data-skilldisplayname="${skill.displayName}"></div>
+            </div>
+
             <!-- LOCATION TOGGLE SWITCH -->
             <div class="d-flex justify-content-between align-items-center pb-4 px-0" style="width: 22%">
                 <div id="location-toggle-switch-label">Enter Location (Optional):</div>
@@ -141,4 +153,5 @@
 <script type="module" th:src="@{/js/validation/profilePictureValidation.js}"></script>
 <script type="module" th:src="@{/js/locationToggleSwitch.js}"></script>
 <script type="module" th:src="@{/js/navbar.js}"></script>
+<script type="module" th:src="@{/js/skills.js}"></script>
 </html>

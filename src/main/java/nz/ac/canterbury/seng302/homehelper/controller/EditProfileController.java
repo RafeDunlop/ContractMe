@@ -1,9 +1,14 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import nz.ac.canterbury.seng302.homehelper.controller.support.ControllerUserSupport;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.mapper.AddressMapper;
 import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
@@ -34,6 +39,8 @@ public class EditProfileController {
 
     private final LoginService loginService;
     private final LocationService locationService;
+    private final AddressMapper addressMapper;
+    private final ControllerUserSupport controllerUserSupport;
 
     /**
      * Constructor for the controller and links the services to the controller.
@@ -43,10 +50,14 @@ public class EditProfileController {
      * @param loginService LoginService for getting user by ID
      */
     @Autowired
-    public EditProfileController(EditProfileService editProfileService, LoginService loginService, LocationService locationService) {
+    public EditProfileController(EditProfileService editProfileService, LoginService loginService,
+                                 LocationService locationService, AddressMapper addressMapper,
+                                 ControllerUserSupport controllerUserSupport) {
         this.editProfileService = editProfileService;
         this.loginService = loginService;
         this.locationService = locationService;
+        this.addressMapper = addressMapper;
+        this.controllerUserSupport = controllerUserSupport;
     }
 
     /**
@@ -56,7 +67,7 @@ public class EditProfileController {
      * @return editProfileTemplate page
      */
     @GetMapping("user/edit")
-    public String editProfile(Model model) {
+    public String editProfile(Model model, HttpServletRequest request) {
         logger.info("GET /user/edit");
 
         try {
@@ -74,18 +85,22 @@ public class EditProfileController {
             }
             model.addAttribute("profilePicture", user.getProfilePicture());
 
+            if (user instanceof Contractor contractor) {
+                model.addAttribute("isContractor", true);
+                controllerUserSupport.addContractorDetails(model, contractor, request);
+            } else {
+                model.addAttribute("isContractor", false);
+            }
+
+            List<Skill> skillList = Skill.listOfSortedSkills();
+            model.addAttribute("skills", skillList);
+
             // Only add addressDTO if not present from flash
             if (!model.containsAttribute("addressDTO")) {
                 AddressDTO addressDTO = new AddressDTO();
                 Location location = user.getLocation();
                 if (location != null) {
-                    addressDTO.setAddress_line1(location.getAddress());
-                    addressDTO.setCountry(location.getCountry());
-                    addressDTO.setPostcode(location.getPostcode());
-                    addressDTO.setCity(location.getCity());
-                    addressDTO.setRegion(location.getSuburb());
-                    addressDTO.setLat(location.getLatitude());
-                    addressDTO.setLon(location.getLongitude());
+                    addressDTO = addressMapper.mapLocationToAddressDTO(location);
                     model.addAttribute("locationUsed", true);
                 }
                 model.addAttribute("addressDTO", addressDTO);
