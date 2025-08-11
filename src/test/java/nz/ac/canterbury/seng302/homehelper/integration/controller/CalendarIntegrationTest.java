@@ -1,11 +1,9 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
-import nz.ac.canterbury.seng302.homehelper.controller.RenovationController;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,17 +34,10 @@ public class CalendarIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private RenovationController renovationController;
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private RenovationRecordRepository renovationRecordRepository;
-
-    @Autowired
-    private RenovationRecordService renovationRecordService;
-
 
     private RenovationRecord renovationRecord;
 
@@ -69,7 +60,7 @@ public class CalendarIntegrationTest {
     }
 
     @Test
-    public void viewRenovation_dateEditedInMonth_dateCellHighlighted() throws Exception {
+    public void viewRenovation_dateEditedInMonth_editedCellHighlighted() throws Exception {
         LocalDate firstOfMonth = LocalDate.now().withDayOfMonth(1);
         LocalDate dateEdited = firstOfMonth.plusDays(5);
         MvcResult result = mockMvc.perform(get("/renovations/view")
@@ -81,12 +72,12 @@ public class CalendarIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        assertTrue(result.getResponse().getContentAsString().contains("dateCell"));
+        assertTrue(result.getResponse().getContentAsString().contains("cellEdited"));
         assertTrue(result.getResponse().getContentAsString().contains("#fafa91"));
     }
 
     @Test
-    public void viewRenovation_dateEditedNotInMonth_dateCellNotPresent() throws Exception {
+    public void viewRenovation_dateEditedNotInMonth_editedCellNotPresent() throws Exception {
         LocalDate firstOfMonth = LocalDate.now().withDayOfMonth(1);
         LocalDate dateEdited = firstOfMonth.minusMonths(1);
         MvcResult result = mockMvc.perform(get("/renovations/view")
@@ -97,6 +88,22 @@ public class CalendarIntegrationTest {
                         .param("month", Integer.toString(firstOfMonth.getMonthValue())))
                 .andExpect(status().isOk())
                 .andReturn();
-        assertFalse(result.getResponse().getContentAsString().contains("dateCell"));
+        assertFalse(result.getResponse().getContentAsString().contains("cellEdited"));
+    }
+
+    @Test
+    public void viewRenovation_dateEditedToday_editedCellNotHighlightedYellow() throws Exception {
+        LocalDate dateEdited = LocalDate.now();
+        MvcResult result = mockMvc.perform(get("/renovations/view")
+                        .session(session)
+                        .param("dateEdited", dateEdited.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+                        .param("id", Long.toString(renovationRecord.getId()))
+                        .param("year", Integer.toString(dateEdited.getYear()))
+                        .param("month", Integer.toString(dateEdited.getMonthValue())))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertTrue(result.getResponse().getContentAsString().contains("cellEdited"));
+        assertFalse(result.getResponse().getContentAsString().contains("#fafa91"));
     }
 }
