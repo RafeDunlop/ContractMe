@@ -125,6 +125,18 @@ public class ProfileControllerIntegrationTest {
 
     @Test
     @Transactional
+    public void changeAvailability_nullContractor_contractorIsAvailable() throws Exception {
+        mockMvc.perform(post("/editAvailability/{id}", 999)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content("{\"isAvailable\": true}")
+                        .with(csrf()))
+                .andExpect(status().isNotFound())
+                .andExpect(status().reason("Contractor not found"));
+
+    }
+
+    @Test
+    @Transactional
     public void changeAvailability_setTrue_contractorIsAvailable() throws Exception {
         mockMvc.perform(post("/editAvailability/{id}", contractor.getId())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)

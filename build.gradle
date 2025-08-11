@@ -48,10 +48,10 @@ dependencies {
 }
 
 tasks.named("check") {
-    dependsOn test, integration, cucumber
+    dependsOn test, integration, cucumber, end2end
 }
 
-tasks.named('test') {
+tasks.named('test', Test) {
     useJUnitPlatform()
     filter {
         includeTestsMatching "nz.ac.canterbury.seng302.homehelper.unit.*"
@@ -113,33 +113,35 @@ jacocoTestReport { // Generate a report for all generated test data
     onlyIf { // Allow the report to be skipped when -PskipTestReport is passed via commandline
         return !project.hasProperty('skipTestReport')
     }
-    mustRunAfter test, integration, cucumber
+    mustRunAfter test, integration, cucumber, end2end
     executionData fileTree(project.rootDir) {
         include '**/*.exec'
     }
+
     reports {
         xml.required = true
-            xml.destination file("${buildDir}/jacoco/test-report.xml")
-            csv.required = false
-            html.destination file("${buildDir}/reports/coverage/overall")
+        xml.destination file("${buildDir}/jacoco/test-report.xml")
+        csv.required = false
+        html.destination file("${buildDir}/reports/coverage/overall")
     }
 }
 
 sonar {
     properties {
         property "sonar.projectKey", "seng302-2025-team200"
-            property "sonar.projectName", "seng302-2025-team200"
-            property "sonar.sourceEncoding", "UTF-8"
-            property "sonar.host.url", "https://sonarqube.csse.canterbury.ac.nz"
-            property "sonar.login", "$System.env.SONARQUBE_TOKEN"
-            if(System.env.CI_MERGE_REQUEST_IID == null || System.env.CI_MERGE_REQUEST_IID.trim().isEmpty()) {
-                property "sonar.branch.name", "$System.env.CI_COMMIT_REF_NAME"
-            }
-            else {
-                property "sonar.pullrequest.key", "$System.env.CI_MERGE_REQUEST_IID"
-                    property "sonar.pullrequest.branch", "$System.env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
-                    property "sonar.pullrequest.base", "$System.env.CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
-            }
+        property "sonar.projectName", "seng302-2025-team200"
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.host.url", "https://sonarqube.csse.canterbury.ac.nz"
+        property "sonar.login", "$System.env.SONARQUBE_TOKEN"
+        property "sonar.coverage.exclusions", "src/main/java/nz/ac/canterbury/seng302/homehelper/profanityFilter/**"
+        if(System.env.CI_MERGE_REQUEST_IID == null || System.env.CI_MERGE_REQUEST_IID.trim().isEmpty()) {
+            property "sonar.branch.name", "$System.env.CI_COMMIT_REF_NAME"
+        }
+        else {
+            property "sonar.pullrequest.key", "$System.env.CI_MERGE_REQUEST_IID"
+            property "sonar.pullrequest.branch", "$System.env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
+            property "sonar.pullrequest.base", "$System.env.CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+        }
     }
 }
 
@@ -155,8 +157,8 @@ tasks.register("unitTestReport", JacocoReport) { // Generate a report for unit t
     reports {
         // The jacoco coverage report will ge generated in the destination below
         html.destination file("${buildDir}/reports/coverage/test")
-            xml.required = true
-            xml.destination file("${buildDir}/reports/coverage/test.xml")
+        xml.required = true
+        xml.destination file("${buildDir}/reports/coverage/test.xml")
     }
 }
 tasks.register("integrationTestReport", JacocoReport) { // Generate a report for integration tests
@@ -171,8 +173,8 @@ tasks.register("integrationTestReport", JacocoReport) { // Generate a report for
     reports {
         // The jacoco coverage report will ge generated in the destination below
         html.destination file("${buildDir}/reports/coverage/integration")
-            xml.required = true
-            xml.destination file("${buildDir}/reports/coverage/integration.xml")
+        xml.required = true
+        xml.destination file("${buildDir}/reports/coverage/integration.xml")
     }
 
 }
@@ -188,8 +190,8 @@ tasks.register("cucumberTestReport", JacocoReport) { // Generate a report for cu
     reports {
         // The jacoco coverage report will ge generated in the destination below
         html.destination file("${buildDir}/reports/coverage/cucumber")
-            xml.required = true
-            xml.destination file("${buildDir}/reports/coverage/cucumber.xml")
+        xml.required = true
+        xml.destination file("${buildDir}/reports/coverage/cucumber.xml")
     }
 }
 

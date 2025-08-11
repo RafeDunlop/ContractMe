@@ -20,7 +20,11 @@
         <div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
             <form th:action="@{/user/edit/profile-picture}" method="POST" enctype="multipart/form-data">
                 <div class="input-group">
-                    <input class="form-control d-none" type="file" id="formFile" name="file">
+                    <!-- Original input, no name -->
+                    <input class="form-control d-none" type="file" id="formFile" accept=".jpg,.jpeg,.png,.svg" />
+
+                    <!-- Processed input (no name initially) -->
+                    <input type="file" id="processedFile" style="display: none;">
                     <label class="btn btn-outline-secondary" for="formFile" id="fileLabel">Edit Profile Picture</label>
                     <input type="submit" class="btn btn-primary" value="Upload">
                 </div>

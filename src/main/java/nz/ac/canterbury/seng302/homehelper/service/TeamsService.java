@@ -2,6 +2,8 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,22 @@ public class TeamsService {
     }
 
     /**
+     * Constructs a list of roles for the team entity.
+     * @param skillNames The list of skills selected by the user
+     * @return An array of roles created from each skill
+     */
+    public List<Role> createRoles(List<String> skillNames) {
+        List<Role> roles = new ArrayList<>();
+        for (String skillName : skillNames) {
+            Skill skill = Skill.valueOf(skillName);
+            Role role = new Role(skill);
+            roles.add(role);
+        }
+        return roles;
+    }
+
+
+    /**
      * Saves a team to the repository.
      * @param team The team to be saved.
      */
@@ -56,11 +74,11 @@ public class TeamsService {
     public List<String> validateTeam(TeamRequestDTO teamRequestDTO) {
         List<String> errors = new ArrayList<>();
 
-        String  notEmptyError = teamValidation.validateNotEmpty(teamRequestDTO);
-        if (notEmptyError != null) errors.add(notEmptyError);
+        String  skillsTypeError =  teamValidation.validateSkills(teamRequestDTO);
+        if (skillsTypeError != null) errors.add(skillsTypeError);
 
-        String  skillError =  teamValidation.validateAllRolesHaveSkill(teamRequestDTO);
-        if (skillError != null) errors.add(skillError);
+        String  teamSizeError = teamValidation.validateTeamSize(teamRequestDTO);
+        if (teamSizeError != null) errors.add(teamSizeError);
 
         return errors;
     }

@@ -2,8 +2,17 @@ stages:
   - tagChecking
   - build
   - test
+  - coverage
   - sonarqube
   - deploy
+
+workflow:
+  rules:
+    - if: '$CI_COMMIT_TAG'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
 
 tag-checker:
   stage: tagChecking
@@ -16,47 +25,70 @@ junit:
   stage: test
   script:
     - ./gradlew test
-    - ls ./build/jacoco
   artifacts:
+    when: always
     paths:
-      - build/jacoco/test-report.xml
+      - build/test-results/test/*.xml
+      - build/jacoco/test.exec
+    reports:
+      junit: build/test-results/test/*.xml
 
 sonarqube-report:
   stage: sonarqube
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
   script:
-    - ./gradlew sonarqube
+    - ./gradlew sonar
 
 integration-tests:
   stage: test
   script:
     - ./gradlew integration
   artifacts:
+    when: always
     paths:
+      - build/test-results/integration/*.xml
       - build/jacoco/integration.exec
+    reports:
+      junit: build/test-results/integration/*.xml
 cucumber-acceptance-tests:
   stage: test
   script:
     - ./gradlew cucumber
   artifacts:
+    when: always
     paths:
       - build/jacoco/cucumber.exec
+      - build/test-results/cucumber/*.xml
+    reports:
+      junit: build/test-results/cucumber/*.xml
 
 playwright-end2end-tests:
   stage: test
   script:
     - ./gradlew end2end
   artifacts:
+    when: always
     paths:
       - build/jacoco/playwright.exec
+      - build/test-results/end2end/*.xml
+    reports:
+      junit: build/test-results/end2end/*.xml
 
 generate-test-coverage-reports:
-  stage: test
+  stage: coverage
   dependencies:
     - junit
     - integration-tests
     - cucumber-acceptance-tests
   script:
-    ./gradlew jacocoTestReport
+    - ./gradlew jacocoTestReport
+    - ls ./build/jacoco
   artifacts:
     paths:
       - build/jacoco/*
