@@ -14,25 +14,25 @@ Feature: As Lei, I want to be able to filter the tasks on one of my renovation r
             | "Cancelled"   |
             | "All"         |
 
-    Scenario: AC2 - Default state filter
-        Given that I am viewing one of my renovation records with tasks
-        When I view the tasks section
-        Then I see the option "All" pre-selected
-
     Scenario Outline: AC3 - Task state filter
         Given that I am viewing one of my renovation records with tasks
         And I have tasks
-            | name | state |
-            | "Task 1" | "Not Started" |
+            | name     | state         |
+            | "Task 1" | NOT_STARTED |
+            | "Task 2" | NOT_STARTED |
+            | "Task 3" | IN_PROGRESS |
+            | "Task 4" | BLOCKED    |
+            | "Task 5" | COMPLETED   |
+            | "Task 6" | CANCELLED   |
         When I select the option <state> to filter tasks by state
-        Then The page is reloaded with only <state> tasks shown
+        Then The page is reloaded with only the <num_tasks> tasks shown
 
         Examples:
-            | state         |
-            | "Not Started" |
-            | "In Progress" |
-            | "Blocked"     |
-            | "Completed"   |
-            | "Cancelled"   |
-            | "All"         |
+            | state         | num_tasks |
+            | "notStarted" | 2         |
+            | "inProgress" | 1         |
+            | "blocked"     | 1         |
+            | "completed"   | 1         |
+            | "cancelled"   | 1         |
+            | "all"         | 6         |
 

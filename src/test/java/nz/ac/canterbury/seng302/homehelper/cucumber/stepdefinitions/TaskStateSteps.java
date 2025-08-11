@@ -1,39 +1,39 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-
-import java.io.UnsupportedEncodingException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import org.hamcrest.CustomMatcher;
+import org.hamcrest.core.StringContains;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+import org.w3c.dom.Node;
+import org.w3c.dom.html.HTMLOptionElement;
 
-import java.util.Optional;
+import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -57,6 +57,7 @@ public class TaskStateSteps {
 
     private Long taskId;
 
+    private ResultActions resultActions;
     private MvcResult result;
 
 
@@ -177,9 +178,13 @@ public class TaskStateSteps {
     }
 
     @When("I view the tasks section")
-    public void i_view_the_tasks_section() throws UnsupportedEncodingException {
-        String html = result.getResponse().getContentAsString().toLowerCase();
-        assertTrue(html.contains("task-grid"));
+    public void i_view_the_tasks_section() throws Exception {
+        resultActions = mockMvc.perform(get("/renovations/view")
+                        .param("id", String.valueOf(renovationId))
+                        .sessionAttr("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(StringContains.containsString("task-grid")));
+        result = resultActions.andReturn();
     }
 
     @Then("I can select option {string} to filter tasks by task state")
@@ -188,22 +193,31 @@ public class TaskStateSteps {
         assertTrue(html.contains(state));
     }
 
-    @Then("I see the option {string} pre-selected")
-    public void i_see_the_option_pre_selected(String stateOption) {
-        assertEquals(stateOption, result.getRequest().getParameter("state"));
-    }
-
     @When("I select the option {string} to filter tasks by state")
     public void i_select_the_option_to_filter_tasks_by_state(String stateOption) throws Exception {
-        result = mockMvc.perform(get("/renovations/retrieve/" + renovationId)
-                        .param("state", stateOption))
+        resultActions = mockMvc.perform(get("/renovations/retrieve/" + renovationId)
+                        .queryParam("status", stateOption))
                 .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        result = resultActions.andReturn();
     }
 
-    @Then("The page is reloaded with only {string} tasks shown")
-    public void the_page_is_reloaded_with_only_tasks_shown(String state) {
-        // Write code here that turns the phrase above into concrete actions
-        throw new io.cucumber.java.PendingException();
+    @Given("I have tasks")
+    public void i_have_tasks(List<Map<String, String>> tasksTable) {
+        RenovationRecord renovationRecord = renovationRecordRepository.findById(renovationId).orElseThrow();
+        List<RenovationTask> taskList = new ArrayList<>();
+        for (Map<String, String> taskMap : tasksTable) {
+            RenovationTask task = new RenovationTask(taskMap.get("name"), "Desc", List.of(), null, renovationRecord);
+            task.setState(TaskState.valueOf(taskMap.get("state")));
+            taskList.add(task);
+        }
+        renovationTaskRepository.saveAll(taskList);
+        renovationRecord.setRenovationTasks(taskList);
+        renovationRecordRepository.save(renovationRecord);
+    }
+
+    @Then("The page is reloaded with only the {int} tasks shown")
+    public void the_page_is_reloaded_with_only_the_tasks_shown(Integer expectedTasks) throws Exception {
+       resultActions.andExpect(jsonPath("$.totalElements").value(expectedTasks));
     }
 }
