@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -370,10 +371,11 @@ public class RenovationController {
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                  @RequestParam(required = false) Integer year,
                                  @RequestParam(required = false) Integer month,
-                                 @RequestAttribute(required = false) LocalDate dateEdited,
+                                 @RequestParam(required = false) @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate dateEdited,
                                  Model model,
                                  HttpServletRequest request) {
         logger.info("GET /renovations/view");
+        logger.info("dateEdited: {}", dateEdited);
 
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
@@ -419,9 +421,10 @@ public class RenovationController {
     public String getCalendarFragment(@RequestParam Long id,
                                       @RequestParam(required = false) Integer year,
                                       @RequestParam(required = false) Integer month,
-                                      @RequestAttribute(required = false) LocalDate dateEdited,
+                                      @RequestParam(required = false) @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate dateEdited,
                                       Model model) {
 
+        logger.info("dateEdited: {}", dateEdited);
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Renovation not found");
 
