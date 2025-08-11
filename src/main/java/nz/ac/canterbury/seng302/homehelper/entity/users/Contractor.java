@@ -133,6 +133,16 @@ public class Contractor extends User {
     public boolean addSkill(Skill skill) {
         return skills.add(skill);
     }
+
+    /**
+     * Set  a skill to the contractor's skill set.
+     *
+     * @param skills The skill to add.
+     */
+    public void setSkills(Set<Skill> skills) {
+        this.skills = skills;
+    }
+
     /**
      * Removes a skill from the contractor's skill set.
      *

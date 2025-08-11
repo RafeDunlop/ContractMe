@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
@@ -16,6 +17,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -95,13 +97,13 @@ public class EditProfileService {
      *
      * @param userRegisterDTO Data transfer object containing the updated registration details
      * @param contractor The contractor entity to be updated
-     * @return The updated contractor entity
      */
-    public Contractor updateContractor(UserRegisterDTO userRegisterDTO, Contractor contractor) {
+    public void updateContractor(UserRegisterDTO userRegisterDTO, Contractor contractor) {
         contractor.setCountryCode(userRegisterDTO.getCountryCode());
         contractor.setPhoneNumber(userRegisterDTO.getPhoneNumber());
         contractor.setHourlyRate(userRegisterDTO.getHourlyRate());
-        return contractor;
+        contractor.setSkills(new HashSet<>(userRegisterDTO.getSkills()));
+        updateUser(contractor);
     }
 
     /**

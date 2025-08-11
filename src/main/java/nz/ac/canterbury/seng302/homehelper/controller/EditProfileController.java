@@ -171,8 +171,7 @@ public class EditProfileController {
         newUser.setEmail(updatedUser.getEmail());
         newUser = editProfileService.updateUserLocation(newUser, addressDTO);
         if(contractor != null) {
-            contractor = editProfileService.updateContractor(userRegisterDTO,contractor);
-            editProfileService.updateUser(contractor);
+            editProfileService.updateContractor(userRegisterDTO,contractor);
         } else {
             editProfileService.updateUser(newUser);
         }
