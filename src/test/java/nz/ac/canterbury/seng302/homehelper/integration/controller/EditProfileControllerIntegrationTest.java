@@ -2,9 +2,14 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
+import java.util.Locale;
+import java.util.Optional;
 import nz.ac.canterbury.seng302.homehelper.controller.EditProfileController;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
@@ -12,16 +17,20 @@ import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.nio.file.Files;
@@ -32,6 +41,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -42,7 +54,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @WithMockUser(username = "jane@doe.com")
 @ActiveProfiles("test")
-public class EditProfileControllerIntegrationTest {
+public class
+EditProfileControllerIntegrationTest {
 
     @Autowired
     private EditProfileController editProfileController;
@@ -367,4 +380,58 @@ public class EditProfileControllerIntegrationTest {
         User savedUser = userRepository.findByEmailIgnoreCase("jane@doe.com").orElseThrow();
         assertNull(savedUser.getLocation());
     }
+
+// ToDo:Add the skills  to this test for the person doing the skill task for this story.
+    @Test
+    public void testEditContractor_validUserDetails_exitEditor() throws Exception {
+        Contractor current = new Contractor("Jane", "Doe", "jane@doe.com", "password");
+        current.grantAuthority("ROLE_USER");
+        current.setHourlyRate(27.80f);
+        current.setPhoneNumber("6412345678");
+        current.addSkill(Skill.CARPENTRY);
+        current.setLocation(
+                new Location("123 Linwood Ave", "New Zealand", "8045", "Christchurch", "Linwood"));
+        userRepository.save(current);
+
+
+        mockMvc.perform(post("/user/edit")
+                        .param("firstName", "John")
+                        .param("lastName", "Doe")
+                        .param("email", "john@doe.com")
+                        .param("password", "password")
+                        .param("address_line1", "123 Ilam Road")
+                        .param("country", "New Zealand")
+                        .param("postcode", "8042")
+                        .param("city", "Christchurch")
+                        .param("region", "Ilam")
+                        .param("lat", "1.0")
+                        .param("lon", "1.0")
+                        .param("hourlyRate", "30.80")
+                        .param("countryCode", "64")
+                        .param("phoneNumber", "87654321")
+                        .param("skills","CARPENTRY")
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user"));
+
+        User savedUser = userRepository.findByEmailIgnoreCase("john@doe.com").orElseThrow();
+
+        Assertions.assertEquals("John", savedUser.getFirstName());
+        Assertions.assertEquals("Doe", savedUser.getLastName());
+        Assertions.assertEquals("john@doe.com", savedUser.getEmail());
+
+        Assertions.assertNotNull(savedUser.getLocation());
+        Assertions.assertEquals("123 Ilam Road", savedUser.getLocation().getAddress());
+        Assertions.assertEquals("8042", savedUser.getLocation().getPostcode());
+        Assertions.assertEquals("Ilam", savedUser.getLocation().getSuburb());
+
+        Assertions.assertInstanceOf(Contractor.class, savedUser);
+        Contractor savedContractor = (Contractor) savedUser;
+        Assertions.assertEquals(30.80f, savedContractor.getHourlyRate());
+        Assertions.assertEquals("87654321", savedContractor.getPhoneNumber());
+        Assertions.assertEquals(64, savedContractor.getCountryCode());
+
+
+    }
+
 }
