@@ -5,18 +5,18 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class TaskStateTest {
+class TaskStateTest {
 
 
     @ParameterizedTest
     @ValueSource(strings = {"notStarted", "inProgress", "blocked", "completed", "cancelled"})
-    public void testGetTaskStateFromCamelCase_validState_returnsTaskState(String state) {
+    void testGetTaskStateFromCamelCase_validState_returnsTaskState(String state) {
         Assertions.assertDoesNotThrow(() -> TaskState.fromCamelCaseName(state));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"all", "sldkfsdl", "", "   "})
-    public void testGetTaskStateFromCamelCase_invalidState_throwsException(String state) {
+    void testGetTaskStateFromCamelCase_invalidState_throwsException(String state) {
         Assertions.assertThrows(IllegalArgumentException.class, () -> TaskState.fromCamelCaseName(state));
     }
 }

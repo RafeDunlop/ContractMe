@@ -76,7 +76,7 @@ public class RenovationTaskServiceIntegrationTest {
 
     @Test
     @Transactional
-    public void getTasksWithinDates_noTasksBetweenDates_mapContainsEmptyLists() {
+    void getTasksWithinDates_noTasksBetweenDates_mapContainsEmptyLists() {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(2);
         Map<LocalDate,  List<RenovationTask>> map = this.toTest.getTasksWithinDates(renovationRecord, startDate, endDate);
@@ -85,7 +85,7 @@ public class RenovationTaskServiceIntegrationTest {
 
     @Test
     @Transactional
-    public void getTasksWithinDates_taskDueBeforeStart_notRetrieved() {
+    void getTasksWithinDates_taskDueBeforeStart_notRetrieved() {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(2);
         RenovationTask testTask = new RenovationTask(
@@ -102,7 +102,7 @@ public class RenovationTaskServiceIntegrationTest {
 
     @Test
     @Transactional
-    public void getTasksWithinDates_taskDueAfterEnd_notRetrieved() {
+    void getTasksWithinDates_taskDueAfterEnd_notRetrieved() {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(2);
         RenovationTask testTask = new RenovationTask(
@@ -119,7 +119,7 @@ public class RenovationTaskServiceIntegrationTest {
 
     @Test
     @Transactional
-    public void getTasksWithinDates_taskDueOnStartDate_retrieved() {
+    void getTasksWithinDates_taskDueOnStartDate_retrieved() {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(2);
         RenovationTask testTask = new RenovationTask(
@@ -136,7 +136,7 @@ public class RenovationTaskServiceIntegrationTest {
 
     @Test
     @Transactional
-    public void getTasksWithinDates_taskDueOnEndDate_retrieved() {
+    void getTasksWithinDates_taskDueOnEndDate_retrieved() {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(2);
         RenovationTask testTask = new RenovationTask(
@@ -154,7 +154,7 @@ public class RenovationTaskServiceIntegrationTest {
     @ParameterizedTest
     @CsvSource({"all, 3", "inProgress, 1", "notStarted, 2"})
     @Transactional
-    public void filterTasksByState_returnsCorrectNoTasks(String stateName, int expectedTasks) {
+    void filterTasksByState_returnsCorrectNoTasks(String stateName, int expectedTasks) {
         RenovationTask testTask = new RenovationTask("Task", "Do thing", List.of(), null, renovationRecord);
         testTask.setState(TaskState.IN_PROGRESS);
         RenovationTask otherTask = new RenovationTask("Other task", "Do other thing", List.of(), null, renovationRecord);
