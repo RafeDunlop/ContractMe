@@ -113,8 +113,12 @@
 
             <!-- LOCATION TOGGLE SWITCH -->
             <div class="d-flex justify-content-between align-items-center pb-4 px-0" style="width: 22%">
-                <div id="location-toggle-switch-label">Enter Location (Optional):</div>
-                <div>
+                <div id="location-toggle-switch-label">
+                    <div th:if="${!isContractor}">Enter Location (Optional):</div>
+                    <div th:if="${isContractor}">Enter Location:</div>
+                </div>
+
+                <div th:style="${isContractor} ? 'display : none'">
                     <label class="switch">
                         <input type="checkbox" id="location-toggleswitch" th:checked="${hasLocation}" th:disabled="${isContractor}">
                         <span class="slider"></span>

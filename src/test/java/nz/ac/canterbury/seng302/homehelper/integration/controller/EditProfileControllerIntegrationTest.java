@@ -61,6 +61,8 @@ EditProfileControllerIntegrationTest {
         mockMvc = MockMvcBuilders.standaloneSetup(editProfileController).build();
     }
 
+
+
     /**
      * Tests the edit profile page with a valid id in the URL path.
      * Test simulates a user clicking the edit button from the profile page to edit their details.

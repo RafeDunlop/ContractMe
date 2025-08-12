@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import nz.ac.canterbury.seng302.homehelper.controller.support.ControllerUserSupport;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
@@ -40,7 +39,6 @@ public class EditProfileController {
     private final LoginService loginService;
     private final LocationService locationService;
     private final AddressMapper addressMapper;
-    private final ControllerUserSupport controllerUserSupport;
 
     private final ContractorService contractorService;
 
@@ -54,13 +52,12 @@ public class EditProfileController {
     @Autowired
     public EditProfileController(EditProfileService editProfileService, LoginService loginService,
                                  LocationService locationService, ContractorService contractorService,
-                                 AddressMapper addressMapper, ControllerUserSupport controllerUserSupport) {
+                                 AddressMapper addressMapper) {
         this.editProfileService = editProfileService;
         this.loginService = loginService;
         this.locationService = locationService;
         this.contractorService = contractorService;
         this.addressMapper = addressMapper;
-        this.controllerUserSupport = controllerUserSupport;
     }
 
     /**
@@ -74,15 +71,30 @@ public class EditProfileController {
         logger.info("GET /user/edit");
         try {
             User user = loginService.getUserByEmail();
-            controllerUserSupport.addUserDetails(model, user);
+            if (!model.containsAttribute("firstName")) {
+                model.addAttribute("firstName", user.getFirstName());
+            }
+            if (!model.containsAttribute("lastName")) {
+                model.addAttribute("lastName", user.getLastName());
+            }
+            if (!model.containsAttribute("email")) {
+                model.addAttribute("email", user.getEmail());
+            }
+            model.addAttribute("profilePicture", user.getProfilePicture());
 
             if (user instanceof Contractor contractor) {
                 model.addAttribute("isContractor", true);
-                controllerUserSupport.addContractorDetails(model, contractor);
-
+                if (!model.containsAttribute("contractorDTO")) {
+                    UserRegisterDTO contractorDTO = new UserRegisterDTO();
+                    contractorDTO.setHourlyRate(contractor.getHourlyRate());
+                    contractorDTO.setPhoneNumber(contractor.getPhoneNumber());
+                    contractorDTO.setCountryCode(contractor.getCountryCode());
+                    contractorDTO.setSkills(new ArrayList<>(contractor.getSkills()));
+                    model.addAttribute("contractorDTO", contractorDTO);
+                    model.addAttribute("isAvailable", contractor.getAvailable());
+                }
                 List<Skill> skillList = Skill.listOfSortedSkills();
                 model.addAttribute("skills", skillList);
-
                 Locale locale = Locale.getDefault();
                 Currency currency = Currency.getInstance(locale);
                 model.addAttribute("currencySymbol", currency.getSymbol(locale));
