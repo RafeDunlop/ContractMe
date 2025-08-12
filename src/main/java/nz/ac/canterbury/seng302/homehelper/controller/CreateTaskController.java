@@ -62,7 +62,8 @@ public class CreateTaskController {
      */
     @GetMapping("renovations/view/create")
     public String createTask(@RequestParam(name = "id") Long id,
-                             @RequestParam(name = "date", required = false) String date, Model model) {
+                             @RequestParam(name = "fromDate", required = false, defaultValue = "") String date,
+                             Model model) {
         logger.info("GET renovations/view/create");
 
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
@@ -77,6 +78,10 @@ public class CreateTaskController {
 
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("roomList", renovationRecord.getRooms());
+
+
+        model.addAttribute("fromDate", date);
+
 
         if (!model.containsAttribute("renovationTaskDTO")) {
             RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("", "", date, new ArrayList<>());

@@ -63,6 +63,7 @@ public class EditTaskController {
     @GetMapping("/editTask")
     public String editTask(@RequestParam(name = "taskId") Long taskId,
                            @RequestParam(name = "renovationId") Long renovationId,
+                           @RequestParam(name = "fromDate", required = false, defaultValue = "") String fromDate,
                            Model model) {
 
         logger.info("GET renovations/editTask");
@@ -84,6 +85,8 @@ public class EditTaskController {
         model.addAttribute("task", renovationTask.get());
         model.addAttribute("roomList", renovationRecord.getRooms());
         model.addAttribute("renovationTaskDTO", renovationTaskDTO);
+
+        model.addAttribute("fromDate", fromDate);
 
         return "editTaskTemplate";
     }

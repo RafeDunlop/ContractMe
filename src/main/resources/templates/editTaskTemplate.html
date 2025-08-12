@@ -92,7 +92,12 @@
 
       <div class="mt-4 d-flex gap-3 ">
         <button type="submit" class="btn btn-primary">Submit</button>
-        <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn btn-secondary">Cancel</a>
+        <a th:unless="${fromDate.isEmpty()}"
+           th:href="@{/renovations/view#cellEdited(id=${renovation.id},dateEdited=${fromDate})}"
+           class="btn btn-secondary">Cancel</a>
+        <a th:if="${fromDate.isEmpty()}"
+           th:href="@{/renovations/view(id=${renovation.id})}"
+           class="btn btn-secondary">Cancel</a>
       </div>
     </form>
 
