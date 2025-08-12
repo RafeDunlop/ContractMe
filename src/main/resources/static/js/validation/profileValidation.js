@@ -23,19 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastNameFrontendErrorMessage = document.getElementById("last-name-frontend-error-message");
     let lastNameBackendError = document.getElementById("last-name-backend-error");
 
-    let hourlyRateField = document.getElementById("hourlyRate");
-    let hourlyRateFrontendError = document.getElementById("hourly-rate-frontend-error");
-    let hourlyRateFrontendErrorMessage = document.getElementById("hourly-rate-frontend-error-message");
-    let hourlyRateBackendError = document.getElementById("hourly-rate-backend-error");
 
-    let phoneNumberField = document.getElementById("phoneNumber");
-    let phoneNumberFrontendError = document.getElementById("phone-number-frontend-error");
-    let phoneNumberFrontendErrorMessage = document.getElementById("phone-number-frontend-error-message");
-    let phoneNumberBackendError = document.getElementById("phone-number-backend-error");
-
-    let countryCodeField = document.getElementById("countryCode");
-
-// Event listeners
+    // Event listeners
     emailField.addEventListener("input", () => {
         checkEmailField(
             emailField.value,
@@ -65,19 +54,40 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     });
 
-    hourlyRateField.addEventListener("input", () => {
-        validateHourlyRate(hourlyRateField.value, hourlyRateFrontendErrorMessage, hourlyRateFrontendError,
-            hourlyRateBackendError);
-    });
+    const contractorForm = document.getElementById("contractor-form");
 
-    phoneNumberField.addEventListener("input", () => {
-        validatePhoneNumber(phoneNumberField.value, phoneNumberFrontendErrorMessage, phoneNumberFrontendError,
-            phoneNumberBackendError);
-    });
+    if (contractorForm) {
 
-    countryCodeField.addEventListener("input", () => {
-        validateCountryCode(countryCodeField.value, phoneNumberFrontendErrorMessage, phoneNumberFrontendError,
-            phoneNumberBackendError);
-    });
+        let hourlyRateField = document.getElementById("hourlyRate");
+        let hourlyRateFrontendError = document.getElementById("hourly-rate-frontend-error");
+        let hourlyRateFrontendErrorMessage = document.getElementById("hourly-rate-frontend-error-message");
+        let hourlyRateBackendError = document.getElementById("hourly-rate-backend-error");
+
+        let phoneNumberField = document.getElementById("phoneNumber");
+        let phoneNumberFrontendError = document.getElementById("phone-number-frontend-error");
+        let phoneNumberFrontendErrorMessage = document.getElementById("phone-number-frontend-error-message");
+        let phoneNumberBackendError = document.getElementById("phone-number-backend-error");
+
+        let countryCodeField = document.getElementById("countryCode");
+
+        hourlyRateField.addEventListener("input", () => {
+            validateHourlyRate(hourlyRateField.value, hourlyRateFrontendErrorMessage, hourlyRateFrontendError,
+                hourlyRateBackendError);
+        });
+
+        phoneNumberField.addEventListener("input", () => {
+            validatePhoneNumber(phoneNumberField.value, phoneNumberFrontendErrorMessage, phoneNumberFrontendError,
+                phoneNumberBackendError);
+        });
+
+        countryCodeField.addEventListener("input", () => {
+            validateCountryCode(countryCodeField.value, phoneNumberFrontendErrorMessage, phoneNumberFrontendError,
+                phoneNumberBackendError);
+        });
+
+    }
+
+
+
 
 });
