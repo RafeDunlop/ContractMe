@@ -109,6 +109,7 @@ public class EditTaskController {
     public String editTask(@ModelAttribute("renovationTaskDTO") RenovationTaskDTO renovationTaskDTO,
                                 @RequestParam(name = "taskId") Long taskId,
                                 @RequestParam(name = "renovationId") Long renovationId,
+                                @RequestParam(required = false, defaultValue = "") String dateToReturnTo,
                                 RedirectAttributes redirectAttributes) {
         logger.info("POST renovations/editTask");
         RenovationTask renovationTask = renovationTaskService.getTaskById(taskId);
@@ -136,7 +137,9 @@ public class EditTaskController {
 
         try {
             editTaskService.updateTask(renovationTaskDTO,renovationTask);
-            return "redirect:/renovations/view?id=" + renovationId;
+            return (dateToReturnTo.isEmpty()) ?
+                    String.format("redirect:/renovations/view?id=%s", renovationId) :
+                    String.format("redirect:/renovations/view?id=%s&dateEdited=%s#cellEdited", renovationId, dateToReturnTo);
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error {}", e.getMessage());
 

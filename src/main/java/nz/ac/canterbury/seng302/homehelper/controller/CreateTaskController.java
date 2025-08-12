@@ -9,6 +9,7 @@ import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +65,7 @@ public class CreateTaskController {
      */
     @GetMapping("renovations/view/create")
     public String createTask(@RequestParam(name = "id") Long id,
-                             @RequestParam(name = "fromDate", required = false, defaultValue = "") String date,
+                             @RequestParam(name = "fromDate", required = false) @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate date,
                              Model model) {
         logger.info("GET renovations/view/create");
 
@@ -78,17 +81,17 @@ public class CreateTaskController {
 
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("roomList", renovationRecord.getRooms());
-
-
-        model.addAttribute("fromDate", date);
+        model.addAttribute("fromDate", (date == null) ? "" : DateTimeFormatter.ofPattern("dd-MM-yyyy").format(date));
 
 
         if (!model.containsAttribute("renovationTaskDTO")) {
-            RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO("", "", date, new ArrayList<>());
-            String dueDate = renovationTaskDTO.getDueDate();
-            String formattedDate = (dueDate != null) ? dueDate : "";
+            RenovationTaskDTO renovationTaskDTO = new RenovationTaskDTO(
+                    "",
+                    "",
+                    (date == null) ? "" : DateTimeFormatter.ofPattern("yyyy-MM-dd").format(date),
+                    List.of()
+            );
             model.addAttribute("renovationTaskDTO", renovationTaskDTO);
-            model.addAttribute("dueDate", formattedDate);
         }
 
         return "createTaskTemplate";
@@ -113,6 +116,7 @@ public class CreateTaskController {
     public String submitNewTask(@ModelAttribute("renovationTaskDTO") RenovationTaskDTO renovationTaskDTO,
                                 @RequestParam(name = "roomList", required = false) List<String> roomList,
                                 @RequestParam(name = "renovationId") Long renovationId,
+                                @RequestParam(required = false, defaultValue = "") String dateToReturnTo,
                                 RedirectAttributes redirectAttributes) {
         logger.info("POST renovations/view/create");
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
@@ -140,8 +144,9 @@ public class CreateTaskController {
         }
 
         renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
-
-        return "redirect:/renovations/view?id=" + renovationId;
+        return (dateToReturnTo.isEmpty()) ?
+                String.format("redirect:/renovations/view?id=%s", renovationId) :
+                String.format("redirect:/renovations/view?id=%s&dateEdited=%s#cellEdited", renovationId, dateToReturnTo);
     }
 
 }

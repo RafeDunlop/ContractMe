@@ -20,6 +20,7 @@
 
             <input type="hidden" id="availableRoomList" th:name="availableRoomList" th:value="${#strings.arrayJoin(roomList, ',')}">
             <input type="hidden" id="renovationId" th:name="renovationId" th:value="${renovation.id}">
+            <input th:unless="${fromDate.isEmpty()}" type="hidden" name="dateToReturnTo" th:value="${fromDate}">
 
             <!-- NAME -->
             <div class="mb-3">
@@ -61,7 +62,7 @@
             <!-- DUE DATE -->
             <div class="mb-3">
                 <label for="dueDate" class="form-label">Due Date (optional):</label>
-                <input type="date" class="form-control" id="dueDate" name="dueDate" th:value="${dueDate} " />
+                <input type="date" class="form-control" id="dueDate" name="dueDate" th:field="*{dueDate} " />
 
 
                 <!-- Frontend JS error -->

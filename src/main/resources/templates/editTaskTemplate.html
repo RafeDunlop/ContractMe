@@ -20,6 +20,7 @@
 
       <input type="hidden" id="renovationId" th:name="renovationId" th:value="${renovation.id}">
       <input type="hidden" id="taskId" th:name="taskId" th:value="${task.getId()}">
+      <input th:unless="${fromDate.isEmpty()}" type="hidden" name="dateToReturnTo" th:value="${fromDate}">
 
       <img th:src="@{${'/images/' + task.getIconFileName()}}"
            class="img-fluid rounded-circle"
