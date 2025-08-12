@@ -96,7 +96,7 @@
                 <!-- CONTRACTOR FORM FRAGMENT -->
                 <div th:class="'pb-3 ' + (${userRegisterDTO.isContractor} ? 'form-extension' : 'hidden-form-extension')" id="contractor-form">
                     <div th:replace="~{fragments/contractorRegistration.html :: contractor-registration(
-                    skills=${skills})}"></div>
+                    skills=${skills}, dto=${userRegisterDTO})}"></div>
                 </div>
 
                 <!-- LOCATION TOGGLE SWITCH -->
