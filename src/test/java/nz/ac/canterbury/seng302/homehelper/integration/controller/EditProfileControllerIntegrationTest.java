@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
+import io.cucumber.core.gherkin.Argument;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.controller.EditProfileController;
@@ -72,6 +73,16 @@ EditProfileControllerIntegrationTest {
                 Arguments.of(27.08f, 64, "6412345678", Set.of(Skill.CARPENTRY)),
                 Arguments.of(0, 1, "11111 1111", Set.of(Skill.EARTHMOVING)),
                 Arguments.of(9999f, 99, "9 9 9 9 9 9 9 9", Set.of(Skill.SEPTIC_SYSTEMS, Skill.HVAC, Skill.MECHANICAL_ENGINEERING))
+        );
+    }
+
+    private static Stream<Arguments> streamInvalidContractorDetails() {
+        List<Object> errorsList = List.of(List.of("Invalid hourly rate"), List.of("Your phone number is invalid", "Invalid country code"), List.of("You must select one or more skills"));
+        return Stream.of(
+                Arguments.of(-10f, 0, "999", null, errorsList),
+                Arguments.of(-999, 1000, "9999999999999999", null, errorsList),
+                Arguments.of(-99999, 10001, "9 9 9 9 9#$$%", null, errorsList),
+                Arguments.of(-99999, 10001, "99", null, errorsList)
         );
     }
 
@@ -431,6 +442,43 @@ EditProfileControllerIntegrationTest {
         Assertions.assertEquals(hourlyRate, savedContractor.getHourlyRate());
         Assertions.assertEquals(countryCode, savedContractor.getCountryCode());
         Assertions.assertEquals(phoneNumber, savedContractor.getPhoneNumber());
+    }
+
+    @ParameterizedTest
+    @MethodSource("streamInvalidContractorDetails")
+    public void testEditContractor_invalidContractorDetails_stayOnEditProfilePage(float hourlyRate, int countryCode, String phoneNumber, Set<Skill> skills, List<Object> expectedErrors) throws Exception {
+        Contractor current = new Contractor("Jane", "Doe", "jane@doe.com", "password");
+        current.grantAuthority("ROLE_USER");
+        current.setHourlyRate(27.80f);
+        current.setPhoneNumber("6412345678");
+        current.addSkill(Skill.CARPENTRY);
+        current.setLocation(
+                new Location("123 Linwood Ave", "New Zealand", "8045", "Christchurch", "Linwood"));
+        userRepository.save(current);
+
+        mockMvc.perform(post("/user/edit")
+                .param("firstName", "John")
+                .param("lastName", "Doe")
+                .param("email", "john@doe.com")
+                .param("password", "password")
+                .param("address_line1", "123 Ilam Road")
+                .param("country", "New Zealand")
+                .param("postcode", "8042")
+                .param("city", "Christchurch")
+                .param("region", "Ilam")
+                .param("lat", "1.0")
+                .param("lon", "1.0")
+                .param("hourlyRate", Float.toString(hourlyRate))
+                .param("countryCode", Integer.toString(countryCode))
+                .param("phoneNumber", phoneNumber)
+                .param("skills", (String) null)
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/edit"))
+                .andExpect(flash().attribute("hourlyRateError", expectedErrors.get(0)))
+                .andExpect(flash().attribute("phoneNumberError", expectedErrors.get(1)))
+                .andExpect(flash().attribute("skillsError", expectedErrors.get(2)));
+
     }
 
 }
