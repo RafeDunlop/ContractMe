@@ -92,13 +92,17 @@
       </div>
 
       <div class="mt-4 d-flex gap-3 ">
+
+        <!-- SUBMIT BUTTON -->
         <button type="submit" class="btn btn-primary">Submit</button>
+
+        <!-- CANCEL BUTTON -->
         <a th:unless="${fromDate.isEmpty()}"
            th:href="@{/renovations/view#cellEdited(id=${renovation.id},dateEdited=${fromDate})}"
-           class="btn btn-secondary">Cancel</a>
+           class="btn btn-secondary cancel-task-form">Cancel</a>
         <a th:if="${fromDate.isEmpty()}"
            th:href="@{/renovations/view(id=${renovation.id})}"
-           class="btn btn-secondary">Cancel</a>
+           class="btn btn-secondary cancel-task-form">Cancel</a>
       </div>
     </form>
 
@@ -110,8 +114,6 @@
     </div>
 
   </div>
-
-  <!-- CANCEL BUTTON -->
 </div>
 </body>
 <script type="module" th:src="@{/js/validation/taskValidation.js}"></script>

@@ -105,10 +105,10 @@
                 <!-- CANCEL BUTTON -->
                 <a th:unless="${fromDate.isEmpty()}"
                    th:href="@{/renovations/view#cellEdited(id=${renovation.id}, dateEdited=${fromDate})}"
-                   class="btn btn-secondary">Cancel</a>
+                   class="btn btn-secondary cancel-task-form">Cancel</a>
                 <a th:if="${fromDate.isEmpty()}"
                    th:href="@{/renovations/view(id=${renovation.id})}"
-                   class="btn btn-secondary">Cancel</a>
+                   class="btn btn-secondary cancel-task-form">Cancel</a>
             </div>
 
             <!-- General error messages -->

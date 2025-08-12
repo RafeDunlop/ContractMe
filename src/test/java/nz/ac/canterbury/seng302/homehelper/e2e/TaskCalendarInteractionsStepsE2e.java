@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.e2e;
 
+import com.microsoft.playwright.Locator;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -11,10 +12,12 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
+import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,5 +92,58 @@ public class TaskCalendarInteractionsStepsE2e {
     public void the_due_date_is_set_to_the_date_i_clicked() {
         String dueDate = RunPlaywrightTests.page.locator("#dueDate").inputValue();
         Assertions.assertEquals(today.plusDays(1).toString(), dueDate);
+    }
+
+    @Given("I am viewing the calendar for this month with a task due on day {int}")
+    public void iAmViewingTheCalendarForThisMonth(int dayOfMonth) {
+        renovationTask = new RenovationTask("Task", "desc", List.of(), today.withDayOfMonth(dayOfMonth), renovationRecord);
+        renovationTaskRepository.save(renovationTask);
+        renovationRecord.setRenovationTasks(List.of(renovationTask));
+        i_navigate_to_the_renovation();
+    }
+
+    @And("I click on day {int} to go to the {string} form")
+    public void iClickOnDayDayOfMonthToGoToTheTaskFormForm(int dayOfMonth, String formName) {
+        LocalDate dayToClick = today.withDayOfMonth(dayOfMonth);
+        switch (formName) {
+            case "Create Task" -> RunPlaywrightTests.page.locator(
+                        String.format("cell %s", dayToClick.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                ).dblclick();
+
+            case "Edit Task" -> RunPlaywrightTests.page.locator(
+                    String.format("[data-task-id='%s']", renovationTask.getId())
+                ).dblclick();
+
+            default -> throw new IllegalStateException(String.format("Unexpected value: %s", formName));
+        }
+    }
+
+    @And("I enter valid details to the {string} form")
+    public void iEnterValidDetailsToTheTaskFormForm(String formName) {
+        switch (formName) {
+            case "Create Task" -> {
+                RunPlaywrightTests.page.locator("#name").fill("playwright test task");
+                RunPlaywrightTests.page.locator("#description").fill("playwright test task description");
+            }
+
+            case "Edit Task" -> RunPlaywrightTests.page.locator("#name").fill("adjusted playwright test task");
+
+            default -> throw new IllegalStateException(String.format("Unexpected value: %s", formName));
+
+        }
+    }
+
+    @When("I click the {string} button")
+    public void iClickTheButtonButton(String buttonName) {
+        switch (buttonName) {
+            case "Submit" -> RunPlaywrightTests.page.locator("button[type=submit]").click();
+
+            case "Cancel" -> RunPlaywrightTests.page.locator(".cancel-task-form").click();
+        }
+    }
+
+    @Then("I am returned to the calendar view with the {string} of the edited task highlighted yellow if it is not the current day")
+    public void iAmReturnedToTheCalendarViewWithTheDayOfMonthOfTheEditedTaskHighlightedYellowIfItIsNotTheCurrentDay(int dayOfMonth) {
+        throw new NotImplementedException();
     }
 }
