@@ -1,5 +1,5 @@
 @authoriseUser
-Feature: As Lei, I want to be able to filter the tasks on one of my renovation records by state so that I can see only the pertinent tasks.
+Feature: U24B - As Lei, I want to be able to filter the tasks on one of my renovation records by state so that I can see only the pertinent tasks.
     Scenario Outline: AC1 - State filter option
         Given that I am viewing one of my renovation records with tasks
         When I view the tasks section

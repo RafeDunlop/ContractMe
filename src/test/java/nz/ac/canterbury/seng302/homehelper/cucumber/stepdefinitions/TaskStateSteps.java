@@ -10,13 +10,11 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.hamcrest.core.StringContains;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -46,9 +44,6 @@ public class TaskStateSteps {
 
     @Autowired
     private RenovationTaskRepository renovationTaskRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private MockMvc mockMvc;
@@ -126,8 +121,7 @@ public class TaskStateSteps {
         this.taskId = task.getId();
 
         result = mockMvc.perform(get("/renovations/view")
-                        .param("id", String.valueOf(renovationId))
-                        .sessionAttr("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext()))
+                        .param("id", String.valueOf(renovationId)))
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -164,8 +158,7 @@ public class TaskStateSteps {
     @When("I view the task in the calendar")
     public void i_view_the_task_in_the_calendar() throws Exception {
         result = mockMvc.perform(get("/renovations/view")
-                        .param("id", String.valueOf(renovationId))
-                        .sessionAttr("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext()))
+                        .param("id", String.valueOf(renovationId)))
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -180,8 +173,7 @@ public class TaskStateSteps {
     @When("I view the tasks section")
     public void i_view_the_tasks_section() throws Exception {
         resultActions = mockMvc.perform(get("/renovations/view")
-                        .param("id", String.valueOf(renovationId))
-                        .sessionAttr("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext()))
+                        .param("id", String.valueOf(renovationId)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(StringContains.containsString("task-grid")));
         result = resultActions.andReturn();
