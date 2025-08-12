@@ -69,7 +69,4 @@ public class Team {
             roles.set(index, updatedRole);
         }
     }
-
-    public Team clone()
-
 }

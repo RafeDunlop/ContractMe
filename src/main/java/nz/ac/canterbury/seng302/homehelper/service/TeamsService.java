@@ -12,7 +12,11 @@ import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.Console;
 import java.util.*;
+import java.util.function.Supplier;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Service class for handling teams.
@@ -24,7 +28,6 @@ public class TeamsService {
     private final TeamsRepository teamsRepository;
     private final TeamValidation teamValidation;
     private final ContractorRepository contractorRepository;
-
 
     /**
      * Constructs TeamsService with necessary dependencies.
@@ -87,71 +90,140 @@ public class TeamsService {
         return errors;
     }
 
-    /**
-     * Assigns available contractors to the given team's roles based on proximity
-     * to a specified renovation location, ensuring that no contractor is assigned
-     * more than once.
-     * @param team               the team whose roles need contractors assigned
-     * @param renovationLocation the location of the renovation used to determine contractor proximity
-     * @return an empty string if all roles were successfully assigned contractors,
-     *         or an error message if one or more roles could not be filled
-     */
     public String assignContractorsToTeam(Team team, Location renovationLocation) {
+        boolean greedySuccess = greedyAssign(team, renovationLocation);
+        if (greedySuccess) {
+            return "";
+        }
 
-        Stack<>
-        Team result = loop(team, renovationLocation);
+        Set<String> visitedStates = new HashSet<>();
 
-        for (Role assignedRole: result.getRoles()) {
-            if (assignedRole.getContractor() == null) {
-                List<Role> possibleRoles = result.getRoles().stream().filter(role -> role.getContractor() != null && role.getContractor().getSkills().contains(assignedRole.getSkill())).toList();
-                for (Role role: possibleRoles) {
-                    Team updatedTeam = team.copy()
-                    result = assignContractorsToTeam(updatedTeam);
-                    if result != notPOssible {
-                        return true
+        for (Role emptyRole : team.getRoles()) {
+            if (emptyRole.getContractor() == null) {
+                List<Role> candidatesToShuffle = team.getRoles().stream()
+                        .filter(r -> r.getContractor() != null)
+                        .filter(r -> r.getContractor().getSkills().contains(emptyRole.getSkill()))
+                        .toList();
+
+                for (Role candidateRole : candidatesToShuffle) {
+                    Contractor contractorToMove = candidateRole.getContractor();
+
+                    emptyRole.setContractor(contractorToMove);
+                    candidateRole.setContractor(null);
+
+                    // Fill the vacated candidateRole recursively with cycle detection
+                    if (fillRoleWithBacktracking(team, renovationLocation, candidateRole, visitedStates)) {
+                        return "";
                     }
+
+                    // Backtrack
+                    emptyRole.setContractor(null);
+                    candidateRole.setContractor(contractorToMove);
                 }
-                return false
-            }
-            if (assignedRole.getContractor() != null && assignedRole.getContractor().getSkills().contains(role.getSkill())) {
-                team.replaceRoleContractor(role, assignedRole.getContractor());
+
+                return "Unable to find available contractors to fill team";
             }
         }
-        return "Unable to find available contractors to fill team";
 
-        return "";
+        return "Unable to find available contractors to fill team";
     }
 
-    private Team loop(Team team, Location renovationLocation) {
+    /**
+     * Fill the given empty role by querying nearest available contractor
+     * excluding contractors already assigned in the team.
+     * If none found, try reassigning team members recursively (backtracking).
+     * Uses cycle detection to avoid infinite loops.
+     */
+    private boolean fillRoleWithBacktracking(Team team, Location location, Role roleToFill, Set<String> visitedStates) {
+        String stateKey = serializeTeamAssignment(team);
+        if (!visitedStates.add(stateKey)) {
+            // prune
+            return false;
+        }
+
+        Set<Long> assignedIds = team.getRoles().stream()
+                .filter(r -> r.getContractor() != null)
+                .map(r -> r.getContractor().getId())
+                .collect(Collectors.toSet());
+
+        Contractor candidate = findNearestContractor(roleToFill, location, assignedIds);
+        if (candidate != null) {
+            roleToFill.setContractor(candidate);
+            return true;
+        }
+
+        // No direct candidate found, try reassigning team members recursively:
+        for (Role otherRole : team.getRoles()) {
+            if (otherRole != roleToFill && otherRole.getContractor() != null
+                    && otherRole.getContractor().getSkills().contains(roleToFill.getSkill())) {
+
+                Contractor movingContractor = otherRole.getContractor();
+
+                // Move contractor to current empty role
+                roleToFill.setContractor(movingContractor);
+                otherRole.setContractor(null);
+
+                if (fillRoleWithBacktracking(team, location, otherRole, visitedStates)) {
+                    return true;
+                }
+
+                // Backtrack
+                otherRole.setContractor(movingContractor);
+                roleToFill.setContractor(null);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Greedy assignment:
+     * Assign nearest available contractor for each unassigned role.
+     * @return true if all roles assigned, false if any remain unassigned.
+     */
+    private boolean greedyAssign(Team team, Location renovationLocation) {
         Set<Long> assignedContractors = new HashSet<>();
-        Team loopedTeam = team;
+        boolean allAssigned = true;
 
         for (Role role : team.getRoles()) {
             if (role.getContractor() == null) {
-                Contractor availableContractor = findContractor(role, renovationLocation, assignedContractors);
-
-                if (availableContractor != null) {
-                    team.replaceRoleContractor(role, availableContractor);
-                    assignedContractors.add(availableContractor.getId());
+                Contractor contractor = findNearestContractor(role, renovationLocation, assignedContractors);
+                if (contractor == null) {
+                    allAssigned = false;
+                } else {
+                    team.replaceRoleContractor(role, contractor);
+                    assignedContractors.add(contractor.getId());
                 }
+            } else {
+                assignedContractors.add(role.getContractor().getId());
             }
         }
 
-        return loopedTeam;
+        return allAssigned;
     }
 
     /**
-     * Find the closest available and suitable contractor for a given role
-     * @param role the desired role for the position in the team
-     * @param renovationLocation location of the renovation
-     * @return the closest available and suitable contractor for a given role
+     * Finds the nearest available contractor for a role excluding contractors in blacklist.
      */
-    private Contractor findContractor(Role role, Location renovationLocation, Set<Long> blacklist) {
-        double renovationLat = renovationLocation.getLatitude();
-        double renovationLon = renovationLocation.getLongitude();
-
+    private Contractor findNearestContractor(Role role, Location location, Set<Long> blacklist) {
         return contractorRepository.findNearestWithinDistanceExcluding(
-                renovationLat, renovationLon, role.getSkill().toString(), 200, blacklist
+                location.getLatitude(),
+                location.getLongitude(),
+                role.getSkill().toString(),
+                200,
+                blacklist.isEmpty() ? null : blacklist
         );
+    }
+
+    /**
+     * Serialize team assignments as a string key for cycle detection.
+     */
+    private String serializeTeamAssignment(Team team) {
+        return team.getRoles().stream()
+                .map(role -> {
+                    Contractor c = role.getContractor();
+                    return role.getSkill() + ":" + (c == null ? "null" : c.getId());
+                })
+                .collect(Collectors.joining("|"));
     }
 }

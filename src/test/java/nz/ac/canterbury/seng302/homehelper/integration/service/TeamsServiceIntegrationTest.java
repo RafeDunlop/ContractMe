@@ -199,7 +199,7 @@ public class TeamsServiceIntegrationTest {
 
     @Transactional
     @Test
-    void firstContractorGreedy_findsOptimalSolution_fullsTeam() {
+    void firstContractorGreedy_findsOptimalSolution_fillsTeam() {
         Team team = new Team(renovation);
         Role role1 = new Role(Skill.PLUMBING);
         Role role2 = new Role(Skill.ELECTRICAL);
@@ -213,6 +213,7 @@ public class TeamsServiceIntegrationTest {
         contractor.addSkill(Skill.PLUMBING);
         contractor.addSkill(Skill.ELECTRICAL);
         contractor.activate();
+        contractor.setAvailable(true);
         contractorRepository.save(contractor);
 
         String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
@@ -220,18 +221,19 @@ public class TeamsServiceIntegrationTest {
         contractor2.setLocation(location);
         contractor2.addSkill(Skill.PLUMBING);
         contractor2.activate();
+        contractor2.setAvailable(true);
         contractorRepository.save(contractor2);
 
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractor());
-        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+        assertEquals(contractor2, team.getRoles().get(0).getContractor());
+        assertEquals(contractor, team.getRoles().get(1).getContractor());
     }
 
     @Transactional
     @Test
-    void firstContractorGreedy2_findsOptimalSolution_fullsTeam() {
+    void firstContractorGreedy2_findsOptimalSolution_fillsTeam() {
         Team team = new Team(renovation);
         Role role1 = new Role(Skill.PLUMBING);
         Role role2 = new Role(Skill.ELECTRICAL);
@@ -246,6 +248,7 @@ public class TeamsServiceIntegrationTest {
         contractor.addSkill(Skill.PLUMBING);
         contractor.addSkill(Skill.ELECTRICAL);
         contractor.activate();
+        contractor.setAvailable(true);
         contractorRepository.save(contractor);
 
         String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
@@ -254,11 +257,268 @@ public class TeamsServiceIntegrationTest {
         contractor2.setLocation(contractor2Location);
         contractor2.addSkill(Skill.PLUMBING);
         contractor2.activate();
+        contractor2.setAvailable(true);
         contractorRepository.save(contractor2);
 
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
+        assertEquals(contractor2, team.getRoles().get(0).getContractor());
+        assertEquals(contractor, team.getRoles().get(1).getContractor());
+    }
+
+    @Transactional
+    @Test
+    void oneContractorTwoRoles_noInfiniteLoop_fillsOne() {
+        Team team = new Team(renovation);
+        Role role1 = new Role(Skill.PLUMBING);
+        Role role2 = new Role(Skill.ELECTRICAL);
+        team.addRole(role1);
+        team.addRole(role2);
+        teamsRepository.save(team);
+
+        String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
+        Contractor contractor = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
+
+        contractor.setLocation(location);
+        contractor.addSkill(Skill.PLUMBING);
+        contractor.addSkill(Skill.ELECTRICAL);
+        contractor.activate();
+        contractor.setAvailable(true);
+        contractorRepository.save(contractor);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("Unable to find available contractors to fill team", result);
+        assertEquals(contractor, team.getRoles().get(0).getContractor());
+    }
+
+    @Transactional
+    @Test
+    void oneContractorTwoRoles2_noInfiniteLoop_fillsOne() {
+        Team team = new Team(renovation);
+        Role role1 = new Role(Skill.PLUMBING);
+        Role role2 = new Role(Skill.ELECTRICAL);
+        team.addRole(role1);
+        team.addRole(role2);
+        teamsRepository.save(team);
+
+        String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
+        Contractor contractor = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
+
+        contractor.setLocation(location);
+        contractor.addSkill(Skill.PLUMBING);
+        contractor.activate();
+        contractor.setAvailable(true);
+        contractorRepository.save(contractor);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("Unable to find available contractors to fill team", result);
+        assertEquals(contractor, team.getRoles().get(0).getContractor());
+    }
+
+    @Transactional
+    @Test
+    void oneContractorTwoRoles3_noInfiniteLoop_fillsOne() {
+        Team team = new Team(renovation);
+        Role role1 = new Role(Skill.PLUMBING);
+        Role role2 = new Role(Skill.PLUMBING);
+        team.addRole(role1);
+        team.addRole(role2);
+        teamsRepository.save(team);
+
+        String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
+        Contractor contractor = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
+
+        contractor.setLocation(location);
+        contractor.addSkill(Skill.PLUMBING);
+        contractor.activate();
+        contractor.setAvailable(true);
+        contractorRepository.save(contractor);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("Unable to find available contractors to fill team", result);
+        assertEquals(contractor, team.getRoles().get(0).getContractor());
+    }
+
+    @Transactional
+    @Test
+    void oneContractorTwoRoles4_noInfiniteLoop_fillsOne() {
+        Team team = new Team(renovation);
+        Role role1 = new Role(Skill.PLUMBING);
+        Role role2 = new Role(Skill.ELECTRICAL);
+        team.addRole(role1);
+        team.addRole(role2);
+        teamsRepository.save(team);
+
+        String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
+        Contractor contractor = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
+
+        contractor.setLocation(location);
+        contractor.addSkill(Skill.ELECTRICAL);
+        contractor.activate();
+        contractor.setAvailable(true);
+        contractorRepository.save(contractor);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("Unable to find available contractors to fill team", result);
+        assertEquals(contractor, team.getRoles().get(1).getContractor());
+    }
+
+    @Transactional
+    @Test
+    void twoContractorsThreeRoles_maximumBacktracing_fillsTwo() {
+        Team team = new Team(renovation);
+        Role role1 = new Role(Skill.PLUMBING);
+        Role role2 = new Role(Skill.ELECTRICAL);
+        Role role3 = new Role(Skill.CARPENTRY);
+        team.addRole(role1);
+        team.addRole(role2);
+        team.addRole(role3);
+        teamsRepository.save(team);
+
+        String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
+        Contractor contractor = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
+        contractor.setLocation(location);
+        contractor.addSkill(Skill.PLUMBING);
+        contractor.addSkill(Skill.ELECTRICAL);
+        contractor.addSkill(Skill.CARPENTRY);
+        contractor.activate();
+        contractor.setAvailable(true);
+        contractorRepository.save(contractor);
+
+        String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
+        Contractor contractor2 = new Contractor("Bob", "Doe", bobUniqueEmail, "encoded");
+        contractor2.setLocation(location);
+        contractor2.addSkill(Skill.PLUMBING);
+        contractor2.addSkill(Skill.ELECTRICAL);
+        contractor2.addSkill(Skill.CARPENTRY);
+        contractor2.activate();
+        contractor2.setAvailable(true);
+        contractorRepository.save(contractor2);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("Unable to find available contractors to fill team", result);
+        assertEquals(contractor, team.getRoles().get(0).getContractor());
+        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+    }
+
+    @Transactional
+    @Test
+    void threeContractorsFourRoles_maximumBacktracing_fillsThree() {
+        Team team = new Team(renovation);
+        Role role1 = new Role(Skill.PLUMBING);
+        Role role2 = new Role(Skill.PLUMBING);
+        Role role3 = new Role(Skill.PLUMBING);
+        Role role4 = new Role(Skill.PLUMBING);
+        team.addRole(role1);
+        team.addRole(role2);
+        team.addRole(role3);
+        team.addRole(role4);
+        teamsRepository.save(team);
+
+        String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
+        Contractor contractor = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
+        contractor.setLocation(location);
+        contractor.addSkill(Skill.PLUMBING);
+        contractor.activate();
+        contractor.setAvailable(true);
+        contractorRepository.save(contractor);
+
+        String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
+        Contractor contractor2 = new Contractor("Bob", "Doe", bobUniqueEmail, "encoded");
+        contractor2.setLocation(location);
+        contractor2.addSkill(Skill.PLUMBING);
+        contractor2.activate();
+        contractor2.setAvailable(true);
+        contractorRepository.save(contractor2);
+
+        String chrisUniqueEmail = "chris" + System.nanoTime() + "@doe.com";
+        Contractor contractor3 = new Contractor("Chris", "Doe", chrisUniqueEmail, "encoded");
+        contractor3.setLocation(location);
+        contractor3.addSkill(Skill.PLUMBING);
+        contractor3.activate();
+        contractor3.setAvailable(true);
+        contractorRepository.save(contractor3);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("Unable to find available contractors to fill team", result);
+        assertEquals(contractor, team.getRoles().get(0).getContractor());
+        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+    }
+
+    @Transactional
+    @Test
+    void fourContractorsFiveRoles_maximumBacktracing_fillsFour() {
+        Team team = new Team(renovation);
+        Role role1 = new Role(Skill.PLUMBING);
+        Role role2 = new Role(Skill.ELECTRICAL);
+        Role role3 = new Role(Skill.CARPENTRY);
+        Role role4 = new Role(Skill.FLOORING);
+        Role role5 = new Role(Skill.WELDING);
+        team.addRole(role1);
+        team.addRole(role2);
+        team.addRole(role3);
+        team.addRole(role4);
+        team.addRole(role5);
+        teamsRepository.save(team);
+
+        String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
+        Contractor contractor = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
+        contractor.setLocation(location);
+        contractor.addSkill(Skill.PLUMBING);
+        contractor.addSkill(Skill.ELECTRICAL);
+        contractor.addSkill(Skill.CARPENTRY);
+        contractor.addSkill(Skill.FLOORING);
+        contractor.addSkill(Skill.WELDING);
+        contractor.activate();
+        contractor.setAvailable(true);
+        contractorRepository.save(contractor);
+
+        String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
+        Contractor contractor2 = new Contractor("Bob", "Doe", bobUniqueEmail, "encoded");
+        contractor2.setLocation(location);
+        contractor2.addSkill(Skill.PLUMBING);
+        contractor2.addSkill(Skill.ELECTRICAL);
+        contractor2.addSkill(Skill.CARPENTRY);
+        contractor2.addSkill(Skill.FLOORING);
+        contractor2.addSkill(Skill.WELDING);
+        contractor2.activate();
+        contractor2.setAvailable(true);
+        contractorRepository.save(contractor2);
+
+        String chrisUniqueEmail = "chris" + System.nanoTime() + "@doe.com";
+        Contractor contractor3 = new Contractor("Chris", "Doe", chrisUniqueEmail, "encoded");
+        contractor3.setLocation(location);
+        contractor3.addSkill(Skill.PLUMBING);
+        contractor3.addSkill(Skill.ELECTRICAL);
+        contractor3.addSkill(Skill.CARPENTRY);
+        contractor3.addSkill(Skill.FLOORING);
+        contractor3.addSkill(Skill.WELDING);
+        contractor3.activate();
+        contractor3.setAvailable(true);
+        contractorRepository.save(contractor3);
+
+        String jennyUniqueEmail = "jenny" + System.nanoTime() + "@doe.com";
+        Contractor contractor4 = new Contractor("Jenny", "Doe", jennyUniqueEmail, "encoded");
+        contractor4.setLocation(location);
+        contractor4.addSkill(Skill.PLUMBING);
+        contractor4.addSkill(Skill.ELECTRICAL);
+        contractor4.addSkill(Skill.CARPENTRY);
+        contractor4.addSkill(Skill.FLOORING);
+        contractor4.addSkill(Skill.WELDING);
+        contractor4.activate();
+        contractor4.setAvailable(true);
+        contractorRepository.save(contractor4);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("Unable to find available contractors to fill team", result);
         assertEquals(contractor, team.getRoles().get(0).getContractor());
         assertEquals(contractor2, team.getRoles().get(1).getContractor());
     }
