@@ -49,11 +49,14 @@
         <div th:each="row : ${datesArray}" class="row">
             <div th:each="cell : ${row}"
                  th:if="${cell != null}"
+                 th:id="${(dateEdited != null && dateEdited.equals(cell.day))} ? 'cellEdited' : ('cell ' + ${cell.day.toString()})"
                  class="col border border-secondary text-start"
                  th:ondblclick="|addTask(${id}, this, event)|"
                  th:attr="data-cell-date=${cell.day.toString()}, data-reno-id=${id}"
                  th:classappend="${cell.day.getMonthValue() != date.monthValue} ? ' bg-body-secondary text-muted' : ''"
-                 th:style="${(cell.day.getDayOfMonth() == currentDay and cell.day.getMonthValue() == currentMonth and date.year == currentYear) ? 'background-color: #87bcfa;' : ''}">
+                 th:style="${(cell.day.getDayOfMonth() == currentDay and cell.day.getMonthValue() == currentMonth and date.year == currentYear)
+                 ? 'background-color: #87bcfa;' : (dateEdited != null && dateEdited.equals(cell.day) ? 'background-color: #fafa91' : '')}">
+
 
                  <div class="d-flex flex-column align-items-center" style="min-height:120px">
                      <div class="d-flex flex-column align-items-lg-start">
