@@ -5,7 +5,8 @@
     <base th:href="@{/}"/>
     <title>Edit Profile</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/tags.css}">
 
 
     <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
@@ -103,6 +104,12 @@
                 </div>
             </div>
 
+            <!-- CONTRACTOR FORM FRAGMENT -->
+            <div th:if="${isContractor}" class="pb-3 form-extension" id="contractor-form">
+                <div th:replace="~{fragments/contractorRegistration.html ::
+                    contractor-registration(skills=${skills}, userRegisterDTO=${userRegisterDTO})}"></div>
+            </div>
+
             <!-- LOCATION TOGGLE SWITCH -->
             <div class="d-flex justify-content-between align-items-center pb-4 px-0" style="width: 22%">
                 <div id="location-toggle-switch-label">Enter Location (Optional):</div>
@@ -119,13 +126,6 @@
                 <div th:replace="~{fragments/locationForm.html :: locationForm(
                      addressDTO=${addressDTO})}"></div>
             </div>
-
-            <!-- CONTRACTOR FORM FRAGMENT -->
-            <div th:if="${isContractor}" class="pb-3 form-extension" id="contractor-form">
-                <div th:replace="~{fragments/contractorRegistration.html ::
-                    contractor-registration(skills=${skills}, userRegisterDTO=${userRegisterDTO})}"></div>
-            </div>
-
 
             <!-- Form submission buttons -->
             <div class="d-flex justify-content-between align-items-center">
