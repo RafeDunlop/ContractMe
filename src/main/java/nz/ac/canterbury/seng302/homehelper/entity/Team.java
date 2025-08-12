@@ -70,4 +70,6 @@ public class Team {
         }
     }
 
+    public Team clone()
+
 }

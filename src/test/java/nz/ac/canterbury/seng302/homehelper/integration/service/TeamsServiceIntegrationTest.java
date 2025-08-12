@@ -72,6 +72,7 @@ public class TeamsServiceIntegrationTest {
         contractor1.setLocation(location);
         contractor1.addSkill(Skill.PLUMBING);
         contractor1.activate();
+        contractor1.setAvailable(true);
         contractorRepository.save(contractor1);
 
         String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
@@ -79,6 +80,7 @@ public class TeamsServiceIntegrationTest {
         contractor2.setLocation(location);
         contractor2.addSkill(Skill.ELECTRICAL);
         contractor2.activate();
+        contractor2.setAvailable(true);
         contractorRepository.save(contractor2);
 
         String result = teamsService.assignContractorsToTeam(team, location);
@@ -143,12 +145,16 @@ public class TeamsServiceIntegrationTest {
         Contractor contractor1 = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
         contractor1.addSkill(Skill.PLUMBING);
         contractor1.activate();
+        contractor1.setAvailable(true);
+        contractor1.setLocation(location);
         contractorRepository.save(contractor1);
 
         String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
         Contractor contractor2 = new Contractor("Bob", "Doe", bobUniqueEmail, "encoded");
         contractor2.addSkill(Skill.PLUMBING);
         contractor2.activate();
+        contractor2.setAvailable(true);
+        contractor2.setLocation(location);
         contractorRepository.save(contractor2);
 
         String result = teamsService.assignContractorsToTeam(team, location);
@@ -160,7 +166,7 @@ public class TeamsServiceIntegrationTest {
 
     @Transactional
     @Test
-    void multipleSkillsOneContractor_contractorOnlyAssignedToOne_fillsTeam() {
+    void multipleSkillsOneContractor_contractorOnlyAssignedToOne_fillOne() {
         Team team = new Team(renovation);
         Role role1 = new Role(Skill.PLUMBING);
         Role role2 = new Role(Skill.ELECTRICAL);
@@ -174,19 +180,21 @@ public class TeamsServiceIntegrationTest {
         contractor.addSkill(Skill.PLUMBING);
         contractor.addSkill(Skill.ELECTRICAL);
         contractor.activate();
+        contractor.setAvailable(true);
         contractorRepository.save(contractor);
 
         String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
         Contractor contractor2 = new Contractor("Bob", "Doe", bobUniqueEmail, "encoded");
         contractor2.setLocation(location);
         contractor2.activate();
+        contractor2.setAvailable(true);
         contractorRepository.save(contractor2);
 
         String result = teamsService.assignContractorsToTeam(team, location);
 
-        assertEquals("", result);
+        assertEquals("Unable to find available contractors to fill team", result);
         assertEquals(contractor, team.getRoles().get(0).getContractor());
-        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+        assertNull(team.getRoles().get(1).getContractor());
     }
 
     @Transactional

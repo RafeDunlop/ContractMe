@@ -15,25 +15,29 @@ import org.springframework.data.repository.query.Param;
 public interface ContractorRepository extends UserBaseRepository<Contractor> {
 
     @Query(value = """
-    SELECT c.*, 
+    SELECT c.*,
     (6371 * acos(
         cos(radians(:lat)) * cos(radians(c.latitude)) *
         cos(radians(c.longitude) - radians(:lon)) +
         sin(radians(:lat)) * sin(radians(c.latitude))
     )) AS distance
     FROM user_details c
-    JOIN contractor_skills s ON c.user_id = s.contractor_user_id
-    WHERE s.skills = :requiredSkill
+    JOIN contractor_skills s ON c.user_id = s.contractor_id
+    WHERE s.skill = :requiredSkill
       AND c.available = true
       AND (:excludedIds IS NULL OR c.user_id NOT IN (:excludedIds))
-    HAVING distance <= :maxDistance
+      AND (6371 * acos(
+        cos(radians(:lat)) * cos(radians(c.latitude)) *
+        cos(radians(c.longitude) - radians(:lon)) +
+        sin(radians(:lat)) * sin(radians(c.latitude))
+    )) <= :maxDistance
     ORDER BY distance ASC
     LIMIT 1
 """, nativeQuery = true)
     Contractor findNearestWithinDistanceExcluding(
             @Param("lat") double lat,
             @Param("lon") double lon,
-            @Param("requiredSkillId") int skillId,
+            @Param("requiredSkill") String skill,
             @Param("maxDistance") double maxDistance,
             @Param("excludedIds") java.util.Set<Long> excludedIds
     );

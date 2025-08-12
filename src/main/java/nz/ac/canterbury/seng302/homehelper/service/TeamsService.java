@@ -11,10 +11,8 @@ import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.Contracto
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
 
 /**
  * Service class for handling teams.
@@ -99,8 +97,34 @@ public class TeamsService {
      *         or an error message if one or more roles could not be filled
      */
     public String assignContractorsToTeam(Team team, Location renovationLocation) {
-        // Store all contractor's id in list to prevent duplicates
+
+        Stack<>
+        Team result = loop(team, renovationLocation);
+
+        for (Role assignedRole: result.getRoles()) {
+            if (assignedRole.getContractor() == null) {
+                List<Role> possibleRoles = result.getRoles().stream().filter(role -> role.getContractor() != null && role.getContractor().getSkills().contains(assignedRole.getSkill())).toList();
+                for (Role role: possibleRoles) {
+                    Team updatedTeam = team.copy()
+                    result = assignContractorsToTeam(updatedTeam);
+                    if result != notPOssible {
+                        return true
+                    }
+                }
+                return false
+            }
+            if (assignedRole.getContractor() != null && assignedRole.getContractor().getSkills().contains(role.getSkill())) {
+                team.replaceRoleContractor(role, assignedRole.getContractor());
+            }
+        }
+        return "Unable to find available contractors to fill team";
+
+        return "";
+    }
+
+    private Team loop(Team team, Location renovationLocation) {
         Set<Long> assignedContractors = new HashSet<>();
+        Team loopedTeam = team;
 
         for (Role role : team.getRoles()) {
             if (role.getContractor() == null) {
@@ -109,12 +133,11 @@ public class TeamsService {
                 if (availableContractor != null) {
                     team.replaceRoleContractor(role, availableContractor);
                     assignedContractors.add(availableContractor.getId());
-                } else {
-                    return "Unable to find available contractors to fill team";
                 }
             }
         }
-        return "";
+
+        return loopedTeam;
     }
 
     /**
@@ -128,7 +151,7 @@ public class TeamsService {
         double renovationLon = renovationLocation.getLongitude();
 
         return contractorRepository.findNearestWithinDistanceExcluding(
-                renovationLat, renovationLon, role.getSkill(), 200, blacklist
+                renovationLat, renovationLon, role.getSkill().toString(), 200, blacklist
         );
     }
 }
