@@ -62,7 +62,7 @@ function handleTaskDoubleClick(renovationId, taskElement, event) {
     }
     const taskId = taskElement.dataset.taskId
     const date = taskElement.dataset.cellDate;
-    window.location.assign(`/editTask?taskId=${taskId}&renovationId=${renovationId}&fromDate=${date}`);
+    window.location.assign(`editTask?taskId=${taskId}&renovationId=${renovationId}&fromDate=${date}`);
 }
 
 /**
@@ -131,5 +131,5 @@ function renderTaskModalContent(task) {
 function addTask(renovationId, cell, event) {
     event.stopPropagation();
     const date = cell.dataset.cellDate;
-    window.location.assign(`/renovations/view/create?id=${renovationId}&fromDate=${date}`);
+    window.location.assign(`renovations/view/create?id=${renovationId}&fromDate=${date}`);
 }
