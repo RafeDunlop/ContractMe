@@ -18,7 +18,7 @@ function updateTaskState(taskId, newState, cardSelect) {
 
     const newColor = stateColors[newState];
 
-    fetch(`/task/${taskId}/state?state=${newState}`, {
+    fetch(`task/${taskId}/state?state=${newState}`, {
         method: "PATCH",
         headers: {
             'X-CSRF-TOKEN': csrfToken
