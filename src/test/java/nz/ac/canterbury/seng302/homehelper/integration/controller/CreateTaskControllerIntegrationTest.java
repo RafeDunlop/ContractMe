@@ -255,8 +255,10 @@ public class CreateTaskControllerIntegrationTest {
     public void testViewCreatePage_dateProvided_dateSet() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/view/create")
                 .param("id", "1")
-                .param("date", "2020-01-01"))
+                .param("fromDate", "01-01-2020"))
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("dueDate", "2020-01-01"));
+                .andExpect(model().attribute("fromDate", "01-01-2020"))
+                .andExpect(model().attribute("renovationTaskDTO",
+                        Matchers.hasProperty("dueDate", Matchers.equalTo("2020-01-01"))));
     }
 }
