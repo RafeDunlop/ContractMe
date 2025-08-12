@@ -92,12 +92,13 @@ public class EditProfileController {
 
             // Only add addressDTO if not present from flash
             if (!model.containsAttribute("addressDTO")) {
+                AddressDTO addressDTO = new AddressDTO();
                 Location location = user.getLocation();
                 if (location != null) {
-                    AddressDTO addressDTO = addressMapper.mapLocationToAddressDTO(location);
+                    addressDTO = addressMapper.mapLocationToAddressDTO(location);
                     model.addAttribute("hasLocation", true);
-                    model.addAttribute("addressDTO", addressDTO);
                 }
+                model.addAttribute("addressDTO", addressDTO);
             }
             return "editProfileTemplate";
         } catch (NoSuchElementException e) {

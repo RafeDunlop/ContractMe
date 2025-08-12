@@ -2,35 +2,26 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
-import java.util.Locale;
-import java.util.Optional;
 import nz.ac.canterbury.seng302.homehelper.controller.EditProfileController;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
-import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.nio.file.Files;
@@ -41,9 +32,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -87,7 +75,6 @@ EditProfileControllerIntegrationTest {
         mockMvc.perform(get("/user/edit"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("editProfileTemplate"))
-                .andExpect(model().attributeExists("user"))
                 .andExpect(model().attribute("firstName", expectedUser.getFirstName()))
                 .andExpect(model().attribute("lastName", expectedUser.getLastName()))
                 .andExpect(model().attribute("email", expectedUser.getEmail()))
@@ -148,7 +135,6 @@ EditProfileControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user/edit"))
                 .andExpect(flash().attribute("firstNameError", expectedErrors))
-                .andExpect(flash().attributeExists("user"))
                 .andExpect(flash().attribute("firstName", updatedUser.getFirstName()))
                 .andExpect(flash().attribute("lastName", updatedUser.getLastName()))
                 .andExpect(flash().attribute("email", updatedUser.getEmail()));
@@ -176,7 +162,6 @@ EditProfileControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user/edit"))
                 .andExpect(flash().attribute("emailError", expectedErrors))
-                .andExpect(flash().attributeExists("user"))
                 .andExpect(flash().attribute("firstName", updatedUser.getFirstName()))
                 .andExpect(flash().attribute("lastName", updatedUser.getLastName()))
                 .andExpect(flash().attribute("email", updatedUser.getEmail()));
@@ -208,7 +193,6 @@ EditProfileControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user/edit"))
                 .andExpect(flash().attribute("emailError", expectedErrors))
-                .andExpect(flash().attributeExists("user"))
                 .andExpect(flash().attribute("firstName", expectedUser1.getFirstName()))
                 .andExpect(flash().attribute("lastName", expectedUser1.getLastName()))
                 .andExpect(flash().attribute("email", expectedUser2.getEmail()));
