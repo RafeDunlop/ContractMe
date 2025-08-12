@@ -48,7 +48,7 @@ public class RenovationTaskServiceTest {
         renovationRecord.setRenovationTasks(List.of());
         Pageable pageable = PageRequest.of(0, 5);
 
-        Page<RenovationTask> result = renovationTaskService.returnTaskPages(renovationRecord, pageable);
+        Page<RenovationTask> result = renovationTaskService.returnTaskPages(renovationRecord, pageable, "all");
 
         assertEquals(0L, result.getTotalElements());
         assertTrue(result.getContent().isEmpty());
@@ -59,7 +59,7 @@ public class RenovationTaskServiceTest {
         renovationRecord.setRenovationTasks(createDummyTasks(10));
         Pageable pageable = PageRequest.of(1, 5);
 
-        Page<RenovationTask> result = renovationTaskService.returnTaskPages(renovationRecord, pageable);
+        Page<RenovationTask> result = renovationTaskService.returnTaskPages(renovationRecord, pageable, "all");
 
         assertEquals(5, result.getContent().size());
         assertEquals(10, result.getTotalElements());
@@ -71,10 +71,23 @@ public class RenovationTaskServiceTest {
 
         Pageable pageable = PageRequest.of(0, 5);
 
-        Page<RenovationTask> result = renovationTaskService.returnTaskPages(renovationRecord, pageable);
+        Page<RenovationTask> result = renovationTaskService.returnTaskPages(renovationRecord, pageable, "all");
 
         assertEquals(3, result.getContent().size());
         assertEquals(3, result.getTotalElements());
+    }
+
+    @Test
+    void returnTaskPages_filterByState_returnsCorrectPage() {
+        TaskState state = TaskState.COMPLETED;
+        List<RenovationTask> tasks = createDummyTasks(3);
+        RenovationTask renovationTask = new RenovationTask("Test task", "Test task with state", List.of("A room"), null, renovationRecord);
+        renovationTask.setState(state);
+        tasks.add(renovationTask);
+        renovationRecord.setRenovationTasks(tasks);
+        Pageable pageable = PageRequest.of(0, 5);
+        renovationTaskService.returnTaskPages(renovationRecord, pageable, "completed");
+        Mockito.verify(renovationTaskRepository, Mockito.times(1)).findByRenovationRecordAndState(renovationRecord, state);
     }
 
     private List<RenovationTask> createDummyTasks(int count) {
