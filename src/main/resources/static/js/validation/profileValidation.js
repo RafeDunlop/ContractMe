@@ -23,7 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastNameFrontendErrorMessage = document.getElementById("last-name-frontend-error-message");
     let lastNameBackendError = document.getElementById("last-name-backend-error");
 
-
     // Event listeners
     emailField.addEventListener("input", () => {
         checkEmailField(
@@ -70,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let countryCodeField = document.getElementById("countryCode");
 
+        //Event listeners
         hourlyRateField.addEventListener("input", () => {
             validateHourlyRate(hourlyRateField.value, hourlyRateFrontendErrorMessage, hourlyRateFrontendError,
                 hourlyRateBackendError);
@@ -84,10 +84,5 @@ document.addEventListener("DOMContentLoaded", () => {
             validateCountryCode(countryCodeField.value, phoneNumberFrontendErrorMessage, phoneNumberFrontendError,
                 phoneNumberBackendError);
         });
-
     }
-
-
-
-
 });

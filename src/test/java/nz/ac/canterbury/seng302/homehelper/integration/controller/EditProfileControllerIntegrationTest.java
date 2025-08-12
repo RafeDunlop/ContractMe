@@ -13,6 +13,9 @@ import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +32,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -61,6 +66,14 @@ EditProfileControllerIntegrationTest {
         mockMvc = MockMvcBuilders.standaloneSetup(editProfileController).build();
     }
 
+
+    private static Stream<Arguments> streamValidContractorDetails() {
+        return Stream.of(
+                Arguments.of(27.08f, 64, "6412345678", Set.of(Skill.CARPENTRY)),
+                Arguments.of(0, 1, "11111 1111", Set.of(Skill.EARTHMOVING)),
+                Arguments.of(9999f, 99, "9 9 9 9 9 9 9 9", Set.of(Skill.SEPTIC_SYSTEMS, Skill.HVAC, Skill.MECHANICAL_ENGINEERING))
+        );
+    }
 
 
     /**
@@ -367,9 +380,12 @@ EditProfileControllerIntegrationTest {
         assertNull(savedUser.getLocation());
     }
 
+
 // ToDo:Add the skills  to this test for the person doing the skill task for this story.
-    @Test
-    public void testEditContractor_validUserDetails_exitEditor() throws Exception {
+
+    @ParameterizedTest
+    @MethodSource("streamValidContractorDetails")
+    public void testEditContractor_validUserDetails_exitEditor(float hourlyRate, int countryCode, String phoneNumber, Set<Skill> skills) throws Exception {
         Contractor current = new Contractor("Jane", "Doe", "jane@doe.com", "password");
         current.grantAuthority("ROLE_USER");
         current.setHourlyRate(27.80f);
@@ -378,7 +394,6 @@ EditProfileControllerIntegrationTest {
         current.setLocation(
                 new Location("123 Linwood Ave", "New Zealand", "8045", "Christchurch", "Linwood"));
         userRepository.save(current);
-
 
         mockMvc.perform(post("/user/edit")
                         .param("firstName", "John")
@@ -392,10 +407,10 @@ EditProfileControllerIntegrationTest {
                         .param("region", "Ilam")
                         .param("lat", "1.0")
                         .param("lon", "1.0")
-                        .param("hourlyRate", "30.80")
-                        .param("countryCode", "64")
-                        .param("phoneNumber", "87654321")
-                        .param("skills","CARPENTRY")
+                        .param("hourlyRate", Float.toString(hourlyRate))
+                        .param("countryCode", Integer.toString(countryCode))
+                        .param("phoneNumber", phoneNumber)
+                        .param("skills", Skill.CARPENTRY.toString())
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user"));
@@ -413,11 +428,9 @@ EditProfileControllerIntegrationTest {
 
         Assertions.assertInstanceOf(Contractor.class, savedUser);
         Contractor savedContractor = (Contractor) savedUser;
-        Assertions.assertEquals(30.80f, savedContractor.getHourlyRate());
-        Assertions.assertEquals("87654321", savedContractor.getPhoneNumber());
-        Assertions.assertEquals(64, savedContractor.getCountryCode());
-
-
+        Assertions.assertEquals(hourlyRate, savedContractor.getHourlyRate());
+        Assertions.assertEquals(countryCode, savedContractor.getCountryCode());
+        Assertions.assertEquals(phoneNumber, savedContractor.getPhoneNumber());
     }
 
 }
