@@ -8,7 +8,6 @@ import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.mapper.AddressMapper;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -75,7 +73,8 @@ public class ContractorEditDetailsSteps {
 
     @Then("I don't see the fields for my skills, phone number, and hourly rate")
     public void i_dont_see_the_fields_for_my_skills_phone_number_and_hourly_rate() {
-
+        UserRegisterDTO contractorDetails = (UserRegisterDTO) Objects.requireNonNull(mvcResult.getModelAndView()).getModel().get("contractorDTO");
+        Assertions.assertNull(contractorDetails);
     }
 
     @Then("An error message tells me {string}")

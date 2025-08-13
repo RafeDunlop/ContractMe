@@ -5,12 +5,11 @@ Feature: As Bob, I want to be able to edit my contractor details so that I can k
     When I click the edit profile button
     Then I see fields for my skills, phone number, hourly rate, and location
 
-#  @authoriseUser
-#  Scenario: AC1.2 - Contractor details are not on edit profile form if I am a not contractor
-#    Given I am not a contractor
-#    When I click the edit profile button
-#    Then I don't see the fields for my skills, phone number, and hourly rate
-#
+  @authoriseUser
+  Scenario: AC1.2 - Contractor details are not on edit profile form if I am a not contractor
+    When I click the edit profile button
+    Then I don't see the fields for my skills, phone number, and hourly rate
+
 #  @authoriseContractor
 #  Scenario Outline: AC2 - An error is shown when an invalid phone number is submitted
 #    Given I am editing the contractor details
