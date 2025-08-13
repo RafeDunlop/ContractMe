@@ -49,7 +49,7 @@
         <div th:each="row : ${datesArray}" class="row">
             <div th:each="cell : ${row}"
                  th:if="${cell != null}"
-                 th:id="${(dateEdited != null && dateEdited.equals(cell.day))} ? 'cellEdited' : ('cell ' + ${cell.day.toString()})"
+                 th:id="${(dateEdited != null && dateEdited.equals(cell.day))} ? 'cellEdited' : ('cell-' + ${cell.day.toString()})"
                  class="col border border-secondary text-start"
                  th:ondblclick="|addTask(${id}, this, event)|"
                  th:attr="data-cell-date=${cell.day.format(dateFormatter)}, data-reno-id=${id}"
