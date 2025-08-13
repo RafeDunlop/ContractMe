@@ -366,7 +366,8 @@ public class RenovationController {
 
         User user = loginService.getUserByEmail();
         boolean isOwner = user.equals(record.getUser());
-        if (!isOwner && !record.isPublic()) {
+
+        if (!isOwner && !record.isPublic() && !teamsService.checkViewRenovationAccess(record, user)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
