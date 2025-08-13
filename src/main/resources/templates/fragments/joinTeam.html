@@ -6,7 +6,36 @@
 </head>
 <body>
 <div th:fragment="join-team">
+    <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+    <main class="team-join-body">
+        <section>
+            <h1>Renovation Name</h1>
+            <div style="padding-top:40px">
+                <p><strong>Role:</strong> Contractor Skill</p>
+                <p><strong>Owner:</strong> Owner Name</p>
+            </div>
+            <div style="padding-top:50px" >
+                <h2>Description</h2>
+                <p style="padding-top:30px">
+                    Short details about the renovation go here. Include scope, timing, and
+                    any prerequisites the contractor should know.
+                </p>
+            </div>
 
+
+            <div class="btn-group mr-2" role="group">
+                <form action="/requests/123/accept" method="post">
+                    <button class="btn btn-primary ml-1" type="submit">View Renovation</button>
+                </form>
+                <form action="/requests/123/accept" method="post">
+                    <button class="btn btn-primary ml-1" type="submit">Accept</button>
+                </form>
+                <form action="/requests/123/decline" method="post">
+                    <button class="btn btn-outline-secondary ml-1" type="submit">Decline</button>
+                </form>
+            </div>
+        </section>
+    </main>
 </div>
 
 </body>

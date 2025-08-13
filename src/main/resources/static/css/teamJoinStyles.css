@@ -1,0 +1,26 @@
+.body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+.team-join-body {
+    padding-top: 175px;
+    text-align: center;
+}
+.form {
+    display: inline-block;
+    margin: 5px;
+}
+.a, button {
+    padding: 8px 14px;
+    text-decoration: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f4f4f4;
+    cursor: pointer;
+}
+.button:hover, a:hover {
+    background-color: #eaeaea;
+}
