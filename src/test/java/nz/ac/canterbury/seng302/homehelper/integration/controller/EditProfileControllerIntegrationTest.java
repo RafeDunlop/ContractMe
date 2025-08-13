@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
-import io.cucumber.core.gherkin.Argument;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.controller.EditProfileController;
