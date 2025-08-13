@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.integration.service;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
@@ -12,8 +13,12 @@ import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
@@ -71,7 +76,7 @@ public class RenovationTaskServiceIntegrationTest {
 
     @Test
     @Transactional
-    public void getTasksWithinDates_noTasksBetweenDates_mapContainsEmptyLists() {
+    void getTasksWithinDates_noTasksBetweenDates_mapContainsEmptyLists() {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(2);
         Map<LocalDate,  List<RenovationTask>> map = this.toTest.getTasksWithinDates(renovationRecord, startDate, endDate);
@@ -80,7 +85,7 @@ public class RenovationTaskServiceIntegrationTest {
 
     @Test
     @Transactional
-    public void getTasksWithinDates_taskDueBeforeStart_notRetrieved() {
+    void getTasksWithinDates_taskDueBeforeStart_notRetrieved() {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(2);
         RenovationTask testTask = new RenovationTask(
@@ -97,7 +102,7 @@ public class RenovationTaskServiceIntegrationTest {
 
     @Test
     @Transactional
-    public void getTasksWithinDates_taskDueAfterEnd_notRetrieved() {
+    void getTasksWithinDates_taskDueAfterEnd_notRetrieved() {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(2);
         RenovationTask testTask = new RenovationTask(
@@ -114,7 +119,7 @@ public class RenovationTaskServiceIntegrationTest {
 
     @Test
     @Transactional
-    public void getTasksWithinDates_taskDueOnStartDate_retrieved() {
+    void getTasksWithinDates_taskDueOnStartDate_retrieved() {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(2);
         RenovationTask testTask = new RenovationTask(
@@ -131,7 +136,7 @@ public class RenovationTaskServiceIntegrationTest {
 
     @Test
     @Transactional
-    public void getTasksWithinDates_taskDueOnEndDate_retrieved() {
+    void getTasksWithinDates_taskDueOnEndDate_retrieved() {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusDays(2);
         RenovationTask testTask = new RenovationTask(
@@ -144,5 +149,19 @@ public class RenovationTaskServiceIntegrationTest {
         renovationTaskRepository.save(testTask);
         Map<LocalDate,  List<RenovationTask>> map = this.toTest.getTasksWithinDates(renovationRecord, startDate, endDate);
         assertEquals(testTask, map.get(endDate).get(0));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"all, 3", "inProgress, 1", "notStarted, 2"})
+    @Transactional
+    void filterTasksByState_returnsCorrectNoTasks(String stateName, int expectedTasks) {
+        RenovationTask testTask = new RenovationTask("Task", "Do thing", List.of(), null, renovationRecord);
+        testTask.setState(TaskState.IN_PROGRESS);
+        RenovationTask otherTask = new RenovationTask("Other task", "Do other thing", List.of(), null, renovationRecord);
+        RenovationTask anotherTask = new RenovationTask("Another task", "Do other thing", List.of(), null, renovationRecord);
+        List<RenovationTask> tasks = List.of(testTask, otherTask, anotherTask);
+        renovationRecord.setRenovationTasks(tasks);
+        Page<RenovationTask> result = toTest.returnTaskPages(renovationRecord, PageRequest.of(0, 5), stateName);
+        assertEquals(expectedTasks, result.getTotalElements());
     }
 }
