@@ -6,10 +6,14 @@ import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.CalendarCellDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.*;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
@@ -65,6 +69,9 @@ public class RenovationControllerIntegrationTest {
 
     @Autowired
     private TagRepository tagRepository;
+
+    @Autowired
+    private TeamsRepository teamsRepository;
 
     @Autowired
     private TagService tagService;
@@ -1881,5 +1888,27 @@ public class RenovationControllerIntegrationTest {
         Assertions.assertEquals(now.getYear(), returnedDate.getYear());
         Assertions.assertEquals(now.getMonthValue(), returnedDate.getMonthValue());
         Assertions.assertTrue(List.of(5, 6).contains(returnedCalendarCells.size()));
+    }
+
+    @Test
+    @WithMockUser(username = "contractor@test.com")
+    public void viewRenovation_private_contractorOnTeam_returnsOk() throws Exception {
+        Contractor contractor = new Contractor("Greg", "Smith", "contractor@test.com", "Password123!");
+        contractor.grantAuthority("ROLE_USER");
+        userRepository.save(contractor);
+
+        renovationRecord.setPublicity(false);
+        renovationRecord = renovationRecordRepository.save(renovationRecord);
+
+        Team team = new Team(renovationRecord);
+        team.addRole(new Role(contractor, Skill.ELECTRICAL, true));
+        teamsRepository.save(team);
+
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(renovationRecord.getId()))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"))
+                .andReturn();
     }
 }
