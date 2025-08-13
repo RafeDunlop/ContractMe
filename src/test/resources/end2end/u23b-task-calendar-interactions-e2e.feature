@@ -17,7 +17,7 @@ Feature: As Kaia, I want to be able to create and edit tasks directly from the c
     Given I am viewing the calendar for this month with a task due on day <day of month>
     And I click on day <day of month> to go to the <task form> form
     And I enter valid details to the <task form> form
-    When I click the <button> button
+    When I click the form button labelled <button>
     Then I am returned to the calendar view with the <day of month> of the edited task highlighted yellow if it is not the current day
 
     Examples:
