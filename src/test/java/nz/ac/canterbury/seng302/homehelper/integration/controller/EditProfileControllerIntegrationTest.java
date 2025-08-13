@@ -420,7 +420,7 @@ EditProfileControllerIntegrationTest {
                         .param("hourlyRate", Float.toString(hourlyRate))
                         .param("countryCode", Integer.toString(countryCode))
                         .param("phoneNumber", phoneNumber)
-                        .param("skills", Skill.CARPENTRY.toString())
+                        .param("skills", skills.stream().map(Skill::toString).toArray(String[]::new))
                 )
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user"));
