@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -43,7 +42,7 @@ public class ContractorEditDetailsSteps {
     private String phoneNumber;
     private Set<Skill> skills;
 
-    Map<String, String> EXPECTED_ERRORS = Map.of(
+    Map<String, String> expectedErrors = Map.of(
             "Your phone number is invalid", "phoneNumberError",
             "You must enter a phone number", "phoneNumberError",
             "Invalid hourly rate", "hourlyRateError",
@@ -160,10 +159,10 @@ public class ContractorEditDetailsSteps {
 
     @Then("An error message tells me {string}")
     public void an_error_message_tells_me(String expectedError) {
-        for (String error : EXPECTED_ERRORS.keySet()) {
+        for (String error : expectedErrors.keySet()) {
             if (Objects.equals(error, expectedError)) {
-                Assertions.assertTrue(Objects.requireNonNull(mvcResult.getFlashMap()).containsKey(EXPECTED_ERRORS.get(error)));
-                Assertions.assertEquals(List.of(expectedError), mvcResult.getFlashMap().get(EXPECTED_ERRORS.get(error)));
+                Assertions.assertTrue(Objects.requireNonNull(mvcResult.getFlashMap()).containsKey(expectedErrors.get(error)));
+                Assertions.assertEquals(List.of(expectedError), mvcResult.getFlashMap().get(expectedErrors.get(error)));
             }
         }
     }

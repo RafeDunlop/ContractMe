@@ -146,4 +146,9 @@ public class AddressDTO {
                 && Objects.equals(lat, addressDTO.lat) && Objects.equals(lon, addressDTO.lon)
                 && Objects.equals(address_line1, addressDTO.address_line1);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(country, postcode, city, region, lat, lon, address_line1);
+    }
 }
