@@ -390,9 +390,6 @@ EditProfileControllerIntegrationTest {
         assertNull(savedUser.getLocation());
     }
 
-
-// ToDo:Add the skills  to this test for the person doing the skill task for this story.
-
     @ParameterizedTest
     @MethodSource("streamValidContractorDetails")
     public void testEditContractor_validUserDetails_exitEditor(float hourlyRate, int countryCode, String phoneNumber, Set<Skill> skills) throws Exception {

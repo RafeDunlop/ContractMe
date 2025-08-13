@@ -15,11 +15,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -41,6 +45,7 @@ public class ContractorEditDetailsSteps {
 
     Map<String, String> EXPECTED_ERRORS = Map.of(
             "Your phone number is invalid", "phoneNumberError",
+            "You must enter a phone number", "phoneNumberError",
             "Invalid hourly rate", "hourlyRateError",
             "You must select one or more skills", "skillsError"
     );
@@ -67,9 +72,11 @@ public class ContractorEditDetailsSteps {
         this.phoneNumber = phoneNumber;
     }
 
-    @Given("I make changes to the skills in the input field, and I have at least one skill in the input field")
-    public void i_make_changes_to_the_skills_in_the_input_field_and_i_have_at_least_one_skill_in_the_input_field() {
-
+    @Given("I add {string} to the skills input")
+    public void i_add_to_the_skills_input(String skillsString) {
+        skills = Arrays.stream(skillsString.split(","))
+                .map(Skill::valueOf)
+                .collect(Collectors.toSet());
     }
 
     @Given("I don't have any skills in the input field")
@@ -96,7 +103,7 @@ public class ContractorEditDetailsSteps {
         phoneNumber = Objects.requireNonNullElse(phoneNumber, contractor.getPhoneNumber());
         skills = Objects.requireNonNullElse(skills, contractor.getSkills());
 
-        mvcResult = mockMvc.perform(post("/user/edit")
+        MockHttpServletRequestBuilder requestBuilder = post("/user/edit")
                         .param("firstName", contractor.getFirstName())
                         .param("lastName", contractor.getLastName())
                         .param("email", contractor.getEmail())
@@ -110,7 +117,13 @@ public class ContractorEditDetailsSteps {
                         .param("hourlyRate", hourlyRate.toString())
                         .param("countryCode", countryCode.toString())
                         .param("phoneNumber", phoneNumber)
-                        .param("skills", skills.stream().map(Skill::toString).toArray(String[]::new)))
+                        .with(csrf());
+
+        if (!skills.isEmpty()) {
+            requestBuilder.param("skills", skills.stream().map(Skill::toString).collect(Collectors.joining(",")));
+        }
+
+        mvcResult = mockMvc.perform(requestBuilder)
                 .andReturn();
     }
 
@@ -149,9 +162,14 @@ public class ContractorEditDetailsSteps {
     public void an_error_message_tells_me(String expectedError) {
         for (String error : EXPECTED_ERRORS.keySet()) {
             if (Objects.equals(error, expectedError)) {
-                Assertions.assertTrue(Objects.requireNonNull(mvcResult.getModelAndView()).getModel().containsKey(EXPECTED_ERRORS.get(error)));
-                Assertions.assertEquals(expectedError, mvcResult.getModelAndView().getModel().get(EXPECTED_ERRORS.get(error)));
+                Assertions.assertTrue(Objects.requireNonNull(mvcResult.getFlashMap()).containsKey(EXPECTED_ERRORS.get(error)));
+                Assertions.assertEquals(List.of(expectedError), mvcResult.getFlashMap().get(EXPECTED_ERRORS.get(error)));
             }
         }
+    }
+
+    @Then("My skills are updated to the new values")
+    public void my_skills_are_updated_to_the_new_values() {
+        System.out.println("hello");
     }
 }
