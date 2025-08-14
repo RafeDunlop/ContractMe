@@ -16,7 +16,7 @@ public class JoinTeamController {
     public void JoinTeamController() {}
 
 
-    @GetMapping("/joinTeam")
+    @GetMapping("/join-team")
     public String joinTeam(Model model) {
         return "joinTeamInbox";
     }
