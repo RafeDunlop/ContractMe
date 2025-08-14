@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -1881,5 +1882,23 @@ public class RenovationControllerIntegrationTest {
         Assertions.assertEquals(now.getYear(), returnedDate.getYear());
         Assertions.assertEquals(now.getMonthValue(), returnedDate.getMonthValue());
         Assertions.assertTrue(List.of(5, 6).contains(returnedCalendarCells.size()));
+    }
+
+    @Test
+    public void calendar_dateEditedPresent_modelContainsDate() throws Exception {
+        String dateToReturnTo = LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecordRepository.save(existingRecord);
+
+        MvcResult result = mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(existingRecord.getId()))
+                        .param("dateEdted", dateToReturnTo)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"))
+                .andExpect(model().attribute("renovation", existingRecord))
+                .andReturn();
+
+        Assertions.assertTrue(Objects.requireNonNull(result.getModelAndView()).getModelMap().containsKey("dateFormatter"));
     }
 }

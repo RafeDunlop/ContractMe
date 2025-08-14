@@ -86,6 +86,24 @@ public class CreateTaskControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "jane@doe.com")
+    public void testAddTask_fromCalendar_TaskAddedAndRedirect() throws Exception {
+        String dateToReturnTo = LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("name", "Demolish walls")
+                        .param("description", "Demolish all the stuff")
+                        .param("roomList", "Room 1", "Room 2")
+                        .param("renovationId", "1")
+                        .param("dateToReturnTo", dateToReturnTo)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(view().name(String.format("redirect:/renovations/view?id=1&dateEdited=%s#cellEdited", dateToReturnTo)));
+        Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(Mockito.any(RenovationTask.class));
+    }
+
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
     public void testAddTask_validTask_taskHasTheNotStartedState() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -209,6 +227,8 @@ public class CreateTaskControllerIntegrationTest {
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
 
+
+
     @Test
     @WithMockUser(username = "jane@doe.com")
     public void testAddTask_roomsInvalid_TaskNotAddedStaysOnCreateTask() throws Exception {
@@ -255,8 +275,10 @@ public class CreateTaskControllerIntegrationTest {
     public void testViewCreatePage_dateProvided_dateSet() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/view/create")
                 .param("id", "1")
-                .param("date", "2020-01-01"))
+                .param("fromDate", "01-01-2020"))
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("dueDate", "2020-01-01"));
+                .andExpect(model().attribute("fromDate", "01-01-2020"))
+                .andExpect(model().attribute("renovationTaskDTO",
+                        Matchers.hasProperty("dueDate", Matchers.equalTo("2020-01-01"))));
     }
 }

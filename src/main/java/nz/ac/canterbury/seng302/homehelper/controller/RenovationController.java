@@ -34,6 +34,7 @@ import org.springframework.web.util.UrlPathHelper;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -386,6 +387,7 @@ public class RenovationController {
         model.addAttribute("pageNumber", Math.max(pageNumber, 1));
         model.addAttribute("renovation", record);
         model.addAttribute("icons", iconFileNames);
+        model.addAttribute("dateFormatter", DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
         return "viewRenovation";
     }
@@ -421,6 +423,7 @@ public class RenovationController {
         injectDateElements(year, month, dateEdited, model, record);
         model.addAttribute("id", id);
         model.addAttribute("dateEdited", dateEdited);
+        model.addAttribute("dateFormatter", DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
         return "fragments/calendar :: calendar";  // return only fragment for partial update
     }
