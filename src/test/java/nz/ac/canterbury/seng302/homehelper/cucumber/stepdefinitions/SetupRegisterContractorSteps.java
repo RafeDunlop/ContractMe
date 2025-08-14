@@ -5,6 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.cucumber.context.ContractorContext;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
@@ -38,8 +39,13 @@ public class SetupRegisterContractorSteps {
         PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         String uniqueEmail = "test" + System.currentTimeMillis() + "@user.nz";
         Contractor contractor = new Contractor("Test", "User", uniqueEmail, encoder.encode("Test123!"));
-        Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
+        Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041",
+                "Christchurch", "Upper Riccarton", 1D, 1D);
         contractor.setLocation(location);
+        contractor.setHourlyRate(27.50F);
+        contractor.setCountryCode(64);
+        contractor.setPhoneNumber("021 123 4567");
+        contractor.addSkill(Skill.CARPENTRY);
 
         contractor.activate();
         contractorRepository.save(contractor);

@@ -87,4 +87,16 @@ public class ContractorService {
         MapUtil.putIfNotEmpty(errors, "skillsError", contractorValidation.validateContractorSkillsField(userRegisterDTO.getSkills()));
         return errors;
     }
+
+
+    /**
+     * Retrieves a contractor by their identifier.
+     *
+     * @param id the unique identifier of the contractor to be retrieved
+     * @return the contractor associated with the given ID, or null if no contractor is found
+     */
+    public Contractor getContractorById(Long id) {
+        return contractorRepository.findById(id).orElse(null);
+    }
+
 }

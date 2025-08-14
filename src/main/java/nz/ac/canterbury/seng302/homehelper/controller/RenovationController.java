@@ -62,7 +62,9 @@ public class RenovationController {
      * @param locationService         The location service provides the function to validate the locations
      */
     @Autowired
-    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService,LocationService locationService,TeamsService teamsService) {
+    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService,
+                                RenovationTaskService renovationTaskService, TagService tagService,
+                                LocationService locationService, TeamsService teamsService) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.loginService = loginService;
