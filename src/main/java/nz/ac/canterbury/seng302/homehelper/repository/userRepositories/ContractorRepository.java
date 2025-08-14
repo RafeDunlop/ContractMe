@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.repository.userRepositories;
 
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -24,7 +25,7 @@ public interface ContractorRepository extends UserBaseRepository<Contractor> {
     JOIN contractor_skills s ON c.user_id = s.contractor_id
     WHERE s.skill = :requiredSkill
       AND c.available = true
-      AND (c.user_id NOT IN (:excludedIds))
+      AND (:excludedIds IS NULL OR c.user_id NOT IN (:excludedIds))
       AND (6371 * acos(
         cos(radians(:lat)) * cos(radians(c.latitude)) *
         cos(radians(c.longitude) - radians(:lon)) +

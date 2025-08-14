@@ -12,10 +12,10 @@ import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.Console;
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -211,7 +211,7 @@ public class TeamsService {
                 location.getLongitude(),
                 role.getSkill().toString(),
                 200,
-                blacklist
+                blacklist.isEmpty() ? null : blacklist
         );
     }
 
