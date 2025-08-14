@@ -63,7 +63,7 @@ public class TeamJoinRequestSteps {
 
     @Given("A private renovation exists with a team")
     public void a_private_renovation_exists_with_a_team() {
-        owner = userRepository.save(new User("Greg", "smith", "greg@smith.com", "Password123!"));
+        owner = userRepository.save(new User("Greg", "smith", "greg" + System.currentTimeMillis() + "@smith.com", "Password123!"));
 
         renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", Collections.emptyList());
         renovationRecord.setPublicity(false);
