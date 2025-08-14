@@ -450,6 +450,7 @@ public class TeamsServiceIntegrationTest {
         assertEquals("Unable to find available contractors to fill team", result);
         assertEquals(contractor, team.getRoles().get(0).getContractor());
         assertEquals(contractor2, team.getRoles().get(1).getContractor());
+        assertEquals(contractor3, team.getRoles().get(2).getContractor());
     }
 
     @Transactional
@@ -521,5 +522,37 @@ public class TeamsServiceIntegrationTest {
         assertEquals("Unable to find available contractors to fill team", result);
         assertEquals(contractor, team.getRoles().get(0).getContractor());
         assertEquals(contractor2, team.getRoles().get(1).getContractor());
+        assertEquals(contractor3, team.getRoles().get(2).getContractor());
+        assertEquals(contractor4, team.getRoles().get(3).getContractor());
+    }
+
+    @Transactional
+    @Test
+    void oneContractorsFiveRoles_maximumBacktracing_fillsOne() {
+        Team team = new Team(renovation);
+        Role role1 = new Role(Skill.PLUMBING);
+        Role role2 = new Role(Skill.PLUMBING);
+        Role role3 = new Role(Skill.PLUMBING);
+        Role role4 = new Role(Skill.PLUMBING);
+        Role role5 = new Role(Skill.PLUMBING);
+        team.addRole(role1);
+        team.addRole(role2);
+        team.addRole(role3);
+        team.addRole(role4);
+        team.addRole(role5);
+        teamsRepository.save(team);
+
+        String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
+        Contractor contractor = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
+        contractor.setLocation(location);
+        contractor.addSkill(Skill.PLUMBING);
+        contractor.activate();
+        contractor.setAvailable(true);
+        contractorRepository.save(contractor);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("Unable to find available contractors to fill team", result);
+        assertEquals(contractor, team.getRoles().get(0).getContractor());
     }
 }
