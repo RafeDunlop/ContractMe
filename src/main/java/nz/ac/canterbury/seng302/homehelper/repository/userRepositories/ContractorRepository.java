@@ -12,7 +12,20 @@ import org.springframework.data.repository.query.Param;
  * This repository handles Contractors
  */
 public interface ContractorRepository extends UserBaseRepository<Contractor> {
-
+    /**
+     * Finds the nearest available contractor with the given skill, within a specified maximum distance
+     * from a given latitude and longitude, excluding a set of contractor IDs if provided.
+     * The search uses the Haversine formula to calculate distances in kilometers.
+     * Contractors must be marked as available and have the specified skill.
+     * If {@code excludedIds} is {@code null} or empty, no IDs are excluded.
+     *
+     * @param lat          Latitude of the reference location.
+     * @param lon          Longitude of the reference location.
+     * @param skill        Required skill of the contractor.
+     * @param maxDistance  Maximum allowed distance (in kilometers) from the reference location.
+     * @param excludedIds  Set of contractor IDs to exclude from the search; may be {@code null}.
+     * @return The nearest matching {@link Contractor}, or {@code null} if none found within the distance.
+     */
     @Query(value = """
     SELECT c.*,
     (6371 * acos(

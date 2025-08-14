@@ -86,6 +86,12 @@ public class TeamsService {
         return errors;
     }
 
+    /**
+     * Run algorithm to assign the closest available contractors to the team if possible
+     * @param team team to assign contractors to
+     * @param renovationLocation location of the renovation
+     * @return error message if unable to fill team or empty string if able to fill team
+     */
     public String assignContractorsToTeam(Team team, Location renovationLocation) {
         boolean greedySuccess = greedyAssign(team, renovationLocation);
         if (greedySuccess) {
@@ -129,6 +135,11 @@ public class TeamsService {
      * excluding contractors already assigned in the team.
      * If none found, try reassigning team members recursively (backtracking).
      * Uses cycle detection to avoid infinite loops.
+     * @param team team to assign contractors to
+     * @param location location of the renovation
+     * @param roleToFill role to fill
+     * @param visitedStates Set of serialized team that have been visited
+     * @return true if all roles assigned, false if any remain unassigned.
      */
     private boolean fillRoleWithBacktracking(Team team, Location location, Role roleToFill, Set<String> visitedStates) {
         String stateKey = serializeTeamAssignment(team);
@@ -173,8 +184,9 @@ public class TeamsService {
     }
 
     /**
-     * Greedy assignment:
      * Assign nearest available contractor for each unassigned role.
+     * @param team team to assign contractors to
+     * @param renovationLocation location of the renovation
      * @return true if all roles assigned, false if any remain unassigned.
      */
     private boolean greedyAssign(Team team, Location renovationLocation) {
@@ -199,7 +211,11 @@ public class TeamsService {
     }
 
     /**
-     * Finds the nearest available contractor for a role excluding contractors in blacklist.
+     *  Finds the nearest available contractor for a role excluding contractors in blacklist.
+     * @param role empty role to find contractor for
+     * @param location renovation location
+     * @param blacklist set of current contractors in team to prevent duplicates
+     * @return the nearest contractor that can fill the role
      */
     private Contractor findNearestContractor(Role role, Location location, Set<Long> blacklist) {
         return contractorRepository.findNearestWithinDistanceExcluding(
@@ -213,6 +229,8 @@ public class TeamsService {
 
     /**
      * Serialize team assignments as a string key for cycle detection.
+     * @param team team to serialize
+     * @return serialized team
      */
     private String serializeTeamAssignment(Team team) {
         return team.getRoles().stream()
