@@ -26,7 +26,10 @@ public class Contractor extends User {
     @Column
     private int countryCode;
 
-    @ElementCollection
+    @ElementCollection(targetClass = Skill.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "contractor_skills", joinColumns = @JoinColumn(name = "contractor_id"))
+    @Column(name = "skill")
     private Set<Skill> skills;
 
     @Column

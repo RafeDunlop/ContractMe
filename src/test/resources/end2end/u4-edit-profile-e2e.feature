@@ -8,7 +8,7 @@ Feature: As Sarah, I want to edit my user profile so that I can keep my details 
 
   Scenario: AC2
     Given I am on the edit profile form
-    And I enter valid values for my first name,last name, and email address
+    And I enter valid values for my first name, last name, and email address
     When I click on the "Submit" button
     Then my new details are saved
     And I am taken back to my profile page
