@@ -113,37 +113,4 @@ public class TeamController {
         teamsService.saveTeam(team);
         return "redirect:/renovations/view?id=" + id;
     }
-
-
-    /**
-     * Handler for a get request to the join team fragment.
-     * @return the join team fragment
-     */
-    @GetMapping("/join-team")
-    public String joinTeam(Model model) {
-        return "joinTeamInbox";
-    }
-
-    @PostMapping("invitation/accept")
-    public String acceptTeamRequest(@RequestParam(name = "roleId") Long roleId,
-                                    @RequestParam(name = "teamId") Long teamId,
-                                    @RequestParam(name = "contractorId") Long contractorId,
-                                    Model model) {
-        logger.info("POST /renovations/team/accept");
-
-//        teamsService.acceptContractor();
-
-        return "";
-    }
-
-    @PostMapping("invitation/decline")
-    public String declineTeamRequest(@RequestParam(name = "roleId") Long roleId,
-                                     @RequestParam(name = "teamId") Long teamId,
-                                     Model model) {
-        logger.info("POST /renovations/team/decline");
-
-//        teamsService.declineContractor();
-
-        return "";
-    }
 }

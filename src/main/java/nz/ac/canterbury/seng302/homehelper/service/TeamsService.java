@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
@@ -85,26 +86,50 @@ public class TeamsService {
         return errors;
     }
 
-    public boolean acceptContractor(Role role, Contractor contractor, Team team) {
-        Contractor roleContractor = role.getContractor();
-        if (roleContractor != null && (Objects.equals(contractor.getId(), roleContractor.getId()))) {
+    public List<String> acceptContractor(Contractor contractor, Team team) {
+        List<String> errors = new ArrayList<>();
+        try {
+            Role role = findAssignedRole(team, contractor);
+
+            if (role.isAccepted()) {
+                errors.add("Contractor has already accepted.");
+                return errors;
+            }
+
             role.setAccepted(true);
             teamsRepository.save(team);
-            return true;
-        } else {
-            throw new IllegalStateException("The given contractor is not assigned to the given role.");
-        }
+        } catch (Exception e) { errors.add(e.getMessage()); }
+
+        return errors;
     }
 
-    public boolean declineContractor(Role role, Contractor contractor, Team team) {
-        Contractor roleContractor = role.getContractor();
-        if (roleContractor != null && (Objects.equals(contractor.getId(), roleContractor.getId()))) {
+    public List<String> declineContractor(Contractor contractor, Team team) {
+        List<String> errors = new ArrayList<>();
+        try {
+            Role role = findAssignedRole(team, contractor);
+
             role.setAccepted(false);
             role.setContractor(null);
             teamsRepository.save(team);
-            return true;
-        } else {
-            throw new IllegalStateException("The given contractor is not assigned to the given role.");
+        }catch (Exception e) { errors.add(e.getMessage()); }
+
+        return errors;
+    }
+
+    public Role findAssignedRole(Team team, Contractor contractor) throws Exception {
+        List<Role> matches = team.getRoles().stream()
+                .filter(r -> r.getContractor() != null && Objects.equals(r.getContractor().getId(), contractor.getId()))
+                .toList();
+        if (matches.isEmpty()) {
+            throw new Exception("Contractor is not apart of this team.");
         }
+        if (matches.size() > 1) {
+            throw new Exception("Contractor is in more then one role in the team.");
+        }
+        return matches.get(0);
+    }
+
+    public Team getTeamById(long teamId) {
+        return teamsRepository.findById(teamId).orElseThrow(() -> new EntityNotFoundException("Team: " + teamId + " not found"));
     }
 }

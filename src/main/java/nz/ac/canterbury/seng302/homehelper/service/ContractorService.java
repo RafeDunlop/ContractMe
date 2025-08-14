@@ -1,7 +1,9 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
@@ -86,5 +88,9 @@ public class ContractorService {
         MapUtil.putIfNotEmpty(errors, "locationError", contractorValidation.validateContractorLocation(locationProvided));
         MapUtil.putIfNotEmpty(errors, "skillsError", contractorValidation.validateContractorSkillsField(userRegisterDTO.getSkills()));
         return errors;
+    }
+
+    public Contractor getContractorById(long userId) {
+        return contractorRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Contractor: " + userId + " not found"));
     }
 }

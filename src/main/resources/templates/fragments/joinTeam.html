@@ -27,11 +27,12 @@
             </form>
             <div class="btn-group mr-2 d-flex justify-content-start" role="group">
 
-                <form action="renovations/team/invitation/decline" method="post">
-                    <button class="btn btn-danger mt-4" type="submit">Decline</button>
-                </form>
-                <form action="renovations/team/invitation/accept" method="post">
+                <form th:action="@{'/invitations/' + ${team.id} + '/' + ${contractor.userId} + '/accept'}" method="post">
                     <button class="btn btn-primary mt-4 ms-2 me-2" type="submit">Accept</button>
+                </form>
+
+                <form th:action="@{'/invitations/' + ${team.id} + '/' + ${contractor.userId} + '/decline'}" method="post">
+                    <button class="btn btn-danger mt-4" type="submit">Decline</button>
                 </form>
 
             </div>
