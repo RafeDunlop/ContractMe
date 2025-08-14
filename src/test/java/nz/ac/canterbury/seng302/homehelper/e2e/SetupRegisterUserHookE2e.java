@@ -34,7 +34,7 @@ public class SetupRegisterUserHookE2e {
         PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         String uniqueEmail = "test" + System.currentTimeMillis() + "@user.nz";
         User user = new User("Test", "User", uniqueEmail, encoder.encode("Test123!"));
-        Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
+        Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton", 1d, 1d);
         user.setLocation(location);
         user.activate();
         userRepository.save(user);
