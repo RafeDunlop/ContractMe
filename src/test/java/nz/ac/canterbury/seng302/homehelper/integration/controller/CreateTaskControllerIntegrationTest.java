@@ -86,6 +86,24 @@ public class CreateTaskControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "jane@doe.com")
+    public void testAddTask_fromCalendar_TaskAddedAndRedirect() throws Exception {
+        String dateToReturnTo = LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("name", "Demolish walls")
+                        .param("description", "Demolish all the stuff")
+                        .param("roomList", "Room 1", "Room 2")
+                        .param("renovationId", "1")
+                        .param("dateToReturnTo", dateToReturnTo)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(view().name(String.format("redirect:/renovations/view?id=1&dateEdited=%s#cellEdited", dateToReturnTo)));
+        Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(Mockito.any(RenovationTask.class));
+    }
+
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
     public void testAddTask_validTask_taskHasTheNotStartedState() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/view/create")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -208,6 +226,8 @@ public class CreateTaskControllerIntegrationTest {
                 .andExpect(flash().attribute("dueDateError", contains("Date is not in valid format, DD/MM/YYYY.")));
         Mockito.verify(renovationTaskRepository, Mockito.times(0)).save(Mockito.any(RenovationTask.class));
     }
+
+
 
     @Test
     @WithMockUser(username = "jane@doe.com")
