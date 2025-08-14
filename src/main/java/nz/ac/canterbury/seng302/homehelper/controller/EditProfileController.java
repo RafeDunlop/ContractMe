@@ -7,7 +7,6 @@ import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.mapper.AddressMapper;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
@@ -37,7 +36,6 @@ public class EditProfileController {
 
     private final LoginService loginService;
     private final LocationService locationService;
-    private final AddressMapper addressMapper;
 
     private final ContractorService contractorService;
 
@@ -50,13 +48,11 @@ public class EditProfileController {
      */
     @Autowired
     public EditProfileController(EditProfileService editProfileService, LoginService loginService,
-                                 LocationService locationService, ContractorService contractorService,
-                                 AddressMapper addressMapper) {
+                                 LocationService locationService, ContractorService contractorService) {
         this.editProfileService = editProfileService;
         this.loginService = loginService;
         this.locationService = locationService;
         this.contractorService = contractorService;
-        this.addressMapper = addressMapper;
     }
 
     /**
@@ -107,8 +103,6 @@ public class EditProfileController {
                 Location location = user.getLocation();
                 if (location != null) {
                     addressDTO.setFromLocation(location);
-                    model.addAttribute("hasLocation", true);
-                    addressDTO = addressMapper.mapLocationToAddressDTO(location);
                     model.addAttribute("hasLocation", true);
                 }
                 model.addAttribute("addressDTO", addressDTO);

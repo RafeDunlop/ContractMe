@@ -9,7 +9,6 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
-import nz.ac.canterbury.seng302.homehelper.mapper.AddressMapper;
 import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
@@ -53,7 +52,6 @@ public class RenovationController {
     private final LoginService loginService;
     private final TagService tagService;
     private final LocationService locationService;
-    private final AddressMapper addressMapper;
 
     /**
      * induces spring to automatically sets up the {@code RenovationRecordService}
@@ -65,15 +63,13 @@ public class RenovationController {
     @Autowired
     public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService,
                                 RenovationTaskService renovationTaskService, TagService tagService,
-                                LocationService locationService, TeamsService teamsService,
-                                AddressMapper addressMapper) {
+                                LocationService locationService, TeamsService teamsService) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.loginService = loginService;
         this.tagService = tagService;
         this.locationService = locationService;
         this.teamsService = teamsService;
-        this.addressMapper = addressMapper;
     }
 
     /**
@@ -241,7 +237,6 @@ public class RenovationController {
             Location location = renovationRecord.getLocation();
             if (locationService.hasLocation(renovationRecord)) {
                 addressDTO.setFromLocation(location);
-                addressDTO = addressMapper.mapLocationToAddressDTO(location);
                 model.addAttribute("locationUsed", true);
             }
             model.addAttribute("addressDTO", addressDTO);

@@ -8,7 +8,6 @@ import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.mapper.AddressMapper;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -35,8 +34,6 @@ public class ContractorEditDetailsSteps {
 
     private final ContractorContext contractorContext;
 
-    private final AddressMapper addressMapper;
-
     private Float hourlyRate;
     private Integer countryCode;
     private String phoneNumber;
@@ -51,7 +48,6 @@ public class ContractorEditDetailsSteps {
 
     public ContractorEditDetailsSteps(ContractorContext contractorContext) {
         this.contractorContext = contractorContext;
-        addressMapper = new AddressMapper();
     }
 
     private void resetInputs() {
@@ -131,7 +127,8 @@ public class ContractorEditDetailsSteps {
         UserRegisterDTO contractorDetails = (UserRegisterDTO) Objects.requireNonNull(mvcResult.getModelAndView()).getModel().get("contractorDTO");
         AddressDTO locationDetails  = (AddressDTO) Objects.requireNonNull(mvcResult.getModelAndView()).getModel().get("addressDTO");
         Contractor currentContractor = contractorContext.getContractor();
-        AddressDTO currentLocation = addressMapper.mapLocationToAddressDTO(currentContractor.getLocation());
+        AddressDTO currentLocation = new AddressDTO();
+        currentLocation.setFromLocation(currentContractor.getLocation());
 
         Assertions.assertEquals(currentContractor.getSkills(), new HashSet<>(contractorDetails.getSkills()));
         Assertions.assertEquals(currentContractor.getPhoneNumber(), contractorDetails.getPhoneNumber());
