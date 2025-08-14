@@ -1911,4 +1911,16 @@ public class RenovationControllerIntegrationTest {
                 .andExpect(view().name("viewRenovation"))
                 .andReturn();
     }
+
+    @Test
+    @WithMockUser(username = "steve@test.com")
+    public void viewRenovation_privateRenovation_noTeam_randomUser_4xx() throws Exception {
+        User randomUser = new User("Steve", "Jacobson", "steve@test.com", "Password123!");
+        userRepository.save(randomUser);
+
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", renovationRecord.toString())
+                        .with(csrf()))
+                .andExpect(status().is4xxClientError());
+    }
 }
