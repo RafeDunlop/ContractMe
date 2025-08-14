@@ -47,8 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @WithMockUser(username = "jane@doe.com")
 @ActiveProfiles("test")
-public class
-EditProfileControllerIntegrationTest {
+class EditProfileControllerIntegrationTest {
 
     @Autowired
     private EditProfileController editProfileController;
@@ -392,7 +391,7 @@ EditProfileControllerIntegrationTest {
 
     @ParameterizedTest
     @MethodSource("streamValidContractorDetails")
-    public void testEditContractor_validUserDetails_exitEditor(float hourlyRate, int countryCode, String phoneNumber, Set<Skill> skills) throws Exception {
+    void testEditContractor_validUserDetails_exitEditor(float hourlyRate, int countryCode, String phoneNumber, Set<Skill> skills) throws Exception {
         Contractor current = new Contractor("Jane", "Doe", "jane@doe.com", "password");
         current.grantAuthority("ROLE_USER");
         current.setHourlyRate(27.80f);
@@ -442,7 +441,7 @@ EditProfileControllerIntegrationTest {
 
     @ParameterizedTest
     @MethodSource("streamInvalidContractorDetails")
-    public void testEditContractor_invalidContractorDetails_stayOnEditProfilePage(float hourlyRate, int countryCode, String phoneNumber, Set<Skill> skills, List<Object> expectedErrors) throws Exception {
+    void testEditContractor_invalidContractorDetails_stayOnEditProfilePage(float hourlyRate, int countryCode, String phoneNumber, Set<Skill> skills, List<Object> expectedErrors) throws Exception {
         Contractor current = new Contractor("Jane", "Doe", "jane@doe.com", "password");
         current.grantAuthority("ROLE_USER");
         current.setHourlyRate(27.80f);
