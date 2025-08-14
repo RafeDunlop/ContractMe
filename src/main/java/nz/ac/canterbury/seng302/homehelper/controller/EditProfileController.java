@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
@@ -31,12 +32,16 @@ import java.util.*;
 public class EditProfileController {
 
     private static final Logger logger = LoggerFactory.getLogger(EditProfileController.class);
+    private static final String ADDRESS_DTO = "addressDTO";
+    private static final String CONTRACTOR_DTO = "contractorDTO";
+    private static final String FIRST_NAME = "firstName";
+    private static final String LAST_NAME = "lastName";
+    private static final String EMAIL = "email";
+    private static final String PROFILE_PICTURE = "profilePicture";
 
     private final EditProfileService editProfileService;
-
     private final LoginService loginService;
     private final LocationService locationService;
-
     private final ContractorService contractorService;
 
     /**
@@ -62,35 +67,35 @@ public class EditProfileController {
      * @return editProfileTemplate page
      */
     @GetMapping("user/edit")
-    public String editProfile(Model model) {
+    public String editProfile(Model model, HttpServletRequest request) {
         logger.info("GET /user/edit");
         try {
             User user = loginService.getUserByEmail();
-            if (!model.containsAttribute("firstName")) {
-                model.addAttribute("firstName", user.getFirstName());
+            if (!model.containsAttribute(FIRST_NAME)) {
+                model.addAttribute(FIRST_NAME, user.getFirstName());
             }
-            if (!model.containsAttribute("lastName")) {
-                model.addAttribute("lastName", user.getLastName());
+            if (!model.containsAttribute(LAST_NAME)) {
+                model.addAttribute(LAST_NAME, user.getLastName());
             }
-            if (!model.containsAttribute("email")) {
-                model.addAttribute("email", user.getEmail());
+            if (!model.containsAttribute(EMAIL)) {
+                model.addAttribute(EMAIL, user.getEmail());
             }
-            model.addAttribute("profilePicture", user.getProfilePicture());
+            model.addAttribute(PROFILE_PICTURE, user.getProfilePicture());
 
             if (user instanceof Contractor contractor) {
                 model.addAttribute("isContractor", true);
-                if (!model.containsAttribute("contractorDTO")) {
+                if (!model.containsAttribute(CONTRACTOR_DTO)) {
                     UserRegisterDTO contractorDTO = new UserRegisterDTO();
                     contractorDTO.setHourlyRate(contractor.getHourlyRate());
                     contractorDTO.setPhoneNumber(contractor.getPhoneNumber());
                     contractorDTO.setCountryCode(contractor.getCountryCode());
                     contractorDTO.setSkills(new ArrayList<>(contractor.getSkills()));
-                    model.addAttribute("contractorDTO", contractorDTO);
+                    model.addAttribute(CONTRACTOR_DTO, contractorDTO);
                     model.addAttribute("isAvailable", contractor.getAvailable());
                 }
                 List<Skill> skillList = Skill.listOfSortedSkills();
                 model.addAttribute("skills", skillList);
-                Locale locale = Locale.getDefault();
+                Locale locale = request.getLocale();
                 Currency currency = Currency.getInstance(locale);
                 model.addAttribute("currencySymbol", currency.getSymbol(locale));
             } else {
@@ -98,14 +103,14 @@ public class EditProfileController {
             }
 
             // Only add addressDTO if not present from flash
-            if (!model.containsAttribute("addressDTO")) {
+            if (!model.containsAttribute(ADDRESS_DTO)) {
                 AddressDTO addressDTO = new AddressDTO();
                 Location location = user.getLocation();
                 if (location != null) {
                     addressDTO.setFromLocation(location);
                     model.addAttribute("hasLocation", true);
                 }
-                model.addAttribute("addressDTO", addressDTO);
+                model.addAttribute(ADDRESS_DTO, addressDTO);
             }
             return "editProfileTemplate";
         } catch (NoSuchElementException e) {
@@ -115,9 +120,9 @@ public class EditProfileController {
 
     /**
      * Handles the submission of the edit profile form.
-     * Attempt to edit profile using the provided form data.
+     * Attempt to edit the profile using the provided form data.
      * If successful, it redirects to the profile view page.
-     * If an error occurs during task creation, it redirects back to the edit profile.
+     * If an error occurs during task creation, it redirects back to the edit profile
      * with error messages and previously entered form data.
      *
      * @param updatedUser The user containing the edited profile details.
@@ -139,7 +144,7 @@ public class EditProfileController {
 
         Map<String, List<String>> errors = editProfileService.validateUpdate(updatedUser, sameEmail);
 
-        // Checks if the users location has been modified in the form and compares to their old location.
+        // Checks if the user's location has been modified in the form and compares to their old location.
         Location currentLocation = newUser.getLocation();
         errors.putAll(locationService.validateLocation(addressDTO));
         if (contractor != null) {
@@ -148,12 +153,12 @@ public class EditProfileController {
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
-            redirectAttributes.addFlashAttribute("firstName", updatedUser.getFirstName());
-            redirectAttributes.addFlashAttribute("lastName", updatedUser.getLastName());
-            redirectAttributes.addFlashAttribute("email", updatedUser.getEmail());
-            redirectAttributes.addFlashAttribute("profilePicture", newUser.getProfilePicture());
-            redirectAttributes.addFlashAttribute("contractorDTO", contractorDTO);
-            redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
+            redirectAttributes.addFlashAttribute(FIRST_NAME, updatedUser.getFirstName());
+            redirectAttributes.addFlashAttribute(LAST_NAME, updatedUser.getLastName());
+            redirectAttributes.addFlashAttribute(EMAIL, updatedUser.getEmail());
+            redirectAttributes.addFlashAttribute(PROFILE_PICTURE, newUser.getProfilePicture());
+            redirectAttributes.addFlashAttribute(CONTRACTOR_DTO, contractorDTO);
+            redirectAttributes.addFlashAttribute(ADDRESS_DTO, addressDTO);
             if (currentLocation != null || locationService.isLocationProvided(addressDTO)) {
                 redirectAttributes.addFlashAttribute("hasLocation", true);
             }
@@ -177,7 +182,7 @@ public class EditProfileController {
      * Handles the upload of a profile picture for the currently logged-in user.
      * This method retrieves the currently logged-in user,
      * Stores the profile picture locally,
-     * updates their profile picture using the generated address for the provided file,
+     * updates their profile picture using the generated address for the provided file.
      *
      * @param file  The MultipartFile representing the uploaded profile picture.
      * @param redirectAttributes used to pass errors to the view on the user/edit page.
@@ -197,7 +202,7 @@ public class EditProfileController {
             return "redirect:/user/edit";
         }
 
-        session.setAttribute("profilePicture", user.getProfilePicture());
+        session.setAttribute(PROFILE_PICTURE, user.getProfilePicture());
 
         return "redirect:/user";
     }

@@ -3,11 +3,14 @@ package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.ContractorContext;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -29,6 +32,9 @@ public class ContractorEditDetailsSteps {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private MvcResult mvcResult;
 
@@ -164,8 +170,14 @@ public class ContractorEditDetailsSteps {
         }
     }
 
+    @Transactional
     @Then("My skills are updated to the new values")
     public void my_skills_are_updated_to_the_new_values() {
-        System.out.println("hello");
+        Optional<User> updatedUser = userRepository.findByEmailIgnoreCase(contractorContext.getContractor().getEmail());
+        if (updatedUser.isPresent() && updatedUser.get() instanceof Contractor updatedContractor) {
+            Assertions.assertEquals(skills, updatedContractor.getSkills());
+        } else {
+            Assertions.fail("User not found.");
+        }
     }
 }
