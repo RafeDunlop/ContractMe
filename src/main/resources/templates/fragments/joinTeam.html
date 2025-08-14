@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="join-team">
+    <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+    <main class="team-join-body p-4 card container mt-5 shadow-sm">
+        <section>
+            <h1>Renovation Name</h1>
+            <div style="padding-top:40px">
+                <p><strong>Role:</strong> Contractor Skill</p>
+                <p><strong>Owner:</strong> Owner Name</p>
+            </div>
+            <div style="padding-top:50px; text-align: center" >
+                <h2>Description</h2>
+                <p style="padding-top:30px;">
+                    Short details about the renovation go here. Include scope, timing, and
+                    any prerequisites the contractor should know.
+                </p>
+            </div>
+
+            <form action="/requests/123/accept" method="post">
+                <button class="btn btn-primary mt-4 me-4" type="submit">View Renovation</button>
+            </form>
+            <div class="btn-group mr-2 d-flex justify-content-start" role="group">
+
+                <form action="/requests/123/decline" method="post">
+                    <button class="btn btn-danger mt-4" type="submit">Decline</button>
+                </form>
+                <form action="/requests/123/accept" method="post">
+                    <button class="btn btn-primary mt-4 ms-2 me-2" type="submit">Accept</button>
+                </form>
+
+            </div>
+        </section>
+
+    </main>
+</div>
+
+</body>
+</html>
