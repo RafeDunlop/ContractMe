@@ -12,6 +12,7 @@ import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
+import nz.ac.canterbury.seng302.homehelper.util.LocaleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ public class EditProfileController {
     private final LoginService loginService;
     private final LocationService locationService;
     private final ContractorService contractorService;
+    private final LocaleUtil localeUtil;
 
     /**
      * Constructor for the controller and links the services to the controller.
@@ -58,6 +60,7 @@ public class EditProfileController {
         this.loginService = loginService;
         this.locationService = locationService;
         this.contractorService = contractorService;
+        localeUtil = new LocaleUtil();
     }
 
     /**
@@ -95,7 +98,7 @@ public class EditProfileController {
                 }
                 List<Skill> skillList = Skill.listOfSortedSkills();
                 model.addAttribute("skills", skillList);
-                Locale locale = request.getLocale();
+                Locale locale = localeUtil.getSafeLocale(request.getLocale());
                 Currency currency = Currency.getInstance(locale);
                 model.addAttribute("currencySymbol", currency.getSymbol(locale));
             } else {
