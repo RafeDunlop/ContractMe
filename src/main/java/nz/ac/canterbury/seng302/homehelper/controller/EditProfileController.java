@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
@@ -67,7 +66,7 @@ public class EditProfileController {
      * @return editProfileTemplate page
      */
     @GetMapping("user/edit")
-    public String editProfile(Model model, HttpServletRequest request) {
+    public String editProfile(Model model) {
         logger.info("GET /user/edit");
         try {
             User user = loginService.getUserByEmail();
@@ -107,6 +106,8 @@ public class EditProfileController {
                 AddressDTO addressDTO = new AddressDTO();
                 Location location = user.getLocation();
                 if (location != null) {
+                    addressDTO.setFromLocation(location);
+                    model.addAttribute("hasLocation", true);
                     addressDTO = addressMapper.mapLocationToAddressDTO(location);
                     model.addAttribute("hasLocation", true);
                 }

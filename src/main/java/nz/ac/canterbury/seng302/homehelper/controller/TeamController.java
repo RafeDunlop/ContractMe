@@ -44,6 +44,7 @@ public class TeamController {
      * @param renovationRecordService the service associated with renovation records
      * @param loginService the login service for retrieving the logged-in user
      * @param locationService the location service to check if a record contains a valid location
+     * @param teamsService the team service used for calling validation and creating roles, from the given request
      */
     @Autowired
     public TeamController(RenovationRecordService renovationRecordService, LoginService loginService, LocationService locationService,TeamsService teamsService) {
@@ -73,7 +74,7 @@ public class TeamController {
             }
             model.addAttribute("teamRequestDTO", teamRequestDTO);
             model.addAttribute("renovationRecord", renovationRecord);
-            model.addAttribute("skills", Skill.values());
+            model.addAttribute("skills", Skill.listOfSortedSkills());
             return "createTeam";
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

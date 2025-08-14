@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -239,6 +240,7 @@ public class RenovationController {
         if (!locationService.isLocationProvided(addressDTO)) {
             Location location = renovationRecord.getLocation();
             if (locationService.hasLocation(renovationRecord)) {
+                addressDTO.setFromLocation(location);
                 addressDTO = addressMapper.mapLocationToAddressDTO(location);
                 model.addAttribute("locationUsed", true);
             }
@@ -360,9 +362,11 @@ public class RenovationController {
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                  @RequestParam(required = false) Integer year,
                                  @RequestParam(required = false) Integer month,
+                                 @RequestParam(required = false) @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate dateEdited,
                                  Model model,
                                  HttpServletRequest request) {
         logger.info("GET /renovations/view");
+        logger.info("dateEdited: {}", dateEdited);
 
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
@@ -378,7 +382,9 @@ public class RenovationController {
         String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
-        injectDateElements(year, month, model, record);
+        injectDateElements(year, month, dateEdited, model, record);
+        model.addAttribute("dateEdited", dateEdited);
+
 
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
         model.addAttribute("hasLocation", locationService.hasLocation(record));
@@ -406,8 +412,10 @@ public class RenovationController {
     public String getCalendarFragment(@RequestParam Long id,
                                       @RequestParam(required = false) Integer year,
                                       @RequestParam(required = false) Integer month,
+                                      @RequestParam(required = false) @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate dateEdited,
                                       Model model) {
 
+        logger.info("dateEdited: {}", dateEdited);
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Renovation not found");
 
@@ -417,13 +425,18 @@ public class RenovationController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
-        injectDateElements(year, month, model, record);
+        injectDateElements(year, month, dateEdited, model, record);
         model.addAttribute("id", id);
+        model.addAttribute("dateEdited", dateEdited);
 
         return "fragments/calendar :: calendar";  // return only fragment for partial update
     }
 
-    private void injectDateElements(@RequestParam(required = false) Integer year, @RequestParam(required = false) Integer month, Model model, RenovationRecord record) {
+    private void injectDateElements(@RequestParam(required = false) Integer year,
+                                    @RequestParam(required = false) Integer month,
+                                    @RequestParam(required = false) @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate dateEdited,
+                                    Model model,
+                                    RenovationRecord record) {
         LocalDate localDate = LocalDate.now();
         model.addAttribute("currentDay", localDate.getDayOfMonth());
         model.addAttribute("currentMonth", localDate.getMonthValue());
@@ -441,6 +454,8 @@ public class RenovationController {
             } catch (DateTimeException e) {
                 logger.error(e.getMessage());
             }
+        } else if (dateEdited != null) {
+            localDate = dateEdited;
         }
 
         List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate, record);
@@ -483,17 +498,15 @@ public class RenovationController {
         }
 
         int requestedPage = Math.max(pageNumber - 1, 0);
-        cardsPerPage = Math.max(cardsPerPage, 1);
         Pageable pageable = PageRequest.of(requestedPage, cardsPerPage);
-        Page<RenovationTask> page = renovationTaskService.returnTaskPages(record, pageable);
+        Page<RenovationTask> page = renovationTaskService.returnTaskPages(record, pageable, status);
 
         if (requestedPage >= page.getTotalPages() && page.getTotalPages() > 0) {
             pageable = PageRequest.of(page.getTotalPages() - 1, cardsPerPage);
-            page = renovationTaskService.returnTaskPages(record, pageable);
+            page = renovationTaskService.returnTaskPages(record, pageable, status);
         }
 
-        Page<RenovationTaskDTO> dtoPage = page.map(RenovationTaskDTO::new);
-        return dtoPage;
+        return page.map(RenovationTaskDTO::new);
     }
 
     /**
