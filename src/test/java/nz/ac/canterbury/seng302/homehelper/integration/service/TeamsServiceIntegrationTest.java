@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class TeamsServiceIntegrationTest {
+class TeamsServiceIntegrationTest {
     @Autowired
     private ContractorRepository contractorRepository;
     @Autowired

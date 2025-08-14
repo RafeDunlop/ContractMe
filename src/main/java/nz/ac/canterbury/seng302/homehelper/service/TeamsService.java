@@ -11,11 +11,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.Contracto
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.io.Console;
 import java.util.*;
-import java.util.function.Supplier;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
