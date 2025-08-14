@@ -29,6 +29,23 @@ public enum TaskState {
     }
 
     /**
+     * Get a TaskState instance from its lowerCamelCase name.
+     * @param camelCaseName the camelCaseName used by the javascript input
+     * @return the TaskState instance
+     * @throws IllegalArgumentException if the argument is unknown
+     */
+    public static TaskState fromCamelCaseName(String camelCaseName) throws IllegalArgumentException {
+        return switch (camelCaseName) {
+            case "notStarted" -> NOT_STARTED;
+            case "inProgress" -> IN_PROGRESS;
+            case "blocked" -> BLOCKED;
+            case "completed" -> COMPLETED;
+            case "cancelled" -> CANCELLED;
+            default -> throw new IllegalArgumentException("Unknown camel case name: " + camelCaseName);
+        };
+    }
+
+    /**
      * Returns the human-readable display name of this task state.
      *
      * @return the display string for the task state

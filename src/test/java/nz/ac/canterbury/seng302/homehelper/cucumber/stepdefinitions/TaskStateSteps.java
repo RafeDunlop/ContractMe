@@ -1,39 +1,37 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-
-import java.io.UnsupportedEncodingException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import org.hamcrest.core.StringContains;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 
+import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -48,15 +46,13 @@ public class TaskStateSteps {
     private RenovationTaskRepository renovationTaskRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private MockMvc mockMvc;
 
     private Long renovationId;
 
     private Long taskId;
 
+    private ResultActions resultActions;
     private MvcResult result;
 
 
@@ -124,9 +120,8 @@ public class TaskStateSteps {
         renovationTaskRepository.save(task);
         this.taskId = task.getId();
 
-        mockMvc.perform(get("/renovations/view")
-                        .param("id", String.valueOf(renovationId))
-                        .sessionAttr("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext()))
+        result = mockMvc.perform(get("/renovations/view")
+                        .param("id", String.valueOf(renovationId)))
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -163,8 +158,7 @@ public class TaskStateSteps {
     @When("I view the task in the calendar")
     public void i_view_the_task_in_the_calendar() throws Exception {
         result = mockMvc.perform(get("/renovations/view")
-                        .param("id", String.valueOf(renovationId))
-                        .sessionAttr("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext()))
+                        .param("id", String.valueOf(renovationId)))
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -174,5 +168,48 @@ public class TaskStateSteps {
         String html = result.getResponse().getContentAsString().toLowerCase();
 
         assertTrue(html.contains("background-color: " + expectedHexColour),"Expected calendar task with background-color: " + expectedHexColour);
+    }
+
+    @When("I view the tasks section")
+    public void i_view_the_tasks_section() throws Exception {
+        resultActions = mockMvc.perform(get("/renovations/view")
+                        .param("id", String.valueOf(renovationId)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(StringContains.containsString("task-grid")));
+        result = resultActions.andReturn();
+    }
+
+    @Then("I can select option {string} to filter tasks by task state")
+    public void i_can_select_option_to_filter_tasks_by_task_state(String state) throws UnsupportedEncodingException {
+        String html = result.getResponse().getContentAsString();
+        assertTrue(html.contains(state));
+    }
+
+    @When("I select the option {string} to filter tasks by state")
+    public void i_select_the_option_to_filter_tasks_by_state(String stateOption) throws Exception {
+        resultActions = mockMvc.perform(get("/renovations/retrieve/" + renovationId)
+                        .queryParam("status", stateOption))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        result = resultActions.andReturn();
+    }
+
+    @Given("I have tasks")
+    public void i_have_tasks(List<Map<String, String>> tasksTable) {
+        RenovationRecord renovationRecord = renovationRecordRepository.findById(renovationId).orElseThrow();
+        List<RenovationTask> taskList = new ArrayList<>();
+        for (Map<String, String> taskMap : tasksTable) {
+            RenovationTask task = new RenovationTask(taskMap.get("name"), "Desc", List.of(), null, renovationRecord);
+            task.setState(TaskState.valueOf(taskMap.get("state")));
+            taskList.add(task);
+        }
+        renovationTaskRepository.saveAll(taskList);
+        renovationRecord.setRenovationTasks(taskList);
+        renovationRecordRepository.save(renovationRecord);
+    }
+
+    @Then("The page is reloaded with only the {int} tasks shown")
+    public void the_page_is_reloaded_with_only_the_tasks_shown(Integer expectedTasks) throws Exception {
+       resultActions.andExpect(jsonPath("$.totalElements").value(expectedTasks));
     }
 }

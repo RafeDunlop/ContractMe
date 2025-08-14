@@ -79,13 +79,7 @@ public class EditProfileController {
                 AddressDTO addressDTO = new AddressDTO();
                 Location location = user.getLocation();
                 if (location != null) {
-                    addressDTO.setAddress_line1(location.getAddress());
-                    addressDTO.setCountry(location.getCountry());
-                    addressDTO.setPostcode(location.getPostcode());
-                    addressDTO.setCity(location.getCity());
-                    addressDTO.setRegion(location.getSuburb());
-                    addressDTO.setLat(location.getLatitude());
-                    addressDTO.setLon(location.getLongitude());
+                    addressDTO.setFromLocation(location);
                     model.addAttribute("locationUsed", true);
                 }
                 model.addAttribute("addressDTO", addressDTO);
