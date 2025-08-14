@@ -113,4 +113,16 @@ public class TeamController {
         teamsService.saveTeam(team);
         return "redirect:/renovations/view?id=" + id;
     }
+
+
+    /**
+     * Handler for a get request to the join team fragment.
+     * @return the join team fragment
+     */
+    @GetMapping("/join-team")
+    public String joinTeam(Model model) {
+        return "joinTeamInbox";
+    }
+
+
 }
