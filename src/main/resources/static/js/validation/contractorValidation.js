@@ -36,7 +36,7 @@ export function validatePhoneNumber(phoneNumber, phoneNumberFrontendErrorMessage
     phoneNumber = phoneNumber.trim();
     if (phoneNumberBackendError) phoneNumberBackendError.hidden = true;
     if (phoneNumber === "") {
-        phoneNumberFrontendErrorMessage.textContent = "You must enter a valid phone number";
+        phoneNumberFrontendErrorMessage.textContent = "You must enter a phone number";
         phoneNumberFrontendError.hidden = false;
         phoneNumberFrontendErrorMessage.hidden = false;
     } else if (phoneNumber.length < 8 || phoneNumber.length > 15 || !phonePattern.test(phoneNumber)) {
