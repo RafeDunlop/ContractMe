@@ -1891,7 +1891,7 @@ public class RenovationControllerIntegrationTest {
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     @WithMockUser(username = "contractor@test.com")
-    public void viewRenovation_private_contractorOnTeam_returnsOk(boolean accepted) throws Exception {
+    void viewRenovation_private_contractorOnTeam_returnsOk(boolean accepted) throws Exception {
         Contractor contractor = new Contractor("Greg", "Smith", "contractor@test.com", "Password123!");
         contractor.grantAuthority("ROLE_USER");
         userRepository.save(contractor);
@@ -1913,7 +1913,7 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "steve@test.com")
-    public void viewRenovation_privateRenovation_noTeam_randomUser_4xx() throws Exception {
+    void viewRenovation_privateRenovation_noTeam_randomUser_4xx() throws Exception {
         User randomUser = new User("Steve", "Jacobson", "steve@test.com", "Password123!");
         userRepository.save(randomUser);
 

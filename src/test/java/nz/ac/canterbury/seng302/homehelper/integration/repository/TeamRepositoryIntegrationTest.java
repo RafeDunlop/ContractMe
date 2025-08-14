@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
-public class TeamRepositoryIntegrationTest {
+class TeamRepositoryIntegrationTest {
 
     @Autowired
     TeamsRepository teamsRepository;
@@ -34,19 +34,19 @@ public class TeamRepositoryIntegrationTest {
     @Test
     void contractor_on_different_team_returns_false() {
         User owner = userRepository.save(new User("Steve","Jobs","steve@test.com","Password123!"));
-        RenovationRecord record = renovationRecordRepository.save( new RenovationRecord(owner, "Test Renovation", "one", Collections.emptyList()));
+        RenovationRecord renovationRecord = renovationRecordRepository.save( new RenovationRecord(owner, "Test Renovation", "one", Collections.emptyList()));
         Contractor contractor = userRepository.save( new Contractor("Greg", "Smith", "greg@test.com", "Password123!"));
 
-        Team team = new Team(record);
+        Team team = new Team(renovationRecord);
 
-        RenovationRecord second_record = renovationRecordRepository.save( new RenovationRecord(owner, "Test Renovation 2", "two", Collections.emptyList()));
-        Team secondTeam = new Team(second_record);
+        RenovationRecord secondRecord = renovationRecordRepository.save( new RenovationRecord(owner, "Test Renovation 2", "two", Collections.emptyList()));
+        Team secondTeam = new Team(secondRecord);
         secondTeam.addRole(new Role(contractor, Skill.ELECTRICAL, true));
 
         teamsRepository.save(team);
         teamsRepository.save(secondTeam);
 
-        boolean result = teamsRepository.checkIfUserBelongsToRecordTeam(record, contractor.getId());
+        boolean result = teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, contractor.getId());
         assertThat(result).isFalse();
     }
 
@@ -54,15 +54,15 @@ public class TeamRepositoryIntegrationTest {
     @ValueSource(booleans = { true, false })
     void contractor_on_team_for_record_accepted_parameterized_returns_true(boolean accepted) {
         User owner = userRepository.save(new User("Steve","Jobs","steve@test.com","Password123!"));
-        RenovationRecord record = renovationRecordRepository.save( new RenovationRecord(owner, "Test Renovation", "a description", Collections.emptyList()));
-        Team team = new Team(record);
+        RenovationRecord renovationRecord = renovationRecordRepository.save( new RenovationRecord(owner, "Test Renovation", "a description", Collections.emptyList()));
+        Team team = new Team(renovationRecord);
 
         Contractor contractor = userRepository.save( new Contractor("Greg", "Smith", "greg@test.com", "Password123!"));
         team.addRole(new Role(contractor, Skill.ELECTRICAL, accepted));
 
         teamsRepository.save(team);
 
-        boolean result = teamsRepository.checkIfUserBelongsToRecordTeam(record, contractor.getId());
+        boolean result = teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, contractor.getId());
         assertThat(result).isTrue();
     }
 
@@ -70,11 +70,11 @@ public class TeamRepositoryIntegrationTest {
     @Test
     void user_not_contractor_no_team_on_record_returns_false() {
         User owner = userRepository.save(new User("Bob","Smith","bob@test.com","Password123!"));
-        RenovationRecord record = renovationRecordRepository.save( new RenovationRecord(owner, "Bobs Renovation", "Desc", Collections.emptyList()));
+        RenovationRecord renovationRecord = renovationRecordRepository.save( new RenovationRecord(owner, "Bobs Renovation", "Desc", Collections.emptyList()));
 
         User regularUser = userRepository.save( new User("Greg", "Smith", "greg@test.com", "Password123!"));
 
-        boolean result = teamsRepository.checkIfUserBelongsToRecordTeam(record, regularUser.getId());
+        boolean result = teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, regularUser.getId());
         assertThat(result).isFalse();
     }
 }
