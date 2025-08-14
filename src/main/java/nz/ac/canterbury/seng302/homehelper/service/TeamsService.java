@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Service class for handling teams.
@@ -81,5 +83,28 @@ public class TeamsService {
         if (teamSizeError != null) errors.add(teamSizeError);
 
         return errors;
+    }
+
+    public boolean acceptContractor(Role role, Contractor contractor, Team team) {
+        Contractor roleContractor = role.getContractor();
+        if (roleContractor != null && (Objects.equals(contractor.getId(), roleContractor.getId()))) {
+            role.setAccepted(true);
+            teamsRepository.save(team);
+            return true;
+        } else {
+            throw new IllegalStateException("The given contractor is not assigned to the given role.");
+        }
+    }
+
+    public boolean declineContractor(Role role, Contractor contractor, Team team) {
+        Contractor roleContractor = role.getContractor();
+        if (roleContractor != null && (Objects.equals(contractor.getId(), roleContractor.getId()))) {
+            role.setAccepted(false);
+            role.setContractor(null);
+            teamsRepository.save(team);
+            return true;
+        } else {
+            throw new IllegalStateException("The given contractor is not assigned to the given role.");
+        }
     }
 }
