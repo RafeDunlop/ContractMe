@@ -116,6 +116,31 @@ public class EditTaskControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "jane@doe.com")
+    public void editTask_fromCalendar_editTaskAndRedirect() throws Exception {
+        String dateToReturnTo = LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("name", "Demolish walls")
+                        .param("description", "Demolish all the stuff")
+                        .param("rooms", "Room 1", "Room 2")
+                        .param("taskId", "1")
+                        .param("renovationId", "1")
+                        .param("dateToReturnTo", dateToReturnTo)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(view().name(String.format("redirect:/renovations/view?id=1&dateEdited=%s#cellEdited", dateToReturnTo)));
+
+        ArgumentCaptor<RenovationTask> taskCaptor = ArgumentCaptor.forClass(RenovationTask.class);
+        Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(taskCaptor.capture());
+
+        RenovationTask savedTask = taskCaptor.getValue();
+        assertEquals("Demolish walls", savedTask.getName());
+        assertEquals("Demolish all the stuff", savedTask.getDescription());
+        assertEquals(List.of("Room 1", "Room 2"), savedTask.getRoomList());
+    }
+
+    @Test
+    @WithMockUser(username = "jane@doe.com")
     public void testEditTask_invalidTaskName_TaskNotEditStaysOnCreateEditTask() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/editTask")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)

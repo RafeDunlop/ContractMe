@@ -68,7 +68,7 @@ public class EditProfileStepsE2e {
         RunPlaywrightTests.page.navigate(RunPlaywrightTests.baseUrl + "/user/edit");
     }
 
-    @When("I enter valid values for my first name,last name, and email address")
+    @When("I enter valid values for my first name, last name, and email address")
     public void i_enter_valid_values_for_my_first_name_last_name_and_email_address() {
         RunPlaywrightTests.page.locator("#first-name").fill("John");
         RunPlaywrightTests.page.locator("#last-name").fill("Smith");
