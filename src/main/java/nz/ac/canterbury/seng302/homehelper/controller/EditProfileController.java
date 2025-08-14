@@ -160,7 +160,7 @@ public class EditProfileController {
             redirectAttributes.addFlashAttribute("contractorDTO", contractorDTO);
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
             if (currentLocation != null || locationService.isLocationProvided(addressDTO)) {
-                redirectAttributes.addFlashAttribute("locationUsed", true);
+                redirectAttributes.addFlashAttribute("hasLocation", true);
             }
             return "redirect:/user/edit";
         }
