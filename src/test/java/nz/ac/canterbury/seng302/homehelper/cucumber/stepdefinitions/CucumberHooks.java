@@ -5,6 +5,7 @@ import jakarta.persistence.EntityManager;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
@@ -21,11 +22,15 @@ public class CucumberHooks {
     @Autowired
     private TeamsRepository teamsRepository;
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
     private EntityManager entityManager;
     /** Entities must be deleted in order of children to parent */
     @Before
     @Transactional
     public void clearDatabaseBeforeScenario() {
+        entityManager.createQuery("DELETE FROM Authority").executeUpdate();
+
         entityManager.createQuery("DELETE FROM RenovationTask ").executeUpdate();
         renovationTaskRepository.deleteAll();
 
@@ -38,6 +43,9 @@ public class CucumberHooks {
 
         entityManager.createQuery("DELETE FROM Tag").executeUpdate();
         tagRepository.deleteAll();
+
+        entityManager.createQuery("DELETE FROM User").executeUpdate();
+        userRepository.deleteAll();
 
         entityManager.flush();
         entityManager.clear();

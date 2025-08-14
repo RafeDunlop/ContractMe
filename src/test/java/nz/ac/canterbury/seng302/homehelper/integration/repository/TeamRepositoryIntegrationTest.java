@@ -10,6 +10,8 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -48,20 +50,22 @@ public class TeamRepositoryIntegrationTest {
         assertThat(result).isFalse();
     }
 
-    @Test
-    void contractor_on_team_for_record_returns_true() {
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void contractor_on_team_for_record_accepted_parameterized_returns_true(boolean accepted) {
         User owner = userRepository.save(new User("Steve","Jobs","steve@test.com","Password123!"));
         RenovationRecord record = renovationRecordRepository.save( new RenovationRecord(owner, "Test Renovation", "a description", Collections.emptyList()));
         Team team = new Team(record);
 
         Contractor contractor = userRepository.save( new Contractor("Greg", "Smith", "greg@test.com", "Password123!"));
-        team.addRole(new Role(contractor, Skill.ELECTRICAL, true));
+        team.addRole(new Role(contractor, Skill.ELECTRICAL, accepted));
 
         teamsRepository.save(team);
 
         boolean result = teamsRepository.checkIfUserBelongsToRecordTeam(record, contractor.getId());
         assertThat(result).isTrue();
     }
+
 
     @Test
     void user_not_contractor_no_team_on_record_returns_false() {
