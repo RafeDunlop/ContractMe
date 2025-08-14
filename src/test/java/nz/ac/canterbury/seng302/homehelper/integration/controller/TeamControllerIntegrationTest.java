@@ -2,11 +2,9 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nz.ac.canterbury.seng302.homehelper.controller.TeamController;
-import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
@@ -20,21 +18,20 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -71,12 +68,17 @@ public class TeamControllerIntegrationTest {
 
     private TestInfo testInfo;
 
+    private MockHttpSession session;
+
+
     @BeforeEach
     public void setup(TestInfo testInfo) {
         user = new User("Jane", "Doe", "jane@doe.nz", "password");
         user = userRepository.save(user);
+        user.grantAuthority("ROLE_USER");
         renovationRecord = new RenovationRecord(user, "test renovation", "test description", List.of());
         renovationRecord = renovationRecordRepository.save(renovationRecord);
+        session = new MockHttpSession();
 
         if (testInfo.getDisplayName().contains("hasLocation")) {
             Location location = new Location();
@@ -84,7 +86,6 @@ public class TeamControllerIntegrationTest {
             renovationRecord.setLocation(location);
             renovationRecordRepository.save(renovationRecord);
         }
-
     }
 
     @Test
@@ -151,4 +152,17 @@ public class TeamControllerIntegrationTest {
                 .param("skills", "ELECTRICAL", "PLUMBING"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    public void teamController_hasTeamJoinRequest_getsForm() throws Exception {
+        MvcResult result = mockMvc.perform(get("/renovations/team/join-team")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertTrue(result.getResponse().getContentAsString().contains("Renovation Name"));
+        assertTrue(result.getResponse().getContentAsString().contains("Role"));
+
+    }
 }
+
+
