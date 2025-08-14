@@ -15,7 +15,10 @@ public class JoinTeamController {
 
     public void JoinTeamController() {}
 
-
+    /**
+     * Handler for a get request to the join team fragment.
+     * @return the join team fragment
+     */
     @GetMapping("/join-team")
     public String joinTeam(Model model) {
         return "joinTeamInbox";
