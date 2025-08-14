@@ -13,7 +13,7 @@ Feature: As Kaia, I want to be able to create and edit tasks directly from the c
     When I double click on the task in the calendar
     Then I see the edit task page
 
-  Scenario Outline: AC3
+  Scenario Outline: AC3.1
     Given I am viewing the calendar for this month with a task due on day <day of month>
     And I click on day <day of month> to go to the <task form> form
     And I enter valid details to the <task form> form
@@ -26,3 +26,9 @@ Feature: As Kaia, I want to be able to create and edit tasks directly from the c
       | 10            | "Edit Task"        | "Submit"     |
       | 27            | "Create Task"      | "Cancel"     |
       | 16            | "Create Task"      | "Submit"     |
+
+
+  Scenario: AC3.2
+    Given I am viewing the calendar for this month with a task due on day 1
+    When I click on day 1 to go to the "Create Task" form
+    Then I can see the "dueDate" field prefilled with day 1

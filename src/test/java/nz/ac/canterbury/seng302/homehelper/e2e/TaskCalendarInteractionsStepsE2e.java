@@ -161,4 +161,11 @@ public class TaskCalendarInteractionsStepsE2e {
         String expectedBackgroundColour = (today.getDayOfMonth() == dayOfMonth) ? "rgb(135, 188, 250)" : "rgb(250, 250, 145)"; // blue : yellow
         assertEquals(expectedBackgroundColour, actualBackgroundColour);
     }
+
+    @Then("I can see the {string} field prefilled with day {int}")
+    public void iCanSeeTheFieldPrefilledWithDay(String fieldName, int dayOfMonth) {
+        String expectedValue = today.withDayOfMonth(dayOfMonth).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String actualValue = RunPlaywrightTests.page.locator(String.format("#%s", fieldName)).inputValue();
+        assertEquals(expectedValue, actualValue);
+    }
 }
