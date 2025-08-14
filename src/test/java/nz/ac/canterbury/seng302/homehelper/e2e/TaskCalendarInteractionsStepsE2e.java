@@ -151,6 +151,8 @@ public class TaskCalendarInteractionsStepsE2e {
             case "Submit" -> RunPlaywrightTests.page.locator("button[type=submit]").click();
 
             case "Cancel" -> RunPlaywrightTests.page.locator(".cancel-task-form").click();
+
+            default -> throw new IllegalStateException(String.format("Unexpected button name: %s", buttonName));
         }
     }
 
