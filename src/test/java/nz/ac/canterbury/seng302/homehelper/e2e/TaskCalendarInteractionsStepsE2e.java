@@ -110,7 +110,7 @@ public class TaskCalendarInteractionsStepsE2e {
         i_navigate_to_the_renovation();
     }
 
-    @And("I click on day {int} to go to the {string} form")
+    @And("I double click on day {int} to go to the {string} form")
     public void iClickOnDayDayOfMonthToGoToTheTaskFormForm(int dayOfMonth, String formName) {
         LocalDate dayToClick = today.withDayOfMonth(dayOfMonth);
         switch (formName) {

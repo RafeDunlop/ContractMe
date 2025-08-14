@@ -15,7 +15,7 @@ Feature: As Kaia, I want to be able to create and edit tasks directly from the c
 
   Scenario Outline: AC3.1
     Given I am viewing the calendar for this month with a task due on day <day of month>
-    And I click on day <day of month> to go to the <task form> form
+    And I double click on day <day of month> to go to the <task form> form
     And I enter valid details to the <task form> form
     When I click the form button labelled <button>
     Then I am returned to the calendar view with the <day of month> of the edited task highlighted yellow if it is not the current day
@@ -30,5 +30,5 @@ Feature: As Kaia, I want to be able to create and edit tasks directly from the c
 
   Scenario: AC3.2
     Given I am viewing the calendar for this month with a task due on day 1
-    When I click on day 1 to go to the "Create Task" form
+    When I double click on day 1 to go to the "Create Task" form
     Then I can see the "dueDate" field prefilled with day 1
