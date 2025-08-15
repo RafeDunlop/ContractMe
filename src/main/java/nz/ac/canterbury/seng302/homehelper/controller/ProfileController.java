@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
+import nz.ac.canterbury.seng302.homehelper.util.LocaleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -35,6 +37,7 @@ public class ProfileController {
 
 	private final LoginService loginService;
 	private final ContractorRepository contractorRepository;
+	private final LocaleUtil localeUtil;
 
 	/**
 	 * Induces spring to automatically set up the LoginService
@@ -44,6 +47,7 @@ public class ProfileController {
 	public ProfileController(LoginService loginService, ContractorRepository contractorRepository) {
 		this.loginService = loginService;
 		this.contractorRepository = contractorRepository;
+		localeUtil = new LocaleUtil();
 	}
 
 	/**
@@ -69,7 +73,8 @@ public class ProfileController {
 			if (user instanceof Contractor contractor) {
 				model.addAttribute("userType", "Contractor");
 				model.addAttribute("phoneNumber", contractor.getPhoneNumberFormatted());
-				model.addAttribute("hourlyRate", contractor.getHourlyRateFormatted(request.getLocale()));
+				Locale locale = localeUtil.getSafeLocale(request.getLocale());
+				model.addAttribute("hourlyRate", contractor.getHourlyRateFormatted(locale));
 				model.addAttribute("skills", contractor.getSkills());
 				model.addAttribute("isAvailable", contractor.getAvailable());
 				model.addAttribute("contractor", contractor);

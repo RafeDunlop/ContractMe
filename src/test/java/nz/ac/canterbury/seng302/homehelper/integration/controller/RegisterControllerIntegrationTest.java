@@ -237,6 +237,8 @@ public class RegisterControllerIntegrationTest {
                         .param("city", "Christchurch")
                         .param("postcode", "8041")
                         .param("country", "New Zealand")
+                        .param("lat", "1d")
+                        .param("lon", "1d")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(view().name("redirect:/confirm-registration"));

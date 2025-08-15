@@ -90,7 +90,15 @@ public class ContractorService {
         return errors;
     }
 
-    public Contractor getContractorById(long userId) {
-        return contractorRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Contractor: " + userId + " not found"));
+
+    /**
+     * Retrieves a contractor by their identifier.
+     *
+     * @param id the unique identifier of the contractor to be retrieved
+     * @return the contractor associated with the given ID, or null if no contractor is found
+     */
+    public Contractor getContractorById(Long id) {
+        return contractorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Contractor: " + id + " not found"));
     }
+
 }

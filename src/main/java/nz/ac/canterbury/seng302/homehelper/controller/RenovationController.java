@@ -34,6 +34,7 @@ import org.springframework.web.util.UrlPathHelper;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -61,7 +62,9 @@ public class RenovationController {
      * @param locationService         The location service provides the function to validate the locations
      */
     @Autowired
-    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService,LocationService locationService,TeamsService teamsService) {
+    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService,
+                                RenovationTaskService renovationTaskService, TagService tagService,
+                                LocationService locationService, TeamsService teamsService) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.loginService = loginService;
@@ -366,7 +369,8 @@ public class RenovationController {
 
         User user = loginService.getUserByEmail();
         boolean isOwner = user.equals(record.getUser());
-        if (!isOwner && !record.isPublic()) {
+
+        if (!isOwner && !record.isPublic() && !teamsService.checkViewRenovationAccess(record, user)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
@@ -386,6 +390,7 @@ public class RenovationController {
         model.addAttribute("pageNumber", Math.max(pageNumber, 1));
         model.addAttribute("renovation", record);
         model.addAttribute("icons", iconFileNames);
+        model.addAttribute("dateFormatter", DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
         return "viewRenovation";
     }
@@ -421,6 +426,7 @@ public class RenovationController {
         injectDateElements(year, month, dateEdited, model, record);
         model.addAttribute("id", id);
         model.addAttribute("dateEdited", dateEdited);
+        model.addAttribute("dateFormatter", DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
         return "fragments/calendar :: calendar";  // return only fragment for partial update
     }

@@ -2,6 +2,7 @@ import {
     checkEmailField,
     checkNameField,
 } from './userValidation.js';
+import {validateCountryCode, validateHourlyRate, validatePhoneNumber} from "./contractorValidation.js";
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -22,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastNameFrontendErrorMessage = document.getElementById("last-name-frontend-error-message");
     let lastNameBackendError = document.getElementById("last-name-backend-error");
 
-// Event listeners
+    // Event listeners
     emailField.addEventListener("input", () => {
         checkEmailField(
             emailField.value,
@@ -52,4 +53,36 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     });
 
+    const contractorForm = document.getElementById("contractor-form");
+
+    if (contractorForm) {
+
+        let hourlyRateField = document.getElementById("hourlyRate");
+        let hourlyRateFrontendError = document.getElementById("hourly-rate-frontend-error");
+        let hourlyRateFrontendErrorMessage = document.getElementById("hourly-rate-frontend-error-message");
+        let hourlyRateBackendError = document.getElementById("hourly-rate-backend-error");
+
+        let phoneNumberField = document.getElementById("phoneNumber");
+        let phoneNumberFrontendError = document.getElementById("phone-number-frontend-error");
+        let phoneNumberFrontendErrorMessage = document.getElementById("phone-number-frontend-error-message");
+        let phoneNumberBackendError = document.getElementById("phone-number-backend-error");
+
+        let countryCodeField = document.getElementById("countryCode");
+
+        //Event listeners
+        hourlyRateField.addEventListener("input", () => {
+            validateHourlyRate(hourlyRateField.value, hourlyRateFrontendErrorMessage, hourlyRateFrontendError,
+                hourlyRateBackendError);
+        });
+
+        phoneNumberField.addEventListener("input", () => {
+            validatePhoneNumber(phoneNumberField.value, phoneNumberFrontendErrorMessage, phoneNumberFrontendError,
+                phoneNumberBackendError);
+        });
+
+        countryCodeField.addEventListener("input", () => {
+            validateCountryCode(countryCodeField.value, phoneNumberFrontendErrorMessage, phoneNumberFrontendError,
+                phoneNumberBackendError);
+        });
+    }
 });

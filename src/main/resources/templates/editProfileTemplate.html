@@ -5,7 +5,9 @@
     <base th:href="@{/}"/>
     <title>Edit Profile</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+    <link th:href="@{/css/tags.css}" rel="stylesheet">
+    <link th:href="@{/css/inputBoxStyles.css}" rel="stylesheet">
 
 
     <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
@@ -103,23 +105,32 @@
                 </div>
             </div>
 
+            <!-- CONTRACTOR FORM FRAGMENT -->
+            <div th:if="${isContractor}" class="pb-3 form-extension" id="contractor-form">
+                <div th:replace="~{fragments/contractorRegistration.html ::
+                    contractor-registration(skills=${skills}, dto=${contractorDTO})}"></div>
+            </div>
+
             <!-- LOCATION TOGGLE SWITCH -->
             <div class="d-flex justify-content-between align-items-center pb-4 px-0" style="width: 22%">
-                <div id="location-toggle-switch-label">Enter Location (Optional):</div>
-                <div>
+                <div id="location-toggle-switch-label">
+                    <div th:if="${!isContractor}">Enter Location (Optional):</div>
+                    <div th:if="${isContractor}">Enter Location:</div>
+                </div>
+
+                <div th:style="${isContractor} ? 'display : none'">
                     <label class="switch">
-                        <input type="checkbox" id="location-toggleswitch" th:checked="${locationUsed}">
+                        <input type="checkbox" id="location-toggleswitch" th:checked="${hasLocation}" th:disabled="${isContractor}">
                         <span class="slider"></span>
                     </label>
                 </div>
             </div>
 
             <!-- LOCATION FORM FRAGMENT -->
-            <div th:class="'pb-3 ' + (${locationUsed} ? 'form-extension' : 'hidden-form-extension')" id="location-form">
+            <div th:class="'pb-3 ' + (${hasLocation} ? 'form-extension' : 'hidden-form-extension')" id="location-form">
                 <div th:replace="~{fragments/locationForm.html :: locationForm(
                      addressDTO=${addressDTO})}"></div>
             </div>
-
 
             <!-- Form submission buttons -->
             <div class="d-flex justify-content-between align-items-center">
@@ -141,4 +152,5 @@
 <script type="module" th:src="@{/js/validation/profilePictureValidation.js}"></script>
 <script type="module" th:src="@{/js/locationToggleSwitch.js}"></script>
 <script type="module" th:src="@{/js/navbar.js}"></script>
+<script type="module" th:src="@{/js/skills.js}" th:if="${isContractor}" ></script>
 </html>
