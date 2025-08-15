@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @WithMockUser(username = "jane@doe.nz")
 @Transactional
-public class TeamInvitationControllerTest {
+public class TeamInvitationControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -119,11 +119,19 @@ public class TeamInvitationControllerTest {
 
     @Test
     @WithMockUser(username = "Steve@doe.nz")
-    void accep() throws Exception {
+    void acceptInvitation_notApartOfTeam_returnNotFound() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/accept")
                         .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()));
+                .andExpect(status().isNotFound())
+                .andExpect(status().reason("Unable to accept invitation, link is no longer valid."));
     }
 
+    @Test
+    @WithMockUser(username = "Steve@doe.nz")
+    void declineInvitation_notApartOfTeam_returnNotFound() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/decline")
+                        .with(csrf()))
+                .andExpect(status().isNotFound())
+                .andExpect(status().reason("Unable to decline invitation, link is no longer valid."));
+    }
 }

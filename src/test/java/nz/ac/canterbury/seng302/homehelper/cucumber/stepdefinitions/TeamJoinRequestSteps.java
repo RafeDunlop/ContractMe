@@ -19,8 +19,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -97,5 +101,50 @@ public class TeamJoinRequestSteps {
     public void i_can_view_the_renovation_record() throws Exception {
         resultActions.andExpect(status().isOk())
                 .andExpect(view().name("viewRenovation"));
+    }
+
+    @When("I click the {string} button")
+    public void i_click_the_button(String button) throws Exception {
+        resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/" + button)
+                    .with(user(contractor.getEmail()).roles("USER", "CONTRACTOR"))
+                    .with(csrf()));
+
+    }
+
+    @Then("I am taken to the renovation page")
+    public void i_am_taken_to_the_renovation_page() throws Exception {
+        String expectedUrl = "/renovations/view?id=" + Long.toString(renovationRecord.getId());
+        resultActions.andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedUrl));
+    }
+
+
+    @Then("I am taken to the main page")
+    public void i_am_taken_to_the_main_page() throws Exception {
+        String expectedUrl = "/main";
+        resultActions.andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedUrl));
+    }
+
+    @Then("I am in the team")
+    public void i_am_in_the_team() {
+        boolean inTeam = team.getRoles().stream()
+                .anyMatch(r -> r.getContractor() != null
+                        && r.getContractor().equals(contractor));
+        assertTrue(inTeam);
+    }
+
+    @Then("I am not in the team")
+    public void i_am_not_in_the_team() {
+        boolean inTeam = team.getRoles().stream()
+                .anyMatch(r -> r.getContractor() != null
+                        && r.getContractor().equals(contractor));
+        assertFalse(inTeam);
+    }
+
+    @Given("I am shown an error page displaying {string}")
+    public void i_am_shown_an_error_page_displaying(String error) throws Exception {
+        resultActions.andExpect(status().isNotFound())
+                .andExpect(status().reason(error));
     }
 }
