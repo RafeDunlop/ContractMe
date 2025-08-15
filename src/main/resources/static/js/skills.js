@@ -6,6 +6,17 @@ const validSkills = Array.from(skillsSelect.options).map(skill => skill.value);
 let selectedSkills = []
 
 /**
+ * A listener to add any existing user skills to the list of selected skills so that each bubble value can only be added
+ * once.
+ */
+addEventListener("DOMContentLoaded", () => {
+    const existingSkills = hiddenSkillInputContainer.querySelectorAll("input")
+    existingSkills.forEach(skill => {
+        selectedSkills.push(skill.value)
+    })
+})
+
+/**
  * A listener to add a skill to the list of selected skills if it hasn't already been added when an option is pressed on
  * the selection box. Calls the method to create the bubble when a skill is added.
  */

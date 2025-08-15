@@ -26,7 +26,10 @@ public class Contractor extends User {
     @Column
     private int countryCode;
 
-    @ElementCollection
+    @ElementCollection(targetClass = Skill.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "contractor_skills", joinColumns = @JoinColumn(name = "contractor_id"))
+    @Column(name = "skill")
     private Set<Skill> skills;
 
     @Column
@@ -133,6 +136,16 @@ public class Contractor extends User {
     public boolean addSkill(Skill skill) {
         return skills.add(skill);
     }
+
+    /**
+     * Set  a skill to the contractor's skill set.
+     *
+     * @param skills The skill to add.
+     */
+    public void setSkills(Set<Skill> skills) {
+        this.skills = skills;
+    }
+
     /**
      * Removes a skill from the contractor's skill set.
      *

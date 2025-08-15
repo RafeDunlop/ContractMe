@@ -13,7 +13,9 @@ import java.util.*;
 import javax.imageio.ImageIO;
 
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -71,11 +73,35 @@ public class EditProfileService {
         SecurityContextHolder.getContext().setAuthentication(newAuth);
     }
 
+    /**
+     * Updates the location of a given user based on the provided address details.
+     * This method first updates the provided address details with some existing
+     * location information, and then determines the new location to associate
+     * with the user. The updated user object is returned.
+     *
+     * @param currentUser The user whose location is being updated.
+     * @param addressDTO The address details used to update the user's location.
+     * @return The updated user with the new location.
+     */
     public User updateUserLocation(User currentUser, AddressDTO addressDTO) {
         Location currentLocation = currentUser.getLocation();
         addressDTO = locationService.updateEditedLocation(currentLocation, addressDTO);
         currentUser.setLocation(locationService.locate(addressDTO));
         return currentUser;
+    }
+
+    /**
+     * Updates the contractor's details based on the provided user registration data.
+     *
+     * @param userRegisterDTO Data transfer object containing the updated registration details
+     * @param contractor The contractor entity to be updated
+     */
+    public void updateContractor(UserRegisterDTO userRegisterDTO, Contractor contractor) {
+        contractor.setCountryCode(userRegisterDTO.getCountryCode());
+        contractor.setPhoneNumber(userRegisterDTO.getPhoneNumber());
+        contractor.setHourlyRate(userRegisterDTO.getHourlyRate());
+        contractor.setSkills(new HashSet<>(userRegisterDTO.getSkills()));
+        updateUser(contractor);
     }
 
     /**

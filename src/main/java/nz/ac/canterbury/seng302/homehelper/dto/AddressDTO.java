@@ -3,6 +3,8 @@ package nz.ac.canterbury.seng302.homehelper.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 
+import java.util.Objects;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AddressDTO {
 
@@ -134,6 +136,21 @@ public class AddressDTO {
 
     public void setRegion(String region) {
         this.region = region;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        AddressDTO addressDTO = (AddressDTO) o;
+        return Objects.equals(country, addressDTO.country) && Objects.equals(postcode, addressDTO.postcode)
+                && Objects.equals(city, addressDTO.city) && Objects.equals(region, addressDTO.region)
+                && Objects.equals(lat, addressDTO.lat) && Objects.equals(lon, addressDTO.lon)
+                && Objects.equals(address_line1, addressDTO.address_line1);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(country, postcode, city, region, lat, lon, address_line1);
     }
 
     /**

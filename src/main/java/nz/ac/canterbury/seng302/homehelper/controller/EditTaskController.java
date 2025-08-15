@@ -63,6 +63,7 @@ public class EditTaskController {
     @GetMapping("/editTask")
     public String editTask(@RequestParam(name = "taskId") Long taskId,
                            @RequestParam(name = "renovationId") Long renovationId,
+                           @RequestParam(name = "fromDate", required = false, defaultValue = "") String fromDate,
                            Model model) {
 
         logger.info("GET renovations/editTask");
@@ -85,6 +86,8 @@ public class EditTaskController {
         model.addAttribute("roomList", renovationRecord.getRooms());
         model.addAttribute("renovationTaskDTO", renovationTaskDTO);
 
+        model.addAttribute("fromDate", fromDate);
+
         return "editTaskTemplate";
     }
 
@@ -106,6 +109,7 @@ public class EditTaskController {
     public String editTask(@ModelAttribute("renovationTaskDTO") RenovationTaskDTO renovationTaskDTO,
                                 @RequestParam(name = "taskId") Long taskId,
                                 @RequestParam(name = "renovationId") Long renovationId,
+                                @RequestParam(required = false, defaultValue = "") String dateToReturnTo,
                                 RedirectAttributes redirectAttributes) {
         logger.info("POST renovations/editTask");
         RenovationTask renovationTask = renovationTaskService.getTaskById(taskId);
@@ -133,7 +137,9 @@ public class EditTaskController {
 
         try {
             editTaskService.updateTask(renovationTaskDTO,renovationTask);
-            return "redirect:/renovations/view?id=" + renovationId;
+            return (dateToReturnTo.isEmpty()) ?
+                    String.format("redirect:/renovations/view?id=%s", renovationId) :
+                    String.format("redirect:/renovations/view?id=%s&dateEdited=%s#cellEdited", renovationId, dateToReturnTo);
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error {}", e.getMessage());
 
