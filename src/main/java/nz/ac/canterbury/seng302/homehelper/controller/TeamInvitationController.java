@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamInvitationService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +19,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/renovations/team/invitations")
-public class InvitationController {
+public class TeamInvitationController {
 
-    private static final Logger logger = LoggerFactory.getLogger(InvitationController.class);
+    private static final Logger logger = LoggerFactory.getLogger(TeamInvitationController.class);
+    private final LoginService loginService;
 
     TeamsService teamsService;
 
@@ -29,24 +31,23 @@ public class InvitationController {
     ContractorService contractorService;
 
     @Autowired
-    public InvitationController(TeamsService teamsService, ContractorService contractorService, TeamInvitationService teamInvitationService) {
+    public TeamInvitationController(TeamsService teamsService, ContractorService contractorService, TeamInvitationService teamInvitationService, LoginService loginService) {
         this.teamsService = teamsService;
         this.contractorService = contractorService;
         this.teamInvitationService = teamInvitationService;
+        this.loginService = loginService;
     }
 
-    @GetMapping("/{teamId}/{userId}")
+    @GetMapping("/{teamId}")
     public String viewInvitation(
             @PathVariable long teamId,
-            @PathVariable long userId,
             Model model) {
 
         model.addAttribute("teamId", teamId);
-        model.addAttribute("userId", userId);
+        Long userId = loginService.getUserByEmail().getId();
         try {
-            Contractor contractor = contractorService.getContractorById(userId);
             Team team = teamsService.getTeamById(teamId);
-            if (teamInvitationService.linkExpired(contractor, team)) {
+            if (teamInvitationService.linkExpired(contractorService.getContractorById(userId), team)) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team invitation link is no longer valid.");
             }
         } catch (EntityNotFoundException e) {
@@ -56,14 +57,13 @@ public class InvitationController {
         return "joinTeamInbox";
     }
 
-    @PostMapping("/{teamId}/{userId}/accept")
+    @PostMapping("/{teamId}/accept")
     public String acceptInvitation(@PathVariable long teamId,
-                                   @PathVariable long userId,
                                    RedirectAttributes redirectAttributes,
                                    Model model) {
 
-        logger.info("POST /invitations/{}/{} accept", teamId, userId);
-
+        logger.info("POST /invitations/{} accept", teamId);
+        Long userId = loginService.getUserByEmail().getId();
         Team team = teamsService.getTeamById(teamId);
         Contractor contractor = contractorService.getContractorById(userId);
 
@@ -72,13 +72,12 @@ public class InvitationController {
         return String.format("redirect:/renovations/view?id=%d", team.getRenovationRecord().getId());
     }
 
-    @PostMapping("/{teamId}/{userId}/decline")
+    @PostMapping("/{teamId}/decline")
     public String declineInvitation(
-            @PathVariable long teamId,
-            @PathVariable long userId) {
+            @PathVariable long teamId) {
 
-        logger.info("POST /invitations/{}/{} decline", teamId, userId);
-
+        logger.info("POST /invitations/{} decline", teamId);
+        Long userId = loginService.getUserByEmail().getId();
         Team team = teamsService.getTeamById(teamId);
         Contractor contractor = contractorService.getContractorById(userId);
 
