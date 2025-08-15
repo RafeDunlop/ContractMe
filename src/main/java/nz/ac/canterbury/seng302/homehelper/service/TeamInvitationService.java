@@ -13,7 +13,7 @@ import java.util.Objects;
 @Service
 public class TeamInvitationService {
 
-    private TeamsRepository teamsRepository;
+    private final TeamsRepository teamsRepository;
 
     @Autowired
     public TeamInvitationService(TeamsRepository teamsRepository) {
@@ -23,7 +23,7 @@ public class TeamInvitationService {
     public void acceptContractor(Contractor contractor, Team team) {
         Role role = findAssignedRole(team, contractor);
         if (role.isAccepted()) {
-            return;
+            throw new IllegalStateException("Invitation already accepted.");
         }
 
         role.setAccepted(true);

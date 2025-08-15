@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/renovations/team/invitations")
@@ -58,32 +57,44 @@ public class TeamInvitationController {
     }
 
     @PostMapping("/{teamId}/accept")
-    public String acceptInvitation(@PathVariable long teamId,
-                                   RedirectAttributes redirectAttributes,
-                                   Model model) {
-
+    public String acceptInvitation(@PathVariable long teamId) {
         logger.info("POST /invitations/{} accept", teamId);
+
         Long userId = loginService.getUserByEmail().getId();
         Team team = teamsService.getTeamById(teamId);
         Contractor contractor = contractorService.getContractorById(userId);
 
-        teamInvitationService.acceptContractor(contractor, team);
+        try {
+            if (teamInvitationService.linkExpired(contractorService.getContractorById(userId), team)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to accept invitation, link is no longer valid.");
+            }
+            teamInvitationService.acceptContractor(contractor, team);
+        } catch (EntityNotFoundException | IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to accept invitation, link is no longer valid.");
+        }
 
         return String.format("redirect:/renovations/view?id=%d", team.getRenovationRecord().getId());
     }
 
     @PostMapping("/{teamId}/decline")
-    public String declineInvitation(
-            @PathVariable long teamId) {
-
+    public String declineInvitation(@PathVariable long teamId) {
         logger.info("POST /invitations/{} decline", teamId);
+
         Long userId = loginService.getUserByEmail().getId();
         Team team = teamsService.getTeamById(teamId);
         Contractor contractor = contractorService.getContractorById(userId);
 
+        try {
+            if (teamInvitationService.linkExpired(contractorService.getContractorById(userId), team)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to decline invitation, link is no longer valid.");
+            }
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to decline invitation, link is no longer valid.");
+        }
+
         teamInvitationService.declineContractor(contractor, team);
 
         //todo redirect to inbox when it exists
-        return "redirect:/main" + teamId;
+        return "redirect:/main";
     }
 }
