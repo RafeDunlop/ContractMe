@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.config;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Arrays;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +44,10 @@ public class DefaultDataConfigurator {
 
     private final TagService tagService;
 
+    private final TeamsService teamsService;
+
     private final ContractorService contractorService;
+    private final ContractorRepository contractorRepository;
 
     private User default1;
 
@@ -63,13 +68,17 @@ public class DefaultDataConfigurator {
                                    RenovationRecordService renovationRecordService,
                                    RenovationTaskService renovationTaskService,
                                    VerificationCodeService verificationCodeService,
-                                   TagService tagService, ContractorService contractorService) {
+                                   TagService tagService,
+                                   TeamsService teamsService,
+                                   ContractorService contractorService, ContractorRepository contractorRepository) {
         this.registerService = registerService;
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.verificationCodeService = verificationCodeService;
         this.contractorService = contractorService;
         this.tagService = tagService;
+        this.teamsService = teamsService;
+        this.contractorRepository = contractorRepository;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -79,6 +88,7 @@ public class DefaultDataConfigurator {
         setupDefaultRenovationTasks();
         setupDefaultTags();
     }
+
 
     private void setupDefaultUsers() {
         UserRegisterDTO user = new UserRegisterDTO();
@@ -119,7 +129,7 @@ public class DefaultDataConfigurator {
         user.setCountryCode(64);
         user.setPhoneNumber("33692888");
         AddressDTO address = new AddressDTO();
-        address.setAddress_line1("Jack Erskine");
+        address.setAddress_line1("Ilam Road");
         address.setCity("Christchurch");
         address.setRegion("Ilam");
         address.setCountry("New Zealand");
@@ -129,6 +139,28 @@ public class DefaultDataConfigurator {
         defaultContractor1 = contractorService.registerContractor(user, address);
         code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, defaultContractor1, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);
+
+        List<Skill> skillList = Skill.listOfSortedSkills();
+
+        // Add 10 Contractors to the default data
+        for (int i = 1; i <= 10; i++) {
+            user.setEmail("seng302.team200.contractor" + i + "@gmail.com");
+            address.setAddress_line1(i + " Ilam Road");
+            address.setLat(-43.522345 + i * 0.001);
+            address.setLon(172.580907 + i * 0.001);
+            user.setSkills(List.of(skillList.get(i)));
+            Contractor newContractor = contractorService.registerContractor(user, address);
+            Contractor contractor = contractorService.getContractorById(newContractor.getId());
+            code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, newContractor, Locale.ENGLISH);
+            verificationCodeService.consumeSignupCode(code);
+            contractor.setAvailable(true);
+            contractorRepository.save(contractor);
+
+        }
+
+
+
+
     }
 
     private void setupDefaultRenovations() {
@@ -169,6 +201,11 @@ public class DefaultDataConfigurator {
                         defaultJERooms
                 )
         );
+    }
+
+    private void setupDefaultTeams() {
+        Team team = new Team(default2Renovation1);
+
     }
 
 

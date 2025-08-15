@@ -111,7 +111,6 @@ public class TeamController {
             team.addRole(role);
         }
 
-
         teamsService.saveTeam(team);
 
         Location renovationLocation = renovationRecordService.getRecordById(id).getLocation();
