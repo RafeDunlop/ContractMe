@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
@@ -84,6 +85,21 @@ public class TeamsService {
         if (teamSizeError != null) errors.add(teamSizeError);
 
         return errors;
+    }
+
+    /**
+     * Returns a list of team requests for the given user after checking if they are a contractor.
+     *
+     * @param user the user to find team requests for
+     * @return the list of team requests, ordered by creation date
+     * @throws IllegalArgumentException if the user is not a contractor
+     */
+    public List<Team> getContractorTeamRequests(User user) throws IllegalArgumentException {
+        if (user instanceof Contractor contractor) {
+            return teamsRepository.findByRoleContractor(contractor);
+        } else {
+            throw new IllegalArgumentException("User is not a contractor");
+        }
     }
 
     /**

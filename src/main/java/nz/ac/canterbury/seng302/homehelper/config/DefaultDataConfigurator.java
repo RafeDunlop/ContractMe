@@ -162,13 +162,14 @@ public class DefaultDataConfigurator {
             renovationRecordService.addRenovationRecord(record);
         }
 
-        default1Renovation1 = renovationRecordService.addRenovationRecord(
-                new RenovationRecord(default1,
+        default1Renovation1 = new RenovationRecord(default1,
                         "Jack Erskine revamp",
                         "CSSE building => palace of slay",
                         defaultJERooms
-                )
         );
+        Location location = new Location("18 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
+        default1Renovation1.setLocation(location);
+        default1Renovation1 = renovationRecordService.addRenovationRecord(default1Renovation1);
     }
 
 

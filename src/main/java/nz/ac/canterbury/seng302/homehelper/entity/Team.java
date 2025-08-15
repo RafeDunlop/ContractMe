@@ -1,17 +1,11 @@
 package nz.ac.canterbury.seng302.homehelper.entity;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import java.util.ArrayList;
-import java.util.List;
-
+import jakarta.persistence.*;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a team entity, associated with a renovation record
@@ -29,7 +23,7 @@ public class Team {
 
     @ElementCollection
     @CollectionTable(name = "roles")
-    private List<Role> roles = new ArrayList<>();
+    private final List<Role> roles = new ArrayList<>();
 
     protected Team() {}
 
