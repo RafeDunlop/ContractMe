@@ -54,13 +54,9 @@ public class DefaultDataConfigurator {
 
     private User default2;
 
-    private Contractor defaultContractor1;
-
     private RenovationRecord default1Renovation1;
 
     private RenovationRecord default2Renovation1;
-
-    private RenovationRecord default2Renovation2;
 
     private static final int numGenericTasksToAdd = 101;
 
@@ -140,7 +136,7 @@ public class DefaultDataConfigurator {
         address.setPostcode("");
         address.setLat(-43.522345);
         address.setLon(172.580907);
-        defaultContractor1 = contractorService.registerContractor(user, address);
+        Contractor defaultContractor1 = contractorService.registerContractor(user, address);
         code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, defaultContractor1, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);
 
@@ -173,14 +169,9 @@ public class DefaultDataConfigurator {
                 "CSSE building => palace of slay",
                 defaultJERooms
         );
-        default2Renovation2 = new RenovationRecord(default2,
-                "Jacuzzi for Fabian's Office",
-                "Stress Relief :)",
-                defaultJERooms
-        );
+
         default2Renovation1.setLocation(new Location("Jack Erskine", "", "", "", ""));
         default2Renovation1 = renovationRecordService.addRenovationRecord(default2Renovation1);
-        default2Renovation2 = renovationRecordService.addRenovationRecord(default2Renovation2);
 
 
         // Add 200 test renovations for default1

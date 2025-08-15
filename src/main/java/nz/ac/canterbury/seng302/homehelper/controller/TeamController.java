@@ -117,11 +117,8 @@ public class TeamController {
         Location renovationLocation = renovationRecordService.getRecordById(id).getLocation();
         String response = teamsService.assignContractorsToTeam(team, renovationLocation);
 
-        if (response.isEmpty()) {
-            redirectAttributes.addFlashAttribute("response", true);
-        } else {
-            redirectAttributes.addFlashAttribute("response", false);
-        }
+
+        redirectAttributes.addFlashAttribute("response", response.isEmpty());
 
         return "redirect:/renovations/view?id=" + id;
     }

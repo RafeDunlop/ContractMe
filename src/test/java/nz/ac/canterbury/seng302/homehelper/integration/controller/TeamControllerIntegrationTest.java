@@ -29,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -47,8 +46,6 @@ public class TeamControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    private User user;
 
     private RenovationRecord renovationRecord;
 
@@ -74,10 +71,10 @@ public class TeamControllerIntegrationTest {
 
     @BeforeEach
     public void setup(TestInfo testInfo) {
-        user = new User("Jane", "Doe", "jane@doe.nz", "password");
-        user = userRepository.save(user);
-        user.grantAuthority("ROLE_USER");
-        renovationRecord = new RenovationRecord(user, "test renovation", "test description", List.of());
+        User newUser = new User("Jane", "Doe", "jane@doe.nz", "password");
+        newUser = userRepository.save(newUser);
+        newUser.grantAuthority("ROLE_USER");
+        renovationRecord = new RenovationRecord(newUser, "test renovation", "test description", List.of());
         renovationRecord = renovationRecordRepository.save(renovationRecord);
         session = new MockHttpSession();
 
@@ -87,10 +84,10 @@ public class TeamControllerIntegrationTest {
             location.setAddress("nonNull");
             location.setLongitude(172.580907);
             location.setLatitude(-43.522345);
-            user.setLocation(location);
+            newUser.setLocation(location);
             renovationRecord.setLocation(location);
             renovationRecordRepository.save(renovationRecord);
-            userRepository.save(user);
+            userRepository.save(newUser);
         }
 
         if (testInfo.getDisplayName().contains("assignContractors")) {
@@ -158,7 +155,7 @@ public class TeamControllerIntegrationTest {
     }
 
     @Test
-    public void hasLocation_createTeam_submitsTeamWithRoles_createsTeam() throws Exception {
+    void hasLocation_createTeam_submitsTeamWithRoles_createsTeam() throws Exception {
         mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", "DRYWALL_PLASTERING")
@@ -172,7 +169,7 @@ public class TeamControllerIntegrationTest {
     }
 
     @Test
-    public void hasLocation_createTeam_submitsTeamWithDuplicateRoles_createsTeam() throws Exception {
+    void hasLocation_createTeam_submitsTeamWithDuplicateRoles_createsTeam() throws Exception {
         mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", "ELECTRICAL", "ELECTRICAL")
@@ -208,7 +205,7 @@ public class TeamControllerIntegrationTest {
 
 
     @Test
-    public void hasLocation_createTeam_submitsTeamWithRoles_assignContractorsToTeams() throws Exception {
+    void hasLocation_createTeam_submitsTeamWithRoles_assignContractorsToTeams() throws Exception {
        mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", "ANTIQUE_RESTORATION", "ARCHITECTURE", "ASBESTOS_REMOVAL")
@@ -221,7 +218,7 @@ public class TeamControllerIntegrationTest {
     }
 
     @Test
-    public void hasLocation_createTeam_submitsTeamWithRoles_doesNotAssignContractorsToTeams() throws Exception {
+    void hasLocation_createTeam_submitsTeamWithRoles_doesNotAssignContractorsToTeams() throws Exception {
         mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", "ELECTRICAL", "RESOURCE_CONSENT_COMPLIANCE")
