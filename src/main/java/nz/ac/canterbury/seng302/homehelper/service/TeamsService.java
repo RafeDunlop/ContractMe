@@ -2,10 +2,12 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
@@ -84,6 +86,17 @@ public class TeamsService {
         if (teamSizeError != null) errors.add(teamSizeError);
 
         return errors;
+    }
+
+
+    /**
+     * Checks if a given user belongs to the team associated with a renovation record
+     * @param renovationRecord the renovation record that we want to check the associated team
+     * @param user the id of the user to check if they belong to the team
+     * @return boolean, true if the user is a contractor and belongs to the team associated with the record
+     */
+    public boolean checkViewRenovationAccess(RenovationRecord renovationRecord, User user) {
+        return teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, user.getId());
     }
 
     /**
