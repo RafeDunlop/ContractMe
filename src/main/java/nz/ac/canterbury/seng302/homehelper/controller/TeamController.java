@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
@@ -110,7 +111,18 @@ public class TeamController {
             team.addRole(role);
         }
 
+
         teamsService.saveTeam(team);
+
+        Location renovationLocation = renovationRecordService.getRecordById(id).getLocation();
+        String response = teamsService.assignContractorsToTeam(team, renovationLocation);
+
+        if (response.isEmpty()) {
+            model.addAttribute("response", "Team successfully assigned to contractors");
+        } else {
+            model.addAttribute("response", response);
+        }
+
         return "redirect:/renovations/view?id=" + id;
     }
 
