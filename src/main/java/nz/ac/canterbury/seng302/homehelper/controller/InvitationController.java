@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +16,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@RequestMapping("/invitations")
+@RequestMapping("/renovations/team/invitations")
 public class InvitationController {
 
     private static final Logger logger = LoggerFactory.getLogger(InvitationController.class);
 
-    @Autowired
     TeamsService teamsService;
 
-    @Autowired
     ContractorService contractorService;
+
+    @Autowired
+    public InvitationController(TeamsService teamsService, ContractorService contractorService) {
+        this.teamsService = teamsService;
+        this.contractorService = contractorService;
+    }
 
     @GetMapping("/{teamId}/{userId}")
     public String viewInvitation(
