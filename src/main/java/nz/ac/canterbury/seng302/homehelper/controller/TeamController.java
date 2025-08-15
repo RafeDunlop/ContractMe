@@ -20,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -92,7 +93,7 @@ public class TeamController {
     @PostMapping("/create")
     public String submitTeamRequest(TeamRequestDTO teamRequestDTO,
                                     @RequestParam(name = "id") Long id,
-                                    Model model) {
+                                    Model model, RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/team/create");
 
         List<String> errors = teamsService.validateTeam(teamRequestDTO);
@@ -117,9 +118,9 @@ public class TeamController {
         String response = teamsService.assignContractorsToTeam(team, renovationLocation);
 
         if (response.isEmpty()) {
-            model.addAttribute("response", "Team successfully assigned to contractors");
+            redirectAttributes.addFlashAttribute("response", true);
         } else {
-            model.addAttribute("response", response);
+            redirectAttributes.addFlashAttribute("response", false);
         }
 
         return "redirect:/renovations/view?id=" + id;
