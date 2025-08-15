@@ -94,49 +94,6 @@ public class TeamsService {
         return errors;
     }
 
-    public List<String> acceptContractor(Contractor contractor, Team team) {
-        List<String> errors = new ArrayList<>();
-        try {
-            Role role = findAssignedRole(team, contractor);
-
-            if (role.isAccepted()) {
-                errors.add("Contractor has already accepted.");
-                return errors;
-            }
-
-            role.setAccepted(true);
-            teamsRepository.save(team);
-        } catch (Exception e) { errors.add(e.getMessage()); }
-
-        return errors;
-    }
-
-    public List<String> declineContractor(Contractor contractor, Team team) {
-        List<String> errors = new ArrayList<>();
-        try {
-            Role role = findAssignedRole(team, contractor);
-
-            role.setAccepted(false);
-            role.setContractor(null);
-            teamsRepository.save(team);
-        }catch (Exception e) { errors.add(e.getMessage()); }
-
-        return errors;
-    }
-
-    public Role findAssignedRole(Team team, Contractor contractor) throws Exception {
-        List<Role> matches = team.getRoles().stream()
-                .filter(r -> r.getContractor() != null && Objects.equals(r.getContractor().getId(), contractor.getId()))
-                .toList();
-        if (matches.isEmpty()) {
-            throw new Exception("Contractor is not apart of this team.");
-        }
-        if (matches.size() > 1) {
-            throw new Exception("Contractor is in more then one role in the team.");
-        }
-        return matches.get(0);
-    }
-
     public Team getTeamById(long teamId) {
         return teamsRepository.findById(teamId).orElseThrow(() -> new EntityNotFoundException("Team: " + teamId + " not found"));
     }

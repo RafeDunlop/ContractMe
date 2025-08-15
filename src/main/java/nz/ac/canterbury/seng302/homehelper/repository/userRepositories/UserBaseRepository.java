@@ -1,7 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.repository.userRepositories;
 
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
@@ -22,11 +20,11 @@ public interface UserBaseRepository<T extends User> extends CrudRepository<T, Lo
 
     Optional<T> findByEmailIgnoreCase(String email);
 
-    /**
-     *  Finds a contractor from the repository by id
-     * @param id of the contractor to find
-     * @return an Optional containing the contractor if it exists
-     */
-    Optional<Contractor> findById(long id);
+//    /**
+//     *  Finds a contractor from the repository by id
+//     * @param id of the contractor to find
+//     * @return an Optional containing the contractor if it exists
+//     */
+//    Optional<RenovationRecord> findById(long id);
 
 }

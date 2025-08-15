@@ -152,17 +152,6 @@ public class TeamControllerIntegrationTest {
                 .param("skills", "ELECTRICAL", "PLUMBING"))
                 .andExpect(status().isNotFound());
     }
-
-    @Test
-    public void teamController_hasTeamJoinRequest_getsForm() throws Exception {
-        MvcResult result = mockMvc.perform(get("/renovations/team/join-team")
-                        .session(session))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertTrue(result.getResponse().getContentAsString().contains("Renovation Name"));
-        assertTrue(result.getResponse().getContentAsString().contains("Role"));
-
-    }
 }
 
 
