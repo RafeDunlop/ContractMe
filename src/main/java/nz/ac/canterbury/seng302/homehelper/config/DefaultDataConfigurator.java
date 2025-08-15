@@ -5,6 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +60,8 @@ public class DefaultDataConfigurator {
 
     private RenovationRecord default2Renovation1;
 
+    private RenovationRecord default2Renovation2;
+
     private static final int numGenericTasksToAdd = 101;
 
     private static final List<String> defaultJERooms = List.of("131", "133", "Fabian's office");
@@ -87,6 +90,7 @@ public class DefaultDataConfigurator {
         setupDefaultRenovations();
         setupDefaultRenovationTasks();
         setupDefaultTags();
+        setupDefaultTeams();
     }
 
 
@@ -169,8 +173,15 @@ public class DefaultDataConfigurator {
                 "CSSE building => palace of slay",
                 defaultJERooms
         );
+        default2Renovation2 = new RenovationRecord(default2,
+                "Jacuzzi for Fabian's Office",
+                "Stress Relief :)",
+                defaultJERooms
+        );
         default2Renovation1.setLocation(new Location("Jack Erskine", "", "", "", ""));
         default2Renovation1 = renovationRecordService.addRenovationRecord(default2Renovation1);
+        default2Renovation2 = renovationRecordService.addRenovationRecord(default2Renovation2);
+
 
         // Add 200 test renovations for default1
         for (int i = 1; i <= 200; i++) {
@@ -205,6 +216,12 @@ public class DefaultDataConfigurator {
 
     private void setupDefaultTeams() {
         Team team = new Team(default2Renovation1);
+        ArrayList<String> skillsList = new ArrayList<>(Arrays.asList("ANTIQUE_RESTORATION", "ARCHITECTURE", "ASBESTOS_REMOVAL", "AUTOMATION_SYSTEMS", "BUILDING_CODE_CONSULTATION"));
+        List<Role> roles = teamsService.createRoles(skillsList);
+        for(Role role : roles) {
+            team.addRole(role);
+        }
+        teamsService.saveTeam(team);
 
     }
 
