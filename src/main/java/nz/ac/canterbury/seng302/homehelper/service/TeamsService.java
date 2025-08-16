@@ -14,6 +14,7 @@ import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -26,6 +27,8 @@ public class TeamsService {
     private final TeamsRepository teamsRepository;
     private final TeamValidation teamValidation;
     private final ContractorRepository contractorRepository;
+    private final EmailService emailService;
+    private Logger logger;
 
     /**
      * Constructs TeamsService with necessary dependencies.
@@ -33,13 +36,12 @@ public class TeamsService {
      * @param teamValidation Service used to validate team requests.
      */
     @Autowired
-    public TeamsService(TeamsRepository teamsRepository, TeamValidation teamValidation, ContractorRepository contractorRepository) {
+    public TeamsService(TeamsRepository teamsRepository, TeamValidation teamValidation, ContractorRepository contractorRepository, EmailService emailService) {
         this.teamsRepository = teamsRepository;
         this.teamValidation = teamValidation;
         this.contractorRepository = contractorRepository;
+        this.emailService = emailService;
     }
-
-
 
 
     /**
@@ -100,6 +102,26 @@ public class TeamsService {
      */
     public boolean checkViewRenovationAccess(RenovationRecord renovationRecord, User user) {
         return teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, user.getId());
+    }
+
+
+    /**
+     * Goes through the list of contractors assigned to a team and
+     * emails them, notifying them that they have an offer to join
+     * a team
+     * @param team the newly created team emails are being sent to
+     */
+    public void sendContractorEmails(Team team) {
+        for (Role role : team.getRoles()) {
+            Contractor recipient = role.getContractor();
+            try {
+                String ownerName = team.getRenovationRecord().getUser().getFirstName();
+                emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
+                        team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault());
+            } catch (Exception e) {
+                logger.warning(e.getMessage());
+            }
+        }
     }
 
     /**

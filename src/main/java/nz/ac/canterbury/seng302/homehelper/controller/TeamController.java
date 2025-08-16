@@ -117,6 +117,7 @@ public class TeamController {
         Location renovationLocation = renovationRecordService.getRecordById(id).getLocation();
         String response = teamsService.assignContractorsToTeam(team, renovationLocation);
 
+        teamsService.sendContractorEmails(team);
 
         redirectAttributes.addFlashAttribute("response", response.isEmpty());
 
