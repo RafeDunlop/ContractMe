@@ -129,9 +129,17 @@ public class EmailService {
      */
     @Async
     public void sendRequestToContractor(String recipientEmail,
+            String recipientName,
+            String ownerName,
+            String renovationName,
+            String role,
             Locale locale) {
         final Context context = new Context(locale);
-        context.setVariable("name", recipientEmail);
+        context.setVariable("recipientEmail", recipientEmail);
+        context.setVariable("name", recipientName);
+        context.setVariable("owner", ownerName);
+        context.setVariable("renovation", renovationName);
+        context.setVariable("role", role);
         String subject = "Contractor Request";
         final String htmlContent = htmlTemplateEngine.process("html/email-confirm-team-request", context);
         sendEmail(recipientEmail, subject, htmlContent, "Contractor request send failed");
