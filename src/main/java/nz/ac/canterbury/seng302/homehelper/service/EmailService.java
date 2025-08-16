@@ -134,6 +134,8 @@ public class EmailService {
         context.setVariable("name", recipientEmail);
         String subject = "Contractor Request";
         final String htmlContent = htmlTemplateEngine.process("html/email-confirm-team-request", context);
+        sendEmail(recipientEmail, subject, htmlContent, "Contractor request send failed");
+
 
 
 
