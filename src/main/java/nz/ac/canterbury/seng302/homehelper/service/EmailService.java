@@ -121,4 +121,22 @@ public class EmailService {
         }
 
     }
+
+    /**
+     * Sends an email to a contractor when they've been successfully added to a team
+     *
+     * @param recipientEmail the email of the recipient contractor
+     */
+    @Async
+    public void sendRequestToContractor(String recipientEmail,
+            Locale locale) {
+        final Context context = new Context(locale);
+        context.setVariable("name", recipientEmail);
+        String subject = "Contractor Request";
+        final String htmlContent = htmlTemplateEngine.process("html/email-confirm-team-request", context);
+
+
+
+
+    }
 }
