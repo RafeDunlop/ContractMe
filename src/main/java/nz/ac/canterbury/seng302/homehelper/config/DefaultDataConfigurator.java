@@ -3,7 +3,9 @@ package nz.ac.canterbury.seng302.homehelper.config;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +46,8 @@ public class DefaultDataConfigurator {
 
     private final ContractorService contractorService;
 
+    private final TeamsService teamsService;
+
     private User default1;
 
     private User default2;
@@ -63,13 +67,15 @@ public class DefaultDataConfigurator {
                                    RenovationRecordService renovationRecordService,
                                    RenovationTaskService renovationTaskService,
                                    VerificationCodeService verificationCodeService,
-                                   TagService tagService, ContractorService contractorService) {
+                                   TagService tagService, ContractorService contractorService,
+                                   TeamsService teamsService) {
         this.registerService = registerService;
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.verificationCodeService = verificationCodeService;
         this.contractorService = contractorService;
         this.tagService = tagService;
+        this.teamsService = teamsService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -78,6 +84,7 @@ public class DefaultDataConfigurator {
         setupDefaultRenovations();
         setupDefaultRenovationTasks();
         setupDefaultTags();
+        setupTeamRequest();
     }
 
     private void setupDefaultUsers() {
@@ -287,5 +294,14 @@ public class DefaultDataConfigurator {
         tagService.createTag("Zoning");
         tagService.createTag("Z-Flashing");
         tagService.createTag("Zero Energy");
+    }
+
+    private void setupTeamRequest() {
+        Role role1 = new Role(defaultContractor1, Skill.ACOUSTIC_INSULATION, false);
+        Role role2 = new Role((Contractor) default2, Skill.ANTIQUE_RESTORATION, false);
+        Team team = new Team(default1Renovation1);
+        team.addRole(role1);
+        team.addRole(role2);
+        teamsService.saveTeam(team);
     }
 }
