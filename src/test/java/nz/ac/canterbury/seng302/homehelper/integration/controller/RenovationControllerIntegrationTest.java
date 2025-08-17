@@ -6,10 +6,14 @@ import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.CalendarCellDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.*;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
@@ -17,11 +21,11 @@ import nz.ac.canterbury.seng302.homehelper.service.TagService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -36,10 +40,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
-
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -66,6 +68,9 @@ public class RenovationControllerIntegrationTest {
 
     @Autowired
     private TagRepository tagRepository;
+
+    @Autowired
+    private TeamsRepository teamsRepository;
 
     @Autowired
     private TagService tagService;
@@ -1900,5 +1905,40 @@ public class RenovationControllerIntegrationTest {
                 .andReturn();
 
         Assertions.assertTrue(Objects.requireNonNull(result.getModelAndView()).getModelMap().containsKey("dateFormatter"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    @WithMockUser(username = "contractor@test.com")
+    void viewRenovation_private_contractorOnTeam_returnsOk(boolean accepted) throws Exception {
+        Contractor contractor = new Contractor("Greg", "Smith", "contractor@test.com", "Password123!");
+        contractor.grantAuthority("ROLE_USER");
+        userRepository.save(contractor);
+
+        renovationRecord.setPublicity(false);
+        renovationRecord = renovationRecordRepository.save(renovationRecord);
+
+        Team team = new Team(renovationRecord);
+        team.addRole(new Role(contractor, Skill.ELECTRICAL, accepted));
+        teamsRepository.save(team);
+
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", Long.toString(renovationRecord.getId()))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewRenovation"))
+                .andReturn();
+    }
+
+    @Test
+    @WithMockUser(username = "steve@test.com")
+    void viewRenovation_privateRenovation_noTeam_randomUser_4xx() throws Exception {
+        User randomUser = new User("Steve", "Jacobson", "steve@test.com", "Password123!");
+        userRepository.save(randomUser);
+
+        mockMvc.perform(get("/renovations/view")
+                        .param("id", renovationRecord.toString())
+                        .with(csrf()))
+                .andExpect(status().is4xxClientError());
     }
 }

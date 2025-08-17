@@ -62,7 +62,9 @@ public class RenovationController {
      * @param locationService         The location service provides the function to validate the locations
      */
     @Autowired
-    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService,LocationService locationService,TeamsService teamsService) {
+    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService,
+                                RenovationTaskService renovationTaskService, TagService tagService,
+                                LocationService locationService, TeamsService teamsService) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.loginService = loginService;
@@ -367,7 +369,8 @@ public class RenovationController {
 
         User user = loginService.getUserByEmail();
         boolean isOwner = user.equals(record.getUser());
-        if (!isOwner && !record.isPublic()) {
+
+        if (!isOwner && !record.isPublic() && !teamsService.checkViewRenovationAccess(record, user)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
