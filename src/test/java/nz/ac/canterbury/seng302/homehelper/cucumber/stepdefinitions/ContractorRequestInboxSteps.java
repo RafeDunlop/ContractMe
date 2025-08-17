@@ -74,17 +74,20 @@ public class ContractorRequestInboxSteps {
     @Then("I am taken to the contractor team request inbox where I can see requests from clients")
     public void i_am_taken_to_the_contractor_team_request_inbox_where_i_can_see_requests_from_clients() {
         Object returnedObject = Objects.requireNonNull(mvcResult.getModelAndView()).getModel().get("teams");
-        if (returnedObject instanceof List<?> returnedTeams) {
-            Team returnedTeam = (Team) returnedTeams.get(0);
-            Assertions.assertEquals(expectedTeams.size(), returnedTeams.size());
-            Assertions.assertEquals(expectedTeams.get(0).getId(), returnedTeam.getId());
-            Assertions.assertEquals(expectedTeams.get(0).getRenovationRecord().getId(), returnedTeam.getRenovationRecord().getId());
-            Assertions.assertEquals(expectedTeams.get(0).getRoles().get(0).getContractor(), returnedTeam.getRoles().get(0).getContractor());
-            Assertions.assertEquals(expectedTeams.get(0).getRoles().get(0).getSkill(), returnedTeam.getRoles().get(0).getSkill());
-        } else {
-            Assertions.fail("Team not found.");
-        }
+        Assertions.assertInstanceOf(List.class, returnedObject);
 
+        List<?> returnedTeams = (List<?>) returnedObject;
+
+        Team expectedTeam = expectedTeams.get(0);
+        Team returnedTeam = (Team) returnedTeams.get(0);
+        Assertions.assertEquals(expectedTeams.size(), returnedTeams.size());
+        Assertions.assertEquals(expectedTeam.getId(), returnedTeam.getId());
+        Assertions.assertEquals(expectedTeam.getRenovationRecord().getId(), returnedTeam.getRenovationRecord().getId());
+
+        Role expectedRole = expectedTeam.getRoles().get(0);
+        Role returnedRole = returnedTeam.getRoles().get(0);
+        Assertions.assertEquals(expectedRole.getContractor(), returnedRole.getContractor());
+        Assertions.assertEquals(expectedRole.getSkill(), returnedRole.getSkill());
     }
 
     @Then("I am redirected to the main page")
