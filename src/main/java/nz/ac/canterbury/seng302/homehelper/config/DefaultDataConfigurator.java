@@ -124,7 +124,7 @@ public class DefaultDataConfigurator {
 
         user.setIsContractor(true);
         user.setEmail("seng302.team200.contractor@gmail.com");
-        user.setSkills(List.of(Skill.SCAFFOLDING, Skill.RESOURCE_CONSENT_COMPLIANCE, Skill.CARPENTRY));
+        user.setSkills(List.of(Skill.SCAFFOLDING, Skill.RESOURCE_CONSENT_COMPLIANCE, Skill.CARPENTRY, Skill.ANTIQUE_RESTORATION));
         user.setHourlyRate(30.0f);
         user.setCountryCode(64);
         user.setPhoneNumber("33692888");
