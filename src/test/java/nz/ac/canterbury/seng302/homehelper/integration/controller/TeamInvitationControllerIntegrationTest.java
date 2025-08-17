@@ -64,15 +64,14 @@ public class TeamInvitationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "Steve@doe.nz")
-    void viewInvitation_contractorOnTeam_returns200() throws Exception {
+    void viewInvitation_contractorOnTeam_alreadyAccepted_returns404() throws Exception {
         team.addRole(new Role(contractor, Skill.ELECTRICAL, true));
         team = teamsRepository.save(team);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/invitations/" + team.getId())
                         .param("id", Long.toString(renovationRecord.getId())))
-                .andExpect(status().isOk())
-                .andExpect(view().name("joinTeamInbox"))
-                .andExpect(model().attribute("teamId", team.getId()));
+                .andExpect(status().isNotFound())
+                .andExpect(status().reason("Team invitation link is no longer valid."));
     }
 
     @Test
@@ -95,26 +94,26 @@ public class TeamInvitationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "Steve@doe.nz")
-    void acceptInvitation_alreadyAccepted_returnsRedirectToRenovationView() throws Exception {
+    void acceptInvitation_alreadyAccepted_returns404() throws Exception {
         team.addRole(new Role(contractor, Skill.ELECTRICAL, true));
         team = teamsRepository.save(team);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/accept")
                         .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()));
+                .andExpect(status().isNotFound())
+                .andExpect(status().reason("Unable to accept invitation, link is no longer valid."));
     }
 
     @Test
     @WithMockUser(username = "Steve@doe.nz")
-    void declineInvitation_alreadyAccepted_returnsRedirectToMain() throws Exception {
+    void declineInvitation_alreadyAccepted_returns404n() throws Exception {
         team.addRole(new Role(contractor, Skill.ELECTRICAL, true));
         team = teamsRepository.save(team);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/decline")
                         .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/main"));
+                .andExpect(status().isNotFound())
+                .andExpect(status().reason("Unable to decline invitation, link is no longer valid."));
     }
 
     @Test

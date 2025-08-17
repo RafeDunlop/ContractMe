@@ -103,7 +103,7 @@ public class TeamJoinRequestSteps {
                 .andExpect(view().name("viewRenovation"));
     }
 
-    @When("I click the {string} button")
+    @When("^I click the \"(accept|decline)\" button$")
     public void i_click_the_button(String button) throws Exception {
         resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/" + button)
                     .with(user(contractor.getEmail()).roles("USER", "CONTRACTOR"))
