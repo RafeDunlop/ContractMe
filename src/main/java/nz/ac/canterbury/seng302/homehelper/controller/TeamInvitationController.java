@@ -16,19 +16,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * Controller for handling contractor invitations to renovation teams
+ * Provides endpoints for viewing, accepting, and declining invitations
+ * All endpoints require the current user to be a contractor and logged in
+ * If the invitation link is invalid or expired, a 404 (NOT_FOUND) is returned
+ */
 @Controller
 @RequestMapping("/renovations/team/invitations")
 public class TeamInvitationController {
-
     private static final Logger logger = LoggerFactory.getLogger(TeamInvitationController.class);
     private final LoginService loginService;
 
     TeamsService teamsService;
-
     TeamInvitationService teamInvitationService;
-
     ContractorService contractorService;
 
+    /**
+     * Creates a new controller for contractor invitations
+     * @param teamsService service for accessing team data
+     * @param contractorService service for accessing contractor data
+     * @param teamInvitationService service for invitation logic
+     * @param loginService service for getting the current logged-in user
+     */
     @Autowired
     public TeamInvitationController(TeamsService teamsService, ContractorService contractorService, TeamInvitationService teamInvitationService, LoginService loginService) {
         this.teamsService = teamsService;
@@ -37,6 +47,13 @@ public class TeamInvitationController {
         this.loginService = loginService;
     }
 
+    /**
+     * Displays the invitation page for a given team.
+     * @param teamId ID of the team the invitation belongs to
+     * @param model model used to pass attributes to the view
+     * @return the "joinTeamInbox" view if the invitation is valid
+     * @throws ResponseStatusException 404 if the team does not exist or the link is invalid/expired
+     */
     @GetMapping("/{teamId}")
     public String viewInvitation(
             @PathVariable long teamId,
@@ -56,6 +73,13 @@ public class TeamInvitationController {
         return "joinTeamInbox";
     }
 
+    /**
+     * Accepts the contractors invitation to join the given team
+     * @param teamId ID of the team to accept
+     * @return redirect to the renovation view on success
+     * @throws ResponseStatusException 404 if the team does not exist, or the invitation is invalid/expired,
+     *                                 or the invitation was already accepted or declined
+     */
     @PostMapping("/{teamId}/accept")
     public String acceptInvitation(@PathVariable long teamId) {
         logger.info("POST /invitations/{} accept", teamId);
@@ -76,6 +100,13 @@ public class TeamInvitationController {
         return String.format("redirect:/renovations/view?id=%d", team.getRenovationRecord().getId());
     }
 
+    /**
+     * Declines the contractors invitation to join the given team
+     * @param teamId ID of the team to decline
+     * @return redirect to the main page on success todo change to inbox when done
+     * @throws ResponseStatusException 404 if the team does not exist, or the invitation is invalid/expired,
+     *                                 or the invitation was already accepted or declined
+     */
     @PostMapping("/{teamId}/decline")
     public String declineInvitation(@PathVariable long teamId) {
         logger.info("POST /invitations/{} decline", teamId);

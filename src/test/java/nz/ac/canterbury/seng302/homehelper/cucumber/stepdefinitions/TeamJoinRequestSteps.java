@@ -48,7 +48,6 @@ public class TeamJoinRequestSteps {
     @Autowired private MockMvc mockMvc;
 
     private RenovationRecord renovationRecord;
-    private User owner;
     private Team team;
 
     private Contractor contractor;
@@ -61,13 +60,14 @@ public class TeamJoinRequestSteps {
 
     @Given("A private renovation exists with a team")
     public void a_private_renovation_exists_with_a_team() {
-        owner = userRepository.save(new User("Greg", "smith", "greg" + System.currentTimeMillis() + "@smith.com", "Password123!"));
+        User owner = userRepository.save(new User("Greg", "smith", "greg" + System.currentTimeMillis() + "@smith.com", "Password123!"));
 
         renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", Collections.emptyList());
         renovationRecord.setPublicity(false);
         renovationRecord = renovationRecordRepository.save(renovationRecord);
 
         team = new Team(renovationRecord);
+        team = teamsRepository.save(team);
     }
 
     @Given("I am logged in and a contractor")
@@ -113,7 +113,7 @@ public class TeamJoinRequestSteps {
 
     @Then("I am taken to the renovation page")
     public void i_am_taken_to_the_renovation_page() throws Exception {
-        String expectedUrl = "/renovations/view?id=" + Long.toString(renovationRecord.getId());
+        String expectedUrl = "/renovations/view?id=" + renovationRecord.getId();
         resultActions.andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(expectedUrl));
     }
@@ -128,6 +128,8 @@ public class TeamJoinRequestSteps {
 
     @Then("I am in the team")
     public void i_am_in_the_team() {
+        team = teamsRepository.findById(team.getId()).orElseThrow();
+
         boolean inTeam = team.getRoles().stream()
                 .anyMatch(r -> r.getContractor() != null
                         && r.getContractor().equals(contractor));
@@ -136,9 +138,11 @@ public class TeamJoinRequestSteps {
 
     @Then("I am not in the team")
     public void i_am_not_in_the_team() {
+        team = teamsRepository.findById(team.getId()).orElseThrow();
+
         boolean inTeam = team.getRoles().stream()
-                .anyMatch(r -> r.getContractor() != null
-                        && r.getContractor().equals(contractor));
+                .anyMatch(r -> r.getContractor() != null &&
+                        r.getContractor().getId().equals(contractor.getId()));
         assertFalse(inTeam);
     }
 
