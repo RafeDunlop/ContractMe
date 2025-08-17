@@ -46,6 +46,7 @@ public class RequestInboxController {
         try {
             List<Team> teams = teamsService.getContractorTeamRequests(user);
             model.addAttribute("teams", teams);
+            model.addAttribute("user", user);
         } catch (IllegalArgumentException e) {
             return "redirect:/main";
         }

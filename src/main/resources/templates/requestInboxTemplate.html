@@ -15,14 +15,23 @@
     <div class="row">
       <div class="col-4">
         <div class="row">
-          <h2>Inbox</h2>
+          <h1 class="text-center mb-3">Inbox</h1>
         </div>
-        <div class="row card" th:each="team: ${teams}">
+        <div class="row card me-1 mb-2" th:each="team: ${teams}">
           <h5 class="card-header" th:text="${team.getRenovationRecord().getName()}"></h5>
-          <p class="card-body" th:text="|${team.getRenovationRecord().getUser().getFirstName()} ${team.getRenovationRecord().getUser().getLastName()}|"></p>
+          <div class="card-body">
+            <div th:each="role : ${team.getRoles()}" th:if="${role.getContractor().getId() == user.getId()}">
+              <strong>Role:</strong>
+              <span th:text="${role.getSkill().getDisplayName()}"></span>
+            </div>
+            <div>
+              <strong>Owner:</strong>
+              <span th:text="|${team.getRenovationRecord().getUser().getFirstName()} ${team.getRenovationRecord().getUser().getLastName()}|"></span>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="col-8">
+      <div class="col-8 p-0">
         <div th:replace="~{fragments/joinTeam.html :: join-team}"></div>
       </div>
     </div>
