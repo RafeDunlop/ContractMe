@@ -11,10 +11,14 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.*;
-import java.util.logging.Logger;
+
 import java.util.stream.Collectors;
 
 /**
@@ -28,7 +32,7 @@ public class TeamsService {
     private final TeamValidation teamValidation;
     private final ContractorRepository contractorRepository;
     private final EmailService emailService;
-    private Logger logger;
+    private final Logger logger = LoggerFactory.getLogger(TeamsService.class);
 
     /**
      * Constructs TeamsService with necessary dependencies.
@@ -119,7 +123,7 @@ public class TeamsService {
                 emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
                         team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault());
             } catch (Exception e) {
-                logger.warning(e.getMessage());
+                logger.warn(e.getMessage());
             }
         }
     }
