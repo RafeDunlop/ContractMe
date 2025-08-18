@@ -63,6 +63,8 @@ public class DefaultDataConfigurator {
 
     private static final List<String> defaultJERooms = List.of("131", "133", "Fabian's office");
 
+    private static final String NEW_ZEALAND = "New Zealand";
+
     @Autowired
     public DefaultDataConfigurator(RegisterService registerService,
                                    RenovationRecordService renovationRecordService,
@@ -126,7 +128,7 @@ public class DefaultDataConfigurator {
         address.setAddress_line1("Ilam Road");
         address.setCity("Christchurch");
         address.setRegion("Ilam");
-        address.setCountry("New Zealand");
+        address.setCountry(NEW_ZEALAND);
         address.setPostcode("");
         address.setLat(-43.522345);
         address.setLon(172.580907);
@@ -154,7 +156,7 @@ public class DefaultDataConfigurator {
     }
 
     private static AddressDTO getAddressDTO() {
-        Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
+        Location location = new Location("20 Kirkwood Avenue", NEW_ZEALAND, "8041", "Christchuch", "Upper Riccarton");
         AddressDTO addressDTO = new AddressDTO();
         addressDTO.setAddress_line1(location.getAddress());
         addressDTO.setCity(location.getCity());
@@ -202,7 +204,7 @@ public class DefaultDataConfigurator {
                         "CSSE building => palace of slay",
                         defaultJERooms
         );
-        Location location = new Location("18 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
+        Location location = new Location("18 Kirkwood Avenue", NEW_ZEALAND, "8041", "Christchuch", "Upper Riccarton");
         default1Renovation1.setLocation(location);
         default1Renovation1 = renovationRecordService.addRenovationRecord(default1Renovation1);
     }
