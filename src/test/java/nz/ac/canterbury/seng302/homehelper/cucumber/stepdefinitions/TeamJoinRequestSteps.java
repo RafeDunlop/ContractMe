@@ -13,6 +13,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -50,6 +53,7 @@ public class TeamJoinRequestSteps {
     private Contractor contractor;
     private final ContractorContext contractorContext;
     private ResultActions resultActions;
+    private EmailService emailService;
 
     public TeamJoinRequestSteps(ContractorContext contractorContext) {
         this.contractorContext = contractorContext;
@@ -61,6 +65,7 @@ public class TeamJoinRequestSteps {
         Role role = new Role(Skill.valueOf(Skill.PLUMBING.toString()));
         team = new Team(renovationRecord);
         team.addRole(role);
+        teamsRepository.save(team);
         assertNull(team.getRoles().get(0).getContractor());
 
     }
@@ -96,6 +101,10 @@ public class TeamJoinRequestSteps {
 
     @When("There is an available contractor eligible for that role")
     public void there_is_an_available_contractor_eligible_for_that_role() {
+        contractor = contractorContext.getContractor();
+        if (this.contractor == null) { throw new IllegalStateException("Contractor was not found"); }
+        contractor.setSkills(Set.of(Skill.PLUMBING));
+        contractor.setAvailable(true);
 
     }
 
