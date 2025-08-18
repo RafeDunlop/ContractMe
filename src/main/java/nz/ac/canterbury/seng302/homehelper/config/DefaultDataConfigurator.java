@@ -139,6 +139,9 @@ public class DefaultDataConfigurator {
         Contractor defaultContractor1 = contractorService.registerContractor(user, address);
         code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, defaultContractor1, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);
+        Contractor newlyMadeContractor = contractorService.getContractorById(defaultContractor1.getId());
+        newlyMadeContractor.setAvailable(true);
+        contractorRepository.save(newlyMadeContractor);
 
         List<Skill> skillList = Skill.listOfSortedSkills();
 
@@ -149,19 +152,22 @@ public class DefaultDataConfigurator {
             address.setLat(-43.522345 + i * 0.001);
             address.setLon(172.580907 + i * 0.001);
             user.setSkills(List.of(skillList.get(i)));
+
+
             Contractor newContractor = contractorService.registerContractor(user, address);
-            Contractor contractor = contractorService.getContractorById(newContractor.getId());
             code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, newContractor, Locale.ENGLISH);
             verificationCodeService.consumeSignupCode(code);
-            contractor.setAvailable(true);
-            contractorRepository.save(contractor);
-
+            Contractor newContractor1 = contractorService.getContractorById(newContractor.getId());
+            newContractor1.setAvailable(true);
+            contractorRepository.save(newContractor1);
         }
 
 
 
 
     }
+
+
 
     private void setupDefaultRenovations() {
         default2Renovation1 = new RenovationRecord(default2,
@@ -170,7 +176,7 @@ public class DefaultDataConfigurator {
                 defaultJERooms
         );
 
-        default2Renovation1.setLocation(new Location("Jack Erskine", "", "", "", ""));
+        default2Renovation1.setLocation(new Location("Jack Erskine", "New Zealand", "8041", "Christchurch", "Uni-Cycle Cycleway", -43.52255, 172.58124));
         default2Renovation1 = renovationRecordService.addRenovationRecord(default2Renovation1);
 
 
@@ -196,14 +202,16 @@ public class DefaultDataConfigurator {
             renovationRecordService.addRenovationRecord(record);
         }
 
-        default1Renovation1 = renovationRecordService.addRenovationRecord(
-                new RenovationRecord(default1,
+        default1Renovation1 = new RenovationRecord(default1,
                         "Jack Erskine revamp",
                         "CSSE building => palace of slay",
-                        defaultJERooms
-                )
-        );
+                        defaultJERooms);
+
+        default1Renovation1.setLocation(new Location("Jack Erskine", "New Zealand", "8041", "Christchurch", "Uni-Cycle Cycleway", -43.52255, 172.58124));
+        renovationRecordService.addRenovationRecord(default1Renovation1);
     }
+
+
 
     private void setupDefaultTeams() {
         Team team = new Team(default2Renovation1);
