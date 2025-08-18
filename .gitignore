@@ -51,3 +51,7 @@ env.properties
 /profile_pictures/*
 !profile_pictures/default/
 !profile_pictures/default/*
+
+### local test temp
+
+cucumber.html
