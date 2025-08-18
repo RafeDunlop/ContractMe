@@ -86,8 +86,9 @@ public class LocationService {
                 injectCoordsViaIpGeolocation(addressDTO, ipAddress);
             }
         }
+        String loggedAddress = getLoggedAddress(addressDTO);
         logger.info("Creating location for address {} with coords {}, {}",
-                addressDTO.getAddress_line1().replaceAll("[\r\n]", "_"),
+                loggedAddress,
                 addressDTO.getLat(),
                 addressDTO.getLon()
         );
@@ -103,13 +104,26 @@ public class LocationService {
     }
 
     /**
+     * Sanitise the address line 1 for logging purposes.
+     * @param addressDTO the addressDTO we want to log
+     * @return the address with newline characters stripped
+     */
+    private String getLoggedAddress(AddressDTO addressDTO) {
+        String loggedAddress = addressDTO.getAddress_line1();
+        if (addressDTO.getAddress_line1() != null) {
+            loggedAddress = loggedAddress.replaceAll("[\r\n]", "_");
+        }
+        return loggedAddress;
+    }
+
+    /**
      * Attempts to inject the co-ordinates of a custom-input address via the Geoapify Geocoding service.
      * @param addressDTO The {@link AddressDTO} to be edited inline with the co-ordinates supplied by Geoapify
      * @throws IllegalArgumentException if the specified address does not exist or is not present or if Geoapify
      * cannot identify coordinates for it
      */
     public void injectCoordsViaGeocoding(AddressDTO addressDTO) throws IllegalArgumentException {
-        logger.debug("Attempting to retrieve coordinates via geocoding for address {}", addressDTO.getAddress_line1().replaceAll("[\r\n]", "_"));
+        logger.debug("Attempting to retrieve coordinates via geocoding for address {}", getLoggedAddress(addressDTO));
         ResponseEntity<String> response = restTemplate.getForEntity(getGeocodingCompleteUrl(addressDTO), String.class);
         logger.debug(response.getBody());
         try {
