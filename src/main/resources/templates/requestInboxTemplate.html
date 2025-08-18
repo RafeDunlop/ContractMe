@@ -17,18 +17,23 @@
         <div class="row">
           <h1 class="text-center mb-3">Inbox</h1>
         </div>
-        <div class="row card me-1 mb-2" th:each="team: ${teams}">
-          <h5 class="card-header" th:text="${team.getRenovationRecord().getName()}"></h5>
-          <div class="card-body">
-            <div th:each="role : ${team.getRoles()}" th:if="${role.getContractor().getId() == user.getId()}">
-              <strong>Role:</strong>
-              <span th:text="${role.getSkill().getDisplayName()}"></span>
-            </div>
-            <div>
-              <strong>Owner:</strong>
-              <span th:text="|${team.getRenovationRecord().getUser().getFirstName()} ${team.getRenovationRecord().getUser().getLastName()}|"></span>
+        <div class="inbox-scrollable-div">
+          <div class="row card me-1 mb-2" th:each="team: ${teams}">
+            <h5 class="card-header" th:text="${team.getRenovationRecord().getName()}"></h5>
+            <div class="card-body">
+              <div th:each="role : ${team.getRoles()}" th:if="${role.getContractor().getId() == user.getId()}">
+                <strong>Role:</strong>
+                <span th:text="${role.getSkill().getDisplayName()}"></span>
+              </div>
+              <div>
+                <strong>Owner:</strong>
+                <span th:text="|${team.getRenovationRecord().getUser().getFirstName()} ${team.getRenovationRecord().getUser().getLastName()}|"></span>
+              </div>
             </div>
           </div>
+        </div>
+        <div class="mt-3 text-center" th:if="${teams.isEmpty()}">
+          Your inbox is empty.
         </div>
       </div>
       <div class="col-8 p-0">
