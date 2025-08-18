@@ -10,15 +10,13 @@
 </head>
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
-<div id="container" class="card container mt-5 shadow-sm">
+<div id="container" class="card px-0 container mt-5 shadow-sm">
   <div id="content-container" class="content-container m-3">
     <div class="row">
       <div class="col-4">
-        <div class="row">
-          <h1 class="text-center mb-3">Inbox</h1>
-        </div>
-        <div class="inbox-scrollable-div">
-          <div class="row card me-1 mb-2" th:each="team: ${teams}">
+        <h1 class="text-center mb-3">Inbox</h1>
+        <div class="inbox-scrollable-div px-2">
+          <div class="card my-2" th:each="team: ${teams}">
             <h5 class="card-header" th:text="${team.getRenovationRecord().getName()}"></h5>
             <div class="card-body">
               <div th:each="role : ${team.getRoles()}" th:if="${role.getContractor().getId() == user.getId()}">
@@ -36,7 +34,7 @@
           Your inbox is empty.
         </div>
       </div>
-      <div class="col-8 p-0">
+      <div class="col-8">
         <div th:replace="~{fragments/joinTeam.html :: join-team}"></div>
       </div>
     </div>
