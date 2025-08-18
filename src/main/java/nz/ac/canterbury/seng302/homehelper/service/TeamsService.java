@@ -12,9 +12,6 @@ import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.*;
@@ -32,7 +29,6 @@ public class TeamsService {
     private final TeamValidation teamValidation;
     private final ContractorRepository contractorRepository;
     private final EmailService emailService;
-    private final Logger logger = LoggerFactory.getLogger(TeamsService.class);
 
     /**
      * Constructs TeamsService with necessary dependencies.
@@ -65,7 +61,9 @@ public class TeamsService {
 
         Location renovationLocation = teamRecord.getLocation();
         String response = assignContractorsToTeam(team, renovationLocation);
-        sendContractorEmails(team);
+        if (Objects.equals(response, "")) {
+            sendContractorEmails(team);
+        }
 
         return response;
     }
@@ -140,13 +138,11 @@ public class TeamsService {
     public void sendContractorEmails(Team team) {
         for (Role role : team.getRoles()) {
             Contractor recipient = role.getContractor();
-            try {
-                String ownerName = team.getRenovationRecord().getUser().getFirstName();
-                emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
-                        team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault());
-            } catch (Exception e) {
-                logger.warn(e.getMessage());
-            }
+            if (recipient == null) continue;
+            String ownerName = team.getRenovationRecord().getUser().getFirstName();
+            emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
+                    team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault());
+
         }
     }
 

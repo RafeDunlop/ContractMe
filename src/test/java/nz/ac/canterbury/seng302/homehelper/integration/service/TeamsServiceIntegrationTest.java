@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.integration.service;
 
+import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
@@ -23,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,7 +68,7 @@ class TeamsServiceIntegrationTest {
 
     @Transactional
     @Test
-    void validTeamAndLocation_assignContractorsToTeam_fillsTeamAndSendsEmails() {
+    void validTeamAndLocation_assignContractorsToTeam_fillsTeam() {
         Team team = new Team(renovation);
         Role role1 = new Role(Skill.PLUMBING);
         Role role2 = new Role(Skill.ELECTRICAL);
@@ -96,6 +98,31 @@ class TeamsServiceIntegrationTest {
         assertEquals(contractor1, team.getRoles().get(0).getContractor());
         assertEquals(contractor2, team.getRoles().get(1).getContractor());
 
+    }
+
+    @Transactional
+    @Test
+    void validTeamAndLocation_assignContractorsToTeam_fillsTeamAndSendsEmails() {
+        TeamRequestDTO teamRequestDTO = new TeamRequestDTO();
+        teamRequestDTO.setSkills(List.of(Skill.PLUMBING.toString(), Skill.ELECTRICAL.toString()));
+        String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
+        Contractor contractor1 = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
+        contractor1.setLocation(location);
+        contractor1.addSkill(Skill.PLUMBING);
+        contractor1.activate();
+        contractor1.setAvailable(true);
+        contractorRepository.save(contractor1);
+
+        String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
+        Contractor contractor2 = new Contractor("Bob", "Doe", bobUniqueEmail, "encoded");
+        contractor2.setLocation(location);
+        contractor2.addSkill(Skill.ELECTRICAL);
+        contractor2.activate();
+        contractor2.setAvailable(true);
+        contractorRepository.save(contractor2);
+
+        teamsService.createNewTeam(renovation, teamRequestDTO);
+
         //If any skills are added in the future, change this threshold to match the number of skills present
         Mockito.verify(emailService, times(2)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
@@ -117,6 +144,42 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
+    }
+
+    @Test
+    void teamWithNoRoles_assignContractorsToTeam_fillsTeamAndSendsNoEmails() {
+        TeamRequestDTO teamRequestDTO = new TeamRequestDTO();
+        teamRequestDTO.setSkills(List.of());
+
+        String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
+        Contractor contractor1 = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
+        contractor1.setLocation(location);
+        contractor1.addSkill(Skill.PLUMBING);
+        contractor1.activate();
+        contractorRepository.save(contractor1);
+
+        teamsService.createNewTeam(renovation, teamRequestDTO);
+
+        Mockito.verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+    }
+
+    @Test
+    void teamWithRoles_rolesUnfilled_andSendsNoEmails() {
+        TeamRequestDTO teamRequestDTO = new TeamRequestDTO();
+        teamRequestDTO.setSkills(List.of(Skill.PLUMBING.toString(), Skill.ELECTRICAL.toString()));
+
+        String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
+        Contractor contractor1 = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
+        contractor1.setLocation(location);
+        contractor1.addSkill(Skill.PLUMBING);
+        contractor1.activate();
+        contractorRepository.save(contractor1);
+
+        teamsService.createNewTeam(renovation, teamRequestDTO);
+
+        Mockito.verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 
     @Transactional
