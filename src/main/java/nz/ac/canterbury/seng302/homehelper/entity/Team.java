@@ -12,6 +12,8 @@ import java.util.List;
 
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 /**
  * Represents a team entity, associated with a renovation record
@@ -25,6 +27,7 @@ public class Team {
     private long id;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private RenovationRecord renovationRecord;
 
     @ElementCollection
