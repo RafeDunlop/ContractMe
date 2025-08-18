@@ -13,12 +13,15 @@ import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
+import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,9 +31,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.atMost;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -61,6 +66,8 @@ public class TeamControllerIntegrationTest {
     @Autowired
     private RenovationRecordRepository renovationRecordRepository;
 
+    @MockBean
+    private EmailService emailService;
 
     @Autowired
     private TeamsRepository teamsRepository;
@@ -205,7 +212,7 @@ public class TeamControllerIntegrationTest {
 
 
     @Test
-    void hasLocation_createTeam_submitsTeamWithRoles_assignContractorsToTeams() throws Exception {
+    void hasLocation_createTeam_submitsTeamWithRoles_assignContractorsToTeamsAndSendsEmailNotifications() throws Exception {
        mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", "ANTIQUE_RESTORATION", "ARCHITECTURE", "ASBESTOS_REMOVAL")
@@ -213,7 +220,9 @@ public class TeamControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("response", true))
                 .andReturn();
-
+       //If any skills are added in the future, change this threshold to match the number of skills present
+       Mockito.verify(emailService, atMost(3)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
+               Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
 
     }
 
