@@ -109,9 +109,9 @@ public class LocationService {
      * @return the address with newline characters stripped
      */
     private String getLoggedAddress(AddressDTO addressDTO) {
-        String loggedAddress = addressDTO.getAddress_line1();
+        String loggedAddress = "";
         if (addressDTO.getAddress_line1() != null) {
-            loggedAddress = loggedAddress.replaceAll("[\r\n]", "_");
+            loggedAddress = addressDTO.getAddress_line1().replaceAll("[\r\n]", "_");
         }
         return loggedAddress;
     }
@@ -123,7 +123,8 @@ public class LocationService {
      * cannot identify coordinates for it
      */
     public void injectCoordsViaGeocoding(AddressDTO addressDTO) throws IllegalArgumentException {
-        logger.debug("Attempting to retrieve coordinates via geocoding for address {}", getLoggedAddress(addressDTO));
+        String loggedAddress = getLoggedAddress(addressDTO);
+        logger.debug("Attempting to retrieve coordinates via geocoding for address {}", loggedAddress);
         ResponseEntity<String> response = restTemplate.getForEntity(getGeocodingCompleteUrl(addressDTO), String.class);
         logger.debug(response.getBody());
         try {
