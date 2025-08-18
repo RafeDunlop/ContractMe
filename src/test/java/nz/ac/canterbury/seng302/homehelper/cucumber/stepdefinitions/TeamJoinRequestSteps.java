@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -46,13 +47,22 @@ public class TeamJoinRequestSteps {
     private RenovationRecord renovationRecord;
     private User owner;
     private Team team;
-
     private Contractor contractor;
     private final ContractorContext contractorContext;
     private ResultActions resultActions;
 
     public TeamJoinRequestSteps(ContractorContext contractorContext) {
         this.contractorContext = contractorContext;
+    }
+
+    @Given("A team request has been created for a renovation which has an available role")
+    public void a_team_request_has_been_created_for_a_renovation_which_has_an_available_role() {
+
+        Role role = new Role(Skill.valueOf(Skill.PLUMBING.toString()));
+        team = new Team(renovationRecord);
+        team.addRole(role);
+        assertNull(team.getRoles().get(0).getContractor());
+
     }
 
     @Given("A private renovation exists with a team")
@@ -84,12 +94,22 @@ public class TeamJoinRequestSteps {
         teamsRepository.save(team);
     }
 
+    @When("There is an available contractor eligible for that role")
+    public void there_is_an_available_contractor_eligible_for_that_role() {
+
+    }
+
     @When("I view the renovation")
     public void i_view_the_renovation() throws Exception {
         resultActions = mockMvc.perform(get("/renovations/view")
                                 .param("id", Long.toString(renovationRecord.getId()))
                                 .with(user(contractor.getEmail()).roles("USER","CONTRACTOR"))
                                 .with(csrf()));
+
+    }
+
+    @Then("The system will automatically send an email to the contractor who is closest to the renovation location")
+    public void the_system_will_automatically_send_an_email_to_the_contractor_who_is_closest_to_the_renovation_location() {
 
     }
 
