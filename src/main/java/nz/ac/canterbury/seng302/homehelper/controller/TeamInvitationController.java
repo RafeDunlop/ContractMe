@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Controller for handling contractor invitations to renovation teams
@@ -57,7 +59,11 @@ public class TeamInvitationController {
     @GetMapping("/{teamId}")
     public String viewInvitation(
             @PathVariable long teamId,
-            Model model) {
+            Model model, HttpServletRequest request) {
+
+        String lastVisitedRenovationPage = new UrlPathHelper().getPathWithinApplication(request);
+        request.getSession().setAttribute("lastVisitedRenovationPage", lastVisitedRenovationPage);
+        request.getSession().setAttribute("lastVisitedRenovationParameters", request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
         model.addAttribute("teamId", teamId);
         Long userId = loginService.getUserByEmail().getId();
@@ -83,9 +89,8 @@ public class TeamInvitationController {
      *                                 or the invitation was already accepted or declined
      */
     @PostMapping("/{teamId}/accept")
-    public String acceptInvitation(@PathVariable long teamId) {
+    public String acceptInvitation(@PathVariable long teamId) throws ResponseStatusException {
         logger.info("POST /invitations/{} accept", teamId);
-
         Long userId = loginService.getUserByEmail().getId();
         Team team = teamsService.getTeamById(teamId);
         Contractor contractor = contractorService.getContractorById(userId);
