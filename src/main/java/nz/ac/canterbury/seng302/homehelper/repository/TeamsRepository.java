@@ -23,4 +23,20 @@ public interface TeamsRepository extends CrudRepository<Team, Long>{
      */
         @Query("SELECT t FROM Team t JOIN FETCH t.roles r WHERE r.contractor = :contractor AND r.accepted = FALSE ORDER BY r.creationDate DESC")
         List<Team> findByRoleContractor(@Param("contractor") Contractor contractor);
+
+    /**
+     * Checks if a given user belongs to the team associated with a renovation record
+     * @param renovationRecord the renovation record that we want to check the associated team
+     * @param userId the id of the user to check if they belong to the team
+     * @return boolean, true if the user is a contractor and belongs to the team associated with the record
+     */
+    @Query("""
+    select count(t) > 0
+    from Team t join t.roles r
+    where t.renovationRecord = :renovationRecord
+      and r.contractor.id = :userId
+      and exists (select 1 from Contractor c where c.id = :userId)
+    """)
+    boolean checkIfUserBelongsToRecordTeam(@Param("renovationRecord") RenovationRecord renovationRecord, @Param("userId") Long userId);
+
 }

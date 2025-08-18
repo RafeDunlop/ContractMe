@@ -12,6 +12,7 @@ import java.util.Arrays;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,8 @@ public class DefaultDataConfigurator {
 
     private final ContractorService contractorService;
 
+    private final ContractorRepository contractorRepository;
+
     private final TeamsService teamsService;
 
     private User default1;
@@ -67,8 +70,10 @@ public class DefaultDataConfigurator {
                                    RenovationRecordService renovationRecordService,
                                    RenovationTaskService renovationTaskService,
                                    VerificationCodeService verificationCodeService,
-                                   TagService tagService, ContractorService contractorService,
-                                   TeamsService teamsService) {
+                                   TagService tagService,
+                                   TeamsService teamsService,
+                                   ContractorService contractorService,
+                                   ContractorRepository contractorRepository) {
         this.registerService = registerService;
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
@@ -76,6 +81,7 @@ public class DefaultDataConfigurator {
         this.contractorService = contractorService;
         this.tagService = tagService;
         this.teamsService = teamsService;
+        this.contractorRepository = contractorRepository;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -84,6 +90,7 @@ public class DefaultDataConfigurator {
         setupDefaultRenovations();
         setupDefaultRenovationTasks();
         setupDefaultTags();
+        setupDefaultTeams();
         setupTeamRequest();
     }
 
@@ -126,16 +133,38 @@ public class DefaultDataConfigurator {
         user.setCountryCode(64);
         user.setPhoneNumber("33692888");
         AddressDTO address = new AddressDTO();
-        address.setAddress_line1("Jack Erskine");
+        address.setAddress_line1("Ilam Road");
         address.setCity("Christchurch");
         address.setRegion("Ilam");
         address.setCountry("New Zealand");
         address.setPostcode("");
         address.setLat(-43.522345);
         address.setLon(172.580907);
-        defaultContractor1 = contractorService.registerContractor(user, address);
+        Contractor defaultContractor1 = contractorService.registerContractor(user, address);
         code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, defaultContractor1, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);
+
+        List<Skill> skillList = Skill.listOfSortedSkills();
+
+        // Add 10 Contractors to the default data
+        for (int i = 1; i <= 10; i++) {
+            user.setEmail("seng302.team200.contractor" + i + "@gmail.com");
+            address.setAddress_line1(i + " Ilam Road");
+            address.setLat(-43.522345 + i * 0.001);
+            address.setLon(172.580907 + i * 0.001);
+            user.setSkills(List.of(skillList.get(i)));
+            Contractor newContractor = contractorService.registerContractor(user, address);
+            Contractor contractor = contractorService.getContractorById(newContractor.getId());
+            code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, newContractor, Locale.ENGLISH);
+            verificationCodeService.consumeSignupCode(code);
+            contractor.setAvailable(true);
+            contractorRepository.save(contractor);
+
+        }
+
+
+
+
     }
 
     private void setupDefaultRenovations() {
@@ -177,6 +206,17 @@ public class DefaultDataConfigurator {
         Location location = new Location("18 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
         default1Renovation1.setLocation(location);
         default1Renovation1 = renovationRecordService.addRenovationRecord(default1Renovation1);
+    }
+
+    private void setupDefaultTeams() {
+        Team team = new Team(default2Renovation1);
+        ArrayList<String> skillsList = new ArrayList<>(Arrays.asList("ANTIQUE_RESTORATION", "ARCHITECTURE", "ASBESTOS_REMOVAL", "AUTOMATION_SYSTEMS", "BUILDING_CODE_CONSULTATION"));
+        List<Role> roles = teamsService.createRoles(skillsList);
+        for(Role role : roles) {
+            team.addRole(role);
+        }
+        teamsService.saveTeam(team);
+
     }
 
 
@@ -297,11 +337,9 @@ public class DefaultDataConfigurator {
     }
 
     private void setupTeamRequest() {
-        Role role1 = new Role(defaultContractor1, Skill.ACOUSTIC_INSULATION, false);
-        Role role2 = new Role((Contractor) default2, Skill.ANTIQUE_RESTORATION, false);
+        Role role = new Role((Contractor) default2, Skill.ANTIQUE_RESTORATION, false);
         Team team = new Team(default1Renovation1);
-        team.addRole(role1);
-        team.addRole(role2);
+        team.addRole(role);
         teamsService.saveTeam(team);
     }
 }
