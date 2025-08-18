@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -91,7 +93,7 @@ public class TeamController {
     @PostMapping("/create")
     public String submitTeamRequest(TeamRequestDTO teamRequestDTO,
                                     @RequestParam(name = "id") Long id,
-                                    Model model) {
+                                    Model model, RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/team/create");
 
         List<String> errors = teamsService.validateTeam(teamRequestDTO);
@@ -111,6 +113,13 @@ public class TeamController {
         }
 
         teamsService.saveTeam(team);
+
+        Location renovationLocation = renovationRecordService.getRecordById(id).getLocation();
+        String response = teamsService.assignContractorsToTeam(team, renovationLocation);
+
+
+        redirectAttributes.addFlashAttribute("response", response.isEmpty());
+
         return "redirect:/renovations/view?id=" + id;
     }
 }
