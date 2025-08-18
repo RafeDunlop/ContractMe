@@ -1,15 +1,9 @@
 package nz.ac.canterbury.seng302.homehelper.entity;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.*;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import org.hibernate.annotations.OnDelete;
@@ -31,7 +25,6 @@ public class Team {
     private RenovationRecord renovationRecord;
 
     @ElementCollection
-    @CollectionTable(name = "roles")
     private List<Role> roles = new ArrayList<>();
 
     protected Team() {}

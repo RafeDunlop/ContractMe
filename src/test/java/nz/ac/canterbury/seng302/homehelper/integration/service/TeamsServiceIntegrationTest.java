@@ -86,8 +86,8 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor1, team.getRoles().get(0).getContractor());
-        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+        assertEquals(contractor1.getId(), team.getRoles().get(0).getContractorId());
+        assertEquals(contractor2.getId(), team.getRoles().get(1).getContractorId());
     }
 
     @Test
@@ -128,7 +128,7 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("Unable to find available contractors to fill team", result);
-        assertNull(team.getRoles().get(0).getContractor());
+        assertNull(team.getRoles().get(0).getContractorId());
     }
 
     @Transactional
@@ -160,8 +160,8 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor1, team.getRoles().get(0).getContractor());
-        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+        assertEquals(contractor1.getId(), team.getRoles().get(0).getContractorId());
+        assertEquals(contractor2.getId(), team.getRoles().get(1).getContractorId());
     }
 
     @Transactional
@@ -193,8 +193,8 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("Unable to find available contractors to fill team", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractor());
-        assertNull(team.getRoles().get(1).getContractor());
+        assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
+        assertEquals(0L, team.getRoles().get(1).getContractorId());
     }
 
     @Transactional
@@ -227,8 +227,8 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor2, team.getRoles().get(0).getContractor());
-        assertEquals(contractor, team.getRoles().get(1).getContractor());
+        assertEquals(contractor2.getId(), team.getRoles().get(0).getContractorId());
+        assertEquals(contractor.getId(), team.getRoles().get(1).getContractorId());
     }
 
     @Transactional
@@ -263,8 +263,8 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor2, team.getRoles().get(0).getContractor());
-        assertEquals(contractor, team.getRoles().get(1).getContractor());
+        assertEquals(contractor2.getId(), team.getRoles().get(0).getContractorId());
+        assertEquals(contractor.getId(), team.getRoles().get(1).getContractorId());
     }
 
     @Transactional
@@ -290,7 +290,7 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("Unable to find available contractors to fill team", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractor());
+        assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
     }
 
     @Transactional
@@ -315,7 +315,7 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("Unable to find available contractors to fill team", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractor());
+        assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
     }
 
     @Transactional
@@ -340,7 +340,7 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("Unable to find available contractors to fill team", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractor());
+        assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
     }
 
     @Transactional
@@ -365,7 +365,7 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("Unable to find available contractors to fill team", result);
-        assertEquals(contractor, team.getRoles().get(1).getContractor());
+        assertEquals(contractor.getId(), team.getRoles().get(1).getContractorId());
     }
 
     @Transactional
@@ -403,8 +403,8 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("Unable to find available contractors to fill team", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractor());
-        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+        assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
+        assertEquals(contractor2.getId(), team.getRoles().get(1).getContractorId());
     }
 
     @Transactional
@@ -448,9 +448,9 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("Unable to find available contractors to fill team", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractor());
-        assertEquals(contractor2, team.getRoles().get(1).getContractor());
-        assertEquals(contractor3, team.getRoles().get(2).getContractor());
+        assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
+        assertEquals(contractor2.getId(), team.getRoles().get(1).getContractorId());
+        assertEquals(contractor3.getId(), team.getRoles().get(2).getContractorId());
     }
 
     @Transactional
@@ -520,10 +520,10 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("Unable to find available contractors to fill team", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractor());
-        assertEquals(contractor2, team.getRoles().get(1).getContractor());
-        assertEquals(contractor3, team.getRoles().get(2).getContractor());
-        assertEquals(contractor4, team.getRoles().get(3).getContractor());
+        assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
+        assertEquals(contractor2.getId(), team.getRoles().get(1).getContractorId());
+        assertEquals(contractor3.getId(), team.getRoles().get(2).getContractorId());
+        assertEquals(contractor4.getId(), team.getRoles().get(3).getContractorId());
     }
 
     @Transactional
@@ -553,6 +553,6 @@ class TeamsServiceIntegrationTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("Unable to find available contractors to fill team", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractor());
+        assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
     }
 }

@@ -103,8 +103,8 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor1, team.getRoles().get(0).getContractor());
-        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+        assertEquals(contractor1.getId(), team.getRoles().get(0).getContractorId());
+        assertEquals(contractor2.getId(), team.getRoles().get(1).getContractorId());
     }
 
     @Test
@@ -135,7 +135,7 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractor());
+        assertEquals(contractor, team.getRoles().get(0).getContractorId());
     }
 
     @Test
@@ -151,7 +151,7 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("Unable to find available contractors to fill team", result);
-        assertNull(team.getRoles().get(0).getContractor());
+        assertNull(team.getRoles().get(0).getContractorId());
     }
 
     @Test
@@ -180,8 +180,8 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor1, team.getRoles().get(0).getContractor());
-        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+        assertEquals(contractor1, team.getRoles().get(0).getContractorId());
+        assertEquals(contractor2, team.getRoles().get(1).getContractorId());
     }
 
     @Test
@@ -197,7 +197,7 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("Unable to find available contractors to fill team", result);
-        assertNull(team.getRoles().get(0).getContractor());
+        assertNull(team.getRoles().get(0).getContractorId());
     }
 
     @Test
@@ -226,7 +226,7 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractor());
-        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+        assertEquals(contractor, team.getRoles().get(0).getContractorId());
+        assertEquals(contractor2, team.getRoles().get(1).getContractorId());
     }
 }

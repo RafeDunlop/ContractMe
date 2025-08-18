@@ -117,14 +117,15 @@ public class TeamsService {
         Set<String> visitedStates = new HashSet<>();
 
         for (Role emptyRole : team.getRoles()) {
-            if (emptyRole.getContractor() == null) {
+            if (emptyRole.getContractorId() == null) {
                 List<Role> candidatesToShuffle = team.getRoles().stream()
-                        .filter(r -> r.getContractor() != null)
-                        .filter(r -> r.getContractor().getSkills().contains(emptyRole.getSkill()))
+                        .filter(r -> r.getContractorId() != null)
+                        .filter(r ->  contractorRepository.findById(r.getContractorId())
+                                .map(contractor -> contractor.getSkills().contains(emptyRole.getSkill())).orElse(false))
                         .toList();
 
                 for (Role candidateRole : candidatesToShuffle) {
-                    Contractor contractorToMove = candidateRole.getContractor();
+                    Contractor contractorToMove = contractorRepository.findById(candidateRole.getContractorId()).orElse(null);
 
                     emptyRole.setContractor(contractorToMove);
                     candidateRole.setContractor(null);
@@ -165,8 +166,8 @@ public class TeamsService {
         }
 
         Set<Long> assignedIds = team.getRoles().stream()
-                .filter(r -> r.getContractor() != null)
-                .map(r -> r.getContractor().getId())
+                .map(Role::getContractorId)
+                .filter(contractorId -> contractorId != null && contractorId != 0L)
                 .collect(Collectors.toSet());
 
         Contractor candidate = findNearestContractor(roleToFill, location, assignedIds);
@@ -177,10 +178,11 @@ public class TeamsService {
 
         // No direct candidate found, try reassigning team members recursively:
         for (Role otherRole : team.getRoles()) {
-            if (otherRole != roleToFill && otherRole.getContractor() != null
-                    && otherRole.getContractor().getSkills().contains(roleToFill.getSkill())) {
+            Optional<Contractor> contractor = getContractorFromRole(otherRole);
+            if (otherRole != roleToFill && contractor.isPresent()
+                    && contractor.get().getSkills().contains(roleToFill.getSkill())) {
 
-                Contractor movingContractor = otherRole.getContractor();
+                Contractor movingContractor = contractor.get();
 
                 // Move contractor to current empty role
                 roleToFill.setContractor(movingContractor);
@@ -210,7 +212,7 @@ public class TeamsService {
         boolean allAssigned = true;
 
         for (Role role : team.getRoles()) {
-            if (role.getContractor() == null) {
+            if (role.getContractorId() == null) {
                 Contractor contractor = findNearestContractor(role, renovationLocation, assignedContractors);
                 if (contractor == null) {
                     allAssigned = false;
@@ -219,7 +221,7 @@ public class TeamsService {
                     assignedContractors.add(contractor.getId());
                 }
             } else {
-                assignedContractors.add(role.getContractor().getId());
+                assignedContractors.add(role.getContractorId());
             }
         }
 
@@ -251,9 +253,15 @@ public class TeamsService {
     private String serializeTeamAssignment(Team team) {
         return team.getRoles().stream()
                 .map(role -> {
-                    Contractor c = role.getContractor();
-                    return role.getSkill() + ":" + (c == null ? "null" : c.getId());
+                    Optional<Contractor> c = getContractorFromRole(role);
+                    return role.getSkill() + ":" + ((c.isEmpty()) ? "null" : c.get().getId());
                 })
                 .collect(Collectors.joining("|"));
+    }
+
+    private Optional<Contractor> getContractorFromRole(Role role) {
+        return (role.getContractorId() != null) ?
+                contractorRepository.findById(role.getContractorId()) :
+                Optional.empty();
     }
 }

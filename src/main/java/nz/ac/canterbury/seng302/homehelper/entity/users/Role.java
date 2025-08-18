@@ -1,7 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.entity.users;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.ManyToOne;
 
 /**
  * Represents a role within the system. A role is associated with a contractor, a specific skill,
@@ -11,8 +10,7 @@ import jakarta.persistence.ManyToOne;
 @Embeddable
 public class Role {
 
-    @ManyToOne
-    private Contractor contractor;
+    private Long contractorId;
 
     private Skill skill;
 
@@ -21,23 +19,24 @@ public class Role {
     public Role() {}
 
     public Role(Skill skill) {
-        this.contractor = null;
+        this.contractorId = null;
         this.skill = skill;
         this.accepted = false;
     }
 
     public Role(Contractor contractor, Skill skill, boolean accepted) {
-        this.contractor = contractor;
+        this.contractorId = contractor.getId();
         this.skill = skill;
         this.accepted = accepted;
     }
 
-    public Contractor getContractor() {
-        return contractor;
+    public Long getContractorId() {
+        return contractorId;
     }
 
     public void setContractor(Contractor contractor) {
-        this.contractor = contractor;
+        if (contractor == null) contractorId = 0L;
+        else contractorId = contractor.getId();
     }
 
     public Skill getSkill() {
