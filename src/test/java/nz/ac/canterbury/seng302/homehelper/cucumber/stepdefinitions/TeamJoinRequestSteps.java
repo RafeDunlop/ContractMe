@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -14,6 +16,11 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EmailService;
+import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,16 +29,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
@@ -49,6 +56,10 @@ public class TeamJoinRequestSteps {
     @Autowired
     private TeamsRepository teamsRepository;
 
+    @Autowired
+    @InjectMocks
+    private TeamsService teamsService;
+
     @Autowired private MockMvc mockMvc;
 
     private RenovationRecord renovationRecord;
@@ -56,10 +67,23 @@ public class TeamJoinRequestSteps {
     private Contractor contractor;
     private final ContractorContext contractorContext;
     private ResultActions resultActions;
+    private AutoCloseable autoCloseable;
+
+    @Mock
     private EmailService emailService;
 
     public TeamJoinRequestSteps(ContractorContext contractorContext) {
         this.contractorContext = contractorContext;
+    }
+
+    @Before
+    public void openMocks() {
+        autoCloseable = MockitoAnnotations.openMocks(this);
+    }
+
+    @After
+    public void releaseMocks() throws Exception {
+        autoCloseable.close();
     }
 
     @Given("A team request has been created for a renovation which has an available role")
@@ -127,15 +151,6 @@ public class TeamJoinRequestSteps {
 
     }
 
-    @When("I click the accept button")
-    public void i_click_the_accept_button() {
-
-    }
-
-    @When("I click the decline button")
-    public void i_click_the_decline_button() {
-
-    }
 
     @When("I view the renovation")
     public void i_view_the_renovation() throws Exception {
@@ -148,7 +163,8 @@ public class TeamJoinRequestSteps {
 
     @Then("The system will automatically send an email to the contractor who is closest to the renovation location")
     public void the_system_will_automatically_send_an_email_to_the_contractor_who_is_closest_to_the_renovation_location() {
-
+        Mockito.verify(emailService, times(1)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 
     @Then("I am taken to the confirm join team page")
