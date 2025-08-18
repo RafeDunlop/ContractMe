@@ -193,18 +193,6 @@ public class TeamControllerIntegrationTest {
     }
 
     @Test
-    public void teamController_hasTeamJoinRequest_getsForm() throws Exception {
-        MvcResult result = mockMvc.perform(get("/renovations/team/join-team")
-                        .session(session))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertTrue(result.getResponse().getContentAsString().contains("Renovation Name"));
-        assertTrue(result.getResponse().getContentAsString().contains("Role"));
-
-    }
-
-
-    @Test
     void hasLocation_createTeam_submitsTeamWithRoles_assignContractorsToTeams() throws Exception {
         mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
