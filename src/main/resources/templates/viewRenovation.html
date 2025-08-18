@@ -88,7 +88,7 @@
                 </div>
 
                 <!-- Display added tags -->
-                <div id="tagList" class="mb-3">
+                <div th:if="${!#lists.isEmpty(renovation.sortedTags)}" id="tagList" class="mb-3">
                     <label class="fw-bold d-block mb-1">Current Tags:</label>
                     <span th:each="tag : ${renovation.getSortedTags()}" class="tag-box badge bg-success d-inline-flex align-items-center me-2 mb-2">
                         <span class="tag-text-large text-truncate ms-1" th:text="${tag.getTagName()}"></span>
@@ -128,6 +128,11 @@
 
                 <div class="alert alert-danger" id="errorMessage" style="margin-top: 20px; display: none;">
                     <p id="errorText"></p>
+                </div>
+
+                <div th:if="${renovation.location}" class="align-self-start mb-3">
+                    <h6 class="fw-bold">Location:</h6>
+                    <p class="mb-0" th:replace="~{fragments/addressDisplay.html :: addressDisplay (${renovation.location})}"></p>
                 </div>
 
                 <!-- Buttons -->
