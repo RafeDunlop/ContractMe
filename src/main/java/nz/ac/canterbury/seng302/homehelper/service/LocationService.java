@@ -87,7 +87,7 @@ public class LocationService {
             }
         }
         logger.info("Creating location for address {} with coords {}, {}",
-                addressDTO.getAddress_line1(),
+                addressDTO.getAddress_line1().replaceAll("[\r\n]", "_"),
                 addressDTO.getLat(),
                 addressDTO.getLon()
         );
@@ -109,7 +109,7 @@ public class LocationService {
      * cannot identify coordinates for it
      */
     public void injectCoordsViaGeocoding(AddressDTO addressDTO) throws IllegalArgumentException {
-        logger.debug("Attempting to retrieve coordinates via geocoding for address {}", addressDTO.getAddress_line1());
+        logger.debug("Attempting to retrieve coordinates via geocoding for address {}", addressDTO.getAddress_line1().replaceAll("[\r\n]", "_"));
         ResponseEntity<String> response = restTemplate.getForEntity(getGeocodingCompleteUrl(addressDTO), String.class);
         logger.debug(response.getBody());
         try {
@@ -254,8 +254,8 @@ public class LocationService {
     private String getAutoCompleteUrl(String prompt, String countryCode, double latitude, double longitude) {
         for (String input : List.of(prompt, countryCode, String.valueOf(latitude), String.valueOf(longitude))) {
             if (input == null || input.isEmpty()) {
-                logger.warn("A required input is missing {}", input);
-                throw new IllegalArgumentException(String.format("A required input is missing: %s", input));
+                logger.warn("A required input is missing");
+                throw new IllegalArgumentException("A required input is missing");
             }
         }
         StringBuilder sb = new StringBuilder();
