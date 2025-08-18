@@ -151,6 +151,11 @@ public class TeamJoinRequestSteps {
 
     }
 
+    @Then("I am taken to the confirm join team page")
+    public void i_am_taken_to_the_confirm_join_team_page() {
+
+    }
+
 
     @Then("I can view the renovation record")
     public void i_can_view_the_renovation_record() throws Exception {
