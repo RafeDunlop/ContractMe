@@ -66,6 +66,8 @@ public class TeamInvitationController {
             if (teamInvitationService.linkExpired(contractorService.getContractorById(userId), team)) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team invitation link is no longer valid.");
             }
+
+            model.addAttribute("renovationId", team.getRenovationRecord().getId());
         } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team invitation link is no longer valid.");
         }

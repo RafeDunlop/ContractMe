@@ -21,9 +21,7 @@
                 </p>
             </div>
 
-            <form action="/requests/123/accept" method="post">
-                <button class="btn btn-primary mt-4 me-4" type="submit">View Renovation</button>
-            </form>
+            <a class="btn btn-primary mt-4 me-4" th:href="@{/renovations/view(id=${renovationId})}">View Renovation</a>
             <div class="btn-group mr-2 d-flex justify-content-start" role="group">
 
                 <form th:action="@{${teamId} + '/accept'}" method="post">
@@ -33,7 +31,6 @@
                 <form th:action="@{${teamId} + '/decline'}" method="post">
                     <button class="btn btn-danger mt-4" type="submit">Decline</button>
                 </form>
-
             </div>
         </section>
 
