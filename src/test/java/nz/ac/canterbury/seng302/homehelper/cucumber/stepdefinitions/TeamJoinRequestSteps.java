@@ -20,11 +20,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -48,7 +52,6 @@ public class TeamJoinRequestSteps {
     @Autowired private MockMvc mockMvc;
 
     private RenovationRecord renovationRecord;
-    private User owner;
     private Team team;
     private Contractor contractor;
     private final ContractorContext contractorContext;
@@ -77,18 +80,19 @@ public class TeamJoinRequestSteps {
 
     @Given("A private renovation exists with a team")
     public void a_private_renovation_exists_with_a_team() {
-        owner = userRepository.save(new User("Greg", "smith", "greg" + System.currentTimeMillis() + "@smith.com", "Password123!"));
+        User owner = userRepository.save(new User("Greg", "smith", "greg" + System.currentTimeMillis() + "@smith.com", "Password123!"));
 
         renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", Collections.emptyList());
         renovationRecord.setPublicity(false);
         renovationRecord = renovationRecordRepository.save(renovationRecord);
 
         team = new Team(renovationRecord);
+        team = teamsRepository.save(team);
     }
 
     @Given("I am on a request form from a client")
     public void i_am_on_a_request_form_from_a_client() {
-       
+
     }
 
     @Given("I am logged in and a contractor")
@@ -147,20 +151,59 @@ public class TeamJoinRequestSteps {
 
     }
 
-    @Then("I am taken to the confirm join team page")
-    public void i_am_taken_to_the_confirm_join_team_page() {
-
-    }
-
-    @Then("I am taken to the view renovation page for that record")
-    public void i_am_taken_to_the_view_renovation_page_for_that_record() {
-
-    }
-
 
     @Then("I can view the renovation record")
     public void i_can_view_the_renovation_record() throws Exception {
         resultActions.andExpect(status().isOk())
                 .andExpect(view().name("viewRenovation"));
+    }
+
+    @When("^I click the \"(accept|decline)\" button$")
+    public void i_click_the_button(String button) throws Exception {
+        resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/" + button)
+                    .with(user(contractor.getEmail()).roles("USER", "CONTRACTOR"))
+                    .with(csrf()));
+
+    }
+
+    @Then("I am taken to the renovation page")
+    public void i_am_taken_to_the_renovation_page() throws Exception {
+        String expectedUrl = "/renovations/view?id=" + renovationRecord.getId();
+        resultActions.andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedUrl));
+    }
+
+
+    @Then("I am taken to the main page")
+    public void i_am_taken_to_the_main_page() throws Exception {
+        String expectedUrl = "/main";
+        resultActions.andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedUrl));
+    }
+
+    @Then("I am in the team")
+    public void i_am_in_the_team() {
+        team = teamsRepository.findById(team.getId()).orElseThrow();
+
+        boolean inTeam = team.getRoles().stream()
+                .anyMatch(r -> r.getContractor() != null
+                        && r.getContractor().equals(contractor));
+        assertTrue(inTeam);
+    }
+
+    @Then("I am not in the team")
+    public void i_am_not_in_the_team() {
+        team = teamsRepository.findById(team.getId()).orElseThrow();
+
+        boolean inTeam = team.getRoles().stream()
+                .anyMatch(r -> r.getContractor() != null &&
+                        r.getContractor().getId().equals(contractor.getId()));
+        assertFalse(inTeam);
+    }
+
+    @Given("I am shown an error page displaying {string}")
+    public void i_am_shown_an_error_page_displaying(String error) throws Exception {
+        resultActions.andExpect(status().isNotFound())
+                .andExpect(status().reason(error));
     }
 }

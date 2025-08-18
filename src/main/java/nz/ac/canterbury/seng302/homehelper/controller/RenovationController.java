@@ -480,15 +480,16 @@ public class RenovationController {
                                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                                  @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage,
                                                  @RequestParam(defaultValue = "all") String status) {
-        User user = loginService.getUserByEmail();
         RenovationRecord record = renovationRecordService.getRecordById(id);
 
         if (record == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
         }
 
+        User user = loginService.getUserByEmail();
         boolean isOwner = user.equals(record.getUser());
-        if (!isOwner && !record.isPublic()) {
+
+        if (!isOwner && !record.isPublic() && !teamsService.checkViewRenovationAccess(record, user)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 

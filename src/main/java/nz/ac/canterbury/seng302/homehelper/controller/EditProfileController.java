@@ -142,7 +142,7 @@ public class EditProfileController {
         logger.info("POST /user/edit");
 
         User newUser = loginService.getUserByEmail();
-        Contractor contractor = contractorService.getContractorById(newUser.getId());
+        Contractor contractor = contractorService.getContractorByIdElseNull(newUser.getId());
         boolean sameEmail = newUser.getEmail().equals(updatedUser.getEmail());
 
         Map<String, List<String>> errors = editProfileService.validateUpdate(updatedUser, sameEmail);

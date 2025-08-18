@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EmailService;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -231,5 +233,20 @@ public class TeamServiceTest {
         assertEquals("", result);
         assertEquals(contractor, team.getRoles().get(0).getContractor());
         assertEquals(contractor2, team.getRoles().get(1).getContractor());
+    }
+
+    @Test
+    void getContractorTeamRequests_userIsContractor_callRepository() {
+        Contractor contractor = new Contractor("Jane", "Doe", "jane@doe.com", "password");
+        when(teamsRepository.findByRoleContractor(contractor)).thenReturn(List.of());
+        teamsService.getContractorTeamRequests(contractor);
+        verify(teamsRepository).findByRoleContractor(contractor);
+    }
+
+    @Test
+    void getContractorTeamRequests_userIsNotContractor_throwsException() {
+        User user = new User("Jane", "Doe", "jane@doe.com", "password");
+        assertThrows(IllegalArgumentException.class, () -> teamsService.getContractorTeamRequests(user));
+        verify(teamsRepository, never()).findByRoleContractor(Mockito.any());
     }
 }
