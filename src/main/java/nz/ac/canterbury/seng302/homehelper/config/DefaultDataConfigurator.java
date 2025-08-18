@@ -55,8 +55,6 @@ public class DefaultDataConfigurator {
 
     private User default2;
 
-    private Contractor defaultContractor1;
-
     private RenovationRecord default1Renovation1;
 
     private RenovationRecord default2Renovation1;
@@ -113,16 +111,8 @@ public class DefaultDataConfigurator {
         user.setSkills(skills);
         user.setCountryCode(64);
         user.setPhoneNumber("226430022");
-        Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
-        AddressDTO addressDTO = new AddressDTO();
-        addressDTO.setAddress_line1(location.getAddress());
-        addressDTO.setCity(location.getCity());
-        addressDTO.setCountry(location.getCountry());
-        addressDTO.setPostcode(location.getPostcode());
-        addressDTO.setRegion(location.getSuburb());
-        addressDTO.setLat(1d);
-        addressDTO.setLon(1d);
-        default2 = contractorService.registerContractor(user,addressDTO);
+        AddressDTO addressDTO = getAddressDTO();
+        default2 = contractorService.registerContractor(user, addressDTO);
         code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, default2, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);
 
@@ -161,10 +151,19 @@ public class DefaultDataConfigurator {
             contractorRepository.save(contractor);
 
         }
+    }
 
-
-
-
+    private static AddressDTO getAddressDTO() {
+        Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
+        AddressDTO addressDTO = new AddressDTO();
+        addressDTO.setAddress_line1(location.getAddress());
+        addressDTO.setCity(location.getCity());
+        addressDTO.setCountry(location.getCountry());
+        addressDTO.setPostcode(location.getPostcode());
+        addressDTO.setRegion(location.getSuburb());
+        addressDTO.setLat(-43.527887d);
+        addressDTO.setLon(172.5846232);
+        return addressDTO;
     }
 
     private void setupDefaultRenovations() {

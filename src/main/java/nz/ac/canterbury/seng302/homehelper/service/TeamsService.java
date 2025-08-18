@@ -126,6 +126,7 @@ public class TeamsService {
     public String assignContractorsToTeam(Team team, Location renovationLocation) {
         boolean greedySuccess = greedyAssign(team, renovationLocation);
         if (greedySuccess) {
+            teamsRepository.save(team);
             return "";
         }
 
@@ -146,6 +147,7 @@ public class TeamsService {
 
                     // Fill the vacated candidateRole recursively with cycle detection
                     if (fillRoleWithBacktracking(team, renovationLocation, candidateRole, visitedStates)) {
+                        teamsRepository.save(team);
                         return "";
                     }
 
