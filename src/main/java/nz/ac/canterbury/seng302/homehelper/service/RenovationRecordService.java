@@ -260,7 +260,7 @@ public class RenovationRecordService {
     public void removeRenovationRecord(Long id) {
         Optional<RenovationRecord> recordToRemove = renovationRecordRepository.findById(id);
         if (recordToRemove.isPresent()) {
-            renovationTaskRepository.deleteTaskById(id);
+            renovationTaskRepository.deleteTasksWithRenovationId(id);
             renovationRecordRepository.deleteById(id);
         }
     }
