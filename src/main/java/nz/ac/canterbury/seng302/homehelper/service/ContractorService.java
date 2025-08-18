@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
@@ -31,9 +32,10 @@ public class ContractorService {
     private final LocationService locationService;
 
     /**
-     * Constructor for the service and links the repository and validator to the
-     * service.
+     * Constructor for the service and links the repository and validator to the service.
      * @param contractorRepository ContractorRepository for getting and updating contractor details
+     * @param contractorValidation validation for contractor related inputs
+     * @param locationService the location service for setting locations
      */
     @Autowired
     public ContractorService(ContractorRepository contractorRepository, ContractorValidation contractorValidation, LocationService locationService) {
@@ -96,6 +98,16 @@ public class ContractorService {
      * @return the contractor associated with the given ID, or null if no contractor is found
      */
     public Contractor getContractorById(Long id) {
+        return contractorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Contractor: " + id + " not found"));
+    }
+
+    /**
+     * Retrieves a contractor by their identifier.
+     *
+     * @param id the unique identifier of the contractor to be retrieved
+     * @return the contractor associated with the given ID, or null if no contractor is found
+     */
+    public Contractor getContractorByIdElseNull(Long id) {
         return contractorRepository.findById(id).orElse(null);
     }
 
