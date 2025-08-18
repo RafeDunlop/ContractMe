@@ -19,6 +19,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -61,9 +63,9 @@ class RequestInboxControllerIntegrationTest {
         Team team = new Team(renovationRecord);
         Role role = new Role(contractor, Skill.HVAC, false);
         team.addRole(role);
-
-        Mockito.when(teamsRepository.findByRoleContractor(contractor)).thenReturn(List.of(team));
-        Mockito.when(userRepository.findByEmailIgnoreCase(contractor.getEmail())).thenReturn(Optional.of(contractor));
+        when(contractor.getId()).thenReturn(1L);
+        when(teamsRepository.findByRoleContractor(1L)).thenReturn(List.of(team));
+        when(userRepository.findByEmailIgnoreCase(contractor.getEmail())).thenReturn(Optional.of(contractor));
 
         mockMvc.perform(get("/view-requests"))
                 .andExpect(status().isOk())
@@ -74,7 +76,7 @@ class RequestInboxControllerIntegrationTest {
     @Test
     @WithMockUser("john@doe.com")
     void requestInbox_userIsNotContractor_returnMainRedirect() throws Exception {
-        Mockito.when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
+        when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
 
         mockMvc.perform(get("/view-requests"))
                 .andExpect(status().is3xxRedirection())

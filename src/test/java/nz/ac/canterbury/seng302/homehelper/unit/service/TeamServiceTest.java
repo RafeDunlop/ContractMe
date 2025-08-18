@@ -235,9 +235,10 @@ public class TeamServiceTest {
     @Test
     void getContractorTeamRequests_userIsContractor_callRepository() {
         Contractor contractor = new Contractor("Jane", "Doe", "jane@doe.com", "password");
-        when(teamsRepository.findByRoleContractor(contractor)).thenReturn(List.of());
+        when(contractor.getId()).thenReturn(1L);
+        when(teamsRepository.findByRoleContractor(1L)).thenReturn(List.of());
         teamsService.getContractorTeamRequests(contractor);
-        verify(teamsRepository).findByRoleContractor(contractor);
+        verify(teamsRepository).findByRoleContractor(1L);
     }
 
     @Test

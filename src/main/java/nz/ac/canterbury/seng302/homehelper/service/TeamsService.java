@@ -111,7 +111,7 @@ public class TeamsService {
      */
     public List<Team> getContractorTeamRequests(User user) throws IllegalArgumentException {
         if (user instanceof Contractor contractor) {
-            return teamsRepository.findByRoleContractor(contractor);
+            return teamsRepository.findByRoleContractor(contractor.getId());
         } else {
             throw new IllegalArgumentException("User is not a contractor");
         }
