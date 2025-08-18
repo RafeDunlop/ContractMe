@@ -85,7 +85,7 @@
             <div class="mb-3">
                 <div class="input-group">
                     <input type="text" class="form-control" id="roomList" placeholder="Enter a room name"
-                           th:name="roomList" data-cy="roomList">
+                           th:name="roomList" data-cy="roomList" aria-label="roomList">
                     <button type="button" class="btn btn-primary" id="create-room-button">Add</button>
                 </div>
 
@@ -125,21 +125,17 @@
             </div>
 
             <!-- LOCATION FORM FRAGMENT -->
-            <div th:class="${locationUsed} ? 'form-extension' : 'hidden-form-extension'" id="location-form">
+            <div th:class="'pb-3 ' + (${locationUsed} ? 'form-extension' : 'hidden-form-extension')" id="location-form">
                 <div th:replace="~{fragments/locationForm.html :: locationForm(
                      addressDTO=${addressDTO})}"></div>
             </div>
 
-            <button type="submit" id="submit-record" class="btn btn-primary">Create</button>
 
-
-
+            <div class="mt-4">
+                <button type="submit" id="submit-record" class="btn btn-primary">Create</button>
+                <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-3">Cancel</a>
+            </div>
         </form>
-    </div>
-
-    <!-- CANCEL BUTTON -->
-    <div class="mt-4">
-        <a th:href="@{${previousUrl}}" class="btn btn-primary">Cancel</a>
     </div>
 </div>
 </body>
