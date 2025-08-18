@@ -19,7 +19,7 @@ Feature: As Bob, I want to be able to receive requests from clients and an email
 
   Scenario: AC4 - Decline Clicked
     Given I am on a request form from a client
-    When I click the accept button
+    When I click the decline button
     Then I am taken to the view renovation page for that record
 
   @authoriseContractor

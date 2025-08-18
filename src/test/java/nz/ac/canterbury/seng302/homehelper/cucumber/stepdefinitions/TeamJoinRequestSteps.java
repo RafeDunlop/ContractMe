@@ -70,6 +70,11 @@ public class TeamJoinRequestSteps {
 
     }
 
+    @Given("A team request email has been received")
+    public void a_team_request_email_has_been_received() {
+
+    }
+
     @Given("A private renovation exists with a team")
     public void a_private_renovation_exists_with_a_team() {
         owner = userRepository.save(new User("Greg", "smith", "greg" + System.currentTimeMillis() + "@smith.com", "Password123!"));
@@ -79,6 +84,11 @@ public class TeamJoinRequestSteps {
         renovationRecord = renovationRecordRepository.save(renovationRecord);
 
         team = new Team(renovationRecord);
+    }
+
+    @Given("I am on a request form from a client")
+    public void i_am_on_a_request_form_from_a_client() {
+       
     }
 
     @Given("I am logged in and a contractor")
@@ -108,6 +118,21 @@ public class TeamJoinRequestSteps {
 
     }
 
+    @When("I click the link contained therein")
+    public void i_click_the_link_contained_therein() {
+
+    }
+
+    @When("I click the accept button")
+    public void i_click_the_accept_button() {
+
+    }
+
+    @When("I click the decline button")
+    public void i_click_the_decline_button() {
+
+    }
+
     @When("I view the renovation")
     public void i_view_the_renovation() throws Exception {
         resultActions = mockMvc.perform(get("/renovations/view")
@@ -121,6 +146,17 @@ public class TeamJoinRequestSteps {
     public void the_system_will_automatically_send_an_email_to_the_contractor_who_is_closest_to_the_renovation_location() {
 
     }
+
+    @Then("I am taken to the confirm join team page")
+    public void i_am_taken_to_the_confirm_join_team_page() {
+
+    }
+
+    @Then("I am taken to the view renovation page for that record")
+    public void i_am_taken_to_the_view_renovation_page_for_that_record() {
+
+    }
+
 
     @Then("I can view the renovation record")
     public void i_can_view_the_renovation_record() throws Exception {
