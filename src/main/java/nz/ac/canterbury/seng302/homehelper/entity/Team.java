@@ -25,7 +25,7 @@ public class Team {
     private RenovationRecord renovationRecord;
 
     @ElementCollection
-    private List<Role> roles = new ArrayList<>();
+    private final List<Role> roles = new ArrayList<>();
 
     protected Team() {}
 

@@ -103,6 +103,21 @@ public class TeamsService {
     }
 
     /**
+     * Returns a list of team requests for the given user after checking if they are a contractor.
+     *
+     * @param user the user to find team requests for
+     * @return the list of team requests, ordered by creation date
+     * @throws IllegalArgumentException if the user is not a contractor
+     */
+    public List<Team> getContractorTeamRequests(User user) throws IllegalArgumentException {
+        if (user instanceof Contractor contractor) {
+            return teamsRepository.findByRoleContractor(contractor);
+        } else {
+            throw new IllegalArgumentException("User is not a contractor");
+        }
+    }
+
+    /**
      * Run algorithm to assign the closest available contractors to the team if possible
      * @param team team to assign contractors to
      * @param renovationLocation location of the renovation
@@ -111,6 +126,7 @@ public class TeamsService {
     public String assignContractorsToTeam(Team team, Location renovationLocation) {
         boolean greedySuccess = greedyAssign(team, renovationLocation);
         if (greedySuccess) {
+            teamsRepository.save(team);
             return "";
         }
 
@@ -132,6 +148,7 @@ public class TeamsService {
 
                     // Fill the vacated candidateRole recursively with cycle detection
                     if (fillRoleWithBacktracking(team, renovationLocation, candidateRole, visitedStates)) {
+                        teamsRepository.save(team);
                         return "";
                     }
 

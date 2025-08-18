@@ -1,6 +1,9 @@
 package nz.ac.canterbury.seng302.homehelper.entity.users;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+
+import java.time.LocalDateTime;
 
 /**
  * Represents a role within the system. A role is associated with a contractor, a specific skill,
@@ -12,6 +15,9 @@ public class Role {
 
     private Long contractorId;
 
+    @Column
+    private LocalDateTime creationDate;
+
     private Skill skill;
 
     private boolean accepted;
@@ -22,12 +28,14 @@ public class Role {
         this.contractorId = null;
         this.skill = skill;
         this.accepted = false;
+        creationDate = LocalDateTime.now();
     }
 
     public Role(Contractor contractor, Skill skill, boolean accepted) {
         this.contractorId = contractor.getId();
         this.skill = skill;
         this.accepted = accepted;
+        creationDate = LocalDateTime.now();
     }
 
     public Long getContractorId() {
@@ -55,4 +63,11 @@ public class Role {
         this.accepted = accepted;
     }
 
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
+    }
 }
