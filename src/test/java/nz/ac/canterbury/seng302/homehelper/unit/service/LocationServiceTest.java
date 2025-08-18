@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.stream.Stream;
 
-public class LocationServiceTest {
+class LocationServiceTest {
 
     private LocationService locationService;
     private LocationService locationServiceSpy;
@@ -54,7 +54,7 @@ public class LocationServiceTest {
 
     @ParameterizedTest
     @MethodSource("streamValidLocationInputsWithCoordinates")
-    public void locate_inputValidLocationsWithCoordinates_returnLocationWithGivenDetails(String address, String suburb, String city,
+    void locate_inputValidLocationsWithCoordinates_returnLocationWithGivenDetails(String address, String suburb, String city,
                                                                                          String postcode, String country, Double lat,
                                                                                          Double lon) {
         Location expectedLocation = new Location(address, country, postcode, city, suburb, lat, lon);
@@ -68,7 +68,7 @@ public class LocationServiceTest {
     }
 
     @Test
-    public void locate_inputValidLocationWithoutCoordinates_returnLocationWithGeolocatedDetails() {
+    void locate_inputValidLocationWithoutCoordinates_returnLocationWithGeolocatedDetails() {
         String address = "1 Address";
         String suburb = "Suburb";
         String city = "City";
@@ -93,7 +93,7 @@ public class LocationServiceTest {
     }
 
     @Test
-    public void locate_inputInvalidLocation_returnLocationWithIpDetails() {
+    void locate_inputInvalidLocation_returnLocationWithIpDetails() {
         String address = "Fake Address";
         String suburb = "Fake Suburb";
         String city = "Fake City";
@@ -124,7 +124,7 @@ public class LocationServiceTest {
     }
 
     @Test
-    public void testHasLocation_locationValid_returnsTrue() {
+    void testHasLocation_locationValid_returnsTrue() {
         Location location = new Location("Jack Erskine", "", "", "", "");
         RenovationRecord renovationRecord = new RenovationRecord();
         renovationRecord.setLocation(location);
@@ -132,13 +132,13 @@ public class LocationServiceTest {
     }
 
     @Test
-    public void testHasLocation_locationNull_returnsFalse() {
+    void testHasLocation_locationNull_returnsFalse() {
         RenovationRecord renovationRecord = new RenovationRecord();
         assertFalse(locationService.hasLocation(renovationRecord));
     }
 
     @Test
-    public void testHasLocation_addressEmpty_returnsFalse() {
+    void testHasLocation_addressEmpty_returnsFalse() {
         RenovationRecord renovationRecord = new RenovationRecord();
         Location location = new Location("", "", "", "", "");
         renovationRecord.setLocation(location);
