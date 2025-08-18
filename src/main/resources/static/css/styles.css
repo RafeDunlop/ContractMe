@@ -159,6 +159,10 @@
     display: block;
 }
 
+.team-request {
+    cursor: pointer;
+}
+
 
 .custom-navbar {
     background-color: #333;
