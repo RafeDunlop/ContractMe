@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="English">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <title th:remove="all">Confirm Join Team Request</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body>
       <p th:text="|Hi ${name},|">Hi user,</p>
-      <p th:text="You have been chosen to join |${owner}|\'s team on their |${renovation}| as a |${role}|.">You have been chosen to join owner's team on their renovation as a role.</p>
+      <p th:text="|You have been chosen to join ${owner}'s team on their ${renovation} as a ${role}.|">You have been chosen to join owner's team on their renovation as a role.</p>
       <p>You can accept or decline this request below.</p>
       <br/>
-      <br>
+
          Regards,<br/>
       <em>Team 200</em>
 </body>
