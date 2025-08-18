@@ -11,18 +11,24 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.times;
 
 
 @SpringBootTest
@@ -38,6 +44,8 @@ class TeamsServiceIntegrationTest {
     private RenovationRecordRepository renovationRecordRepository;
     @Autowired
     private UserRepository userRepository;
+    @MockBean
+    private EmailService emailService;
 
     private User user;
     private RenovationRecord renovation;
@@ -59,7 +67,7 @@ class TeamsServiceIntegrationTest {
 
     @Transactional
     @Test
-    void validTeamAndLocation_assignContractorsToTeam_fillsTeam() {
+    void validTeamAndLocation_assignContractorsToTeam_fillsTeamAndSendsEmails() {
         Team team = new Team(renovation);
         Role role1 = new Role(Skill.PLUMBING);
         Role role2 = new Role(Skill.ELECTRICAL);
@@ -88,6 +96,11 @@ class TeamsServiceIntegrationTest {
         assertEquals("", result);
         assertEquals(contractor1, team.getRoles().get(0).getContractor());
         assertEquals(contractor2, team.getRoles().get(1).getContractor());
+
+        //If any skills are added in the future, change this threshold to match the number of skills present
+        Mockito.verify(emailService, times(2)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+
     }
 
     @Test

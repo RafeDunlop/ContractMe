@@ -212,7 +212,7 @@ public class TeamControllerIntegrationTest {
 
 
     @Test
-    void hasLocation_createTeam_submitsTeamWithRoles_assignContractorsToTeamsAndSendsEmailNotifications() throws Exception {
+    void hasLocation_createTeam_submitsTeamWithRoles_assignContractorsToTeamsAndSendsEmails() throws Exception {
        mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", "ANTIQUE_RESTORATION", "ARCHITECTURE", "ASBESTOS_REMOVAL")
@@ -227,7 +227,7 @@ public class TeamControllerIntegrationTest {
     }
 
     @Test
-    void hasLocation_createTeam_submitsTeamWithRoles_doesNotAssignContractorsToTeams() throws Exception {
+    void hasLocation_createTeam_submitsTeamWithRoles_doesNotAssignContractorsToTeamsAndSendsNoEmails() throws Exception {
         mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", "ELECTRICAL", "RESOURCE_CONSENT_COMPLIANCE")
@@ -236,8 +236,11 @@ public class TeamControllerIntegrationTest {
                 .andExpect(flash().attribute("response", false))
                 .andReturn();
 
+        Mockito.verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
 
     }
+
 
 }
 
