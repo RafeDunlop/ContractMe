@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
+import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.controller.RequestInboxController;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
@@ -8,10 +9,10 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +30,7 @@ import java.util.Optional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 @ActiveProfiles("test")
 class RequestInboxControllerIntegrationTest {
 
@@ -38,21 +40,25 @@ class RequestInboxControllerIntegrationTest {
     @Autowired
     private RequestInboxController requestInboxController;
 
+    @Autowired
+    private ContractorRepository contractorRepository;
+
     @MockBean
     private TeamsRepository teamsRepository;
 
     @MockBean
     private UserRepository userRepository;
 
-    private static Contractor contractor;
+    private Contractor contractor;
 
-    private static User user;
+    private User user;
 
-    private static RenovationRecord renovationRecord;
+    private RenovationRecord renovationRecord;
 
-    @BeforeAll
-    static void setUp() {
+    @BeforeEach
+    void setUp() {
         contractor = new Contractor("Jane", "Doe", "jane@doe.com", "password");
+        contractor = contractorRepository.save(contractor);
         user = new User("John", "Doe", "john@doe.com", "password");
         renovationRecord = new RenovationRecord(user, "Record 1", "description", List.of());
     }
@@ -63,7 +69,6 @@ class RequestInboxControllerIntegrationTest {
         Team team = new Team(renovationRecord);
         Role role = new Role(contractor, Skill.HVAC, false);
         team.addRole(role);
-        when(contractor.getId()).thenReturn(1L);
         when(teamsRepository.findByRoleContractor(1L)).thenReturn(List.of(team));
         when(userRepository.findByEmailIgnoreCase(contractor.getEmail())).thenReturn(Optional.of(contractor));
 

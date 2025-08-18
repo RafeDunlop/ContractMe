@@ -38,7 +38,6 @@ public class RenovationRecordService {
 
     private final RenovationTaskService renovationTaskService;
     private final LocationService locationService;
-    private final TeamsService teamsService;
     private final TeamsRepository teamsRepository;
 
     /**
@@ -47,13 +46,12 @@ public class RenovationRecordService {
      * @param renovationRecordRepository initializes with the repository for storing records
      */
     @Autowired
-    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation, RenovationTaskService renovationTaskService, LocationService locationService, TeamsService teamsService, TeamsRepository teamsRepository) {
+    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation, RenovationTaskService renovationTaskService, LocationService locationService, TeamsRepository teamsRepository) {
         this.renovationRecordRepository = renovationRecordRepository;
         this.renovationTaskRepository = renovationTaskRepository;
         this.renovationRecordValidation = renovationRecordValidation;
         this.renovationTaskService = renovationTaskService;
         this.locationService = locationService;
-        this.teamsService = teamsService;
         this.teamsRepository = teamsRepository;
     }
 

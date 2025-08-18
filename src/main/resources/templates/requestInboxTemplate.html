@@ -20,7 +20,7 @@
         <div class="row card me-1 mb-2" th:each="team: ${teams}">
           <h5 class="card-header" th:text="${team.getRenovationRecord().getName()}"></h5>
           <div class="card-body">
-            <div th:each="role : ${team.getRoles()}" th:if="${role.getContractor().getId() == user.getId()}">
+            <div th:each="role : ${team.getRoles()}" th:if="${role.getContractorId() == user.getId()}">
               <strong>Role:</strong>
               <span th:text="${role.getSkill().getDisplayName()}"></span>
             </div>

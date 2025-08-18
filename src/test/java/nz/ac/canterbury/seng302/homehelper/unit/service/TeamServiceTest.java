@@ -137,7 +137,7 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractorId());
+        assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
     }
 
     @Test
@@ -182,8 +182,8 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor1, team.getRoles().get(0).getContractorId());
-        assertEquals(contractor2, team.getRoles().get(1).getContractorId());
+        assertEquals(contractor1.getId(), team.getRoles().get(0).getContractorId());
+        assertEquals(contractor2.getId(), team.getRoles().get(1).getContractorId());
     }
 
     @Test
@@ -228,13 +228,13 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractorId());
-        assertEquals(contractor2, team.getRoles().get(1).getContractorId());
+        assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
+        assertEquals(contractor2.getId(), team.getRoles().get(1).getContractorId());
     }
 
     @Test
     void getContractorTeamRequests_userIsContractor_callRepository() {
-        Contractor contractor = new Contractor("Jane", "Doe", "jane@doe.com", "password");
+        Contractor contractor = mock(Contractor.class);
         when(contractor.getId()).thenReturn(1L);
         when(teamsRepository.findByRoleContractor(1L)).thenReturn(List.of());
         teamsService.getContractorTeamRequests(contractor);

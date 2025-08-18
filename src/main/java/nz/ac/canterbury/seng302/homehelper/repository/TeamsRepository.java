@@ -22,8 +22,8 @@ public interface TeamsRepository extends CrudRepository<Team, Long>{
      * @param contractorId the id of the contractor to match
      * @return the list of matching teams
      */
-        @Query("SELECT t FROM Team t JOIN FETCH t.roles r WHERE r.contractorId = :contractorId AND r.accepted = FALSE ORDER BY r.creationDate DESC")
-        List<Team> findByRoleContractor(@Param("contractor") Long contractorId);
+    @Query("SELECT t FROM Team t JOIN FETCH t.roles r WHERE r.contractorId = :contractorId AND r.accepted = FALSE ORDER BY r.creationDate DESC")
+    List<Team> findByRoleContractor(Long contractorId);
 
     /**
      * Checks if a given user belongs to the team associated with a renovation record

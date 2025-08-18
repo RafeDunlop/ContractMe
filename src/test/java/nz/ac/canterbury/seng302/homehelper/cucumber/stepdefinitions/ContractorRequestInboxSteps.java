@@ -86,7 +86,7 @@ public class ContractorRequestInboxSteps {
 
         Role expectedRole = expectedTeam.getRoles().get(0);
         Role returnedRole = returnedTeam.getRoles().get(0);
-        Assertions.assertEquals(expectedRole.getContractor(), returnedRole.getContractor());
+        Assertions.assertEquals(expectedRole.getContractorId(), returnedRole.getContractorId());
         Assertions.assertEquals(expectedRole.getSkill(), returnedRole.getSkill());
     }
 
