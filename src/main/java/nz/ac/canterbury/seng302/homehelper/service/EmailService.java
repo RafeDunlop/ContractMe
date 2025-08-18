@@ -140,13 +140,9 @@ public class EmailService {
         context.setVariable("owner", ownerName);
         context.setVariable("renovation", renovationName);
         context.setVariable("role", role);
+        context.setVariable("domain", domain);
         String subject = "Contractor Request";
         final String htmlContent = htmlTemplateEngine.process("html/email-confirm-team-request", context);
         sendEmail(recipientEmail, subject, htmlContent, "Contractor request send failed");
-
-
-
-
-
     }
 }

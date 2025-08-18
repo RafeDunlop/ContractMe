@@ -130,7 +130,9 @@ public class TeamController {
      * @return the join team fragment
      */
     @GetMapping("/join-team")
-    public String joinTeam(Model model) {
+    public String joinTeam() {
+
+
         return "joinTeamInbox";
     }
 

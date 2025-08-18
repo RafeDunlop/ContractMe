@@ -6,10 +6,11 @@
 </head>
 <body>
       <p th:text="|Hi ${name},|">Hi user,</p>
-      <p th:text="|You have been chosen to join ${owner}'s team on their ${renovation} as a ${role}.|">You have been chosen to join owner's team on their renovation as a role.</p>
-      <p>You can accept or decline this request below.</p>
+      <p th:text="|You have been chosen to join ${owner}s team on their ${renovation} as a ${role} contractor.|">You have been chosen to join owner's team on their renovation as a role contractor.</p>
+      <p>You can accept or decline this request after clicking the link below.</p>
       <br/>
-
+<a class="nav-link" th:href="${domain} + '/renovations/team/join-team'"
+   th:text="${domain} + '/join-team'"></a>
          Regards,<br/>
       <em>Team 200</em>
 </body>
