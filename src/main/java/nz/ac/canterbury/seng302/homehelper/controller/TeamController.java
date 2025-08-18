@@ -2,10 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
@@ -105,19 +102,8 @@ public class TeamController {
             return "createTeam";
         }
 
-        Team team = new Team(renovationRecordService.getRecordById(id));
-
-        List<Role> roles = teamsService.createRoles(teamRequestDTO.getSkills());
-        for(Role role : roles) {
-            team.addRole(role);
-        }
-
-        teamsService.saveTeam(team);
-
-        Location renovationLocation = renovationRecordService.getRecordById(id).getLocation();
-        String response = teamsService.assignContractorsToTeam(team, renovationLocation);
-
-        teamsService.sendContractorEmails(team);
+        RenovationRecord teamRecord = renovationRecordService.getRecordById(id);
+        String response = teamsService.createNewTeam(teamRecord, teamRequestDTO);
 
         redirectAttributes.addFlashAttribute("response", response.isEmpty());
 

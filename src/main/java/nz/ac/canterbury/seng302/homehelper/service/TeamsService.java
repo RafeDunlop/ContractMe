@@ -47,6 +47,28 @@ public class TeamsService {
         this.emailService = emailService;
     }
 
+    /**
+     * Creates a new team
+     * @param teamRecord the renovation record with which the team was associated
+     * @param teamRequestDTO the request DTO containing the info about the skills required
+     * @return the response value of the matching algorithm
+     */
+    public String createNewTeam(RenovationRecord teamRecord, TeamRequestDTO teamRequestDTO) {
+        Team team = new Team(teamRecord);
+
+        List<Role> roles = createRoles(teamRequestDTO.getSkills());
+        for(Role role : roles) {
+            team.addRole(role);
+        }
+
+        saveTeam(team);
+
+        Location renovationLocation = teamRecord.getLocation();
+        String response = assignContractorsToTeam(team, renovationLocation);
+        sendContractorEmails(team);
+
+        return response;
+    }
 
     /**
      * Constructs a list of roles for the team entity.
