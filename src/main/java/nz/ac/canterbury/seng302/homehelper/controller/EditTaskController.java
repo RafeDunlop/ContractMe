@@ -9,15 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
@@ -65,6 +63,7 @@ public class EditTaskController {
     @GetMapping("/editTask")
     public String editTask(@RequestParam(name = "taskId") Long taskId,
                            @RequestParam(name = "renovationId") Long renovationId,
+                           @RequestParam(name = "fromDate", required = false, defaultValue = "") String fromDate,
                            Model model) {
 
         logger.info("GET renovations/editTask");
@@ -87,6 +86,8 @@ public class EditTaskController {
         model.addAttribute("roomList", renovationRecord.getRooms());
         model.addAttribute("renovationTaskDTO", renovationTaskDTO);
 
+        model.addAttribute("fromDate", fromDate);
+
         return "editTaskTemplate";
     }
 
@@ -108,42 +109,27 @@ public class EditTaskController {
     public String editTask(@ModelAttribute("renovationTaskDTO") RenovationTaskDTO renovationTaskDTO,
                                 @RequestParam(name = "taskId") Long taskId,
                                 @RequestParam(name = "renovationId") Long renovationId,
+                                @RequestParam(required = false, defaultValue = "") String dateToReturnTo,
                                 RedirectAttributes redirectAttributes) {
         logger.info("POST renovations/editTask");
         RenovationTask renovationTask = renovationTaskService.getTaskById(taskId);
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
-        LocalDate parsedDate = null;
         if (renovationRecord == null || renovationRecord.getUser() != loginService.getUserByEmail()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation record was not found.");
         }
         if (renovationTask == null || renovationTask.getRenovationRecord() != renovationRecord) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation task does not exist.");
         }
-        if (renovationTaskDTO.getDueDate() != null) {
-            DateTimeFormatter[] formatters = new DateTimeFormatter[] {
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd"),
-                    DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            };
-
-            for (DateTimeFormatter formatter : formatters) {
-                try {
-                    parsedDate = LocalDate.parse(renovationTaskDTO.getDueDate(), formatter);
-                    break;
-                } catch (DateTimeParseException ignored) {}
-            }
-
-            if (parsedDate != null) {
-                String formattedDueDate = parsedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
-                renovationTaskDTO.setDueDate(formattedDueDate);
-            }
+        String formattedDueDate = renovationTaskService.parseDueDate(renovationTaskDTO);
+        if (formattedDueDate != null) {
+            redirectAttributes.addFlashAttribute("dueDate", formattedDueDate);
         }
 
         Map<String, List<String>> errors = renovationTaskService.validateTaskDetails(
                 renovationTaskDTO, renovationTask.getRenovationRecord());
 
         if (!errors.isEmpty()) {
-            errors.forEach((key, messages) -> redirectAttributes.addFlashAttribute(key, messages));
+            errors.forEach(redirectAttributes::addFlashAttribute);
 
             redirectAttributes.addFlashAttribute("renovationTaskDTO", renovationTaskDTO);
             return "redirect:/editTask?taskId=" + taskId + "&renovationId=" + renovationId;
@@ -151,7 +137,9 @@ public class EditTaskController {
 
         try {
             editTaskService.updateTask(renovationTaskDTO,renovationTask);
-            return "redirect:/renovations/view?id=" + renovationId;
+            return (dateToReturnTo.isEmpty()) ?
+                    String.format("redirect:/renovations/view?id=%s", renovationId) :
+                    String.format("redirect:/renovations/view?id=%s&dateEdited=%s#cellEdited", renovationId, dateToReturnTo);
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error {}", e.getMessage());
 
@@ -184,5 +172,30 @@ public class EditTaskController {
         RenovationRecord renovation = renovationTask.getRenovationRecord();
         editTaskService.updateTaskIcon(renovationTask, iconName);
         return "redirect:/renovations/view?id=" + renovation.getId();
+    }
+
+
+    /**
+     * Handles a PATCH request to update the state of a task.
+     * @param id of the task to update.
+     * @param state The new state to assign to the task
+     * @return A ResponseEntity with HTTP 200 if successful, or 400/403 if there is an error.
+     */
+    @PatchMapping("/task/{id}/state")
+    public ResponseEntity<String> changeTaskState(@PathVariable Long id, @RequestParam String state) {
+        logger.info("PATCH /task/{}/state", id);
+
+        RenovationTask renovationTask = renovationTaskService.getTaskById(id);
+        User user = loginService.getUserByEmail();
+        if (!renovationTask.getRenovationRecord().getUser().equals(user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Action not allowed.");
+        }
+
+        try {
+            editTaskService.updateTaskState(renovationTask, state);
+            return ResponseEntity.ok("State updated");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

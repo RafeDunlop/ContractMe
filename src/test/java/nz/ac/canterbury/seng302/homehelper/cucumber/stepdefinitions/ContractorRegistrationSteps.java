@@ -7,8 +7,8 @@ import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.ContractorRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -182,6 +182,8 @@ public class ContractorRegistrationSteps {
                 .param("password", "P4$$word")
                 .param("confirmPassword", "P4$$word")
                 .param("isContractor", "true")
+                .param("lat", "1d")
+                .param("lon", "1d")
                 .with(csrf());
 
         resultActions = mockMvc.perform(request)

@@ -5,12 +5,17 @@ import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.controller.EditProfileController;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +32,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -40,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @WithMockUser(username = "jane@doe.com")
 @ActiveProfiles("test")
-public class EditProfileControllerIntegrationTest {
+class EditProfileControllerIntegrationTest {
 
     @Autowired
     private EditProfileController editProfileController;
@@ -58,6 +65,26 @@ public class EditProfileControllerIntegrationTest {
         mockMvc = MockMvcBuilders.standaloneSetup(editProfileController).build();
     }
 
+
+    private static Stream<Arguments> streamValidContractorDetails() {
+        return Stream.of(
+                Arguments.of(27.08f, 64, "6412345678", Set.of(Skill.CARPENTRY)),
+                Arguments.of(0, 1, "11111 1111", Set.of(Skill.EARTHMOVING)),
+                Arguments.of(9999f, 99, "9 9 9 9 9 9 9 9", Set.of(Skill.SEPTIC_SYSTEMS, Skill.HVAC, Skill.MECHANICAL_ENGINEERING))
+        );
+    }
+
+    private static Stream<Arguments> streamInvalidContractorDetails() {
+        List<Object> errorsList = List.of(List.of("Invalid hourly rate"), List.of("Your phone number is invalid", "Invalid country code"), List.of("You must select one or more skills"));
+        return Stream.of(
+                Arguments.of(-10f, 0, "999", null, errorsList),
+                Arguments.of(-999, 1000, "9999999999999999", null, errorsList),
+                Arguments.of(-99999, 10001, "9 9 9 9 9#$$%", null, errorsList),
+                Arguments.of(-99999, 10001, "99", null, errorsList)
+        );
+    }
+
+
     /**
      * Tests the edit profile page with a valid id in the URL path.
      * Test simulates a user clicking the edit button from the profile page to edit their details.
@@ -72,7 +99,6 @@ public class EditProfileControllerIntegrationTest {
         mockMvc.perform(get("/user/edit"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("editProfileTemplate"))
-                .andExpect(model().attributeExists("user"))
                 .andExpect(model().attribute("firstName", expectedUser.getFirstName()))
                 .andExpect(model().attribute("lastName", expectedUser.getLastName()))
                 .andExpect(model().attribute("email", expectedUser.getEmail()))
@@ -133,7 +159,6 @@ public class EditProfileControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user/edit"))
                 .andExpect(flash().attribute("firstNameError", expectedErrors))
-                .andExpect(flash().attributeExists("user"))
                 .andExpect(flash().attribute("firstName", updatedUser.getFirstName()))
                 .andExpect(flash().attribute("lastName", updatedUser.getLastName()))
                 .andExpect(flash().attribute("email", updatedUser.getEmail()));
@@ -161,7 +186,6 @@ public class EditProfileControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user/edit"))
                 .andExpect(flash().attribute("emailError", expectedErrors))
-                .andExpect(flash().attributeExists("user"))
                 .andExpect(flash().attribute("firstName", updatedUser.getFirstName()))
                 .andExpect(flash().attribute("lastName", updatedUser.getLastName()))
                 .andExpect(flash().attribute("email", updatedUser.getEmail()));
@@ -193,7 +217,6 @@ public class EditProfileControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user/edit"))
                 .andExpect(flash().attribute("emailError", expectedErrors))
-                .andExpect(flash().attributeExists("user"))
                 .andExpect(flash().attribute("firstName", expectedUser1.getFirstName()))
                 .andExpect(flash().attribute("lastName", expectedUser1.getLastName()))
                 .andExpect(flash().attribute("email", expectedUser2.getEmail()));
@@ -313,6 +336,8 @@ public class EditProfileControllerIntegrationTest {
         addressDTO.setPostcode("8023");
         addressDTO.setCity("Christchurch");
         addressDTO.setRegion("Beckenham");
+        addressDTO.setLat(1D);
+        addressDTO.setLon(1D);
 
         mockMvc.perform(post("/user/edit")
                         .param("firstName", "Jane")
@@ -322,7 +347,9 @@ public class EditProfileControllerIntegrationTest {
                         .param("country", addressDTO.getCountry())
                         .param("postcode", addressDTO.getPostcode())
                         .param("city", addressDTO.getCity())
-                        .param("region", addressDTO.getRegion()))
+                        .param("region", addressDTO.getRegion())
+                        .param("lat", Double.toString(addressDTO.getLat()))
+                        .param("lon", Double.toString(addressDTO.getLon())))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/user"));
 
@@ -361,4 +388,92 @@ public class EditProfileControllerIntegrationTest {
         User savedUser = userRepository.findByEmailIgnoreCase("jane@doe.com").orElseThrow();
         assertNull(savedUser.getLocation());
     }
+
+    @ParameterizedTest
+    @MethodSource("streamValidContractorDetails")
+    void testEditContractor_validUserDetails_exitEditor(float hourlyRate, int countryCode, String phoneNumber, Set<Skill> skills) throws Exception {
+        Contractor current = new Contractor("Jane", "Doe", "jane@doe.com", "password");
+        current.grantAuthority("ROLE_USER");
+        current.setHourlyRate(27.80f);
+        current.setPhoneNumber("6412345678");
+        current.addSkill(Skill.CARPENTRY);
+        current.setLocation(
+                new Location("123 Linwood Ave", "New Zealand", "8045", "Christchurch", "Linwood"));
+        userRepository.save(current);
+
+        mockMvc.perform(post("/user/edit")
+                        .param("firstName", "John")
+                        .param("lastName", "Doe")
+                        .param("email", "john@doe.com")
+                        .param("password", "password")
+                        .param("address_line1", "123 Ilam Road")
+                        .param("country", "New Zealand")
+                        .param("postcode", "8042")
+                        .param("city", "Christchurch")
+                        .param("region", "Ilam")
+                        .param("lat", "1.0")
+                        .param("lon", "1.0")
+                        .param("hourlyRate", Float.toString(hourlyRate))
+                        .param("countryCode", Integer.toString(countryCode))
+                        .param("phoneNumber", phoneNumber)
+                        .param("skills", skills.stream().map(Skill::toString).toArray(String[]::new))
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user"));
+
+        User savedUser = userRepository.findByEmailIgnoreCase("john@doe.com").orElseThrow();
+
+        Assertions.assertEquals("John", savedUser.getFirstName());
+        Assertions.assertEquals("Doe", savedUser.getLastName());
+        Assertions.assertEquals("john@doe.com", savedUser.getEmail());
+
+        Assertions.assertNotNull(savedUser.getLocation());
+        Assertions.assertEquals("123 Ilam Road", savedUser.getLocation().getAddress());
+        Assertions.assertEquals("8042", savedUser.getLocation().getPostcode());
+        Assertions.assertEquals("Ilam", savedUser.getLocation().getSuburb());
+
+        Assertions.assertInstanceOf(Contractor.class, savedUser);
+        Contractor savedContractor = (Contractor) savedUser;
+        Assertions.assertEquals(hourlyRate, savedContractor.getHourlyRate());
+        Assertions.assertEquals(countryCode, savedContractor.getCountryCode());
+        Assertions.assertEquals(phoneNumber, savedContractor.getPhoneNumber());
+    }
+
+    @ParameterizedTest
+    @MethodSource("streamInvalidContractorDetails")
+    void testEditContractor_invalidContractorDetails_stayOnEditProfilePage(float hourlyRate, int countryCode, String phoneNumber, Set<Skill> skills, List<Object> expectedErrors) throws Exception {
+        Contractor current = new Contractor("Jane", "Doe", "jane@doe.com", "password");
+        current.grantAuthority("ROLE_USER");
+        current.setHourlyRate(27.80f);
+        current.setPhoneNumber("6412345678");
+        current.addSkill(Skill.CARPENTRY);
+        current.setLocation(
+                new Location("123 Linwood Ave", "New Zealand", "8045", "Christchurch", "Linwood"));
+        userRepository.save(current);
+
+        mockMvc.perform(post("/user/edit")
+                .param("firstName", "John")
+                .param("lastName", "Doe")
+                .param("email", "john@doe.com")
+                .param("password", "password")
+                .param("address_line1", "123 Ilam Road")
+                .param("country", "New Zealand")
+                .param("postcode", "8042")
+                .param("city", "Christchurch")
+                .param("region", "Ilam")
+                .param("lat", "1.0")
+                .param("lon", "1.0")
+                .param("hourlyRate", Float.toString(hourlyRate))
+                .param("countryCode", Integer.toString(countryCode))
+                .param("phoneNumber", phoneNumber)
+                .param("skills", (String) null)
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user/edit"))
+                .andExpect(flash().attribute("hourlyRateError", expectedErrors.get(0)))
+                .andExpect(flash().attribute("phoneNumberError", expectedErrors.get(1)))
+                .andExpect(flash().attribute("skillsError", expectedErrors.get(2)));
+
+    }
+
 }

@@ -5,11 +5,14 @@
     <base th:href="@{/}"/>
     <title>Create renovation</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+
+
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
     <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
 </head>
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+
 <div class="container mt-5">
 
     <div class="card p-4 shadow-sm">
@@ -82,7 +85,7 @@
             <div class="mb-3">
                 <div class="input-group">
                     <input type="text" class="form-control" id="roomList" placeholder="Enter a room name"
-                           th:name="roomList" data-cy="roomList">
+                           th:name="roomList" data-cy="roomList" aria-label="roomList">
                     <button type="button" class="btn btn-primary" id="create-room-button">Add</button>
                 </div>
 
@@ -122,25 +125,21 @@
             </div>
 
             <!-- LOCATION FORM FRAGMENT -->
-            <div th:class="${locationUsed} ? 'form-extension' : 'hidden-form-extension'" id="location-form">
+            <div th:class="'pb-3 ' + (${locationUsed} ? 'form-extension' : 'hidden-form-extension')" id="location-form">
                 <div th:replace="~{fragments/locationForm.html :: locationForm(
                      addressDTO=${addressDTO})}"></div>
             </div>
 
-            <button type="submit" id="submit-record" class="btn btn-primary">Create</button>
 
-
-
+            <div class="mt-4">
+                <button type="submit" id="submit-record" class="btn btn-primary">Create</button>
+                <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-3">Cancel</a>
+            </div>
         </form>
-    </div>
-
-    <!-- CANCEL BUTTON -->
-    <div class="mt-4">
-        <a th:href="@{${previousUrl}}" class="btn btn-primary">Cancel</a>
     </div>
 </div>
 </body>
-
+<script type="module" th:src="@{/js/navbar.js}"></script>
 <script type="module" th:src="@{/js/locationForm.js}"></script>
 <script type="module" th:src="@{/js/validation/locationFormValidation.js}"></script>
 <script type="module" th:src="@{/js/validation/renovationValidations.js}"></script>

@@ -1,6 +1,9 @@
 package nz.ac.canterbury.seng302.homehelper.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
+
+import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AddressDTO {
@@ -23,9 +26,9 @@ public class AddressDTO {
 
     private String formatted;
 
-    private double latitude;
+    private double lat;
 
-    private double longitude;
+    private double lon;
 
     private String address_line1;
 
@@ -95,20 +98,20 @@ public class AddressDTO {
         this.formatted = formatted;
     }
 
-    public double getLatitude() {
-        return latitude;
+    public double getLat() {
+        return lat;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    public void setLat(double lat) {
+        this.lat = lat;
     }
 
-    public double getLongitude() {
-        return longitude;
+    public double getLon() {
+        return lon;
     }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+    public void setLon(double lon) {
+        this.lon = lon;
     }
 
     public String getAddress_line1() {
@@ -133,5 +136,47 @@ public class AddressDTO {
 
     public void setRegion(String region) {
         this.region = region;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        AddressDTO addressDTO = (AddressDTO) o;
+        return Objects.equals(country, addressDTO.country) && Objects.equals(postcode, addressDTO.postcode)
+                && Objects.equals(city, addressDTO.city) && Objects.equals(region, addressDTO.region)
+                && Objects.equals(lat, addressDTO.lat) && Objects.equals(lon, addressDTO.lon)
+                && Objects.equals(address_line1, addressDTO.address_line1);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(country, postcode, city, region, lat, lon, address_line1);
+    }
+
+    /**
+     * Set the fields of this AddressDTO from the location provided.
+     * @param location location object to set this DTO to match
+     */
+    public void setFromLocation(Location location) {
+        setAddress_line1(location.getAddress());
+        setCountry(location.getCountry());
+        setPostcode(location.getPostcode());
+        setCity(location.getCity());
+        setRegion(location.getSuburb());
+        setLat(location.getLatitude());
+        setLon(location.getLongitude());
+    }
+
+    /**
+     * Sanitise the address line 1 for logging purposes.
+     *
+     * @return the address with newline characters stripped
+     */
+    public String getLoggedAddress() {
+        String loggedAddress = "";
+        if (getAddress_line1() != null) {
+            loggedAddress = getAddress_line1().replaceAll("[\r\n]", "_");
+        }
+        return loggedAddress;
     }
 }

@@ -4,7 +4,6 @@ window.contextPath = /*[[@{/}]]*/ '';
 /*]]>*/
 
 document.addEventListener("DOMContentLoaded", () => {
-    setupTagSearch();
     updateLayout();
     window.addEventListener('resize', () => {
         clearTimeout(window._resizeTimeout);

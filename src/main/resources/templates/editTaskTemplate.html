@@ -6,10 +6,13 @@
   <title>Edit Task</title>
   <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet" />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
+
+
   <script type="module" th:src="@{/js/createTask.js}"></script>
 </head>
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+
 <div class="container mt-5">
   <div class="card p-4 shadow-sm">
     <h4 class="card-title mb-4">Edit Task</h4>
@@ -17,6 +20,7 @@
 
       <input type="hidden" id="renovationId" th:name="renovationId" th:value="${renovation.id}">
       <input type="hidden" id="taskId" th:name="taskId" th:value="${task.getId()}">
+      <input th:unless="${fromDate.isEmpty()}" type="hidden" name="dateToReturnTo" th:value="${fromDate}">
 
       <img th:src="@{${'/images/' + task.getIconFileName()}}"
            class="img-fluid rounded-circle"
@@ -87,9 +91,18 @@
         <label class="form-check-label ml-3 small" th:for="'room-' + ${meta.index}" th:text="${room}"></label>
       </div>
 
-      <div class="mt-4 d-flex gap-3 ">
+      <div class="mt-5 d-flex">
+
+        <!-- SUBMIT BUTTON -->
         <button type="submit" class="btn btn-primary">Submit</button>
-        <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn btn-secondary">Cancel</a>
+
+        <!-- CANCEL BUTTON -->
+        <a th:unless="${fromDate.isEmpty()}"
+           th:href="@{/renovations/view#cellEdited(id=${renovation.id}, dateEdited=${fromDate})}"
+           class="btn btn-outline-secondary cancel-task-form ms-3">Cancel</a>
+        <a th:if="${fromDate.isEmpty()}"
+           th:href="@{/renovations/view(id=${renovation.id})}"
+           class="btn btn-outline-secondary cancel-task-form ms-3">Cancel</a>
       </div>
     </form>
 
@@ -101,9 +114,8 @@
     </div>
 
   </div>
-
-  <!-- CANCEL BUTTON -->
 </div>
 </body>
 <script type="module" th:src="@{/js/validation/taskValidation.js}"></script>
+<script type="module" th:src="@{/js/navbar.js}"></script>
 </html>

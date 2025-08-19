@@ -5,11 +5,14 @@
     <base th:href="@{/}"/>
     <title>Create New Task</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+
+
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
     <script type="module" th:src="@{/js/createTask.js}"></script>
 </head>
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+
 <div class="container mt-5">
     <div class="card p-4 shadow-sm">
         <h4 class="card-title mb-4">Add Task to Renovation</h4>
@@ -17,6 +20,7 @@
 
             <input type="hidden" id="availableRoomList" th:name="availableRoomList" th:value="${#strings.arrayJoin(roomList, ',')}">
             <input type="hidden" id="renovationId" th:name="renovationId" th:value="${renovation.id}">
+            <input th:unless="${fromDate.isEmpty()}" type="hidden" name="dateToReturnTo" th:value="${fromDate}">
 
             <!-- NAME -->
             <div class="mb-3">
@@ -58,7 +62,7 @@
             <!-- DUE DATE -->
             <div class="mb-3">
                 <label for="dueDate" class="form-label">Due Date (optional):</label>
-                <input type="date" class="form-control" id="dueDate" name="dueDate" th:value="${dueDate} " />
+                <input type="date" class="form-control" id="dueDate" name="dueDate" th:field="*{dueDate} " />
 
 
                 <!-- Frontend JS error -->
@@ -77,7 +81,7 @@
             <div class="mb-3">
                 <label class="form-label">Rooms:</label>
                 <div class="form-check mb-1 fs-3" th:each="room, meta : ${roomList}">
-                    <input class="form-check-input fs-3" type="checkbox" th:field="*{rooms}"
+                    <input class="form-check-input fs-3" type="checkbox" aria-label="room" th:field="*{rooms}"
                            th:id="'room-' + ${meta.index}" th:value="${room}"
                            th:checked="${renovationTaskDTO.getRooms() != null and #lists.contains(renovationTaskDTO.getRooms(), room)}">
                     <label class="form-check-label ms-3 small" th:for="'room-' + ${meta.index}" th:text="${room}"></label>
@@ -95,11 +99,16 @@
                 </div>
             </div>
 
-            <div class="mt-4 d-flex gap-3 ">
+            <div class="mt-5 d-flex">
                 <!-- SUBMIT -->
-                    <button type="submit" class="btn btn-primary">Create</button>
+                <button type="submit" class="btn btn-primary">Create</button>
                 <!-- CANCEL BUTTON -->
-                    <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn btn-secondary">Cancel</a>
+                <a th:unless="${fromDate.isEmpty()}"
+                   th:href="@{/renovations/view#cellEdited(id=${renovation.id}, dateEdited=${fromDate})}"
+                   class="btn btn-outline-secondary cancel-task-form ms-3">Cancel</a>
+                <a th:if="${fromDate.isEmpty()}"
+                   th:href="@{/renovations/view(id=${renovation.id})}"
+                   class="btn btn-outline-secondary cancel-task-form ms-3">Cancel</a>
             </div>
 
             <!-- General error messages -->
@@ -111,5 +120,6 @@
 
 </div>
 </body>
+<script type="module" th:src="@{/js/navbar.js}"></script>
 <script type="module" th:src="@{/js/validation/taskValidation.js}"></script>
 </html>

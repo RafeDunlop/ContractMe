@@ -1,3 +1,7 @@
+import {
+    scrollThroughAutoComplete
+} from "./autocomplete.js";
+
 /**
  * Tag search bar input logic, for search renovations html page.
  * Allows users to input tags, displays them as bubbles inside search bar, and adds hidden inputs for form submission.
@@ -17,6 +21,10 @@ let currentTabIndex = -1
 function focusTagInput() {
     tagInput.focus();
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    setupTagSearch();
+});
 
 tagInput.addEventListener("input", function () {
     const partialTag = tagInput.value.trim();
@@ -109,7 +117,7 @@ function addTag(tag) {
 
     // Create bubble
     const bubble = document.createElement("span");
-    bubble.className = "badge bg-primary text-white me-1 mb-1";
+    bubble.className = "badge bg-success text-white me-1 mb-1";
     bubble.textContent = tag;
 
     // Remove button
@@ -134,27 +142,7 @@ function addTag(tag) {
 document.addEventListener("keydown", function (event) {
     const listItems = document.querySelectorAll("#autocomplete-list .autocomplete-item");
 
-    if (listItems.length === 0) {
-        return;
-    }
-
-    if (event.key === "ArrowDown") {
-        event.preventDefault();
-        currentTabIndex++;
-        if (currentTabIndex >= listItems.length) {
-            currentTabIndex = 0;
-        }
-        listItems[currentTabIndex].focus();
-    }
-
-    if (event.key === "ArrowUp") {
-        event.preventDefault();
-        currentTabIndex--;
-        if (currentTabIndex < 0) {
-            currentTabIndex = listItems.length - 1;
-        }
-        listItems[currentTabIndex].focus();
-    }
+    scrollThroughAutoComplete(listItems);
 });
 
 
@@ -236,4 +224,6 @@ function setupTagSearch() {
         }
     });
 }
+
+window.focusTagInput = focusTagInput;
 

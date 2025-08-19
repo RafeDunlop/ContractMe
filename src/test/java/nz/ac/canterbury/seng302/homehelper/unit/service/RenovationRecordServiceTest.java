@@ -9,6 +9,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
@@ -37,6 +38,7 @@ public class RenovationRecordServiceTest {
     private static RenovationRecordRepository renovationRecordRepository;
     private static RenovationTaskRepository renovationTaskRepository;
     private static RenovationTaskService renovationTaskService;
+    private static LocationService locationService;
     private static LoginService loginService;
     private static RenovationRecord mockRenovationRecord;
 
@@ -47,6 +49,8 @@ public class RenovationRecordServiceTest {
         loginService = mock(LoginService.class);
         renovationRecordValidation = new RenovationRecordValidation(renovationRecordRepository, loginService);
         renovationTaskService = mock(RenovationTaskService.class);
+        locationService = mock(LocationService.class);
+
 
         User mockUser = mock(User.class);
         when(loginService.getUserByEmail()).thenReturn(mockUser);
@@ -57,8 +61,8 @@ public class RenovationRecordServiceTest {
         when(renovationRecordRepository.findExactMatch("name", mockUser)).thenReturn(Optional.empty());
         when(renovationRecordRepository.findExactMatch("name!", mockUser)).thenReturn(Optional.empty());
 
-        toTest = new RenovationRecordService(renovationRecordRepository, renovationTaskRepository, renovationRecordValidation,
-                renovationTaskService);
+        toTest = new RenovationRecordService(renovationRecordRepository, renovationTaskRepository,
+                renovationRecordValidation, renovationTaskService, locationService);
 
         mockRenovationRecord = mock(RenovationRecord.class);
         when(renovationTaskService.getTasksWithinDates(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(new HashMap<>());
@@ -86,6 +90,14 @@ public class RenovationRecordServiceTest {
         addressDTO.setPostcode("8011");
         addressDTO.setCity("Christchurch");
         addressDTO.setRegion("Canterbury");
+
+        when(locationService.locate(addressDTO)).thenReturn(new Location(
+                addressDTO.getAddress_line1(),
+                addressDTO.getCountry(),
+                addressDTO.getPostcode(),
+                addressDTO.getCity(),
+                addressDTO.getRegion()
+        ));
 
         toTest.addRenovationLocation(renovationRecord, addressDTO);
 
@@ -499,9 +511,9 @@ public class RenovationRecordServiceTest {
 
         List<List<CalendarCellDTO>> calendarCells = toTest.generateCalendarCells(date, mockRenovationRecord);
 
-        Assertions.assertTrue(calendarCells.getFirst().contains(firstOfCurrentMonth));
-        Assertions.assertFalse(calendarCells.getFirst().contains(lastDayOfPreviousMonth));
-        Assertions.assertFalse(calendarCells.getLast().contains(firstOfNextMonth));
+        Assertions.assertTrue(calendarCells.get(0).contains(firstOfCurrentMonth));
+        Assertions.assertFalse(calendarCells.get(0).contains(lastDayOfPreviousMonth));
+        Assertions.assertFalse(calendarCells.get(calendarCells.size() - 1).contains(firstOfNextMonth));
         assertEquals(4, calendarCells.size());
     }
 

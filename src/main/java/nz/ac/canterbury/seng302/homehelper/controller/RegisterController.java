@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
+import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
@@ -69,6 +71,9 @@ public class RegisterController {
         logger.info("GET /register");
         List<Skill> skillList = Skill.listOfSortedSkills();
         model.addAttribute("skills", skillList);
+        Locale locale = Locale.getDefault();
+        Currency currency = Currency.getInstance(locale);
+        model.addAttribute("currencySymbol", currency.getSymbol(locale));
         return "registrationTemplate";
     }
 

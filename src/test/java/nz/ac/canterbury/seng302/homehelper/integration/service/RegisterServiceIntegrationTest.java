@@ -4,28 +4,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 
+@SpringBootTest
 public class RegisterServiceIntegrationTest {
+
     private RegisterService registerService;
     private UserRepository userRepositoryMock;
+
+    @MockBean
+    private LocationService locationServiceMock;
 
     @BeforeEach
     void setUp() {
         userRepositoryMock = Mockito.mock(UserRepository.class);
         UserValidation userValidation = new UserValidation();
-        registerService = new RegisterService(userRepositoryMock, userValidation);
+        registerService = new RegisterService(userRepositoryMock, userValidation, locationServiceMock);
     }
 
     @Test
@@ -62,8 +70,6 @@ public class RegisterServiceIntegrationTest {
     @Test
     public void testRegister_validUser_accountCreated() {
         Mockito.when(userRepositoryMock.save(Mockito.any())).thenAnswer(i -> i.getArgument(0));
-        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        User expectedUser = new User("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "Smith", "email@email.com", passwordEncoder.encode("Password1!"));
         UserRegisterDTO userRegisterDTO = new UserRegisterDTO();
         userRegisterDTO.setEmail("email@email.com");
         userRegisterDTO.setFirstName("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");

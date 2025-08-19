@@ -46,23 +46,26 @@
                     </div>
 
                     <!-- General error -->
-                    <div th:if="${errorMessage}"  class="alert alert-danger mb-4" role="alert">
+                    <div th:if="${errorMessage}" id="general-error" class="alert alert-danger mb-4" role="alert">
                         <ul>
                             <li th:each="error : ${errorMessage}" th:text="${error}"></li>
                         </ul>
                     </div>
 
-                    <!-- SIGN IN BUTTON -->
-                    <button type="submit" class="btn btn-primary">Sign in</button>
+                    <div class="mt-5">
+                        <!-- SIGN IN BUTTON -->
+                        <button id="sign-in-button" type="submit" class="btn btn-primary">Sign in</button>
 
-                    <!-- CANCEL BUTTON -->
-                    <a th:href="@{/}" class="btn btn-outline-secondary m-4">Cancel</a>
+                        <!-- CANCEL BUTTON -->
+                        <a id="cancel-button" th:href="@{/}" class="btn btn-outline-secondary ms-3">Cancel</a>
 
-                    <!-- REGISTER BUTTON -->
-                    <a th:href="@{/register}" class="btn btn-link">Not registered? Create an account</a>
+                        <!-- REGISTER BUTTON -->
+                        <a id="registration-page-link" th:href="@{/register}" class="btn btn-link ms-4">Not registered? Create an account</a>
 
-                    <!-- FORGOT PASSWORD BUTTON -->
-                    <a th:href="@{/password/forgot}" class="btn btn-link">Forgot your password?</a>
+                        <!-- FORGOT PASSWORD BUTTON -->
+                        <a id="forgot-password-link" th:href="@{/password/forgot}" class="btn btn-link">Forgot your password?</a>
+                    </div>
+
                 </div>
             </form>
         </div>

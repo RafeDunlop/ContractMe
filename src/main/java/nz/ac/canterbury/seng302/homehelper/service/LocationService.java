@@ -3,8 +3,12 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.GeocodingCoordsDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.LocationValidation;
@@ -15,6 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -22,6 +29,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -35,6 +44,8 @@ public class LocationService {
     private static final String LOCALHOST_IP_IPV6 = "0:0:0:0:0:0:0:1";
 
     private static final String GEOAPIFY_BASE_URL = "https://api.geoapify.com/v1/";
+
+    private static final double CONFIDENCE_LEVEL = 0.95d;
 
     private static final String IP_API = "ipinfo";
 
@@ -56,6 +67,84 @@ public class LocationService {
         this.locationValidation = locationValidation;
         this.objectMapper = new ObjectMapper();
         this.restTemplate = new RestTemplate();
+    }
+
+    /**
+     * This method calls Geoapify API endpoints. These should be mocked for testing.
+     * If the addressDTO is empty, this will still create and return an empty Location without co-ordinates in order to
+     * maintain consistent data
+     * @param addressDTO address data object passed from frontend
+     * @return fully-formed {@link Location} object guaranteed to be supplied coordinates
+     */
+    public Location locate(AddressDTO addressDTO) {
+        if (!hasCoords(addressDTO) && isLocationProvided(addressDTO)) {
+            try {
+                injectCoordsViaGeocoding(addressDTO);
+            } catch (IllegalArgumentException e) {
+                logger.warn("Failed to acquire location coordinates via geocoding: {}", e.getMessage());
+                String ipAddress = getIpFromRequest();
+                injectCoordsViaIpGeolocation(addressDTO, ipAddress);
+            }
+        }
+        String loggedAddress = addressDTO.getLoggedAddress();
+        logger.info("Creating location for address {} with coords {}, {}",
+                loggedAddress,
+                addressDTO.getLat(),
+                addressDTO.getLon()
+        );
+        return new Location(
+                addressDTO.getAddress_line1(),
+                addressDTO.getCountry(),
+                addressDTO.getPostcode(),
+                addressDTO.getCity(),
+                addressDTO.getRegion(),
+                addressDTO.getLat(),
+                addressDTO.getLon()
+        );
+    }
+
+    /**
+     * Attempts to inject the co-ordinates of a custom-input address via the Geoapify Geocoding service.
+     * @param addressDTO The {@link AddressDTO} to be edited inline with the co-ordinates supplied by Geoapify
+     * @throws IllegalArgumentException if the specified address does not exist or is not present or if Geoapify
+     * cannot identify coordinates for it
+     */
+    public void injectCoordsViaGeocoding(AddressDTO addressDTO) throws IllegalArgumentException {
+        String loggedAddress = addressDTO.getLoggedAddress();
+        logger.debug("Attempting to retrieve coordinates via geocoding for address {}", loggedAddress);
+        ResponseEntity<String> response = restTemplate.getForEntity(getGeocodingCompleteUrl(addressDTO), String.class);
+        logger.debug(response.getBody());
+        try {
+            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode results = root.get("results");
+            List<GeocodingCoordsDTO> coordResultList = objectMapper.readValue(results.toString(), new TypeReference<>() {});
+            if (coordResultList.isEmpty()) {
+                throw new IllegalArgumentException("No coordinates found");
+            } else if (coordResultList.get(0).getConfidence() < CONFIDENCE_LEVEL) {
+                throw new IllegalArgumentException("No results with satisfactory confidence found");
+            } else {
+                addressDTO.setLat(coordResultList.get(0).getLat());
+                addressDTO.setLon(coordResultList.get(0).getLon());
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to parse geocoding results", e);
+        }
+    }
+
+    /**
+     * Injects the co-ordinates of a malformed custom-input address via Geoapify's IP geolocation service. This is
+     * less precise than geolocation or autocomplete
+     * @param addressDTO The {@link AddressDTO} to be edited inline with the co-ordinates supplied by Geoapify
+     * @param ipAddress The ip address of the request to be forwarded to Geopaify
+     */
+    public void injectCoordsViaIpGeolocation(AddressDTO addressDTO, String ipAddress) {
+        logger.info("Retrieving rough coordinates for address {} via request ip: {}",
+                addressDTO.getAddress_line1(),
+                ipAddress
+        );
+        LocalisationDTO localisationDTO = getRoughLocation(ipAddress);
+        addressDTO.setLat(localisationDTO.getLocation().getLatitude());
+        addressDTO.setLon(localisationDTO.getLocation().getLongitude());
     }
 
     /**
@@ -145,6 +234,16 @@ public class LocationService {
                         .anyMatch(field -> field != null && !field.trim().isEmpty());
     }
 
+    /**
+     * Gets whether a location is provided by a renovation record
+     * @param record The renovation record to check
+     * @return Whether a location is provided by a renovation record
+     */
+    public boolean hasLocation(RenovationRecord record) {
+        Location location = record.getLocation();
+        return location != null && location.getAddress() != null && !location.getAddress().isEmpty();
+    }
+
 
     /**
      * Assembles the URL to call the Geoapify autocomplete API endpoint for the specified parameters
@@ -158,7 +257,7 @@ public class LocationService {
         for (String input : List.of(prompt, countryCode, String.valueOf(latitude), String.valueOf(longitude))) {
             if (input == null || input.isEmpty()) {
                 logger.warn("A required input is missing");
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("A required input is missing");
             }
         }
         StringBuilder sb = new StringBuilder();
@@ -170,6 +269,30 @@ public class LocationService {
         sb.append("&lang=en");
         sb.append("&format=json");
         logger.debug("calling autocomplete API: {}", sb);
+        sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
+        return sb.toString();
+    }
+
+    /**
+     * Gets the URL to call to retrieve geocoding information about the custom supplied location
+     * @param address The {@link AddressDTO} which contains the address
+     * @return The URL to call to retrieve geocoding information about the custom supplied location
+     */
+    private String getGeocodingCompleteUrl(AddressDTO address) {
+        String addressEntry = Stream.of(
+                address.getAddress_line1(),
+                address.getRegion(),
+                address.getCity(),
+                address.getPostcode(),
+                address.getCountry()
+        ).filter(s -> s != null && !s.isBlank()).collect(Collectors.joining(", "));
+        StringBuilder sb = new StringBuilder();
+        sb.append(GEOAPIFY_BASE_URL);
+        sb.append(AUTOCOMPLETE_API);
+        sb.append(String.format("?text=%s", URLEncoder.encode(addressEntry, StandardCharsets.UTF_8)));
+        sb.append("&lang=en");
+        sb.append("&format=json");
+        logger.debug("calling geocoding API: {}", sb);
         sb.append(String.format("&apiKey=%s", keys.getGeoapify()));
         return sb.toString();
     }
@@ -211,5 +334,57 @@ public class LocationService {
             }
         }
         return addresses;
+    }
+
+    /**
+     * Performs a simple values-based check to check whether a location has co-ordinates provided
+     * note: 0, 0 is null island (middle of sea). Nobody lives or works there
+     * @param address The DTO which contains fields for co-ordinates
+     * @return Whether the co-ordinates provided in the specified address are null-equivalent (returns false)
+     */
+    private boolean hasCoords(AddressDTO address) {
+        return !(address.getLon() == 0d ||
+                address.getLat() == 0d);
+    }
+
+    /**
+     * Gets the IP address of the request, principally from the original client that submitted the request
+     * if forwarded
+     * Uses {@link RequestContextHolder} from Spring to statically extract the web request, via {@link ServletRequestAttributes}
+     * @return The IP address of the client
+     */
+    public String getIpFromRequest() {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes instanceof ServletRequestAttributes servletAttributes) {
+            HttpServletRequest request = servletAttributes.getRequest();
+            String forwardingHeader = request.getHeader("X-Forwarded-For");
+            if (forwardingHeader == null || forwardingHeader.isEmpty()) {
+                return request.getRemoteAddr();
+            }
+            return forwardingHeader.split(",")[0];
+        }
+        throw new IllegalStateException("Method called illegally outside web request context");
+    }
+
+    /**
+     * Gets an {@link AddressDTO} which represents the merging of an AddressDTO with an existing location.
+     * Nullifies co-ordinates if they correspond to the stored Location (so they may be recalculated)
+     * @param currentLocation The saved {@link Location}
+     * @param editedAddressDTO The edited address fields
+     * @return The specified locations merged into one {@link AddressDTO}
+     */
+    public AddressDTO updateEditedLocation(Location currentLocation, AddressDTO editedAddressDTO) {
+        if (currentLocation != null) {
+            Location editedLocation = new Location(editedAddressDTO.getAddress_line1(), editedAddressDTO.getCountry(),
+                    editedAddressDTO.getPostcode(), editedAddressDTO.getCity(), editedAddressDTO.getRegion(),
+                    editedAddressDTO.getLat(), editedAddressDTO.getLon());
+            boolean sameCoordinates = currentLocation.getLatitude() == editedLocation.getLatitude() &&
+                    currentLocation.getLongitude() == editedLocation.getLongitude();
+            if (!Objects.equals(currentLocation, editedLocation) && sameCoordinates) {
+                editedAddressDTO.setLat(0L);
+                editedAddressDTO.setLon(0L);
+            }
+        }
+        return editedAddressDTO;
     }
 }

@@ -18,6 +18,7 @@ public class UserRegisterDTO {
 
     private List<Skill> skills;
 
+
     public String getPhoneNumber() {
         return phoneNumber;
     }

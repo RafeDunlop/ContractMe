@@ -15,12 +15,14 @@ import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
+import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -32,6 +34,7 @@ import org.springframework.web.util.UrlPathHelper;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -45,6 +48,7 @@ public class RenovationController {
     private static final Logger logger = LoggerFactory.getLogger(RenovationController.class);
 
     private final RenovationRecordService renovationRecordService;
+    private final TeamsService teamsService;
     private final RenovationTaskService renovationTaskService;
     private final LoginService loginService;
     private final TagService tagService;
@@ -58,12 +62,15 @@ public class RenovationController {
      * @param locationService         The location service provides the function to validate the locations
      */
     @Autowired
-    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService, RenovationTaskService renovationTaskService, TagService tagService,LocationService locationService) {
+    public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService,
+                                RenovationTaskService renovationTaskService, TagService tagService,
+                                LocationService locationService, TeamsService teamsService) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.loginService = loginService;
         this.tagService = tagService;
         this.locationService = locationService;
+        this.teamsService = teamsService;
     }
 
     /**
@@ -229,12 +236,8 @@ public class RenovationController {
 
         if (!locationService.isLocationProvided(addressDTO)) {
             Location location = renovationRecord.getLocation();
-            if (location != null) {
-                addressDTO.setAddress_line1(location.getAddress());
-                addressDTO.setCountry(location.getCountry());
-                addressDTO.setPostcode(location.getPostcode());
-                addressDTO.setCity(location.getCity());
-                addressDTO.setRegion(location.getSuburb());
+            if (locationService.hasLocation(renovationRecord)) {
+                addressDTO.setFromLocation(location);
                 model.addAttribute("locationUsed", true);
             }
             model.addAttribute("addressDTO", addressDTO);
@@ -295,18 +298,7 @@ public class RenovationController {
         Map<String, List<String>> errors = renovationRecordService.validateAllInputsEdit(renovationRecord, name);
 
         Location currentLocation = renovationRecord.getLocation();
-        Location formLocation = locationService.isLocationProvided(addressDTO)
-                ? new Location(addressDTO.getAddress_line1(),
-                addressDTO.getCountry(),
-                addressDTO.getPostcode(),
-                addressDTO.getCity(),
-                addressDTO.getRegion()
-        )
-                : null;
-        boolean locationChanged = !Objects.equals(currentLocation, formLocation);
-        if (locationChanged) {
-            errors.putAll(locationService.validateLocation(addressDTO));
-        }
+        errors.putAll(locationService.validateLocation(addressDTO));
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
@@ -317,7 +309,9 @@ public class RenovationController {
             redirectAttributes.addFlashAttribute("roomList", roomList);
             redirectAttributes.addFlashAttribute("renovation", renovationRecord);
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
-            redirectAttributes.addFlashAttribute("locationUsed", locationChanged);
+            if (currentLocation != null || locationService.isLocationProvided(addressDTO)) {
+                redirectAttributes.addFlashAttribute("locationUsed", true);
+            }
 
             return "redirect:/renovations/edit?id=" + renovationRecord.getId();
         }
@@ -326,10 +320,7 @@ public class RenovationController {
 
         redirectAttributes.addFlashAttribute("renovation", renovationRecord);
 
-        if (locationChanged) {
-            renovationRecord.setLocation(formLocation);
-        }
-        renovationRecordService.addRenovationRecord(renovationRecord); //updates existing record (identified by id)
+        renovationRecordService.updateRenovationLocation(renovationRecord, addressDTO); //updates existing record (identified by id)
         return "redirect:/renovations/view?id=" + renovationRecord.getId();
     }
 
@@ -367,16 +358,19 @@ public class RenovationController {
                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                  @RequestParam(required = false) Integer year,
                                  @RequestParam(required = false) Integer month,
+                                 @RequestParam(required = false) @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate dateEdited,
                                  Model model,
                                  HttpServletRequest request) {
         logger.info("GET /renovations/view");
+        logger.info("dateEdited: {}", dateEdited);
 
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
 
         User user = loginService.getUserByEmail();
         boolean isOwner = user.equals(record.getUser());
-        if (!isOwner && !record.isPublic()) {
+
+        if (!isOwner && !record.isPublic() && !teamsService.checkViewRenovationAccess(record, user)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
@@ -385,14 +379,18 @@ public class RenovationController {
         String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
-        injectDateElements(year, month, model, record);
+        injectDateElements(year, month, dateEdited, model, record);
+        model.addAttribute("dateEdited", dateEdited);
+
 
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
-
+        model.addAttribute("hasLocation", locationService.hasLocation(record));
+        model.addAttribute("hasTeam",teamsService.teamExists(record.getId()));
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("pageNumber", Math.max(pageNumber, 1));
         model.addAttribute("renovation", record);
         model.addAttribute("icons", iconFileNames);
+        model.addAttribute("dateFormatter", DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
         return "viewRenovation";
     }
@@ -412,8 +410,10 @@ public class RenovationController {
     public String getCalendarFragment(@RequestParam Long id,
                                       @RequestParam(required = false) Integer year,
                                       @RequestParam(required = false) Integer month,
+                                      @RequestParam(required = false) @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate dateEdited,
                                       Model model) {
 
+        logger.info("dateEdited: {}", dateEdited);
         RenovationRecord record = renovationRecordService.getRecordById(id);
         if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Renovation not found");
 
@@ -423,13 +423,19 @@ public class RenovationController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
-        injectDateElements(year, month, model, record);
+        injectDateElements(year, month, dateEdited, model, record);
         model.addAttribute("id", id);
+        model.addAttribute("dateEdited", dateEdited);
+        model.addAttribute("dateFormatter", DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
         return "fragments/calendar :: calendar";  // return only fragment for partial update
     }
 
-    private void injectDateElements(@RequestParam(required = false) Integer year, @RequestParam(required = false) Integer month, Model model, RenovationRecord record) {
+    private void injectDateElements(@RequestParam(required = false) Integer year,
+                                    @RequestParam(required = false) Integer month,
+                                    @RequestParam(required = false) @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate dateEdited,
+                                    Model model,
+                                    RenovationRecord record) {
         LocalDate localDate = LocalDate.now();
         model.addAttribute("currentDay", localDate.getDayOfMonth());
         model.addAttribute("currentMonth", localDate.getMonthValue());
@@ -447,6 +453,8 @@ public class RenovationController {
             } catch (DateTimeException e) {
                 logger.error(e.getMessage());
             }
+        } else if (dateEdited != null) {
+            localDate = dateEdited;
         }
 
         List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate, record);
@@ -470,16 +478,18 @@ public class RenovationController {
     @ResponseBody
     public Page<RenovationTaskDTO> getRenovation(@PathVariable("id") Long id,
                                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
-                                                 @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage) {
-        User user = loginService.getUserByEmail();
+                                                 @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage,
+                                                 @RequestParam(defaultValue = "all") String status) {
         RenovationRecord record = renovationRecordService.getRecordById(id);
 
         if (record == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
         }
 
+        User user = loginService.getUserByEmail();
         boolean isOwner = user.equals(record.getUser());
-        if (!isOwner && !record.isPublic()) {
+
+        if (!isOwner && !record.isPublic() && !teamsService.checkViewRenovationAccess(record, user)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
@@ -488,17 +498,15 @@ public class RenovationController {
         }
 
         int requestedPage = Math.max(pageNumber - 1, 0);
-        cardsPerPage = Math.max(cardsPerPage, 1);
         Pageable pageable = PageRequest.of(requestedPage, cardsPerPage);
-        Page<RenovationTask> page = renovationTaskService.returnTaskPages(record, pageable);
+        Page<RenovationTask> page = renovationTaskService.returnTaskPages(record, pageable, status);
 
         if (requestedPage >= page.getTotalPages() && page.getTotalPages() > 0) {
             pageable = PageRequest.of(page.getTotalPages() - 1, cardsPerPage);
-            page = renovationTaskService.returnTaskPages(record, pageable);
+            page = renovationTaskService.returnTaskPages(record, pageable, status);
         }
 
-        Page<RenovationTaskDTO> dtoPage = page.map(RenovationTaskDTO::new);
-        return dtoPage;
+        return page.map(RenovationTaskDTO::new);
     }
 
     /**

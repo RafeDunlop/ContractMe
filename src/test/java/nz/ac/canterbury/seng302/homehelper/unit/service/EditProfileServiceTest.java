@@ -1,8 +1,9 @@
 package nz.ac.canterbury.seng302.homehelper.unit.service;
 
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.repository.userReposoitories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,8 @@ public class EditProfileServiceTest {
     void setUp() {
         userRepository = Mockito.mock(UserRepository.class);
         userValidation = Mockito.mock(UserValidation.class);
-        editProfileService = new EditProfileService(userRepository, userValidation);
+        LocationService locationService = Mockito.mock(LocationService.class);
+        editProfileService = new EditProfileService(userRepository, userValidation, locationService);
 
         // Set up mock authentication for tests
         User currentUser = new User("John", "Smith", "john@smith.com", "password");
@@ -71,7 +73,7 @@ public class EditProfileServiceTest {
     }
 
     @Test
-    public void validateUser_invalidName_returnsErrors() {
+    public void validateUser_invalidCharactersName_returnsErrors() {
         User user = new User("J@hn!", "Sm1th#", "john@smith.com", "password");
         userValidation = new UserValidation();
 
@@ -83,6 +85,22 @@ public class EditProfileServiceTest {
 
         assertEquals("First name must only include letters, spaces, hyphens, or apostrophes.", firstNameErrors.get(0));
         assertEquals("Last name must only include letters, spaces, hyphens, or apostrophes.", lastNameErrors.get(0));
+
+    }
+
+    @Test
+    public void validateUser_nullName_returnsErrors() {
+        User user = new User(null, null, "john@smith.com", "password");
+        userValidation = new UserValidation();
+
+        List<String> firstNameErrors = userValidation.validateNameString(user.getFirstName(), "First");
+        List<String> lastNameErrors = userValidation.validateNameString(user.getLastName(), "Last");
+
+        assertFalse(firstNameErrors.isEmpty());
+        assertFalse(lastNameErrors.isEmpty());
+
+        assertEquals("First name cannot be empty.", firstNameErrors.get(0));
+        assertEquals("Last name cannot be empty.", lastNameErrors.get(0));
     }
 
     @Test

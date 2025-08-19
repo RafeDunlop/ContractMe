@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="join-team" id="join-team">
+    <main class="team-join-body p-4 card container shadow-sm">
+        <section>
+            <h1 th:text="${renovationName}">Renovation Name</h1>
+            <div style="padding-top:40px">
+                <p><strong>Role:</strong> <span th:text="${skill}">Contractor Skill</span></p>
+                <p><strong>Owner:</strong><img th:src="@{'/profile_pictures/' + ${profilePicture}}"
+                     alt="Profile Picture"
+                     class="img-fluid rounded-circle"
+                     style="width: 50px; height: 50px; object-fit: cover;"><span th:text="${ownerName}">Owner Name</span></p>
+            </div>
+
+            <a class="btn btn-primary mt-4 me-4" th:href="@{/renovations/view(id=${renovationId})}">View Renovation</a>
+            <div class="btn-group mr-2 d-flex justify-content-start" role="group">
+
+                <form th:action="@{'/renovations/team/invitations/' + ${teamId} + '/accept'}" method="post">
+                    <button class="btn btn-primary mt-4 ms-2 me-2" type="submit">Accept</button>
+                </form>
+
+                <form th:action="@{'/renovations/team/invitations/' + ${teamId} + '/decline'}" method="post">
+                    <button class="btn btn-danger mt-4" type="submit">Decline</button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+</body>
+</html>

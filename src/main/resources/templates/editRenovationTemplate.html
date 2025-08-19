@@ -7,6 +7,8 @@
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
     <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
+
+
 </head>
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
@@ -73,8 +75,7 @@
                 </div>
 
                 <!-- Backend error -->
-                <div class="alert alert-danger mb-4" role="alert" id="description-backend-error" hidden
-                     th:if="${descriptionError}">
+                <div class="alert alert-danger mb-4" role="alert" id="description-backend-error" th:attr="hidden=${descriptionError == null}">
                     <div class="error-box">
                         <ul>
                             <li th:each="msg : ${descriptionError}" th:text="${msg}"></li>
@@ -87,7 +88,7 @@
             <div class="mb-3">
                 <div class="input-group">
                     <input type="text" class="form-control" id="roomList" placeholder="Enter a room name"
-                           th:name="renovation.rooms" data-cy="roomList">
+                           th:name="renovation.rooms" data-cy="roomList" aria-label="roomList">
                     <button type="button" class="btn btn-primary" id="create-room-button">Add Room</button>
                 </div>
 
@@ -128,26 +129,20 @@
             </div>
 
             <!-- LOCATION FORM FRAGMENT -->
-            <div th:class="${locationUsed} ? 'form-extension' : 'hidden-form-extension'" id="location-form">
+            <div th:class="'pb-3 ' + (${locationUsed} ? 'form-extension' : 'hidden-form-extension')" id="location-form">
                 <div th:replace="~{fragments/locationForm.html :: locationForm(
                      addressDTO=${addressDTO})}"></div>
             </div>
 
-
-
-
-            <!-- SUBMIT BUTTON -->
-            <button type="submit" class="btn btn-primary" id="submit-record">Submit</button>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary" id="submit-record">Submit</button>
+                <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn btn-outline-secondary ms-3">Cancel</a>
+            </div>
         </form>
-    </div>
-
-    <!-- CANCEL BUTTON -->
-    <div class="mt-4">
-        <a th:href="@{/renovations/view(id=${renovation.id})}" class="btn  btn-primary">Cancel</a>
     </div>
 </div>
 </body>
-
+<script type="module" th:src="@{/js/navbar.js}"></script>
 <script type="module" th:src="@{/js/locationForm.js}"></script>
 <script type="module" th:src="@{/js/validation/renovationValidations.js}"></script>
 <script type="module" th:src="@{/js/individualRenovation.js}"></script>

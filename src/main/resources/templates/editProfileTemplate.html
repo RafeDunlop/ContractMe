@@ -5,19 +5,28 @@
     <base th:href="@{/}"/>
     <title>Edit Profile</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+    <link th:href="@{/css/tags.css}" rel="stylesheet">
+    <link th:href="@{/css/inputBoxStyles.css}" rel="stylesheet">
+
+
     <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
 </head>
 
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+
 <div class="container mt-5">
     <div class="card p-4 shadow">
         <h4 class="card-title mb-5">Edit profile</h4>
         <div class="position-absolute top-0 end-0 m-3 d-flex gap-2">
             <form th:action="@{/user/edit/profile-picture}" method="POST" enctype="multipart/form-data">
                 <div class="input-group">
-                    <input class="form-control d-none" type="file" id="formFile" name="file">
+                    <!-- Original input, no name -->
+                    <input class="form-control d-none" type="file" id="formFile" accept=".jpg,.jpeg,.png,.svg" />
+
+                    <!-- Processed input (no name initially) -->
+                    <input type="file" id="processedFile" style="display: none;">
                     <label class="btn btn-outline-secondary" for="formFile" id="fileLabel">Edit Profile Picture</label>
                     <input type="submit" class="btn btn-primary" value="Upload">
                 </div>
@@ -96,29 +105,38 @@
                 </div>
             </div>
 
+            <!-- CONTRACTOR FORM FRAGMENT -->
+            <div th:if="${isContractor}" class="pb-3 form-extension" id="contractor-form">
+                <div th:replace="~{fragments/contractorRegistration.html ::
+                    contractor-registration(skills=${skills}, dto=${contractorDTO})}"></div>
+            </div>
+
             <!-- LOCATION TOGGLE SWITCH -->
             <div class="d-flex justify-content-between align-items-center pb-4 px-0" style="width: 22%">
-                <div id="location-toggle-switch-label">Enter Location (Optional):</div>
-                <div>
+                <div id="location-toggle-switch-label">
+                    <div th:if="${!isContractor}">Enter Location (Optional):</div>
+                    <div th:if="${isContractor}">Enter Location:</div>
+                </div>
+
+                <div th:style="${isContractor} ? 'display : none'">
                     <label class="switch">
-                        <input type="checkbox" id="location-toggleswitch" th:checked="${locationUsed}">
+                        <input type="checkbox" id="location-toggleswitch" th:checked="${hasLocation}" th:disabled="${isContractor}">
                         <span class="slider"></span>
                     </label>
                 </div>
             </div>
 
             <!-- LOCATION FORM FRAGMENT -->
-            <div th:class="'pb-3 ' + (${locationUsed} ? 'form-extension' : 'hidden-form-extension')" id="location-form">
+            <div th:class="'pb-3 ' + (${hasLocation} ? 'form-extension' : 'hidden-form-extension')" id="location-form">
                 <div th:replace="~{fragments/locationForm.html :: locationForm(
                      addressDTO=${addressDTO})}"></div>
             </div>
 
-
             <!-- Form submission buttons -->
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center mt-4">
                 <div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <a th:href="@{/user}" class="btn btn-outline-secondary m-2">Cancel</a>
+                    <button type="submit" id="submit-button" class="btn btn-primary">Submit</button>
+                    <a th:href="@{/user}" id="cancel-button" class="btn btn-outline-secondary ms-3">Cancel</a>
                 </div>
                 <div>
                     <a th:href="@{/user/edit/updatePassword}" class="btn btn-primary">Change Password</a>
@@ -133,4 +151,6 @@
 <script type="module" th:src="@{/js/validation/profileValidation.js}"></script>
 <script type="module" th:src="@{/js/validation/profilePictureValidation.js}"></script>
 <script type="module" th:src="@{/js/locationToggleSwitch.js}"></script>
+<script type="module" th:src="@{/js/navbar.js}"></script>
+<script type="module" th:src="@{/js/skills.js}" th:if="${isContractor}" ></script>
 </html>

@@ -84,7 +84,7 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
 
             container.style.display = "block";
             if (viewMode === "cards") {
-                renderRecordCards(data, currentUserId, pageNumber);
+                renderRecordCards(data, currentUserId);
             } else {
                 const csrfToken = document.getElementById("globalCsrfToken")?.value || "";
                 renderRecordTable(data, pageNumber, csrfToken);
@@ -126,6 +126,15 @@ function fetchRenovation(id, resetPage = false) {
     let cardsPerPage = parseInt(document.getElementById("cardsPerPage")?.value, 10);
     let totalPages = parseInt(document.getElementById("totalPages")?.value, 10);
 
+    let statusElement = document.getElementById("status-filter");
+    let selectedStatus = statusElement.value;
+    const validStatuses = ["all", "notStarted", "inProgress", "blocked", "completed", "cancelled"];
+
+    if (!validStatuses.includes(selectedStatus)) {
+        selectedStatus = "all";
+        statusElement.value = "all";
+    }
+
     if (isNaN(pageNumber) || pageNumber < 1) pageNumber = 1;
     if (isNaN(cardsPerPage)) cardsPerPage = 16;
     if (!isNaN(totalPages) && pageNumber > totalPages && totalPages > 0) {
@@ -135,6 +144,7 @@ function fetchRenovation(id, resetPage = false) {
     const params = new URLSearchParams();
     params.set("page", pageNumber);
     params.set("cardsPerPage", cardsPerPage);
+    params.set("status", selectedStatus);
 
     fetch(`${basePath}renovations/retrieve/${id}?${params.toString()}`)
         .then(response => response.json())
@@ -154,9 +164,11 @@ function fetchRenovation(id, resetPage = false) {
 
             container.style.display = "block";
             renderTaskCards(data, isOwner, id);
-
+            const pagination = document.getElementById("pagination")
             if (data.totalPages > 1) {
                 createPaginationButtons("cards", id);
+            } else if (data.totalPages === 1) {
+                pagination.innerHTML = "";
             }
         })
         .catch(error => {
@@ -190,9 +202,8 @@ function updateHeaderTitle(visibility) {
  * Renders renovation records in card view.
  * @param data - The data object from the server containing records.
  * @param currentUserId - The current logged-in user ID.
- * @param pageNumber - The current page number.
  */
-function renderRecordCards(data, currentUserId, pageNumber) {
+function renderRecordCards(data, currentUserId) {
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
     grid.className = "grid-container";
@@ -208,7 +219,7 @@ function renderRecordCards(data, currentUserId, pageNumber) {
         card.className = "card card-count position-relative";
 
         card.innerHTML = `
-            <a href="${basePath}renovations/view?id=${record.id}&page=1" class="no-underline text-reset">
+            <a href="${basePath}renovations/view?id=${record.id}&page=1" class="no-underline text-reset" style="text-decoration: none; color: black">
                 ${(record.userId === currentUserId) ? '<span class="badge bg-primary position-absolute top-0 end-0 m-2">Yours</span>' : ""}
                 <div class="card-body">
                     <h5 class="card-title truncate">${record.name}</h5>
@@ -269,7 +280,16 @@ function renderTaskCards(data, isOwner, renovationId) {
     grid.innerHTML = "";
     grid.className = "task-grid";
 
+    const states = {
+        "NOT_STARTED": "Not Started",
+        "IN_PROGRESS": "In Progress",
+        "BLOCKED": "Blocked",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+    };
+
     data.content.forEach(task => {
+        const stateColor = task.stateColour
         const isDefaultIcon = task.iconFileName === 'default-icon.png';
 
         const iconHtml = `
@@ -288,7 +308,7 @@ function renderTaskCards(data, isOwner, renovationId) {
         ` : "";
 
         const cardHtml = `
-            <div class="card card-count">
+            <div class="card card-count" style="border-top: 5px solid ${stateColor};">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         ${iconHtml}
@@ -296,6 +316,17 @@ function renderTaskCards(data, isOwner, renovationId) {
                     </div>
                     <p class="card-text truncate">${task.description}</p>
                     <p class="card-text"><strong>Due Date:</strong> ${task.dueDate}</p>
+                    
+                    <!-- Dropdown to update task state triggers a PATCH that updates border color -->
+                    <div class="d-flex align-items-center mb-3 mt-2">
+                      <p class="card-text mb-0 me-2"><strong>State:</strong></p>
+                      <select id="task-state-${task.id}" class="form-select form-select-sm w-auto" onchange="updateTaskState(${task.id}, this.value, this)">
+                          ${Object.entries(states).map(([key, display]) =>
+                          `<option value="${key}" ${key === task.state ? 'selected' : ''}>${display}</option>`
+                          ).join('')}
+                        </select>
+                    </div>
+                    
                     <div class="d-flex justify-content-between">${editButton}</div>
                 </div>
             </div>
@@ -335,7 +366,7 @@ function renderModalContent(task, csrfToken) {
                 </div>
                 <div class="d-flex flex-row justify-content-start flex-wrap center">
                     <button type="button" class="submit-button btn btn-primary m-2" onclick="submitIcon(${task.id})">Confirm</button>
-                    <button type="button" class="delete-button btn btn-secondary m-2"
+                    <button type="button" class="delete-button btn btn-danger m-2"
                             data-taskid="${task.id}" data-csrf="${csrfToken}"
                             onclick="deleteIcon(this)">Delete</button>
                 </div>

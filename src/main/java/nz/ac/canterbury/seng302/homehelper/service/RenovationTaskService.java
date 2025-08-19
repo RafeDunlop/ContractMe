@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.TaskState;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Service
@@ -37,6 +39,36 @@ public class RenovationTaskService {
     public RenovationTaskService(RenovationTaskRepository renovationTaskRepository, RenovationTaskValidation renovationTaskValidation) {
         this.renovationTaskRepository = renovationTaskRepository;
         this.renovationTaskValidation = renovationTaskValidation;
+    }
+
+    /**
+     * Parse a due date from a renovation task DTO.
+     * Note that this modifies the DTO in place!
+     * @param renovationTaskDTO the DTO from the form submission
+     * @return the formatted due date as a string to be added to the model if necessary
+     */
+    public String parseDueDate(RenovationTaskDTO renovationTaskDTO) {
+        LocalDate parsedDate = null;
+        if (renovationTaskDTO.getDueDate() != null) {
+            DateTimeFormatter[] formatters = new DateTimeFormatter[] {
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            };
+
+            for (DateTimeFormatter formatter : formatters) {
+                try {
+                    parsedDate = LocalDate.parse(renovationTaskDTO.getDueDate(), formatter);
+                    break;
+                } catch (DateTimeParseException ignored) {}
+            }
+
+            if (parsedDate != null) {
+                String formattedDueDate = parsedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                renovationTaskDTO.setDueDate(formattedDueDate);
+                return formattedDueDate;
+            }
+        }
+        return null;
     }
 
     /**
@@ -81,6 +113,7 @@ public class RenovationTaskService {
      */
     public void addRenovationTask(RenovationTaskDTO renovationTaskDTO, RenovationRecord renovationRecord) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        TaskState state = TaskState.NOT_STARTED;
         String name = renovationTaskDTO.getName();
         String description = renovationTaskDTO.getDescription();
         LocalDate dueDate = null;
@@ -89,7 +122,7 @@ public class RenovationTaskService {
         }
         List<String> roomList = renovationTaskDTO.getRooms();
         RenovationTask renovationTask = new RenovationTask(name, description, roomList, dueDate, renovationRecord);
-
+        renovationTask.setState(state);
         renovationTaskRepository.save(renovationTask);
     }
 
@@ -99,8 +132,15 @@ public class RenovationTaskService {
      * @param pageable spring pagination information, including the offset and page size.
      * @return A page of tasks for the renovation record. If there are no tasks an empty page is returned.
      */
-    public Page<RenovationTask> returnTaskPages(RenovationRecord renovationRecord, Pageable pageable) {
-        List<RenovationTask> tasks = renovationRecord.getRenovationTasks();
+    public Page<RenovationTask> returnTaskPages(RenovationRecord renovationRecord, Pageable pageable, String status) {
+        TaskState state;
+        List<RenovationTask> tasks;
+        try {
+            state = TaskState.fromCamelCaseName(status);
+            tasks = renovationTaskRepository.findByRenovationRecordAndState(renovationRecord, state);
+        } catch (IllegalArgumentException e) {
+            tasks = renovationRecord.getRenovationTasks();
+        }
 
         if (tasks == null || tasks.isEmpty()) {
             return new PageImpl<>(Collections.emptyList(), pageable, 0);
@@ -122,7 +162,11 @@ public class RenovationTaskService {
     public List<String> getTaskIconFilenames() {
         PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
         try {
-            List<String> taskIconNames = new ArrayList<>(Arrays.stream(pathMatchingResourcePatternResolver.getResources("/static/images/*")).map(Resource::getFilename).toList());
+            List<String> taskIconNames = new ArrayList<>(Arrays.stream(pathMatchingResourcePatternResolver.getResources("/static/images/*"))
+                    .filter(Resource::isFile)
+                    .map(Resource::getFilename)
+                    .toList());
+            taskIconNames.remove("default_profile");
             taskIconNames.remove("default-icon.png");
             return taskIconNames;
         } catch (IOException e) {

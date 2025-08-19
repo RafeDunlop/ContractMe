@@ -16,7 +16,7 @@
 <div class="container mt-5">
     <div class="card p-4 shadow">
         <h4 class="card-title mb-5">Sign up</h4>
-        <form th:action="@{register}" method="post" id="registration-form">
+        <form th:action="@{register}" method="post" id="registration-form" novalidate>
             <div class="form-group mb-3">
 
                 <!-- FIRST NAME -->
@@ -96,7 +96,7 @@
                 <!-- CONTRACTOR FORM FRAGMENT -->
                 <div th:class="'pb-3 ' + (${userRegisterDTO.isContractor} ? 'form-extension' : 'hidden-form-extension')" id="contractor-form">
                     <div th:replace="~{fragments/contractorRegistration.html :: contractor-registration(
-                    skills=${skills})}"></div>
+                    skills=${skills}, dto=${userRegisterDTO})}"></div>
                 </div>
 
                 <!-- LOCATION TOGGLE SWITCH -->
@@ -173,11 +173,13 @@
                     </ul>
                 </div>
 
-                <!-- SIGN UP BUTTON -->
-                <button type="submit" class="btn btn-primary">Sign up</button>
+                <div class="mt-5">
+                    <!-- SIGN UP BUTTON -->
+                    <button type="submit" class="btn btn-primary">Sign up</button>
 
-                <!-- CANCEL BUTTON -->
-                <a th:href="@{/}" class="btn btn-outline-secondary m-4">Cancel</a>
+                    <!-- CANCEL BUTTON -->
+                    <a th:href="@{/}" class="btn btn-outline-secondary ms-3">Cancel</a>
+                </div>
             </div>
         </form>
     </div>

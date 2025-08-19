@@ -12,6 +12,8 @@ public class Location {
     private String postcode;
     private String city;
     private String suburb;
+    private double latitude;
+    private double longitude;
 
     public Location(String address, String country, String postcode, String city, String suburb) {
         this.address = address;
@@ -21,18 +23,34 @@ public class Location {
         this.suburb = suburb;
     }
 
+    public Location(String address, String country, String postcode, String city, String suburb, double latitude, double longitude) {
+        this.address = address;
+        this.country = country;
+        this.postcode = postcode;
+        this.city = city;
+        this.suburb = suburb;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
     public Location() {}
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Location)) return false;
-        Location that = (Location) o;
+        if (!(o instanceof Location that)) return false;
         return Objects.equals(address, that.address) &&
                 Objects.equals(country, that.country) &&
                 Objects.equals(postcode, that.postcode) &&
                 Objects.equals(city, that.city) &&
-                Objects.equals(suburb, that.suburb);
+                Objects.equals(suburb, that.suburb) &&
+                Objects.equals(latitude, that.latitude) &&
+                Objects.equals(longitude, that.longitude);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(address, country, postcode, city, suburb, latitude, longitude);
     }
 
     public String getAddress() {
@@ -73,5 +91,21 @@ public class Location {
 
     public void setSuburb(String suburb) {
         this.suburb = suburb;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }

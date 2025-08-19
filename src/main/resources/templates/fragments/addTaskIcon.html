@@ -20,7 +20,7 @@
                 </div>
                 <div class="d-flex flex-row justify-content-start flex-wrap center">
                     <button type="button" class="submit-button btn btn-primary m-2" th:onclick="|submitIcon(${renovationTask.getId()})|">Confirm</button>
-                    <button type="button" class="delete-button btn btn-secondary m-2" th:attr="data-taskid=${renovationTask.getId()}, data-csrf=${_csrf.token}" th:onclick="|deleteIcon(this)|">Delete</button>
+                    <button type="button" class="delete-button btn btn-danger m-2" th:attr="data-taskid=${renovationTask.getId()}, data-csrf=${_csrf.token}" th:onclick="|deleteIcon(this)|">Delete</button>
                 </div>
             </div>
         </div>

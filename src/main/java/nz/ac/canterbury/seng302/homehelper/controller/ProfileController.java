@@ -1,10 +1,16 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
+import nz.ac.canterbury.seng302.homehelper.util.LocaleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
@@ -12,15 +18,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Controller for the user profile page.
@@ -31,24 +37,29 @@ public class ProfileController {
 	private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
 
 	private final LoginService loginService;
+	private final ContractorRepository contractorRepository;
+	private final LocaleUtil localeUtil;
 
 	/**
 	 * Induces spring to automatically set up the LoginService
 	 * @param loginService The login service provides the function to get the current user
 	 */
 	@Autowired
-	public ProfileController(LoginService loginService) {
+	public ProfileController(LoginService loginService, ContractorRepository contractorRepository) {
 		this.loginService = loginService;
+		this.contractorRepository = contractorRepository;
+		localeUtil = new LocaleUtil();
 	}
 
 	/**
 	 * Takes the user to the profile page when the "/user" URL is entered. Gets the information of the current user and displays
 	 * it on the profileTemplate.html form.
 	 * @param model Representation of results to be used by Thymeleaf
+	 * @param request network request included to extract {@code Locale} of the request
 	 * @return Thymeleaf profileTemplate
 	 */
 	@GetMapping("/user")
-	public String userProfile(Model model) {
+	public String userProfile(Model model, HttpServletRequest request) {
 		logger.info("GET /user/");
 		try {
 			User user = loginService.getUserByEmail();
@@ -57,7 +68,18 @@ public class ProfileController {
 			model.addAttribute("email", user.getEmail());
 			model.addAttribute("dateAdded", user.getCreatedTimestamp().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 			model.addAttribute("profilePicture", user.getProfilePicture());
-
+			Location location = user.getLocation();
+			model.addAttribute("hasLocation", location != null);
+			model.addAttribute("location", location);
+			if (user instanceof Contractor contractor) {
+				model.addAttribute("userType", "Contractor");
+				model.addAttribute("phoneNumber", contractor.getPhoneNumberFormatted());
+				Locale locale = localeUtil.getSafeLocale(request.getLocale());
+				model.addAttribute("hourlyRate", contractor.getHourlyRateFormatted(locale));
+				model.addAttribute("skills", contractor.getSkills());
+				model.addAttribute("isAvailable", contractor.getAvailable());
+				model.addAttribute("contractor", contractor);
+			}
 			return "profileTemplate";
 		} catch (IllegalArgumentException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
@@ -73,17 +95,22 @@ public class ProfileController {
 	@ResponseBody
 	public ResponseEntity<Resource> getProfilePicture(@PathVariable String filename) {
 		try {
-
-			Path file;
+			Resource resource;
+			String imageType;
 			if (filename.equals("default.jpg")) {
-				file = Paths.get("profile_pictures/default/").resolve("default.jpg").normalize();
+				resource = new ClassPathResource("/static/images/default_profile/default.jpg");
+				if (!resource.exists()) {
+					return ResponseEntity.notFound().build();
+				}
+				imageType = "image/jpeg";
 			} else {
-				file = Paths.get("profile_pictures/").resolve(filename).normalize();
+				Path file = Paths.get("profile_pictures").resolve(filename).normalize();
+				if (!Files.exists(file)) {
+					return ResponseEntity.notFound().build();
+				}
+				resource = new UrlResource(file.toUri());
+				imageType = Files.probeContentType(file);
 			}
-
-			Resource resource = new UrlResource(file.toUri());
-
-			String imageType = Files.probeContentType(file);
 
 			// Return the Image
 			return ResponseEntity.ok()
@@ -94,5 +121,25 @@ public class ProfileController {
 			// Return 404 not found error
 			return ResponseEntity.notFound().build();
 		}
+	}
+
+
+	/**
+	 * Updates the availability status of a contractor.
+	 *
+	 * @param id      the contractor id
+	 * @param payload a JSON map containing the new contractor availability status
+	 * @return a redirect URL to the updated profile view
+	 */
+	@PostMapping("/editAvailability/{id}")
+	public String submitAvailability(@PathVariable("id") Long id,
+									 @RequestBody Map<String, Boolean> payload) {
+		logger.info("POST editAvailability/{}", id);
+		boolean isAvailable = payload.get("isAvailable");
+
+		Contractor contractor = contractorRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contractor not found"));
+        contractor.setAvailable(isAvailable);
+		contractorRepository.save(contractor);
+		return "redirect:/user";
 	}
 }

@@ -39,8 +39,12 @@ public class UserValidation {
     public List<String> validateNameString(String name, String nameType) {
         List<String> errors = new ArrayList<>();
 
+        if (name == null) {
+            errors.add(nameType + " name cannot be empty.");
+            return errors;
+        }
         // Check name is not empty
-        if (Objects.equals(nameType, "First") && (name == null || name.trim().isEmpty())) {
+        if (Objects.equals(nameType, "First") && (name.trim().isEmpty())) {
             errors.add(nameType + " name cannot be empty.");
         }
 
@@ -123,7 +127,7 @@ public class UserValidation {
     }
 
     /**
-     * checks if the provided file is of an allowed image type (PNG, JPG, SVG)
+     * checks if the provided file is of an allowed image type (PNG, JPG)
      * and ensures that its size does not exceed the limit (10MB).
      *
      * @param profilePicture Uploaded profile picture raw data file
@@ -139,7 +143,7 @@ public class UserValidation {
         }
 
         // Allowed MIME types
-        List<String> allowedMimeTypes = List.of("image/jpeg", "image/png", "image/svg+xml");
+        List<String> allowedMimeTypes = List.of("image/jpeg", "image/png");
 
         // Check file type
         if (!allowedMimeTypes.contains(profilePicture.getContentType())) {

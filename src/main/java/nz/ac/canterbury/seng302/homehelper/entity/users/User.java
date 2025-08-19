@@ -109,6 +109,14 @@ public class User {
     }
 
     /**
+     *  Gets the user type
+     * @return the type of the user
+     */
+    public String getDiscriminatorType() {
+        return this.getClass().getSimpleName();
+    }
+
+    /**
      * Gets the first name of the user
      * @return First name of user
      */
@@ -138,6 +146,15 @@ public class User {
      */
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    /**
+     * Convenience method to return the user's full name (i.e. first + last).
+     *
+     * @return the user's full name
+     */
+    public String getFullName() {
+        return firstName + " " + lastName;
     }
 
     /**

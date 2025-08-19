@@ -12,7 +12,7 @@
 </head>
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
-<div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
+
 
 <input type="hidden" id="cardsPerPage"/>
 <input type="hidden" id="pageNumber" th:value="${pageNumber}" name="page"/>
@@ -70,9 +70,12 @@
 </div>
 
 <!-- Scripts -->
-<script type="text/javascript" th:src="@{/js/confirmPrompt.js}"></script>
+<script type="module" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
 <script type="text/javascript" th:src="@{/js/renovationUtils.js}"></script>
 <script type="text/javascript" th:src="@{/js/renovationsInit.js}"></script>
+<script type="module" th:src="@{/js/navbar.js}"></script>
+
+
 </body>
 </html>

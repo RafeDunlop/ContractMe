@@ -1,0 +1,341 @@
+package nz.ac.canterbury.seng302.homehelper.service;
+
+import jakarta.persistence.EntityNotFoundException;
+import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
+import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Service class for handling teams.
+ * Responsible for saving requests and validating beforehand.
+ */
+@Service
+public class TeamsService {
+
+    private final TeamsRepository teamsRepository;
+    private final TeamValidation teamValidation;
+    private final ContractorRepository contractorRepository;
+    private final EmailService emailService;
+
+    /**
+     * Constructs TeamsService with necessary dependencies.
+     * @param teamsRepository Repository for saving teams.
+     * @param teamValidation Service used to validate team requests.
+     */
+    @Autowired
+    public TeamsService(TeamsRepository teamsRepository, TeamValidation teamValidation, ContractorRepository contractorRepository, EmailService emailService) {
+        this.teamsRepository = teamsRepository;
+        this.teamValidation = teamValidation;
+        this.contractorRepository = contractorRepository;
+        this.emailService = emailService;
+    }
+
+    /**
+     * Creates a new team
+     * @param teamRecord the renovation record with which the team was associated
+     * @param teamRequestDTO the request DTO containing the info about the skills required
+     * @return the response value of the matching algorithm
+     */
+    public String createNewTeam(RenovationRecord teamRecord, TeamRequestDTO teamRequestDTO) {
+        Team team = new Team(teamRecord);
+
+        List<Role> roles = createRoles(teamRequestDTO.getSkills());
+        for(Role role : roles) {
+            team.addRole(role);
+        }
+
+        saveTeam(team);
+
+        Location renovationLocation = teamRecord.getLocation();
+        String response = assignContractorsToTeam(team, renovationLocation);
+        if (Objects.equals(response, "")) {
+            sendContractorEmails(team);
+        }
+
+        return response;
+    }
+
+    /**
+     * Constructs a list of roles for the team entity.
+     * @param skillNames The list of skills selected by the user
+     * @return An array of roles created from each skill
+     */
+    public List<Role> createRoles(List<String> skillNames) {
+        List<Role> roles = new ArrayList<>();
+        for (String skillName : skillNames) {
+            Skill skill = Skill.valueOf(skillName);
+            Role role = new Role(skill);
+            roles.add(role);
+        }
+        return roles;
+    }
+
+    /**
+     * Saves a team to the repository.
+     * @param team The team to be saved.
+     */
+    public void saveTeam(Team team) {
+        teamsRepository.save(team);
+    }
+
+    /**
+     * Checks whether a team already exists for the given renovation ID.
+     * @param id The renovation record ID.
+     * @return True if a team already exists, false otherwise.
+     */
+    public boolean teamExists(Long id) {
+        return teamsRepository.existsByRenovationRecordId(id);
+    }
+
+    /**
+     * Validates a team creation request by calling all validation methods.
+     * @param teamRequestDTO The DTO representing the creation request.
+     * @return List containing the errors with the request, which will be empty if it's valid.
+     */
+    public List<String> validateTeam(TeamRequestDTO teamRequestDTO) {
+        List<String> errors = new ArrayList<>();
+
+        String  skillsTypeError =  teamValidation.validateSkills(teamRequestDTO);
+        if (skillsTypeError != null) errors.add(skillsTypeError);
+
+        String  teamSizeError = teamValidation.validateTeamSize(teamRequestDTO);
+        if (teamSizeError != null) errors.add(teamSizeError);
+
+        return errors;
+    }
+
+    public Team getTeamById(long teamId) {
+        return teamsRepository.findById(teamId).orElseThrow(() -> new EntityNotFoundException("Team: " + teamId + " not found"));
+    }
+
+    /**
+     * Checks if a given user belongs to the team associated with a renovation record
+     * @param renovationRecord the renovation record that we want to check the associated team
+     * @param user the id of the user to check if they belong to the team
+     * @return boolean, true if the user is a contractor and belongs to the team associated with the record
+     */
+    public boolean checkViewRenovationAccess(RenovationRecord renovationRecord, User user) {
+        return teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, user.getId());
+    }
+
+
+    /**
+     * Goes through the list of contractors assigned to a team and
+     * emails them, notifying them that they have an offer to join
+     * a team
+     * @param team the newly created team emails are being sent to
+     */
+    public void sendContractorEmails(Team team) {
+        for (Role role : team.getRoles()) {
+            Contractor recipient = role.getContractor();
+            if (recipient == null) continue;
+            String ownerName = team.getRenovationRecord().getUser().getFirstName();
+            emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
+                    team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
+
+        }
+    }
+
+    /**
+     * Returns a list of team requests for the given user after checking if they are a contractor.
+     *
+     * @param user the user to find team requests for
+     * @return the list of team requests, ordered by creation date
+     * @throws IllegalArgumentException if the user is not a contractor
+     */
+    public List<Team> getContractorTeamRequests(User user) throws IllegalArgumentException {
+        if (user instanceof Contractor contractor) {
+            return teamsRepository.findByRoleContractor(contractor);
+        } else {
+            throw new IllegalArgumentException("User is not a contractor");
+        }
+    }
+
+    /**
+     * Returns the role the user (contractor) is assigned to. The team should already have been found by getContractorTeamRequests.
+     *
+     * @param user the user who already has a role assigned in the team
+     * @param team the team which has a role filled by the given contractor
+     * @return the Role assigned to the contractor
+     * @throws ResponseStatusException if the role is not found
+     */
+    public Role getContractorRole(User user, Team team) throws ResponseStatusException {
+        try {
+            return team.getRoles().stream().filter(r -> r.getContractor().equals(user)).findFirst().orElseThrow();
+        } catch (NoSuchElementException|NullPointerException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found");
+        }
+    }
+
+    /**
+     * Run algorithm to assign the closest available contractors to the team if possible
+     * @param team team to assign contractors to
+     * @param renovationLocation location of the renovation
+     * @return error message if unable to fill team or empty string if able to fill team
+     */
+    public String assignContractorsToTeam(Team team, Location renovationLocation) {
+        boolean greedySuccess = greedyAssign(team, renovationLocation);
+        if (greedySuccess) {
+            teamsRepository.save(team);
+            return "";
+        }
+
+        Set<String> visitedStates = new HashSet<>();
+
+        for (Role emptyRole : team.getRoles()) {
+            if (emptyRole.getContractor() == null) {
+                List<Role> candidatesToShuffle = team.getRoles().stream()
+                        .filter(r -> r.getContractor() != null)
+                        .filter(r -> r.getContractor().getSkills().contains(emptyRole.getSkill()))
+                        .toList();
+
+                for (Role candidateRole : candidatesToShuffle) {
+                    Contractor contractorToMove = candidateRole.getContractor();
+
+                    emptyRole.setContractor(contractorToMove);
+                    candidateRole.setContractor(null);
+
+                    // Fill the vacated candidateRole recursively with cycle detection
+                    if (fillRoleWithBacktracking(team, renovationLocation, candidateRole, visitedStates)) {
+                        teamsRepository.save(team);
+                        return "";
+                    }
+
+                    // Backtrack
+                    emptyRole.setContractor(null);
+                    candidateRole.setContractor(contractorToMove);
+                }
+
+                return "Unable to find available contractors to fill team";
+            }
+        }
+
+        return "Unable to find available contractors to fill team";
+    }
+
+    /**
+     * Fill the given empty role by querying nearest available contractor
+     * excluding contractors already assigned in the team.
+     * If none found, try reassigning team members recursively (backtracking).
+     * Uses cycle detection to avoid infinite loops.
+     * @param team team to assign contractors to
+     * @param location location of the renovation
+     * @param roleToFill role to fill
+     * @param visitedStates Set of serialized team that have been visited
+     * @return true if all roles assigned, false if any remain unassigned.
+     */
+    private boolean fillRoleWithBacktracking(Team team, Location location, Role roleToFill, Set<String> visitedStates) {
+        String stateKey = serializeTeamAssignment(team);
+        if (!visitedStates.add(stateKey)) {
+            // prune
+            return false;
+        }
+
+        Set<Long> assignedIds = team.getRoles().stream()
+                .filter(r -> r.getContractor() != null)
+                .map(r -> r.getContractor().getId())
+                .collect(Collectors.toSet());
+
+        Contractor candidate = findNearestContractor(roleToFill, location, assignedIds);
+        if (candidate != null) {
+            roleToFill.setContractor(candidate);
+            return true;
+        }
+
+        // No direct candidate found, try reassigning team members recursively:
+        for (Role otherRole : team.getRoles()) {
+            if (otherRole != roleToFill && otherRole.getContractor() != null
+                    && otherRole.getContractor().getSkills().contains(roleToFill.getSkill())) {
+
+                Contractor movingContractor = otherRole.getContractor();
+
+                // Move contractor to current empty role
+                roleToFill.setContractor(movingContractor);
+                otherRole.setContractor(null);
+
+                if (fillRoleWithBacktracking(team, location, otherRole, visitedStates)) {
+                    return true;
+                }
+
+                // Backtrack
+                otherRole.setContractor(movingContractor);
+                roleToFill.setContractor(null);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Assign nearest available contractor for each unassigned role.
+     * @param team team to assign contractors to
+     * @param renovationLocation location of the renovation
+     * @return true if all roles assigned, false if any remain unassigned.
+     */
+    private boolean greedyAssign(Team team, Location renovationLocation) {
+        Set<Long> assignedContractors = new HashSet<>();
+        boolean allAssigned = true;
+
+        for (Role role : team.getRoles()) {
+            if (role.getContractor() == null) {
+                Contractor contractor = findNearestContractor(role, renovationLocation, assignedContractors);
+                if (contractor == null) {
+                    allAssigned = false;
+                } else {
+                    team.replaceRoleContractor(role, contractor);
+                    assignedContractors.add(contractor.getId());
+                }
+            } else {
+                assignedContractors.add(role.getContractor().getId());
+            }
+        }
+
+        return allAssigned;
+    }
+
+    /**
+     *  Finds the nearest available contractor for a role excluding contractors in blacklist.
+     * @param role empty role to find contractor for
+     * @param location renovation location
+     * @param blacklist set of current contractors in team to prevent duplicates
+     * @return the nearest contractor that can fill the role
+     */
+    private Contractor findNearestContractor(Role role, Location location, Set<Long> blacklist) {
+        return contractorRepository.findNearestWithinDistanceExcluding(
+                location.getLatitude(),
+                location.getLongitude(),
+                role.getSkill().toString(),
+                200,
+                blacklist.isEmpty() ? null : blacklist
+        );
+    }
+
+    /**
+     * Serialize team assignments as a string key for cycle detection.
+     * @param team team to serialize
+     * @return serialized team
+     */
+    private String serializeTeamAssignment(Team team) {
+        return team.getRoles().stream()
+                .map(role -> {
+                    Contractor c = role.getContractor();
+                    return role.getSkill() + ":" + (c == null ? "null" : c.getId());
+                })
+                .collect(Collectors.joining("|"));
+    }
+}
