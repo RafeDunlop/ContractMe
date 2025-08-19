@@ -84,7 +84,7 @@ function fetchRenovations(viewMode = "cards", resetPage = false) {
 
             container.style.display = "block";
             if (viewMode === "cards") {
-                renderRecordCards(data, currentUserId, pageNumber);
+                renderRecordCards(data, currentUserId);
             } else {
                 const csrfToken = document.getElementById("globalCsrfToken")?.value || "";
                 renderRecordTable(data, pageNumber, csrfToken);
@@ -202,9 +202,8 @@ function updateHeaderTitle(visibility) {
  * Renders renovation records in card view.
  * @param data - The data object from the server containing records.
  * @param currentUserId - The current logged-in user ID.
- * @param pageNumber - The current page number.
  */
-function renderRecordCards(data, currentUserId, pageNumber) {
+function renderRecordCards(data, currentUserId) {
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
     grid.className = "grid-container";
@@ -367,7 +366,7 @@ function renderModalContent(task, csrfToken) {
                 </div>
                 <div class="d-flex flex-row justify-content-start flex-wrap center">
                     <button type="button" class="submit-button btn btn-primary m-2" onclick="submitIcon(${task.id})">Confirm</button>
-                    <button type="button" class="delete-button btn btn-secondary m-2"
+                    <button type="button" class="delete-button btn btn-danger m-2"
                             data-taskid="${task.id}" data-csrf="${csrfToken}"
                             onclick="deleteIcon(this)">Delete</button>
                 </div>

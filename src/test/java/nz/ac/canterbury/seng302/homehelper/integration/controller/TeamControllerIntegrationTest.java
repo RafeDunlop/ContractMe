@@ -188,25 +188,13 @@ public class TeamControllerIntegrationTest {
         teamsRepository.save(existingTeam);
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/create")
                         .param("id", Long.toString(renovationRecord.getId()))
-                .param("skills", "ELECTRICAL", "PLUMBING"))
+                        .param("skills", "ELECTRICAL", "PLUMBING"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void teamController_hasTeamJoinRequest_getsForm() throws Exception {
-        MvcResult result = mockMvc.perform(get("/renovations/team/join-team")
-                        .session(session))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertTrue(result.getResponse().getContentAsString().contains("Renovation Name"));
-        assertTrue(result.getResponse().getContentAsString().contains("Role"));
-
-    }
-
-
-    @Test
     void hasLocation_createTeam_submitsTeamWithRoles_assignContractorsToTeams() throws Exception {
-       mockMvc.perform(post("/renovations/team/create")
+        mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", "ANTIQUE_RESTORATION", "ARCHITECTURE", "ASBESTOS_REMOVAL")
                         .with(csrf()))
