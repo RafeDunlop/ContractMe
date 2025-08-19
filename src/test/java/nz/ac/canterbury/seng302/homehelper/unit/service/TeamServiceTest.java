@@ -17,9 +17,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -266,7 +266,7 @@ public class TeamServiceTest {
         Contractor contractor = new Contractor("Alice", "Doe", "alice@doe.com", "encoded");
         role.setContractor(new Contractor("Bob", "Doe", "bob@doe.com", "encoded"));
         team.addRole(role);
-        assertThrows(NoSuchElementException.class, () -> teamsService.getContractorRole(contractor, team));
+        assertThrows(ResponseStatusException.class, () -> teamsService.getContractorRole(contractor, team));
     }
 
     @Test
@@ -275,7 +275,7 @@ public class TeamServiceTest {
         Role role = new Role(Skill.PLUMBING);
         team.addRole(role);
         Contractor contractor = new Contractor("Alice", "Doe", "alice@doe.com", "encoded");
-        assertThrows(NullPointerException.class, () -> teamsService.getContractorRole(contractor, team));
+        assertThrows(ResponseStatusException.class, () -> teamsService.getContractorRole(contractor, team));
     }
 
     @Test
@@ -287,6 +287,6 @@ public class TeamServiceTest {
         otherRole.setContractor(new Contractor("Alice", "Doe", "alice@doe.com", "encoded"));
         team.addRole(otherRole);
         Contractor contractor = new Contractor("Bob", "Doe", "bob@doe.com", "encoded");
-        assertThrows(NullPointerException.class, () -> teamsService.getContractorRole(contractor, team));
+        assertThrows(ResponseStatusException.class, () -> teamsService.getContractorRole(contractor, team));
     }
 }

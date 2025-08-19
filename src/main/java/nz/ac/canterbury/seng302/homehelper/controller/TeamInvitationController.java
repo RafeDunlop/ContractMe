@@ -11,17 +11,18 @@ import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamInvitationService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UrlPathHelper;
-
-import java.util.NoSuchElementException;
 
 /**
  * Controller for handling contractor invitations to renovation teams
@@ -82,12 +83,8 @@ public class TeamInvitationController {
             RenovationRecord renovationRecord = team.getRenovationRecord();
             User owner = renovationRecord.getUser();
             String ownerName = owner.getFullName();
-            try {
-                Role role = teamsService.getContractorRole(user, team);
-                model.addAttribute("skill", role.getSkill().getDisplayName());
-            } catch (NoSuchElementException|NullPointerException e) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found");
-            }
+            Role role = teamsService.getContractorRole(user, team);
+            model.addAttribute("skill", role.getSkill().getDisplayName());
             model.addAttribute("renovationId", renovationRecord.getId());
             model.addAttribute("renovationName", renovationRecord.getName());
             model.addAttribute("ownerName", ownerName);

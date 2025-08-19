@@ -23,7 +23,6 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * A controller for team management pages
@@ -134,14 +133,10 @@ public class TeamController {
         User user = loginService.getUserByEmail();
         Team team = teamsService.getTeamById(id);
         RenovationRecord renovationRecord = team.getRenovationRecord();
-        try {
-            Role role = teamsService.getContractorRole(user, team);
-            model.addAttribute("skill", role.getSkill().getDisplayName());
-        } catch (NoSuchElementException|NullPointerException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found");
-        }
         User owner = renovationRecord.getUser();
         String ownerName = owner.getFullName();
+        Role role = teamsService.getContractorRole(user, team);
+        model.addAttribute("skill", role.getSkill().getDisplayName());
         model.addAttribute("renovationName", renovationRecord.getName());
         model.addAttribute("ownerName", ownerName);
         model.addAttribute("teamId", id);

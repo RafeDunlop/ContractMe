@@ -13,7 +13,9 @@ import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -128,11 +130,14 @@ public class TeamsService {
      * @param user the user who already has a role assigned in the team
      * @param team the team which has a role filled by the given contractor
      * @return the Role assigned to the contractor
-     * @throws NoSuchElementException if the role is not found
-     * @throws NullPointerException if a role has a null contractor
+     * @throws ResponseStatusException if the role is not found
      */
-    public Role getContractorRole(User user, Team team) throws NoSuchElementException, NullPointerException {
-        return team.getRoles().stream().filter(r -> r.getContractor().equals(user)).findFirst().orElseThrow();
+    public Role getContractorRole(User user, Team team) throws ResponseStatusException {
+        try {
+            return team.getRoles().stream().filter(r -> r.getContractor().equals(user)).findFirst().orElseThrow();
+        } catch (NoSuchElementException|NullPointerException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found");
+        }
     }
 
     /**
