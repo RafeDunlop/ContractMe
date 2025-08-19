@@ -53,13 +53,13 @@
                 </div>
 
                 <div th:if="${renovation.description} != ''" class="mb-3">
-                    <h6 class="fw-bold">Description:</h6>
-                    <p class="mb-0" th:text="${renovation.description}"></p>
+                    <h6 class="mb-1 fw-bold">Description:</h6>
+                    <p class="fw-normal" th:text="${renovation.description}"></p>
                 </div>
 
                 <div class="mb-3" th:if="${renovation.location.address != null}">
                     <h6 class="mb-1 fw-bold">Location: </h6>
-                        <span class="fw-normal" th:text="${renovation.location.address}">
+                        <span class="fw-normal" th:text="${renovation.location.toString()}">
                         </span>
                 </div>
 
@@ -132,11 +132,6 @@
 
                 <div class="alert alert-danger" id="errorMessage" style="margin-top: 20px; display: none;">
                     <p id="errorText"></p>
-                </div>
-
-                <div th:if="${renovation.location}" class="align-self-start mb-3">
-                    <h6 class="fw-bold">Location:</h6>
-                    <p class="mb-0" th:replace="~{fragments/addressDisplay.html :: addressDisplay (${renovation.location})}"></p>
                 </div>
 
                 <!-- Buttons -->

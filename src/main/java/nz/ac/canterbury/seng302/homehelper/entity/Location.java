@@ -2,6 +2,8 @@ package nz.ac.canterbury.seng302.homehelper.entity;
 
 import jakarta.persistence.Embeddable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Embeddable
@@ -48,6 +50,18 @@ public class Location {
                 Objects.equals(latitude, that.latitude) &&
                 Objects.equals(longitude, that.longitude);
     }
+
+    @Override
+    public String toString() {
+        List<String> parts = new ArrayList<>();
+        if (address != null && !address.isBlank()) parts.add(address);
+        if (suburb != null && !suburb.isBlank()) parts.add(suburb);
+        if (city != null && !city.isBlank()) parts.add(city);
+        if (postcode != null && !postcode.isBlank()) parts.add(postcode);
+        if (country != null && !country.isBlank()) parts.add(country);
+        return String.join(", ", parts);
+    }
+
 
     public String getAddress() {
         return address;
