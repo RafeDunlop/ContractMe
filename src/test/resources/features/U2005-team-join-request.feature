@@ -37,7 +37,7 @@ Feature: As Bob, I want to be able to receive requests from clients and an email
     And I am logged in and a contractor
     And my request to join the renovation team is "pending"
     When I click the "decline" button
-    Then I am taken to the main page
+    Then I am taken to the view requests page
     And I am not in the team
 
   @authoriseContractor

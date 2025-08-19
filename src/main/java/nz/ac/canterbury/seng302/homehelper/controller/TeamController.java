@@ -3,6 +3,8 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
@@ -110,12 +112,27 @@ public class TeamController {
         return "redirect:/renovations/view?id=" + id;
     }
 
+
     /**
      * Handler for a get request to the join team fragment.
      * @return the join team fragment
      */
     @GetMapping("/join-team")
-    public String joinTeam() {
-        return "joinTeamInbox";
+    public String joinTeam(Model model, @RequestParam("id") Long id) {
+        User user = loginService.getUserByEmail();
+        Team team = teamsService.getTeamById(id);
+        RenovationRecord renovationRecord = team.getRenovationRecord();
+        User owner = renovationRecord.getUser();
+        String ownerName = owner.getFullName();
+        Role role = teamsService.getContractorRole(user, team);
+        model.addAttribute("skill", role.getSkill().getDisplayName());
+        model.addAttribute("renovationName", renovationRecord.getName());
+        model.addAttribute("ownerName", ownerName);
+        model.addAttribute("profilePicture", owner.getProfilePicture());
+        model.addAttribute("teamId", id);
+        model.addAttribute("renovationId", renovationRecord.getId());
+        return "fragments/joinTeam :: join-team";
     }
+
+
 }
