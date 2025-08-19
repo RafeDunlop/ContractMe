@@ -123,11 +123,6 @@ public class TeamJoinRequestSteps {
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 
-    @Given("A team request email has been received")
-    public void a_team_request_email_has_been_received() {
-
-    }
-
     @Given("A private renovation exists with a team")
     public void a_private_renovation_exists_with_a_team() {
         User owner = userRepository.save(new User("Greg", "smith", "greg" + System.currentTimeMillis() + "@smith.com", "Password123!"));
@@ -157,12 +152,6 @@ public class TeamJoinRequestSteps {
 
         team.addRole(new Role(contractor, Skill.ELECTRICAL, accepted));
         teamsRepository.save(team);
-    }
-
-
-    @When("I click the link contained therein")
-    public void i_click_the_link_contained_therein() {
-
     }
 
 

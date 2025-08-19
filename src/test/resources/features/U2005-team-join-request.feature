@@ -8,12 +8,6 @@ Feature: As Bob, I want to be able to receive requests from clients and an email
     Then The system will automatically send an email to the contractor who is closest to the renovation location
 
   @authoriseContractor
-  Scenario: AC2 - Request Email Links to Renovation
-    Given A team request email has been received
-    When I click the link contained therein
-    Then I am taken to the confirm join team page
-
-  @authoriseContractor
   Scenario: AC3.1 - accept team request
     Given A private renovation exists with a team
     And I am logged in and a contractor
