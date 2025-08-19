@@ -14,12 +14,11 @@ import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.Contracto
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.*;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -124,6 +123,17 @@ public class TeamsService {
         } else {
             throw new IllegalArgumentException("User is not a contractor");
         }
+    }
+
+    /**
+     * Returns the role the user (contractor) is assigned to. The team should already have been found by getContractorTeamRequests.
+     *
+     * @param user the user who already has a role assigned in the team
+     * @param team the team which has a role filled by the given contractor
+     * @return the Role assigned to the contractor
+     */
+    public Role getContractorRole(User user, Team team) {
+        return team.getRoles().stream().filter(r -> r.getContractor().equals(user)).findFirst().orElseThrow();
     }
 
     /**

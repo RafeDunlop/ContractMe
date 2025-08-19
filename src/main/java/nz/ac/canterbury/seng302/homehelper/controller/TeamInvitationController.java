@@ -2,8 +2,11 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamInvitationService;
@@ -17,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UrlPathHelper;
+
+import java.util.NoSuchElementException;
 
 /**
  * Controller for handling contractor invitations to renovation teams
@@ -66,14 +71,26 @@ public class TeamInvitationController {
         request.getSession().setAttribute("lastVisitedRenovationParameters", request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
         model.addAttribute("teamId", teamId);
-        Long userId = loginService.getUserByEmail().getId();
+        User user = loginService.getUserByEmail();
+        Long userId = user.getId();
         try {
             Team team = teamsService.getTeamById(teamId);
             if (teamInvitationService.linkExpired(contractorService.getContractorById(userId), team)) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team invitation link is no longer valid.");
             }
 
-            model.addAttribute("renovationId", team.getRenovationRecord().getId());
+            RenovationRecord renovationRecord = team.getRenovationRecord();
+            User owner = renovationRecord.getUser();
+            String ownerName = owner.getFullName();
+            try {
+                Role role = teamsService.getContractorRole(user, team);
+                model.addAttribute("skill", role.getSkill().getDisplayName());
+            } catch (NoSuchElementException e) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found");
+            }
+            model.addAttribute("renovationId", renovationRecord.getId());
+            model.addAttribute("renovationName", renovationRecord.getName());
+            model.addAttribute("ownerName", ownerName);
         } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team invitation link is no longer valid.");
         }

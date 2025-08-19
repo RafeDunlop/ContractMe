@@ -2,8 +2,10 @@ for (const element of document.getElementsByClassName("team-request")) {
     element.addEventListener("click", showRequest);
 }
 
-async function showRequest() {
-    const response = await fetch("renovations/team/join-team")
+async function showRequest(event) {
+    const element = event.currentTarget;
+    const teamId = element.dataset.teamId;
+    const response = await fetch(`renovations/team/join-team?id=${teamId}`);
     if (response.ok) {
         const responseText = await response.text();
         const container = document.getElementById("join-team");

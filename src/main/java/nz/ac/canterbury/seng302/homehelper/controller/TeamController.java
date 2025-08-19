@@ -23,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * A controller for team management pages
@@ -129,7 +130,22 @@ public class TeamController {
      * @return the join team fragment
      */
     @GetMapping("/join-team")
-    public String joinTeam(Model model) {
+    public String joinTeam(Model model, @RequestParam("id") Long id) {
+        User user = loginService.getUserByEmail();
+        Team team = teamsService.getTeamById(id);
+        RenovationRecord renovationRecord = team.getRenovationRecord();
+        try {
+            Role role = teamsService.getContractorRole(user, team);
+            model.addAttribute("skill", role.getSkill().getDisplayName());
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found");
+        }
+        User owner = renovationRecord.getUser();
+        String ownerName = owner.getFullName();
+        model.addAttribute("renovationName", renovationRecord.getName());
+        model.addAttribute("ownerName", ownerName);
+        model.addAttribute("teamId", id);
+        model.addAttribute("renovationId", renovationRecord.getId());
         return "fragments/joinTeam :: join-team";
     }
 
