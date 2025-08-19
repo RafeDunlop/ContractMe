@@ -6,6 +6,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.ContractorContext;
+import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
@@ -31,6 +33,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -90,13 +93,18 @@ public class TeamJoinRequestSteps {
         autoCloseable.close();
     }
 
-    @Given("There is an available contractor eligible for that role")
-    public void there_is_an_available_contractor_eligible_for_that_role() {
-        contractor = contractorContext.getContractor();
-        if (this.contractor == null) { throw new IllegalStateException("Contractor was not found"); }
-        contractor.setAvailable(true);
-        contractor = contractorRepository.save(contractor);
+    @Given("A team request has been created for a renovation which has an available role")
+    public void a_team_request_has_been_created_for_a_renovation_which_has_an_available_role() throws Exception {
+        User owner = userRepository.save(new User("Eve", "Smith", "eve" + System.currentTimeMillis() + "@smith.com", "Password123!"));
+        renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", Collections.emptyList());
+        Location location = new Location("77 Ilam Road", "", "", "", "", -43.522345, 172.580907);
+        renovationRecord.setLocation(location);
+        renovationRecord.setPublicity(false);
+        renovationRecord = renovationRecordRepository.save(renovationRecord);
 
+        mockMvc.perform(post("/renovations/team/create")
+                .param("skills", Skill.CARPENTRY.toString())
+                .param("id", renovationRecord.getId().toString()));
     }
 
     @Given("A team request email has been received")
@@ -135,18 +143,13 @@ public class TeamJoinRequestSteps {
         teamsRepository.save(team);
     }
 
-    @When("A team request has been created for a renovation which has an available role")
-    public void a_team_request_has_been_created_for_a_renovation_which_has_an_available_role() throws Exception {
-        User owner = userRepository.save(new User("Eve", "Smith", "eve" + System.currentTimeMillis() + "@smith.com", "Password123!"));
-        RenovationRecord renovation = new RenovationRecord(owner, "Test Renovation", "Test Desc", Collections.emptyList());
-        renovation.setPublicity(false);
-        renovation = renovationRecordRepository.save(renovation);
-
-        mockMvc.perform(post("/renovations/team/create")
-                .param("skills", Skill.CARPENTRY.toString())
-                .param("id", renovation.getId().toString()));
-
+    @When("There is an available contractor eligible for that role")
+    public void there_is_an_available_contractor_eligible_for_that_role() {
+        contractor = contractorContext.getContractor();
+        if (this.contractor == null) { throw new IllegalStateException("Contractor was not found"); }
+        assertTrue(contractor.getSkills().contains(Skill.CARPENTRY));
     }
+
 
     @When("I click the link contained therein")
     public void i_click_the_link_contained_therein() {
@@ -165,6 +168,9 @@ public class TeamJoinRequestSteps {
 
     @Then("The system will automatically send an email to the contractor who is closest to the renovation location")
     public void the_system_will_automatically_send_an_email_to_the_contractor_who_is_closest_to_the_renovation_location() {
+        TeamRequestDTO teamRequestDTO = new TeamRequestDTO();
+        teamRequestDTO.setSkills(List.of(Skill.CARPENTRY.toString()));
+        teamsService.createNewTeam(renovationRecord, teamRequestDTO);
         Mockito.verify(emailService, times(1)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
