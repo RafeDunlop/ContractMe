@@ -10,6 +10,7 @@ import nz.ac.canterbury.seng302.homehelper.util.LocaleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
@@ -94,17 +95,22 @@ public class ProfileController {
 	@ResponseBody
 	public ResponseEntity<Resource> getProfilePicture(@PathVariable String filename) {
 		try {
-
-			Path file;
+			Resource resource;
+			String imageType;
 			if (filename.equals("default.jpg")) {
-				file = Paths.get("profile_pictures/default/").resolve("default.jpg").normalize();
+				resource = new ClassPathResource("/static/images/default_profile/default.jpg");
+				if (!resource.exists()) {
+					return ResponseEntity.notFound().build();
+				}
+				imageType = "image/jpeg";
 			} else {
-				file = Paths.get("profile_pictures/").resolve(filename).normalize();
+				Path file = Paths.get("profile_pictures").resolve(filename).normalize();
+				if (!Files.exists(file)) {
+					return ResponseEntity.notFound().build();
+				}
+				resource = new UrlResource(file.toUri());
+				imageType = Files.probeContentType(file);
 			}
-
-			Resource resource = new UrlResource(file.toUri());
-
-			String imageType = Files.probeContentType(file);
 
 			// Return the Image
 			return ResponseEntity.ok()
