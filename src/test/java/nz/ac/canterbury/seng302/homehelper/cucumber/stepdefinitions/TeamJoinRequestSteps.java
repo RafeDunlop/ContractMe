@@ -120,7 +120,7 @@ public class TeamJoinRequestSteps {
         teamRequestDTO.setSkills(List.of(Skill.CARPENTRY.toString()));
         teamsService.createNewTeam(renovationRecord, teamRequestDTO);
         Mockito.verify(emailService, times(1)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class),Mockito.anyLong());
     }
 
     @Given("A private renovation exists with a team")

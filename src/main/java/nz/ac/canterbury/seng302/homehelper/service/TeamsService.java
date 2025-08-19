@@ -20,9 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.*;
 
-import java.util.stream.Collectors;
 
 /**
  * Service class for handling teams.
@@ -150,7 +148,7 @@ public class TeamsService {
             if (recipient == null) continue;
             String ownerName = team.getRenovationRecord().getUser().getFirstName();
             emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
-                    team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault());
+                    team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
 
         }
     }

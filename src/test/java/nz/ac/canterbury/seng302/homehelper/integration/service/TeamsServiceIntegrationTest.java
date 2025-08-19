@@ -125,7 +125,7 @@ class TeamsServiceIntegrationTest {
 
         //If any skills are added in the future, change this threshold to match the number of skills present
         Mockito.verify(emailService, times(2)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class),Mockito.anyLong());
 
     }
 
@@ -161,7 +161,7 @@ class TeamsServiceIntegrationTest {
         teamsService.createNewTeam(renovation, teamRequestDTO);
 
         Mockito.verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class),Mockito.anyLong());
     }
 
     @Test
@@ -179,7 +179,7 @@ class TeamsServiceIntegrationTest {
         teamsService.createNewTeam(renovation, teamRequestDTO);
 
         Mockito.verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class),Mockito.anyLong());
     }
 
     @Transactional

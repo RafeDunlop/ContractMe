@@ -26,7 +26,6 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.atMost;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -73,9 +71,6 @@ public class TeamControllerIntegrationTest {
     private TeamsRepository teamsRepository;
 
 
-    private MockHttpSession session;
-
-
     @BeforeEach
     public void setup(TestInfo testInfo) {
         User newUser = new User("Jane", "Doe", "jane@doe.nz", "password");
@@ -83,7 +78,6 @@ public class TeamControllerIntegrationTest {
         newUser.grantAuthority("ROLE_USER");
         renovationRecord = new RenovationRecord(newUser, "test renovation", "test description", List.of());
         renovationRecord = renovationRecordRepository.save(renovationRecord);
-        session = new MockHttpSession();
 
 
         if (testInfo.getDisplayName().contains("hasLocation")) {
@@ -210,7 +204,7 @@ public class TeamControllerIntegrationTest {
                 .andReturn();
        //If any skills are added in the future, change this threshold to match the number of skills present
        Mockito.verify(emailService, atMost(3)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
-               Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+               Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class),Mockito.anyLong());
 
     }
 
@@ -225,7 +219,7 @@ public class TeamControllerIntegrationTest {
                 .andReturn();
 
         Mockito.verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class),Mockito.anyLong());
 
     }
 

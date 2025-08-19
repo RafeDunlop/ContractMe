@@ -133,7 +133,7 @@ public class EmailService {
             String ownerName,
             String renovationName,
             String role,
-            Locale locale) {
+            Locale locale,Long teamId) {
         final Context context = new Context(locale);
         context.setVariable("recipientEmail", recipientEmail);
         context.setVariable("name", recipientName);
@@ -141,6 +141,7 @@ public class EmailService {
         context.setVariable("renovation", renovationName);
         context.setVariable("role", role);
         context.setVariable("domain", domain);
+        context.setVariable("teamId", teamId);
         String subject = "Contractor Request";
         final String htmlContent = htmlTemplateEngine.process("html/email-confirm-team-request", context);
         sendEmail(recipientEmail, subject, htmlContent, "Contractor request send failed");
