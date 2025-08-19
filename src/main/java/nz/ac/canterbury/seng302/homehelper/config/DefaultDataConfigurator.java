@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.config;
 
-import nz.ac.canterbury.seng302.homehelper.controller.TeamInvitationController;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
@@ -183,7 +182,7 @@ public class DefaultDataConfigurator {
                 defaultJERooms
         );
 
-        default2Renovation1.setLocation(new Location("Jack Erskine", "New Zealand", "8041", "Christchurch", "Uni-Cycle Cycleway", -43.52255, 172.58124));
+        default2Renovation1.setLocation(new Location("Jack Erskine", NEW_ZEALAND, "8041", "Christchurch", "Uni-Cycle Cycleway", -43.52255, 172.58124));
         default2Renovation1 = renovationRecordService.addRenovationRecord(default2Renovation1);
 
         // Add 200 test renovations for default1
