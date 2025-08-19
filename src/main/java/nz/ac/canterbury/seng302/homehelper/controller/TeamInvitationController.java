@@ -127,7 +127,7 @@ public class TeamInvitationController {
     /**
      * Declines the contractors invitation to join the given team
      * @param teamId ID of the team to decline
-     * @return redirect to the main page on success todo change to inbox when done
+     * @return redirect to the main page on success
      * @throws ResponseStatusException 404 if the team does not exist, or the invitation is invalid/expired,
      *                                 or the invitation was already accepted or declined
      */
@@ -149,7 +149,6 @@ public class TeamInvitationController {
 
         teamInvitationService.declineContractor(contractor, team);
 
-        //todo redirect to inbox when it exists
-        return "redirect:/main";
+        return "redirect:/view-requests";
     }
 }
