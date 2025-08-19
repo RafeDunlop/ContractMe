@@ -2,6 +2,12 @@ for (const element of document.getElementsByClassName("team-request")) {
     element.addEventListener("click", showRequest);
 }
 
+/**
+ * Event handler to show the request form fragment when the user clicks on a request card.
+ *
+ * @param event the click event triggered
+ * @returns {Promise<void>}
+ */
 async function showRequest(event) {
     const element = event.currentTarget;
     const teamId = element.dataset.teamId;
