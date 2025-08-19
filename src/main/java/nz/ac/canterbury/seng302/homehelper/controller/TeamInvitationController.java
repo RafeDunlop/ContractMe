@@ -85,7 +85,7 @@ public class TeamInvitationController {
             try {
                 Role role = teamsService.getContractorRole(user, team);
                 model.addAttribute("skill", role.getSkill().getDisplayName());
-            } catch (NoSuchElementException e) {
+            } catch (NoSuchElementException|NullPointerException e) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found");
             }
             model.addAttribute("renovationId", renovationRecord.getId());

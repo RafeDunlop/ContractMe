@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -245,5 +246,47 @@ public class TeamServiceTest {
         User user = new User("Jane", "Doe", "jane@doe.com", "password");
         assertThrows(IllegalArgumentException.class, () -> teamsService.getContractorTeamRequests(user));
         verify(teamsRepository, never()).findByRoleContractor(Mockito.any());
+    }
+
+    @Test
+    void getContractorRole_roleAssigned_returnsRole() {
+        Team team = new Team(new RenovationRecord());
+        Role role = new Role(Skill.PLUMBING);
+        Contractor contractor = new Contractor("Alice", "Doe", "alice@doe.com", "encoded");
+        role.setContractor(contractor);
+        team.addRole(role);
+        Role result = assertDoesNotThrow(() -> teamsService.getContractorRole(contractor, team));
+        assertEquals(role, result);
+    }
+
+    @Test
+    void getContractorRole_roleNotAssigned_throwsException() {
+        Team team = new Team(new RenovationRecord());
+        Role role = new Role(Skill.PLUMBING);
+        Contractor contractor = new Contractor("Alice", "Doe", "alice@doe.com", "encoded");
+        role.setContractor(new Contractor("Bob", "Doe", "bob@doe.com", "encoded"));
+        team.addRole(role);
+        assertThrows(NoSuchElementException.class, () -> teamsService.getContractorRole(contractor, team));
+    }
+
+    @Test
+    void getContractorRole_roleHasNullContractor_throwsException() {
+        Team team = new Team(new RenovationRecord());
+        Role role = new Role(Skill.PLUMBING);
+        team.addRole(role);
+        Contractor contractor = new Contractor("Alice", "Doe", "alice@doe.com", "encoded");
+        assertThrows(NullPointerException.class, () -> teamsService.getContractorRole(contractor, team));
+    }
+
+    @Test
+    void getContractorRole_roleNullOrAssigned_throwsNullPointerException() {
+        Team team = new Team(new RenovationRecord());
+        Role role = new Role(Skill.PLUMBING);
+        team.addRole(role);
+        Role otherRole = new Role(Skill.ELECTRICAL);
+        otherRole.setContractor(new Contractor("Alice", "Doe", "alice@doe.com", "encoded"));
+        team.addRole(otherRole);
+        Contractor contractor = new Contractor("Bob", "Doe", "bob@doe.com", "encoded");
+        assertThrows(NullPointerException.class, () -> teamsService.getContractorRole(contractor, team));
     }
 }
