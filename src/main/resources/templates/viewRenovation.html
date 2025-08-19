@@ -57,7 +57,7 @@
                     <p class="fw-normal" th:text="${renovation.description}"></p>
                 </div>
 
-                <div class="mb-3" th:if="${renovation.location.address != null}">
+                <div class="mb-3" th:if="${renovation.location?.address != null}">
                     <h6 class="mb-1 fw-bold">Location: </h6>
                         <span class="fw-normal" th:text="${renovation.location.toString()}">
                         </span>
