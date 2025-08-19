@@ -11,3 +11,9 @@ Feature: U2006 - As Bob, I want to be able to see all the requests which I have 
   Scenario: AC1.2 - Users can't view the team request inbox page
     When I click the view requests button in the navigation page
     Then I am redirected to the main page
+
+  @authoriseContractor
+  Scenario: AC5 - Have not received any requests message
+    Given I have not received any requests
+    When I click the view requests button in the navigation page
+    Then I see a message telling me that I have not received any requests yet
