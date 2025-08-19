@@ -26,7 +26,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -36,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.atMost;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -131,7 +131,7 @@ public class TeamControllerIntegrationTest {
 
     @Test
     public void teamController_hasLocationOwnsRecord_getsForm() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/create")
+        mockMvc.perform(get("/renovations/team/create")
                         .param("id", Long.toString(renovationRecord.getId()))
                 )
                 .andExpect(status().isOk());
@@ -140,7 +140,7 @@ public class TeamControllerIntegrationTest {
     @Test
     @WithMockUser(username = "different@user.nz")
     public void teamController_hasLocationDoesNotOwnRecord_returns404() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/create")
+        mockMvc.perform(get("/renovations/team/create")
                         .param("id", Long.toString(renovationRecord.getId())))
                 .andExpect(status().isNotFound());
     }
@@ -150,7 +150,7 @@ public class TeamControllerIntegrationTest {
         Location location = new Location();
         renovationRecord.setLocation(location);
         renovationRecordRepository.save(renovationRecord);
-        mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/create")
+        mockMvc.perform(get("/renovations/team/create")
                         .param("id", Long.toString(renovationRecord.getId())))
                 .andExpect(status().isNotFound());
     }
@@ -187,7 +187,7 @@ public class TeamControllerIntegrationTest {
     public void createTeam_renovationHasTeamAndHasLocation_returns404() throws Exception {
         Team existingTeam = new Team(renovationRecord);
         teamsRepository.save(existingTeam);
-        mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/create")
+        mockMvc.perform(get("/renovations/team/create")
                         .param("id", Long.toString(renovationRecord.getId()))
                         .param("skills", "ELECTRICAL", "PLUMBING"))
                 .andExpect(status().isNotFound());
