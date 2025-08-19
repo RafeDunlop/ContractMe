@@ -186,9 +186,9 @@ public class TeamJoinRequestSteps {
     }
 
 
-    @Then("I am taken to the main page")
-    public void i_am_taken_to_the_main_page() throws Exception {
-        String expectedUrl = "/main";
+    @Then("I am taken to the view requests page")
+    public void i_am_taken_to_the_view_requests_page() throws Exception {
+        String expectedUrl = "/view-requests";
         resultActions.andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(expectedUrl));
     }

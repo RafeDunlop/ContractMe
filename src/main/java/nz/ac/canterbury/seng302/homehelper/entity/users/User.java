@@ -149,6 +149,15 @@ public class User {
     }
 
     /**
+     * Convenience method to return the user's full name (i.e. first + last).
+     *
+     * @return the user's full name
+     */
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
+    /**
      * Gets the email of the user
      * @return Email of user
      */

@@ -2,19 +2,25 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamInvitationService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UrlPathHelper;
 
@@ -66,14 +72,23 @@ public class TeamInvitationController {
         request.getSession().setAttribute("lastVisitedRenovationParameters", request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
         model.addAttribute("teamId", teamId);
-        Long userId = loginService.getUserByEmail().getId();
+        User user = loginService.getUserByEmail();
+        Long userId = user.getId();
         try {
             Team team = teamsService.getTeamById(teamId);
             if (teamInvitationService.linkExpired(contractorService.getContractorById(userId), team)) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team invitation link is no longer valid.");
             }
 
-            model.addAttribute("renovationId", team.getRenovationRecord().getId());
+            RenovationRecord renovationRecord = team.getRenovationRecord();
+            User owner = renovationRecord.getUser();
+            String ownerName = owner.getFullName();
+            Role role = teamsService.getContractorRole(user, team);
+            model.addAttribute("skill", role.getSkill().getDisplayName());
+            model.addAttribute("renovationId", renovationRecord.getId());
+            model.addAttribute("renovationName", renovationRecord.getName());
+            model.addAttribute("ownerName", ownerName);
+            model.addAttribute("profilePicture", owner.getProfilePicture());
         } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team invitation link is no longer valid.");
         }
@@ -110,7 +125,7 @@ public class TeamInvitationController {
     /**
      * Declines the contractors invitation to join the given team
      * @param teamId ID of the team to decline
-     * @return redirect to the main page on success todo change to inbox when done
+     * @return redirect to the main page on success
      * @throws ResponseStatusException 404 if the team does not exist, or the invitation is invalid/expired,
      *                                 or the invitation was already accepted or declined
      */
@@ -132,7 +147,6 @@ public class TeamInvitationController {
 
         teamInvitationService.declineContractor(contractor, team);
 
-        //todo redirect to inbox when it exists
-        return "redirect:/main";
+        return "redirect:/view-requests";
     }
 }

@@ -12,15 +12,13 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.*;
 import java.util.stream.Collectors;
-
 
 /**
  * Service class for handling teams.
@@ -165,6 +163,22 @@ public class TeamsService {
             return teamsRepository.findByRoleContractor(contractor);
         } else {
             throw new IllegalArgumentException("User is not a contractor");
+        }
+    }
+
+    /**
+     * Returns the role the user (contractor) is assigned to. The team should already have been found by getContractorTeamRequests.
+     *
+     * @param user the user who already has a role assigned in the team
+     * @param team the team which has a role filled by the given contractor
+     * @return the Role assigned to the contractor
+     * @throws ResponseStatusException if the role is not found
+     */
+    public Role getContractorRole(User user, Team team) throws ResponseStatusException {
+        try {
+            return team.getRoles().stream().filter(r -> r.getContractor().equals(user)).findFirst().orElseThrow();
+        } catch (NoSuchElementException|NullPointerException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found");
         }
     }
 
