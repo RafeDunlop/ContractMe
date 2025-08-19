@@ -37,7 +37,7 @@ public class SetupRegisterContractorSteps {
         String uniqueEmail = "test" + System.currentTimeMillis() + "@user.nz";
         Contractor contractor = new Contractor("Test", "User", uniqueEmail, encoder.encode("Test123!"));
         Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041",
-                "Christchurch", "Upper Riccarton", 1D, 1D);
+                "Christchurch", "Upper Riccarton", -43.522345, 172.580907);
         contractor.setLocation(location);
         contractor.setHourlyRate(27.50F);
         contractor.setCountryCode(64);

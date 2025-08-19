@@ -16,18 +16,18 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,10 +61,11 @@ public class TeamJoinRequestSteps {
     private TeamsRepository teamsRepository;
 
     @Autowired
-    @InjectMocks
+    @SpyBean
     private TeamsService teamsService;
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
     private RenovationRecord renovationRecord;
     private Team team;
@@ -75,8 +76,6 @@ public class TeamJoinRequestSteps {
 
     @Mock
     private EmailService emailService;
-    @Autowired
-    private ContractorRepository contractorRepository;
 
     public TeamJoinRequestSteps(ContractorContext contractorContext) {
         this.contractorContext = contractorContext;
@@ -93,7 +92,15 @@ public class TeamJoinRequestSteps {
         autoCloseable.close();
     }
 
-    @Given("A team request has been created for a renovation which has an available role")
+    @Given("There is an available contractor eligible for that role")
+    public void there_is_an_available_contractor_eligible_for_that_role() {
+        contractor = contractorContext.getContractor();
+        if (this.contractor == null) { throw new IllegalStateException("Contractor was not found"); }
+        ReflectionTestUtils.setField(teamsService, "emailService", emailService);
+        assertTrue(contractor.getSkills().contains(Skill.CARPENTRY));
+    }
+
+    @When("A team request has been created for a renovation which has an available role")
     public void a_team_request_has_been_created_for_a_renovation_which_has_an_available_role() throws Exception {
         User owner = userRepository.save(new User("Eve", "Smith", "eve" + System.currentTimeMillis() + "@smith.com", "Password123!"));
         renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", Collections.emptyList());
@@ -105,6 +112,15 @@ public class TeamJoinRequestSteps {
         mockMvc.perform(post("/renovations/team/create")
                 .param("skills", Skill.CARPENTRY.toString())
                 .param("id", renovationRecord.getId().toString()));
+    }
+
+    @Then("The system will automatically send an email to the contractor who is closest to the renovation location")
+    public void the_system_will_automatically_send_an_email_to_the_contractor_who_is_closest_to_the_renovation_location() {
+        TeamRequestDTO teamRequestDTO = new TeamRequestDTO();
+        teamRequestDTO.setSkills(List.of(Skill.CARPENTRY.toString()));
+        teamsService.createNewTeam(renovationRecord, teamRequestDTO);
+        Mockito.verify(emailService, times(1)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 
     @Given("A team request email has been received")
@@ -143,13 +159,6 @@ public class TeamJoinRequestSteps {
         teamsRepository.save(team);
     }
 
-    @When("There is an available contractor eligible for that role")
-    public void there_is_an_available_contractor_eligible_for_that_role() {
-        contractor = contractorContext.getContractor();
-        if (this.contractor == null) { throw new IllegalStateException("Contractor was not found"); }
-        assertTrue(contractor.getSkills().contains(Skill.CARPENTRY));
-    }
-
 
     @When("I click the link contained therein")
     public void i_click_the_link_contained_therein() {
@@ -164,15 +173,6 @@ public class TeamJoinRequestSteps {
                                 .with(user(contractor.getEmail()).roles("USER","CONTRACTOR"))
                                 .with(csrf()));
 
-    }
-
-    @Then("The system will automatically send an email to the contractor who is closest to the renovation location")
-    public void the_system_will_automatically_send_an_email_to_the_contractor_who_is_closest_to_the_renovation_location() {
-        TeamRequestDTO teamRequestDTO = new TeamRequestDTO();
-        teamRequestDTO.setSkills(List.of(Skill.CARPENTRY.toString()));
-        teamsService.createNewTeam(renovationRecord, teamRequestDTO);
-        Mockito.verify(emailService, times(1)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
     }
 
     @Then("I am taken to the confirm join team page")
