@@ -3,8 +3,8 @@ Feature: As Bob, I want to be able to receive requests from clients and an email
 
   @authoriseContractor
   Scenario: AC1 - Contractor Request Email
-    Given A team request has been created for a renovation which has an available role
-    When There is an available contractor eligible for that role
+    Given There is an available contractor eligible for that role
+    When A team request has been created for a renovation which has an available role
     Then The system will automatically send an email to the contractor who is closest to the renovation location
 
   @authoriseContractor

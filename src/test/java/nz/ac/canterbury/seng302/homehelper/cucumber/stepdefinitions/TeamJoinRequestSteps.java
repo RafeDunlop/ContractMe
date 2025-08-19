@@ -14,6 +14,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
@@ -27,18 +28,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.Locale;
-import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
@@ -71,6 +72,8 @@ public class TeamJoinRequestSteps {
 
     @Mock
     private EmailService emailService;
+    @Autowired
+    private ContractorRepository contractorRepository;
 
     public TeamJoinRequestSteps(ContractorContext contractorContext) {
         this.contractorContext = contractorContext;
@@ -81,19 +84,18 @@ public class TeamJoinRequestSteps {
         autoCloseable = MockitoAnnotations.openMocks(this);
     }
 
+
     @After
     public void releaseMocks() throws Exception {
         autoCloseable.close();
     }
 
-    @Given("A team request has been created for a renovation which has an available role")
-    public void a_team_request_has_been_created_for_a_renovation_which_has_an_available_role() {
-
-        Role role = new Role(Skill.valueOf(Skill.PLUMBING.toString()));
-        team = new Team(renovationRecord);
-        team.addRole(role);
-        teamsRepository.save(team);
-        assertNull(team.getRoles().get(0).getContractor());
+    @Given("There is an available contractor eligible for that role")
+    public void there_is_an_available_contractor_eligible_for_that_role() {
+        contractor = contractorContext.getContractor();
+        if (this.contractor == null) { throw new IllegalStateException("Contractor was not found"); }
+        contractor.setAvailable(true);
+        contractor = contractorRepository.save(contractor);
 
     }
 
@@ -114,10 +116,6 @@ public class TeamJoinRequestSteps {
         team = teamsRepository.save(team);
     }
 
-    @Given("I am on a request form from a client")
-    public void i_am_on_a_request_form_from_a_client() {
-
-    }
 
     @Given("I am logged in and a contractor")
     public void i_am_logged_in_and_a_contractor() {
@@ -137,12 +135,16 @@ public class TeamJoinRequestSteps {
         teamsRepository.save(team);
     }
 
-    @When("There is an available contractor eligible for that role")
-    public void there_is_an_available_contractor_eligible_for_that_role() {
-        contractor = contractorContext.getContractor();
-        if (this.contractor == null) { throw new IllegalStateException("Contractor was not found"); }
-        contractor.setSkills(Set.of(Skill.PLUMBING));
-        contractor.setAvailable(true);
+    @When("A team request has been created for a renovation which has an available role")
+    public void a_team_request_has_been_created_for_a_renovation_which_has_an_available_role() throws Exception {
+        User owner = userRepository.save(new User("Eve", "Smith", "eve" + System.currentTimeMillis() + "@smith.com", "Password123!"));
+        RenovationRecord renovation = new RenovationRecord(owner, "Test Renovation", "Test Desc", Collections.emptyList());
+        renovation.setPublicity(false);
+        renovation = renovationRecordRepository.save(renovation);
+
+        mockMvc.perform(post("/renovations/team/create")
+                .param("skills", Skill.CARPENTRY.toString())
+                .param("id", renovation.getId().toString()));
 
     }
 
@@ -181,7 +183,7 @@ public class TeamJoinRequestSteps {
 
     @When("^I click the \"(accept|decline)\" button$")
     public void i_click_the_button(String button) throws Exception {
-        resultActions = mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/" + button)
+        resultActions = mockMvc.perform(post("/renovations/team/invitations/" + team.getId() + "/" + button)
                     .with(user(contractor.getEmail()).roles("USER", "CONTRACTOR"))
                     .with(csrf()));
 
