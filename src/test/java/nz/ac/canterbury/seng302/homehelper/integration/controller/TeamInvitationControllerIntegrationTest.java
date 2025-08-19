@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
@@ -132,5 +133,27 @@ public class TeamInvitationControllerIntegrationTest {
                         .with(csrf()))
                 .andExpect(status().isNotFound())
                 .andExpect(status().reason("Unable to decline invitation, link is no longer valid."));
+    }
+
+
+    @Test
+    @WithMockUser(username = "bob.doe@doe.nz")
+    void viewInvitation_validTeam_returnsInfo() throws Exception {
+        Team team = new Team(renovationRecord);
+        Role role = new Role(Skill.CARPENTRY);
+        Contractor contractor = new Contractor("Bob", "Doe", "bob.doe@doe.nz", "password");
+        role.setContractor(contractor);
+        team.addRole(role);
+        userRepository.save(contractor);
+        team = teamsRepository.save(team);
+        mockMvc.perform(get("/renovations/team/invitations/" + team.getId()))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("skill", "Carpentry"))
+                .andExpect(model().attribute("renovationName", "test renovation"))
+                .andExpect(model().attribute("ownerName", "Jane Doe"))
+                .andExpect(model().attribute("profilePicture", "default/default.jpg"))
+                .andExpect(model().attribute("teamId", team.getId()))
+                .andExpect(model().attribute("renovationId", renovationRecord.getId()))
+                .andExpect(view().name("joinTeamInbox"));
     }
 }
