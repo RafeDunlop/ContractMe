@@ -1,5 +1,12 @@
 Feature: As Bob, I want to be able to receive requests from clients and an email to notify me that I have gotten a request.
 
+
+  @authoriseContractor
+  Scenario: AC1 - Contractor Request Email
+    Given There is an available contractor eligible for that role
+    When A team request has been created for a renovation which has an available role
+    Then The system will automatically send an email to the contractor who is closest to the renovation location
+
   @authoriseContractor
   Scenario: AC3.1 - accept team request
     Given A private renovation exists with a team
@@ -60,4 +67,3 @@ Feature: As Bob, I want to be able to receive requests from clients and an email
       | status   |
       | pending  |
       | accepted |
-

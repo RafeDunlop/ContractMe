@@ -9,6 +9,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
+import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,10 +35,12 @@ public class TeamServiceTest {
     private TeamsService teamsService;
     @Mock
     private TeamValidation teamValidation;
+    @Mock
+    private EmailService emailService;
 
     @BeforeEach
     void setUp() {
-        teamsService = new TeamsService(teamsRepository, teamValidation, contractorRepository);
+        teamsService = new TeamsService(teamsRepository, teamValidation, contractorRepository, emailService);
     }
 
     @Test
