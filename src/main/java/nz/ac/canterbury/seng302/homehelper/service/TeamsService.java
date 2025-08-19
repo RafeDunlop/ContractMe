@@ -12,6 +12,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
@@ -19,8 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.*;
-import java.util.stream.Collectors;
+
 
 /**
  * Service class for handling teams.
@@ -32,6 +32,7 @@ public class TeamsService {
     private final TeamsRepository teamsRepository;
     private final TeamValidation teamValidation;
     private final ContractorRepository contractorRepository;
+    private final EmailService emailService;
 
     /**
      * Constructs TeamsService with necessary dependencies.
@@ -39,14 +40,37 @@ public class TeamsService {
      * @param teamValidation Service used to validate team requests.
      */
     @Autowired
-    public TeamsService(TeamsRepository teamsRepository, TeamValidation teamValidation, ContractorRepository contractorRepository) {
+    public TeamsService(TeamsRepository teamsRepository, TeamValidation teamValidation, ContractorRepository contractorRepository, EmailService emailService) {
         this.teamsRepository = teamsRepository;
         this.teamValidation = teamValidation;
         this.contractorRepository = contractorRepository;
+        this.emailService = emailService;
     }
 
+    /**
+     * Creates a new team
+     * @param teamRecord the renovation record with which the team was associated
+     * @param teamRequestDTO the request DTO containing the info about the skills required
+     * @return the response value of the matching algorithm
+     */
+    public String createNewTeam(RenovationRecord teamRecord, TeamRequestDTO teamRequestDTO) {
+        Team team = new Team(teamRecord);
 
+        List<Role> roles = createRoles(teamRequestDTO.getSkills());
+        for(Role role : roles) {
+            team.addRole(role);
+        }
 
+        saveTeam(team);
+
+        Location renovationLocation = teamRecord.getLocation();
+        String response = assignContractorsToTeam(team, renovationLocation);
+        if (Objects.equals(response, "")) {
+            sendContractorEmails(team);
+        }
+
+        return response;
+    }
 
     /**
      * Constructs a list of roles for the team entity.
@@ -109,6 +133,24 @@ public class TeamsService {
      */
     public boolean checkViewRenovationAccess(RenovationRecord renovationRecord, User user) {
         return teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, user.getId());
+    }
+
+
+    /**
+     * Goes through the list of contractors assigned to a team and
+     * emails them, notifying them that they have an offer to join
+     * a team
+     * @param team the newly created team emails are being sent to
+     */
+    public void sendContractorEmails(Team team) {
+        for (Role role : team.getRoles()) {
+            Contractor recipient = role.getContractor();
+            if (recipient == null) continue;
+            String ownerName = team.getRenovationRecord().getUser().getFirstName();
+            emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
+                    team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
+
+        }
     }
 
     /**

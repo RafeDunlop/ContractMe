@@ -2,13 +2,10 @@ package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
 import io.cucumber.java.Before;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.ContractorContext;
-import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -40,7 +37,7 @@ public class SetupRegisterContractorSteps {
         String uniqueEmail = "test" + System.currentTimeMillis() + "@user.nz";
         Contractor contractor = new Contractor("Test", "User", uniqueEmail, encoder.encode("Test123!"));
         Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041",
-                "Christchurch", "Upper Riccarton", 1D, 1D);
+                "Christchurch", "Upper Riccarton", -43.522345, 172.580907);
         contractor.setLocation(location);
         contractor.setHourlyRate(27.50F);
         contractor.setCountryCode(64);
@@ -48,6 +45,7 @@ public class SetupRegisterContractorSteps {
         contractor.addSkill(Skill.CARPENTRY);
 
         contractor.activate();
+        contractor.setAvailable(true);
         contractorRepository.save(contractor);
         contractorContext.setContractor(contractor);
 
