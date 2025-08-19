@@ -4,19 +4,20 @@ import io.cucumber.java.en.*;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.ContractorContext;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -43,6 +44,8 @@ public class ContractorRequestInboxSteps {
     private List<Team> expectedTeams;
 
     private final ContractorContext contractorContext;
+    @Autowired
+    private TeamsService teamsService;
 
     public ContractorRequestInboxSteps(ContractorContext contractorContext) {
         this.contractorContext = contractorContext;
@@ -93,5 +96,17 @@ public class ContractorRequestInboxSteps {
     @Then("I am redirected to the main page")
     public void i_am_redirected_to_the_main_page() {
         Assertions.assertEquals("/main", mvcResult.getResponse().getRedirectedUrl());
+    }
+
+    @Given("I have not received any requests")
+    public void i_have_not_received_any_requests() {
+        Contractor contractor = contractorContext.getContractor();
+        Assertions.assertTrue(teamsService.getContractorTeamRequests(contractor).isEmpty());
+    }
+
+    @Then("I see a message telling me that I have not received any requests yet")
+    public void i_see_a_message_telling_me_that_i_have_not_received_any_requests_yet() throws Exception {
+        String content = mvcResult.getResponse().getContentAsString();
+        Assertions.assertTrue(content.contains("Your inbox is empty."));
     }
 }

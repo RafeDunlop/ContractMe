@@ -12,9 +12,12 @@ import java.util.Arrays;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
@@ -35,6 +38,8 @@ import java.util.Locale;
 @Profile("!test & !cucumber & !production")
 public class DefaultDataConfigurator {
 
+    private static final Logger logger = LoggerFactory.getLogger(DefaultDataConfigurator.class);
+
     private final RegisterService registerService;
 
     private final RenovationRecordService renovationRecordService;
@@ -46,10 +51,9 @@ public class DefaultDataConfigurator {
     private final TagService tagService;
 
     private final ContractorService contractorService;
-
-    private final ContractorRepository contractorRepository;
-
+    private final TeamsRepository teamsRepository;
     private final TeamsService teamsService;
+    private final ContractorRepository contractorRepository;
 
     private User default1;
 
@@ -65,21 +69,20 @@ public class DefaultDataConfigurator {
 
     private static final String NEW_ZEALAND = "New Zealand";
 
+
     @Autowired
     public DefaultDataConfigurator(RegisterService registerService,
                                    RenovationRecordService renovationRecordService,
                                    RenovationTaskService renovationTaskService,
                                    VerificationCodeService verificationCodeService,
-                                   TagService tagService,
-                                   TeamsService teamsService,
-                                   ContractorService contractorService,
-                                   ContractorRepository contractorRepository) {
+                                   TagService tagService, ContractorService contractorService, TeamsRepository teamsRepository, TeamsService teamsService, ContractorRepository contractorRepository) {
         this.registerService = registerService;
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.verificationCodeService = verificationCodeService;
         this.contractorService = contractorService;
         this.tagService = tagService;
+        this.teamsRepository = teamsRepository;
         this.teamsService = teamsService;
         this.contractorRepository = contractorRepository;
     }
@@ -90,9 +93,11 @@ public class DefaultDataConfigurator {
         setupDefaultRenovations();
         setupDefaultRenovationTasks();
         setupDefaultTags();
+        setupDefaultTeamData();
         setupDefaultTeams();
         setupTeamRequest();
     }
+
 
     private void setupDefaultUsers() {
         UserRegisterDTO user = new UserRegisterDTO();
@@ -200,9 +205,9 @@ public class DefaultDataConfigurator {
         }
 
         default1Renovation1 = new RenovationRecord(default1,
-                        "Jack Erskine revamp",
-                        "CSSE building => palace of slay",
-                        defaultJERooms
+                "Jack Erskine revamp",
+                "CSSE building => palace of slay",
+                defaultJERooms
         );
         Location location = new Location("18 Kirkwood Avenue", NEW_ZEALAND, "8041", "Christchuch", "Upper Riccarton");
         default1Renovation1.setLocation(location);
@@ -335,6 +340,15 @@ public class DefaultDataConfigurator {
         tagService.createTag("Zoning");
         tagService.createTag("Z-Flashing");
         tagService.createTag("Zero Energy");
+    }
+
+    private void setupDefaultTeamData() {
+        Contractor defaulContractor = contractorRepository.findByEmailIgnoreCase(default2.getEmail()).orElseThrow();
+
+        Team team = new Team(default1Renovation1);
+        team.addRole(new Role(defaulContractor, Skill.CARPENTRY, false));
+        team = teamsRepository.save(team);
+        logger.info("creating default team with id {}", team.getId());
     }
 
     private void setupTeamRequest() {

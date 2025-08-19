@@ -81,7 +81,7 @@
             <div class="mb-3">
                 <label class="form-label">Rooms:</label>
                 <div class="form-check mb-1 fs-3" th:each="room, meta : ${roomList}">
-                    <input class="form-check-input fs-3" type="checkbox" th:field="*{rooms}"
+                    <input class="form-check-input fs-3" type="checkbox" aria-label="room" th:field="*{rooms}"
                            th:id="'room-' + ${meta.index}" th:value="${room}"
                            th:checked="${renovationTaskDTO.getRooms() != null and #lists.contains(renovationTaskDTO.getRooms(), room)}">
                     <label class="form-check-label ms-3 small" th:for="'room-' + ${meta.index}" th:text="${room}"></label>
@@ -99,16 +99,16 @@
                 </div>
             </div>
 
-            <div class="mt-4 d-flex gap-3 ">
+            <div class="mt-5 d-flex">
                 <!-- SUBMIT -->
                 <button type="submit" class="btn btn-primary">Create</button>
                 <!-- CANCEL BUTTON -->
                 <a th:unless="${fromDate.isEmpty()}"
                    th:href="@{/renovations/view#cellEdited(id=${renovation.id}, dateEdited=${fromDate})}"
-                   class="btn btn-secondary cancel-task-form">Cancel</a>
+                   class="btn btn-outline-secondary cancel-task-form ms-3">Cancel</a>
                 <a th:if="${fromDate.isEmpty()}"
                    th:href="@{/renovations/view(id=${renovation.id})}"
-                   class="btn btn-secondary cancel-task-form">Cancel</a>
+                   class="btn btn-outline-secondary cancel-task-form ms-3">Cancel</a>
             </div>
 
             <!-- General error messages -->

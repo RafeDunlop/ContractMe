@@ -40,8 +40,7 @@ public class Location {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Location)) return false;
-        Location that = (Location) o;
+        if (!(o instanceof Location that)) return false;
         return Objects.equals(address, that.address) &&
                 Objects.equals(country, that.country) &&
                 Objects.equals(postcode, that.postcode) &&
@@ -49,6 +48,11 @@ public class Location {
                 Objects.equals(suburb, that.suburb) &&
                 Objects.equals(latitude, that.latitude) &&
                 Objects.equals(longitude, that.longitude);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(address, country, postcode, city, suburb, latitude, longitude);
     }
 
     @Override

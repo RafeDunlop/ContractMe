@@ -91,18 +91,18 @@
         <label class="form-check-label ml-3 small" th:for="'room-' + ${meta.index}" th:text="${room}"></label>
       </div>
 
-      <div class="mt-4 d-flex gap-3 ">
+      <div class="mt-5 d-flex">
 
         <!-- SUBMIT BUTTON -->
         <button type="submit" class="btn btn-primary">Submit</button>
 
         <!-- CANCEL BUTTON -->
         <a th:unless="${fromDate.isEmpty()}"
-           th:href="@{/renovations/view#cellEdited(id=${renovation.id},dateEdited=${fromDate})}"
-           class="btn btn-secondary cancel-task-form">Cancel</a>
+           th:href="@{/renovations/view#cellEdited(id=${renovation.id}, dateEdited=${fromDate})}"
+           class="btn btn-outline-secondary cancel-task-form ms-3">Cancel</a>
         <a th:if="${fromDate.isEmpty()}"
            th:href="@{/renovations/view(id=${renovation.id})}"
-           class="btn btn-secondary cancel-task-form">Cancel</a>
+           class="btn btn-outline-secondary cancel-task-form ms-3">Cancel</a>
       </div>
     </form>
 
