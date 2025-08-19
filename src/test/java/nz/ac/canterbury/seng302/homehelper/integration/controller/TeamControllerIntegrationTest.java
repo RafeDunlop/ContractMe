@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
@@ -19,11 +20,9 @@ import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,9 +65,6 @@ public class TeamControllerIntegrationTest {
     private TeamsRepository teamsRepository;
 
 
-    private MockHttpSession session;
-
-
     @BeforeEach
     public void setup(TestInfo testInfo) {
         User newUser = new User("Jane", "Doe", "jane@doe.nz", "password");
@@ -76,7 +72,6 @@ public class TeamControllerIntegrationTest {
         newUser.grantAuthority("ROLE_USER");
         renovationRecord = new RenovationRecord(newUser, "test renovation", "test description", List.of());
         renovationRecord = renovationRecordRepository.save(renovationRecord);
-        session = new MockHttpSession();
 
 
         if (testInfo.getDisplayName().contains("hasLocation")) {
@@ -216,6 +211,27 @@ public class TeamControllerIntegrationTest {
                 .andReturn();
 
 
+    }
+
+    @Test
+    @WithMockUser(username = "bob.doe@doe.nz")
+    void getJoinTeamFragment_validTeam_returnsFragment() throws Exception {
+        Team team = new Team(renovationRecord);
+        Role role = new Role(Skill.CARPENTRY);
+        Contractor contractor = new Contractor("Bob", "Doe", "bob.doe@doe.nz", "password");
+        role.setContractor(contractor);
+        team.addRole(role);
+        contractorRepository.save(contractor);
+        team = teamsRepository.save(team);
+        mockMvc.perform(get("/renovations/team/join-team")
+                .param("id", team.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("skill", "Carpentry"))
+                .andExpect(model().attribute("renovationName", "test renovation"))
+                .andExpect(model().attribute("ownerName", "Jane Doe"))
+                .andExpect(model().attribute("teamId", team.getId()))
+                .andExpect(model().attribute("renovationId", renovationRecord.getId()))
+                .andExpect(view().name("fragments/joinTeam :: join-team"));
     }
 
 }
