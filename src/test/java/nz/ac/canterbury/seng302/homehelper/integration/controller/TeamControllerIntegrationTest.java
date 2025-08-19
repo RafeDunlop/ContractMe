@@ -229,6 +229,7 @@ public class TeamControllerIntegrationTest {
                 .andExpect(model().attribute("skill", "Carpentry"))
                 .andExpect(model().attribute("renovationName", "test renovation"))
                 .andExpect(model().attribute("ownerName", "Jane Doe"))
+                .andExpect(model().attribute("profilePicture", "default/default.jpg"))
                 .andExpect(model().attribute("teamId", team.getId()))
                 .andExpect(model().attribute("renovationId", renovationRecord.getId()))
                 .andExpect(view().name("fragments/joinTeam :: join-team"));

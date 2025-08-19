@@ -11,7 +11,10 @@
             <h1 th:text="${renovationName}">Renovation Name</h1>
             <div style="padding-top:40px">
                 <p><strong>Role:</strong> <span th:text="${skill}">Contractor Skill</span></p>
-                <p><strong>Owner:</strong> <span th:text="${ownerName}">Owner Name</span></p>
+                <p><strong>Owner:</strong><img th:src="@{'/profile_pictures/' + ${profilePicture}}"
+                     alt="Profile Picture"
+                     class="img-fluid rounded-circle"
+                     style="width: 50px; height: 50px; object-fit: cover;"><span th:text="${ownerName}">Owner Name</span></p>
             </div>
 
             <a class="btn btn-primary mt-4 me-4" th:href="@{/renovations/view(id=${renovationId})}">View Renovation</a>

@@ -88,6 +88,7 @@ public class TeamInvitationController {
             model.addAttribute("renovationId", renovationRecord.getId());
             model.addAttribute("renovationName", renovationRecord.getName());
             model.addAttribute("ownerName", ownerName);
+            model.addAttribute("profilePicture", owner.getProfilePicture());
         } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team invitation link is no longer valid.");
         }

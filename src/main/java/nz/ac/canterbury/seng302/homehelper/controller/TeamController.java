@@ -139,6 +139,7 @@ public class TeamController {
         model.addAttribute("skill", role.getSkill().getDisplayName());
         model.addAttribute("renovationName", renovationRecord.getName());
         model.addAttribute("ownerName", ownerName);
+        model.addAttribute("profilePicture", owner.getProfilePicture());
         model.addAttribute("teamId", id);
         model.addAttribute("renovationId", renovationRecord.getId());
         return "fragments/joinTeam :: join-team";
