@@ -276,6 +276,12 @@ function renderRecordTable(data, pageNumber, csrfToken) {
  */
 function renderTaskCards(data, isOwner, renovationId) {
     window.loadedTasks = data.content;
+    window.dispatchEvent(new CustomEvent('tasks:loaded', {
+        detail: {
+            count: data.content.length,
+            renovationId
+        }
+    }));
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
     grid.className = "task-grid";
