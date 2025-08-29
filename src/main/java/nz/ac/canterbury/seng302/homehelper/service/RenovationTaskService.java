@@ -163,8 +163,8 @@ public class RenovationTaskService {
         PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
         try {
             List<String> taskIconNames = new ArrayList<>(Arrays.stream(pathMatchingResourcePatternResolver.getResources("classpath:/static/images/*"))
-                    .filter(Resource::isFile)
                     .map(Resource::getFilename)
+                    .filter(Objects::nonNull)
                     .toList());
             taskIconNames.remove("default_profile");
             taskIconNames.remove("default-icon.png");
