@@ -162,7 +162,7 @@ public class RenovationTaskService {
     public List<String> getTaskIconFilenames() {
         PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
         try {
-            List<String> taskIconNames = new ArrayList<>(Arrays.stream(pathMatchingResourcePatternResolver.getResources("/static/images/*"))
+            List<String> taskIconNames = new ArrayList<>(Arrays.stream(pathMatchingResourcePatternResolver.getResources("classpath:/static/images/*"))
                     .filter(Resource::isFile)
                     .map(Resource::getFilename)
                     .toList());
