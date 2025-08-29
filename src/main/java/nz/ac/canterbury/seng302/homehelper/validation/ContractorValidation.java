@@ -23,7 +23,7 @@ public class ContractorValidation {
     public List<String> validateHourlyRate(Float hourlyRate) {
         List<String> errors = new ArrayList<>();
 
-        if (hourlyRate == null || hourlyRate < 0) {
+        if (hourlyRate == null || hourlyRate < 0 || hourlyRate.equals(Float.POSITIVE_INFINITY)) {
             errors.add("Invalid hourly rate");
         }
         return errors;
