@@ -22,7 +22,7 @@ function getIconSelector(renovationTaskId) {
 
 /**
  * Toggles the modal corresponding to the specified renovation task to be visible
- * @param taskId The identifier of the renovation task whose icon selector is to be made visible
+ * @param renovationTaskId The identifier of the renovation task whose icon selector is to be made visible
  */
 function showIconSelector(taskId) {
     localStorage.setItem("selectedTaskId", taskId);
@@ -32,6 +32,7 @@ function showIconSelector(taskId) {
     const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
     const modal = document.getElementById("icon-selector-modal");
     const content = document.getElementById("icon-selector-content");
+
     content.innerHTML = renderModalContent(task, csrfToken);
     modal.style.display = "block";
 }
@@ -82,7 +83,7 @@ async function deleteIcon(button) {
 
 
 
-document.addEventListener('tasks:loaded', function () {
+document.addEventListener("DOMContentLoaded", function () {
     const savedTaskId = localStorage.getItem("selectedTaskId");
     if (savedTaskId) {
         showIconSelector(savedTaskId);
