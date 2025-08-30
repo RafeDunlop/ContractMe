@@ -12,6 +12,9 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class TeamsService {
+    private final Logger log = LoggerFactory.getLogger(TeamsService.class);
 
     private final TeamsRepository teamsRepository;
     private final TeamValidation teamValidation;
@@ -148,7 +152,7 @@ public class TeamsService {
                 emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
                         team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
             } catch (NoSuchElementException e) {
-                continue;
+                log.debug("Role for skill {} has no contractor", role.getSkill());
             }
         }
     }
