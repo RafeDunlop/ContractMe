@@ -166,4 +166,17 @@ public class AddressDTO {
         setLat(location.getLatitude());
         setLon(location.getLongitude());
     }
+
+    /**
+     * Sanitise the address line 1 for logging purposes.
+     *
+     * @return the address with newline characters stripped
+     */
+    public String getLoggedAddress() {
+        String loggedAddress = "";
+        if (getAddress_line1() != null) {
+            loggedAddress = getAddress_line1().replaceAll("[\r\n]", "_");
+        }
+        return loggedAddress;
+    }
 }

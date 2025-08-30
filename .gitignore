@@ -39,6 +39,7 @@ out/
 ### VIm ###
 *.swp
 *.orig
+.vimspector.json
 
 ### Mac
 .DS_Store
@@ -49,8 +50,6 @@ env.properties
 
 ### Local Profile Picture Storage ###
 /profile_pictures/*
-!profile_pictures/default/
-!profile_pictures/default/*
 
 ### local test temp
 

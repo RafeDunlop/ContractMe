@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
@@ -12,7 +13,10 @@ import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,6 +30,7 @@ public class TeamsService {
     private final TeamsRepository teamsRepository;
     private final TeamValidation teamValidation;
     private final ContractorRepository contractorRepository;
+    private final EmailService emailService;
 
     /**
      * Constructs TeamsService with necessary dependencies.
@@ -33,14 +38,37 @@ public class TeamsService {
      * @param teamValidation Service used to validate team requests.
      */
     @Autowired
-    public TeamsService(TeamsRepository teamsRepository, TeamValidation teamValidation, ContractorRepository contractorRepository) {
+    public TeamsService(TeamsRepository teamsRepository, TeamValidation teamValidation, ContractorRepository contractorRepository, EmailService emailService) {
         this.teamsRepository = teamsRepository;
         this.teamValidation = teamValidation;
         this.contractorRepository = contractorRepository;
+        this.emailService = emailService;
     }
 
+    /**
+     * Creates a new team
+     * @param teamRecord the renovation record with which the team was associated
+     * @param teamRequestDTO the request DTO containing the info about the skills required
+     * @return the response value of the matching algorithm
+     */
+    public String createNewTeam(RenovationRecord teamRecord, TeamRequestDTO teamRequestDTO) {
+        Team team = new Team(teamRecord);
 
+        List<Role> roles = createRoles(teamRequestDTO.getSkills());
+        for(Role role : roles) {
+            team.addRole(role);
+        }
 
+        saveTeam(team);
+
+        Location renovationLocation = teamRecord.getLocation();
+        String response = assignContractorsToTeam(team, renovationLocation);
+        if (Objects.equals(response, "")) {
+            sendContractorEmails(team);
+        }
+
+        return response;
+    }
 
     /**
      * Constructs a list of roles for the team entity.
@@ -91,6 +119,9 @@ public class TeamsService {
         return errors;
     }
 
+    public Team getTeamById(long teamId) {
+        return teamsRepository.findById(teamId).orElseThrow(() -> new EntityNotFoundException("Team: " + teamId + " not found"));
+    }
 
     /**
      * Checks if a given user belongs to the team associated with a renovation record
@@ -100,6 +131,24 @@ public class TeamsService {
      */
     public boolean checkViewRenovationAccess(RenovationRecord renovationRecord, User user) {
         return teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, user.getId());
+    }
+
+
+    /**
+     * Goes through the list of contractors assigned to a team and
+     * emails them, notifying them that they have an offer to join
+     * a team
+     * @param team the newly created team emails are being sent to
+     */
+    public void sendContractorEmails(Team team) {
+        for (Role role : team.getRoles()) {
+            Contractor recipient = role.getContractor();
+            if (recipient == null) continue;
+            String ownerName = team.getRenovationRecord().getUser().getFirstName();
+            emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
+                    team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
+
+        }
     }
 
     /**
@@ -114,6 +163,22 @@ public class TeamsService {
             return teamsRepository.findByRoleContractor(contractor.getId());
         } else {
             throw new IllegalArgumentException("User is not a contractor");
+        }
+    }
+
+    /**
+     * Returns the role the user (contractor) is assigned to. The team should already have been found by getContractorTeamRequests.
+     *
+     * @param user the user who already has a role assigned in the team
+     * @param team the team which has a role filled by the given contractor
+     * @return the Role assigned to the contractor
+     * @throws ResponseStatusException if the role is not found
+     */
+    public Role getContractorRole(User user, Team team) throws ResponseStatusException {
+        try {
+            return team.getRoles().stream().filter(r -> r.getContractor().equals(user)).findFirst().orElseThrow();
+        } catch (NoSuchElementException|NullPointerException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found");
         }
     }
 

@@ -9,6 +9,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
+import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -33,10 +35,12 @@ public class TeamServiceTest {
     private TeamsService teamsService;
     @Mock
     private TeamValidation teamValidation;
+    @Mock
+    private EmailService emailService;
 
     @BeforeEach
     void setUp() {
-        teamsService = new TeamsService(teamsRepository, teamValidation, contractorRepository);
+        teamsService = new TeamsService(teamsRepository, teamValidation, contractorRepository, emailService);
     }
 
     @Test
@@ -246,5 +250,47 @@ public class TeamServiceTest {
         User user = new User("Jane", "Doe", "jane@doe.com", "password");
         assertThrows(IllegalArgumentException.class, () -> teamsService.getContractorTeamRequests(user));
         verify(teamsRepository, never()).findByRoleContractor(Mockito.any());
+    }
+
+    @Test
+    void getContractorRole_roleAssigned_returnsRole() {
+        Team team = new Team(new RenovationRecord());
+        Role role = new Role(Skill.PLUMBING);
+        Contractor contractor = new Contractor("Alice", "Doe", "alice@doe.com", "encoded");
+        role.setContractor(contractor);
+        team.addRole(role);
+        Role result = assertDoesNotThrow(() -> teamsService.getContractorRole(contractor, team));
+        assertEquals(role, result);
+    }
+
+    @Test
+    void getContractorRole_roleNotAssigned_throwsException() {
+        Team team = new Team(new RenovationRecord());
+        Role role = new Role(Skill.PLUMBING);
+        Contractor contractor = new Contractor("Alice", "Doe", "alice@doe.com", "encoded");
+        role.setContractor(new Contractor("Bob", "Doe", "bob@doe.com", "encoded"));
+        team.addRole(role);
+        assertThrows(ResponseStatusException.class, () -> teamsService.getContractorRole(contractor, team));
+    }
+
+    @Test
+    void getContractorRole_roleHasNullContractor_throwsException() {
+        Team team = new Team(new RenovationRecord());
+        Role role = new Role(Skill.PLUMBING);
+        team.addRole(role);
+        Contractor contractor = new Contractor("Alice", "Doe", "alice@doe.com", "encoded");
+        assertThrows(ResponseStatusException.class, () -> teamsService.getContractorRole(contractor, team));
+    }
+
+    @Test
+    void getContractorRole_roleNullOrAssigned_throwsNullPointerException() {
+        Team team = new Team(new RenovationRecord());
+        Role role = new Role(Skill.PLUMBING);
+        team.addRole(role);
+        Role otherRole = new Role(Skill.ELECTRICAL);
+        otherRole.setContractor(new Contractor("Alice", "Doe", "alice@doe.com", "encoded"));
+        team.addRole(otherRole);
+        Contractor contractor = new Contractor("Bob", "Doe", "bob@doe.com", "encoded");
+        assertThrows(ResponseStatusException.class, () -> teamsService.getContractorRole(contractor, team));
     }
 }

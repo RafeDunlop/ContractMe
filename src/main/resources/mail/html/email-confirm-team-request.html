@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title th:remove="all">Confirm Join Team Request</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+      <p th:text="|Hi ${name},|">Hi user,</p>
+      <p th:text="|You have been chosen to join ${owner}s team on their ${renovation} as a ${role} contractor.|">You have been chosen to join owner's team on their renovation as a role contractor.</p>
+      <p>You can accept or decline this request after clicking the link below.</p>
+      <br/>
+<a class="nav-link" th:href="${domain} + '/renovations/team/invitations/' + ${teamId}"
+   th:text="${domain} + '/renovations/team/invitations/' + ${teamId}"></a>
+         Regards,<br/>
+      <em>Team 200</em>
+</body>
+</html>

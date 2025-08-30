@@ -159,6 +159,10 @@
     display: block;
 }
 
+.team-request {
+    cursor: pointer;
+}
+
 
 .custom-navbar {
     background-color: #333;
@@ -306,4 +310,11 @@
     text-overflow: ellipsis;
     height: 100%;
     width: 100%;
+}
+
+.inbox-scrollable-div {
+    overflow-y: auto;
+    height: 665px;
+    border: solid 1px #D2D2D2;
+    border-radius: 0.375rem;
 }
