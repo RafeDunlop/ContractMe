@@ -4,12 +4,18 @@ import nz.ac.canterbury.seng302.homehelper.validation.ContractorValidation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class ContractorValidationTest {
 
+
+    private static Stream<Float> streamInvalidHourlyRates() {
+        return Stream.of(-1f, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, null);
+    }
 
     @ParameterizedTest
     @ValueSource(strings = {"0226450022","12345678","123456789123456"})
@@ -35,16 +41,17 @@ public class ContractorValidationTest {
         Assertions.assertTrue(result.contains("You must enter a phone number"));
     }
 
-    @Test
-    public void hourlyRateValidation_negativeHourlyRate_rejectInput() {
+    @ParameterizedTest
+    @MethodSource("streamInvalidHourlyRates")
+    public void hourlyRateValidation_invalidHourlyRate_rejectInput(Float hourlyRate) {
         ContractorValidation contractorValidation = new ContractorValidation();
-        List<String> result = contractorValidation.validateHourlyRate(-1f);
+        List<String> result = contractorValidation.validateHourlyRate(hourlyRate);
         List<String> expected = List.of("Invalid hourly rate");
         Assertions.assertEquals(expected, result);
     }
 
     @ParameterizedTest
-    @ValueSource(floats = {27.8f, 1, 1000000000})
+    @ValueSource(floats = {27.8f, 1, 1000000000, 3.4028235E38f})
     public void hourlyRateValidation_validHourlyRate_acceptInput(float hourlyRate) {
         ContractorValidation contractorValidation = new ContractorValidation();
         Assertions.assertTrue(contractorValidation.validateHourlyRate(hourlyRate).isEmpty());
