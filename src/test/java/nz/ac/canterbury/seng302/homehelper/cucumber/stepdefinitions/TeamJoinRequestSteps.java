@@ -198,8 +198,8 @@ public class TeamJoinRequestSteps {
         team = teamsRepository.findById(team.getId()).orElseThrow();
 
         boolean inTeam = team.getRoles().stream()
-                .anyMatch(r -> r.getContractor() != null
-                        && r.getContractor().equals(contractor));
+                .anyMatch(r -> r.getContractorId() != null
+                        && r.getContractorId().equals(contractor.getId()));
         assertTrue(inTeam);
     }
 
@@ -208,8 +208,8 @@ public class TeamJoinRequestSteps {
         team = teamsRepository.findById(team.getId()).orElseThrow();
 
         boolean inTeam = team.getRoles().stream()
-                .anyMatch(r -> r.getContractor() != null &&
-                        r.getContractor().getId().equals(contractor.getId()));
+                .anyMatch(r -> r.getContractorId() != null &&
+                        r.getContractorId().equals(contractor.getId()));
         assertFalse(inTeam);
     }
 

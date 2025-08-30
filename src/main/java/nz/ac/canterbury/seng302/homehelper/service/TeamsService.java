@@ -142,7 +142,7 @@ public class TeamsService {
      */
     public void sendContractorEmails(Team team) {
         for (Role role : team.getRoles()) {
-            Contractor recipient = role.getContractor();
+            Contractor recipient = contractorRepository.findById(role.getContractorId()).orElseGet(null);
             if (recipient == null) continue;
             String ownerName = team.getRenovationRecord().getUser().getFirstName();
             emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
@@ -176,7 +176,7 @@ public class TeamsService {
      */
     public Role getContractorRole(User user, Team team) throws ResponseStatusException {
         try {
-            return team.getRoles().stream().filter(r -> r.getContractor().equals(user)).findFirst().orElseThrow();
+            return team.getRoles().stream().filter(r -> r.getContractorId().equals(user.getId())).findFirst().orElseThrow();
         } catch (NoSuchElementException|NullPointerException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found");
         }

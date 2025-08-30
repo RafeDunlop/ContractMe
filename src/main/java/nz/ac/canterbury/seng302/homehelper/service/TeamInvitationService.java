@@ -97,7 +97,7 @@ public class TeamInvitationService {
      */
     private List<Role> getMatchedRoles(Contractor contractor, Team team) {
         return team.getRoles().stream()
-                .filter(r -> r.getContractor() != null && Objects.equals(r.getContractor().getId(), contractor.getId()))
+                .filter(r -> r.getContractorId() != null && Objects.equals(r.getContractorId(), contractor.getId()))
                 .toList();
     }
 }

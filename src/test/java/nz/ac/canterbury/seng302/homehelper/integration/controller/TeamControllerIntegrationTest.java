@@ -229,9 +229,9 @@ public class TeamControllerIntegrationTest {
         Team team = new Team(renovationRecord);
         Role role = new Role(Skill.CARPENTRY);
         Contractor contractor = new Contractor("Bob", "Doe", "bob.doe@doe.nz", "password");
+        contractor = contractorRepository.save(contractor);
         role.setContractor(contractor);
         team.addRole(role);
-        contractorRepository.save(contractor);
         team = teamsRepository.save(team);
         mockMvc.perform(get("/renovations/team/join-team")
                 .param("id", team.getId().toString()))

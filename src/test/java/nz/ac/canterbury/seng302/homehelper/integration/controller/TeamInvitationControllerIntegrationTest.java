@@ -142,9 +142,9 @@ public class TeamInvitationControllerIntegrationTest {
         Team team = new Team(renovationRecord);
         Role role = new Role(Skill.CARPENTRY);
         Contractor contractor = new Contractor("Bob", "Doe", "bob.doe@doe.nz", "password");
+        contractor = userRepository.save(contractor);
         role.setContractor(contractor);
         team.addRole(role);
-        userRepository.save(contractor);
         team = teamsRepository.save(team);
         mockMvc.perform(get("/renovations/team/invitations/" + team.getId()))
                 .andExpect(status().isOk())
