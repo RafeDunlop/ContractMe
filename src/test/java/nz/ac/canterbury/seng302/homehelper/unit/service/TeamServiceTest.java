@@ -256,7 +256,8 @@ public class TeamServiceTest {
     void getContractorRole_roleAssigned_returnsRole() {
         Team team = new Team(new RenovationRecord());
         Role role = new Role(Skill.PLUMBING);
-        Contractor contractor = new Contractor("Alice", "Doe", "alice@doe.com", "encoded");
+        Contractor contractor = Mockito.spy(new Contractor("Alice", "Doe", "alice@doe.com", "encoded"));
+        when(contractor.getId()).thenReturn(1L);
         role.setContractor(contractor);
         team.addRole(role);
         Role result = assertDoesNotThrow(() -> teamsService.getContractorRole(contractor, team));
