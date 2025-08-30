@@ -39,6 +39,7 @@ out/
 ### VIm ###
 *.swp
 *.orig
+.vimspector.json
 
 ### Mac
 .DS_Store
