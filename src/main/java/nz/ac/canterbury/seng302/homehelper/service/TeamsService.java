@@ -142,12 +142,14 @@ public class TeamsService {
      */
     public void sendContractorEmails(Team team) {
         for (Role role : team.getRoles()) {
-            Contractor recipient = contractorRepository.findById(role.getContractorId()).orElseGet(null);
-            if (recipient == null) continue;
-            String ownerName = team.getRenovationRecord().getUser().getFirstName();
-            emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
-                    team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
-
+            try {
+                Contractor recipient = contractorRepository.findById(role.getContractorId()).orElseThrow();
+                String ownerName = team.getRenovationRecord().getUser().getFirstName();
+                emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
+                        team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
+            } catch (NoSuchElementException e) {
+                continue;
+            }
         }
     }
 
