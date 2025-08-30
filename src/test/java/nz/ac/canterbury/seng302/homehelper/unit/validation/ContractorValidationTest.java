@@ -43,9 +43,9 @@ public class ContractorValidationTest {
 
     @ParameterizedTest
     @MethodSource("streamInvalidHourlyRates")
-    public void hourlyRateValidation_invalidHourlyRate_rejectInput() {
+    public void hourlyRateValidation_invalidHourlyRate_rejectInput(Float hourlyRate) {
         ContractorValidation contractorValidation = new ContractorValidation();
-        List<String> result = contractorValidation.validateHourlyRate(-1f);
+        List<String> result = contractorValidation.validateHourlyRate(hourlyRate);
         List<String> expected = List.of("Invalid hourly rate");
         Assertions.assertEquals(expected, result);
     }
