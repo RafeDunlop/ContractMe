@@ -18,22 +18,14 @@ public class MainController {
 
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
-    private final LoginService loginService;
-
-    public MainController(LoginService loginService) {
-        this.loginService = loginService;
-    }
-
     /**
      * Handler for a get request to the main page.
      *
      * @return mainTemplate
      */
     @GetMapping("/main")
-    public String login(Model model, HttpSession session) {
+    public String login(Model model) {
         logger.info("GET /Main");
-        User user = loginService.getUserByEmail();
-        session.setAttribute("isContractor",user instanceof Contractor contractor);
         return "mainTemplate";
     }
 }
