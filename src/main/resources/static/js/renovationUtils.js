@@ -291,10 +291,11 @@ function renderTaskCards(data, isOwner, renovationId) {
     data.content.forEach(task => {
         const stateColor = task.stateColour
         const isDefaultIcon = task.iconFileName === 'default-icon.png';
+        const iconType = isDefaultIcon ? 'default-icon' : 'custom-icon';
 
         const iconHtml = `
             <div class="position-relative">
-                <img src="${basePath}images/${task.iconFileName}" alt="Task Icon" class="task-icon"
+                <img src="${basePath}images/${task.iconFileName}" alt="Task Icon" class="task-icon ${iconType}"
                      ${isOwner && !isDefaultIcon ? `onclick="showIconSelector(${task.id})"` : ""} />
                 ${isOwner && isDefaultIcon ? `
                     <button type="button" class="btn btn-secondary btn-sm rounded-circle opacity-75 top-0 start-100 translate-middle position-absolute"
