@@ -289,7 +289,7 @@ function renderTaskCards(data, isOwner, renovationId) {
     };
 
     data.content.forEach(task => {
-        const stateColor = task.stateColour
+        const stateColor = task.stateColour;
         const isDefaultIcon = task.iconFileName === 'default-icon.png';
         const iconType = isDefaultIcon ? 'default-icon' : 'custom-icon';
 
@@ -298,7 +298,7 @@ function renderTaskCards(data, isOwner, renovationId) {
                 <img src="${basePath}images/${task.iconFileName}" alt="Task Icon" class="task-icon ${iconType}"
                      ${isOwner && !isDefaultIcon ? `onclick="showIconSelector(${task.id})"` : ""} />
                 ${isOwner && isDefaultIcon ? `
-                    <button type="button" class="btn btn-secondary btn-sm rounded-circle opacity-75 top-0 start-100 translate-middle position-absolute"
+                    <button type="button" class="btn btn-secondary btn-sm rounded-circle opacity-75 top-0 start-100 translate-middle position-absolute icon-selector-button"
                             onclick="showIconSelector(${task.id})">+</button>
                 ` : ""}
             </div>
@@ -350,7 +350,7 @@ function renderModalContent(task, csrfToken) {
     return `
         <div class="d-flex justify-content-center align-items-center vh-100">
             <div class="card p-4 shadow">
-                <h4>Select Task Icon</h4>
+                <h4 style="text-align: center">Select Task Icon</h4>
                 <div class="d-flex flex-row justify-content-start flex-wrap center">
                     ${allIcons.map(icon => `
                         <button class="icon-btn task-icon-button-colour"

@@ -81,6 +81,17 @@ async function deleteIcon(button) {
     }
 }
 
+/*
+document.addEventListener("click", event => {
+    console.log("click");
+    const modal = document.getElementById("icon-selector-modal");
+    if (modal.style.display==='block' && !modal.contains(event.target) && !event.target.classList.contains("icon-selector-button")) {
+        modal.style.display = 'none';
+        console.log("executed");
+    }
+});*/
+
+
 
 
 document.addEventListener("DOMContentLoaded", function () {
