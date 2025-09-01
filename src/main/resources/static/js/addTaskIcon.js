@@ -81,7 +81,6 @@ async function deleteIcon(button) {
     }
 }
 
-/*
 document.addEventListener("click", event => {
     console.log("click");
     const modal = document.getElementById("icon-selector-modal");
@@ -89,7 +88,7 @@ document.addEventListener("click", event => {
         modal.style.display = 'none';
         console.log("executed");
     }
-});*/
+});
 
 
 
