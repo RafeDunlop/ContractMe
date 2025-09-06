@@ -531,7 +531,7 @@ class ViewRenovationControllerIntegrationTest {
         currentRenovation.setRenovationTasks(tasks);
         renovationRecordRepository.save(currentRenovation);
 
-        long recordId = renovationRecord.getId();
+        long recordId = currentRenovation.getId();
 
         MvcResult outOfBoundsResult = mockMvc.perform(get("/renovations/retrieve/" + recordId)
                         .param("page", "34")
