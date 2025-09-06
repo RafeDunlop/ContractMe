@@ -518,18 +518,18 @@ class ViewRenovationControllerIntegrationTest {
 
     @Test
     void getRenovationTaskPages_withInvalidPageNumber_returnsDefaultOrLastPage() throws Exception {
-        RenovationRecord renovationRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        RenovationRecord currentRenovation = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         List<RenovationTask> tasks = IntStream.range(0, 10)
                 .mapToObj(i -> new RenovationTask(
                         "Task " + i,
                         "Description " + i,
                         List.of("Room 1", "Room 2"),
                         LocalDate.now().plusDays(i),
-                        renovationRecord
+                        currentRenovation
                 ))
                 .toList();
-        renovationRecord.setRenovationTasks(tasks);
-        renovationRecordRepository.save(renovationRecord);
+        currentRenovation.setRenovationTasks(tasks);
+        renovationRecordRepository.save(currentRenovation);
 
         long recordId = renovationRecord.getId();
 

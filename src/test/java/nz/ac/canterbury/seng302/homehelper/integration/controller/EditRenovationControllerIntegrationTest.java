@@ -247,12 +247,12 @@ class EditRenovationControllerIntegrationTest {
 
         List<RenovationRecord> renovationRecords = renovationRecordRepository.findAll();
         RenovationRecord janeRecord = renovationRecords.stream()
-                .filter(record -> record.getUser().getEmail().equals("jane@doe.com"))
+                .filter(currentRecord -> currentRecord.getUser().getEmail().equals("jane@doe.com"))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Jane's renovation record not found"));
 
         RenovationRecord notOwnerRecord = renovationRecords.stream()
-                .filter(record -> record.getUser().getEmail().equals("not.owner@doe.com"))
+                .filter(currentRecord -> currentRecord.getUser().getEmail().equals("not.owner@doe.com"))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("NotOwner's renovation record not found"));
 
@@ -280,12 +280,12 @@ class EditRenovationControllerIntegrationTest {
         assertNotNull(renovationRecords);
 
         janeRecord = renovationRecords.stream()
-                .filter(record -> record.getUser().getEmail().equals("jane@doe.com"))
+                .filter(currentRecord -> currentRecord.getUser().getEmail().equals("jane@doe.com"))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Jane's renovation record not found"));
 
         notOwnerRecord = renovationRecords.stream()
-                .filter(record -> record.getUser().getEmail().equals("not.owner@doe.com"))
+                .filter(currentRecord -> currentRecord.getUser().getEmail().equals("not.owner@doe.com"))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("NotOwner's renovation record not found"));
 
@@ -318,9 +318,9 @@ class EditRenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("suburbError", List.of("Suburb contains invalid characters.")))
                 .andReturn();
 
-        RenovationRecord renovationRecord = renovationRecordRepository.findById(testRecord.getId())
+        RenovationRecord currentRenovation = renovationRecordRepository.findById(testRecord.getId())
                 .orElseThrow(() -> new AssertionError("Renovation record not found."));
-        assertNull(renovationRecord.getLocation());
+        assertNull(currentRenovation.getLocation());
     }
 
     @Test

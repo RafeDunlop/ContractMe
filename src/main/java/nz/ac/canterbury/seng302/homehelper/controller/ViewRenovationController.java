@@ -39,6 +39,9 @@ public class ViewRenovationController {
     private final LoginService loginService;
     private final LocationService locationService;
 
+    private final String RENOVATION_NOT_FOUND = "This renovation does not exist";
+    private final String RENOVATION_NOT_ACCESSIBLE = "This renovation is not accessible";
+
     /**
      * Autowired constructor for the request inbox controller
      * @param renovationRecordService Service methods for the renovation records
@@ -78,14 +81,14 @@ public class ViewRenovationController {
 
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_FOUND);
         }
 
         User user = loginService.getUserByEmail();
         boolean isOwner = user.equals(renovationRecord.getUser());
 
         if (!isOwner && !renovationRecord.isPublic() && !teamsService.checkViewRenovationAccess(renovationRecord, user)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_ACCESSIBLE);
         }
 
         List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
@@ -130,13 +133,13 @@ public class ViewRenovationController {
         logger.info("dateEdited: {}", dateEdited);
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Renovation not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_FOUND);
         }
 
         User user = loginService.getUserByEmail();
         boolean isOwner = user.equals(renovationRecord.getUser());
         if (!isOwner) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_ACCESSIBLE);
         }
 
         injectDateElements(year, month, dateEdited, model, renovationRecord);
@@ -151,7 +154,7 @@ public class ViewRenovationController {
                                     @RequestParam(required = false) Integer month,
                                     @RequestParam(required = false) @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate dateEdited,
                                     Model model,
-                                    RenovationRecord record) {
+                                    RenovationRecord renovationRecord) {
         LocalDate localDate = LocalDate.now();
         model.addAttribute("currentDay", localDate.getDayOfMonth());
         model.addAttribute("currentMonth", localDate.getMonthValue());
@@ -173,7 +176,7 @@ public class ViewRenovationController {
             localDate = dateEdited;
         }
 
-        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate, record);
+        List<List<CalendarCellDTO>> datesArray = renovationRecordService.generateCalendarCells(localDate, renovationRecord);
 
         model.addAttribute("datesArray", datesArray);
         model.addAttribute("date", localDate);
@@ -199,14 +202,14 @@ public class ViewRenovationController {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
 
         if (renovationRecord == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_FOUND);
         }
 
         User user = loginService.getUserByEmail();
         boolean isOwner = user.equals(renovationRecord.getUser());
 
         if (!isOwner && !renovationRecord.isPublic() && !teamsService.checkViewRenovationAccess(renovationRecord, user)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_ACCESSIBLE);
         }
 
         if (cardsPerPage < 1) {
