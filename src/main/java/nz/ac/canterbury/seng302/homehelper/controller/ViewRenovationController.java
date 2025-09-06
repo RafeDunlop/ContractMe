@@ -39,6 +39,14 @@ public class ViewRenovationController {
     private final LoginService loginService;
     private final LocationService locationService;
 
+    /**
+     * Autowired constructor for the request inbox controller
+     * @param renovationRecordService Service methods for the renovation records
+     * @param teamsService Service methods for the teams
+     * @param renovationTaskService Service methods for the tasks
+     * @param loginService Service methods for getting the current user
+     * @param locationService Service methods for the locations
+     */
     @Autowired
     public ViewRenovationController(RenovationRecordService renovationRecordService, TeamsService teamsService, RenovationTaskService renovationTaskService, LoginService loginService, LocationService locationService) {
         this.renovationRecordService = renovationRecordService;

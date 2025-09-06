@@ -28,6 +28,12 @@ public class EditRenovationController {
     private final LoginService loginService;
     private final LocationService locationService;
 
+    /**
+     * Autowired constructor for the request inbox controller
+     * @param renovationRecordService Service methods for the renovation records
+     * @param loginService Service methods for getting the current user
+     * @param locationService Service methods for the locations
+     */
     @Autowired
     public EditRenovationController(RenovationRecordService renovationRecordService, LoginService loginService, LocationService locationService) {
         this.renovationRecordService = renovationRecordService;

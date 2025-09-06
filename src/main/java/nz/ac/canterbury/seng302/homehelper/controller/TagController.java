@@ -26,6 +26,12 @@ public class TagController {
     public final LoginService loginService;
     public final TagService tagService;
 
+    /**
+     * Autowired constructor for the request inbox controller
+     * @param renovationRecordService Service methods for the renovation records
+     * @param loginService Service methods for getting the current user
+     * @param tagService Service methods for the tags
+     */
     @Autowired
     public TagController(RenovationRecordService renovationRecordService, LoginService loginService, TagService tagService) {
         this.renovationRecordService = renovationRecordService;

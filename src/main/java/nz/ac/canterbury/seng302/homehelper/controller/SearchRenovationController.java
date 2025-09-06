@@ -32,6 +32,12 @@ public class SearchRenovationController {
     private final LoginService loginService;
     private final TagService tagService;
 
+    /**
+     * Autowired constructor for the request inbox controller
+     * @param renovationRecordService Service methods for the renovation records
+     * @param loginService Service methods for getting the current user
+     * @param tagService Service methods for the tags
+     */
     @Autowired
     public SearchRenovationController(RenovationRecordService renovationRecordService, LoginService loginService, TagService tagService) {
         this.renovationRecordService = renovationRecordService;
