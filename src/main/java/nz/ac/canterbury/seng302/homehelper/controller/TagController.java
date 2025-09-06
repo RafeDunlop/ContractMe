@@ -54,17 +54,17 @@ public class TagController {
                                      RedirectAttributes redirectAttributes) {
         logger.info("POST renovations/tags/add");
 
-        RenovationRecord record = renovationRecordService.getRecordById(renovationId);
-        if (record == null)
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
+        if (renovationRecord == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
-        else if (record.getUser() != loginService.getUserByEmail())
+        else if (renovationRecord.getUser() != loginService.getUserByEmail())
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You don't own this renovation");
-        List<String> errors = tagService.validateTagAndRecord(record, tagName);
+        List<String> errors = tagService.validateTagAndRecord(renovationRecord, tagName);
         if (errors.isEmpty()) {
             if (tagService.checkExists(tagName)) {
                 tagService.createTag(tagName);
             }
-            tagService.addTagToRenovation(record, tagName);
+            tagService.addTagToRenovation(renovationRecord, tagName);
         } else {
             redirectAttributes.addFlashAttribute("errors", errors);
             redirectAttributes.addFlashAttribute("submittedTag",tagName);
@@ -81,13 +81,13 @@ public class TagController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeTagFromRenovation(@RequestParam Long renovationId, @RequestParam String tagName) {
         logger.info("PATCH renovations/tags/remove");
-        RenovationRecord record = renovationRecordService.getRecordById(renovationId);
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(renovationId);
         Tag tag = tagService.getTag(tagName);
-        if (record == null || tag == null)
+        if (renovationRecord == null || tag == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
-        else if (record.getUser() != loginService.getUserByEmail())
+        else if (renovationRecord.getUser() != loginService.getUserByEmail())
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You don't own this renovation");
-        tagService.removeTagFromRenovation(record, tag);
+        tagService.removeTagFromRenovation(renovationRecord, tag);
     }
 
 

@@ -172,11 +172,11 @@ public class RenovationController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteRecord(@PathVariable Long id) {
         logger.info("DELETE /renovations/");
-        RenovationRecord record = renovationRecordService.getRecordById(id);
-        if (record == null) {
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
+        if (renovationRecord == null) {
             return ResponseEntity.notFound().build();
         }
-        if (!loginService.getUserByEmail().equals(record.getUser())) {
+        if (!loginService.getUserByEmail().equals(renovationRecord.getUser())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         renovationRecordService.removeRenovationRecord(id);

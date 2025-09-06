@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @WithMockUser(username = "jane@doe.com")
 @ActiveProfiles("test")
-public class TagControllerIntegrationTest {
+class TagControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -55,7 +55,7 @@ public class TagControllerIntegrationTest {
     private User owner;
 
     @BeforeEach
-    public void setupUser() {
+    void setupUser() {
         currentUser = new User("Jane", "Doe", "jane@doe.com", "password");
         userRepository.save(currentUser);
 
@@ -65,7 +65,7 @@ public class TagControllerIntegrationTest {
     }
 
     @Test
-    public void testAutocompleteTags() throws Exception {
+    void testAutocompleteTags() throws Exception {
         tagService.createTag("historic");
         tagService.createTag("history");
 
@@ -83,7 +83,7 @@ public class TagControllerIntegrationTest {
     }
 
     @Test
-    public void testEmptyAutocompleteTags() throws Exception {
+    void testEmptyAutocompleteTags() throws Exception {
         mockMvc.perform(get("/renovations/tags/autocomplete")
                         .param("partialTag", "his"))
                 .andExpect(status().isOk())
@@ -98,7 +98,7 @@ public class TagControllerIntegrationTest {
     }
 
     @Test
-    public void testAddExistingTagToRenovation() throws Exception {
+    void testAddExistingTagToRenovation() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(currentUser, "Test Renovation", "Some words", List.of("Room1", "Room2"));
         renovationRecordRepository.save(testRecord);
         Long renovationId = testRecord.getId();
@@ -118,7 +118,7 @@ public class TagControllerIntegrationTest {
     }
 
     @Test
-    public void testAddNotExistingTagToRenovation() throws Exception {
+    void testAddNotExistingTagToRenovation() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(currentUser, "Test Renovation", "Some words", List.of("Room1", "Room2"));
         renovationRecordRepository.save(testRecord);
         Long renovationId = testRecord.getId();
@@ -158,7 +158,7 @@ public class TagControllerIntegrationTest {
     }
 
     @Test
-    public void testAddTagInvalidInputs() throws Exception {
+    void testAddTagInvalidInputs() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(currentUser, "Test Renovation", "Description", List.of());
         renovationRecordRepository.save(testRecord);
         Long renovationId = testRecord.getId();
@@ -179,7 +179,7 @@ public class TagControllerIntegrationTest {
     }
 
     @Test
-    public void addTagToRenovation_inappropriateTagName_profanityWarningThrown() throws Exception {
+    void addTagToRenovation_inappropriateTagName_profanityWarningThrown() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(currentUser, "Random Renovation", "Some words", List.of());
         renovationRecordRepository.save(testRecord);
         Long renovationId = testRecord.getId();
@@ -195,7 +195,7 @@ public class TagControllerIntegrationTest {
     }
 
     @Test
-    public void addTagToRenovation_noLettersAndAboveMaxLength_noLettersAndMaxLengthErrorThrown() throws Exception {
+    void addTagToRenovation_noLettersAndAboveMaxLength_noLettersAndMaxLengthErrorThrown() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(currentUser, "Random Renovation", "Some words", List.of());
         renovationRecordRepository.save(testRecord);
         Long renovationId = testRecord.getId();
@@ -213,7 +213,7 @@ public class TagControllerIntegrationTest {
     }
 
     @Test
-    public void addTagToRenovation_recordIdDoesntExist_notFoundErrorThrown() throws Exception {
+    void addTagToRenovation_recordIdDoesntExist_notFoundErrorThrown() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "Random Renovation", "Some words", List.of());
         renovationRecordRepository.save(testRecord);
         Long renovationId = testRecord.getId();
@@ -227,7 +227,7 @@ public class TagControllerIntegrationTest {
     }
 
     @Test
-    public void addTagToRenovation_recordNotOwnedByUser_unauthorizedErrorThrown() throws Exception {
+    void addTagToRenovation_recordNotOwnedByUser_unauthorizedErrorThrown() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "Random Renovation", "Some words", List.of());
         renovationRecordRepository.save(testRecord);
         Long renovationId = testRecord.getId();
@@ -241,7 +241,7 @@ public class TagControllerIntegrationTest {
     }
 
     @Test
-    public void removeTagFromRenovation_validUserAndRecordId_tagDeletedAndNoContentResponse() throws Exception {
+    void removeTagFromRenovation_validUserAndRecordId_tagDeletedAndNoContentResponse() throws Exception {
         Tag newTag = new Tag("random tag 3");
         tagRepository.save(newTag);
         RenovationRecord testRecord = new RenovationRecord(currentUser, "Test Renovation", "Some words", List.of("Room1", "Room2"));
@@ -260,7 +260,7 @@ public class TagControllerIntegrationTest {
     }
 
     @Test
-    public void removeTagFromRenovation_recordIdDoesntExist_notFoundErrorThrown() throws Exception {
+    void removeTagFromRenovation_recordIdDoesntExist_notFoundErrorThrown() throws Exception {
         Tag newTag = new Tag("random tag 4");
         tagRepository.save(newTag);
         RenovationRecord testRecord = new RenovationRecord(currentUser, "Test Renovation", "Some words", List.of("Room1", "Room2"));
@@ -276,7 +276,7 @@ public class TagControllerIntegrationTest {
     }
 
     @Test
-    public void removeTagFromRenovation_recordNotOwnedByUser_unauthorizedErrorThrown() throws Exception {
+    void removeTagFromRenovation_recordNotOwnedByUser_unauthorizedErrorThrown() throws Exception {
         Tag newTag = new Tag("random tag 5");
         tagRepository.save(newTag);
         RenovationRecord testRecord = new RenovationRecord(owner, "Test Renovation", "Some words", List.of("Room1", "Room2"));
@@ -295,7 +295,7 @@ public class TagControllerIntegrationTest {
     }
 
     @Test
-    public void getProfanityFilter_invalidName_returnTrue() throws Exception {
+    void getProfanityFilter_invalidName_returnTrue() throws Exception {
         String invalidName = "ass";
         mockMvc.perform(get("/renovations/tags/profanity-filter").param("tagName", invalidName))
                 .andExpect(content().string(equalTo("true")))
@@ -303,7 +303,7 @@ public class TagControllerIntegrationTest {
     }
 
     @Test
-    public void getProfanityFilter_validName_returnFalse() throws Exception {
+    void getProfanityFilter_validName_returnFalse() throws Exception {
         String invalidName = "Bathroom";
         mockMvc.perform(get("/renovations/tags/profanity-filter").param("tagName", invalidName))
                 .andExpect(content().string(equalTo("false")))

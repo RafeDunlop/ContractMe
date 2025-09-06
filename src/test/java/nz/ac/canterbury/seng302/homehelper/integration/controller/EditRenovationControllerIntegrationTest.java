@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @WithMockUser(username = "jane@doe.com")
 @ActiveProfiles("test")
-public class EditRenovationControllerIntegrationTest {
+class EditRenovationControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -50,7 +50,7 @@ public class EditRenovationControllerIntegrationTest {
     private RenovationRecord renovationRecord;
 
     @BeforeEach
-    public void setupUser() {
+    void setupUser() {
         currentUser = new User("Jane", "Doe", "jane@doe.com", "password");
         userRepository.save(currentUser);
 
@@ -72,7 +72,7 @@ public class EditRenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void getEditRecord_validRecordId_returnForm() throws Exception {
+    void getEditRecord_validRecordId_returnForm() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
@@ -90,7 +90,7 @@ public class EditRenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void getEditRecord_invalidRecordId_throwException() throws Exception {
+    void getEditRecord_invalidRecordId_throwException() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
@@ -107,7 +107,7 @@ public class EditRenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
-    public void editRenovationRecord_userNotOwner_redirectToMain() throws Exception {
+    void editRenovationRecord_userNotOwner_redirectToMain() throws Exception {
         mockMvc.perform(get("/renovations/edit")
                         .param("id", renovationRecord.getId().toString()))
                 .andExpect(status().is3xxRedirection())
@@ -121,7 +121,7 @@ public class EditRenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void postEditRecord_validNewRecordDetails_updateRecord() throws Exception {
+    void postEditRecord_validNewRecordDetails_updateRecord() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
@@ -149,7 +149,7 @@ public class EditRenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void postEditRecord_invalidNewRecordDetails_stayOnForm() throws Exception {
+    void postEditRecord_invalidNewRecordDetails_stayOnForm() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
@@ -181,7 +181,7 @@ public class EditRenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void postEditRecord_recordNameExists_stayOnForm() throws Exception {
+    void postEditRecord_recordNameExists_stayOnForm() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
@@ -210,7 +210,7 @@ public class EditRenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void postEditRecord_invalidRecordId_throwException() throws Exception {
+    void postEditRecord_invalidRecordId_throwException() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
@@ -226,7 +226,7 @@ public class EditRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void testEditSameRenovationNameForDifferentUsers() throws Exception {
+    void testEditSameRenovationNameForDifferentUsers() throws Exception {
         mockMvc.perform(post("/renovations/create")
                         .param("name", "Test Renovation")
                         .param("description", "Test description by Jane")
@@ -296,7 +296,7 @@ public class EditRenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "jane@doe.com")
-    public void editRenovation_invalidLocation_locationNotSaved() throws Exception {
+    void editRenovation_invalidLocation_locationNotSaved() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         renovationRecordRepository.save(testRecord);
 
@@ -318,14 +318,14 @@ public class EditRenovationControllerIntegrationTest {
                 .andExpect(flash().attribute("suburbError", List.of("Suburb contains invalid characters.")))
                 .andReturn();
 
-        RenovationRecord record = renovationRecordRepository.findById(testRecord.getId())
+        RenovationRecord renovationRecord = renovationRecordRepository.findById(testRecord.getId())
                 .orElseThrow(() -> new AssertionError("Renovation record not found."));
-        assertNull(record.getLocation());
+        assertNull(renovationRecord.getLocation());
     }
 
     @Test
     @WithMockUser(username = "jane@doe.com")
-    public void editRenovation_existingLocationInvalidForm_locationNotUpdated() throws Exception {
+    void editRenovation_existingLocationInvalidForm_locationNotUpdated() throws Exception {
         Location initialLocation = new Location(
                 "10 Queen Street ", "Australia", "8011", "Sydney", "Mt Druit"
         );
@@ -367,7 +367,7 @@ public class EditRenovationControllerIntegrationTest {
      * @throws Exception if an error occurs during the test execution
      */
     @Test
-    public void changePublicFlag_setTrue_renovationIsPublic() throws Exception {
+    void changePublicFlag_setTrue_renovationIsPublic() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
         Long id = existingRecord.getId();
@@ -393,7 +393,7 @@ public class EditRenovationControllerIntegrationTest {
      * @throws Exception if an error occurs during the test execution
      */
     @Test
-    public void changePublicFlag_setFalse_renovationIsNotPublic() throws Exception {
+    void changePublicFlag_setFalse_renovationIsNotPublic() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
         Long id = existingRecord.getId();

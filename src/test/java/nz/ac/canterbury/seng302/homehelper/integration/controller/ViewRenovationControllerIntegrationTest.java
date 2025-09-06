@@ -47,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockUser(username = "jane@doe.com")
 @ActiveProfiles("test")
 @SuppressWarnings("unchecked")
-public class ViewRenovationControllerIntegrationTest {
+class ViewRenovationControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -65,7 +65,7 @@ public class ViewRenovationControllerIntegrationTest {
     private RenovationRecord renovationRecord;
 
     @BeforeEach
-    public void setupUser() {
+    void setupUser() {
         currentUser = new User("Jane", "Doe", "jane@doe.com", "password");
         userRepository.save(currentUser);
 
@@ -83,7 +83,7 @@ public class ViewRenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void getViewRecord_validRecordId_returnForm() throws Exception {
+    void getViewRecord_validRecordId_returnForm() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
@@ -101,7 +101,7 @@ public class ViewRenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void getViewRecord_invalidRecordId_throwException() throws Exception {
+    void getViewRecord_invalidRecordId_throwException() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
@@ -116,7 +116,7 @@ public class ViewRenovationControllerIntegrationTest {
     @Test
     @WithMockUser(username = "not.owner@example.com")
     // GitHub Copilot generated some parts of the following test
-    public void getViewRecord_notOwner_notFound() throws Exception {
+    void getViewRecord_notOwner_notFound() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "A cool renovation", "Some words", List.of("Room foo", "Room bar"));
         existingRecord = renovationRecordRepository.save(existingRecord);
         User loggedInUser = new User("Not", "Owner", "not.owner@example.com", "password");
@@ -129,7 +129,7 @@ public class ViewRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void viewRenovation_validYearAndMonth_returnFormWithInputtedMonthAndYear() throws Exception {
+    void viewRenovation_validYearAndMonth_returnFormWithInputtedMonthAndYear() throws Exception {
         int inputtedYear = 2024;
         int inputtedMonth = 12;
 
@@ -157,7 +157,7 @@ public class ViewRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void viewRenovation_validMonthNoYear_returnFormWithInputtedMonthAndCurrentYear() throws Exception {
+    void viewRenovation_validMonthNoYear_returnFormWithInputtedMonthAndCurrentYear() throws Exception {
         int inputtedMonth = 12;
         int currentYear = LocalDate.now().getYear();
 
@@ -184,7 +184,7 @@ public class ViewRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void viewRenovation_noMonthAndYear_returnFormWithCurrentMonthAndYear() throws Exception {
+    void viewRenovation_noMonthAndYear_returnFormWithCurrentMonthAndYear() throws Exception {
         LocalDate now = LocalDate.now();
 
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation with Calendar 3", "Some words", List.of("Room 1", "Room 2"));
@@ -209,7 +209,7 @@ public class ViewRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void viewRenovation_negativeYear_returnFormWithMonthAndPositiveYear() throws Exception {
+    void viewRenovation_negativeYear_returnFormWithMonthAndPositiveYear() throws Exception {
         int inputtedMonth = 12;
         int inputtedYear = 0;
         int expectedYear = LocalDate.now().getYear();
@@ -239,7 +239,7 @@ public class ViewRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void viewRenovation_invalidMonth_returnFormWithCurrentMonthAndYear() throws Exception {
+    void viewRenovation_invalidMonth_returnFormWithCurrentMonthAndYear() throws Exception {
         int inputtedMonth = 13;
         int inputtedYear = 2025;
         LocalDate now = LocalDate.now();
@@ -268,7 +268,7 @@ public class ViewRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void calendar_validYearAndMonth_returnFormWithInputtedMonthAndYear() throws Exception {
+    void calendar_validYearAndMonth_returnFormWithInputtedMonthAndYear() throws Exception {
         int inputtedYear = 2024;
         int inputtedMonth = 12;
 
@@ -296,7 +296,7 @@ public class ViewRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void calendar_validMonthNoYear_returnFormWithInputtedMonthAndCurrentYear() throws Exception {
+    void calendar_validMonthNoYear_returnFormWithInputtedMonthAndCurrentYear() throws Exception {
         int inputtedMonth = 12;
         int currentYear = LocalDate.now().getYear();
 
@@ -323,7 +323,7 @@ public class ViewRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void calendar_noMonthAndYear_returnFormWithCurrentMonthAndYear() throws Exception {
+    void calendar_noMonthAndYear_returnFormWithCurrentMonthAndYear() throws Exception {
         LocalDate now = LocalDate.now();
 
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation with Calendar 3", "Some words", List.of("Room 1", "Room 2"));
@@ -348,7 +348,7 @@ public class ViewRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void calendar_negativeYear_returnFormWithMonthAndPositiveYear() throws Exception {
+    void calendar_negativeYear_returnFormWithMonthAndPositiveYear() throws Exception {
         int inputtedMonth = 12;
         int inputtedYear = 0;
         int expectedYear = LocalDate.now().getYear();
@@ -378,7 +378,7 @@ public class ViewRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void calendar_invalidMonth_returnFormWithCurrentMonthAndYear() throws Exception {
+    void calendar_invalidMonth_returnFormWithCurrentMonthAndYear() throws Exception {
         int inputtedMonth = 13;
         int inputtedYear = 2025;
         LocalDate now = LocalDate.now();
@@ -407,7 +407,7 @@ public class ViewRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void calendar_dateEditedPresent_modelContainsDate() throws Exception {
+    void calendar_dateEditedPresent_modelContainsDate() throws Exception {
         String dateToReturnTo = LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
@@ -460,7 +460,7 @@ public class ViewRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void getViewRecord_withPagination_returnPaginatedTasks_JSON() throws Exception {
+    void getViewRecord_withPagination_returnPaginatedTasks_JSON() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         List<RenovationTask> renovationTasks = IntStream.range(0, 15)
                 .mapToObj(i -> new RenovationTask(
@@ -517,21 +517,21 @@ public class ViewRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void getRenovationTaskPages_withInvalidPageNumber_returnsDefaultOrLastPage() throws Exception {
-        RenovationRecord record = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+    void getRenovationTaskPages_withInvalidPageNumber_returnsDefaultOrLastPage() throws Exception {
+        RenovationRecord renovationRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         List<RenovationTask> tasks = IntStream.range(0, 10)
                 .mapToObj(i -> new RenovationTask(
                         "Task " + i,
                         "Description " + i,
                         List.of("Room 1", "Room 2"),
                         LocalDate.now().plusDays(i),
-                        record
+                        renovationRecord
                 ))
                 .toList();
-        record.setRenovationTasks(tasks);
-        renovationRecordRepository.save(record);
+        renovationRecord.setRenovationTasks(tasks);
+        renovationRecordRepository.save(renovationRecord);
 
-        long recordId = record.getId();
+        long recordId = renovationRecord.getId();
 
         MvcResult outOfBoundsResult = mockMvc.perform(get("/renovations/retrieve/" + recordId)
                         .param("page", "34")

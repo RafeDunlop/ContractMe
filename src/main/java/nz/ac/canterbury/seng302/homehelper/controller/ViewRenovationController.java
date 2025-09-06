@@ -76,13 +76,15 @@ public class ViewRenovationController {
         logger.info("GET /renovations/view");
         logger.info("dateEdited: {}", dateEdited);
 
-        RenovationRecord record = renovationRecordService.getRecordById(id);
-        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
+        if (renovationRecord == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
+        }
 
         User user = loginService.getUserByEmail();
-        boolean isOwner = user.equals(record.getUser());
+        boolean isOwner = user.equals(renovationRecord.getUser());
 
-        if (!isOwner && !record.isPublic() && !teamsService.checkViewRenovationAccess(record, user)) {
+        if (!isOwner && !renovationRecord.isPublic() && !teamsService.checkViewRenovationAccess(renovationRecord, user)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
@@ -91,16 +93,16 @@ public class ViewRenovationController {
         String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
-        injectDateElements(year, month, dateEdited, model, record);
+        injectDateElements(year, month, dateEdited, model, renovationRecord);
         model.addAttribute("dateEdited", dateEdited);
 
 
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
-        model.addAttribute("hasLocation", locationService.hasLocation(record));
-        model.addAttribute("hasTeam",teamsService.teamExists(record.getId()));
+        model.addAttribute("hasLocation", locationService.hasLocation(renovationRecord));
+        model.addAttribute("hasTeam",teamsService.teamExists(renovationRecord.getId()));
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("pageNumber", Math.max(pageNumber, 1));
-        model.addAttribute("renovation", record);
+        model.addAttribute("renovation", renovationRecord);
         model.addAttribute("icons", iconFileNames);
         model.addAttribute("dateFormatter", DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
@@ -126,16 +128,18 @@ public class ViewRenovationController {
                                       Model model) {
 
         logger.info("dateEdited: {}", dateEdited);
-        RenovationRecord record = renovationRecordService.getRecordById(id);
-        if (record == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Renovation not found");
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
+        if (renovationRecord == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Renovation not found");
+        }
 
         User user = loginService.getUserByEmail();
-        boolean isOwner = user.equals(record.getUser());
+        boolean isOwner = user.equals(renovationRecord.getUser());
         if (!isOwner) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
-        injectDateElements(year, month, dateEdited, model, record);
+        injectDateElements(year, month, dateEdited, model, renovationRecord);
         model.addAttribute("id", id);
         model.addAttribute("dateEdited", dateEdited);
         model.addAttribute("dateFormatter", DateTimeFormatter.ofPattern("dd-MM-yyyy"));
@@ -192,16 +196,16 @@ public class ViewRenovationController {
                                                  @RequestParam(defaultValue = "1", name = "page") int pageNumber,
                                                  @RequestParam(defaultValue = "5", name = "cardsPerPage") int cardsPerPage,
                                                  @RequestParam(defaultValue = "all") String status) {
-        RenovationRecord record = renovationRecordService.getRecordById(id);
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
 
-        if (record == null) {
+        if (renovationRecord == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation does not exist");
         }
 
         User user = loginService.getUserByEmail();
-        boolean isOwner = user.equals(record.getUser());
+        boolean isOwner = user.equals(renovationRecord.getUser());
 
-        if (!isOwner && !record.isPublic() && !teamsService.checkViewRenovationAccess(record, user)) {
+        if (!isOwner && !renovationRecord.isPublic() && !teamsService.checkViewRenovationAccess(renovationRecord, user)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This renovation is not accessible");
         }
 
@@ -211,11 +215,11 @@ public class ViewRenovationController {
 
         int requestedPage = Math.max(pageNumber - 1, 0);
         Pageable pageable = PageRequest.of(requestedPage, cardsPerPage);
-        Page<RenovationTask> page = renovationTaskService.returnTaskPages(record, pageable, status);
+        Page<RenovationTask> page = renovationTaskService.returnTaskPages(renovationRecord, pageable, status);
 
         if (requestedPage >= page.getTotalPages() && page.getTotalPages() > 0) {
             pageable = PageRequest.of(page.getTotalPages() - 1, cardsPerPage);
-            page = renovationTaskService.returnTaskPages(record, pageable, status);
+            page = renovationTaskService.returnTaskPages(renovationRecord, pageable, status);
         }
 
         return page.map(RenovationTaskDTO::new);

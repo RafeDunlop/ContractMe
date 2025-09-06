@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @WithMockUser(username = "jane@doe.com")
 @ActiveProfiles("test")
-public class SearchRenovationControllerIntegrationTest {
+class SearchRenovationControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -55,7 +55,7 @@ public class SearchRenovationControllerIntegrationTest {
     private MockHttpSession session;
 
     @BeforeEach
-    public void setupUser() {
+    void setupUser() {
         currentUser = new User("Jane", "Doe", "jane@doe.com", "password");
         userRepository.save(currentUser);
 
@@ -78,7 +78,7 @@ public class SearchRenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void getRenovationRecord_noUserRecords_showNoRecordExist() throws Exception {
+    void getRenovationRecord_noUserRecords_showNoRecordExist() throws Exception {
         MvcResult result = mockMvc.perform(get("/renovations/retrieve"))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -94,7 +94,7 @@ public class SearchRenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void getRenovationForm_searchByName_returnMatchingRecord() throws Exception {
+    void getRenovationForm_searchByName_returnMatchingRecord() throws Exception {
         renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2")));
         renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation Two", "Some words", List.of("Room 1", "Room 2")));
         renovationRecordRepository.save(new RenovationRecord(currentUser, "Tone", "Some words", List.of("Room 1", "Room 2")));
@@ -119,7 +119,7 @@ public class SearchRenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void getRenovationRecord_searchByName_showNoRecordWithName() throws Exception {
+    void getRenovationRecord_searchByName_showNoRecordWithName() throws Exception {
         renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2")));
 
         MvcResult result = mockMvc.perform(get("/renovations/retrieve")
@@ -132,13 +132,13 @@ public class SearchRenovationControllerIntegrationTest {
     }
 
     /**
-     * Tests that a paginated page can be selected using query parametrs.
-     * Verifies that the correct page is returned by specifiying the number
+     * Tests that a paginated page can be selected using query parameters.
+     * Verifies that the correct page is returned by specifying the number
      * of records per page.
      * @throws Exception if the request processing fails
      */
     @Test
-    public void getRenovationRecord_selectPage_returnsCorrectPage() throws Exception {
+    void getRenovationRecord_selectPage_returnsCorrectPage() throws Exception {
         for (int i = 0; i < 20; i++) {
             renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
         }
@@ -160,10 +160,10 @@ public class SearchRenovationControllerIntegrationTest {
     }
 
     /**
-     * Tests that selecting a page that is out of bounds will redirect to the last page.
+     * Tests that selecting a page out of bounds will redirect to the last page.
      */
     @Test
-    public void getRenovationRecord_selectOutOfBoundsPage_returnsLastPage() throws Exception {
+    void getRenovationRecord_selectOutOfBoundsPage_returnsLastPage() throws Exception {
         for (int i = 0; i < 20; i++) {
             renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
         }
@@ -181,10 +181,10 @@ public class SearchRenovationControllerIntegrationTest {
     }
 
     /**
-     * Tests that selecting a page that is out of bounds will redirect to the last page.
+     * Tests that selecting a page out of bounds will redirect to the last page.
      */
     @Test
-    public void getRenovationRecord_selectNegativePage_returnsFirstPage() throws Exception {
+    void getRenovationRecord_selectNegativePage_returnsFirstPage() throws Exception {
         for (int i = 0; i < 20; i++) {
             renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
         }
@@ -205,7 +205,7 @@ public class SearchRenovationControllerIntegrationTest {
      * Tests that requesting 0 items per page will redirect to the default of 8 items per page.
      */
     @Test
-    public void getRenovationRecord_zeroCardsPerPage_returns16ItemsPerPage() throws Exception {
+    void getRenovationRecord_zeroCardsPerPage_returns16ItemsPerPage() throws Exception {
         for (int i = 0; i < 20; i++) {
             RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1", "Room 2"));
             renovationRecordRepository.save(existingRecord);
@@ -227,7 +227,7 @@ public class SearchRenovationControllerIntegrationTest {
      * Tests that requesting a page number of 0 will redirect to the first page.
      */
     @Test
-    public void getRenovationRecord_zeroPageNumber_returnsFirstPage() throws Exception {
+    void getRenovationRecord_zeroPageNumber_returnsFirstPage() throws Exception {
         for (int i = 0; i < 20; i++) {
             renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
         }
@@ -250,7 +250,7 @@ public class SearchRenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void getRenovationForm_withUserWithoutUser_returnUserRecord() throws Exception {
+    void getRenovationForm_withUserWithoutUser_returnUserRecord() throws Exception {
         User anotherUser = new User("John", "Doe", "john@doe.com", "password");
         userRepository.save(anotherUser);
 
@@ -273,7 +273,7 @@ public class SearchRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void searchRenovation_withNoMatches_returnsNoResults() throws Exception {
+    void searchRenovation_withNoMatches_returnsNoResults() throws Exception {
         String searchTerm = "NonExistentTerm";
         String visibility = "all";
 
@@ -293,10 +293,10 @@ public class SearchRenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
-    public void searchRenovation_withMatchingTerm_returnsMatchingRecords() throws Exception {
-        RenovationRecord record = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
-        record.setPublicity(true);
-        renovationRecordRepository.save(record);
+    void searchRenovation_withMatchingTerm_returnsMatchingRecords() throws Exception {
+        RenovationRecord renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", List.of("Room A"));
+        renovationRecord.setPublicity(true);
+        renovationRecordRepository.save(renovationRecord);
 
         MvcResult result = mockMvc.perform(get("/renovations/retrieve")
                         .param("searchTerm", "Test Renovation")
@@ -313,7 +313,7 @@ public class SearchRenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
-    public void searchRenovation_withVisibilityFilter_returnsFilteredResults() throws Exception {
+    void searchRenovation_withVisibilityFilter_returnsFilteredResults() throws Exception {
         RenovationRecord publicRec = new RenovationRecord(owner, "Public Renovation", "Public Desc", List.of("Room A"));
         publicRec.setPublicity(true);
         RenovationRecord privateRec = new RenovationRecord(owner, "Private Renovation", "Private Desc", List.of("Room B"));
@@ -336,7 +336,7 @@ public class SearchRenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
-    public void searchRenovation_withTermAndVisibilityFilter_returnsFilteredResults() throws Exception {
+    void searchRenovation_withTermAndVisibilityFilter_returnsFilteredResults() throws Exception {
         RenovationRecord publicRenovation = new RenovationRecord(owner, "Public Renovation", "Room A", List.of("Room A"));
         publicRenovation.setPublicity(true);
         RenovationRecord privateRenovation = new RenovationRecord(owner, "Private Renovation", "Room B", List.of("Room B"));
@@ -357,7 +357,7 @@ public class SearchRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void tagSearch_withValidPublicRenovation_displaysMoreMatchingTagsFirst() throws Exception {
+    void tagSearch_withValidPublicRenovation_displaysMoreMatchingTagsFirst() throws Exception {
         RenovationRecord oneTag = new RenovationRecord(owner, "RenovationOneTag", "A", List.of("Room A"));
         RenovationRecord twoTags = new RenovationRecord(owner, "RenovationTwoTags", "A", List.of("Room A"));
         oneTag.setPublicity(true);
@@ -394,7 +394,7 @@ public class SearchRenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
-    public void getSearchRenovations_withSessionAttributes_rendersSearchPage() throws Exception {
+    void getSearchRenovations_withSessionAttributes_rendersSearchPage() throws Exception {
         session.setAttribute("visibility", "user");
         session.setAttribute("searchTerm", "Test Renovation");
 
@@ -410,7 +410,7 @@ public class SearchRenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
-    public void getSearchRenovations_withNoMatchingRecords_returnsEmptyResults() throws Exception {
+    void getSearchRenovations_withNoMatchingRecords_returnsEmptyResults() throws Exception {
         session.setAttribute("visibility", "all");
         session.setAttribute("searchTerm", "NonExistent");
 
@@ -429,10 +429,10 @@ public class SearchRenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "not.owner@doe.com")
-    public void getSearchRenovations_withMatchingRecords_returnsFilteredResults() throws Exception {
-        RenovationRecord record = new RenovationRecord(owner, "Renovation One", "Description", List.of("Room A"));
-        record.setPublicity(true);
-        renovationRecordRepository.save(record);
+    void getSearchRenovations_withMatchingRecords_returnsFilteredResults() throws Exception {
+        RenovationRecord renovationRecord = new RenovationRecord(owner, "Renovation One", "Description", List.of("Room A"));
+        renovationRecord.setPublicity(true);
+        renovationRecordRepository.save(renovationRecord);
 
         MvcResult result = mockMvc.perform(get("/renovations/retrieve")
                         .param("searchTerm", "One")
@@ -450,7 +450,7 @@ public class SearchRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void tagSearch_withValidPublicRenovation_displaysListOfTags() throws Exception {
+    void tagSearch_withValidPublicRenovation_displaysListOfTags() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "Test Renovation 1", "Room A Renovation", List.of("Room A"));
         testRecord.setPublicity(true);
         RenovationRecord testRecord2 = new RenovationRecord(owner, "Test Renovation 2", "Room A Renovation", List.of("Room A"));
@@ -482,7 +482,7 @@ public class SearchRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void tagSearch_withNoPublicRenovation_NoResults() throws Exception {
+    void tagSearch_withNoPublicRenovation_NoResults() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "Test Renovation", "Room A Renovation", List.of("Room A"));
         String tagName ="Apartment";
         Tag testTag = new Tag(tagName);
@@ -507,7 +507,7 @@ public class SearchRenovationControllerIntegrationTest {
     }
 
     @Test
-    public void tagSearch_withValidPublicRenovation_displaysMoreMatchingTagsFirstListOfTags() throws Exception {
+    void tagSearch_withValidPublicRenovation_displaysMoreMatchingTagsFirstListOfTags() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         RenovationRecord testRecord2 = new RenovationRecord(owner, "RenovationTwoTags", "Room A Renovation", List.of("Room A"));
         testRecord.setPublicity(true);

@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @WithMockUser(username = "jane@doe.com")
 @ActiveProfiles("test")
-public class RenovationControllerIntegrationTest {
+class RenovationControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -48,7 +48,7 @@ public class RenovationControllerIntegrationTest {
     private User owner;
 
     @BeforeEach
-    public void setupUser() {
+    void setupUser() {
         currentUser = new User("Jane", "Doe", "jane@doe.com", "password");
         userRepository.save(currentUser);
 
@@ -71,7 +71,7 @@ public class RenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void postCreateRecord_validRecordDetails_createRecord() throws Exception {
+    void postCreateRecord_validRecordDetails_createRecord() throws Exception {
         Page<RenovationRecord> userRecords = renovationRecordRepository.findUserRecordsBySearch(currentUser, "Renovation One", null);
         assertTrue(userRecords.getContent().isEmpty());
 
@@ -96,7 +96,7 @@ public class RenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void postCreateRecord_invalidNameInput_stayOnForm() throws Exception {
+    void postCreateRecord_invalidNameInput_stayOnForm() throws Exception {
         // Regex rejects the exclamation mark.
         mockMvc.perform(post("/renovations/create")
                         .param("name", "Fail!")
@@ -116,7 +116,7 @@ public class RenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void postCreateRecord_invalidDescriptionInput_stayOnForm() throws Exception {
+    void postCreateRecord_invalidDescriptionInput_stayOnForm() throws Exception {
         // Description has a maximum length of 512.
         mockMvc.perform(post("/renovations/create")
                         .param("name", "Renovation One")
@@ -136,7 +136,7 @@ public class RenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void postCreateRecord_recordNameExists_stayOnForm() throws Exception {
+    void postCreateRecord_recordNameExists_stayOnForm() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
@@ -158,7 +158,7 @@ public class RenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void deleteRecord_validRecordIdWithoutTask_deletionSuccess() throws Exception {
+    void deleteRecord_validRecordIdWithoutTask_deletionSuccess() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
@@ -179,7 +179,7 @@ public class RenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void deleteRecord_validRecordIdWithTask_deletionSuccess() throws Exception {
+    void deleteRecord_validRecordIdWithTask_deletionSuccess() throws Exception {
         RenovationRecord existingRecord = new RenovationRecord(currentUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
         renovationRecordRepository.save(existingRecord);
 
@@ -203,7 +203,7 @@ public class RenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void deleteRecord_nullRecordId_notFoundError() throws Exception {
+    void deleteRecord_nullRecordId_notFoundError() throws Exception {
         mockMvc.perform(delete("/renovations/delete/")
                         .with(csrf()))
                 .andExpect(status().isNotFound());
@@ -216,7 +216,7 @@ public class RenovationControllerIntegrationTest {
      * @throws Exception if the request processing fails
      */
     @Test
-    public void deleteRecord_invalidUserForDelete_forbiddenError() throws Exception {
+    void deleteRecord_invalidUserForDelete_forbiddenError() throws Exception {
         User anotherUser = new User("John", "Doe", "john@doe.com", "password");
         userRepository.save(anotherUser);
 
@@ -232,7 +232,7 @@ public class RenovationControllerIntegrationTest {
     }
 
     @Test
-    public void testCreateSameRenovationNameForDifferentUsers() throws Exception {
+    void testCreateSameRenovationNameForDifferentUsers() throws Exception {
         // First request for Jane
         mockMvc.perform(post("/renovations/create")
                         .param("name", "Test Renovation")
@@ -274,7 +274,7 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "jane@doe.com")
-    public void getForm_renovationWithLocation_locationAdded() throws Exception {
+    void getForm_renovationWithLocation_locationAdded() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         AddressDTO addressDTO = new AddressDTO();
         addressDTO.setAddress_line1("164 Ingoldsby Street");
@@ -314,7 +314,7 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "jane@doe.com")
-    public void editRenovation_validLocationDetails_LocationUpdated() throws Exception {
+    void editRenovation_validLocationDetails_LocationUpdated() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         renovationRecordRepository.save(testRecord);
 
@@ -354,7 +354,7 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     @WithMockUser(username = "jane@doe.com")
-    public void getForm_renovationWithoutLocation_locationNotAdded() throws Exception {
+    void getForm_renovationWithoutLocation_locationNotAdded() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
 
         mockMvc.perform(post("/renovations/create")
