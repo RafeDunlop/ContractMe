@@ -28,7 +28,7 @@ public class EditRenovationController {
     private final LoginService loginService;
     private final LocationService locationService;
 
-    private final String RENOVATION = "renovation";
+    private static final String renovationModelAttribute = "renovation";
 
     /**
      * Autowired constructor for the request inbox controller
@@ -67,7 +67,7 @@ public class EditRenovationController {
 
         // Only add the renovation object if not already present (e.g. from flash attributes)
         if (!model.containsAttribute("name")) {
-            model.addAttribute(RENOVATION, renovationRecord);
+            model.addAttribute(renovationModelAttribute, renovationRecord);
         }
 
         if (!locationService.isLocationProvided(addressDTO)) {
@@ -143,7 +143,7 @@ public class EditRenovationController {
             redirectAttributes.addFlashAttribute("name", name);
             redirectAttributes.addFlashAttribute("description", description);
             redirectAttributes.addFlashAttribute("roomList", roomList);
-            redirectAttributes.addFlashAttribute(RENOVATION, renovationRecord);
+            redirectAttributes.addFlashAttribute(renovationModelAttribute, renovationRecord);
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
             if (currentLocation != null || locationService.isLocationProvided(addressDTO)) {
                 redirectAttributes.addFlashAttribute("locationUsed", true);
@@ -154,7 +154,7 @@ public class EditRenovationController {
 
         renovationRecord.setName(name); // don't set the name until the changes are valid to avoid db divergence
 
-        redirectAttributes.addFlashAttribute(RENOVATION, renovationRecord);
+        redirectAttributes.addFlashAttribute(renovationModelAttribute, renovationRecord);
 
         renovationRecordService.updateRenovationLocation(renovationRecord, addressDTO); //updates existing record (identified by id)
         return "redirect:/renovations/view?id=" + renovationRecord.getId();
