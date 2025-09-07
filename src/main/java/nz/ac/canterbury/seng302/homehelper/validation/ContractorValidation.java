@@ -36,7 +36,7 @@ public class ContractorValidation {
      * @param phoneNumber the contractor's phone number
      * @return a list of errors, empty if valid
      */
-    public List<String> validatePhoneNumber(String phoneNumber, String countryCode) {
+    public List<String> validatePhoneNumber(String phoneNumber, Integer countryCode) {
         List<String> errors = new ArrayList<>();
         phoneNumber = phoneNumber.replaceAll("\\s+", "");
         String regex = "\\d+";
@@ -87,10 +87,10 @@ public class ContractorValidation {
      * @param countryCode the phone number country code
      * @return a list of errors, empty if valid
      */
-    private List<String> validateCountryCode(String countryCode) {
+    private List<String> validateCountryCode(Integer countryCode) {
         List<String> errors = new ArrayList<>();
 
-        if (countryCode == null || countryCode.equals("0") || !countryCode.matches("\\d{1,3}")) {
+        if (countryCode == null || countryCode <= 0 || countryCode > 999) {
             errors.add("Invalid country code");
         }
         return errors;
