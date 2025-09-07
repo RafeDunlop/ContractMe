@@ -90,7 +90,11 @@ public class ContractorValidation {
     private List<String> validateCountryCode(String countryCode) {
         List<String> errors = new ArrayList<>();
 
-        if (countryCode == null || countryCode.equals("0") || !countryCode.matches("\\d{1,3}")) {
+        if (countryCode == null
+                || countryCode.equals("0")
+                || countryCode.equals("00")
+                || countryCode.equals("000")
+                || !countryCode.matches("\\d{1,3}")) {
             errors.add("Invalid country code");
         }
         return errors;

@@ -62,7 +62,11 @@ export function validatePhoneNumber(phoneNumber, phoneNumberFrontendErrorMessage
 export function validateCountryCode(countryCode, countryCodeFrontendErrorMessage, countryCodeFrontendError,
                                     countryCodeBackendError) {
     if (countryCodeBackendError) countryCodeBackendError.hidden = true;
-    if (countryCode.length === 0 || countryCode === "0" || !countryCodePattern.test(countryCode)) {
+    if (countryCode.length === 0
+        || countryCode === "0"
+        || countryCode === "00"
+        || countryCode === "000"
+        || !countryCodePattern.test(countryCode)) {
         countryCodeFrontendErrorMessage.textContent = "Invalid country code";
         countryCodeFrontendError.hidden = false;
         countryCodeFrontendErrorMessage.hidden = false;
