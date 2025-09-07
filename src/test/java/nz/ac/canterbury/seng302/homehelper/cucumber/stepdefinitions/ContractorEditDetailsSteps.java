@@ -41,7 +41,7 @@ public class ContractorEditDetailsSteps {
     private final ContractorContext contractorContext;
 
     private Float hourlyRate;
-    private Integer countryCode;
+    private String countryCode;
     private String phoneNumber;
     private Set<Skill> skills;
 
@@ -116,7 +116,7 @@ public class ContractorEditDetailsSteps {
                         .param("lat", Double.toString(contractor.getLocation().getLatitude()))
                         .param("lon", Double.toString(contractor.getLocation().getLongitude()))
                         .param("hourlyRate", hourlyRate.toString())
-                        .param("countryCode", countryCode.toString())
+                        .param("countryCode", countryCode)
                         .param("phoneNumber", phoneNumber)
                         .with(csrf());
 

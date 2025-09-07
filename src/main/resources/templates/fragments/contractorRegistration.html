@@ -35,7 +35,7 @@
     <div class="mb-3">
         <div class="input-group">
             <span class="prefix-span input-group-text">+</span>
-            <input type="number" max="999" min="0" class="form-control" id="countryCode" name="countryCode" placeholder="Country Code"
+            <input type="text" max="999" min="0" class="form-control" id="countryCode" name="countryCode" placeholder="Country Code"
                    aria-label="country-code" th:value="${dto.countryCode}">
             <input type="text" inputmode="numeric" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" maxlength="15"
                    pattern="[0-9\s]{6,15}" aria-label="phone-number" th:value="${dto.phoneNumber}">

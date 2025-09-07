@@ -101,7 +101,7 @@ public class TeamControllerIntegrationTest {
             user.setEmail("seng302.team200.contractor@gmail.com");
             user.setSkills(List.of(Skill.SCAFFOLDING, Skill.RESOURCE_CONSENT_COMPLIANCE, Skill.CARPENTRY));
             user.setHourlyRate(30.0f);
-            user.setCountryCode(64);
+            user.setCountryCode("64");
             user.setPhoneNumber("33692888");
             AddressDTO address = new AddressDTO();
             address.setAddress_line1("Ilam Road");

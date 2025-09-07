@@ -1,4 +1,5 @@
 const phonePattern = /^[\d\s]+$/;
+const countryCodePattern = /^\d{1,3}$/;
 
 /**
  * Validates the given hourly rate and updates the frontend error messages and visibility accordingly.
@@ -53,7 +54,7 @@ export function validatePhoneNumber(phoneNumber, phoneNumberFrontendErrorMessage
 /**
  * Validates the provided country code and updates the frontend or backend error messages accordingly.
  *
- * @param {number} countryCode - The country code to validate. Must be a number between 1 and 999.
+ * @param {string} countryCode - The country code to validate. Must be a number between 1 and 999.
  * @param {HTMLElement} countryCodeFrontendErrorMessage - The HTML element where an error message is displayed for invalid country codes.
  * @param {HTMLElement} countryCodeFrontendError - The HTML element to showcase or hide the frontend error state.
  * @param {HTMLElement} countryCodeBackendError - The HTML element representing a backend error state, which will be hidden during the validation.
@@ -61,7 +62,7 @@ export function validatePhoneNumber(phoneNumber, phoneNumberFrontendErrorMessage
 export function validateCountryCode(countryCode, countryCodeFrontendErrorMessage, countryCodeFrontendError,
                                     countryCodeBackendError) {
     if (countryCodeBackendError) countryCodeBackendError.hidden = true;
-    if (countryCode <= 0 || countryCode > 999) {
+    if (countryCode.length === 0 || countryCode === "0" || !countryCodePattern.test(countryCode)) {
         countryCodeFrontendErrorMessage.textContent = "Invalid country code";
         countryCodeFrontendError.hidden = false;
         countryCodeFrontendErrorMessage.hidden = false;

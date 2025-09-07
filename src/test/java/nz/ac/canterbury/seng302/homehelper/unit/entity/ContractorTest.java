@@ -19,7 +19,7 @@ public class ContractorTest {
 
     @Test
     void getPhoneNumberFormatted_validFields_outputIsReadable() {
-        contractor.setCountryCode(64);
+        contractor.setCountryCode("64");
         contractor.setPhoneNumber("12 345 6789");
         assertEquals("+64 12 345 6789", contractor.getPhoneNumberFormatted());
     }

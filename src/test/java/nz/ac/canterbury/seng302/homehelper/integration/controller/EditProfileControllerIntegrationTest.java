@@ -68,19 +68,19 @@ class EditProfileControllerIntegrationTest {
 
     private static Stream<Arguments> streamValidContractorDetails() {
         return Stream.of(
-                Arguments.of(27.08f, 64, "6412345678", Set.of(Skill.CARPENTRY)),
-                Arguments.of(0, 1, "11111 1111", Set.of(Skill.EARTHMOVING)),
-                Arguments.of(9999f, 99, "9 9 9 9 9 9 9 9", Set.of(Skill.SEPTIC_SYSTEMS, Skill.HVAC, Skill.MECHANICAL_ENGINEERING))
+                Arguments.of(27.08f, "64", "6412345678", Set.of(Skill.CARPENTRY)),
+                Arguments.of(0, "1", "11111 1111", Set.of(Skill.EARTHMOVING)),
+                Arguments.of(9999f, "99", "9 9 9 9 9 9 9 9", Set.of(Skill.SEPTIC_SYSTEMS, Skill.HVAC, Skill.MECHANICAL_ENGINEERING))
         );
     }
 
     private static Stream<Arguments> streamInvalidContractorDetails() {
         List<Object> errorsList = List.of(List.of("Invalid hourly rate"), List.of("Your phone number is invalid", "Invalid country code"), List.of("You must select one or more skills"));
         return Stream.of(
-                Arguments.of(-10f, 0, "999", null, errorsList),
-                Arguments.of(-999, 1000, "9999999999999999", null, errorsList),
-                Arguments.of(-99999, 10001, "9 9 9 9 9#$$%", null, errorsList),
-                Arguments.of(-99999, 10001, "99", null, errorsList)
+                Arguments.of(-10f, "0", "999", null, errorsList),
+                Arguments.of(-999, "1000", "9999999999999999", null, errorsList),
+                Arguments.of(-99999, "10001", "9 9 9 9 9#$$%", null, errorsList),
+                Arguments.of(-99999, "10001", "99", null, errorsList)
         );
     }
 
@@ -391,7 +391,7 @@ class EditProfileControllerIntegrationTest {
 
     @ParameterizedTest
     @MethodSource("streamValidContractorDetails")
-    void testEditContractor_validUserDetails_exitEditor(float hourlyRate, int countryCode, String phoneNumber, Set<Skill> skills) throws Exception {
+    void testEditContractor_validUserDetails_exitEditor(float hourlyRate, String countryCode, String phoneNumber, Set<Skill> skills) throws Exception {
         Contractor current = new Contractor("Jane", "Doe", "jane@doe.com", "password");
         current.grantAuthority("ROLE_USER");
         current.setHourlyRate(27.80f);
@@ -414,7 +414,7 @@ class EditProfileControllerIntegrationTest {
                         .param("lat", "1.0")
                         .param("lon", "1.0")
                         .param("hourlyRate", Float.toString(hourlyRate))
-                        .param("countryCode", Integer.toString(countryCode))
+                        .param("countryCode", countryCode)
                         .param("phoneNumber", phoneNumber)
                         .param("skills", skills.stream().map(Skill::toString).toArray(String[]::new))
                 )
@@ -441,7 +441,7 @@ class EditProfileControllerIntegrationTest {
 
     @ParameterizedTest
     @MethodSource("streamInvalidContractorDetails")
-    void testEditContractor_invalidContractorDetails_stayOnEditProfilePage(float hourlyRate, int countryCode, String phoneNumber, Set<Skill> skills, List<Object> expectedErrors) throws Exception {
+    void testEditContractor_invalidContractorDetails_stayOnEditProfilePage(float hourlyRate, String countryCode, String phoneNumber, Set<Skill> skills, List<Object> expectedErrors) throws Exception {
         Contractor current = new Contractor("Jane", "Doe", "jane@doe.com", "password");
         current.grantAuthority("ROLE_USER");
         current.setHourlyRate(27.80f);
@@ -464,7 +464,7 @@ class EditProfileControllerIntegrationTest {
                 .param("lat", "1.0")
                 .param("lon", "1.0")
                 .param("hourlyRate", Float.toString(hourlyRate))
-                .param("countryCode", Integer.toString(countryCode))
+                .param("countryCode", countryCode)
                 .param("phoneNumber", phoneNumber)
                 .param("skills", (String) null)
                 )
