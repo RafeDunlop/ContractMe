@@ -9,7 +9,6 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -57,9 +56,6 @@ class EditProfileControllerIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private LoginService loginService;
-
     @PostConstruct
     public void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(editProfileController).build();
@@ -77,10 +73,10 @@ class EditProfileControllerIntegrationTest {
     private static Stream<Arguments> streamInvalidContractorDetails() {
         List<Object> errorsList = List.of(List.of("Invalid hourly rate"), List.of("Your phone number is invalid", "Invalid country code"), List.of("You must select one or more skills"));
         return Stream.of(
-                Arguments.of(-10f, "0", "999", null, errorsList),
-                Arguments.of(-999, "1000", "9999999999999999", null, errorsList),
-                Arguments.of(-99999, "10001", "9 9 9 9 9#$$%", null, errorsList),
-                Arguments.of(-99999, "10001", "99", null, errorsList)
+                Arguments.of(-10f, "0", "999", errorsList),
+                Arguments.of(-999, "1000", "9999999999999999", errorsList),
+                Arguments.of(-99999, "10001", "9 9 9 9 9#$$%", errorsList),
+                Arguments.of(-99999, "10001", "99", errorsList)
         );
     }
 
@@ -441,7 +437,7 @@ class EditProfileControllerIntegrationTest {
 
     @ParameterizedTest
     @MethodSource("streamInvalidContractorDetails")
-    void testEditContractor_invalidContractorDetails_stayOnEditProfilePage(float hourlyRate, String countryCode, String phoneNumber, Set<Skill> skills, List<Object> expectedErrors) throws Exception {
+    void testEditContractor_invalidContractorDetails_stayOnEditProfilePage(float hourlyRate, String countryCode, String phoneNumber, List<Object> expectedErrors) throws Exception {
         Contractor current = new Contractor("Jane", "Doe", "jane@doe.com", "password");
         current.grantAuthority("ROLE_USER");
         current.setHourlyRate(27.80f);
@@ -473,7 +469,5 @@ class EditProfileControllerIntegrationTest {
                 .andExpect(flash().attribute("hourlyRateError", expectedErrors.get(0)))
                 .andExpect(flash().attribute("phoneNumberError", expectedErrors.get(1)))
                 .andExpect(flash().attribute("skillsError", expectedErrors.get(2)));
-
     }
-
 }
