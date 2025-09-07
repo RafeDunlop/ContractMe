@@ -2,9 +2,6 @@ package nz.ac.canterbury.seng302.homehelper.validation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
-
-import org.springframework.stereotype.Service;
 
 import org.springframework.stereotype.Service;
 
@@ -41,7 +38,7 @@ public class LocationValidation {
         if (isRequired && (address == null || address.isBlank())) {
             errors.add("Street address is required.");
         }
-        if (address != null &&!address.matches("^[\\p{L}\\-'\\d\\s./]*$")) {
+        if (address != null &&!address.matches("^[\\p{L}\\-'\\d\\s./()]*$")) {
             errors.add("Street address contains invalid characters.");
         }
 

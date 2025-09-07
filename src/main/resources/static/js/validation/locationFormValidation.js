@@ -1,4 +1,4 @@
-const addressPattern = /^[\p{L}\-'\d\s.\/]*$/u;
+const addressPattern = /^[\p{L}\-'\d\s.\/()]*$/u;
 const suburbPattern = /^[\p{L}\d\-'\s]*$/u;
 const cityPattern = /^[\p{L}\-'\s]*$/u;
 const postcodePattern = /^(?:(?:\p{L}|\p{N})+(?: (?:\p{L}|\p{N})+)?)?$/u;
