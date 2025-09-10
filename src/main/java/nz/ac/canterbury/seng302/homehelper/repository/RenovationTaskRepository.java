@@ -29,7 +29,7 @@ public interface RenovationTaskRepository extends CrudRepository<RenovationTask,
      */
     @Modifying
     @Query("DELETE FROM RenovationTask rt WHERE rt.renovationRecord.id = :id")
-    void deleteTaskById(long id);
+    void deleteTasksWithRenovationId(long id);
 
     /**
      * Gets all {@code RenovationTask objects} whose due dates fall between the specified {@code LocalDate} objects, for the specified {@code RenovationRecord}
