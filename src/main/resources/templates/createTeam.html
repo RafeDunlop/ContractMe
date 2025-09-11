@@ -30,7 +30,6 @@
 
         <div class="container text-center">
             <div class="row">
-                <!-- Add an id on the Add Role col for JS to find it -->
                 <div id="add-role-card" th:if="${teamRequestDTO.skills?.size() < 5}" class="col">
 
                 <div class="card container border-5 border-dark-subtle align-items-center"
@@ -42,8 +41,12 @@
                 </div>
 
                 <div th:each="skill : ${teamRequestDTO.skills}" class="col skill-card">
-                    <div class="card container border-5 border-dark-subtle align-items-center"
+                    <div class="card container border-5 border-dark-subtle align-items-center position-relative skill-card-container"
                          style="padding-top: 7vh; padding-bottom: 7vh; max-width: 14vw; height: 35vh; margin: 5vh 5% 4vh;">
+
+                        <!-- Delete button (hidden by default, shows on hover) -->
+                        <button type="button" class="btn btn-sm btn-danger delete-skill-btn">✖</button>
+
                         <img src="images/default_profile/default.jpg" alt="default-icon"
                              style="width: 45%; margin-bottom: 3vh; margin-top: 1vh"/>
                         <h3 th:text="${#strings.capitalize(skill.replace('_', ' ').toLowerCase())}">skill</h3>

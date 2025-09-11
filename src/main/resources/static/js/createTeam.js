@@ -1,12 +1,8 @@
 function updateAddRoleVisibility() {
     const skillsGridRow = document.querySelector(".container.text-center .row");
     const addRoleCard = document.getElementById("add-role-card");
-    // Count current visible skill cards
-    // Skill cards have class "skill-card"
     const skillCards = skillsGridRow.querySelectorAll(".skill-card");
     const count = skillCards.length;
-    // Also count whether the Add Role is present
-    // If 5 or more, hide Add Role
     if (count >= 5) {
         if (addRoleCard) {
             addRoleCard.style.display = "none";
@@ -71,14 +67,16 @@ function addSkill() {
         const skillCol = document.createElement("div");
         skillCol.className = "col skill-card";
 
-        skillCard = document.createElement("div");
-        skillCard.className = "card container border-5 border-dark-subtle align-items-center";
-        skillCard.style.paddingTop = "7vh";
-        skillCard.style.paddingBottom = "4vh";
-        skillCard.style.maxWidth = "14vw";
-        skillCard.style.height = "35vh";
-        skillCard.style.margin = "5vh 5% 4vh";
+        const skillCardContainer = document.createElement("div");
+        skillCardContainer.className = "skill-card-container card container border-5 border-dark-subtle align-items-center";
+        skillCardContainer.style.paddingTop = "7vh";
+        skillCardContainer.style.paddingBottom = "4vh";
+        skillCardContainer.style.maxWidth = "14vw";
+        skillCardContainer.style.height = "35vh";
+        skillCardContainer.style.margin = "5vh 5% 4vh";
+        skillCardContainer.style.position = "relative";
 
+// Image and text
         const skillImg = document.createElement("img");
         skillImg.src = "icons/profile-icon.svg";
         skillImg.alt = "default-icon";
@@ -86,18 +84,29 @@ function addSkill() {
         skillImg.style.marginBottom = "1vh";
         skillImg.style.marginTop = "1vh";
 
-        const nameTitle = document.createElement("h4");
-        nameTitle.textContent = "???"; // if needed
-
         const skillTitle = document.createElement("h6");
         skillTitle.textContent = selectedSkillName;
 
-        skillCard.appendChild(skillImg);
-        skillCard.appendChild(nameTitle);
-        skillCard.appendChild(skillTitle);
-        skillCol.appendChild(skillCard);
+// Delete button
+        const deleteSkillBtn = document.createElement("div");
+        deleteSkillBtn.className = "delete-skill-btn";
+        deleteSkillBtn.textContent = "X";
 
+        deleteSkillBtn.addEventListener("click", () => {
+            skillCol.remove();
+            selectedSkillDisplay.remove();
+            updateErrorMessageLabels();
+            updateAddRoleVisibility();
+        });
+
+// Append elements
+        skillCardContainer.appendChild(deleteSkillBtn);
+        skillCardContainer.appendChild(skillImg);
+        skillCardContainer.appendChild(skillTitle);
+
+        skillCol.appendChild(skillCardContainer);
         skillsGridRow.appendChild(skillCol);
+
 
         skillDropdown.selectedIndex = 0;
 
