@@ -54,7 +54,7 @@ public class Contractor extends User {
      * @return The representation of the phone number supplied by the {@code Contractor}
      */
     public String getPhoneNumberFormatted() {
-        return String.format("+%d %s",
+        return String.format("+%s %s",
                 countryCode,
                 phoneNumber
         );
