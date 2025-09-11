@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -246,6 +247,31 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
      */
     @Query("SELECT f FROM RenovationRecord f WHERE (f.user) = (:user)")
     Page<RenovationRecord> findByUser(@Param("user") User user, @Nullable Pageable pageable);
+
+    @Query("SELECT r FROM RenovationRecord r" +
+            " WHERE (r.user) = (:user)" +
+            " AND r.location IS NOT NULL" +
+            " AND (r.location.latitude) <= (:maxLat)" +
+            " AND (r.location.latitude) >= (:minLat)" +
+            " AND (r.location.longitude) <= (:maxLon)" +
+            " AND (r.location.longitude) >= (:minLon)")
+    Collection<RenovationRecord> findOwnedWithinBox(@Param("user") User user,
+                                             @Param("minLat") Double minLat,
+                                             @Param("minLon") Double minLon,
+                                             @Param("maxLat") Double maxLat,
+                                             @Param("maxLon") Double maxLon);
+
+    @Query("SELECT r FROM RenovationRecord r" +
+            " WHERE r.isPublic" +
+            " AND r.location IS NOT NULL" +
+            " AND (r.location.latitude) <= (:maxLat)" +
+            " AND (r.location.latitude) >= (:minLat)" +
+            " AND (r.location.longitude) <= (:maxLon)" +
+            " AND (r.location.longitude) >= (:minLon)")
+    Collection<RenovationRecord> findPublicWithinBox(@Param("minLat") Double minLat,
+                                                     @Param("minLon") Double minLon,
+                                                     @Param("maxLat") Double maxLat,
+                                                     @Param("maxLon") Double maxLon);
 
     /**
      * Deletes a record from the renovations record table by its id. The id cannot be null/
