@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.homehelper.entity.users;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.ManyToOne;
 
 import java.time.LocalDateTime;
 
@@ -14,8 +13,7 @@ import java.time.LocalDateTime;
 @Embeddable
 public class Role {
 
-    @ManyToOne
-    private Contractor contractor;
+    private Long contractorId;
 
     @Column
     private LocalDateTime creationDate;
@@ -27,25 +25,26 @@ public class Role {
     public Role() {}
 
     public Role(Skill skill) {
-        this.contractor = null;
+        this.contractorId = null;
         this.skill = skill;
         this.accepted = false;
         creationDate = LocalDateTime.now();
     }
 
     public Role(Contractor contractor, Skill skill, boolean accepted) {
-        this.contractor = contractor;
+        this.contractorId = contractor.getId();
         this.skill = skill;
         this.accepted = accepted;
         creationDate = LocalDateTime.now();
     }
 
-    public Contractor getContractor() {
-        return contractor;
+    public Long getContractorId() {
+        return contractorId;
     }
 
     public void setContractor(Contractor contractor) {
-        this.contractor = contractor;
+        if (contractor == null) contractorId = 0L;
+        else contractorId = contractor.getId();
     }
 
     public Skill getSkill() {

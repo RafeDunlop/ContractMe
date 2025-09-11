@@ -12,6 +12,9 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class TeamsService {
+    private final Logger log = LoggerFactory.getLogger(TeamsService.class);
 
     private final TeamsRepository teamsRepository;
     private final TeamValidation teamValidation;
@@ -142,12 +146,14 @@ public class TeamsService {
      */
     public void sendContractorEmails(Team team) {
         for (Role role : team.getRoles()) {
-            Contractor recipient = role.getContractor();
-            if (recipient == null) continue;
-            String ownerName = team.getRenovationRecord().getUser().getFirstName();
-            emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
-                    team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
-
+            try {
+                Contractor recipient = contractorRepository.findById(role.getContractorId()).orElseThrow();
+                String ownerName = team.getRenovationRecord().getUser().getFirstName();
+                emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
+                        team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
+            } catch (NoSuchElementException e) {
+                log.debug("Role for skill {} has no contractor", role.getSkill());
+            }
         }
     }
 
@@ -160,7 +166,7 @@ public class TeamsService {
      */
     public List<Team> getContractorTeamRequests(User user) throws IllegalArgumentException {
         if (user instanceof Contractor contractor) {
-            return teamsRepository.findByRoleContractor(contractor);
+            return teamsRepository.findByRoleContractor(contractor.getId());
         } else {
             throw new IllegalArgumentException("User is not a contractor");
         }
@@ -176,7 +182,7 @@ public class TeamsService {
      */
     public Role getContractorRole(User user, Team team) throws ResponseStatusException {
         try {
-            return team.getRoles().stream().filter(r -> r.getContractor().equals(user)).findFirst().orElseThrow();
+            return team.getRoles().stream().filter(r -> r.getContractorId().equals(user.getId())).findFirst().orElseThrow();
         } catch (NoSuchElementException|NullPointerException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found");
         }
@@ -198,14 +204,15 @@ public class TeamsService {
         Set<String> visitedStates = new HashSet<>();
 
         for (Role emptyRole : team.getRoles()) {
-            if (emptyRole.getContractor() == null) {
+            if (emptyRole.getContractorId() == null) {
                 List<Role> candidatesToShuffle = team.getRoles().stream()
-                        .filter(r -> r.getContractor() != null)
-                        .filter(r -> r.getContractor().getSkills().contains(emptyRole.getSkill()))
+                        .filter(r -> r.getContractorId() != null)
+                        .filter(r ->  contractorRepository.findById(r.getContractorId())
+                                .map(contractor -> contractor.getSkills().contains(emptyRole.getSkill())).orElse(false))
                         .toList();
 
                 for (Role candidateRole : candidatesToShuffle) {
-                    Contractor contractorToMove = candidateRole.getContractor();
+                    Contractor contractorToMove = contractorRepository.findById(candidateRole.getContractorId()).orElse(null);
 
                     emptyRole.setContractor(contractorToMove);
                     candidateRole.setContractor(null);
@@ -247,8 +254,8 @@ public class TeamsService {
         }
 
         Set<Long> assignedIds = team.getRoles().stream()
-                .filter(r -> r.getContractor() != null)
-                .map(r -> r.getContractor().getId())
+                .map(Role::getContractorId)
+                .filter(contractorId -> contractorId != null && contractorId != 0L)
                 .collect(Collectors.toSet());
 
         Contractor candidate = findNearestContractor(roleToFill, location, assignedIds);
@@ -259,10 +266,11 @@ public class TeamsService {
 
         // No direct candidate found, try reassigning team members recursively:
         for (Role otherRole : team.getRoles()) {
-            if (otherRole != roleToFill && otherRole.getContractor() != null
-                    && otherRole.getContractor().getSkills().contains(roleToFill.getSkill())) {
+            Optional<Contractor> contractor = getContractorFromRole(otherRole);
+            if (otherRole != roleToFill && contractor.isPresent()
+                    && contractor.get().getSkills().contains(roleToFill.getSkill())) {
 
-                Contractor movingContractor = otherRole.getContractor();
+                Contractor movingContractor = contractor.get();
 
                 // Move contractor to current empty role
                 roleToFill.setContractor(movingContractor);
@@ -292,7 +300,7 @@ public class TeamsService {
         boolean allAssigned = true;
 
         for (Role role : team.getRoles()) {
-            if (role.getContractor() == null) {
+            if (role.getContractorId() == null) {
                 Contractor contractor = findNearestContractor(role, renovationLocation, assignedContractors);
                 if (contractor == null) {
                     allAssigned = false;
@@ -301,7 +309,7 @@ public class TeamsService {
                     assignedContractors.add(contractor.getId());
                 }
             } else {
-                assignedContractors.add(role.getContractor().getId());
+                assignedContractors.add(role.getContractorId());
             }
         }
 
@@ -333,9 +341,15 @@ public class TeamsService {
     private String serializeTeamAssignment(Team team) {
         return team.getRoles().stream()
                 .map(role -> {
-                    Contractor c = role.getContractor();
-                    return role.getSkill() + ":" + (c == null ? "null" : c.getId());
+                    Optional<Contractor> c = getContractorFromRole(role);
+                    return role.getSkill() + ":" + ((c.isEmpty()) ? "null" : c.get().getId());
                 })
                 .collect(Collectors.joining("|"));
+    }
+
+    private Optional<Contractor> getContractorFromRole(Role role) {
+        return (role.getContractorId() != null) ?
+                contractorRepository.findById(role.getContractorId()) :
+                Optional.empty();
     }
 }

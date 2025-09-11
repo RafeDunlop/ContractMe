@@ -24,7 +24,7 @@ public class Contractor extends User {
     private String phoneNumber;
 
     @Column
-    private String countryCode;
+    private int countryCode;
 
     @ElementCollection(targetClass = Skill.class)
     @Enumerated(EnumType.STRING)
@@ -54,7 +54,7 @@ public class Contractor extends User {
      * @return The representation of the phone number supplied by the {@code Contractor}
      */
     public String getPhoneNumberFormatted() {
-        return String.format("+%s %s",
+        return String.format("+%d %s",
                 countryCode,
                 phoneNumber
         );
@@ -107,7 +107,7 @@ public class Contractor extends User {
      * Returns the country code for the contractor's phone number.
      * @return the country code as an integer
      */
-    public String getCountryCode() {
+    public int getCountryCode() {
         return countryCode;
     }
 
@@ -115,7 +115,7 @@ public class Contractor extends User {
      * Sets the country code for the contractor's phone number
      * @param countryCode the country code
      */
-    public void setCountryCode(String countryCode) {
+    public void setCountryCode(int countryCode) {
         this.countryCode = countryCode;
     }
 

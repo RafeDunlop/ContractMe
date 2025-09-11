@@ -9,6 +9,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -469,5 +470,7 @@ class EditProfileControllerIntegrationTest {
                 .andExpect(flash().attribute("hourlyRateError", expectedErrors.get(0)))
                 .andExpect(flash().attribute("phoneNumberError", expectedErrors.get(1)))
                 .andExpect(flash().attribute("skillsError", expectedErrors.get(2)));
+
     }
+
 }

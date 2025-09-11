@@ -1,11 +1,13 @@
 package nz.ac.canterbury.seng302.homehelper.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 /**
  * Represents a team entity, associated with a renovation record
@@ -19,10 +21,10 @@ public class Team {
     private long id;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private RenovationRecord renovationRecord;
 
     @ElementCollection
-    @CollectionTable(name = "roles")
     private final List<Role> roles = new ArrayList<>();
 
     protected Team() {}

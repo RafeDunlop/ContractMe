@@ -62,7 +62,7 @@ public class ContractorServiceIntegrationTest {
         List<Skill> userRegisterDtoSkills = List.of(Skill.ELECTRICAL);
         userRegisterDTO.setSkills(userRegisterDtoSkills);
         userRegisterDTO.setPhoneNumber("0800111111");
-        userRegisterDTO.setCountryCode("64");
+        userRegisterDTO.setCountryCode(64);
 
         invalidUserRegisterDTO = new UserRegisterDTO();
         invalidUserRegisterDTO.setFirstName("John");

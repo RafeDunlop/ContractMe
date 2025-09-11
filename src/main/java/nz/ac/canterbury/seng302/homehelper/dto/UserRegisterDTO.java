@@ -10,7 +10,7 @@ public class UserRegisterDTO {
     private String email;
     private String password;
     private String confirmPassword;
-    private String countryCode;
+    private Integer countryCode;
     private boolean isContractor;
     private Float hourlyRate;
 
@@ -27,11 +27,11 @@ public class UserRegisterDTO {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getCountryCode() {
+    public Integer getCountryCode() {
         return countryCode;
     }
 
-    public void setCountryCode(String countryCode) {
+    public void setCountryCode(Integer countryCode) {
         this.countryCode = countryCode;
     }
 
@@ -70,7 +70,7 @@ public class UserRegisterDTO {
         this.isContractor = false;
     }
 
-    public UserRegisterDTO(String firstName, String lastName, String email, String password, String confirmPassword, boolean isContractor, String countryCode, String phoneNumber, List<Skill> skills, Float hourlyRate) {
+    public UserRegisterDTO(String firstName, String lastName, String email, String password, String confirmPassword, boolean isContractor, int countryCode, String phoneNumber, List<Skill> skills, Float hourlyRate) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
