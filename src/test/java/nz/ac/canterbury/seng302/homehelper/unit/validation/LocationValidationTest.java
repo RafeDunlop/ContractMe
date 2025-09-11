@@ -153,7 +153,7 @@ public class LocationValidationTest {
 
     public static Stream<String> getValidStreetAddress() {
         return Stream.of("34/140 Some-cool' street", "1 Nice street", "12345",
-                "Ørneborgvej 14", "œæÖę");
+                "Ørneborgvej 14", "œæÖę", "1 Hello Street (Real Address)");
     }
 
     public static Stream<String> getInvalidStreetAddress() {
