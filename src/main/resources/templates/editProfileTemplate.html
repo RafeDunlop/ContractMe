@@ -130,6 +130,13 @@
             <div th:class="'pb-3 ' + (${hasLocation} ? 'form-extension' : 'hidden-form-extension')" id="location-form">
                 <div th:replace="~{fragments/locationForm.html :: locationForm(
                      addressDTO=${addressDTO})}"></div>
+                <!-- Backend error -->
+                <div class="alert alert-danger mt-2" id="location-backend-error"
+                     th:attr="hidden=${locationError == null}">
+                    <ul>
+                        <li th:each="msg : ${locationError}" th:text="${msg}"></li>
+                    </ul>
+                </div>
             </div>
 
             <!-- Form submission buttons -->
