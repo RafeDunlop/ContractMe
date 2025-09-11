@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
@@ -33,7 +31,7 @@ public class RegisterServiceIntegrationTest {
     void setUp() {
         userRepositoryMock = Mockito.mock(UserRepository.class);
         UserValidation userValidation = new UserValidation();
-        registerService = new RegisterService(userRepositoryMock, userValidation, locationServiceMock);
+        registerService = new RegisterService(userRepositoryMock, userValidation);
     }
 
     @Test
