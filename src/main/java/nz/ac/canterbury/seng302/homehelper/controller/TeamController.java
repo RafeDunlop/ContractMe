@@ -113,6 +113,7 @@ public class TeamController {
     }
 
 
+
     /**
      * Handler for a get request to the join team fragment.
      * @return the join team fragment
@@ -132,6 +133,12 @@ public class TeamController {
         model.addAttribute("teamId", id);
         model.addAttribute("renovationId", renovationRecord.getId());
         return "fragments/joinTeam :: join-team";
+    }
+
+    @GetMapping("/view")
+    public String viewTeam(Model model) {
+        return "viewTeam";
+
     }
 
 
