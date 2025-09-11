@@ -75,14 +75,15 @@ public class LocationService {
      * maintain consistent data
      * @param addressDTO address data object passed from frontend
      * @return fully-formed {@link Location} object guaranteed to be supplied coordinates
+     * @throws LocationNotFoundException if valid coordinates could not be found for the location
      */
-    public Location locate(AddressDTO addressDTO) {
+    public Location locate(AddressDTO addressDTO) throws LocationNotFoundException {
         if (!hasCoords(addressDTO) && isLocationProvided(addressDTO)) {
             try {
                 injectCoordsViaGeocoding(addressDTO);
             } catch (IllegalArgumentException e) {
                 logger.warn("Failed to acquire location coordinates via geocoding: {}", e.getMessage());
-                throw new IllegalArgumentException("Please enter a valid address", e);
+                throw new LocationNotFoundException("Please enter a valid address", e);
             }
         }
         String loggedAddress = addressDTO.getLoggedAddress();

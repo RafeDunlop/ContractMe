@@ -68,11 +68,7 @@ public class ContractorService {
         contractor.setPhoneNumber(userRegisterDTO.getPhoneNumber());
         contractor.setCountryCode(userRegisterDTO.getCountryCode());
         userRegisterDTO.getSkills().forEach(contractor::addSkill);
-        try {
-            contractor.setLocation(locationService.locate(addressDTO));
-        } catch(IllegalArgumentException e) {
-            throw new LocationNotFoundException("Please enter a valid address", e);
-        }
+        contractor.setLocation(locationService.locate(addressDTO));
         contractor = contractorRepository.save(contractor);
         return contractor;
     }

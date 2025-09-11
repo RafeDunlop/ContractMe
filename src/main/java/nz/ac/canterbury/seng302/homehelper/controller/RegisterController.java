@@ -1,14 +1,13 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
-import java.util.Currency;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
+import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
-import nz.ac.canterbury.seng302.homehelper.service.LocationService;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.event.OnRegistrationCompleteEvent;
+import nz.ac.canterbury.seng302.homehelper.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,16 +15,16 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mail.MailException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-import jakarta.servlet.http.HttpServletRequest;
-import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.event.OnRegistrationCompleteEvent;
-import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
-import nz.ac.canterbury.seng302.homehelper.service.VerificationCodeService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Currency;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 
 /**
@@ -97,8 +96,14 @@ public class RegisterController {
 
 
         boolean locationProvided = locationService.isLocationProvided(addressDTO);
+        Location location = new Location();
         if (locationProvided) {
             errors.putAll(locationService.validateLocation(addressDTO));
+            try {
+                location = locationService.locate(addressDTO);
+            } catch (LocationNotFoundException e) {
+                errors.put("addressError", List.of(e.getMessage()));
+            }
         }
 
         if (userRegisterDTO.getIsContractor()) {
@@ -119,14 +124,20 @@ public class RegisterController {
                 user = contractorService.registerContractor(userRegisterDTO, addressDTO);
             } else {
                 user = registerService.registerUser(userRegisterDTO);
-                if (locationService.isLocationProvided(addressDTO)) {
-                    registerService.registerLocation(user, addressDTO);
+                if (locationProvided) {
+                    registerService.registerLocation(user, location);
                 }
             }
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
             return "redirect:/confirm-registration";
-        } catch (MailException e) {
-            redirectAttributes.addFlashAttribute("error", "Error sending confirmation email.");
+        } catch (MailException | LocationNotFoundException e) {
+            String errorMessage;
+            if (e instanceof MailException) {
+                errorMessage = "Error sending confirmation email.";
+            } else {
+                errorMessage = e.getMessage();
+            }
+            redirectAttributes.addFlashAttribute("error", errorMessage);
             redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
             redirectAttributes.addFlashAttribute("locationUsed", locationProvided);
