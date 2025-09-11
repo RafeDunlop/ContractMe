@@ -1,31 +1,25 @@
 package nz.ac.canterbury.seng302.homehelper.integration.service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import nz.ac.canterbury.seng302.homehelper.service.LocationService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @SpringBootTest
 public class RegisterServiceIntegrationTest {
 
     private RegisterService registerService;
     private UserRepository userRepositoryMock;
-
-    @MockBean
-    private LocationService locationServiceMock;
 
     @BeforeEach
     void setUp() {

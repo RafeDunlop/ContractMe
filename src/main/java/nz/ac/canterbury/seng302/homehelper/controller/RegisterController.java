@@ -102,7 +102,9 @@ public class RegisterController {
             try {
                 location = locationService.locate(addressDTO);
             } catch (LocationNotFoundException e) {
-                errors.put("addressError", List.of(e.getMessage()));
+                if (!errors.containsKey("addressError")) {
+                    errors.put("addressError", List.of(e.getMessage()));
+                }
             }
         }
 
