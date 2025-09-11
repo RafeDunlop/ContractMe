@@ -184,25 +184,6 @@ public class RenovationController {
     }
 
     /**
-     * Gets renovations located within a box described by the co-ordinates specified
-     * @param withPublic Whether to include public renovations not owned by teh logged-in user
-     * @param minLat The minimum latitude to be fetched
-     * @param minLon The minimum longitude to be fetched
-     * @param maxLat The maximum latitude to be fetched
-     * @param maxLon The maximum longitude to be fetched
-     * @return a {@link Collection} of {@link MappedRenovation} DTO objects which contain the minimal requisite details
-     */
-    public Collection<MappedRenovation> getByLocationInBounds(
-            @RequestParam(required = false, defaultValue = "true") boolean withPublic,
-            @RequestParam double minLat,
-            @RequestParam double minLon,
-            @RequestParam double maxLat,
-            @RequestParam double maxLon) {
-        User loggedIn = loginService.getUserByEmail();
-        return List.of();
-    }
-
-    /**
      * Deletes renovation record by its id, redirects back to my records page
      *
      * @param id of the record to be deleted
