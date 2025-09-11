@@ -135,6 +135,10 @@ public class TeamController {
         return "fragments/joinTeam :: join-team";
     }
 
+    /**
+     * Handler for a get request to the view team page.
+     * @return the view team page
+     */
     @GetMapping("/view")
     public String viewTeam(Model model) {
         return "viewTeam";

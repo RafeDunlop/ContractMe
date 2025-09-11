@@ -1,10 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+    <title>View Team</title>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
+
+
 <body>
 
+<div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+
+<div id="container" class="card container mt-5 shadow-sm">
+        <div id="content-header">
+            <div class="jumbotron d-flex justify-content-between align-items-center text-center">
+                <h1 id="header-title" class="text-black">View Team</h1>
+            </div>
+        </div>
+    </div>
 </body>
+
+<script type="module" th:src="@{/js/navbar.js}"></script>
+
 </html>
