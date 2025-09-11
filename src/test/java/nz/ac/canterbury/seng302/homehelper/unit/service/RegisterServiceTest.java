@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.homehelper.unit.service;
 
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.RegisterService;
 import nz.ac.canterbury.seng302.homehelper.validation.UserValidation;
 import org.junit.jupiter.api.Assertions;
