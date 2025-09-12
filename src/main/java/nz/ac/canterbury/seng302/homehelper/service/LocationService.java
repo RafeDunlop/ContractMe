@@ -82,7 +82,6 @@ public class LocationService {
             try {
                 injectCoordsViaGeocoding(addressDTO);
             } catch (IllegalArgumentException e) {
-                logger.warn("Failed to acquire location coordinates via geocoding: {}", e.getMessage());
                 throw new LocationNotFoundException("Please enter a valid address", e);
             }
         }

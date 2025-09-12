@@ -15,6 +15,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.LocationNotFoundException;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
@@ -23,9 +24,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -35,13 +38,18 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.server.ResponseStatusException;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
+
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -78,7 +86,7 @@ public class RenovationControllerIntegrationTest {
     @Autowired
     private RenovationRecordService renovationRecordService;
 
-    @SpyBean
+    @MockBean
     private LocationService locationService;
 
     private User currentUser;
@@ -1574,6 +1582,7 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord testRecord = new RenovationRecord(owner, "Test Record", "Description", List.of("Room A"));
         testRecord.setLocation(initialLocation);
         renovationRecordRepository.save(testRecord);
+        when(locationService.locate(ArgumentMatchers.any(AddressDTO.class))).thenThrow(new LocationNotFoundException("Please enter a valid address", new RuntimeException()));
 
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
                         .param("address_line1", "33 Fendylton Ave")
