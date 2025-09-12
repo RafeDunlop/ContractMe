@@ -1,7 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.e2e;
 
 import com.microsoft.playwright.Locator;
-import com.microsoft.playwright.options.LoadState;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -12,7 +11,6 @@ import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
-import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -24,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class DeleteTeamStepsE2e {
 
     private final UserContext userContext;
-    private RenovationRecord record;
+    private RenovationRecord renovationRecord;
 
     @Autowired
     private RenovationRecordRepository renovationRecordRepository;
@@ -40,13 +38,13 @@ public class DeleteTeamStepsE2e {
     public void i_am_viewing_the_renovation_view_page_for_a_renovation_i_own_with_a_team() {
         User user = userContext.getUser();
 
-        record = new RenovationRecord(user, "Record " + System.currentTimeMillis(), "", List.of());
-        record.setLocation(new Location("1 Test St", "NZ", "8011", "Christchurch", "CBD", -43.5309, 172.6365));
-        renovationRecordRepository.save(record);
+        renovationRecord = new RenovationRecord(user, "Record " + System.currentTimeMillis(), "", List.of());
+        renovationRecord.setLocation(new Location("1 Test St", "NZ", "8011", "Christchurch", "CBD", -43.5309, 172.6365));
+        renovationRecordRepository.save(renovationRecord);
 
-        teamsRepository.save(new Team(record));
+        teamsRepository.save(new Team(renovationRecord));
 
-        RunPlaywrightTests.page.navigate(RunPlaywrightTests.baseUrl + "/renovations/view?id=" + record.getId());
+        RunPlaywrightTests.page.navigate(RunPlaywrightTests.baseUrl + "/renovations/view?id=" + renovationRecord.getId());
     }
 
     @When("I click on the button called {string}")
@@ -102,6 +100,6 @@ public class DeleteTeamStepsE2e {
 
     @Then("I remain on the renovation view page")
     public void i_remain_on_the_renovation_view_page() {
-        assertEquals(RunPlaywrightTests.baseUrl + "/renovations/view?id=" + record.getId(), RunPlaywrightTests.page.url());
+        assertEquals(RunPlaywrightTests.baseUrl + "/renovations/view?id=" + renovationRecord.getId(), RunPlaywrightTests.page.url());
     }
 }
