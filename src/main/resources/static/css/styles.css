@@ -318,3 +318,13 @@
     border: solid 1px #D2D2D2;
     border-radius: 0.375rem;
 }
+
+.skill-card-container {
+    position: relative;
+}
+
+.delete-skill-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
