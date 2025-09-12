@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.config;
 
+import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
@@ -87,8 +88,9 @@ public class DefaultDataConfigurator {
         this.contractorRepository = contractorRepository;
     }
 
+    @Transactional
     @EventListener(ApplicationReadyEvent.class)
-    private void onApplicationReady() {
+    void onApplicationReady() {
         setupDefaultUsers();
         setupDefaultRenovations();
         setupDefaultRenovationTasks();
@@ -366,7 +368,7 @@ public class DefaultDataConfigurator {
 
     private void setupTeamRequest() {
         Role role = new Role((Contractor) default2, Skill.ANTIQUE_RESTORATION, false);
-        Team team = new Team(default1Renovation1);
+        Team team = teamsRepository.findByRenovationRecord(default1Renovation1);
         team.addRole(role);
         teamsService.saveTeam(team);
     }

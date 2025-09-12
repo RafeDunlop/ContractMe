@@ -60,8 +60,8 @@ public class DeleteTeamStepsE2e {
         Locator overlay = RunPlaywrightTests.page.locator("#overlay");
         assertThat(overlay).isVisible();
     }
-    @Then("the prompt text mentions deleting the team")
-    public void the_prompt_text_mentions_deleting_the_team() {
+    @Then("the prompt message asks me to confirm that I want to delete the team")
+    public void the_prompt_message_asks_me_to_confirm_that_i_want_to_delete_the_team() {
         String confirmText = RunPlaywrightTests.page.locator("#promptText").innerText().toLowerCase();
 
         org.junit.jupiter.api.Assertions.assertTrue(
