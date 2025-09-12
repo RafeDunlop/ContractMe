@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
@@ -137,6 +138,8 @@ public class TeamInvitationController {
         Team team = teamsService.getTeamById(teamId);
         Contractor contractor = contractorService.getContractorById(userId);
 
+        Location location = team.getRenovationRecord().getLocation();
+
         try {
             if (teamInvitationService.linkExpired(contractorService.getContractorById(userId), team)) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to decline invitation, link is no longer valid.");
@@ -146,6 +149,7 @@ public class TeamInvitationController {
         }
 
         teamInvitationService.declineContractor(contractor, team);
+        teamsService.assignContractorsToTeam(team, location);
 
         return "redirect:/view-requests";
     }

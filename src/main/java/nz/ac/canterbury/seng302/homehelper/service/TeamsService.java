@@ -352,4 +352,54 @@ public class TeamsService {
                 contractorRepository.findById(role.getContractorId()) :
                 Optional.empty();
     }
+
+    /**
+     * Runs the algorithm again, makes a set of current members before and after to check for new members.
+     * If new members are found they are notified by email.
+     * @param team The team to re-run the algorithm on.
+     * @param renovationLocation The location of the renovation record associated with the Team.
+     */
+    public void runAlgorithmAgain(Team team, Location renovationLocation) {
+        Set<Long> beforeIds = team.getRoles().stream()
+                .map(Role::getContractorId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        assignContractorsToTeam(team, renovationLocation);
+
+        Set<Long> newMemberIds = team.getRoles().stream()
+                .map(Role::getContractorId)
+                .filter(Objects::nonNull).collect(Collectors.toSet());
+        newMemberIds.removeAll(beforeIds);
+
+        if (!newMemberIds.isEmpty()) {
+            sendContractorEmailsTo(team, newMemberIds);
+        }
+    }
+
+    /**
+     * Sends contractors team invite emails, to specified contractors.
+     * @param team The team the contractors belong to.
+     * @param contractorIds The list of contractor Ids that need to be sent the invite email.
+     */
+    private void sendContractorEmailsTo(Team team, Set<Long> contractorIds) {
+        String ownerName = team.getRenovationRecord().getUser().getFirstName();
+
+        Map<Long, Role> roleByContractorId = new HashMap<>();
+
+        for (Role role : team.getRoles()) {
+            Long contractorId = role.getContractorId();
+            if (contractorId != null && contractorId != 0L) {
+                roleByContractorId.putIfAbsent(contractorId, role);
+            }
+        }
+
+        for (Long id : contractorIds) {
+            Contractor recipient = contractorRepository.findById(id).orElseThrow();
+            Role role = roleByContractorId.get(id);
+
+            emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
+                    team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
+        }
+    }
 }
