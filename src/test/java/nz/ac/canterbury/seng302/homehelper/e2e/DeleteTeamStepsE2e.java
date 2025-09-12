@@ -49,8 +49,8 @@ public class DeleteTeamStepsE2e {
         RunPlaywrightTests.page.navigate(RunPlaywrightTests.baseUrl + "/renovations/view?id=" + record.getId());
     }
 
-    @When("I click the {string} button")
-    public void i_click_the_button(String buttonName) {
+    @When("I click on the button called {string}")
+    public void i_click_on_the_button_called(String buttonName) {
         String buttonId = "#" + buttonName.toLowerCase().replaceAll("[^a-z0-9]+", "-") + "-button";
         RunPlaywrightTests.page.locator(buttonId).click();
     }
