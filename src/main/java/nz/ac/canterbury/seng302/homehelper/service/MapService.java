@@ -30,7 +30,7 @@ public class MapService {
      * @param withPublic Whether public renovations unowned by the logged-in user should be retrieved
      * @return {@link ArrayList} containing {@link MappedRenovation} which specify the minimal necessary data to display
      */
-    public Collection<MappedRenovation> getRenovationsInBounds(CoordinateRectangle coordinateRectangle, boolean withPublic) {
+    public List<MappedRenovation> getRenovationsInBounds(CoordinateRectangle coordinateRectangle, boolean withPublic) {
         User user = loginService.getUserByEmail();
         List<MappedRenovation> owned = getOwned(user, coordinateRectangle).toList();
         ArrayList<MappedRenovation> mappings = new ArrayList<>(owned);
