@@ -222,6 +222,23 @@ public class LocationService {
         return errors;
     }
 
+    /**
+     * Validate and return a location geolocated using {@link LocationService#locate(AddressDTO)}, adds an error list
+     * to the passed errors map with key "geolocationError" if the coordinates could not be found.
+     *
+     * @param addressDTO the address DTO object from the location form
+     * @param errors the error map used by the controller to present error messages
+     * @return the location if found, or a new empty Location object otherwise
+     */
+    public Location validateGeolocation(AddressDTO addressDTO, Map<String, List<String>> errors) {
+        Location location = new Location();
+        try {
+            location = locate(addressDTO);
+        } catch (LocationNotFoundException e) {
+            errors.put("geolocationError", List.of(e.getMessage()));
+        }
+        return location;
+    }
 
     /**
      * checks if the location has been provided

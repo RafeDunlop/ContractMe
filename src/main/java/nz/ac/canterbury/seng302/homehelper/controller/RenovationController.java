@@ -10,12 +10,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
-import nz.ac.canterbury.seng302.homehelper.service.LocationService;
-import nz.ac.canterbury.seng302.homehelper.service.LoginService;
-import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
-import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
-import nz.ac.canterbury.seng302.homehelper.service.TagService;
-import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
+import nz.ac.canterbury.seng302.homehelper.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,9 +142,7 @@ public class RenovationController {
 
         boolean locationProvided = locationService.isLocationProvided(addressDTO);
 
-        if (locationProvided) {
-            errors.putAll(locationService.validateLocation(addressDTO));
-        }
+        Location location = locationService.validateGeolocation(addressDTO, errors);
 
         if (!errors.isEmpty()) {
             // Add each error to a flash attribute, categorizing by error type
@@ -169,7 +162,7 @@ public class RenovationController {
                 RenovationRecord renovationRecord = new RenovationRecord(user, name, description, roomList);
 
                 renovationRecordService.addRenovationRecord(renovationRecord);
-                renovationRecordService.addRenovationLocation(renovationRecord,addressDTO);
+                renovationRecordService.addRenovationLocation(renovationRecord, location);
                 redirectAttributes.addFlashAttribute("renovation", renovationRecord);
                 return "redirect:/renovations/view?id=" + renovationRecord.getId();
 
@@ -299,6 +292,8 @@ public class RenovationController {
 
         Location currentLocation = renovationRecord.getLocation();
         errors.putAll(locationService.validateLocation(addressDTO));
+        addressDTO = locationService.updateEditedLocation(currentLocation, addressDTO);
+        Location newLocation = locationService.validateGeolocation(addressDTO, errors);
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
@@ -320,7 +315,7 @@ public class RenovationController {
 
         redirectAttributes.addFlashAttribute("renovation", renovationRecord);
 
-        renovationRecordService.updateRenovationLocation(renovationRecord, addressDTO); //updates existing record (identified by id)
+        renovationRecordService.updateRenovationLocation(renovationRecord, newLocation); //updates existing record (identified by id)
         return "redirect:/renovations/view?id=" + renovationRecord.getId();
     }
 

@@ -147,12 +147,8 @@ public class EditProfileController {
         // Checks if the user's location has been modified in the form and compares to their old location.
         Location currentLocation = newUser.getLocation();
         errors.putAll(locationService.validateLocation(addressDTO));
-        Location newLocation = currentLocation;
-        try {
-            newLocation = editProfileService.updateUserLocation(newUser, addressDTO);
-        } catch (LocationNotFoundException e) {
-            errors.put("geolocationError", List.of(e.getMessage()));
-        }
+        addressDTO = locationService.updateEditedLocation(currentLocation, addressDTO);
+        Location newLocation = locationService.validateGeolocation(addressDTO, errors);
         if (contractor != null) {
             errors.putAll(contractorService.validateContractor(contractorDTO, locationService.isLocationProvided(addressDTO)));
         }

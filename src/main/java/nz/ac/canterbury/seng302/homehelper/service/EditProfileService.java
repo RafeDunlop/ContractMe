@@ -12,9 +12,7 @@ import java.util.*;
 
 import javax.imageio.ImageIO;
 
-import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,7 +33,6 @@ public class EditProfileService {
 
     private final UserRepository userRepository;
     private final UserValidation userValidation;
-    private final LocationService locationService;
     private final String UPLOAD_DIR = "profile_pictures/";
 
     /**
@@ -48,7 +45,6 @@ public class EditProfileService {
     public EditProfileService(UserRepository userRepository, UserValidation userValidation, LocationService locationService) {
         this.userRepository = userRepository;
         this.userValidation = userValidation;
-        this.locationService = locationService;
     }
 
     /**
@@ -71,22 +67,6 @@ public class EditProfileService {
                 currentAuth.getAuthorities()
         );
         SecurityContextHolder.getContext().setAuthentication(newAuth);
-    }
-
-    /**
-     * Updates the location of a given user based on the provided address details.
-     * This method first updates the provided address details with some existing
-     * location information, and then determines the new location to associate
-     * with the user. The updated user object is returned.
-     *
-     * @param currentUser The user whose location is being updated.
-     * @param addressDTO The address details used to update the user's location.
-     * @return The updated user with the new location.
-     */
-    public Location updateUserLocation(User currentUser, AddressDTO addressDTO) {
-        Location currentLocation = currentUser.getLocation();
-        addressDTO = locationService.updateEditedLocation(currentLocation, addressDTO);
-        return locationService.locate(addressDTO);
     }
 
     /**
