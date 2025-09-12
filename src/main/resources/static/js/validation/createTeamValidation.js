@@ -3,6 +3,7 @@ function getSkillCount() {
     return document.querySelectorAll('.skill-card-container').length;
 }
 
+/** Display error message for too many roles */
 function displayTooManyRolesError() {
     let sizeFrontendError = document.getElementById("skill-frontend-error");
     let sizeFrontendErrorMessage = document.getElementById("skill-frontend-error-message");
