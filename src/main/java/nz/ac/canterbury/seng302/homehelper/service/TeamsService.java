@@ -362,14 +362,15 @@ public class TeamsService {
     public void runAlgorithmAgain(Team team, Location renovationLocation) {
         Set<Long> beforeIds = team.getRoles().stream()
                 .map(Role::getContractorId)
-                .filter(Objects::nonNull)
+                .filter(id -> id != null && id != 0L)
                 .collect(Collectors.toSet());
 
         assignContractorsToTeam(team, renovationLocation);
 
         Set<Long> newMemberIds = team.getRoles().stream()
                 .map(Role::getContractorId)
-                .filter(Objects::nonNull).collect(Collectors.toSet());
+                .filter(id -> id != null && id != 0L)
+                .collect(Collectors.toSet());
         newMemberIds.removeAll(beforeIds);
 
         if (!newMemberIds.isEmpty()) {

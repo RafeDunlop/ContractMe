@@ -149,7 +149,7 @@ public class TeamInvitationController {
         }
 
         teamInvitationService.declineContractor(contractor, team);
-        teamsService.assignContractorsToTeam(team, location);
+        teamsService.runAlgorithmAgain(team, location);
 
         return "redirect:/view-requests";
     }
