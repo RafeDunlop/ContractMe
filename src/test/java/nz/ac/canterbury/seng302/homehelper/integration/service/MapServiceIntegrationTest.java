@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@Transactional
 @ActiveProfiles("test")
 public class MapServiceIntegrationTest {
 
@@ -59,7 +61,6 @@ public class MapServiceIntegrationTest {
         );
         notLoggedIn = userRepository.save(notLoggedIn);
         when(loginService.getUserByEmail()).thenReturn(loggedIn);
-
     }
 
     private RenovationRecord registerRecord(User user, boolean publicity, double latitude, double longitude) {
@@ -90,13 +91,13 @@ public class MapServiceIntegrationTest {
                 5d,
                 5d
         );
-        registerRecord(loggedIn, false, 0d, 0d);
-        registerRecord(loggedIn, false, 4.999d, 0d);
+        long idFirst = registerRecord(loggedIn, false, 0d, 0d).getId();
+        long idSecond = registerRecord(loggedIn, false, 4.999d, 0d).getId();
         registerRecord(notLoggedIn, true, 2d, 2d);
         List<MappedRenovation> resultCaptive = toTest.getRenovationsInBounds(rectangle, false);
         assertEquals(2, resultCaptive.size());
-        assertEquals(1, resultCaptive.get(0).getId());
-        assertEquals(2, resultCaptive.get(1).getId());
+        assertEquals(idFirst, resultCaptive.get(0).getId());
+        assertEquals(idSecond, resultCaptive.get(1).getId());
     }
 
     @Test
@@ -107,15 +108,15 @@ public class MapServiceIntegrationTest {
                 5d,
                 5d
         );
-        registerRecord(loggedIn, false, 0d, 0d);
-        registerRecord(loggedIn, false, 4.999d, 0d);
-        registerRecord(notLoggedIn, true, 2d, 2d);
+        long idFirst = registerRecord(loggedIn, false, 0d, 0d).getId();
+        long idSecond = registerRecord(loggedIn, false, 4.999d, 0d).getId();
+        long idThird = registerRecord(notLoggedIn, true, 2d, 2d).getId();
         registerRecord(notLoggedIn, false, 3d, 3d);
         List<MappedRenovation> resultCaptive = toTest.getRenovationsInBounds(rectangle, true);
         assertEquals(3, resultCaptive.size());
-        assertEquals(1, resultCaptive.get(0).getId());
-        assertEquals(2, resultCaptive.get(1).getId());
-        assertEquals(3, resultCaptive.get(2).getId());
+        assertEquals(idFirst, resultCaptive.get(0).getId());
+        assertEquals(idSecond, resultCaptive.get(1).getId());
+        assertEquals(idThird, resultCaptive.get(2).getId());
     }
 
     @Test
@@ -126,13 +127,13 @@ public class MapServiceIntegrationTest {
                 0d,
                 0d
         );
-        registerRecord(loggedIn, false, 0d, 0d);
+        long idFirst = registerRecord(loggedIn, false, 0d, 0d).getId();
         registerRecord(loggedIn, false, 4.999d, 0d);
         registerRecord(notLoggedIn, true, 2d, 2d);
         registerRecord(notLoggedIn, false, 3d, 3d);
         List<MappedRenovation> resultCaptive = toTest.getRenovationsInBounds(rectangle, true);
         assertEquals(1, resultCaptive.size());
-        assertEquals(1, resultCaptive.get(0).getId());
+        assertEquals(idFirst, resultCaptive.get(0).getId());
     }
 
     @Test
