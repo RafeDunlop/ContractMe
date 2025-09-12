@@ -105,7 +105,7 @@ class LocationServiceTest {
         Mockito.doThrow(IllegalArgumentException.class).when(locationServiceSpy).injectCoordsViaGeocoding(Mockito.any(AddressDTO.class));
 
         LocationNotFoundException exception = assertThrows(LocationNotFoundException.class, () -> locationServiceSpy.locate(inputtedAddressDTO));
-        assertEquals("Please enter a valid address", exception.getMessage());
+        assertEquals("The address could not be found", exception.getMessage());
 
     }
 

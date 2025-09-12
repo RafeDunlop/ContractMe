@@ -82,7 +82,7 @@ public class LocationService {
             try {
                 injectCoordsViaGeocoding(addressDTO);
             } catch (IllegalArgumentException e) {
-                throw new LocationNotFoundException("Please enter a valid address", e);
+                throw new LocationNotFoundException("The address could not be found", e);
             }
         }
         String loggedAddress = addressDTO.getLoggedAddress();
