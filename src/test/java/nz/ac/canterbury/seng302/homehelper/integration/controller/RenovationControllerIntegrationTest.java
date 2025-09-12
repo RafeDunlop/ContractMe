@@ -49,6 +49,8 @@ import java.util.stream.StreamSupport;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -86,7 +88,7 @@ public class RenovationControllerIntegrationTest {
     @Autowired
     private RenovationRecordService renovationRecordService;
 
-    @MockBean
+    @SpyBean
     private LocationService locationService;
 
     private User currentUser;
@@ -1581,8 +1583,13 @@ public class RenovationControllerIntegrationTest {
         );
         RenovationRecord testRecord = new RenovationRecord(owner, "Test Record", "Description", List.of("Room A"));
         testRecord.setLocation(initialLocation);
-        renovationRecordRepository.save(testRecord);
-        when(locationService.locate(ArgumentMatchers.any(AddressDTO.class))).thenThrow(new LocationNotFoundException("Please enter a valid address", new RuntimeException()));
+        testRecord = renovationRecordRepository.save(testRecord);
+        doAnswer(invocationOnMock -> {
+            AddressDTO mockAddressDTO = invocationOnMock.getArgument(0);
+            mockAddressDTO.setLat(1D);
+            mockAddressDTO.setLon(1D);
+            return null;
+        }).when(locationService).injectCoordsViaGeocoding(any(AddressDTO.class));
 
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
                         .param("address_line1", "33 Fendylton Ave")
@@ -1600,7 +1607,7 @@ public class RenovationControllerIntegrationTest {
 
         RenovationRecord record = renovationRecordRepository.findById(testRecord.getId())
                 .orElseThrow(() -> new AssertionError("Optional null"));
-        Location location = testRecord.getLocation();
+        Location location = record.getLocation();
 
         assertEquals(initialLocation.getAddress(), location.getAddress(), "Address should not change");
         assertEquals(initialLocation.getCity(), location.getCity(), "City should not change");
