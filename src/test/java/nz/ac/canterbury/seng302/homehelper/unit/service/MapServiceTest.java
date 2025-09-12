@@ -75,7 +75,7 @@ public class MapServiceTest {
     }
 
     @Test
-    void getRenovationsInBounds_public_getsAllAndOneCopy() {
+    void getRenovationsInBounds_publicAndPrivate_getsAllAndOneCopy() {
         CoordinateRectangle rectangle = new CoordinateRectangle(
                 0d,
                 0d,
@@ -106,6 +106,40 @@ public class MapServiceTest {
         assertEquals(0, resultCaptive.get(0).getId());
         assertEquals(1, resultCaptive.get(1).getId());
         assertEquals(2, resultCaptive.get(2).getId());
+    }
+
+    @Test
+    void getRenovationsInBounds_publicAndPrivate_publicityMatches() {
+        CoordinateRectangle rectangle = new CoordinateRectangle(
+                0d,
+                0d,
+                1d,
+                1d
+        );
+        RenovationRecord privateOwned = mockRecord(0);
+        RenovationRecord publicOwned = mockRecord(1);
+        RenovationRecord publicNotOwned = mockRecord(2);
+        when(repository.findOwnedWithinBox(loggedIn,
+                rectangle.getMinLat(),
+                rectangle.getMinLat(),
+                rectangle.getMaxLat(),
+                rectangle.getMaxLon())
+        ).thenReturn(
+                List.of(privateOwned, publicOwned)
+        );
+        when(repository.findPublicWithinBox(
+                rectangle.getMinLat(),
+                rectangle.getMinLat(),
+                rectangle.getMaxLat(),
+                rectangle.getMaxLon())
+        ).thenReturn(
+                List.of(publicOwned, publicNotOwned)
+        );
+        List<MappedRenovation> resultCaptive = toTest.getRenovationsInBounds(rectangle, true);
+        assertEquals(3, resultCaptive.size());
+        assertFalse(resultCaptive.get(0).isUnownedPublic());
+        assertFalse(resultCaptive.get(1).isUnownedPublic());
+        assertTrue(resultCaptive.get(2).isUnownedPublic());
     }
 
 }
