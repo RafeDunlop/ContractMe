@@ -376,9 +376,9 @@ public class RenovationController {
         String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
-        // need to get team by id, to put team id into page
-        if (isOwner) {
-            Team team = teamsService.getTeamFromRenovation(record);
+        Team team = teamsService.getTeamFromRenovation(record);
+
+        if (isOwner && team != null) {
             model.addAttribute("teamId", team.getId());
         }
 
