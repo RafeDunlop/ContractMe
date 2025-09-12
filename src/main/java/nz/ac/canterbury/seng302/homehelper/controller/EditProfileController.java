@@ -8,10 +8,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
-import nz.ac.canterbury.seng302.homehelper.service.EditProfileService;
-import nz.ac.canterbury.seng302.homehelper.service.LocationService;
-import nz.ac.canterbury.seng302.homehelper.service.LoginService;
+import nz.ac.canterbury.seng302.homehelper.service.*;
 import nz.ac.canterbury.seng302.homehelper.util.LocaleUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,6 +147,12 @@ public class EditProfileController {
         // Checks if the user's location has been modified in the form and compares to their old location.
         Location currentLocation = newUser.getLocation();
         errors.putAll(locationService.validateLocation(addressDTO));
+        Location newLocation = currentLocation;
+        try {
+            newLocation = editProfileService.updateUserLocation(newUser, addressDTO);
+        } catch (LocationNotFoundException e) {
+            errors.put("geolocationError", List.of(e.getMessage()));
+        }
         if (contractor != null) {
             errors.putAll(contractorService.validateContractor(contractorDTO, locationService.isLocationProvided(addressDTO)));
         }
@@ -171,7 +174,7 @@ public class EditProfileController {
         newUser.setFirstName(updatedUser.getFirstName());
         newUser.setLastName(updatedUser.getLastName());
         newUser.setEmail(updatedUser.getEmail());
-        newUser = editProfileService.updateUserLocation(newUser, addressDTO);
+        newUser.setLocation(newLocation);
         if (contractor != null) {
             editProfileService.updateContractor(contractorDTO, contractor);
         } else {

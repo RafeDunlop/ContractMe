@@ -83,11 +83,10 @@ public class EditProfileService {
      * @param addressDTO The address details used to update the user's location.
      * @return The updated user with the new location.
      */
-    public User updateUserLocation(User currentUser, AddressDTO addressDTO) {
+    public Location updateUserLocation(User currentUser, AddressDTO addressDTO) {
         Location currentLocation = currentUser.getLocation();
         addressDTO = locationService.updateEditedLocation(currentLocation, addressDTO);
-        currentUser.setLocation(locationService.locate(addressDTO));
-        return currentUser;
+        return locationService.locate(addressDTO);
     }
 
     /**

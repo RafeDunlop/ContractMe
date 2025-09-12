@@ -102,9 +102,7 @@ public class RegisterController {
             try {
                 location = locationService.locate(addressDTO);
             } catch (LocationNotFoundException e) {
-                if (!errors.containsKey("addressError")) {
-                    errors.put("addressError", List.of(e.getMessage()));
-                }
+                errors.put("geolocationError", List.of(e.getMessage()));
             }
         }
 
@@ -132,13 +130,8 @@ public class RegisterController {
             }
             eventPublisher.publishEvent(new OnRegistrationCompleteEvent(user, request.getLocale()));
             return "redirect:/confirm-registration";
-        } catch (MailException | LocationNotFoundException e) {
-            String errorMessage;
-            if (e instanceof MailException) {
-                errorMessage = "Error sending confirmation email.";
-            } else {
-                errorMessage = e.getMessage();
-            }
+        } catch (MailException e) {
+            String errorMessage = "Error sending confirmation email.";
             redirectAttributes.addFlashAttribute("error", errorMessage);
             redirectAttributes.addFlashAttribute("userRegisterDTO", userRegisterDTO);
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);

@@ -379,7 +379,7 @@ public class RegisterControllerIntegrationTest {
                         .param("country", expectedLocation.getCountry()))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(view().name("redirect:/register"))
-                .andExpect(flash().attribute("addressError", List.of("Please enter a valid address")));
+                .andExpect(flash().attribute("geolocationError", List.of("Please enter a valid address")));
 
         verify(userRepository, never()).save(any(User.class));
         verify(locationService, never()).injectCoordsViaIpGeolocation(any(AddressDTO.class), anyString());
