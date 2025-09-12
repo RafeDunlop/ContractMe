@@ -17,7 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-public class MapServiceTest {
+class MapServiceTest {
 
     private MapService toTest;
 
@@ -35,10 +35,10 @@ public class MapServiceTest {
     }
 
     private RenovationRecord mockRecord(long id) {
-        RenovationRecord record = Mockito.mock(RenovationRecord.class);
-        when(record.getId()).thenReturn(id);
-        when(record.getLocation()).thenReturn(Mockito.mock(Location.class));
-        return record;
+        RenovationRecord renovation = Mockito.mock(RenovationRecord.class);
+        when(renovation.getId()).thenReturn(id);
+        when(renovation.getLocation()).thenReturn(Mockito.mock(Location.class));
+        return renovation;
     }
 
     @Test

@@ -32,7 +32,7 @@ import java.util.List;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @WithMockUser(username = "johnny.maps@gmail.com")
-public class MapControllerIntegrationTest {
+class MapControllerIntegrationTest {
 
     private ObjectMapper mapper;
 
@@ -77,13 +77,13 @@ public class MapControllerIntegrationTest {
     }
 
     private RenovationRecord registerRecord(User user, boolean publicity, double latitude, double longitude) {
-        RenovationRecord record = new RenovationRecord(
+        RenovationRecord renovation = new RenovationRecord(
                 user,
                 "name",
                 "description",
                 List.of()
         );
-        record.setLocation(new Location(
+        renovation.setLocation(new Location(
                 "street address",
                 "country",
                 "postcode",
@@ -92,8 +92,8 @@ public class MapControllerIntegrationTest {
                 latitude,
                 longitude
         ));
-        record.setPublicity(publicity);
-        return renovationRecordRepository.save(record);
+        renovation.setPublicity(publicity);
+        return renovationRecordRepository.save(renovation);
     }
 
     @Test

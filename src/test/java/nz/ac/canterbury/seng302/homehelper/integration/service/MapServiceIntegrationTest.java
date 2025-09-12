@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
-public class MapServiceIntegrationTest {
+class MapServiceIntegrationTest {
 
     @Autowired
     private MapService toTest;
@@ -64,13 +64,13 @@ public class MapServiceIntegrationTest {
     }
 
     private RenovationRecord registerRecord(User user, boolean publicity, double latitude, double longitude) {
-        RenovationRecord record = new RenovationRecord(
+        RenovationRecord renovation = new RenovationRecord(
                 user,
                 "name",
                 "description",
                 List.of()
         );
-        record.setLocation(new Location(
+        renovation.setLocation(new Location(
                 "street address",
                 "country",
                 "postcode",
@@ -79,8 +79,8 @@ public class MapServiceIntegrationTest {
                 latitude,
                 longitude
         ));
-        record.setPublicity(publicity);
-        return renovationRecordRepository.save(record);
+        renovation.setPublicity(publicity);
+        return renovationRecordRepository.save(renovation);
     }
 
     @Test
