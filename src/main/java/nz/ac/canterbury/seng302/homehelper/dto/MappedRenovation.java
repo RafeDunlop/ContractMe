@@ -10,6 +10,8 @@ public class MappedRenovation {
 
     private Location location;
 
+    private boolean unownedPublic;
+
     public boolean isUnownedPublic() {
         return unownedPublic;
     }
@@ -17,8 +19,6 @@ public class MappedRenovation {
     public void setUnownedPublic(boolean unownedPublic) {
         this.unownedPublic = unownedPublic;
     }
-
-    private boolean unownedPublic;
 
     public long getId() {
         return id;
