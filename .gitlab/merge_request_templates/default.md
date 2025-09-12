@@ -41,3 +41,6 @@
        pressing tab must move the user to the next element in an ordered manner. For example,
        pressing tab move down fields on a form, but does not move the cursor randomly between
        the different inputs.
+      
+## Post Review Checklist (to be done by review author)
+- [ ] [Manual Testing](https://eng-git.canterbury.ac.nz/seng302-2025/team-200/-/wikis/Manual%20Testing) passes on [test](https://csse-seng302-team200.canterbury.ac.nz/test/)
