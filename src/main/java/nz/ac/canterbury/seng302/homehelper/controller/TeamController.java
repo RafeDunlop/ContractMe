@@ -140,7 +140,9 @@ public class TeamController {
      * @return the view team page
      */
     @GetMapping("/view")
-    public String viewTeam(Model model) {
+    public String viewTeam(Model model, @RequestParam("id") Long id) {
+        Team team = teamsService.getTeamById(id);
+        model.addAttribute("team", team);
         return "viewTeam";
 
     }

@@ -9,6 +9,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
@@ -35,6 +36,7 @@ public class TeamsService {
     private final TeamValidation teamValidation;
     private final ContractorRepository contractorRepository;
     private final EmailService emailService;
+    private final RenovationRecordRepository renovationRecordRepository;
 
     /**
      * Constructs TeamsService with necessary dependencies.
@@ -42,11 +44,13 @@ public class TeamsService {
      * @param teamValidation Service used to validate team requests.
      */
     @Autowired
-    public TeamsService(TeamsRepository teamsRepository, TeamValidation teamValidation, ContractorRepository contractorRepository, EmailService emailService) {
+    public TeamsService(TeamsRepository teamsRepository, TeamValidation teamValidation, ContractorRepository contractorRepository, EmailService emailService,
+                        RenovationRecordRepository renovationRecordRepository) {
         this.teamsRepository = teamsRepository;
         this.teamValidation = teamValidation;
         this.contractorRepository = contractorRepository;
         this.emailService = emailService;
+        this.renovationRecordRepository = renovationRecordRepository;
     }
 
     /**
@@ -63,7 +67,9 @@ public class TeamsService {
             team.addRole(role);
         }
 
-        saveTeam(team);
+        Team newTeam = teamsRepository.save(team);
+        teamRecord.setTeamId(newTeam.getId());
+        renovationRecordRepository.save(teamRecord);
 
         Location renovationLocation = teamRecord.getLocation();
         String response = assignContractorsToTeam(team, renovationLocation);
