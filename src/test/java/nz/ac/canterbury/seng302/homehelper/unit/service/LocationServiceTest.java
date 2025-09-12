@@ -4,6 +4,7 @@ import nz.ac.canterbury.seng302.homehelper.config.Keys;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.service.LocationNotFoundException;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.validation.LocationValidation;
 import org.junit.jupiter.api.Assertions;
@@ -14,10 +15,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class LocationServiceTest {
 
@@ -55,8 +55,8 @@ class LocationServiceTest {
     @ParameterizedTest
     @MethodSource("streamValidLocationInputsWithCoordinates")
     void locate_inputValidLocationsWithCoordinates_returnLocationWithGivenDetails(String address, String suburb, String city,
-                                                                                         String postcode, String country, Double lat,
-                                                                                         Double lon) {
+                                                                                  String postcode, String country, Double lat,
+                                                                                  Double lon) {
         Location expectedLocation = new Location(address, country, postcode, city, suburb, lat, lon);
         AddressDTO inputtedAddressDTO = setAddressDTOValues(address, suburb, city, postcode, country);
         inputtedAddressDTO.setLat(lat);
@@ -93,34 +93,20 @@ class LocationServiceTest {
     }
 
     @Test
-    void locate_inputInvalidLocation_returnLocationWithIpDetails() {
+    void locate_inputInvalidLocation_throwsException() {
         String address = "Fake Address";
         String suburb = "Fake Suburb";
         String city = "Fake City";
         String postcode = "0000";
         String country = "Fake Country";
-        double lat = 1D;
-        double lon = 1D;
-        Location expectedLocation = new Location(address, country, postcode, city, suburb, lat, lon);
         AddressDTO inputtedAddressDTO = setAddressDTOValues(address, suburb, city, postcode, country);
-
-        // Return a fake IP address
-        Mockito.doReturn("127.0.0.1").when(locationServiceSpy).getIpFromRequest();
 
         // Throw an exception to simulate the API failing to find coordinates for the inputted location.
         Mockito.doThrow(IllegalArgumentException.class).when(locationServiceSpy).injectCoordsViaGeocoding(Mockito.any(AddressDTO.class));
 
-        // Prevent call to API and instead add coordinates to DTO when injectCoordsViaIpGeolocation is called.
-        Mockito.doAnswer(invocationOnMock -> {
-            AddressDTO mockAddressDTO = invocationOnMock.getArgument(0);
-            mockAddressDTO.setLat(1D);
-            mockAddressDTO.setLon(1D);
-            return null;
-        }).when(locationServiceSpy).injectCoordsViaIpGeolocation(Mockito.any(AddressDTO.class), Mockito.anyString());
+        LocationNotFoundException exception = assertThrows(LocationNotFoundException.class, () -> locationServiceSpy.locate(inputtedAddressDTO));
+        assertEquals("Please enter a valid address", exception.getMessage());
 
-        Location actualLocation = locationServiceSpy.locate(inputtedAddressDTO);
-
-        Assertions.assertEquals(expectedLocation, actualLocation);
     }
 
     @Test
