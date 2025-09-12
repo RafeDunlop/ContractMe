@@ -142,7 +142,11 @@ public class RenovationController {
 
         boolean locationProvided = locationService.isLocationProvided(addressDTO);
 
-        Location location = locationService.validateGeolocation(addressDTO, errors);
+        Location location = new Location();
+        if (locationProvided) {
+            errors.putAll(locationService.validateLocation(addressDTO));
+            location = locationService.validateGeolocation(addressDTO, errors);
+        }
 
         if (!errors.isEmpty()) {
             // Add each error to a flash attribute, categorizing by error type

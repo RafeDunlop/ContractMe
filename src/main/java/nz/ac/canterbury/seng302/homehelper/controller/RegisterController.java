@@ -96,7 +96,11 @@ public class RegisterController {
 
 
         boolean locationProvided = locationService.isLocationProvided(addressDTO);
-        Location location = locationService.validateGeolocation(addressDTO, errors);
+        Location location = new Location();
+        if (locationProvided) {
+            errors.putAll(locationService.validateLocation(addressDTO));
+            location = locationService.validateGeolocation(addressDTO, errors);
+        }
 
         if (userRegisterDTO.getIsContractor()) {
             errors.putAll(contractorService.validateContractor(userRegisterDTO, locationProvided));
