@@ -214,7 +214,7 @@ public class DefaultDataConfigurator {
         );
 
 
-        Location location = new Location("18 Kirkwood Avenue", NEW_ZEALAND, "8041", "Christchuch", "Upper Riccarton");
+        Location location = new Location("18 Kirkwood Avenue", NEW_ZEALAND, "8041", "Christchuch", "Upper Riccarton",-43.527887d,172.5846232);
         default1Renovation1.setLocation(location);
         default1Renovation1 = renovationRecordService.addRenovationRecord(default1Renovation1);
 
@@ -222,7 +222,7 @@ public class DefaultDataConfigurator {
                 "Jacuzzi for Fabian's Office",
                 "Description", defaultJERooms);
         default1Renovation2.setPublicity(true);
-        Location fabiansOfficeLocation = new Location("Jack Erskine", NEW_ZEALAND, "8041", "Christchurch", "Upper Riccarton");
+        Location fabiansOfficeLocation = new Location("Jack Erskine", NEW_ZEALAND, "8041", "Christchurch", "Upper Riccarton",-43.527887d,172.5846232);
         default1Renovation2.setLocation(fabiansOfficeLocation);
         default1Renovation2 = renovationRecordService.addRenovationRecord(default1Renovation2);
         default1Renovation2.setLocation(location);
