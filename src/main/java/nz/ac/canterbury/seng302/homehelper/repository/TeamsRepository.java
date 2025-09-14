@@ -2,7 +2,6 @@ package nz.ac.canterbury.seng302.homehelper.repository;
 
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -15,6 +14,7 @@ public interface TeamsRepository extends CrudRepository<Team, Long>{
     boolean existsByRenovationRecordId(Long id);
 
     Team findByRenovationRecord(RenovationRecord renovationRecord);
+
 
     /**
      * Find teams by contractor where the contractor has not yet accepted a role.

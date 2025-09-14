@@ -134,6 +134,25 @@ public class TeamsService {
     }
 
     /**
+     * For a given team, returns a map containing all contractor ids
+     * and their corresponding contractors.
+     * @param teamId the id of the team used
+     * @return the map of contractor ids and contractors
+     */
+    public Map<Long, Contractor> getContractorsByTeamId(long teamId) {
+        Map<Long, Contractor> contractors = new HashMap<>();
+        Team team = getTeamById(teamId);
+        for (Role role : team.getRoles()) {
+            if (role.getContractorId() != null) {
+                Long contractorId = role.getContractorId();
+                Optional<Contractor> contractor = contractorRepository.findById(contractorId);
+                contractor.ifPresent(value -> contractors.put(contractorId, value));
+            }
+        }
+        return contractors;
+    }
+
+    /**
      * Checks if a given user belongs to the team associated with a renovation record
      * @param renovationRecord the renovation record that we want to check the associated team
      * @param user the id of the user to check if they belong to the team

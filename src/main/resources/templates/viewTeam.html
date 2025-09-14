@@ -18,23 +18,29 @@
                 <h1 id="header-title" class="text-black">View Team</h1>
             </div>
         </div>
-    </div>
 
-    <!-- Role Card Display-->
-    <div class="container text-center">
-        <div class="row">
-            <div th:each="role : ${team.getRoles()}" class="col skill-card">
-                <div class="card container border-5 border-dark-subtle align-items-center position-relative skill-card-container"
-                     style="padding-top: 7vh; padding-bottom: 7vh; max-width: 14vw; height: 35vh; margin: 5vh 5% 4vh;">
 
-                    <!-- Delete button (hidden by default, shows on hover) -->
-                    <button type="button" class="btn btn-sm btn-danger delete-skill-btn">✖</button>
+        <!-- Role Card Display-->
 
-                    <h3 th:text="${role}">skill</h3>
+        <div class="container text-center">
+            <div class="row">
+                <div th:each="role : ${team.getRoles()}" class="col skill-card">
+                    <div class="card container border-5 border-dark-subtle align-items-center position-relative skill-card-container"
+                         style="padding-top: 7vh; padding-bottom: 7vh; max-width: 14vw; height: 35vh; margin: 5vh 5% 4vh;">
+
+                        <!-- Delete button (hidden by default, shows on hover) -->
+                        <button type="button" class="btn btn-sm btn-danger delete-skill-btn">✖</button>
+
+                        <h3 th:if="${role.getContractorId()}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h3>
+                        <h3 th:text="${role.getSkill().getDisplayName()}">skill</h3>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+
+
 </body>
 
 <script type="module" th:src="@{/js/navbar.js}"></script>
