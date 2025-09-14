@@ -31,9 +31,16 @@
 
                         <!-- Delete button (hidden by default, shows on hover) -->
                         <button type="button" class="btn btn-sm btn-danger delete-skill-btn">✖</button>
-
-                        <h3 th:if="${role.getContractorId()}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h3>
-                        <h3 th:text="${role.getSkill().getDisplayName()}">skill</h3>
+                        <div class="col-md-25  text-center" style="flex: 0 0 18%; max-width: 22%;">
+                            <img th:src="@{'/profile_pictures/' + ${contractors.get(role.getContractorId()).getProfilePicture()}}"
+                                 alt="Profile Picture"
+                                 class="img-fluid rounded-circle"
+                                 style="width: 200px; height: 200px; object-fit: cover;">
+                        </div>
+                        <h3 th:if="${role.getContractorId() != null && role.isAccepted()}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h3>
+                        <h3 th:if="${role.getContractorId() != null && !role.isAccepted()}">Invite Sent!</h3>
+                        <h3 th:if="${role.getContractorId() == null}">No Contractor Found</h3>
+                        <h3 th:text="${role.getSkill().getDisplayName()}"></h3>
                     </div>
                 </div>
             </div>
