@@ -21,7 +21,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -40,6 +40,7 @@ public class TeamServiceTest {
     private EmailService emailService;
     @Mock
     private RenovationRecordRepository renovationRecordRepository;
+
 
     @BeforeEach
     void setUp() {
@@ -297,4 +298,25 @@ public class TeamServiceTest {
         Contractor contractor = new Contractor("Bob", "Doe", "bob@doe.com", "encoded");
         assertThrows(ResponseStatusException.class, () -> teamsService.getContractorRole(contractor, team));
     }
+
+    /*@Test
+    void getContractorMap_allRolesFilled_returnsFullMap() {
+        Team team = new Team(new RenovationRecord());
+        List<Skill> skills = Arrays.asList(Skill.PLUMBING, Skill.ELECTRICAL, Skill.ACOUSTIC_INSULATION, Skill.ARCHITECTURE, Skill.ASBESTOS_REMOVAL);
+        Map<Long, Contractor> expectedMap = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            Role role = new Role(skills.get(i));
+            Contractor contractor = new Contractor("Bob", "Contractor", "bob" + i + "contractor@gmail.com", "encoded");
+            expectedMap.put((long) i, contractor);
+            role.setContractor(contractor);
+            team.addRole(role);
+
+            when(contractorRepository.findById((long) i)).thenReturn(Optional.of(contractor));
+
+        }
+
+        when(teamsRepository.findById(0L)).thenReturn(Optional.of(team));
+        assertEquals(expectedMap, teamsService.getContractorsByTeamId(team.getId()));
+
+    }*/
 }

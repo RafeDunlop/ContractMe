@@ -134,7 +134,8 @@ public class TeamsService {
     }
 
     /**
-     * For a given team, returns a map containing all contractor ids
+     * For a given team, returns a map containing all contractor ids. Can return a partially
+     * or wholly empty map if some or all of the roles are unfilled.
      * and their corresponding contractors.
      * @param teamId the id of the team used
      * @return the map of contractor ids and contractors
