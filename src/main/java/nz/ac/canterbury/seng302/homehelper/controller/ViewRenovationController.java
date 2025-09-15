@@ -39,8 +39,8 @@ public class ViewRenovationController {
     private final LoginService loginService;
     private final LocationService locationService;
 
-    private static final String renovationNotFound = "This renovation does not exist";
-    private static final String renovationNotAccessible = "This renovation is not accessible";
+    private static final String RENOVATION_NOT_FOUND = "This renovation does not exist";
+    private static final String RENOVATION_NOT_ACCESSIBLE = "This renovation is not accessible";
 
     /**
      * Autowired constructor for the request inbox controller
@@ -81,14 +81,14 @@ public class ViewRenovationController {
 
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, renovationNotFound);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_FOUND);
         }
 
         User user = loginService.getUserByEmail();
         boolean isOwner = user.equals(renovationRecord.getUser());
 
         if (!isOwner && !renovationRecord.isPublic() && !teamsService.checkViewRenovationAccess(renovationRecord, user)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, renovationNotAccessible);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_ACCESSIBLE);
         }
 
         List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
@@ -133,13 +133,13 @@ public class ViewRenovationController {
         logger.info("dateEdited: {}", dateEdited);
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, renovationNotFound);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_FOUND);
         }
 
         User user = loginService.getUserByEmail();
         boolean isOwner = user.equals(renovationRecord.getUser());
         if (!isOwner) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, renovationNotAccessible);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_ACCESSIBLE);
         }
 
         injectDateElements(year, month, dateEdited, model, renovationRecord);
@@ -202,14 +202,14 @@ public class ViewRenovationController {
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
 
         if (renovationRecord == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, renovationNotFound);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_FOUND);
         }
 
         User user = loginService.getUserByEmail();
         boolean isOwner = user.equals(renovationRecord.getUser());
 
         if (!isOwner && !renovationRecord.isPublic() && !teamsService.checkViewRenovationAccess(renovationRecord, user)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, renovationNotAccessible);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_ACCESSIBLE);
         }
 
         if (cardsPerPage < 1) {

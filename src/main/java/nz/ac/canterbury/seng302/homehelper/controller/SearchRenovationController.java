@@ -33,7 +33,7 @@ public class SearchRenovationController {
     private final TagService tagService;
 
     /**
-     * Autowired constructor for the request inbox controller
+     * Autowired constructor for the search renovation controller
      * @param renovationRecordService Service methods for the renovation records
      * @param loginService Service methods for getting the current user
      * @param tagService Service methods for the tags

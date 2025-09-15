@@ -28,10 +28,10 @@ public class EditRenovationController {
     private final LoginService loginService;
     private final LocationService locationService;
 
-    private static final String renovationModelAttribute = "renovation";
+    private static final String RENOVATION_MODEL_ATTRIBUTE = "renovation";
 
     /**
-     * Autowired constructor for the request inbox controller
+     * Autowired constructor for the edit renovation controller
      * @param renovationRecordService Service methods for the renovation records
      * @param loginService Service methods for getting the current user
      * @param locationService Service methods for the locations
@@ -67,7 +67,7 @@ public class EditRenovationController {
 
         // Only add the renovation object if not already present (e.g. from flash attributes)
         if (!model.containsAttribute("name")) {
-            model.addAttribute(renovationModelAttribute, renovationRecord);
+            model.addAttribute(RENOVATION_MODEL_ATTRIBUTE, renovationRecord);
         }
 
         if (!locationService.isLocationProvided(addressDTO)) {
@@ -143,7 +143,7 @@ public class EditRenovationController {
             redirectAttributes.addFlashAttribute("name", name);
             redirectAttributes.addFlashAttribute("description", description);
             redirectAttributes.addFlashAttribute("roomList", roomList);
-            redirectAttributes.addFlashAttribute(renovationModelAttribute, renovationRecord);
+            redirectAttributes.addFlashAttribute(RENOVATION_MODEL_ATTRIBUTE, renovationRecord);
             redirectAttributes.addFlashAttribute("addressDTO", addressDTO);
             if (currentLocation != null || locationService.isLocationProvided(addressDTO)) {
                 redirectAttributes.addFlashAttribute("locationUsed", true);
@@ -154,7 +154,7 @@ public class EditRenovationController {
 
         renovationRecord.setName(name); // don't set the name until the changes are valid to avoid db divergence
 
-        redirectAttributes.addFlashAttribute(renovationModelAttribute, renovationRecord);
+        redirectAttributes.addFlashAttribute(RENOVATION_MODEL_ATTRIBUTE, renovationRecord);
 
         renovationRecordService.updateRenovationLocation(renovationRecord, addressDTO); //updates existing record (identified by id)
         return "redirect:/renovations/view?id=" + renovationRecord.getId();

@@ -11,6 +11,9 @@ import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +25,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.hamcrest.Matchers.is;
@@ -53,6 +57,14 @@ class SearchRenovationControllerIntegrationTest {
     private User currentUser;
     private User owner;
     private MockHttpSession session;
+
+    private static Stream<Arguments> streamRenovationRecordPagination() {
+        return Stream.of(
+                Arguments.of("-100", "5", 4, 0),
+                Arguments.of("1", "0", 20, 0),
+                Arguments.of("0", "5", 4, 0)
+        );
+    }
 
     @BeforeEach
     void setupUser() {
@@ -162,43 +174,24 @@ class SearchRenovationControllerIntegrationTest {
     /**
      * Tests that selecting a page out of bounds will redirect to the last page.
      */
-    @Test
-    void getRenovationRecord_selectOutOfBoundsPage_returnsLastPage() throws Exception {
+    @ParameterizedTest
+    @MethodSource("streamRenovationRecordPagination")
+    void getRenovationRecord_selectInvalidValues_returnsDefaultPages(String pageParam, String cardsPerPageParam,
+                                                                   int expectedTotalPages, int expectedPageLength) throws Exception {
         for (int i = 0; i < 20; i++) {
             renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
         }
 
         MvcResult result = mockMvc.perform(get("/renovations/retrieve")
-                        .param("page", "100")
-                        .param("cardsPerPage", "5"))
+                        .param("page", pageParam)
+                        .param("cardsPerPage", cardsPerPageParam))
                 .andExpect(status().isOk())
                 .andReturn();
 
         JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
 
-        assertEquals(4, root.get("totalPages").asInt());
-        assertEquals(3, root.get("number").asInt());
-    }
-
-    /**
-     * Tests that selecting a page out of bounds will redirect to the last page.
-     */
-    @Test
-    void getRenovationRecord_selectNegativePage_returnsFirstPage() throws Exception {
-        for (int i = 0; i < 20; i++) {
-            renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
-        }
-
-        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
-                        .param("page", "-100")
-                        .param("cardsPerPage", "5"))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
-
-        assertEquals(4, root.get("totalPages").asInt());
-        assertEquals(0, root.get("number").asInt());
+        assertEquals(expectedTotalPages, root.get("totalPages").asInt());
+        assertEquals(expectedPageLength, root.get("number").asInt());
     }
 
     /**
@@ -220,27 +213,6 @@ class SearchRenovationControllerIntegrationTest {
         JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
 
         assertEquals(20, root.get("totalPages").asInt());
-        assertEquals(0, root.get("number").asInt());
-    }
-
-    /**
-     * Tests that requesting a page number of 0 will redirect to the first page.
-     */
-    @Test
-    void getRenovationRecord_zeroPageNumber_returnsFirstPage() throws Exception {
-        for (int i = 0; i < 20; i++) {
-            renovationRecordRepository.save(new RenovationRecord(currentUser, "Renovation " + i, "Some words", List.of("Room 1")));
-        }
-
-        MvcResult result = mockMvc.perform(get("/renovations/retrieve")
-                        .param("page", "0")
-                        .param("cardsPerPage", "5"))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        JsonNode root = new ObjectMapper().readTree(result.getResponse().getContentAsString());
-
-        assertEquals(4, root.get("totalPages").asInt());
         assertEquals(0, root.get("number").asInt());
     }
 
