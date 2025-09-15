@@ -54,6 +54,7 @@ public class TeamInvitationService {
         Role role = findAssignedRole(team, contractor);
         role.setAccepted(false);
         role.setContractor(null);
+        team.addBlacklistId(contractor.getId());
         teamsRepository.save(team);
     }
 
