@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Locale;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.atMost;
@@ -243,6 +244,57 @@ public class TeamControllerIntegrationTest {
                 .andExpect(model().attribute("teamId", team.getId()))
                 .andExpect(model().attribute("renovationId", renovationRecord.getId()))
                 .andExpect(view().name("fragments/joinTeam :: join-team"));
+    }
+
+    @Test
+    void viewTeam_rendersThreeRoleCards_andShowsCorrectTexts() throws Exception {
+        Team team = new Team(renovationRecord);
+
+        //Accepted contractor
+        Contractor alice = contractorRepository.save(new Contractor("Alice", "Builder", "alice@test.nz", "pw"));
+        alice.setProfilePicture("alice.jpg");
+        contractorRepository.save(alice);
+        Role accepted = new Role(Skill.CARPENTRY);
+        accepted.setContractor(alice);
+        accepted.setAccepted(true);
+        team.addRole(accepted);
+
+        //Pending contractor
+        Contractor bob = contractorRepository.save(new Contractor("Bob", "Spark", "bob@test.nz", "pw"));
+        bob.setProfilePicture("bob.jpg");
+        contractorRepository.save(bob);
+        Role pending = new Role(Skill.ELECTRICAL);
+        pending.setContractor(bob);
+        pending.setAccepted(false);
+        team.addRole(pending);
+
+        //No contractor
+        Role empty = new Role(Skill.PLUMBING);
+        team.addRole(empty);
+
+        team = teamsRepository.save(team);
+
+        mockMvc.perform(get("/renovations/team/view")
+                        .param("id", team.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("viewTeam"))
+                .andExpect(model().attributeExists("team"))
+                .andExpect(model().attributeExists("contractors"))
+                .andExpect(content().string(containsString("<title>View Team</title>")))
+                .andExpect(content().string(containsString("<h1 id=\"header-title\" class=\"text-black\">View Team</h1>")))
+                //Accepted contractor shows full name and skill
+                .andExpect(content().string(containsString("Alice Builder")))
+                .andExpect(content().string(containsString("Carpentry")))
+                .andExpect(content().string(containsString("/profile_pictures/alice.jpg")))
+                //Pending contractor shows Invite Sent and image and skill
+                .andExpect(content().string(containsString("Invite Sent!")))
+                .andExpect(content().string(containsString("/profile_pictures/bob.jpg")))
+                .andExpect(content().string(containsString("Electrical")))
+                //Empty role shows No Contractor Found, default icon, and skill
+                .andExpect(content().string(containsString("No Contractor Found")))
+                .andExpect(content().string(containsString("icons/profile-icon.svg")))
+                .andExpect(content().string(containsString("Plumbing")));
+
     }
 
 }
