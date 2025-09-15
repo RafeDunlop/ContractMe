@@ -12,6 +12,7 @@ import java.util.Arrays;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
 import nz.ac.canterbury.seng302.homehelper.service.*;
@@ -54,6 +55,7 @@ public class DefaultDataConfigurator {
     private final TeamsRepository teamsRepository;
     private final TeamsService teamsService;
     private final ContractorRepository contractorRepository;
+    private final RenovationRecordRepository renovationRecordRepository;
 
     private User default1;
 
@@ -75,7 +77,7 @@ public class DefaultDataConfigurator {
                                    RenovationRecordService renovationRecordService,
                                    RenovationTaskService renovationTaskService,
                                    VerificationCodeService verificationCodeService,
-                                   TagService tagService, ContractorService contractorService, TeamsRepository teamsRepository, TeamsService teamsService, ContractorRepository contractorRepository) {
+                                   TagService tagService, ContractorService contractorService, TeamsRepository teamsRepository, TeamsService teamsService, ContractorRepository contractorRepository, RenovationRecordRepository renovationRecordRepository) {
         this.registerService = registerService;
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
@@ -85,6 +87,7 @@ public class DefaultDataConfigurator {
         this.teamsRepository = teamsRepository;
         this.teamsService = teamsService;
         this.contractorRepository = contractorRepository;
+        this.renovationRecordRepository = renovationRecordRepository;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -94,7 +97,6 @@ public class DefaultDataConfigurator {
         setupDefaultRenovationTasks();
         setupDefaultTags();
         setupDefaultTeamData();
-        setupDefaultTeams();
         setupTeamRequest();
     }
 
@@ -177,8 +179,8 @@ public class DefaultDataConfigurator {
 
     private void setupDefaultRenovations() {
         default2Renovation1 = new RenovationRecord(default2,
-                "Jack Erskine revamp",
-                "CSSE building => palace of slay",
+                "Central Library revamp",
+                "Library=> palace of slay",
                 defaultJERooms
         );
 
@@ -227,17 +229,6 @@ public class DefaultDataConfigurator {
         default1Renovation2 = renovationRecordService.addRenovationRecord(default1Renovation2);
         default1Renovation2.setLocation(location);
         renovationRecordService.addRenovationRecord(default1Renovation2);
-    }
-
-    private void setupDefaultTeams() {
-        Team team = new Team(default2Renovation1);
-        ArrayList<String> skillsList = new ArrayList<>(Arrays.asList("ANTIQUE_RESTORATION", "ARCHITECTURE", "ASBESTOS_REMOVAL", "AUTOMATION_SYSTEMS", "BUILDING_CODE_CONSULTATION"));
-        List<Role> roles = teamsService.createRoles(skillsList);
-        for(Role role : roles) {
-            team.addRole(role);
-        }
-        teamsService.saveTeam(team);
-
     }
 
 
@@ -363,6 +354,8 @@ public class DefaultDataConfigurator {
         Team team = new Team(default1Renovation1);
         team.addRole(new Role(defaulContractor, Skill.CARPENTRY, false));
         team = teamsRepository.save(team);
+        default1Renovation1.setTeamId(team.getId());
+        renovationRecordRepository.save(default1Renovation1);
         logger.info("creating default team with id {}", team.getId());
     }
 

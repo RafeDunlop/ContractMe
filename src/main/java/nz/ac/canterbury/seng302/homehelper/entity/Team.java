@@ -18,7 +18,7 @@ import org.hibernate.annotations.OnDeleteAction;
 public class Team {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
