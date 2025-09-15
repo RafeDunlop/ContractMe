@@ -4,12 +4,11 @@ import nz.ac.canterbury.seng302.homehelper.dto.CoordinateRectangle;
 import nz.ac.canterbury.seng302.homehelper.dto.MappedRenovation;
 import nz.ac.canterbury.seng302.homehelper.service.MapService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 
-@Controller
+@RestController
 @RequestMapping("/map")
 public class MapController {
 
@@ -29,7 +28,6 @@ public class MapController {
      * @return a {@link Collection} of {@link MappedRenovation} DTO objects which contain the minimal requisite details
      */
     @GetMapping("/renovations")
-    @ResponseBody
     public Collection<MappedRenovation> getByLocationInBounds(
             @RequestParam(required = false, defaultValue = "true") boolean withPublic,
             @ModelAttribute CoordinateRectangle coordinateRectangle) {
