@@ -16,11 +16,7 @@ function debounce(func, wait) {
 if (locationResponse.ok) {
     const locationData = await locationResponse.json();
     const { latitude, longitude } = locationData.location;
-    const map = L.map('map', {
-        center: [latitude, longitude],
-        zoom: 11,
-        maxZoom: 14
-    });
+    const map = L.map('map').setView([latitude, longitude], 11);
 
     const handleMapChange = () => {
         const bounds = map.getBounds();
@@ -32,6 +28,7 @@ if (locationResponse.ok) {
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
+        minZoom: 3,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
