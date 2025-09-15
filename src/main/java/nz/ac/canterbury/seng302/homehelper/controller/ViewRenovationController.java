@@ -5,6 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.CalendarCellDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.*;
 import org.slf4j.Logger;
@@ -96,9 +97,16 @@ public class ViewRenovationController {
         String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
+
+
         injectDateElements(year, month, dateEdited, model, renovationRecord);
         model.addAttribute("dateEdited", dateEdited);
 
+        Team team = teamsService.getTeamFromRenovation(renovationRecord);
+
+        if (isOwner && team != null) {
+            model.addAttribute("teamId", team.getId());
+        }
 
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
         model.addAttribute("hasLocation", locationService.hasLocation(renovationRecord));
