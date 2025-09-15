@@ -140,7 +140,7 @@ public class TeamsService {
      * @param teamId the id of the team used
      * @return the map of contractor ids and contractors
      */
-    public Map<Long, Contractor> getContractorsByTeamId(long teamId) {
+    public Map<Long, Contractor> getContractorsByTeamId(Long teamId) {
         Map<Long, Contractor> contractors = new HashMap<>();
         Team team = getTeamById(teamId);
         for (Role role : team.getRoles()) {

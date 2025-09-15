@@ -27,20 +27,30 @@
             <div class="row">
                 <div th:each="role : ${team.getRoles()}" class="col skill-card">
                     <div class="card container border-5 border-dark-subtle align-items-center position-relative skill-card-container"
-                         style="padding-top: 7vh; padding-bottom: 7vh; max-width: 14vw; height: 35vh; margin: 5vh 5% 4vh;">
+                         style="padding-top: 2vh; padding-bottom: 7vh; max-width: 14vw; min-width: 6vw; height: 35vh; margin: 5vh 5% 4vh;">
 
-                        <!-- Delete button (hidden by default, shows on hover) -->
-                        <button type="button" class="btn btn-sm btn-danger delete-skill-btn">✖</button>
-                        <div class="col-md-25  text-center" style="flex: 0 0 18%; max-width: 22%;">
+                        <!-- Delete button -->
+
+                        <button type="button" class="delete-skill-btn btn btn-outline-danger custom-light-border ms-3">❌</button>
+
+
+
+                        <div th:if="${role.getContractorId() != null}" class="col-md-25  text-center" style="flex: 0 0 18%;">
                             <img th:src="@{'/profile_pictures/' + ${contractors.get(role.getContractorId()).getProfilePicture()}}"
                                  alt="Profile Picture"
                                  class="img-fluid rounded-circle"
-                                 style="width: 200px; height: 200px; object-fit: cover;">
+                                 style="max-width: 125px; max-height: 125px; object-fit: cover;">
                         </div>
-                        <h3 th:if="${role.getContractorId() != null && role.isAccepted()}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h3>
-                        <h3 th:if="${role.getContractorId() != null && !role.isAccepted()}">Invite Sent!</h3>
-                        <h3 th:if="${role.getContractorId() == null}">No Contractor Found</h3>
-                        <h3 th:text="${role.getSkill().getDisplayName()}"></h3>
+                        <div th:if="${role.getContractorId() == null}" class="col-md-25  text-center" style="flex: 0 0 18%;">
+                            <img th:src="@{'icons/profile-icon.svg'}"
+                                 alt="Profile Picture"
+                                 class="img-fluid rounded-circle"
+                                 style="max-width: 125px; max-height: 125px; object-fit: cover;">
+                        </div>
+                        <h5 th:if="${role.getContractorId() != null && role.isAccepted()}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h5>
+                        <h5 th:if="${role.getContractorId() != null && !role.isAccepted()}">Invite Sent!</h5>
+                        <h5 th:if="${role.getContractorId() == null}">No Contractor Found</h5>
+                        <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 0.5vh;"></h5>
                     </div>
                 </div>
             </div>
