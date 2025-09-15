@@ -4,11 +4,8 @@ import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.CalendarCellDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
-import nz.ac.canterbury.seng302.homehelper.entity.Tag;
+import nz.ac.canterbury.seng302.homehelper.entity.*;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
@@ -379,9 +376,14 @@ public class RenovationController {
         String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
+        Team team = teamsService.getTeamFromRenovation(record);
+
+        if (isOwner && team != null) {
+            model.addAttribute("teamId", team.getId());
+        }
+
         injectDateElements(year, month, dateEdited, model, record);
         model.addAttribute("dateEdited", dateEdited);
-
 
         model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
         model.addAttribute("hasLocation", locationService.hasLocation(record));

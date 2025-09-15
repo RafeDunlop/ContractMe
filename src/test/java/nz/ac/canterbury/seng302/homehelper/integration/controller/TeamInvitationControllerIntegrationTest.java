@@ -139,7 +139,7 @@ public class TeamInvitationControllerIntegrationTest {
     @Test
     @WithMockUser(username = "bob.doe@doe.nz")
     void viewInvitation_validTeam_returnsInfo() throws Exception {
-        Team team = new Team(renovationRecord);
+        Team team = teamsRepository.findByRenovationRecord(renovationRecord);
         Role role = new Role(Skill.CARPENTRY);
         Contractor contractor = new Contractor("Bob", "Doe", "bob.doe@doe.nz", "password");
         contractor = userRepository.save(contractor);
