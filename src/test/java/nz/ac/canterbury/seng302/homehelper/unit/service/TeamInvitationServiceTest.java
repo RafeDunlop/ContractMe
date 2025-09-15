@@ -15,6 +15,7 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 public class TeamInvitationServiceTest {
 
@@ -27,7 +28,8 @@ public class TeamInvitationServiceTest {
     void setUp() {
         teamsRepository = Mockito.mock(TeamsRepository.class);
         teamInvitationService = new TeamInvitationService(teamsRepository);
-        contractor = new Contractor("Greg", "Smith", "greg@test.com", "Password123!");
+        contractor = Mockito.spy(new Contractor("Greg", "Smith", "greg@test.com", "Password123!"));
+        when(contractor.getId()).thenReturn(1L);
         team = Mockito.mock(Team.class);
     }
 

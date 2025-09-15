@@ -12,6 +12,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ public class RenovationRecordService {
 
     private final RenovationTaskService renovationTaskService;
     private final LocationService locationService;
+    private final TeamsRepository teamsRepository;
 
     /**
      * Constructor for the RenovationRecordService class
@@ -44,12 +46,13 @@ public class RenovationRecordService {
      * @param renovationRecordRepository initializes with the repository for storing records
      */
     @Autowired
-    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation, RenovationTaskService renovationTaskService, LocationService locationService) {
+    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation, RenovationTaskService renovationTaskService, LocationService locationService, TeamsRepository teamsRepository) {
         this.renovationRecordRepository = renovationRecordRepository;
         this.renovationTaskRepository = renovationTaskRepository;
         this.renovationRecordValidation = renovationRecordValidation;
         this.renovationTaskService = renovationTaskService;
         this.locationService = locationService;
+        this.teamsRepository = teamsRepository;
     }
 
     /**
@@ -260,7 +263,8 @@ public class RenovationRecordService {
     public void removeRenovationRecord(Long id) {
         Optional<RenovationRecord> recordToRemove = renovationRecordRepository.findById(id);
         if (recordToRemove.isPresent()) {
-            renovationTaskRepository.deleteTaskById(id);
+            teamsRepository.deleteByRenovationRecord(recordToRemove.get());
+            renovationTaskRepository.deleteTasksWithRenovationId(id);
             renovationRecordRepository.deleteById(id);
         }
     }
