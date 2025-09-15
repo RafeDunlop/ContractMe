@@ -31,12 +31,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.mock;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
@@ -70,13 +69,14 @@ public class TeamControllerIntegrationTest {
     @Autowired
     private TeamsRepository teamsRepository;
 
+    private User defaultUser;
 
     @BeforeEach
     public void setup(TestInfo testInfo) {
-        User newUser = new User("Jane", "Doe", "jane@doe.nz", "password");
-        newUser = userRepository.save(newUser);
-        newUser.grantAuthority("ROLE_USER");
-        renovationRecord = new RenovationRecord(newUser, "test renovation", "test description", List.of());
+        defaultUser = new User("Jane", "Doe", "jane@doe.nz", "password");
+        defaultUser = userRepository.save(defaultUser);
+        defaultUser.grantAuthority("ROLE_USER");
+        renovationRecord = new RenovationRecord(defaultUser, "test renovation", "test description", List.of());
         renovationRecord = renovationRecordRepository.save(renovationRecord);
 
 
@@ -85,13 +85,11 @@ public class TeamControllerIntegrationTest {
             location.setAddress("nonNull");
             location.setLongitude(172.580907);
             location.setLatitude(-43.522345);
-            newUser.setLocation(location);
+            defaultUser.setLocation(location);
             renovationRecord.setLocation(location);
             renovationRecordRepository.save(renovationRecord);
-            userRepository.save(newUser);
-        }
-
-        if (testInfo.getDisplayName().contains("assignContractors")) {
+            userRepository.save(defaultUser);
+        } else if (testInfo.getDisplayName().contains("assignContractors")) {
             UserRegisterDTO user = new UserRegisterDTO();
             user.setFirstName("Janet");
             user.setLastName("Doe");
@@ -243,6 +241,29 @@ public class TeamControllerIntegrationTest {
                 .andExpect(model().attribute("teamId", team.getId()))
                 .andExpect(model().attribute("renovationId", renovationRecord.getId()))
                 .andExpect(view().name("fragments/joinTeam :: join-team"));
+    }
+
+    @Test
+    void deleteTeam_teamExistsAndOwnedByLoggedIn_teamDeleted() throws Exception {
+        Team team = teamsRepository.save(new Team(renovationRecord));
+        mockMvc.perform(delete("/renovations/team/delete/{id}", team.getId()))
+                .andExpect(status().isOk());
+        assertNull(teamsRepository.findByRenovationRecord(renovationRecord));
+    }
+
+    @Test
+    @WithMockUser(username = "bob.doe@doe.nz")
+    void deleteTeam_teamExistsButNotOwnedByLoggedIn_404AndTeamNotDeleted() throws Exception {
+        Team team = teamsRepository.save(new Team(renovationRecord));
+        mockMvc.perform(delete("/renovations/team/delete/{id}", team.getId()))
+                .andExpect(status().isNotFound());
+        assertNotNull(teamsRepository.findByRenovationRecord(renovationRecord));
+    }
+
+    @Test
+    void deleteTeam_teamDoesNotExist_404() throws Exception {
+        mockMvc.perform(delete("/renovations/team/delete/{id}", 0))
+                .andExpect(status().isNotFound());
     }
 
 }
