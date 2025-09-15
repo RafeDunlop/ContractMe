@@ -4,12 +4,10 @@ import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.CalendarCellDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
-import nz.ac.canterbury.seng302.homehelper.entity.Tag;
+import nz.ac.canterbury.seng302.homehelper.entity.*;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
@@ -53,6 +51,7 @@ public class RenovationController {
     private final LoginService loginService;
     private final TagService tagService;
     private final LocationService locationService;
+    private final TeamsRepository teamsRepository;
 
     /**
      * induces spring to automatically sets up the {@code RenovationRecordService}
@@ -64,13 +63,14 @@ public class RenovationController {
     @Autowired
     public RenovationController(RenovationRecordService renovationRecordService, LoginService loginService,
                                 RenovationTaskService renovationTaskService, TagService tagService,
-                                LocationService locationService, TeamsService teamsService) {
+                                LocationService locationService, TeamsService teamsService, TeamsRepository teamsRepository) {
         this.renovationRecordService = renovationRecordService;
         this.renovationTaskService = renovationTaskService;
         this.loginService = loginService;
         this.tagService = tagService;
         this.locationService = locationService;
         this.teamsService = teamsService;
+        this.teamsRepository = teamsRepository;
     }
 
     /**
@@ -375,7 +375,7 @@ public class RenovationController {
         }
 
         List<String> iconFileNames = renovationTaskService.getTaskIconFilenames();
-
+        Optional<Team> team = Optional.ofNullable(teamsRepository.findByRenovationRecord(record));
         String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
@@ -391,7 +391,7 @@ public class RenovationController {
         model.addAttribute("renovation", record);
         model.addAttribute("icons", iconFileNames);
         model.addAttribute("dateFormatter", DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-
+        team.ifPresent(value -> model.addAttribute("teamId", value.getId()));
         return "viewRenovation";
     }
 

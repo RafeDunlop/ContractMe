@@ -56,8 +56,7 @@ public class RenovationRecord {
     @Column(nullable = false)
     private boolean isPublic = false;
 
-    @Column
-    private Long teamId;
+
 
     public RenovationRecord() {}
 
@@ -255,17 +254,6 @@ public class RenovationRecord {
         this.location = location;
     }
 
-    /**
-     * Gets the team id of the renovation
-     * @return teamId the id
-     */
-    public Long getTeamId() {return teamId;}
-
-    /**
-     * Sets the team id of the renovation
-     * @param teamId the id
-     */
-    public void setTeamId(Long teamId) {this.teamId = teamId;}
 
     /**
      * toString method returning all the values stored

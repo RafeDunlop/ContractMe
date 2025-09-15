@@ -37,6 +37,10 @@ public class Team {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public RenovationRecord getRenovationRecord() {
         return renovationRecord;
     }

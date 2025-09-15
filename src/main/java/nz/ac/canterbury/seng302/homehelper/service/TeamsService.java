@@ -68,7 +68,6 @@ public class TeamsService {
         }
 
         Team newTeam = teamsRepository.save(team);
-        teamRecord.setTeamId(newTeam.getId());
         renovationRecordRepository.save(teamRecord);
 
         Location renovationLocation = teamRecord.getLocation();

@@ -97,7 +97,6 @@ public class DefaultDataConfigurator {
         setupDefaultRenovationTasks();
         setupDefaultTags();
         setupDefaultTeamData();
-        setupTeamRequest();
     }
 
 
@@ -354,15 +353,8 @@ public class DefaultDataConfigurator {
         Team team = new Team(default1Renovation1);
         team.addRole(new Role(defaulContractor, Skill.CARPENTRY, false));
         team = teamsRepository.save(team);
-        default1Renovation1.setTeamId(team.getId());
         renovationRecordRepository.save(default1Renovation1);
         logger.info("creating default team with id {}", team.getId());
     }
 
-    private void setupTeamRequest() {
-        Role role = new Role((Contractor) default2, Skill.ANTIQUE_RESTORATION, false);
-        Team team = new Team(default1Renovation1);
-        team.addRole(role);
-        teamsService.saveTeam(team);
-    }
 }

@@ -299,9 +299,10 @@ public class TeamServiceTest {
         assertThrows(ResponseStatusException.class, () -> teamsService.getContractorRole(contractor, team));
     }
 
-    /*@Test
+    @Test
     void getContractorMap_allRolesFilled_returnsFullMap() {
         Team team = new Team(new RenovationRecord());
+        team.setId(0L);
         List<Skill> skills = Arrays.asList(Skill.PLUMBING, Skill.ELECTRICAL, Skill.ACOUSTIC_INSULATION, Skill.ARCHITECTURE, Skill.ASBESTOS_REMOVAL);
         Map<Long, Contractor> expectedMap = new HashMap<>();
         for (int i = 0; i < 5; i++) {
@@ -318,5 +319,5 @@ public class TeamServiceTest {
         when(teamsRepository.findById(0L)).thenReturn(Optional.of(team));
         assertEquals(expectedMap, teamsService.getContractorsByTeamId(team.getId()));
 
-    }*/
+    }
 }
