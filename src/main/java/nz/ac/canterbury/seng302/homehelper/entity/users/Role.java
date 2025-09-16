@@ -47,6 +47,7 @@ public class Role {
         else contractorId = contractor.getId();
     }
 
+
     public Skill getSkill() {
         return skill;
     }
