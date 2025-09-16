@@ -89,7 +89,9 @@ public class TeamControllerIntegrationTest {
             renovationRecord.setLocation(location);
             renovationRecordRepository.save(renovationRecord);
             userRepository.save(defaultUser);
-        } else if (testInfo.getDisplayName().contains("assignContractors")) {
+        }
+
+        if (testInfo.getDisplayName().contains("assignContractors")) {
             UserRegisterDTO user = new UserRegisterDTO();
             user.setFirstName("Janet");
             user.setLastName("Doe");
@@ -246,24 +248,41 @@ public class TeamControllerIntegrationTest {
     @Test
     void deleteTeam_teamExistsAndOwnedByLoggedIn_teamDeleted() throws Exception {
         Team team = teamsRepository.save(new Team(renovationRecord));
-        mockMvc.perform(delete("/renovations/team/delete/{id}", team.getId()))
-                .andExpect(status().isOk());
+        mockMvc.perform(delete("/renovations/team/delete/{id}", Long.toString(team.getId()))
+                    .with(csrf()))
+                .andExpect(status().isNoContent());
         assertNull(teamsRepository.findByRenovationRecord(renovationRecord));
     }
 
     @Test
-    @WithMockUser(username = "bob.doe@doe.nz")
+    @WithMockUser(username = "other.user@doe.nz")
     void deleteTeam_teamExistsButNotOwnedByLoggedIn_404AndTeamNotDeleted() throws Exception {
         Team team = teamsRepository.save(new Team(renovationRecord));
-        mockMvc.perform(delete("/renovations/team/delete/{id}", team.getId()))
+        userRepository.save(
+                new User("other", "user", "other.user@doe.nz", "dummyPassword"));
+        mockMvc.perform(delete("/renovations/team/delete/{id}", Long.toString(team.getId()))
+                        .with(csrf()))
                 .andExpect(status().isNotFound());
         assertNotNull(teamsRepository.findByRenovationRecord(renovationRecord));
     }
 
     @Test
     void deleteTeam_teamDoesNotExist_404() throws Exception {
-        mockMvc.perform(delete("/renovations/team/delete/{id}", 0))
+        mockMvc.perform(delete("/renovations/team/delete/{id}", 0)
+                        .with(csrf()))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteTeam_possessingRoles_teamDeleted() throws Exception {
+        Team team = new Team(renovationRecord);
+        Role role = new Role(Skill.CARPENTRY);
+        team.addRole(role);
+        team = teamsRepository.save(team);
+        mockMvc.perform(delete("/renovations/team/delete/{id}", Long.toString(team.getId()))
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+        assertNull(teamsRepository.findByRenovationRecord(renovationRecord));
     }
 
 }
