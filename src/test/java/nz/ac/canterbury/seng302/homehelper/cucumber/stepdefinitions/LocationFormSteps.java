@@ -282,8 +282,8 @@ public class LocationFormSteps {
 
     }
 
-    @When("I submit an address that does not exist")
-    public void i_submit_an_address_that_does_not_exist(String endpoint) throws Exception {
+    @When("I enter an address that does not exist and submit the form on the {string} page")
+    public void i_enter_an_address_that_does_not_exist_and_submit_the_form_on_the_page(String endpoint) throws Exception {
         String originalEndpoint = endpoint;
 
         if (endpoint.startsWith("/renovations/edit")) {
@@ -306,23 +306,23 @@ public class LocationFormSteps {
         // Endpoint specific params
         switch (originalEndpoint) {
             case "/register":
-                request.param("password", "Test123!")
+                request = request.param("password", "Test123!")
                         .param("confirmPassword", "Test123!");
                 break;
 
             case "/user/edit":
-                request.with(user("jane.doe@example.com").roles("USER"));
+                request = request.with(user("jane.doe@example.com").roles("USER"));
                 break;
 
             case "/renovations/create":
-                request.param("name", "Test")
+                request = request.param("name", "Test")
                         .param("description", "Test description")
                         .param("roomList", "Kitchen", "Dining Room")
                         .with(user("jane.doe@example.com").roles("USER"));
                 break;
 
             case "/renovations/edit":
-                request.param("name", existingRecord.getName())
+                request = request.param("name", existingRecord.getName())
                         .param("description", "Test Description")
                         .param("roomList", "Kitchen")
                         .with(user("jane.doe@example.com").roles("USER"));
@@ -332,6 +332,8 @@ public class LocationFormSteps {
             default:
                 throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
         }
+
+        resultActions = mockMvc.perform(request);
 
     }
 

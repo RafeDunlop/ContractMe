@@ -123,18 +123,18 @@ Feature:As Kaia, I want to be able to add location to my profile and
     And I am told that I have entered an invalid postcode
 
 
-    Scenario Outline: AC10.1: Given I supply a country, when the country contains non valid characters (i.e. characters
-        other than letters, hyphen, apostrophe, single space), then a message tells me that “Country contains invalid
-        characters.” and the form is not saved
-        Given I am viewing the enter location details form on the <page_name> page
-        When I enter a valid address but an invalid country and submit the form on the <page_name> page
-        Then I am taken back to the <page_name> page
-        And I am told that I have entered an invalid country
-        Examples:
-            | page_name               |
-            |  "/register"            |
-            |  "/user/edit"           |
-            |  "/renovations/create"  |
+  Scenario Outline: AC10.1: Given I supply a country, when the country contains non valid characters (i.e. characters
+      other than letters, hyphen, apostrophe, single space), then a message tells me that “Country contains invalid
+      characters.” and the form is not saved
+      Given I am viewing the enter location details form on the <page_name> page
+      When I enter a valid address but an invalid country and submit the form on the <page_name> page
+      Then I am taken back to the <page_name> page
+      And I am told that I have entered an invalid country
+      Examples:
+          | page_name               |
+          |  "/register"            |
+          |  "/user/edit"           |
+          |  "/renovations/create"  |
 
   Scenario: AC10.2: Given I supply a country, when the country contains non valid characters (i.e. characters
   other than letters, hyphen, apostrophe, single space), then a message tells me that “Country contains invalid
@@ -167,7 +167,7 @@ Feature:As Kaia, I want to be able to add location to my profile and
 
   Scenario Outline: AC12: As Kaia, I want to be able to add location to my profile and my renovation records so that I can keep track of where they are.
     Given I am viewing the enter location details form on the <page_name> page
-    When I submit an address that does not exist
+    When I enter an address that does not exist and submit the form on the <page_name> page
     Then I am taken back to the <page_name> page
     And I am told that the address could not be found
     Examples:
