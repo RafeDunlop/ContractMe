@@ -3,7 +3,7 @@ Feature: 2008 - As Sarah, I want to see the contractors being assigned to my ren
 
   @authoriseUser
   Scenario: AC2 - Users can view their team with contractors assigned to each role.
-    Given a contractor is assigned to a role in a team
+    Given a contractor is assigned and has accepted a role in a team
     When I click the View Team button
     Then I see the contractor's name and profile picture
 

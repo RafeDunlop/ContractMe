@@ -131,7 +131,7 @@ public class TeamSteps {
     }
 
     @Transactional
-    @Given("a contractor is assigned to a role in a team")
+    @Given("a contractor is assigned and has accepted a role in a team")
     public void a_contractor_is_assigned_to_a_role_in_a_team() {
         Team team = new Team(renovationRecord);
         Contractor alice = contractorRepository.save(new Contractor("Alice", "Builder", "alice@test.nz", "pw"));
