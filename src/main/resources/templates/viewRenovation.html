@@ -148,10 +148,10 @@
                         <div class="d-flex align-items-center mt-2" th:if="${hasTeam}">
                             <p class="text-secondary mb-0 me-2 flex-grow-0" th:text="|A team for ${renovation.name} already exists|"></p>
 
-                            <form id="delete-team-form" th:action="@{/renovations/team/delete(id=${teamId})}" method="post" class="d-inline ms-2">
-                                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-                                <button type="button" id="delete-team-button" class="btn btn-outline-danger btn-sm" aria-label="Delete team">Delete Team</button>
-                            </form>
+                            <div id="delete-team-div" class="d-inline ms-2">
+                                <button type="button" id="delete-team-button" class="btn btn-outline-danger btn-sm"
+                                        th:attr="data-csrf=${_csrf.token}, data-id=${teamId}" aria-label="Delete team">Delete Team</button>
+                            </div>
                         </div>
 
                     </div>
