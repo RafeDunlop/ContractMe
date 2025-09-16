@@ -45,6 +45,7 @@ public class Role {
 
     public void setContractor(Contractor contractor) {
         this.contractorId = (contractor == null) ? null : contractor.getId();
+        if (this.status == RoleStatus.UNFILLED) setStatus(RoleStatus.WAITING);
     }
 
     public Skill getSkill() {
@@ -60,6 +61,7 @@ public class Role {
     }
 
     public void setStatus(RoleStatus status) {
+        if (status == RoleStatus.UNFILLED) assert this.contractorId == null;
         this.status = status;
     }
 

@@ -28,7 +28,7 @@
                 <div th:each="role : ${team.getRoles()}" class="col skill-card d-flex justify-content-center">
                     <div class="skill-card-container card container border-5 align-items-center"
                          style="padding-top: 6vh; padding-bottom: 4vh; max-width: 14vw; height: 35vh; max-height:500px; margin: 5vh 5%;"
-                         th:styleappend="${role.getContractorId() != null && role.isAccepted()} ? 'border-color: #8AC926;' : 'border-color: black;'">
+                         th:styleappend="${role.getContractorId() != null && role.status == T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).ACCEPTED} ? 'border-color: #8AC926;' : 'border-color: black;'">
 
                         <!-- Delete button -->
                         <button type="button" class="delete-skill-btn btn btn-outline-danger custom-light-border ms-3">❌</button>
@@ -46,7 +46,7 @@
                                  style="max-width: 125px; max-height: 125px; object-fit: cover;">
                         </div>
                         <h5 th:if="${role.getContractorId() != null}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h5>
-                        <h5 th:if="${role.getContractorId() != null && !role.isAccepted()}">Invite Sent!</h5>
+                        <h5 th:if="${role.getContractorId() != null && role.status != T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).ACCEPTED}">Invite Sent!</h5>
                         <h5 th:if="${role.getContractorId() == null}">No Contractor Found</h5>
                         <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 0.5vh;"></h5>
                     </div>
