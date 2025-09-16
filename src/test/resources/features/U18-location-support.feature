@@ -157,12 +157,25 @@ Feature:As Kaia, I want to be able to add location to my profile and
       |  "/register"            |
       |  "/user/edit"           |
       |  "/renovations/create"  |
+
   Scenario: AC11.2: Given I supply a fully compliant address, when I submit the form,
   then the form is saved with the address I supplied.
     Given I have an existing renovation record
     And I am on the edit record for my existing record
     When I enter a valid address and submit the location form on the "/renovations/edit" page
     Then The form from the "/renovations/edit" page is saved and contains the address I supplied
+
+  Scenario Outline: AC12: As Kaia, I want to be able to add location to my profile and my renovation records so that I can keep track of where they are.
+    Given I am viewing the enter location details form on the <page_name> page
+    When I submit an address that does not exist
+    Then I am taken back to the <page_name> page
+    And I am told that the address could not be found
+    Examples:
+      | page_name               |
+      |  "/register"            |
+      |  "/user/edit"           |
+      |  "/renovations/create"  |
+      | "/renovations/edit/"    |
 
 
 

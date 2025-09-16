@@ -111,9 +111,6 @@ public class LocationFormSteps {
                 .andReturn();
     }
 
-
-
-
     @When("I click the location toggle switch")
     public void i_click_the_location_toggle_switch() throws Exception {
         String content = result.getResponse().getContentAsString();
@@ -282,6 +279,59 @@ public class LocationFormSteps {
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
 
+
+    }
+
+    @When("I submit an address that does not exist")
+    public void i_submit_an_address_that_does_not_exist(String endpoint) throws Exception {
+        String originalEndpoint = endpoint;
+
+        if (endpoint.startsWith("/renovations/edit")) {
+            endpoint = "/renovations/edit?id=" + existingRecord.getId();
+        }
+
+        MockHttpServletRequestBuilder request = post(endpoint)
+                .param("firstName", "Jane")
+                .param("lastName", "Doe")
+                .param("email", "jane.doe@example.com")
+                .param("address_line1", "20000 Riccarton Road")
+                .param("suburb", "Riccarton")
+                .param("city", "Christchurch")
+                .param("postcode", "8041")
+                .param("country", "New Zealand")
+                .param("lat", "1")
+                .param("lon", "1")
+                .with(csrf());
+
+        // Endpoint specific params
+        switch (originalEndpoint) {
+            case "/register":
+                request.param("password", "Test123!")
+                        .param("confirmPassword", "Test123!");
+                break;
+
+            case "/user/edit":
+                request.with(user("jane.doe@example.com").roles("USER"));
+                break;
+
+            case "/renovations/create":
+                request.param("name", "Test")
+                        .param("description", "Test description")
+                        .param("roomList", "Kitchen", "Dining Room")
+                        .with(user("jane.doe@example.com").roles("USER"));
+                break;
+
+            case "/renovations/edit":
+                request.param("name", existingRecord.getName())
+                        .param("description", "Test Description")
+                        .param("roomList", "Kitchen")
+                        .with(user("jane.doe@example.com").roles("USER"));
+                break;
+
+
+            default:
+                throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
+        }
 
     }
 
@@ -677,6 +727,12 @@ public class LocationFormSteps {
     public void i_am_told_that_i_have_entered_an_invalid_country() throws Exception {
         resultActions
                 .andExpect(flash().attribute("countryError", List.of("Country contains invalid characters.")));
+    }
+
+    @And("I am told that the address could not be found")
+    public void i_am_told_that_the_address_could_not_be_found() throws Exception {
+        resultActions
+                .andExpect(flash().attribute("addressError", List.of("The address could not be found")));
     }
 
     @When("I enter {string} in the address field and submit the location form on the {string} page")
