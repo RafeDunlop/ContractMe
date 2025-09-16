@@ -147,7 +147,6 @@ public class TeamController {
         Map<Long, Contractor> contractors = teamsService.getContractorsByTeamId(id);
         RenovationRecord renovationRecord = team.getRenovationRecord();
         model.addAttribute("team", team);
-        model.addAttribute("record",renovationRecord);
         model.addAttribute("contractors", contractors);
         return "viewTeam";
 

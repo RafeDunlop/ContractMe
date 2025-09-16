@@ -133,6 +133,9 @@ public class TeamSteps {
     @Transactional
     @Given("a contractor is assigned and has accepted a role in a team")
     public void a_contractor_is_assigned_to_a_role_in_a_team() {
+        User user = userContext.getUser();
+        renovationRecord = new RenovationRecord(user, "Test", "", List.of());
+        renovationRecord = renovationRepository.save(renovationRecord);
         Team team = new Team(renovationRecord);
         Contractor alice = contractorRepository.save(new Contractor("Alice", "Builder", "alice@test.nz", "pw"));
         alice.setProfilePicture("alice.jpg");
@@ -148,6 +151,9 @@ public class TeamSteps {
     @Transactional
     @Given("a team has no contractors assigned")
     public void a_team_has_no_contractors_assigned() {
+        User user = userContext.getUser();
+        renovationRecord = new RenovationRecord(user, "Test", "", List.of());
+        renovationRecord = renovationRepository.save(renovationRecord);
         Team team = new Team(renovationRecord);
         Role empty = new Role(Skill.PLUMBING);
         team.addRole(empty);
