@@ -139,7 +139,7 @@
 
                     <div class="float-end align-items-end d-flex flex-column" th:if="${isOwner}">
                         <!-- Create button for location and no team -->
-                        <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" th:if="${hasLocation && !hasTeam}">Create Team</a>
+                        <a id="create-team-button" th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" th:if="${hasLocation && !hasTeam}">Create Team</a>
 
                         <!-- No team and no location -->
                         <p class="mt-2 text-secondary flex-grow-0" th:unless="${hasLocation}" th:text="|Add a location to ${renovation.name} to create a team|"></p>
