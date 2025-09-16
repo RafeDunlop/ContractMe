@@ -8,10 +8,7 @@ import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
@@ -142,7 +139,7 @@ public class TeamSteps {
         contractorRepository.save(alice);
         Role accepted = new Role(Skill.CARPENTRY);
         accepted.setContractor(alice);
-        accepted.setAccepted(true);
+        accepted.setStatus(RoleStatus.ACCEPTED);
         team.addRole(accepted);
         team = teamsRepository.save(team);
         this.team = team;
@@ -164,7 +161,7 @@ public class TeamSteps {
         contractorRepository.save(bob);
         Role pending = new Role(Skill.ELECTRICAL);
         pending.setContractor(bob);
-        pending.setAccepted(false);
+        pending.setStatus(RoleStatus.WAITING);
         team.addRole(pending);
         this.team = team;
 

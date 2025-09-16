@@ -65,7 +65,7 @@ public class Team {
     public void replaceRoleContractor(Role existingRole, Contractor newContractor) {
         int index = roles.indexOf(existingRole);
         if (index != -1) {
-            Role updatedRole = new Role(newContractor, existingRole.getSkill(), existingRole.isAccepted());
+            Role updatedRole = new Role(newContractor, existingRole.getSkill(), existingRole.getStatus());
             roles.set(index, updatedRole);
         }
     }

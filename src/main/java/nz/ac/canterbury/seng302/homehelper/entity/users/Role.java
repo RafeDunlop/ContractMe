@@ -20,21 +20,22 @@ public class Role {
 
     private Skill skill;
 
-    private boolean accepted;
+    @Column(nullable = false)
+    private RoleStatus status;
 
     public Role() {}
 
     public Role(Skill skill) {
         this.contractorId = null;
         this.skill = skill;
-        this.accepted = false;
+        this.status = RoleStatus.UNFILLED;
         creationDate = LocalDateTime.now();
     }
 
-    public Role(Contractor contractor, Skill skill, boolean accepted) {
+    public Role(Contractor contractor, Skill skill, RoleStatus status) {
         this.contractorId = contractor.getId();
         this.skill = skill;
-        this.accepted = accepted;
+        this.status = status;
         creationDate = LocalDateTime.now();
     }
 
@@ -43,10 +44,8 @@ public class Role {
     }
 
     public void setContractor(Contractor contractor) {
-        if (contractor == null) contractorId = 0L;
-        else contractorId = contractor.getId();
+        this.contractorId = (contractor == null) ? null : contractor.getId();
     }
-
 
     public Skill getSkill() {
         return skill;
@@ -56,12 +55,12 @@ public class Role {
         this.skill = skill;
     }
 
-    public boolean isAccepted() {
-        return accepted;
+    public RoleStatus getStatus() {
+        return status;
     }
 
-    public void setAccepted(boolean accepted) {
-        this.accepted = accepted;
+    public void setStatus(RoleStatus status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreationDate() {

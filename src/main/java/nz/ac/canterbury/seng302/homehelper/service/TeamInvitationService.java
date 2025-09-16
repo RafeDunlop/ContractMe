@@ -3,6 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,11 +36,11 @@ public class TeamInvitationService {
      */
     public void acceptContractor(Contractor contractor, Team team) {
         Role role = findAssignedRole(team, contractor);
-        if (role.isAccepted()) {
+        if (role.getStatus() ==  RoleStatus.ACCEPTED) {
             throw new IllegalStateException("Invitation already accepted.");
         }
 
-        role.setAccepted(true);
+        role.setStatus(RoleStatus.ACCEPTED);
         teamsRepository.save(team);
     }
 
@@ -52,7 +53,7 @@ public class TeamInvitationService {
      */
     public void declineContractor(Contractor contractor, Team team) {
         Role role = findAssignedRole(team, contractor);
-        role.setAccepted(false);
+        role.setStatus(RoleStatus.DECLINED);
         role.setContractor(null);
         teamsRepository.save(team);
     }
@@ -86,7 +87,7 @@ public class TeamInvitationService {
     public boolean linkExpired(Contractor contractor, Team team) {
         List<Role> matches = getMatchedRoles(contractor, team);
         if (matches.size() != 1) return true;
-        return matches.get(0).isAccepted();
+        return matches.get(0).getStatus() == RoleStatus.ACCEPTED;
     }
 
     /**
