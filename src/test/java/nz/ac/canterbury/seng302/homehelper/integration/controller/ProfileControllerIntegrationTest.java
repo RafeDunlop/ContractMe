@@ -72,7 +72,7 @@ public class ProfileControllerIntegrationTest {
         Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton");
         contractor.setLocation(location);
         contractor.setHourlyRate(0f);
-        contractor.setCountryCode(64);
+        contractor.setCountryCode("64");
         contractor.addSkill(Skill.ACOUSTIC_INSULATION);
         contractor.setPhoneNumber("12 345 6789");
         contractor = contractorRepository.save(contractor);

@@ -118,7 +118,7 @@ public class DefaultDataConfigurator {
         );
         user.setHourlyRate(22.33f);
         user.setSkills(skills);
-        user.setCountryCode(64);
+        user.setCountryCode("64");
         user.setPhoneNumber("226430022");
         AddressDTO addressDTO = getAddressDTO();
         default2 = contractorService.registerContractor(user, addressDTO);
@@ -129,7 +129,7 @@ public class DefaultDataConfigurator {
         user.setEmail("seng302.team200.contractor@gmail.com");
         user.setSkills(List.of(Skill.SCAFFOLDING, Skill.RESOURCE_CONSENT_COMPLIANCE, Skill.CARPENTRY, Skill.ANTIQUE_RESTORATION));
         user.setHourlyRate(30.0f);
-        user.setCountryCode(64);
+        user.setCountryCode("64");
         user.setPhoneNumber("33692888");
         AddressDTO address = new AddressDTO();
         address.setAddress_line1("Ilam Road");
