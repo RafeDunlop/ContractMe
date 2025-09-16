@@ -1544,10 +1544,17 @@ public class RenovationControllerIntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "jane@doe.com")
     public void editRenovation_invalidLocation_locationNotSaved() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         renovationRecordRepository.save(testRecord);
+        doAnswer(invocationOnMock -> {
+            AddressDTO mockAddressDTO = invocationOnMock.getArgument(0);
+            mockAddressDTO.setLat(1D);
+            mockAddressDTO.setLon(1D);
+            return null;
+        }).when(locationService).injectCoordsViaGeocoding(any(AddressDTO.class));
 
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
                         .param("address_line1", "1 Cool Street")
