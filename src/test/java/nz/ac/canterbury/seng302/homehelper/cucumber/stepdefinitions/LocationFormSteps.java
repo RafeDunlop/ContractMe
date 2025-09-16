@@ -734,7 +734,7 @@ public class LocationFormSteps {
     @And("I am told that the address could not be found")
     public void i_am_told_that_the_address_could_not_be_found() throws Exception {
         resultActions
-                .andExpect(flash().attribute("addressError", List.of("The address could not be found")));
+                .andExpect(flash().attribute("geolocationError", List.of("The address could not be found")));
     }
 
     @When("I enter {string} in the address field and submit the location form on the {string} page")
