@@ -3,11 +3,18 @@ package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,15 +37,20 @@ public class TeamSteps {
     private RenovationRecord renovationRecord;
     private MvcResult mvcResult;
     private ResultActions result;
-
+    private final ContractorRepository contractorRepository;
+    private final TeamsRepository teamsRepository;
+    private Team team;
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private RenovationRecordRepository renovationRepository;
 
-    public TeamSteps(UserContext userContext) {
+    public TeamSteps(UserContext userContext, ContractorRepository contractorRepository,
+            TeamsRepository teamsRepository) {
         this.userContext = userContext;
+        this.contractorRepository = contractorRepository;
+        this.teamsRepository = teamsRepository;
     }
 
     @Given("I am on the view renovation page for a renovation I own that has a location listed and that doesn't have a team")
@@ -117,4 +129,66 @@ public class TeamSteps {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()));
     }
+
+    @Transactional
+    @Given("a contractor is assigned to a role in a team")
+    public void a_contractor_is_assigned_to_a_role_in_a_team() {
+        Team team = new Team(renovationRecord);
+        Contractor alice = contractorRepository.save(new Contractor("Alice", "Builder", "alice@test.nz", "pw"));
+        alice.setProfilePicture("alice.jpg");
+        contractorRepository.save(alice);
+        Role accepted = new Role(Skill.CARPENTRY);
+        accepted.setContractor(alice);
+        accepted.setAccepted(true);
+        team.addRole(accepted);
+        team = teamsRepository.save(team);
+        this.team = team;
+    }
+
+    @Transactional
+    @Given("a team has no contractors assigned")
+    public void a_team_has_no_contractors_assigned() {
+        Team team = new Team(renovationRecord);
+        Role empty = new Role(Skill.PLUMBING);
+        team.addRole(empty);
+        team = teamsRepository.save(team);
+
+        Contractor bob = contractorRepository.save(new Contractor("Bob", "Spark", "bob@test.nz", "pw"));
+        bob.setProfilePicture("bob.jpg");
+        contractorRepository.save(bob);
+        Role pending = new Role(Skill.ELECTRICAL);
+        pending.setContractor(bob);
+        pending.setAccepted(false);
+        team.addRole(pending);
+        this.team = team;
+
+    }
+
+    @When("I click the View Team button")
+    public void i_click_the_view_team_button() throws Exception {
+        mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get("/renovations/team/view")
+                        .param("id", team.getId().toString())
+                        .with(csrf())
+        ).andExpect(status().isOk()).andReturn();
+    }
+
+    @Then("I see the contractor's name and profile picture")
+    public void i_see_the_contractor_s_name_and_profile_picture() throws Exception {
+        String html = mvcResult.getResponse().getContentAsString();
+        assertTrue(html.contains("Alice Builder"));
+        assertTrue(html.contains("alice.jpg"));
+        assertTrue(html.contains("Carpentry"));
+    }
+
+    @Then("I see a placeholder")
+    public void i_see_a_placeholder() throws Exception {
+        String html = mvcResult.getResponse().getContentAsString();
+        assertTrue(html.contains("Invite Sent!"));
+        assertTrue(html.contains("bob.jpg"));
+        assertTrue(html.contains("Electrical"));
+        assertTrue(html.contains("Plumbing"));
+    }
+
+
 }
