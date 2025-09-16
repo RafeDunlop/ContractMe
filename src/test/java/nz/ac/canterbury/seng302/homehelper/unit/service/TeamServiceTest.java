@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
@@ -308,6 +309,7 @@ public class TeamServiceTest {
         for (int i = 0; i < 5; i++) {
             Role role = new Role(skills.get(i));
             Contractor contractor = new Contractor("Bob", "Contractor", "bob" + i + "contractor@gmail.com", "encoded");
+            ReflectionTestUtils.setField(contractor, "id", (long) i);
             expectedMap.put((long) i, contractor);
             role.setContractor(contractor);
             team.addRole(role);
