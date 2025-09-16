@@ -136,10 +136,26 @@
                     <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary ms-2" th:if="${isOwner}">Add New Task</a>
                     <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-2" th:if="${previousUrl != null && !previousUrl.contains('/search')}">Back</a>
                     <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-2" th:if="${previousUrl.contains('/search')}">Back to search results</a>
+
                     <div class="float-end align-items-end d-flex flex-column" th:if="${isOwner}">
+                        <!-- Create button for location and no team -->
                         <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" th:if="${hasLocation && !hasTeam}">Create Team</a>
                         <p class="mt-2 text-secondary flex-grow-0" th:unless="${hasLocation}" th:text="|Add a location to ${renovation.name} to create a team|"/>
                         <a th:href="@{/renovations/team/view(id=${teamId})}" class="btn btn-primary" th:if="${hasTeam}">View Team</a>
+
+                        <!-- No team and no location -->
+                        <p class="mt-2 text-secondary flex-grow-0" th:unless="${hasLocation}" th:text="|Add a location to ${renovation.name} to create a team|"></p>
+
+                        <!-- Team exists, delete team -->
+                        <div class="d-flex align-items-center mt-2" th:if="${hasTeam}">
+                            <p class="text-secondary mb-0 me-2 flex-grow-0" th:text="|A team for ${renovation.name} already exists|"></p>
+
+                            <form id="delete-team-form" th:action="@{/renovations/team/delete(id=${teamId})}" method="post" class="d-inline ms-2">
+                                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                                <button type="button" id="delete-team-button" class="btn btn-outline-danger btn-sm" aria-label="Delete team">Delete Team</button>
+                            </form>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -186,11 +202,9 @@
         });
     });
 </script>
-
 <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
 <script th:src="@{/js/addTaskIcon.js}"></script>
 <script type="module" th:src="@{/js/navbar.js}"></script>
-
 <script type="text/javascript" th:src="@{/js/renovationPublicity.js}"></script>
 <script type="module" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="text/javascript" th:src="@{/js/pagination.js}"></script>
@@ -200,4 +214,5 @@
 <script type="text/javascript" th:src="@{/js/renovationUtils.js}"></script>
 <script type="text/javascript" th:src="@{/js/calendar.js}"></script>
 <script type="text/javascript" th:src="@{/js/taskState.js}"></script>
+<script type="module" th:src="@{/js/deleteTeam.js}"></script>
 </html>

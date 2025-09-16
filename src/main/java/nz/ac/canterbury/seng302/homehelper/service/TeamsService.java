@@ -54,6 +54,15 @@ public class TeamsService {
     }
 
     /**
+     * Get the team associated with a given renovation record.
+     * @param renovationRecord The renovation record to get the team associated with it.
+     * @return Team associated with given record.
+     */
+    public Team getTeamFromRenovation(RenovationRecord renovationRecord) {
+        return teamsRepository.findByRenovationRecord(renovationRecord);
+    }
+
+    /**
      * Creates a new team
      * @param teamRecord the renovation record with which the team was associated
      * @param teamRequestDTO the request DTO containing the info about the skills required

@@ -20,7 +20,7 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @OneToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     private RenovationRecord renovationRecord;
 

@@ -47,4 +47,6 @@ public interface TeamsRepository extends CrudRepository<Team, Long>{
     @Modifying
     @Query("DELETE FROM Team team WHERE team.renovationRecord = :renovationRecord")
     void deleteByRenovationRecord(RenovationRecord renovationRecord);
+
+
 }
