@@ -218,7 +218,7 @@ public class DefaultDataConfigurator {
         );
 
 
-        Location location = new Location("18 Kirkwood Avenue", NEW_ZEALAND, "8041", "Christchuch", "Upper Riccarton");
+        Location location = new Location("18 Kirkwood Avenue", NEW_ZEALAND, "8041", "Christchuch", "Upper Riccarton",-43.527887d,172.5846232);
         default1Renovation1.setLocation(location);
         default1Renovation1 = renovationRecordService.addRenovationRecord(default1Renovation1);
 
