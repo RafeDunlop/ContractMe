@@ -151,8 +151,10 @@ public class DefaultDataConfigurator {
         List<Skill> skillList = Skill.listOfSortedSkills();
 
         // Add 10 Contractors to the default data
+        String[] names = {"Alice", "Bob", "Charlie","Mason","Jack","Ryan","Rafe","Sean","Abhi","Jake","Gooby"};
         for (int i = 1; i <= 10; i++) {
             user.setEmail("seng302.team200.contractor" + i + "@gmail.com");
+            user.setFirstName(names[i]);
             address.setAddress_line1(i + " Ilam Road");
             address.setLat(-43.522345 + i * 0.001);
             address.setLon(172.580907 + i * 0.001);
