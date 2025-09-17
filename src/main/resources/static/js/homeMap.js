@@ -1,27 +1,20 @@
-const userRenovation = {
-    url: "/images/markers/user-renovation.png",
-    scaledSize: new google.maps.Size(32, 32)
-};
+const userRenovation = L.icon({
+    iconUrl: "/images/markers/user-renovation.png",
+    iconSize: [32, 32]
+})
 
-const publicRenovation = {
-    url: "/images/markers/public-renovation.png",
-    scaledSize: new google.maps.Size(32, 32)
-};
+const publicRenovation = L.icon({
+    iconUrl: "/images/markers/public-renovation.png",
+    iconSize: [32, 32]
+})
 
-var map = new google.maps.Map(document.getElementById("map"), {
-    center: {lat: -43.52460, lng: 172.57710},
-    zoom: 10,
+const map = L.map('map').setView([-43.52460, 172.57710], 11);
+
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     minZoom: 3,
-});
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}).addTo(map);
 
-new google.maps.Marker({
-    position: {lat: -43.52460, lng: 172.57710},
-    map: map,
-    icon: userRenovation,
-});
-new google.maps.Marker({
-    position: {lat: -43.53333, lng: 172.63333},
-    map,
-    icon: publicRenovation
-});
+L.marker([-43.52460, 172.57710], {icon: userRenovation}).addTo(map);
+L.marker([-43.53333, 172.63333], {icon: publicRenovation}).addTo(map);
