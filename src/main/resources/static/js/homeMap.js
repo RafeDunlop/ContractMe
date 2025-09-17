@@ -1,20 +1,27 @@
-const userRenovation = L.icon({
-    iconUrl: "/images/markers/user-renovation.png",
-    iconSize: [32, 32]
-})
+const userRenovation = document.createElement("img");
+userRenovation.src = "/images/markers/user-renovation.png";
+userRenovation.style.width = "32px";
+userRenovation.style.height = "32px";
 
-const publicRenovation = L.icon({
-    iconUrl: "/images/markers/public-renovation.png",
-    iconSize: [32, 32]
-})
+const publicRenovation = document.createElement("img");
+publicRenovation.src = "/images/markers/public-renovation.png";
+publicRenovation.style.width = "32px";
+publicRenovation.style.height = "32px";
 
-const map = L.map('map').setView([-43.52460, 172.57710], 11);
+const map = new maplibregl.Map({
+    container: 'map',
+    style: 'https://tiles.basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+    center: [172.57710, -43.52460],
+    zoom: 9,
+    maxZoom: 18,
+    minZoom: 2,
+});
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    minZoom: 3,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+map.addControl(new maplibregl.NavigationControl());
 
-L.marker([-43.52460, 172.57710], {icon: userRenovation}).addTo(map);
-L.marker([-43.53333, 172.63333], {icon: publicRenovation}).addTo(map);
+new maplibregl.Marker({element: userRenovation})
+    .setLngLat([172.57710, -43.52460])
+    .addTo(map);
+new maplibregl.Marker({element: publicRenovation})
+    .setLngLat([172.63333, -43.53333])
+    .addTo(map);
