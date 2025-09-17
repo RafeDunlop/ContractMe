@@ -5,6 +5,7 @@ import jakarta.persistence.EntityNotFoundException;
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
@@ -24,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * A controller for team management pages
@@ -149,6 +151,21 @@ public class TeamController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Handler for a get request to the view team page.
+     * @return the view team page
+     */
+    @GetMapping("/view")
+    public String viewTeam(Model model, @RequestParam("id") Long id) {
+        Team team = teamsService.getTeamById(id);
+        Map<Long, Contractor> contractors = teamsService.getContractorsByTeamId(id);
+        RenovationRecord renovationRecord = team.getRenovationRecord();
+        model.addAttribute("team", team);
+        model.addAttribute("contractors", contractors);
+        return "viewTeam";
+
     }
 
 

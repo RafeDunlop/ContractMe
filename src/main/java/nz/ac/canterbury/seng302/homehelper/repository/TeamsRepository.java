@@ -20,6 +20,7 @@ public interface TeamsRepository extends CrudRepository<Team, Long>{
      */
     Team findByRenovationRecord(RenovationRecord renovationRecord);
 
+
     /**
      * Find teams by contractor where the contractor has not yet accepted a role.
      *
