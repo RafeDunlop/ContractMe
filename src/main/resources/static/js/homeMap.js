@@ -1,27 +1,27 @@
-const userRenovation = document.createElement("img");
-userRenovation.src = "/images/markers/user-renovation.png";
-userRenovation.style.width = "32px";
-userRenovation.style.height = "32px";
+const userRenovation = {
+    url: "/images/markers/user-renovation.png",
+    scaledSize: new google.maps.Size(32, 32)
+};
 
-const publicRenovation = document.createElement("img");
-publicRenovation.src = "/images/markers/public-renovation.png";
-publicRenovation.style.width = "32px";
-publicRenovation.style.height = "32px";
+const publicRenovation = {
+    url: "/images/markers/public-renovation.png",
+    scaledSize: new google.maps.Size(32, 32)
+};
 
-const map = new maplibregl.Map({
-    container: 'map',
-    style: 'https://tiles.basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-    center: [172.57710, -43.52460],
-    zoom: 9,
-    maxZoom: 18,
-    minZoom: 2,
+var map = new google.maps.Map(document.getElementById("map"), {
+    center: {lat: -43.52460, lng: 172.57710},
+    zoom: 10,
+    maxZoom: 19,
+    minZoom: 3,
 });
 
-map.addControl(new maplibregl.NavigationControl());
-
-new maplibregl.Marker({element: userRenovation})
-    .setLngLat([172.57710, -43.52460])
-    .addTo(map);
-new maplibregl.Marker({element: publicRenovation})
-    .setLngLat([172.63333, -43.53333])
-    .addTo(map);
+new google.maps.Marker({
+    position: {lat: -43.52460, lng: 172.57710},
+    map: map,
+    icon: userRenovation,
+});
+new google.maps.Marker({
+    position: {lat: -43.53333, lng: 172.63333},
+    map,
+    icon: publicRenovation
+});
