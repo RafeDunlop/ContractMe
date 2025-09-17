@@ -11,6 +11,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.LocalisationDTO;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestClassOrder;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -132,4 +133,6 @@ public class LocationControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].formatted").value("10 Downing Street, SW1A 2AA, London, United Kingdom"));
     }
+
+
 }
