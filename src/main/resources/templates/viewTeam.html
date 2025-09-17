@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+    <base th:href="@{/}"/>
+    <title>View Team</title>
+    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+
+
+<body>
+
+<div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+
+    <div id="container" class="card container mt-5 p-4 shadow-sm">
+        <div id="content-header">
+            <div class="jumbotron d-flex justify-content-between align-items-center text-center">
+                <h1 id="header-title" class="text-black">View Team</h1>
+            </div>
+        </div>
+
+
+        <!-- Role Card Display-->
+
+        <div class="container text-center">
+            <div class="row">
+                <div th:each="role : ${team.getRoles()}" class="col skill-card d-flex justify-content-center">
+                    <div class="skill-card-container card container border-5 border-black align-items-center d-flex flex-column position-relative"
+                         style="padding-top: 6vh; padding-bottom: 4vh; max-width: 14vw;max-height:500px; margin: 5vh 5% 4vh;">
+
+                        <!-- Delete button -->
+
+                        <button type="button" class="delete-skill-btn btn btn-outline-danger custom-light-border ms-3">❌</button>
+
+
+
+                        <div th:if="${role.getContractorId() != null}" class="col-md-25  text-center" style="flex: 0 0 18%;">
+                            <img th:src="@{'/profile_pictures/' + ${contractors.get(role.getContractorId()).getProfilePicture()}}"
+                                 alt="Profile Picture"
+                                 class="img-fluid rounded-circle"
+                                 style="max-width: 125px; max-height: 125px; object-fit: cover;">
+                        </div>
+                        <div th:if="${role.getContractorId() == null}" class="col-md-25  text-center" style="flex: 0 0 18%;">
+                            <img th:src="@{'icons/profile-icon.svg'}"
+                                 alt="Profile Picture"
+                                 class="img-fluid rounded-circle"
+                                 style="max-width: 125px; max-height: 125px; object-fit: cover;">
+                        </div>
+                        <div>
+                            <h5 th:if="${role.getContractorId() != null}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h5>
+                            <h5 th:if="${role.getContractorId() != null && !role.isAccepted()}">Invite Sent!</h5>
+                            <h5 th:if="${role.getContractorId() == null}">No Contractor Found</h5>
+                            <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 0.5vh;"></h5>
+                        </div>
+                        <div>
+                        <form th:if="${role.getContractorId() != null}"
+                              th:action="@{/renovations/view(id=${team.getRenovationRecord().getId()})}"
+                              method="post"
+                              class="bottom-0 m-2">
+                            <input type="hidden" name="teamId" th:value="${team.getId()}"/>
+                            <button type="submit" class="btn btn-light btn-sm border border-danger text-danger">Remove Contractor</button>
+                        </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <a th:href="@{/renovations/view(id=${team.getRenovationRecord().getId()})}" class="btn btn-outline-secondary ms-2">Back</a>
+        </div>
+    </div>
+
+</body>
+
+<script type="module" th:src="@{/js/navbar.js}"></script>
+
+</html>

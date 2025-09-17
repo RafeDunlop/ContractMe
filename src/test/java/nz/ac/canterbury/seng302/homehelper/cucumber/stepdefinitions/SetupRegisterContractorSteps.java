@@ -40,7 +40,7 @@ public class SetupRegisterContractorSteps {
                 "Christchurch", "Upper Riccarton", -43.522345, 172.580907);
         contractor.setLocation(location);
         contractor.setHourlyRate(27.50F);
-        contractor.setCountryCode(64);
+        contractor.setCountryCode("64");
         contractor.setPhoneNumber("021 123 4567");
         contractor.addSkill(Skill.CARPENTRY);
 
