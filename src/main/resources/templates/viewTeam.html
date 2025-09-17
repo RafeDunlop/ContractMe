@@ -54,8 +54,8 @@
                             <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 0.5vh;"></h5>
                         </div>
                         <div>
-                        <form th:if="${role.getContractorId() != null}"
-                              th:action="@{/renovations/view(id=${team.getRenovationRecord().getId()})}"
+                        <form th:if="${role.getContractorId() != null && role.isAccepted()}"
+                              th:action="@{/renovations/team/delete(teamId=${team.getId()}, contractorId=${role.getContractorId()})}"
                               method="post"
                               class="bottom-0 m-2">
                             <input type="hidden" name="teamId" th:value="${team.getId()}"/>

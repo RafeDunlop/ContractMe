@@ -386,4 +386,14 @@ public class TeamsService {
                 contractorRepository.findById(role.getContractorId()) :
                 Optional.empty();
     }
+
+    public void deleteContractorFromTeam(Team team, Contractor contractor) {
+        for (Role role : team.getRoles()) {
+            if (role.getContractorId() != null && role.getContractorId().equals(contractor.getId())) {
+                role.removeContractor();
+                role.setAccepted(false);
+            }
+        }
+        teamsRepository.save(team);
+    }
 }
