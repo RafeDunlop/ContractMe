@@ -1610,6 +1610,33 @@ public class RenovationControllerIntegrationTest {
     }
 
     @Test
+    void createNewRenovation_invalidLocationWithValidCoords_locationNotSaved() throws Exception {
+        doAnswer(invocationOnMock -> {
+            AddressDTO mockAddressDTO = invocationOnMock.getArgument(0);
+            mockAddressDTO.setLat(1D);
+            mockAddressDTO.setLon(1D);
+            return null;
+        }).when(locationService).injectCoordsViaGeocoding(any(AddressDTO.class));
+        mockMvc.perform(post("/renovations/create")
+                .param("name", "New Renovation Record")
+                .param("description", "New record with invalid location")
+                .param("roomList", "Room", "Room")
+                .param("address_line1", "2w3e47g8yh8ujik")
+                .param("country", "")
+                .param("postcode", "")
+                .param("city", "")
+                .param("region", "")
+                .param("lat", "-43.565656")
+                .param("lon", "172.202565")
+                .with(csrf()))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(flash().attribute("geoLocationError", List.of("The address could not be found")))
+            .andReturn();
+
+
+    }
+
+    @Test
     @WithMockUser(username = "jane@doe.com")
     public void editRenovation_existingLocationInvalidForm_locationNotUpdated() throws Exception {
         Location initialLocation = new Location(
