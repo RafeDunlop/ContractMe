@@ -1591,7 +1591,7 @@ public class RenovationControllerIntegrationTest {
 
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
                         .param("address_line1", "1 Cool Street")
-                        .param("country", "New  Zealand")
+                        .param("country", "New Zealand")
                         .param("postcode", "")
                         .param("city", "Christchurch")
                         .param("region", "Foobar")
@@ -1600,7 +1600,6 @@ public class RenovationControllerIntegrationTest {
                         .param("name", "Renovation")
                         .param("description", "Some words")
                         .param("roomList", "Room 1", "Room 2")
-
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("geoLocationError", List.of("The address could not be found")))
