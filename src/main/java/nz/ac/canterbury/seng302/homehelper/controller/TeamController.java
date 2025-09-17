@@ -155,13 +155,20 @@ public class TeamController {
         return "viewTeam";
     }
 
-    @PostMapping("/delete")
-    public String  deleteContractor(@RequestParam Long teamId,@RequestParam Long contractorId) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void>  deleteContractor(@RequestParam Long teamId,@RequestParam Long contractorId) {
         logger.info("DELETE /team/contractor/{}/{}", teamId, contractorId);
         Team team = teamsService.getTeamById(teamId);
         Contractor contractor = contractorService.getContractorById(contractorId);
+        RenovationRecord renovationRecord = team.getRenovationRecord();
+        if (renovationRecord == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!loginService.getUserByEmail().equals(renovationRecord.getUser())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         teamsService.deleteContractorFromTeam(team, contractor);
-        return "redirect:/renovations/team/view?id=" + teamId;
+        return ResponseEntity.noContent().build();
     }
 
 
