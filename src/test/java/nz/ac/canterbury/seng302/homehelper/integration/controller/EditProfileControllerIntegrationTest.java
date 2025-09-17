@@ -69,7 +69,7 @@ class EditProfileControllerIntegrationTest {
     private static Stream<Arguments> streamInvalidLocationsWithCoords() {
         return Stream.of(
                 Arguments.of("23a4s567g8h9uji0k", -43.535915D, 172.620323D),
-                Arguments.of("4tttttttttttnvto;imqr40r9quc m[4", -43.548888D, 172.620444D),
+                Arguments.of("4tttttttttttnvtoimqr40r9qucm4", -43.548888D, 172.620444D),
                 Arguments.of("10000000 Fake Address Street", -43.565656D, 172.621555D)
         );
     }

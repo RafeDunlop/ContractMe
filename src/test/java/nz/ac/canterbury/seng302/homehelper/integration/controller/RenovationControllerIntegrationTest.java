@@ -1579,6 +1579,38 @@ public class RenovationControllerIntegrationTest {
     }
 
     @Test
+    void editRenovation_invalidLocationWithValidCoords_locationNotSaved() throws Exception {
+        RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
+        renovationRecordRepository.save(testRecord);
+        doAnswer(invocationOnMock -> {
+            AddressDTO mockAddressDTO = invocationOnMock.getArgument(0);
+            mockAddressDTO.setLat(1D);
+            mockAddressDTO.setLon(1D);
+            return null;
+        }).when(locationService).injectCoordsViaGeocoding(any(AddressDTO.class));
+
+        mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
+                        .param("address_line1", "1 Cool Street")
+                        .param("country", "New  Zealand")
+                        .param("postcode", "")
+                        .param("city", "Christchurch")
+                        .param("region", "Foobar")
+                        .param("lat", "-42.565505")
+                        .param("lon", "172.303033")
+                        .param("name", "Renovation")
+                        .param("description", "Some words")
+                        .param("roomList", "Room 1", "Room 2")
+
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(flash().attribute("geoLocationError", List.of("The address could not be found")))
+                .andReturn();
+
+        RenovationRecord record = renovationRecordRepository.findById(testRecord.getId()).get();
+        assertNull(record.getLocation());
+    }
+
+    @Test
     @WithMockUser(username = "jane@doe.com")
     public void editRenovation_existingLocationInvalidForm_locationNotUpdated() throws Exception {
         Location initialLocation = new Location(
