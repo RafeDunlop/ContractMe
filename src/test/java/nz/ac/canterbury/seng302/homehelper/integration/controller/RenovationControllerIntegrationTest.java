@@ -15,7 +15,6 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.service.LocationNotFoundException;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
@@ -90,8 +89,6 @@ public class RenovationControllerIntegrationTest {
 
     private User currentUser;
     private User owner;
-    private User notOwner;
-    private User testUser;
 
     private RenovationRecord renovationRecord;
     private MockHttpSession session;
@@ -106,11 +103,11 @@ public class RenovationControllerIntegrationTest {
         owner.grantAuthority("ROLE_USER");
         userRepository.save(owner);
 
-        notOwner = new User("Not", "Owner", "not.owner@doe.com", "Password");
+        User notOwner = new User("Not", "Owner", "not.owner@doe.com", "Password");
         notOwner.grantAuthority("ROLE_USER");
         userRepository.save(notOwner);
 
-        testUser = new User("Test", "User", "test@doe.com", "Password");
+        User testUser = new User("Test", "User", "test@doe.com", "Password");
         testUser.grantAuthority("ROLE_USER");
         userRepository.save(testUser);
 
@@ -1519,8 +1516,8 @@ public class RenovationControllerIntegrationTest {
         String region = "Addington";
         Double lat = 1D;
         Double lon = 1D;
-        Location location = new Location(address, country, postcode, city, region, lat, lon);
-        doReturn(location).when(locationService).locate(any(AddressDTO.class));
+        Location stubLocation = new Location(address, country, postcode, city, region, lat, lon);
+        doReturn(stubLocation).when(locationService).locate(any(AddressDTO.class));
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
                         .param("address_line1", address)
                         .param("country", country)
@@ -1601,7 +1598,7 @@ public class RenovationControllerIntegrationTest {
                         .param("roomList", "Room 1", "Room 2")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("geoLocationError", List.of("The address could not be found")))
+                .andExpect(flash().attribute("geolocationError", List.of("The address could not be found")))
                 .andReturn();
 
         RenovationRecord record = renovationRecordRepository.findById(testRecord.getId()).get();

@@ -35,9 +35,8 @@ import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atMost;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -125,6 +124,7 @@ public class TeamControllerIntegrationTest {
                 address.setAddress_line1(i + " Ilam Road");
                 address.setLat(-43.522345 + i * 0.001);
                 address.setLon(172.580907 + i * 0.001);
+                doNothing().when(locationService).injectCoordsViaGeocoding(address);
                 user.setSkills(List.of(skillList.get(i)));
                 Contractor newContractor = contractorService.registerContractor(user, address);
                 Contractor contractor = contractorService.getContractorById(newContractor.getId());
