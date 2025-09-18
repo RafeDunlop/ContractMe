@@ -5,10 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
@@ -82,6 +79,10 @@ public class TeamsService {
         Location renovationLocation = teamRecord.getLocation();
         String response = assignContractorsToTeam(team, renovationLocation);
         if (Objects.equals(response, "")) {
+            for (Role role : team.getRoles()) {
+                role.setStatus(RoleStatus.WAITING);
+            }
+            teamsRepository.save(team);
             sendContractorEmails(team);
         }
 

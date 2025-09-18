@@ -270,7 +270,7 @@ class TeamsServiceIntegrationTest {
 
         assertEquals("Unable to find available contractors to fill team", result);
         assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
-        assertEquals(0L, team.getRoles().get(1).getContractorId());
+        assertEquals(null, team.getRoles().get(1).getContractorId());
     }
 
     @Transactional

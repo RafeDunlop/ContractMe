@@ -28,25 +28,30 @@
                 <div th:each="role : ${team.getRoles()}" class="col skill-card d-flex justify-content-center">
                     <div class="skill-card-container card container border-5 align-items-center"
                          style="padding-top: 6vh; padding-bottom: 4vh; max-width: 14vw; height: 35vh; max-height:500px; margin: 5vh 5%;"
-                         th:styleappend="${role.getContractorId() != null && role.status == T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).ACCEPTED} ? 'border-color: #8AC926;' : 'border-color: black;'">
+                         th:styleappend="${(role.getContractorId() != null && role.status.equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).ACCEPTED))
+            ? 'border-color: #8AC926;'
+            : (role.status.equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).WAITING)
+                ? 'border-color: black;'
+                : 'border-color: grey;')}">
 
                         <!-- Delete button -->
                         <button type="button" class="delete-skill-btn btn btn-outline-danger custom-light-border ms-3">❌</button>
 
-                        <div th:if="${role.getContractorId() != null}" class="col-md-25  text-center" style="flex: 0 0 18%;">
+                        <div th:if="${role.getContractorId() != null}" class="col-md-25 text-center" style="flex: 0 0 18%;">
                             <img th:src="@{'/profile_pictures/' + ${contractors.get(role.getContractorId()).getProfilePicture()}}"
                                  alt="Profile Picture"
                                  class="img-fluid rounded-circle"
                                  style="max-width: 125px; max-height: 125px; object-fit: cover;">
                         </div>
-                        <div th:if="${role.getContractorId() == null}" class="col-md-25  text-center" style="flex: 0 0 18%;">
+                        <div th:if="${role.getContractorId() == null}" class="col-md-25 text-center" style="flex: 0 0 18%;">
                             <img th:src="@{'icons/profile-icon.svg'}"
                                  alt="Profile Picture"
                                  class="img-fluid rounded-circle"
                                  style="max-width: 125px; max-height: 125px; object-fit: cover;">
                         </div>
+
                         <h5 th:if="${role.getContractorId() != null}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h5>
-                        <h5 th:if="${role.getContractorId() != null && role.status != T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).ACCEPTED}">Invite Sent!</h5>
+                        <h5 th:if="${role.getContractorId() != null && !role.status.equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).ACCEPTED)}">Invite Sent!</h5>
                         <h5 th:if="${role.getContractorId() == null}">No Contractor Found</h5>
                         <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 0.5vh;"></h5>
                     </div>
