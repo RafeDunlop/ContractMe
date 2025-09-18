@@ -3,6 +3,8 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import nz.ac.canterbury.seng302.homehelper.dto.CoordinateRectangle;
 import nz.ac.canterbury.seng302.homehelper.dto.MappedRenovation;
 import nz.ac.canterbury.seng302.homehelper.service.MapService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +15,8 @@ import java.util.Collection;
 public class MapController {
 
     private final MapService mapService;
+
+    private static final Logger logger = LoggerFactory.getLogger(MapController.class);
 
     @Autowired
     public MapController(MapService mapService) {
@@ -31,6 +35,7 @@ public class MapController {
     public Collection<MappedRenovation> getByLocationInBounds(
             @RequestParam(required = false, defaultValue = "true") boolean withPublic,
             @ModelAttribute CoordinateRectangle coordinateRectangle) {
+        logger.info("GET /map/renovations");
         return mapService.getRenovationsInBounds(coordinateRectangle, withPublic);
     }
 }
