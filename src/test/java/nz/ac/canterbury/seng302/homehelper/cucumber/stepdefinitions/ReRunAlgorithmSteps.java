@@ -21,8 +21,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Transactional
@@ -44,6 +47,7 @@ public class ReRunAlgorithmSteps {
 
     private Team team;
     private final ContractorContext contractorContext;
+    private String ownerEmail;
 
     public ReRunAlgorithmSteps(ContractorContext contractorContext) {
         this.contractorContext = contractorContext;
@@ -51,13 +55,12 @@ public class ReRunAlgorithmSteps {
 
     @Before
     public void setUp() {
-        String uniqueEmail = "Test" + System.nanoTime() + "@test.test";
+        ownerEmail = "Test" + System.nanoTime() + "@test.test";
+        User owner = new User("Test", "test", ownerEmail, "test");
+        owner.activate();
+        userRepository.save(owner);
 
-        User user = new User("Test", "test", uniqueEmail, "test");
-        user.activate();
-        userRepository.save(user);
-
-        RenovationRecord renovation = new RenovationRecord(user, "Test renovation", "", new ArrayList<>());
+        RenovationRecord renovation = new RenovationRecord(owner, "Test renovation", "", new ArrayList<>());
         Location location = new Location("20 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Riccarton", 43.53, 172.63);
         renovation.setLocation(location);
         renovationRecordRepository.save(renovation);
@@ -89,18 +92,32 @@ public class ReRunAlgorithmSteps {
                 "Rejected contractor invited again.");
     }
 
-    @Given("that I am on the team details page for a team that I own")
-    public void that_i_am_on_the_team_details_page_for_a_team_that_i_own() {
-
+    @Given("That I am own a team with a contractor who has accepted")
+    public void That_i_am_own_a_team_with_a_contractor_who_has_accepted() {
+        team.addRole(new Role(contractorContext.getContractor(), Skill.ELECTRICAL, false));
+        team.getRoles().get(0).setAccepted(true);
+        teamsRepository.save(team);
     }
 
     @When("I remove a contractor from a role")
-    public void i_remove_a_contractor_from_a_role() {
-
+    public void i_remove_a_contractor_from_a_role() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/renovations/team/delete")
+                        .param("teamId", String.valueOf(team.getId()))
+                        .param("contractorId", String.valueOf(contractorContext.getContractor().getId()))
+                        .with(user(ownerEmail).roles("USER"))   // <- use user(...)
+                        .with(csrf())
+        ).andExpect(status().isNoContent());
     }
 
-    @Then("that contractor does not receive any more invitations to join a role on the team")
-    public void that_contractor_does_not_receive_any_more_invitations_to_join_a_role_on_the_team() {
+    @Then("That contractor does not receive any more invitations to join a role on the team")
+    public void That_contractor_does_not_receive_any_more_invitations_to_join_a_role_on_the_team() {
+        Team updatedTeam = teamsRepository.findById(team.getId()).orElseThrow();
+        Long removedId = contractorContext.getContractor().getId();
 
+        boolean assigned = updatedTeam.getRoles().stream().anyMatch(
+                role -> removedId != null && removedId.equals(role.getContractorId()));
+
+        assertFalse(assigned, "Removed contractor was invited again.");
     }
 }
