@@ -15,6 +15,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TagRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.LocationNotFoundException;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.TagService;
@@ -48,6 +49,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -1468,11 +1470,11 @@ public class RenovationControllerIntegrationTest {
     public void getForm_renovationWithLocation_locationAdded() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         AddressDTO addressDTO = new AddressDTO();
-        addressDTO.setAddress_line1("164 Ingoldsby Street");
+        addressDTO.setAddress_line1("16 Ingoldsby Street");
         addressDTO.setCountry("New Zealand");
         addressDTO.setPostcode("8023");
         addressDTO.setCity("Christchurch");
-        addressDTO.setRegion("Beckenham");
+        addressDTO.setRegion("Sydenham");
         addressDTO.setLat(1D);
         addressDTO.setLon(1D);
 
@@ -1509,11 +1511,11 @@ public class RenovationControllerIntegrationTest {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         renovationRecordRepository.save(testRecord);
 
-        String address = "33 Moorhouse Ave";
+        String address = "33 Moorhouse Avenue";
         String country = "New Zealand";
-        String postcode = "8043";
+        String postcode = "8011";
         String city = "Christchurch";
-        String region = "Sydenham";
+        String region = "Addington";
         Double lat = 1D;
         Double lon = 1D;
 
@@ -1582,12 +1584,7 @@ public class RenovationControllerIntegrationTest {
     void editRenovation_invalidLocationWithValidCoords_locationNotSaved() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         renovationRecordRepository.save(testRecord);
-        doAnswer(invocationOnMock -> {
-            AddressDTO mockAddressDTO = invocationOnMock.getArgument(0);
-            mockAddressDTO.setLat(1D);
-            mockAddressDTO.setLon(1D);
-            return null;
-        }).when(locationService).injectCoordsViaGeocoding(any(AddressDTO.class));
+        doThrow(LocationNotFoundException.class).when((locationService)).locate(any(AddressDTO.class));
 
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
                         .param("address_line1", "1 Cool Street")
@@ -1611,12 +1608,7 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     void createNewRenovation_invalidLocationWithValidCoords_locationNotSaved() throws Exception {
-        doAnswer(invocationOnMock -> {
-            AddressDTO mockAddressDTO = invocationOnMock.getArgument(0);
-            mockAddressDTO.setLat(1D);
-            mockAddressDTO.setLon(1D);
-            return null;
-        }).when(locationService).injectCoordsViaGeocoding(any(AddressDTO.class));
+        doThrow(LocationNotFoundException.class).when((locationService)).locate(any(AddressDTO.class));
         mockMvc.perform(post("/renovations/create")
                 .param("name", "New Renovation Record")
                 .param("description", "New record with invalid location")

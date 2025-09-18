@@ -10,12 +10,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @SpringBootTest
+@ActiveProfiles("test")
 public class RegisterServiceIntegrationTest {
 
     private RegisterService registerService;

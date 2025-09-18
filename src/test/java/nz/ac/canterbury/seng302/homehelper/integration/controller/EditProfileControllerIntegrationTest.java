@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
+import io.cucumber.java.bs.A;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.controller.EditProfileController;
@@ -9,9 +10,12 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -19,6 +23,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -35,6 +41,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -60,11 +67,13 @@ class EditProfileControllerIntegrationTest {
     @Autowired
     private LoginService loginService;
 
+    @SpyBean
+    private LocationService locationService;
+
     @PostConstruct
     public void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(editProfileController).build();
     }
-
 
     private static Stream<Arguments> streamInvalidLocationsWithCoords() {
         return Stream.of(
@@ -346,6 +355,7 @@ class EditProfileControllerIntegrationTest {
         addressDTO.setRegion("Beckenham");
         addressDTO.setLat(1D);
         addressDTO.setLon(1D);
+        when(locationService.locate(any(AddressDTO.class))).thenReturn(new Location(addressDTO.getAddress_line1(), addressDTO.getCountry(), addressDTO.getPostcode(), addressDTO.getCity(), addressDTO.getRegion(), addressDTO.getLat(), addressDTO.getLon()));
 
         mockMvc.perform(post("/user/edit")
                         .param("firstName", "Jane")
@@ -441,9 +451,18 @@ class EditProfileControllerIntegrationTest {
         current.setHourlyRate(27.80f);
         current.setPhoneNumber("6412345678");
         current.addSkill(Skill.CARPENTRY);
-        current.setLocation(
-                new Location("123 Linwood Ave", "New Zealand", "8045", "Christchurch", "Linwood"));
+        Location location = new Location("123 Linwood Ave", "New Zealand", "8045", "Christchurch", "Linwood");
+        current.setLocation(location);
         userRepository.save(current);
+        AddressDTO expectedAddressDTO = new AddressDTO();
+        expectedAddressDTO.setAddress_line1("123 Ilam Road");
+        expectedAddressDTO.setCountry("New Zealand");
+        expectedAddressDTO.setPostcode("8042");
+        expectedAddressDTO.setCity("Christchurch");
+        expectedAddressDTO.setRegion("Ilam");
+        expectedAddressDTO.setLat(1.0);
+        expectedAddressDTO.setLon(1.0);
+        when(locationService.locate(expectedAddressDTO)).thenReturn(new Location(expectedAddressDTO.getAddress_line1(), expectedAddressDTO.getCountry(), expectedAddressDTO.getPostcode(), expectedAddressDTO.getCity(), expectedAddressDTO.getRegion(), expectedAddressDTO.getLat(), expectedAddressDTO.getLon()));
 
         mockMvc.perform(post("/user/edit")
                         .param("firstName", "John")

@@ -224,7 +224,7 @@ public class DefaultDataConfigurator {
         default1Renovation2.setPublicity(true);
         Location fabiansOfficeLocation = new Location("Jack Erskine", NEW_ZEALAND, "8041", "Christchurch", "Upper Riccarton");
         default1Renovation2.setLocation(fabiansOfficeLocation);
-        default1Renovation2 = renovationRecordService.addRenovationRecord(default1Renovation2);
+        renovationRecordService.addRenovationRecord(default1Renovation2);
     }
 
     private void setupDefaultTeams() {
