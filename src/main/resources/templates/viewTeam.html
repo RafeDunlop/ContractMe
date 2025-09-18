@@ -35,10 +35,12 @@
 
                         <!-- Delete button -->
 
-                        <button type="button" class="delete-skill-btn btn btn-outline-danger custom-light-border ms-3">❌</button>
+                        <div class="d-flex justify-content-between align-items-center w-100 mb-2">
+                            <button type="button" class="delete-skill-btn btn btn-outline-danger custom-light-border ms-3">❌</button>
+                            <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 0.5vh;"></h5>
+                        </div>
 
-
-
+                        <div class="border border-5 border-black p-2 mt-2 d-flex flex-column align-items-center" style="width: 100%;">
                         <div th:if="${role.getContractorId() != null}" class="col-md-25  text-center" style="flex: 0 0 18%;">
                             <img th:src="@{'/profile_pictures/' + ${contractors.get(role.getContractorId()).getProfilePicture()}}"
                                  alt="Profile Picture"
@@ -55,7 +57,6 @@
                             <h5 th:if="${role.getContractorId() != null}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h5>
                             <h5 th:if="${role.getContractorId() != null && !role.isAccepted()}">Invite Sent!</h5>
                             <h5 th:if="${role.getContractorId() == null}">No Contractor Found</h5>
-                            <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 0.5vh;"></h5>
                         </div>
                         <div>
                             <div th:if="${role.contractorId != null && role.accepted}" th:inline="javascript">
@@ -67,6 +68,7 @@
                             </div>
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
         </div>
