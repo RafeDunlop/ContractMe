@@ -51,7 +51,9 @@
                         </div>
                         <div>
                             <h5 th:if="${role.getContractorId() != null}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h5>
-                            <h5 th:if="${role.getContractorId() != null && !role.isAccepted()}">Invite Sent!</h5>
+                            <h5 th:if="${role.getContractorId() != null&& (role.getStatus() == null || !role.getStatus().equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).ACCEPTED))}">
+                                Invite Sent!
+                            </h5>
                             <h5 th:if="${role.getContractorId() == null}">No Contractor Found</h5>
                             <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 0.5vh;"></h5>
                         </div>
