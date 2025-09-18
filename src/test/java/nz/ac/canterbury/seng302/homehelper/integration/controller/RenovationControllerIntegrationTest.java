@@ -48,8 +48,7 @@ import java.util.stream.StreamSupport;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -1477,6 +1476,8 @@ public class RenovationControllerIntegrationTest {
         addressDTO.setRegion("Sydenham");
         addressDTO.setLat(1D);
         addressDTO.setLon(1D);
+        Location location = new Location(addressDTO.getAddress_line1(), addressDTO.getCountry(), addressDTO.getPostcode(), addressDTO.getCity(), addressDTO.getRegion(), addressDTO.getLat(), addressDTO.getLon());
+        doReturn(location).when(locationService).locate(addressDTO);
 
         mockMvc.perform(post("/renovations/create")
                 .param("name", testRecord.getName())
@@ -1518,7 +1519,8 @@ public class RenovationControllerIntegrationTest {
         String region = "Addington";
         Double lat = 1D;
         Double lon = 1D;
-
+        Location location = new Location(address, country, postcode, city, region, lat, lon);
+        doReturn(location).when(locationService).locate(any(AddressDTO.class));
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
                         .param("address_line1", address)
                         .param("country", country)
@@ -1584,7 +1586,7 @@ public class RenovationControllerIntegrationTest {
     void editRenovation_invalidLocationWithValidCoords_locationNotSaved() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         renovationRecordRepository.save(testRecord);
-        doThrow(LocationNotFoundException.class).when((locationService)).locate(any(AddressDTO.class));
+        doThrow(IllegalArgumentException.class).when((locationService)).injectCoordsViaGeocoding(any(AddressDTO.class));
 
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
                         .param("address_line1", "1 Cool Street")
@@ -1608,7 +1610,7 @@ public class RenovationControllerIntegrationTest {
 
     @Test
     void createNewRenovation_invalidLocationWithValidCoords_locationNotSaved() throws Exception {
-        doThrow(LocationNotFoundException.class).when((locationService)).locate(any(AddressDTO.class));
+        doThrow(IllegalArgumentException.class).when(locationService).injectCoordsViaGeocoding(any(AddressDTO.class));
         mockMvc.perform(post("/renovations/create")
                 .param("name", "New Renovation Record")
                 .param("description", "New record with invalid location")
@@ -1622,7 +1624,7 @@ public class RenovationControllerIntegrationTest {
                 .param("lon", "172.202565")
                 .with(csrf()))
             .andExpect(status().is3xxRedirection())
-            .andExpect(flash().attribute("geoLocationError", List.of("The address could not be found")))
+            .andExpect(flash().attribute("geolocationError", List.of("The address could not be found")))
             .andReturn();
 
 

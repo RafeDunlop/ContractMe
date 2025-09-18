@@ -218,6 +218,7 @@ public class RegisterControllerIntegrationTest {
         when(verificationCodeRepository.save(any(VerificationCode.class))).thenAnswer((InvocationOnMock) -> null);
         when(contractorRepository.save(any(Contractor.class))).thenReturn(expectedUser);
         when(contractorRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(expectedUser));
+        doReturn(new Location()).when(locationService).locate(any(AddressDTO.class));
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("firstName", "Jane")
@@ -282,6 +283,8 @@ public class RegisterControllerIntegrationTest {
     public void submitRegistration_inputValidLocationsWithCoordinates_successfulRegistrationWithAutocompleteCoordinates(String address, String suburb, String city,
                                                                                                                         String postcode, String country, Double lat,
                                                                                                                         Double lon) throws Exception {
+        Location location = new Location(address, country, postcode, city, suburb, lat, lon);
+        doReturn(location).when(locationService).locate(any());
         createValidUser();
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
