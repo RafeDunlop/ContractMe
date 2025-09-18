@@ -49,11 +49,21 @@
                                  class="img-fluid rounded-circle"
                                  style="max-width: 125px; max-height: 125px; object-fit: cover;">
                         </div>
-
-                        <h5 th:if="${role.getContractorId() != null}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h5>
-                        <h5 th:if="${role.getContractorId() != null && isOwner &&!role.status.equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).ACCEPTED)}">Invite Sent!</h5>
-                        <h5 th:if="${role.getContractorId() == null}">No Contractor Found</h5>
-                        <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 0.5vh;"></h5>
+                        <div>
+                            <h5 th:if="${role.getContractorId() != null}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h5>
+                            <h5 th:if="${role.getContractorId() != null && !role.isAccepted()}">Invite Sent!</h5>
+                            <h5 th:if="${role.getContractorId() == null}">No Contractor Found</h5>
+                            <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 0.5vh;"></h5>
+                        </div>
+                        <div>
+                        <form th:if="${role.getContractorId() != null}"
+                              th:action="@{/renovations/view(id=${team.getRenovationRecord().getId()})}"
+                              method="post"
+                              class="bottom-0 m-2">
+                            <input type="hidden" name="teamId" th:value="${team.getId()}"/>
+                            <button type="submit" class="btn btn-light btn-sm border border-danger text-danger">Remove Contractor</button>
+                        </form>
+                        </div>
                     </div>
                 </div>
             </div>

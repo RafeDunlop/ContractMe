@@ -78,7 +78,6 @@ public class ViewRenovationController {
                                  Model model,
                                  HttpServletRequest request) {
         logger.info("GET /renovations/view");
-        logger.info("dateEdited: {}", dateEdited);
 
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) {
@@ -138,7 +137,6 @@ public class ViewRenovationController {
                                       @RequestParam(required = false) @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate dateEdited,
                                       Model model) {
 
-        logger.info("dateEdited: {}", dateEdited);
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_FOUND);
