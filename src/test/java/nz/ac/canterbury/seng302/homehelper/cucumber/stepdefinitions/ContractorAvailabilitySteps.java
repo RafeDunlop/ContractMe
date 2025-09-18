@@ -72,7 +72,7 @@ public class ContractorAvailabilitySteps {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"isAvailable\": true}")
-                        .session((MockHttpSession) result.getRequest().getSession(false)))
+                        .session((MockHttpSession) result.getRequest().getSession(true)))
                 .andExpect(status().is3xxRedirection())
                 .andReturn();
 

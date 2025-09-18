@@ -70,7 +70,6 @@ function addSkill() {
 
         skillCol.appendChild(skillCardContainer);
         skillsGridRow.appendChild(skillCol);
-        document.getElementById("create-team-form").appendChild(hiddenInput);
         skillDropdown.selectedIndex = 0;
         updateErrorMessageLabels();
     }

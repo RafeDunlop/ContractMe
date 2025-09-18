@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EmailService;
@@ -18,9 +19,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -37,10 +39,13 @@ public class TeamServiceTest {
     private TeamValidation teamValidation;
     @Mock
     private EmailService emailService;
+    @Mock
+    private RenovationRecordRepository renovationRecordRepository;
+
 
     @BeforeEach
     void setUp() {
-        teamsService = new TeamsService(teamsRepository, teamValidation, contractorRepository, emailService);
+        teamsService = new TeamsService(teamsRepository, teamValidation, contractorRepository, emailService, renovationRecordRepository);
     }
 
     @Test
@@ -294,4 +299,39 @@ public class TeamServiceTest {
         Contractor contractor = new Contractor("Bob", "Doe", "bob@doe.com", "encoded");
         assertThrows(ResponseStatusException.class, () -> teamsService.getContractorRole(contractor, team));
     }
+
+    @Test
+    void getContractorMap_allRolesFilled_returnsFullMap() {
+        Team team = new Team(new RenovationRecord());
+        team.setId(0L);
+        List<Skill> skills = Arrays.asList(Skill.PLUMBING, Skill.ELECTRICAL, Skill.ACOUSTIC_INSULATION, Skill.ARCHITECTURE, Skill.ASBESTOS_REMOVAL);
+        Map<Long, Contractor> expectedMap = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            Role role = new Role(skills.get(i));
+            Contractor contractor = new Contractor("Bob", "Contractor", "bob" + i + "contractor@gmail.com", "encoded");
+            ReflectionTestUtils.setField(contractor, "id", (long) i);
+            expectedMap.put((long) i, contractor);
+            role.setContractor(contractor);
+            team.addRole(role);
+
+            when(contractorRepository.findById((long) i)).thenReturn(Optional.of(contractor));
+
+        }
+
+        when(teamsRepository.findById(0L)).thenReturn(Optional.of(team));
+        assertEquals(expectedMap, teamsService.getContractorsByTeamId(team.getId()));
+
+    }
+    @Test
+    void deleteContractorRole_roleAssigned_deletesContractorFromRole() {
+        Team team = new Team(new RenovationRecord());
+        Role role = new Role(Skill.PLUMBING);
+        team.addRole(role);
+        Contractor contractor = new Contractor("Alice", "Doe", "alice@doe.com", "encoded");
+        role.setContractor(contractor);
+        teamsService.deleteContractorFromTeam(team,contractor);
+        assertNull(role.getContractorId());
+        assertFalse(role.isAccepted());
+    }
+
 }

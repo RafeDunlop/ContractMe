@@ -13,7 +13,13 @@ public interface TeamsRepository extends CrudRepository<Team, Long>{
 
     boolean existsByRenovationRecordId(Long id);
 
+    /**
+     * Gets the {@link Team}Team associated with a given {@link RenovationRecord}
+     * @param renovationRecord The renovation whose Team should be retrieved
+     * @return The {@link Team} associated with the {@link RenovationRecord}
+     */
     Team findByRenovationRecord(RenovationRecord renovationRecord);
+
 
     /**
      * Find teams by contractor where the contractor has not yet accepted a role.
@@ -46,6 +52,5 @@ public interface TeamsRepository extends CrudRepository<Team, Long>{
     @Modifying
     @Query("DELETE FROM Team team WHERE team.renovationRecord = :renovationRecord")
     void deleteByRenovationRecord(RenovationRecord renovationRecord);
-
 
 }

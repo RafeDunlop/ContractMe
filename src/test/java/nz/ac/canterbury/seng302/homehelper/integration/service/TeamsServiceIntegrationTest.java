@@ -1,7 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.integration.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
 
 import java.util.ArrayList;
@@ -49,6 +48,7 @@ class TeamsServiceIntegrationTest {
     @MockBean
     private EmailService emailService;
 
+    private User user;
     private RenovationRecord renovation;
     private Location location;
 
@@ -686,5 +686,13 @@ class TeamsServiceIntegrationTest {
 
         assertEquals("", result);
         assertEquals(contractor2.getId(), team.getRoles().get(0).getContractorId());
+    }
+
+    @Transactional
+    @Test
+    void deleteTeam_teamDeletedAndRenovationNotDeleted() {
+        Team team = teamsRepository.save(new Team(renovation));
+        assertDoesNotThrow(() -> teamsService.deleteTeam(team));
+        assertNull(teamsRepository.findByRenovationRecord(renovation));
     }
 }
