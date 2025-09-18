@@ -24,6 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A controller for team management pages
@@ -143,13 +144,31 @@ public class TeamController {
      */
     @GetMapping("/view")
     public String viewTeam(Model model, @RequestParam("id") Long id) {
-        Team team = teamsService.getTeamById(id);
-        Map<Long, Contractor> contractors = teamsService.getContractorsByTeamId(id);
-        RenovationRecord renovationRecord = team.getRenovationRecord();
-        model.addAttribute("team", team);
-        model.addAttribute("contractors", contractors);
-        return "viewTeam";
+        try {
+            User user = loginService.getUserByEmail();
+            Team team = teamsService.getTeamById(id);
 
+            List<Long> contractorIds = team.getRoles().stream()
+                    .map(Role::getContractorId)
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            if (team.getRenovationRecord() != null
+                    && team.getRenovationRecord().getUser() != null
+                    && (
+                    team.getRenovationRecord().getUser().getId().equals(user.getId())
+                            || contractorIds.contains(user.getId())
+            )
+            ) {
+                Map<Long, Contractor> contractors = teamsService.getContractorsByTeamId(id);
+                model.addAttribute("team", team);
+                model.addAttribute("contractors", contractors);
+                return "viewTeam";
+            }
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to view team");
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Error loading team");
+        }
     }
 
 }
