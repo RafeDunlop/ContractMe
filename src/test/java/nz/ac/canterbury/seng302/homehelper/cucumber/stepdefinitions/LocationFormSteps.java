@@ -16,6 +16,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -33,6 +34,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository
 
 @AutoConfigureMockMvc
 @SpringBootTest
+@ActiveProfiles("cucumber")
 public class LocationFormSteps {
 
     @Autowired
@@ -304,34 +306,20 @@ public class LocationFormSteps {
                 .with(csrf());
 
         // Endpoint specific params
-        switch (originalEndpoint) {
-            case "/register":
-                request = request.param("password", "Test123!")
-                        .param("confirmPassword", "Test123!");
-                break;
-
-            case "/user/edit":
-                request = request.with(user("jane.doe@example.com").roles("USER"));
-                break;
-
-            case "/renovations/create":
-                request = request.param("name", "Test")
-                        .param("description", "Test description")
-                        .param("roomList", "Kitchen", "Dining Room")
-                        .with(user("jane.doe@example.com").roles("USER"));
-                break;
-
-            case "/renovations/edit":
-                request = request.param("name", existingRecord.getName())
-                        .param("description", "Test Description")
-                        .param("roomList", "Kitchen")
-                        .with(user("jane.doe@example.com").roles("USER"));
-                break;
-
-
-            default:
-                throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
-        }
+        request = switch (originalEndpoint) {
+            case "/register" -> request.param("password", "Test123!")
+                    .param("confirmPassword", "Test123!");
+            case "/user/edit" -> request.with(user("jane.doe@example.com").roles("USER"));
+            case "/renovations/create" -> request.param("name", "Test")
+                    .param("description", "Test description")
+                    .param("roomList", "Kitchen", "Dining Room")
+                    .with(user("jane.doe@example.com").roles("USER"));
+            case "/renovations/edit" -> request.param("name", existingRecord.getName())
+                    .param("description", "Test Description")
+                    .param("roomList", "Kitchen")
+                    .with(user("jane.doe@example.com").roles("USER"));
+            default -> throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
+        };
 
         resultActions = mockMvc.perform(request);
 

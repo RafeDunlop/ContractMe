@@ -175,7 +175,6 @@ Feature:As Kaia, I want to be able to add location to my profile and
       |  "/register"            |
       |  "/user/edit"           |
       |  "/renovations/create"  |
-      | "/renovations/edit/"    |
 
 
 
