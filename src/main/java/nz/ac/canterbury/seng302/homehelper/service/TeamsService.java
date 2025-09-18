@@ -171,6 +171,14 @@ public class TeamsService {
         return teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, user.getId());
     }
 
+    /**
+     * Deletes the specified {@link Team}
+     * @param team The {@link Team} to delete
+     */
+    public void deleteTeam(Team team) {
+        teamsRepository.delete(team);
+    }
+
 
     /**
      * Goes through the list of contractors assigned to a team and
