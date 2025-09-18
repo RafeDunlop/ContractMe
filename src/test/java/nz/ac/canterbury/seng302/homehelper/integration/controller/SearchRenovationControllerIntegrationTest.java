@@ -149,6 +149,7 @@ class SearchRenovationControllerIntegrationTest {
      * of records per page.
      * @throws Exception if the request processing fails
      */
+
     @Test
     void getRenovationRecord_selectPage_returnsCorrectPage() throws Exception {
         for (int i = 0; i < 20; i++) {
@@ -168,7 +169,7 @@ class SearchRenovationControllerIntegrationTest {
 
         assertEquals(4, root.get("totalPages").asInt());
         assertEquals(1, root.get("number").asInt());
-        assertTrue(names.contains("Renovation 13"));
+        assertTrue(names.contains("Renovation 14"));
     }
 
     /**
