@@ -15,6 +15,7 @@ import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.Contracto
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.EmailService;
+import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,9 +35,17 @@ import java.util.Locale;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
@@ -68,6 +78,9 @@ public class TeamControllerIntegrationTest {
 
     @Autowired
     private TeamsRepository teamsRepository;
+
+    @Autowired
+    LoginService loginService;
 
     private User defaultUser;
 
@@ -334,6 +347,55 @@ public class TeamControllerIntegrationTest {
                 .andExpect(content().string(containsString("icons/profile-icon.svg")))
                 .andExpect(content().string(containsString("Plumbing")));
 
+    }
+
+
+    @Test
+    void deleteContractorFromRole_validUser_deletionSuccess() throws Exception {
+        Team team = new Team(renovationRecord);
+
+        Contractor alice = contractorRepository.save(new Contractor("Alice", "Builder", "alice@test.nz", "pw"));
+        alice.setProfilePicture("alice.jpg");
+        contractorRepository.save(alice);
+        Role accepted = new Role(Skill.CARPENTRY);
+        accepted.setContractor(alice);
+        accepted.setAccepted(true);
+        team.addRole(accepted);
+        teamsRepository.save(team);
+
+
+        mockMvc.perform(delete("/renovations/team/delete")
+                        .param("teamId", String.valueOf(team.getId()))
+                        .param("contractorId", String.valueOf(alice.getId()))
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+
+        assertNull(teamsRepository.findByRenovationRecord(renovationRecord).getRoles().get(0).getContractorId());
+    }
+
+    @Test
+    void deleteContractor_invalidUserForDelete_forbiddenError() throws Exception {
+        User anotherUser = userRepository.save(new User("John", "Doe", "john@doe.com", "password"));
+
+        RenovationRecord record = renovationRecordRepository.save(
+                new RenovationRecord(anotherUser, "Renovation One", "Some words", List.of("Room 1", "Room 2"))
+        );
+        Team team = new Team(record);
+
+        Contractor alice = contractorRepository.save(new Contractor("Alice", "Builder", "alice@test.nz", "pw"));
+        alice.setProfilePicture("alice.jpg");
+        contractorRepository.save(alice);
+        Role accepted = new Role(Skill.CARPENTRY);
+        accepted.setContractor(alice);
+        accepted.setAccepted(true);
+        team.addRole(accepted);
+        teamsRepository.save(team);
+
+        mockMvc.perform(delete("/renovations/team/delete")
+                        .param("teamId", String.valueOf(team.getId()))
+                        .param("contractorId", String.valueOf(alice.getId()))
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
     }
 
 }
