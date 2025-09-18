@@ -1,5 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
+
+import jakarta.persistence.EntityNotFoundException;
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
@@ -119,7 +121,6 @@ public class TeamController {
     }
 
 
-
     /**
      * Handler for a get request to the join team fragment.
      * @return the join team fragment
@@ -139,6 +140,21 @@ public class TeamController {
         model.addAttribute("teamId", id);
         model.addAttribute("renovationId", renovationRecord.getId());
         return "fragments/joinTeam :: join-team";
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteTeam(@PathVariable Long id) {
+        try {
+            User loggedIn = loginService.getUserByEmail();
+            Team team = teamsService.getTeamById(id);
+            RenovationRecord renovationRecord = team.getRenovationRecord();
+            if (!renovationRecord.getUser().equals(loggedIn))
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            teamsService.deleteTeam(team);
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.noContent().build();
     }
 
     /**
@@ -177,7 +193,7 @@ public class TeamController {
         }
         teamsService.deleteContractorFromTeam(team, contractor);
         return ResponseEntity.noContent().build();
+
+
     }
-
-
 }
