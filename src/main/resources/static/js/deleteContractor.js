@@ -3,7 +3,8 @@ const teamId = document.getElementById("teamId").value;
 const contractorId = document.getElementById("contractorId").value;
 
 
-function deleteContractor() {
+/** Sends a delete request to the TeamController to delete a contractor from a role */
+function deleteContractor(teamId,contractorId) {
   fetch(`/renovations/team/delete?teamId=${encodeURIComponent(teamId)}&contractorId=${encodeURIComponent(contractorId)}`, {
     method: "DELETE",
     headers: {

@@ -60,7 +60,7 @@
                         <div>
                             <div th:if="${role.contractorId != null && role.accepted}" th:inline="javascript">
                                 <button type="button"
-                                        onclick="deleteContractor()"
+                                        th:onclick="'deleteContractor(' + ${team.id} + ',' + ${role.contractorId} + ')'"
                                         class="btn btn-light btn-sm border border-danger text-danger">
                                     Remove Contractor
                                 </button>
