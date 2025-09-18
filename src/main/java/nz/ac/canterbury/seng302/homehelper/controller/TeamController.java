@@ -161,8 +161,10 @@ public class TeamController {
             )
             ) {
                 Map<Long, Contractor> contractors = teamsService.getContractorsByTeamId(id);
+                boolean isOwner = user == team.getRenovationRecord().getUser();
                 model.addAttribute("team", team);
                 model.addAttribute("contractors", contractors);
+                model.addAttribute("isOwner", isOwner);
                 return "viewTeam";
             }
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to view team");

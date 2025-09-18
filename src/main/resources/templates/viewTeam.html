@@ -35,7 +35,7 @@
                 : 'border-color: grey;')}">
 
                         <!-- Delete button -->
-                        <button type="button" class="delete-skill-btn btn btn-outline-danger custom-light-border ms-3">❌</button>
+                        <button th:if="${isOwner}" type="button" class="delete-skill-btn btn btn-outline-danger custom-light-border ms-3">❌</button>
 
                         <div th:if="${role.getContractorId() != null}" class="col-md-25 text-center" style="flex: 0 0 18%;">
                             <img th:src="@{'/profile_pictures/' + ${contractors.get(role.getContractorId()).getProfilePicture()}}"
@@ -51,7 +51,7 @@
                         </div>
 
                         <h5 th:if="${role.getContractorId() != null}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h5>
-                        <h5 th:if="${role.getContractorId() != null && !role.status.equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).ACCEPTED)}">Invite Sent!</h5>
+                        <h5 th:if="${role.getContractorId() != null && isOwner &&!role.status.equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).ACCEPTED)}">Invite Sent!</h5>
                         <h5 th:if="${role.getContractorId() == null}">No Contractor Found</h5>
                         <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 0.5vh;"></h5>
                     </div>
