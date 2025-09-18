@@ -49,13 +49,13 @@ public class TeamController {
      * Autowired constructor for instantiating a TeamController
      *
      * @param renovationRecordService the service associated with renovation records
-     * @param loginService the login service for retrieving the logged-in user
-     * @param locationService the location service to check if a record contains a valid location
-     * @param teamsService the team service used for calling validation and creating roles, from the given request
+     * @param loginService            the login service for retrieving the logged-in user
+     * @param locationService         the location service to check if a record contains a valid location
+     * @param teamsService            the team service used for calling validation and creating roles, from the given request
      */
     @Autowired
-    public TeamController(RenovationRecordService renovationRecordService, LoginService loginService, LocationService locationService,TeamsService teamsService,
-            ContractorService contractorService) {
+    public TeamController(RenovationRecordService renovationRecordService, LoginService loginService, LocationService locationService, TeamsService teamsService,
+                          ContractorService contractorService) {
         this.renovationRecordService = renovationRecordService;
         this.loginService = loginService;
         this.locationService = locationService;
@@ -65,9 +65,10 @@ public class TeamController {
 
     /**
      * Get mapping for the create team page
-     * @param id the renovation record id
+     *
+     * @param id             the renovation record id
      * @param teamRequestDTO the DTO containing the form fields
-     * @param model object containing the model attributes for thymeleaf
+     * @param model          object containing the model attributes for thymeleaf
      * @return a string referring to the HTML template for the create team page
      * @throws ResponseStatusException 404 not found if the record does not have a location, the current user does not
      *                                 own the renovation, or an argument is missing or invalid
@@ -92,9 +93,10 @@ public class TeamController {
 
     /**
      * Handles POST requests for creating a team for a renovation.
+     *
      * @param teamRequestDTO The DTO representing the creation request.
-     * @param id Of the renovation record to create a team for.
-     * @param model The model used to pass data back to the view in case of validation errors.
+     * @param id             Of the renovation record to create a team for.
+     * @param model          The model used to pass data back to the view in case of validation errors.
      * @return A redirect to the renovation view page if the team is successfully created, or the create team page with errors displaying.
      */
     @PostMapping("/create")
@@ -123,6 +125,7 @@ public class TeamController {
 
     /**
      * Handler for a get request to the join team fragment.
+     *
      * @return the join team fragment
      */
     @GetMapping("/join-team")
@@ -159,6 +162,7 @@ public class TeamController {
 
     /**
      * Handler for a get request to the view team page.
+     *
      * @return the view team page
      */
     @GetMapping("/view")
@@ -174,13 +178,13 @@ public class TeamController {
     /**
      * Removes the contractor from the role., redirects back to view team page
      *
-     * @param teamId of the team.
+     * @param teamId       of the team.
      * @param contractorId of the contractor
      * @return response based on whether the team id and contractor id  exists, if the user doesn't have permission to remove the contractor, or
      * if the deletion was successful
      */
     @DeleteMapping("/delete")
-    public ResponseEntity<Void>  deleteContractor(@RequestParam Long teamId,@RequestParam Long contractorId) {
+    public ResponseEntity<Void> deleteContractor(@RequestParam Long teamId, @RequestParam Long contractorId) {
         logger.info("DELETE /team/contractor/{}/{}", teamId, contractorId);
         Team team = teamsService.getTeamById(teamId);
         Contractor contractor = contractorService.getContractorById(contractorId);
