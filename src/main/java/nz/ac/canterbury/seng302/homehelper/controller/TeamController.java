@@ -155,6 +155,14 @@ public class TeamController {
         return "viewTeam";
     }
 
+    /**
+     * Removes the contractor from the role., redirects back to view team page
+     *
+     * @param teamId of the team.
+     * @param contractorId of the contractor
+     * @return response based on whether the team id and contractor id  exists, if the user doesn't have permission to remove the contractor, or
+     * if the deletion was successful
+     */
     @DeleteMapping("/delete")
     public ResponseEntity<Void>  deleteContractor(@RequestParam Long teamId,@RequestParam Long contractorId) {
         logger.info("DELETE /team/contractor/{}/{}", teamId, contractorId);
