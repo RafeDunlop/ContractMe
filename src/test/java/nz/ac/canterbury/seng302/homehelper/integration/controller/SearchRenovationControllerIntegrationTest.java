@@ -168,7 +168,7 @@ class SearchRenovationControllerIntegrationTest {
 
         assertEquals(4, root.get("totalPages").asInt());
         assertEquals(1, root.get("number").asInt());
-        assertTrue(names.contains("Renovation 14"));
+        assertTrue(names.contains("Renovation 13"));
     }
 
     /**
