@@ -48,7 +48,6 @@ class TeamsServiceIntegrationTest {
     @MockBean
     private EmailService emailService;
 
-    private User user;
     private RenovationRecord renovation;
     private Location location;
 
