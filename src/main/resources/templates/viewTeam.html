@@ -2,6 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
     <base th:href="@{/}"/>
     <title>View Team</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
@@ -12,6 +13,7 @@
 <body>
 
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+
 
     <div id="container" class="card container mt-5 p-4 shadow-sm">
         <div id="content-header">
@@ -26,15 +28,18 @@
         <div class="container text-center">
             <div class="row">
                 <div th:each="role : ${team.getRoles()}" class="col skill-card d-flex justify-content-center">
+                    <input type="hidden" id="teamId" th:value="${team.id}">
+                    <input type="hidden" id="contractorId" th:value="${role.contractorId}">
                     <div class="skill-card-container card container border-5 border-black align-items-center d-flex flex-column position-relative"
-                         style="padding-top: 6vh; padding-bottom: 4vh; max-width: 14vw;max-height:500px; margin: 5vh 5% 4vh;">
+                         style="padding-top: 2vh; padding-bottom: 4vh; max-width: 14vw;max-height:500px; margin: 5vh 5% 4vh;">
 
                         <!-- Delete button -->
-
                         <button type="button" class="delete-skill-btn btn btn-outline-danger custom-light-border ms-3">❌</button>
 
 
+                        <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 4vh;"></h5>
 
+                        <div class="border border-2 border-black p-2 mt-2 d-flex flex-column align-items-center" style="width: 100%;">
                         <div th:if="${role.getContractorId() != null}" class="col-md-25  text-center" style="flex: 0 0 18%;">
                             <img th:src="@{'/profile_pictures/' + ${contractors.get(role.getContractorId()).getProfilePicture()}}"
                                  alt="Profile Picture"
@@ -51,18 +56,18 @@
                             <h5 th:if="${role.getContractorId() != null}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h5>
                             <h5 th:if="${role.getContractorId() != null && !role.isAccepted()}">Invite Sent!</h5>
                             <h5 th:if="${role.getContractorId() == null}">No Contractor Found</h5>
-                            <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 0.5vh;"></h5>
                         </div>
                         <div>
-                        <form th:if="${role.getContractorId() != null}"
-                              th:action="@{/renovations/view(id=${team.getRenovationRecord().getId()})}"
-                              method="post"
-                              class="bottom-0 m-2">
-                            <input type="hidden" name="teamId" th:value="${team.getId()}"/>
-                            <button type="submit" class="btn btn-light btn-sm border border-danger text-danger">Remove Contractor</button>
-                        </form>
+                            <div th:if="${role.contractorId != null && role.accepted}" th:inline="javascript">
+                                <button type="button"
+                                        th:onclick="'deleteContractor(' + ${team.id} + ',' + ${role.contractorId} + ')'"
+                                        class="btn btn-light btn-sm border border-danger text-danger">
+                                    Remove Contractor
+                                </button>
+                            </div>
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -74,5 +79,7 @@
 </body>
 
 <script type="module" th:src="@{/js/navbar.js}"></script>
+<script type="text/javascript" th:src="@{/js/deleteContractor.js}"></script>
+
 
 </html>

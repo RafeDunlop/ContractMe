@@ -60,6 +60,10 @@ public class Role {
         return accepted;
     }
 
+    public void removeContractor() {
+        this.contractorId = null;
+    }
+
     public void setAccepted(boolean accepted) {
         this.accepted = accepted;
     }
