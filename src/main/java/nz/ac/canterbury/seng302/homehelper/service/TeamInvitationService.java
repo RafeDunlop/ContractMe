@@ -53,8 +53,8 @@ public class TeamInvitationService {
      */
     public void declineContractor(Contractor contractor, Team team) {
         Role role = findAssignedRole(team, contractor);
-        role.setStatus(RoleStatus.DECLINED);
         role.setContractor(null);
+        role.setStatus(RoleStatus.UNFILLED);
         teamsRepository.save(team);
     }
 
