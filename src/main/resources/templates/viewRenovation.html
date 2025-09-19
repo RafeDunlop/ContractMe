@@ -39,7 +39,7 @@
 
         <div id="content-container">
 
-            <div class="renovation-name-header px-3 pt-3">
+            <div id="renovation-name-header" class="renovation-name-header px-3 pt-3">
                 <div class="jumbotron d-flex justify-content-between align-items-center text-center">
                     <form id="renovationForm" class="d-flex align-items-center" th:if="${isOwner}">
                         <input type="checkbox" id="publicCheckbox" name="isPublic" th:checked="${renovation.isPublic()}" class="me-1">
@@ -65,7 +65,7 @@
                 </ul>
             </div>
 
-            <div id="details-content" class="renovation-content" th:attr="hidden=${tabBarFocus != 'details'}">
+            <div id="details-content" class="renovation-content" th:style="${tabBarFocus != 'details'} ? 'display: none;'">
                 <div th:if="${renovation.description} != ''" class="card p-3 bg-light my-3">
                     <h6 class="fw-bold">Description:</h6>
                     <p class="mb-0" th:text="${renovation.description}"></p>
@@ -114,7 +114,7 @@
                 </div>
             </div>
 
-            <div id="tasks-content" class="renovation-content"  th:attr="hidden=${tabBarFocus != 'tasks'}">
+            <div id="tasks-content" class="renovation-content"  th:style="${tabBarFocus != 'tasks'} ? 'display: none;'">
                 <div class="col-md-4 mb-3">
                     <label for="status-filter" class="fw-bold">Show:</label>
                     <select id="status-filter" name="status" class="form-select"
@@ -172,7 +172,7 @@
                 </div>
             </div>
 
-            <div id="calendar-content" class="renovation-content" th:attr="hidden=${tabBarFocus != 'calendar'}">
+            <div id="calendar-content" class="renovation-content" th:style="${tabBarFocus != 'calendar'} ? 'display: none;'">
                 <div th:if="${isOwner}" style="margin-top: 120px;">
                     <div th:replace="~{fragments/calendar.html ::calendar (${date}, ${datesArray}, ${renovation.id})}"></div>
                 </div>
