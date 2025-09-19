@@ -65,6 +65,10 @@ public class Role {
         this.status = status;
     }
 
+    public void removeContractor() {
+        this.contractorId = null;
+    }
+
     public LocalDateTime getCreationDate() {
         return creationDate;
     }

@@ -395,4 +395,19 @@ public class TeamsService {
                 contractorRepository.findById(role.getContractorId()) :
                 Optional.empty();
     }
+
+    /**
+     * Sets the contractor Id and isAccepted of the given role of the given team to null and false respectively.
+     * @param team the team the role is a part of
+     * @param contractor the contractor being removed from the team
+     */
+    public void deleteContractorFromTeam(Team team, Contractor contractor) {
+        for (Role role : team.getRoles()) {
+            if (role.getContractorId() != null && role.getContractorId().equals(contractor.getId())) {
+                role.removeContractor();
+                role.setAccepted(false);
+            }
+        }
+        teamsRepository.save(team);
+    }
 }
