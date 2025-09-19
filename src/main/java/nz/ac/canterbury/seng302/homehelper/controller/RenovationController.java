@@ -5,7 +5,6 @@ import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.profanityFilter.ProfanityFilter;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
@@ -22,7 +21,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UrlPathHelper;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 

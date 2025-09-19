@@ -351,7 +351,7 @@ public class LocationFormSteps {
         Optional<User> testUser = userRepository.findByEmailIgnoreCase(email);
         if (testUser.isPresent()) {
             User user = testUser.get();
-            if (Objects.equals(endpoint, "/register") | Objects.equals(endpoint, "/user/edit")) {
+            if (Objects.equals(endpoint, "/register") || Objects.equals(endpoint, "/user/edit")) {
 
                 Location location = user.getLocation();
                 assertNotNull(location);

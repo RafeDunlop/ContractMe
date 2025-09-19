@@ -112,11 +112,11 @@ public class RegisterControllerIntegrationTest {
     @Test
     public void testRegisterUser_validUser_success() throws Exception {
         PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        User expectedUser = spy(new User("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
-        when(expectedUser.getId()).thenReturn(1L);
-        when(verificationCodeRepository.save(any(VerificationCode.class))).thenAnswer((InvocationOnMock) -> null);
-        when(userRepository.save(any(User.class))).thenReturn(expectedUser);
-        when(userRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(expectedUser));
+        User newlyexpectedUser = spy(new User("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
+        when(newlyexpectedUser.getId()).thenReturn(1L);
+        when(verificationCodeRepository.save(any(VerificationCode.class))).thenAnswer(invocationOnMock -> null);
+        when(userRepository.save(any(User.class))).thenReturn(newlyexpectedUser);
+        when(userRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(newlyexpectedUser));
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .param("firstName", "Jane")
@@ -211,13 +211,13 @@ public class RegisterControllerIntegrationTest {
     @Test
     public void testRegisterContractor_validContractor_success() throws Exception {
         PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        Contractor expectedUser = spy(new Contractor("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
-        expectedUser.setHourlyRate(27.80f);
-        expectedUser.setPhoneNumber("6412345678");
+        Contractor newlyExpectedUser = spy(new Contractor("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
+        newlyExpectedUser.setHourlyRate(27.80f);
+        newlyExpectedUser.setPhoneNumber("6412345678");
         when(expectedUser.getId()).thenReturn(1L);
         when(verificationCodeRepository.save(any(VerificationCode.class))).thenAnswer((InvocationOnMock) -> null);
-        when(contractorRepository.save(any(Contractor.class))).thenReturn(expectedUser);
-        when(contractorRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(expectedUser));
+        when(contractorRepository.save(any(Contractor.class))).thenReturn(newlyExpectedUser);
+        when(contractorRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(newlyExpectedUser));
         doReturn(new Location()).when(locationService).locate(any(AddressDTO.class));
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -247,13 +247,13 @@ public class RegisterControllerIntegrationTest {
     @Test
     public void testRegisterContractor_skillsAreNull_rejectInputWithSkillError() throws Exception {
         PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        Contractor expectedUser = spy(new Contractor("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
-        expectedUser.setHourlyRate(27.80f);
-        expectedUser.setPhoneNumber("6412345678");
+        Contractor newlyExpectedUser = spy(new Contractor("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
+        newlyExpectedUser.setHourlyRate(27.80f);
+        newlyExpectedUser.setPhoneNumber("6412345678");
         when(expectedUser.getId()).thenReturn(1L);
-        when(verificationCodeRepository.save(any(VerificationCode.class))).thenAnswer((InvocationOnMock) -> null);
-        when(contractorRepository.save(any(Contractor.class))).thenReturn(expectedUser);
-        when(contractorRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(expectedUser));
+        when(verificationCodeRepository.save(any(VerificationCode.class))).thenAnswer(invocationOnMock -> null);
+        when(contractorRepository.save(any(Contractor.class))).thenReturn(newlyExpectedUser);
+        when(contractorRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(newlyExpectedUser));
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("firstName", "Jane")
