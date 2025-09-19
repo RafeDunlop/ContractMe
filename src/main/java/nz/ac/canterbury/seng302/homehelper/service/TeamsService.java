@@ -76,7 +76,7 @@ public class TeamsService {
             team.addRole(role);
         }
 
-        Team newTeam = teamsRepository.save(team);
+        teamsRepository.save(team);
         renovationRecordRepository.save(teamRecord);
 
         Location renovationLocation = teamRecord.getLocation();
@@ -342,7 +342,8 @@ public class TeamsService {
         boolean allAssigned = true;
 
         for (Role role : team.getRoles()) {
-            if (role.getContractorId() == null) {
+            Long id = role.getContractorId();
+            if (id == null || id == 0L) {
                 Contractor contractor = findNearestContractor(role, renovationLocation, assignedContractors);
                 if (contractor == null) {
                     allAssigned = false;
