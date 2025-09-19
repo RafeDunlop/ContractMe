@@ -35,7 +35,7 @@ import java.util.Locale;
  * @author Rafe Dunlop
  */
 @Component
-@Profile("!test & !cucumber & !production")
+@Profile("!test & !cucumber & !production & !end2end")
 public class DefaultDataConfigurator {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultDataConfigurator.class);
