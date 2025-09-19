@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/map")
@@ -36,6 +37,8 @@ public class MapController {
             @RequestParam(required = false, defaultValue = "true") boolean withPublic,
             @ModelAttribute CoordinateRectangle coordinateRectangle) {
         logger.info("GET /map/renovations");
-        return mapService.getRenovationsInBounds(coordinateRectangle, withPublic);
+        List<MappedRenovation> mappedRenovationList = mapService.getRenovationsInBounds(coordinateRectangle, withPublic);
+        logger.info("mapped renovations returned: {}", mappedRenovationList.size());
+        return mappedRenovationList;
     }
 }

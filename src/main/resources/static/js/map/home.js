@@ -9,9 +9,9 @@ togglePublicCheckbox.addEventListener("click", toggleListener)
  * todo fix bounds
  */
 function toggleListener() {
-    fetchRenovationMappings({}, togglePublicCheckbox.checked).then(
-        mappings => displayRenovations(mappings)
-    )
+    fetchRenovationMappings({minLat: -90, minLon: -180, maxLat: 90, maxLon: 180}, togglePublicCheckbox.checked)
+        .then(response => response.json())
+        .then(mappings => displayRenovations(mappings))
 }
 
 /**
@@ -21,5 +21,5 @@ function toggleListener() {
  * @param mappings The mappings to be displayed
  */
 function displayRenovations(mappings) {
-    console.log(mappings);
+    mappings.forEach(mapping => console.log(mapping))
 }
