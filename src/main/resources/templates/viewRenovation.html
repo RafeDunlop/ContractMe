@@ -53,13 +53,13 @@
                 </h1>
                 <ul class="nav nav-tabs renovation-tab-bar">
                     <li class="nav-item">
-                        <button id="details-tab-item" class="nav-link renovation-tab-bar-options">Details</button>
+                        <button id="details-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'details'} ? ' active'">Details</button>
                     </li>
                     <li class="nav-item">
-                        <button id="tasks-tab-item" class="nav-link renovation-tab-bar-options">Tasks</button>
+                        <button id="tasks-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'tasks'} ? ' active'">Tasks</button>
                     </li>
                     <li class="nav-item">
-                        <button id="calendar-tab-item" class="nav-link renovation-tab-bar-options">Calendar</button>
+                        <button id="calendar-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'calendar'} ? ' active'">Calendar</button>
                     </li>
                 </ul>
             </div>

@@ -1,5 +1,4 @@
 const detailsTabItem = document.getElementById("details-tab-item");
-detailsTabItem.classList.add("active");
 
 document.querySelectorAll('.nav-link').forEach(btn => {
     btn.addEventListener('click', function () {
