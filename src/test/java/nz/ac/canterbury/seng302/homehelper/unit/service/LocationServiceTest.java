@@ -18,6 +18,7 @@ import org.mockito.Mockito;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class LocationServiceTest {
 
@@ -61,9 +62,9 @@ class LocationServiceTest {
         AddressDTO inputtedAddressDTO = setAddressDTOValues(address, suburb, city, postcode, country);
         inputtedAddressDTO.setLat(lat);
         inputtedAddressDTO.setLon(lon);
-
-        Location actualLocation = locationService.locate(inputtedAddressDTO);
-
+        doNothing().when(locationServiceSpy).injectCoordsViaGeocoding(inputtedAddressDTO);
+        Location actualLocation = locationServiceSpy.locate(inputtedAddressDTO);
+        verify(locationServiceSpy, times(1)).injectCoordsViaGeocoding(inputtedAddressDTO);
         Assertions.assertEquals(expectedLocation, actualLocation);
     }
 
