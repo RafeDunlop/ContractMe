@@ -1,26 +1,16 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
 import io.cucumber.java.Before;
-import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,15 +21,22 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -69,7 +66,8 @@ public class LocationFormSteps {
 
     @Before
     public void before() {
-        doNothing().when(locationService).injectCoordsViaGeocoding(any(AddressDTO.class));
+        doThrow(IllegalArgumentException.class).when(locationService).injectCoordsViaGeocoding(argThat(argument -> argument.getAddress_line1().equals("2000 No such Road")));
+        doNothing().when(locationService).injectCoordsViaGeocoding(argThat(argument -> !argument.getAddress_line1().equals("2000 No such Road")));
     }
 
     @Given("I am on the edit profile form")
@@ -253,9 +251,8 @@ public class LocationFormSteps {
         MockHttpServletRequestBuilder request = post(endpoint)
                 .param("firstName", "Jane")
                 .param("lastName", "Doe")
-                .param("email", "jane.doe@example.com")
                 .param("address_line1", "200 Riccarton Road")
-                .param("suburb", "Riccarton")
+                .param("region", "Riccarton")
                 .param("city", "Christchurch")
                 .param("postcode", "8041")
                 .param("country", "New Zealand")
@@ -267,11 +264,13 @@ public class LocationFormSteps {
         switch (originalEndpoint) {
             case "/register":
                 request.param("password", "Test123!")
-                        .param("confirmPassword", "Test123!");
+                        .param("confirmPassword", "Test123!")
+                        .param("email", "new.user@example.com");
                 break;
 
             case "/user/edit":
-                request.with(user("jane.doe@example.com").roles("USER"));
+                request.with(user("jane.doe@example.com").roles("USER"))
+                        .param("email", "jane.doe@example.com");
                 break;
 
             case "/renovations/create":
@@ -312,8 +311,7 @@ public class LocationFormSteps {
         MockHttpServletRequestBuilder request = post(endpoint)
                 .param("firstName", "Jane")
                 .param("lastName", "Doe")
-                .param("email", "jane.doe@example.com")
-                .param("address_line1", "20000 Riccarton Road")
+                .param("address_line1", "2000 No such Road")
                 .param("suburb", "Riccarton")
                 .param("city", "Christchurch")
                 .param("postcode", "8041")
@@ -325,8 +323,10 @@ public class LocationFormSteps {
         // Endpoint specific params
         request = switch (originalEndpoint) {
             case "/register" -> request.param("password", "Test123!")
-                    .param("confirmPassword", "Test123!");
-            case "/user/edit" -> request.with(user("jane.doe@example.com").roles("USER"));
+                    .param("confirmPassword", "Test123!")
+                .param("email", "new.user@example.com");
+            case "/user/edit" -> request.with(user("jane.doe@example.com").roles("USER"))
+                .param("email", "jane.doe@example.com");
             case "/renovations/create" -> request.param("name", "Test")
                     .param("description", "Test description")
                     .param("roomList", "Kitchen", "Dining Room")
@@ -344,7 +344,11 @@ public class LocationFormSteps {
 
     @Then("The form from the {string} page is saved and contains the address I supplied")
     public void the_form_from_the_page_is_saved_and_contains_the_address_i_supplied(String endpoint) {
-        Optional<User> testUser = userRepository.findByEmailIgnoreCase("jane.doe@example.com");
+        String email = "jane.doe@example.com";
+        if (endpoint.equals("/register")) {
+            email = "new.user@example.com";
+        }
+        Optional<User> testUser = userRepository.findByEmailIgnoreCase(email);
         if (testUser.isPresent()) {
             User user = testUser.get();
             if (Objects.equals(endpoint, "/register") | Objects.equals(endpoint, "/user/edit")) {
@@ -352,7 +356,7 @@ public class LocationFormSteps {
                 Location location = user.getLocation();
                 assertNotNull(location);
                 assertEquals("address", "200 Riccarton Road", location.getAddress());
-                assertEquals("suburb", "Riccarton", location.getSuburb());
+                assertEquals("region", "Riccarton", location.getSuburb());
                 assertEquals("city", "Christchurch", location.getCity());
                 assertEquals("postcode", "8041", location.getPostcode());
                 assertEquals("country", "New Zealand", location.getCountry());
@@ -360,19 +364,28 @@ public class LocationFormSteps {
                 assertEquals("lon", 1D, location.getLongitude());
 
 
-            } else if (Objects.equals(endpoint, "/renovations/create")) {
-                Optional<RenovationRecord> testRecord = renovationRecordRepository.findExactMatch("Special Test Record", user);
-                if (testRecord.isPresent()) {
-                    Location location = testRecord.get().getLocation();
-                    assertNotNull(location);
-                    assertEquals("address", "200 Riccarton Road", location.getAddress());
-                    assertEquals("suburb", "Riccarton", location.getSuburb());
-                    assertEquals("city", "Christchurch", location.getCity());
-                    assertEquals("postcode", "8041", location.getPostcode());
-                    assertEquals("country", "New Zealand", location.getCountry());
-                    assertEquals("lat", 1D, location.getLatitude());
-                    assertEquals("lon", 1D, location.getLongitude());
+            } else if (endpoint.startsWith("/renovations/")) {
+                RenovationRecord renovationRecord  = new RenovationRecord();
+                if (Objects.equals(endpoint, "/renovations/create")) {
+                    Optional<RenovationRecord> testRecord = renovationRecordRepository.findExactMatch("Special Test Record", user);
+                    if (testRecord.isPresent()) {
+                        renovationRecord = testRecord.get();
+                    }
+                } else if (Objects.equals(endpoint, "/renovations/edit")) {
+                    Optional<RenovationRecord> testRecord = renovationRecordRepository.findById(existingRecord.getId());
+                    if (testRecord.isPresent()) {
+                        renovationRecord = testRecord.get();
+                    }
                 }
+                Location location= renovationRecord.getLocation();
+                assertNotNull(location);
+                assertEquals("address", "200 Riccarton Road", location.getAddress());
+                assertEquals("region", "Riccarton", location.getSuburb());
+                assertEquals("city", "Christchurch", location.getCity());
+                assertEquals("postcode", "8041", location.getPostcode());
+                assertEquals("country", "New Zealand", location.getCountry());
+                assertEquals("lat", 1D, location.getLatitude());
+                assertEquals("lon", 1D, location.getLongitude());
             } else {
                 throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
             }
