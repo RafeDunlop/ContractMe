@@ -75,15 +75,14 @@ public class LocationService {
      * maintain consistent data
      * @param addressDTO address data object passed from frontend
      * @return fully-formed {@link Location} object guaranteed to be supplied coordinates
+     * @throws LocationNotFoundException if valid coordinates could not be found for the location
      */
-    public Location locate(AddressDTO addressDTO) {
-        if (!hasCoords(addressDTO) && isLocationProvided(addressDTO)) {
+    public Location locate(AddressDTO addressDTO) throws LocationNotFoundException {
+        if (isLocationProvided(addressDTO)) {
             try {
                 injectCoordsViaGeocoding(addressDTO);
             } catch (IllegalArgumentException e) {
-                logger.warn("Failed to acquire location coordinates via geocoding: {}", e.getMessage());
-                String ipAddress = getIpFromRequest();
-                injectCoordsViaIpGeolocation(addressDTO, ipAddress);
+                throw new LocationNotFoundException("The address could not be found", e);
             }
         }
         String loggedAddress = addressDTO.getLoggedAddress();
@@ -92,15 +91,7 @@ public class LocationService {
                 addressDTO.getLat(),
                 addressDTO.getLon()
         );
-        return new Location(
-                addressDTO.getAddress_line1(),
-                addressDTO.getCountry(),
-                addressDTO.getPostcode(),
-                addressDTO.getCity(),
-                addressDTO.getRegion(),
-                addressDTO.getLat(),
-                addressDTO.getLon()
-        );
+        return new Location(addressDTO);
     }
 
     /**
@@ -222,6 +213,23 @@ public class LocationService {
         return errors;
     }
 
+    /**
+     * Validate and return a location geolocated using {@link LocationService#locate(AddressDTO)}, adds an error list
+     * to the passed errors map with key "geolocationError" if the coordinates could not be found.
+     *
+     * @param addressDTO the address DTO object from the location form
+     * @param errors the error map used by the controller to present error messages
+     * @return the location if found, or a new empty Location object otherwise
+     */
+    public Location validateGeolocation(AddressDTO addressDTO, Map<String, List<String>> errors) {
+        Location location = new Location();
+        try {
+            location = locate(addressDTO);
+        } catch (LocationNotFoundException e) {
+            errors.put("geolocationError", List.of(e.getMessage()));
+        }
+        return location;
+    }
 
     /**
      * checks if the location has been provided
@@ -337,17 +345,6 @@ public class LocationService {
     }
 
     /**
-     * Performs a simple values-based check to check whether a location has co-ordinates provided
-     * note: 0, 0 is null island (middle of sea). Nobody lives or works there
-     * @param address The DTO which contains fields for co-ordinates
-     * @return Whether the co-ordinates provided in the specified address are null-equivalent (returns false)
-     */
-    private boolean hasCoords(AddressDTO address) {
-        return !(address.getLon() == 0d ||
-                address.getLat() == 0d);
-    }
-
-    /**
      * Gets the IP address of the request, principally from the original client that submitted the request
      * if forwarded
      * Uses {@link RequestContextHolder} from Spring to statically extract the web request, via {@link ServletRequestAttributes}
@@ -375,9 +372,7 @@ public class LocationService {
      */
     public AddressDTO updateEditedLocation(Location currentLocation, AddressDTO editedAddressDTO) {
         if (currentLocation != null) {
-            Location editedLocation = new Location(editedAddressDTO.getAddress_line1(), editedAddressDTO.getCountry(),
-                    editedAddressDTO.getPostcode(), editedAddressDTO.getCity(), editedAddressDTO.getRegion(),
-                    editedAddressDTO.getLat(), editedAddressDTO.getLon());
+            Location editedLocation = new Location(editedAddressDTO);
             boolean sameCoordinates = currentLocation.getLatitude() == editedLocation.getLatitude() &&
                     currentLocation.getLongitude() == editedLocation.getLongitude();
             if (!Objects.equals(currentLocation, editedLocation) && sameCoordinates) {

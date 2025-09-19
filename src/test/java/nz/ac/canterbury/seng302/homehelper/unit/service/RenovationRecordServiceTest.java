@@ -90,15 +90,15 @@ public class RenovationRecordServiceTest {
         addressDTO.setCity("Christchurch");
         addressDTO.setRegion("Canterbury");
 
-        when(locationService.locate(addressDTO)).thenReturn(new Location(
+        Location inputLocation = new Location(
                 addressDTO.getAddress_line1(),
                 addressDTO.getCountry(),
                 addressDTO.getPostcode(),
                 addressDTO.getCity(),
                 addressDTO.getRegion()
-        ));
+        );
 
-        toTest.addRenovationLocation(renovationRecord, addressDTO);
+        toTest.addRenovationLocation(renovationRecord, inputLocation);
 
         ArgumentCaptor<RenovationRecord> captor = ArgumentCaptor.forClass(RenovationRecord.class);
         Mockito.verify(renovationRecordRepository, Mockito.times(2)).save(captor.capture());
