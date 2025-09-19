@@ -1,30 +1,55 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Service that handles contractor invitations to renovation teams.
  * Provides logic for accepting, declining, and checking if invite links are still valid.
  */
 @Service
+@EnableScheduling
 public class TeamInvitationService {
-
+    private static final int RERUNNING_FREQUENCY_MINUTES = 10;
     private final TeamsRepository teamsRepository;
+    private final TeamsService teamsService;
+    private static final Logger logger = LoggerFactory.getLogger(TeamInvitationService.class);
 
     /**
      * Creates a new instance with access to the teams repository.
      * @param teamsRepository team repository to persist changes
      */
     @Autowired
-    public TeamInvitationService(TeamsRepository teamsRepository) {
+    public TeamInvitationService(TeamsRepository teamsRepository, TeamsService teamsService) {
         this.teamsRepository = teamsRepository;
+        this.teamsService = teamsService;
+    }
+
+    /**
+     * todo
+     */
+    @Scheduled(fixedRate = RERUNNING_FREQUENCY_MINUTES, timeUnit = TimeUnit.MINUTES)
+    public void rerunAlgorithm() {
+        Set<Team> teams = teamsRepository.getIncompleteTeams();
+        logger.info("Rerunning matching algorithm on {} teams",teams.size());
+        for (Team team : teams) {
+            Location location = team.getRenovationRecord().getLocation();
+            teamsService.assignContractorsToTeam(team, location);
+        }
+
     }
 
     /**

@@ -8,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TeamsRepository extends CrudRepository<Team, Long>{
 
@@ -29,6 +30,13 @@ public interface TeamsRepository extends CrudRepository<Team, Long>{
      */
     @Query("SELECT t FROM Team t JOIN FETCH t.roles r WHERE r.contractorId = :contractorId AND r.accepted = FALSE ORDER BY r.creationDate DESC")
     List<Team> findByRoleContractor(Long contractorId);
+
+    /**
+     *todo
+     * @return
+     */
+    @Query("SELECT t FROM Team t JOIN FETCH t.roles r WHERE r.contractorId IS NULL")
+    Set<Team> getIncompleteTeams();
 
     /**
      * Checks if a given user belongs to the team associated with a renovation record
