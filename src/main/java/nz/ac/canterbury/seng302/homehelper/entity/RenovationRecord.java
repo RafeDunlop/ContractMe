@@ -56,6 +56,8 @@ public class RenovationRecord {
     @Column(nullable = false)
     private boolean isPublic = false;
 
+
+
     public RenovationRecord() {}
 
     /**
@@ -251,6 +253,7 @@ public class RenovationRecord {
     public void setLocation(Location location) {
         this.location = location;
     }
+
 
     /**
      * toString method returning all the values stored

@@ -43,7 +43,6 @@ function confirmTeamRequest(e) {
     const skills = Array.from(
         document.querySelectorAll('.selected-skill-name')
     ).map(el => `• ${el.textContent}`).join('\n');
-    console.log(skills);
 
     const promptText = `Do you want to create this team request?\n\nRoles:\n\n${skills}\n\n`;
 
@@ -60,7 +59,7 @@ export function confirmLogout() {
             })
 
             if (!response.ok) {
-                alert("failed to log out")
+                alert("failed to log out");
             }
             window.location.assign("logout");
         }

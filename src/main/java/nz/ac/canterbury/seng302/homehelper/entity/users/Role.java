@@ -47,6 +47,7 @@ public class Role {
         else contractorId = contractor.getId();
     }
 
+
     public Skill getSkill() {
         return skill;
     }
@@ -57,6 +58,10 @@ public class Role {
 
     public boolean isAccepted() {
         return accepted;
+    }
+
+    public void removeContractor() {
+        this.contractorId = null;
     }
 
     public void setAccepted(boolean accepted) {
