@@ -405,7 +405,7 @@ public class TeamsService {
         for (Role role : team.getRoles()) {
             if (role.getContractorId() != null && role.getContractorId().equals(contractor.getId())) {
                 role.removeContractor();
-                role.setAccepted(false);
+                role.setStatus(RoleStatus.UNFILLED);
             }
         }
         teamsRepository.save(team);

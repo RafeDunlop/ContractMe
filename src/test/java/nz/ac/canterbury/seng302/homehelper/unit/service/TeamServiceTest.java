@@ -3,10 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.unit.service;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
@@ -331,7 +328,7 @@ public class TeamServiceTest {
         role.setContractor(contractor);
         teamsService.deleteContractorFromTeam(team,contractor);
         assertNull(role.getContractorId());
-        assertFalse(role.isAccepted());
+        assertNotSame(role.getStatus(), RoleStatus.ACCEPTED);
     }
 
 }
