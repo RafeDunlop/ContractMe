@@ -351,7 +351,7 @@ class EditProfileControllerIntegrationTest {
         addressDTO.setRegion("Beckenham");
         addressDTO.setLat(1D);
         addressDTO.setLon(1D);
-        Location expectedLocation = new Location(addressDTO.getAddress_line1(), addressDTO.getCountry(), addressDTO.getPostcode(), addressDTO.getCity(), addressDTO.getRegion(), addressDTO.getLat(), addressDTO.getLon());
+        Location expectedLocation = new Location(addressDTO);
         doReturn(expectedLocation).when(locationService).locate(addressDTO);
 
         mockMvc.perform(post("/user/edit")

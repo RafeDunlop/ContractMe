@@ -91,15 +91,7 @@ public class LocationService {
                 addressDTO.getLat(),
                 addressDTO.getLon()
         );
-        return new Location(
-                addressDTO.getAddress_line1(),
-                addressDTO.getCountry(),
-                addressDTO.getPostcode(),
-                addressDTO.getCity(),
-                addressDTO.getRegion(),
-                addressDTO.getLat(),
-                addressDTO.getLon()
-        );
+        return new Location(addressDTO);
     }
 
     /**
@@ -380,9 +372,7 @@ public class LocationService {
      */
     public AddressDTO updateEditedLocation(Location currentLocation, AddressDTO editedAddressDTO) {
         if (currentLocation != null) {
-            Location editedLocation = new Location(editedAddressDTO.getAddress_line1(), editedAddressDTO.getCountry(),
-                    editedAddressDTO.getPostcode(), editedAddressDTO.getCity(), editedAddressDTO.getRegion(),
-                    editedAddressDTO.getLat(), editedAddressDTO.getLon());
+            Location editedLocation = new Location(editedAddressDTO);
             boolean sameCoordinates = currentLocation.getLatitude() == editedLocation.getLatitude() &&
                     currentLocation.getLongitude() == editedLocation.getLongitude();
             if (!Objects.equals(currentLocation, editedLocation) && sameCoordinates) {

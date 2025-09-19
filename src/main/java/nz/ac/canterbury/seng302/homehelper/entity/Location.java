@@ -35,13 +35,8 @@ public class Location {
     }
 
     public Location(AddressDTO addressDTO) {
-        this.address = addressDTO.getAddress_line1();
-        this.country = addressDTO.getCountry();
-        this.postcode = addressDTO.getPostcode();
-        this.city = addressDTO.getCity();
-        this.suburb = addressDTO.getRegion();
-        this.latitude = addressDTO.getLat();
-        this.longitude = addressDTO.getLon();
+        this(addressDTO.getAddress_line1(), addressDTO.getCountry(), addressDTO.getPostcode(), addressDTO.getCity(),
+                addressDTO.getRegion(), addressDTO.getLat(), addressDTO.getLon());
     }
 
     public Location() {}
