@@ -41,7 +41,7 @@ public class ContractorEditDetailsSteps {
     private final ContractorContext contractorContext;
 
     private Float hourlyRate;
-    private Integer countryCode;
+    private String countryCode;
     private String phoneNumber;
     private Set<Skill> skills;
 

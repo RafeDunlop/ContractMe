@@ -9,6 +9,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.validation.TeamValidation;
@@ -35,6 +36,7 @@ public class TeamsService {
     private final TeamValidation teamValidation;
     private final ContractorRepository contractorRepository;
     private final EmailService emailService;
+    private final RenovationRecordRepository renovationRecordRepository;
 
     /**
      * Constructs TeamsService with necessary dependencies.
@@ -42,11 +44,22 @@ public class TeamsService {
      * @param teamValidation Service used to validate team requests.
      */
     @Autowired
-    public TeamsService(TeamsRepository teamsRepository, TeamValidation teamValidation, ContractorRepository contractorRepository, EmailService emailService) {
+    public TeamsService(TeamsRepository teamsRepository, TeamValidation teamValidation, ContractorRepository contractorRepository, EmailService emailService,
+                        RenovationRecordRepository renovationRecordRepository) {
         this.teamsRepository = teamsRepository;
         this.teamValidation = teamValidation;
         this.contractorRepository = contractorRepository;
         this.emailService = emailService;
+        this.renovationRecordRepository = renovationRecordRepository;
+    }
+
+    /**
+     * Get the team associated with a given renovation record.
+     * @param renovationRecord The renovation record to get the team associated with it.
+     * @return Team associated with given record.
+     */
+    public Team getTeamFromRenovation(RenovationRecord renovationRecord) {
+        return teamsRepository.findByRenovationRecord(renovationRecord);
     }
 
     /**
@@ -63,7 +76,8 @@ public class TeamsService {
             team.addRole(role);
         }
 
-        saveTeam(team);
+        Team newTeam = teamsRepository.save(team);
+        renovationRecordRepository.save(teamRecord);
 
         Location renovationLocation = teamRecord.getLocation();
         String response = assignContractorsToTeam(team, renovationLocation);
@@ -128,6 +142,26 @@ public class TeamsService {
     }
 
     /**
+     * For a given team, returns a map containing all contractor ids. Can return a partially
+     * or wholly empty map if some or all of the roles are unfilled.
+     * and their corresponding contractors.
+     * @param teamId the id of the team used
+     * @return the map of contractor ids and contractors
+     */
+    public Map<Long, Contractor> getContractorsByTeamId(Long teamId) {
+        Map<Long, Contractor> contractors = new HashMap<>();
+        Team team = getTeamById(teamId);
+        for (Role role : team.getRoles()) {
+            if (role.getContractorId() != null) {
+                Long contractorId = role.getContractorId();
+                Optional<Contractor> contractor = contractorRepository.findById(contractorId);
+                contractor.ifPresent(value -> contractors.put(contractorId, value));
+            }
+        }
+        return contractors;
+    }
+
+    /**
      * Checks if a given user belongs to the team associated with a renovation record
      * @param renovationRecord the renovation record that we want to check the associated team
      * @param user the id of the user to check if they belong to the team
@@ -135,6 +169,14 @@ public class TeamsService {
      */
     public boolean checkViewRenovationAccess(RenovationRecord renovationRecord, User user) {
         return teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, user.getId());
+    }
+
+    /**
+     * Deletes the specified {@link Team}
+     * @param team The {@link Team} to delete
+     */
+    public void deleteTeam(Team team) {
+        teamsRepository.delete(team);
     }
 
 
@@ -351,5 +393,20 @@ public class TeamsService {
         return (role.getContractorId() != null) ?
                 contractorRepository.findById(role.getContractorId()) :
                 Optional.empty();
+    }
+
+    /**
+     * Sets the contractor Id and isAccepted of the given role of the given team to null and false respectively.
+     * @param team the team the role is a part of
+     * @param contractor the contractor being removed from the team
+     */
+    public void deleteContractorFromTeam(Team team, Contractor contractor) {
+        for (Role role : team.getRoles()) {
+            if (role.getContractorId() != null && role.getContractorId().equals(contractor.getId())) {
+                role.removeContractor();
+                role.setAccepted(false);
+            }
+        }
+        teamsRepository.save(team);
     }
 }
