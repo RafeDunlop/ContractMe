@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
@@ -12,7 +13,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -327,7 +331,43 @@ public class LocationFormSteps {
 
     @Then("The form from the {string} page is saved and contains the address I supplied")
     public void the_form_from_the_page_is_saved_and_contains_the_address_i_supplied(String endpoint) {
-        // Due to no database queries being defined for the scope of this task, this step cannot be completed yet
+        if (Objects.equals(endpoint, "/register") | Objects.equals(endpoint, "/user/edit")) {
+
+            Optional<User> testUser = userRepository.findByEmailIgnoreCase("jane.doe@example.com");
+            if (testUser.isPresent()) {
+                Location location = testUser.get().getLocation();
+                assertNotNull(location);
+                assertEquals("address", "200 Riccarton Road", location.getAddress());
+                assertEquals("suburb", "Riccarton", location.getSuburb());
+                assertEquals("city", "Christchurch", location.getCity());
+                assertEquals("postcode", "8041", location.getPostcode());
+                assertEquals("country", "New Zealand", location.getCountry());
+                assertEquals("lat", 1D, location.getLatitude());
+                assertEquals("lon", 1D, location.getLongitude());
+            }
+
+        }
+        else if (Objects.equals(endpoint, "/renovations/create")) {
+            Optional<RenovationRecord> testRecord = renovationRecordRepository.findById(1);
+            if (testRecord.isPresent()) {
+                Location location = testRecord.get().getLocation();
+                assertNotNull(location);
+                assertEquals("address", "200 Riccarton Road", location.getAddress());
+                assertEquals("suburb", "Riccarton", location.getSuburb());
+                assertEquals("city", "Christchurch", location.getCity());
+                assertEquals("postcode", "8041", location.getPostcode());
+                assertEquals("country", "New Zealand", location.getCountry());
+                assertEquals("lat", 1D, location.getLatitude());
+                assertEquals("lon", 1D, location.getLongitude());
+            }
+        }
+
+        else {
+            throw new IllegalArgumentException("Unsupported endpoint: " + endpoint);
+        }
+
+
+
     }
 
 
