@@ -5,6 +5,10 @@ if (removeButton != null) {
     removeButton.addEventListener("click", confirmContractorRemove);
 }
 
+/**
+ * Event listener for the contractor remove button, opens a confirmation
+ * prompt to confirm the delete action.
+ */
 function confirmContractorRemove() {
     const promptText = "Are you sure you want to remove this contractor?";
     confirmPrompt(promptText, "Remove", "Cancel", true).then((ok) => {if (ok) deleteContractor(); });
