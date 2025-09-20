@@ -1,10 +1,10 @@
 const userRenovation = L.icon({
-    iconUrl: "/images/markers/user-renovation.png",
+    iconUrl: new URL("images/markers/user-renovation.png", document.baseURI),
     iconSize: [32, 32]
 })
 
 const publicRenovation = L.icon({
-    iconUrl: "/images/markers/public-renovation.png",
+    iconUrl: new URL("images/markers/public-renovation.png", document.baseURI),
     iconSize: [32, 32]
 })
 
@@ -32,7 +32,7 @@ const renovationResponse = await fetch(`map/renovations/${encodeURIComponent(raw
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     minZoom: 3,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
 }).addTo(map);
 
 for (const eventName of ["click", "moveend"]) {
