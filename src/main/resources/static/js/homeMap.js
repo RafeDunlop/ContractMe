@@ -1,4 +1,6 @@
 const locationResponse = await fetch("location/localisation", {method: "GET"});
+
+/* Latitude and longitude of Christchurch. */
 let latitude = -43.52460;
 let longitude =  172.57710;
 
