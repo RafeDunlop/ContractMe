@@ -259,6 +259,7 @@ public class DefaultDataConfigurator {
     }
 
 
+
     private void setupDefaultRenovationTasks() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
