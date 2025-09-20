@@ -1,10 +1,20 @@
-const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-const teamId = document.getElementById("teamId").value;
-const contractorId = document.getElementById("contractorId").value;
+import { confirmPrompt } from "./confirmPrompt.js";
 
+const removeButton = document.getElementById("remove-contractor-button");
+if (removeButton != null) {
+    removeButton.addEventListener("click", confirmContractorRemove);
+}
+
+function confirmContractorRemove() {
+    const promptText = "Are you sure you want to remove this contractor?";
+    confirmPrompt(promptText, "Remove", "Cancel", true).then((ok) => {if (ok) deleteContractor(); });
+}
 
 /** Sends a delete request to the TeamController to delete a contractor from a role */
-function deleteContractor(teamId,contractorId) {
+function deleteContractor() {
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const teamId = document.getElementById("teamId").value;
+    const contractorId = document.getElementById("contractorId").value;
   fetch(`/renovations/team/delete?teamId=${encodeURIComponent(teamId)}&contractorId=${encodeURIComponent(contractorId)}`, {
     method: "DELETE",
     headers: {
