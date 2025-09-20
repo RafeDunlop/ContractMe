@@ -53,7 +53,7 @@ public class MapController {
     @GetMapping("/markers/{markerType}")
     public ResponseEntity<Resource> getMarker(@PathVariable String markerType) {
         if (MARKERS.containsKey(markerType)) {
-            Resource resource = new ClassPathResource("/static/images/markers/" + MARKERS.get(markerType));
+            Resource resource = new ClassPathResource("classpath:static/images/markers/" + MARKERS.get(markerType));
             if (!resource.exists()) {
                 return ResponseEntity.notFound().build();
             }
