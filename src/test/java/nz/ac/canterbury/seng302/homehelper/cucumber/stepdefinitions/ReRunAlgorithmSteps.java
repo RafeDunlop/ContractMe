@@ -55,7 +55,7 @@ public class ReRunAlgorithmSteps {
 
     @Before
     public void setUp() {
-        ownerEmail = "Test" + System.nanoTime() + "@test.test";
+        ownerEmail = "Test" + System.nanoTime() + "@test.test1";
         User owner = new User("Test", "test", ownerEmail, "test");
         owner.activate();
         userRepository.save(owner);
