@@ -25,8 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Transactional
@@ -51,6 +53,7 @@ public class ReRunAlgorithmSteps {
 
     private Team team;
     private final ContractorContext contractorContext;
+    private String ownerEmail;
     private Contractor secondContractor;
 
     public ReRunAlgorithmSteps(ContractorContext contractorContext) {
@@ -60,12 +63,17 @@ public class ReRunAlgorithmSteps {
     @Before
     public void setUp() {
         String uniqueEmail = "Test" + System.nanoTime() + "@test.test";
+        ownerEmail = "Test" + System.nanoTime() + "@test.test";
+        User owner = new User("Test", "test", ownerEmail, "test");
+        owner.activate();
+        userRepository.save(owner);
 
         User user = new User("Test", "test", uniqueEmail, "test");
         user.activate();
         userRepository.save(user);
 
         RenovationRecord renovation = new RenovationRecord(user, "Test renovation", "", new ArrayList<>());
+        RenovationRecord renovation = new RenovationRecord(owner, "Test renovation", "", new ArrayList<>());
         Location location = new Location("20 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Riccarton", 43.53, 172.63);
         renovation.setLocation(location);
         renovationRecordRepository.save(renovation);
@@ -97,7 +105,6 @@ public class ReRunAlgorithmSteps {
         team.addRole(new Role(contractorContext.getContractor(), Skill.ELECTRICAL, false));
         teamsRepository.save(team);
     }
-
     @When("The contractor rejects the invitation")
     public void the_contractor_rejects_the_invitation() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/decline")
@@ -105,4 +112,43 @@ public class ReRunAlgorithmSteps {
                 .andExpect(status().is3xxRedirection());
     }
 
+    @Then("The contractor does not receive any more invitations to join a role on the team")
+    public void the_contractor_does_not_receive_any_more_invitations_to_join_a_role_on_the_team() {
+        Team updatedTeam = teamsRepository.findById(team.getId()).orElseThrow();
+
+        Long currentContractorId = updatedTeam.getRoles().get(0).getContractorId();
+        Long rejectedContractorId = contractorContext.getContractor().getId();
+
+        assertNotEquals(rejectedContractorId, currentContractorId,
+                "Rejected contractor invited again.");
+    }
+
+    @Given("That I am own a team with a contractor who has accepted")
+    public void That_i_am_own_a_team_with_a_contractor_who_has_accepted() {
+        team.addRole(new Role(contractorContext.getContractor(), Skill.ELECTRICAL, false));
+        team.getRoles().get(0).setAccepted(true);
+        teamsRepository.save(team);
+    }
+
+    @When("I remove a contractor from a role")
+    public void i_remove_a_contractor_from_a_role() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete("/renovations/team/delete")
+                        .param("teamId", String.valueOf(team.getId()))
+                        .param("contractorId", String.valueOf(contractorContext.getContractor().getId()))
+                        .with(user(ownerEmail).roles("USER"))   // <- use user(...)
+                        .with(csrf())
+        ).andExpect(status().isNoContent());
+    }
+
+    @Then("That contractor does not receive any more invitations to join a role on the team")
+    public void That_contractor_does_not_receive_any_more_invitations_to_join_a_role_on_the_team() {
+        Team updatedTeam = teamsRepository.findById(team.getId()).orElseThrow();
+        Long removedId = contractorContext.getContractor().getId();
+
+        boolean assigned = updatedTeam.getRoles().stream().anyMatch(
+                role -> removedId != null && removedId.equals(role.getContractorId()));
+
+        assertFalse(assigned, "Removed contractor was invited again.");
+    }
 }

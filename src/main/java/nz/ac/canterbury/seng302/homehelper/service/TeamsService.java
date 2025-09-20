@@ -300,6 +300,9 @@ public class TeamsService {
                 .filter(contractorId -> contractorId != null && contractorId != 0L)
                 .collect(Collectors.toSet());
 
+        Set<Long> blacklistIds = new HashSet<>(team.getBlacklistIds());
+        assignedIds.addAll(blacklistIds);
+
         Contractor candidate = findNearestContractor(roleToFill, location, assignedIds);
         if (candidate != null) {
             roleToFill.setContractor(candidate);
@@ -338,7 +341,7 @@ public class TeamsService {
      * @return true if all roles assigned, false if any remain unassigned.
      */
     private boolean greedyAssign(Team team, Location renovationLocation) {
-        Set<Long> assignedContractors = new HashSet<>();
+        Set<Long> assignedContractors = new HashSet<>(team.getBlacklistIds());
         boolean allAssigned = true;
 
         for (Role role : team.getRoles()) {
