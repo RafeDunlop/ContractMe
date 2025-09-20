@@ -9,6 +9,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
@@ -71,7 +72,7 @@ public class ReRunAlgorithmSteps {
 
     @Given("A contractor has received an invitation for a role in a team")
     public void a_contractor_has_received_an_invitation_for_a_role_in_a_team() {
-        team.addRole(new Role(contractorContext.getContractor(), Skill.ELECTRICAL, false));
+        team.addRole(new Role(contractorContext.getContractor(), Skill.ELECTRICAL, RoleStatus.WAITING));
         teamsRepository.save(team);
     }
     @When("The contractor rejects the invitation")
@@ -94,8 +95,7 @@ public class ReRunAlgorithmSteps {
 
     @Given("That I am own a team with a contractor who has accepted")
     public void That_i_am_own_a_team_with_a_contractor_who_has_accepted() {
-        team.addRole(new Role(contractorContext.getContractor(), Skill.ELECTRICAL, false));
-        team.getRoles().get(0).setAccepted(true);
+        team.addRole(new Role(contractorContext.getContractor(), Skill.ELECTRICAL, RoleStatus.ACCEPTED));
         teamsRepository.save(team);
     }
 
