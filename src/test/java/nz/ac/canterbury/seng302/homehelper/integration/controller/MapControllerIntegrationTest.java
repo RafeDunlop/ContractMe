@@ -98,7 +98,7 @@ class MapControllerIntegrationTest {
 
     @Test
     void getRenovationsInBounds_privateValidRectangle_getsPrivateMappings() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovations")
+        MvcResult result = mockMvc.perform(get("/map/renovations/{rawCoordinates}")
                     .param("withPublic", "false")
                     .param("minLat", Double.toString(0d))
                     .param("minLon", Double.toString(0d))
@@ -115,7 +115,7 @@ class MapControllerIntegrationTest {
 
     @Test
     void getRenovationsInBounds_publicValidRectangleAndImplicitPublicityInclusion_getsAllMappings() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovations")
+        MvcResult result = mockMvc.perform(get("/map/renovations/{rawCoordinates}")
                         .param("minLat", Double.toString(0d))
                         .param("minLon", Double.toString(0d))
                         .param("maxLat", Double.toString(40d))
@@ -132,7 +132,7 @@ class MapControllerIntegrationTest {
 
     @Test
     void getRenovationsInBounds_publicValidRectangleAndExplicitPublicity_getsAllMappings() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovations")
+        MvcResult result = mockMvc.perform(get("/map/renovations/{rawCoordinates}")
                         .param("withPublic", "true")
                         .param("minLat", Double.toString(0d))
                         .param("minLon", Double.toString(0d))
@@ -150,7 +150,7 @@ class MapControllerIntegrationTest {
 
     @Test
     void getRenovationsInBounds_publicAndPointRectangle_getsOnlyExactMatch() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovations")
+        MvcResult result = mockMvc.perform(get("/map/renovations/{rawCoordinates}")
                         .param("minLat", Double.toString(0d))
                         .param("minLon", Double.toString(0d))
                         .param("maxLat", Double.toString(0d))
@@ -165,7 +165,7 @@ class MapControllerIntegrationTest {
 
     @Test
     void getRenovationsInBounds_rectangleIllegal_noMatches() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovations")
+        MvcResult result = mockMvc.perform(get("/map/renovations/{rawCoordinates}")
                         .param("minLat", Double.toString(10d))
                         .param("minLon", Double.toString(10d))
                         .param("maxLat", Double.toString(0d))
