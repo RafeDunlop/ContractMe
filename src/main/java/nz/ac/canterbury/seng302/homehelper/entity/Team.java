@@ -27,6 +27,9 @@ public class Team {
     @ElementCollection
     private final List<Role> roles = new ArrayList<>();
 
+    @ElementCollection
+    private final List<Long> blacklistIds = new ArrayList<>();
+
     protected Team() {}
 
     public Team(RenovationRecord renovationRecord) {
@@ -56,6 +59,9 @@ public class Team {
     public void removeRole(Role role) {
         roles.remove(role);
     }
+
+    public List<Long> getBlacklistIds() { return blacklistIds; }
+    public void addBlacklistId(Long userId) { blacklistIds.add(userId); }
 
     /**
      * Replaces the contractor for a specific role in the team.

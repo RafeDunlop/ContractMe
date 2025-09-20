@@ -48,7 +48,6 @@ class TeamsServiceIntegrationTest {
     @MockBean
     private EmailService emailService;
 
-    private User user;
     private RenovationRecord renovation;
     private Location location;
 
@@ -57,11 +56,11 @@ class TeamsServiceIntegrationTest {
     @BeforeEach
     void setUp() {
         String uniqueEmail = "Test" + System.nanoTime() + "@test.test";
-        user = new User("Test", "test", uniqueEmail, "test");
+        User user = new User("Test", "test", uniqueEmail, "test");
         user.activate();
         userRepository.save(user);
         renovation = new RenovationRecord(user, "Test renovation", "", new ArrayList<>());
-        location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", 43.53, 172.63);
+        location = new Location("20 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Riccarton", 43.53, 172.63);
         renovation.setLocation(location);
         renovationRecordRepository.save(renovation);
     }
@@ -198,6 +197,7 @@ class TeamsServiceIntegrationTest {
         contractor1.setLocation(contractorLocation);
         contractor1.addSkill(Skill.PLUMBING);
         contractor1.activate();
+        contractor1.setAvailable(true);
         contractorRepository.save(contractor1);
 
         String result = teamsService.assignContractorsToTeam(team, location);
@@ -629,6 +629,62 @@ class TeamsServiceIntegrationTest {
 
         assertEquals("Unable to find available contractors to fill team", result);
         assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
+    }
+
+    @Transactional
+    @Test
+    void contractorInBlacklist_shouldNotBeAssigned_cantFillTeam() {
+        String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
+        Contractor contractor1 = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
+        contractor1.setLocation(location);
+        contractor1.addSkill(Skill.PLUMBING);
+        contractor1.activate();
+        contractor1.setAvailable(true);
+        contractorRepository.save(contractor1);
+
+        Team team = new Team(renovation);
+        Role role1 = new Role(Skill.PLUMBING);
+        team.addRole(role1);
+        team.addBlacklistId(contractor1.getId());
+        teamsRepository.save(team);
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("Unable to find available contractors to fill team", result);
+        assertNull(team.getRoles().get(0).getContractorId());
+    }
+
+    @Transactional
+    @Test
+    void contractorInBlacklist_findNextClosest_fillsOne() {
+        String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
+        Contractor contractor1 = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
+        contractor1.setLocation(location);
+        contractor1.addSkill(Skill.PLUMBING);
+        contractor1.activate();
+        contractor1.setAvailable(true);
+        contractorRepository.save(contractor1);
+
+        String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
+        Contractor contractor2 = new Contractor("Bob", "Doe", bobUniqueEmail, "encoded");
+        Location contractorLocation = new Location("143 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Hornby", 43.52, 172.70);
+        contractor2.setLocation(contractorLocation);
+        contractor2.addSkill(Skill.PLUMBING);
+        contractor2.activate();
+        contractor2.setAvailable(true);
+        contractorRepository.save(contractor2);
+
+        Team team = new Team(renovation);
+        Role role1 = new Role(Skill.PLUMBING);
+        team.addRole(role1);
+        team.addBlacklistId(contractor1.getId());
+        teamsRepository.save(team);
+
+
+        String result = teamsService.assignContractorsToTeam(team, location);
+
+        assertEquals("", result);
+        assertEquals(contractor2.getId(), team.getRoles().get(0).getContractorId());
     }
 
     @Transactional

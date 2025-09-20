@@ -135,6 +135,8 @@ public class EditRenovationController {
 
         Location currentLocation = renovationRecord.getLocation();
         errors.putAll(locationService.validateLocation(addressDTO));
+        addressDTO = locationService.updateEditedLocation(currentLocation, addressDTO);
+        Location newLocation = locationService.validateGeolocation(addressDTO, errors);
 
         if (!errors.isEmpty()) {
             errors.forEach(redirectAttributes::addFlashAttribute);
@@ -156,7 +158,7 @@ public class EditRenovationController {
 
         redirectAttributes.addFlashAttribute(RENOVATION_MODEL_ATTRIBUTE, renovationRecord);
 
-        renovationRecordService.updateRenovationLocation(renovationRecord, addressDTO); //updates existing record (identified by id)
+        renovationRecordService.updateRenovationLocation(renovationRecord, newLocation); //updates existing record (identified by id)
         return "redirect:/renovations/view?id=" + renovationRecord.getId();
     }
 
