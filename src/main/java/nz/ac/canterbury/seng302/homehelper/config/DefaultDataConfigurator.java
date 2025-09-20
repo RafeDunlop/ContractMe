@@ -96,6 +96,7 @@ public class DefaultDataConfigurator {
     void onApplicationReady() {
         setupDefaultUsers();
         setupDefaultRenovations();
+        //setupDefaultRenovationsWithLocations();
         setupDefaultRenovationTasks();
         setupDefaultTags();
         setupDefaultTeamData();
@@ -233,6 +234,19 @@ public class DefaultDataConfigurator {
         default1Renovation2 = renovationRecordService.addRenovationRecord(default1Renovation2);
         default1Renovation2.setLocation(location);
         renovationRecordService.addRenovationRecord(default1Renovation2);
+    }
+
+    private void setupDefaultRenovationsWithLocations() {
+        List<String> renovationNames = new ArrayList<>(Arrays.asList("Remove Asbestos from Rec Centre", "Build new Rec Centre", "Build Statue Honouring Richard Lobb", "Clean the smell in 133",
+                "Fix new Brighton Pier", "Finish omnipresent Ilam roadworks", "Add grass touching patch to maths department", "Build Grand Palace for Fabian",
+                "Fix waste disposal in Council Building", "Build New Campus"));
+        List<String> renovationDescriptions = new ArrayList<>(Arrays.asList("I have no clue why we're even having this conversation", "About time", "All hail", "No but seriously can someone fix this",
+                "Add aura point detector", "Pleeeeease hurry up", "Self explanatory really isn't it", "Versailles will be the size of this palace's garden shed", "Why did we build a soviet brutalist campus we need a new one"));
+        List<String> addresses = new ArrayList<>(Arrays.asList(""));
+        for (int i = 0; i < 10; i++) {
+            RenovationRecord renovationRecord = new RenovationRecord(default1, renovationNames.get(i), renovationDescriptions.get(i), defaultJERooms);
+
+        }
     }
 
 
