@@ -2,9 +2,11 @@ package nz.ac.canterbury.seng302.homehelper.e2e;
 
 import io.cucumber.java.Before;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+
 @SpringBootTest
 public class SetupRegisterUserHookE2e {
 
@@ -24,12 +29,17 @@ public class SetupRegisterUserHookE2e {
 
     private final UserContext userContext;
 
+    @Autowired
+    private LocationService locationService;
+
     public SetupRegisterUserHookE2e(UserContext userContext) {
         this.userContext = userContext;
     }
 
     @Before("@authoriseUser")
     public void i_am_an_existing_user() {
+
+        doNothing().when(locationService).injectCoordsViaGeocoding(any(AddressDTO.class));
 
         PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         String uniqueEmail = "test" + System.currentTimeMillis() + "@user.nz";

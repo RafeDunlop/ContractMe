@@ -22,7 +22,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -58,7 +57,6 @@ public class TeamJoinRequestSteps {
     private TeamsRepository teamsRepository;
 
     @Autowired
-    @SpyBean
     private TeamsService teamsService;
 
     @Autowired
