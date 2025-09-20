@@ -1,5 +1,3 @@
-
-
 const userRenovation = L.icon({
     iconUrl: "/images/markers/user-renovation.png",
     iconSize: [32, 32]
@@ -24,7 +22,6 @@ const bounds = map.getBounds();
 const southwest = bounds.getSouthWest();
 const northeast = bounds.getNorthEast();
 const rawCoordinates = [southwest.lat, southwest.lng, northeast.lat, northeast.lng]
-console.log(rawCoordinates.join(","))
 
 
 const renovationResponse = await fetch(`map/renovations/${encodeURIComponent(rawCoordinates.join(","))}`, {method: "GET"});
@@ -39,6 +36,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 for (const eventName of ["click", "moveend"]) {
+    console.log("working");
     map.on(eventName, debouncedHandleMapChange)
     const renovationData = await renovationResponse.json();
     renovationData.forEach(renovation => {
