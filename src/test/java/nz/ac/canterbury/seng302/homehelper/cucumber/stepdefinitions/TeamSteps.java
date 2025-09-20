@@ -141,16 +141,16 @@ public class TeamSteps {
         User user = userContext.getUser();
         renovationRecord = new RenovationRecord(user, "Test", "", List.of());
         renovationRecord = renovationRepository.save(renovationRecord);
-        Team team = new Team(renovationRecord);
+        Team newTeam = new Team(renovationRecord);
         Contractor alice = contractorRepository.save(new Contractor("Alice", "Builder", "alice@test.nz", "pw"));
         alice.setProfilePicture("alice.jpg");
         contractorRepository.save(alice);
         Role accepted = new Role(Skill.CARPENTRY);
         accepted.setContractor(alice);
         accepted.setStatus(RoleStatus.ACCEPTED);
-        team.addRole(accepted);
-        team = teamsRepository.save(team);
-        this.team = team;
+        newTeam.addRole(accepted);
+        newTeam = teamsRepository.save(newTeam);
+        this.team = newTeam;
     }
 
     @Transactional
@@ -159,16 +159,16 @@ public class TeamSteps {
         User user = userContext.getUser();
         renovationRecord = new RenovationRecord(user, "Test", "", List.of());
         renovationRecord = renovationRepository.save(renovationRecord);
-        Team team = new Team(renovationRecord);
+        Team newTeam = new Team(renovationRecord);
         Contractor alice = contractorRepository.save(new Contractor("Alice", "Builder", "alice2@test.nz", "pw"));
         alice.setProfilePicture("alice.jpg");
         contractorRepository.save(alice);
         Role role = new Role(Skill.CARPENTRY);
         role.setContractor(alice);
         role.setStatus(RoleStatus.WAITING);
-        team.addRole(role);
-        team = teamsRepository.save(team);
-        this.team = team;
+        newTeam.addRole(role);
+        newTeam = teamsRepository.save(newTeam);
+        this.team = newTeam;
     }
 
     @Transactional
@@ -177,10 +177,10 @@ public class TeamSteps {
         User user = userContext.getUser();
         renovationRecord = new RenovationRecord(user, "Test", "", List.of());
         renovationRecord = renovationRepository.save(renovationRecord);
-        Team team = new Team(renovationRecord);
+        Team newTeam = new Team(renovationRecord);
         Role empty = new Role(Skill.PLUMBING);
-        team.addRole(empty);
-        team = teamsRepository.save(team);
+        newTeam.addRole(empty);
+        newTeam = teamsRepository.save(newTeam);
 
         Contractor bob = contractorRepository.save(new Contractor("Bob", "Spark", "bob@test.nz", "pw"));
         bob.setProfilePicture("bob.jpg");
@@ -188,8 +188,8 @@ public class TeamSteps {
         Role pending = new Role(Skill.ELECTRICAL);
         pending.setContractor(bob);
         pending.setStatus(RoleStatus.WAITING);
-        team.addRole(pending);
-        this.team = team;
+        newTeam.addRole(pending);
+        this.team = newTeam;
 
     }
 
@@ -293,7 +293,7 @@ public class TeamSteps {
     }
 
     @Then("I get 404 error")
-    public void i_get_404_error() throws Exception {
+    public void i_get_404_error() {
         int status = mvcResult.getResponse().getStatus();
         assertEquals(404, status);
     }
