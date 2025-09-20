@@ -96,6 +96,7 @@ public class DefaultDataConfigurator {
     void onApplicationReady() {
         setupDefaultUsers();
         setupDefaultRenovations();
+        setupDefaultRenovationsWithLocations();
         setupDefaultRenovationTasks();
         setupDefaultTags();
         setupDefaultTeamData();
@@ -213,14 +214,36 @@ public class DefaultDataConfigurator {
             renovationRecordService.addRenovationRecord(record);
         }
 
+
+
+
+
+    }
+
+    private void setupDefaultRenovationsWithLocations() {
+        List<String> renovationNames = new ArrayList<>(Arrays.asList("Remove Asbestos from Rec Centre", "Build new Rec Centre", "Build Statue Honouring Richard Lobb", "Clean the smell in 133",
+                "Fix new Brighton Pier", "Finish omnipresent Ilam roadworks", "Add grass touching patch to engineering department", "Build Grand Palace for Fabian",
+                "Fix waste disposal in Council Building", "Build New Campus"));
+        List<String> renovationDescriptions = new ArrayList<>(Arrays.asList("I have no clue why we're even having this conversation", "About time", "All hail", "No but seriously can someone fix this",
+                "Add aura point detector", "Pleeeeease hurry up", "Self explanatory really isn't it", "Versailles will be the size of this palace's garden shed",
+                "Waste accumulation issue", "Why did we build a soviet brutalist campus we need a new one"));
+        List<String> addresses = new ArrayList<>(Arrays.asList("22 Kirkwood Avenue", "19 Kirkwood Avenue", "5 Engineering Road", "Jack Erskine",
+                "2 Brighton Mall", "5 Ilam road", "69 Creyke Road", "26 School Road",
+                "53 Hereford Street", "31 Seafield Road"));
+        for (int i = 0; i < 10; i++) {
+            RenovationRecord renovationRecord = new RenovationRecord(default1, renovationNames.get(i), renovationDescriptions.get(i), defaultJERooms);
+            Location location = new Location(addresses.get(i), "", "", "", "");
+            renovationRecord.setLocation(location);
+            renovationRecordService.addRenovationRecord(renovationRecord);
+        }
+
         default1Renovation1 = new RenovationRecord(default1,
                 "Jack Erskine revamp",
                 "CSSE building => palace of slay",
                 defaultJERooms
         );
 
-
-        Location location = new Location("18 Kirkwood Avenue", NEW_ZEALAND, "8041", "Christchuch", "Upper Riccarton",-43.527887d,172.5846232);
+        Location location = new Location("19 Kirkwood Avenue", NEW_ZEALAND, "8041", "Christchuch", "Upper Riccarton",-43.527887d,172.5846232);
         default1Renovation1.setLocation(location);
         default1Renovation1 = renovationRecordService.addRenovationRecord(default1Renovation1);
 
@@ -234,7 +257,6 @@ public class DefaultDataConfigurator {
         default1Renovation2.setLocation(location);
         renovationRecordService.addRenovationRecord(default1Renovation2);
     }
-
 
 
     private void setupDefaultRenovationTasks() {
