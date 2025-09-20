@@ -13,7 +13,7 @@ const map = L.map('map').setView([-43.52460, 172.57710], 11);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     minZoom: 3,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
 }).addTo(map);
 
 L.marker([-43.52460, 172.57710], {icon: userRenovation}).addTo(map);
