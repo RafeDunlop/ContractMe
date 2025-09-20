@@ -4,6 +4,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import jakarta.transaction.Transactional;
+import nz.ac.canterbury.seng302.homehelper.cucumber.context.ContractorContext;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.UserContext;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
@@ -12,9 +13,12 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.*;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -22,7 +26,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,11 +35,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 public class TeamSteps {
     UserContext userContext;
+    ContractorContext contractorContext;
     private RenovationRecord renovationRecord;
     private MvcResult mvcResult;
     private ResultActions result;
     private final ContractorRepository contractorRepository;
     private final TeamsRepository teamsRepository;
+    private final UserRepository userRepository;
     private Team team;
     @Autowired
     private MockMvc mockMvc;
@@ -43,11 +49,13 @@ public class TeamSteps {
     @Autowired
     private RenovationRecordRepository renovationRepository;
 
-    public TeamSteps(UserContext userContext, ContractorRepository contractorRepository,
-            TeamsRepository teamsRepository) {
+    public TeamSteps(UserContext userContext, ContractorContext contractorContext, ContractorRepository contractorRepository,
+            TeamsRepository teamsRepository, UserRepository userRepository) {
         this.userContext = userContext;
+        this.contractorContext = contractorContext;
         this.contractorRepository = contractorRepository;
         this.teamsRepository = teamsRepository;
+        this.userRepository = userRepository;
     }
 
     @Given("I am on the view renovation page for a renovation I own that has a location listed and that doesn't have a team")
@@ -128,8 +136,8 @@ public class TeamSteps {
     }
 
     @Transactional
-    @Given("a contractor is assigned and has accepted a role in a team")
-    public void a_contractor_is_assigned_to_a_role_in_a_team() {
+    @Given("a contractor is assigned and has accepted a role in the team")
+    public void a_contractor_is_assigned_and_has_accepted_a_role_in_the_team() {
         User user = userContext.getUser();
         renovationRecord = new RenovationRecord(user, "Test", "", List.of());
         renovationRecord = renovationRepository.save(renovationRecord);
@@ -141,6 +149,24 @@ public class TeamSteps {
         accepted.setContractor(alice);
         accepted.setStatus(RoleStatus.ACCEPTED);
         team.addRole(accepted);
+        team = teamsRepository.save(team);
+        this.team = team;
+    }
+
+    @Transactional
+    @Given("a contractor is assigned and has not accepted a role in the team")
+    public void a_contractor_is_assigned_and_has_not_accepted_a_role_in_the_team() {
+        User user = userContext.getUser();
+        renovationRecord = new RenovationRecord(user, "Test", "", List.of());
+        renovationRecord = renovationRepository.save(renovationRecord);
+        Team team = new Team(renovationRecord);
+        Contractor alice = contractorRepository.save(new Contractor("Alice", "Builder", "alice2@test.nz", "pw"));
+        alice.setProfilePicture("alice.jpg");
+        contractorRepository.save(alice);
+        Role role = new Role(Skill.CARPENTRY);
+        role.setContractor(alice);
+        role.setStatus(RoleStatus.WAITING);
+        team.addRole(role);
         team = teamsRepository.save(team);
         this.team = team;
     }
@@ -193,5 +219,149 @@ public class TeamSteps {
         assertTrue(html.contains("Plumbing"));
     }
 
+    @Transactional
+    @Given("I am assigned to the team and have accepted a role in the team")
+    public void i_am_assigned_to_the_team_and_have_accepted_a_role_in_the_team() {
+        User owner = new User("Owner", "User", "owner"+System.currentTimeMillis()+"@test.nz", "pw");
+        owner.activate();
+        owner = userRepository.save(owner);
 
+        Contractor contractor = contractorContext.getContractor();
+        contractor.setFirstName("Alice");
+        contractor.setLastName("Builder");
+        contractor.setProfilePicture("alice.jpg");
+        contractor = contractorRepository.save(contractor);
+
+        renovationRecord = new RenovationRecord(owner, "Test", "", List.of());
+        renovationRecord = renovationRepository.save(renovationRecord);
+
+        Team team = new Team(renovationRecord);
+        Role acceptedRole = new Role(Skill.CARPENTRY);
+        acceptedRole.setContractor(contractor);
+        acceptedRole.setStatus(RoleStatus.ACCEPTED);
+        team.addRole(acceptedRole);
+        team = teamsRepository.save(team);
+
+        this.team = team;
+    }
+
+
+    @Transactional
+    @Given("I am assigned to the team and have not accepted a role in the team")
+    public void i_am_assigned_to_the_team_and_have_not_accepted_a_role_in_the_team() {
+        Contractor contractor = contractorContext.getContractor();
+        contractor.setFirstName("Alice");
+        contractor.setLastName("Builder");
+        contractor.setProfilePicture("alice.jpg");
+        contractor = contractorRepository.save(contractor);
+
+        renovationRecord = new RenovationRecord(contractor, "Test", "", List.of());
+        renovationRecord = renovationRepository.save(renovationRecord);
+
+        Team team = new Team(renovationRecord);
+        Role acceptedRole = new Role(Skill.CARPENTRY);
+        acceptedRole.setContractor(contractor);
+        acceptedRole.setStatus(RoleStatus.ACCEPTED);
+        team.addRole(acceptedRole);
+        team = teamsRepository.save(team);
+
+        this.team = team;
+    }
+
+    @Transactional
+    @Given("I do not own the team")
+    public void i_do_not_own_the_team() {
+        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        String ownerEmail = "owner" + System.currentTimeMillis() + "@user.nz";
+        User owner = new User("Owner", "User", ownerEmail, encoder.encode("Test123!"));
+        owner.activate();
+        userRepository.save(owner);
+
+        renovationRecord = new RenovationRecord(owner, "Other Renovation", "", List.of());
+        renovationRecord = renovationRepository.save(renovationRecord);
+        team = new Team(renovationRecord);
+        teamsRepository.save(team);
+    }
+
+    @When("I visit the team page")
+    public void i_visit_the_team_page() throws Exception {
+        mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get("/renovations/team/view")
+                        .param("id", team.getId().toString())
+                        .with(csrf())
+        ).andReturn();
+    }
+
+    @Then("I get 404 error")
+    public void i_get_404_error() throws Exception {
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(404, status);
+    }
+
+    @Transactional
+    @Given("There is a public renovation I do not own")
+    public void there_is_a_public_renovation_i_do_not_own() {
+        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        String ownerEmail = "owner" + System.currentTimeMillis() + "@user.nz";
+        User owner = new User("Owner", "User", ownerEmail, encoder.encode("Test123!"));
+        owner.activate();
+        userRepository.save(owner);
+
+        renovationRecord = new RenovationRecord(owner, "Public Renovation", "", List.of());
+        renovationRecord.setPublicity(true);
+        renovationRecord = renovationRepository.save(renovationRecord);
+    }
+
+    @When("I visit the renovation record")
+    public void i_visit_the_renovation_record() throws Exception {
+        mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get("/renovations/view")
+                        .param("id", renovationRecord.getId().toString())
+                        .with(csrf())
+        ).andExpect(status().isOk()).andReturn();
+    }
+
+    @Then("I can not see the view team button")
+    public void i_can_not_see_the_view_team_button() throws Exception {
+        String html = mvcResult.getResponse().getContentAsString();
+        assertFalse(html.contains("View Team"));
+    }
+
+    @Transactional
+    @Given("I am not assigned to a role in the team")
+    public void i_am_not_assigned_to_a_role_in_the_team() {
+        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        String uniqueEmail = "test" + System.currentTimeMillis() + "@user.nz";
+        User user = new User("Test", "User", uniqueEmail, encoder.encode("Test123!"));
+        user.activate();
+        userRepository.save(user);
+
+        renovationRecord = new RenovationRecord(user, "Team Without Me", "", List.of());
+        renovationRepository.save(renovationRecord);
+
+        team = new Team(renovationRecord);
+        Role role = new Role(Skill.CARPENTRY);
+
+        Contractor other = new Contractor("Other", "Contractor", "other@test.nz", "pw");
+        contractorRepository.save(other);
+        role.setContractor(other);
+        role.setStatus(RoleStatus.ACCEPTED);
+
+        team.addRole(role);
+        teamsRepository.save(team);
+    }
+
+    @Transactional
+    @Given("There is a public renovation I am not assigned to")
+    public void public_renovation_not_assigned() {
+        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        String ownerEmail = "owner" + System.currentTimeMillis() + "@user.nz";
+        User owner = new User("Owner", "User", ownerEmail, encoder.encode("Test123!"));
+        owner.activate();
+        userRepository.save(owner);
+
+        renovationRecord = new RenovationRecord(owner, "Public Renovation", "", List.of());
+        renovationRecord.setPublicity(true);
+        renovationRepository.save(renovationRecord);
+    }
 }

@@ -149,7 +149,6 @@ class SearchRenovationControllerIntegrationTest {
      * of records per page.
      * @throws Exception if the request processing fails
      */
-
     @Test
     void getRenovationRecord_selectPage_returnsCorrectPage() throws Exception {
         for (int i = 0; i < 20; i++) {

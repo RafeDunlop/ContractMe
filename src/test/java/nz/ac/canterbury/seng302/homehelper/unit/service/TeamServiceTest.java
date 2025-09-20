@@ -328,7 +328,7 @@ public class TeamServiceTest {
         role.setContractor(contractor);
         teamsService.deleteContractorFromTeam(team,contractor);
         assertNull(role.getContractorId());
-        assertNotSame(role.getStatus(), RoleStatus.ACCEPTED);
+        assertNotSame(RoleStatus.ACCEPTED, role.getStatus());
     }
 
 }

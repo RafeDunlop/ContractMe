@@ -48,7 +48,7 @@
                             <img th:src="@{'/profile_pictures/' + ${contractors.get(role.getContractorId()).getProfilePicture()}}"
                                  alt="Profile Picture"
                                  class="img-fluid rounded-circle"
-                                 style="max-width: 125px; max-height: 125px; object-fit: cover;">
+                                 style="width: 125%">
                         </div>
                         <div th:if="${role.getContractorId() == null}" class="col-md-25 text-center" style="flex: 0 0 18%;">
                             <img th:src="@{'icons/profile-icon.svg'}"

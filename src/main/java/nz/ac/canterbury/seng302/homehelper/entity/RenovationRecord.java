@@ -56,8 +56,6 @@ public class RenovationRecord {
     @Column(nullable = false)
     private boolean isPublic = false;
 
-
-
     public RenovationRecord() {}
 
     /**
@@ -222,6 +220,7 @@ public class RenovationRecord {
     public boolean removeTag(Tag tag) {
         return tags.remove(tag);
     }
+
     /**
      * Sets the publicity status of the renovation record
      * @param status of the publicity of renovation record
@@ -229,6 +228,7 @@ public class RenovationRecord {
     public void setPublicity(boolean status) {
         this.isPublic = status;
     }
+
     /**
      * Gets the publicity status of the renovation record
      * @return publicity status of renovation record
@@ -249,7 +249,6 @@ public class RenovationRecord {
      * Sets the location of renovation
      * @param location location entity
      */
-
     public void setLocation(Location location) {
         this.location = location;
     }

@@ -27,7 +27,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * A controller for team management pages
@@ -172,28 +171,27 @@ public class TeamController {
             User user = loginService.getUserByEmail();
             Team team = teamsService.getTeamById(id);
 
-            List<Long> contractorIds = team.getRoles().stream()
-                    .map(Role::getContractorId)
-                    .filter(Objects::nonNull)
-                    .toList();
+            Map<Long, Contractor> contractors = teamsService.getContractorsByTeamId(id);
 
             if (team.getRenovationRecord() != null
                     && team.getRenovationRecord().getUser() != null
                     && (
                     team.getRenovationRecord().getUser().getId().equals(user.getId())
-                            || contractorIds.contains(user.getId())
+                            || contractors.containsKey(user.getId())
             )
             ) {
-                Map<Long, Contractor> contractors = teamsService.getContractorsByTeamId(id);
                 boolean isOwner = user == team.getRenovationRecord().getUser();
                 model.addAttribute("team", team);
                 model.addAttribute("contractors", contractors);
                 model.addAttribute("isOwner", isOwner);
                 return "viewTeam";
             }
+
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to view team");
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Error loading team");
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found");
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
     }
 
