@@ -32,10 +32,11 @@ public interface TeamsRepository extends CrudRepository<Team, Long>{
     List<Team> findByRoleContractor(Long contractorId);
 
     /**
-     *todo
-     * @return
+     * Retrieves all teams that have at least one role without an assigned contractor.
+     *
+     * @return a set of incomplete {@link Team} entities
      */
-    @Query("SELECT t FROM Team t JOIN FETCH t.roles r WHERE r.contractorId IS NULL")
+    @Query("SELECT DISTINCT t FROM Team t JOIN FETCH t.roles r WHERE r.contractorId IS NULL")
     Set<Team> getIncompleteTeams();
 
     /**

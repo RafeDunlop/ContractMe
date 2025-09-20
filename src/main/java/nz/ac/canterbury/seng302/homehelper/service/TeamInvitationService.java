@@ -39,7 +39,9 @@ public class TeamInvitationService {
     }
 
     /**
-     * todo
+     * Scheduled task that reruns the contractor matching algorithm for all
+     * incomplete teams at a fixed interval. Retrieves incomplete teams,
+     * logs the count, and assigns contractors based on each team's location.
      */
     @Scheduled(fixedRate = RERUNNING_FREQUENCY_MINUTES, timeUnit = TimeUnit.MINUTES)
     public void rerunAlgorithm() {
