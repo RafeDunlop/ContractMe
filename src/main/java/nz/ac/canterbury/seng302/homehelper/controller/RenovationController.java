@@ -1,6 +1,8 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
+
 import jakarta.servlet.http.HttpServletRequest;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
@@ -18,7 +20,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UrlPathHelper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Controller for /renovation and subsidiary endpoints, associated with the consuming of renovations
@@ -123,8 +127,10 @@ public class RenovationController {
 
         boolean locationProvided = locationService.isLocationProvided(addressDTO);
 
+        Location location = new Location();
         if (locationProvided) {
             errors.putAll(locationService.validateLocation(addressDTO));
+            location = locationService.validateGeolocation(addressDTO, errors);
         }
 
         if (!errors.isEmpty()) {
@@ -145,7 +151,7 @@ public class RenovationController {
                 RenovationRecord renovationRecord = new RenovationRecord(user, name, description, roomList);
 
                 renovationRecordService.addRenovationRecord(renovationRecord);
-                renovationRecordService.addRenovationLocation(renovationRecord,addressDTO);
+                renovationRecordService.addRenovationLocation(renovationRecord, location);
                 redirectAttributes.addFlashAttribute("renovation", renovationRecord);
                 return "redirect:/renovations/view?id=" + renovationRecord.getId();
 

@@ -50,9 +50,6 @@ document.addEventListener("click", event => {
     }
 })
 addressField.addEventListener("input", triggerUpdateAutocomplete);
-
-let currentTabIndex = -1;
-
 // Event for navigating the autocomplete with the up/down arrow keys
 document.addEventListener("keydown", function (event) {
     const listItems = document.querySelectorAll("#autocomplete-list .list-group-item:not(.disabled)");
@@ -94,6 +91,8 @@ function commitAddressFields() {
  */
 function updateAutocomplete(input) {
     clearTimeout(timeoutId);
+    latField.value = 0;
+    lonField.value = 0;
     if (autocompleteMap.has(input)) { // don't wait if we already know what the answer is
         setAutoCompleteList(autocompleteMap.get(input))
     } else {
