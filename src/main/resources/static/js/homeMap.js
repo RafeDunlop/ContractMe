@@ -1,10 +1,10 @@
 const userRenovation = L.icon({
-    iconUrl: "/map/markers/user-renovation",
+    iconUrl: new URL("images/markers/user-renovation.png", document.baseURI),
     iconSize: [32, 32]
 })
 
 const publicRenovation = L.icon({
-    iconUrl: "/map/markers/public-renovation",
+    iconUrl: new URL("images/markers/public-renovation.png", document.baseURI),
     iconSize: [32, 32]
 })
 
