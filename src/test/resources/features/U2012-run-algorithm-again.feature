@@ -2,6 +2,13 @@ Feature: As Kaia, I want the algorithm to look for a new contractor
   when a contractor assigned to role for a team I own rejects or is removed from the position
   so that my team continues to fill despite changes.
 
+
+  @authoriseContractor
+  Scenario: AC3 - Rerun algorithm on teams with empty roles every 10 minutes
+    Given That i have a team with a role that no contractor is eligible to fill
+    When A contractor becomes eligible to fill the role
+    Then An email invitation is sent to that contractor after no more than 10 minutes
+
   @authoriseContractor
   Scenario: AC4 - Contractor who rejects an invitation should not be re-invited
     Given A contractor has received an invitation for a role in a team

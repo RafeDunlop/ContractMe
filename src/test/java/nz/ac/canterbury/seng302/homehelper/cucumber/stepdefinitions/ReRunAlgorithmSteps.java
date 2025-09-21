@@ -8,33 +8,50 @@ import nz.ac.canterbury.seng302.homehelper.cucumber.context.ContractorContext;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.EmailService;
+import nz.ac.canterbury.seng302.homehelper.service.TeamInvitationService;
+
+import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
+import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Transactional
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
+@ActiveProfiles("cucumber")
 public class ReRunAlgorithmSteps {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private TeamsService teamsService;
+
+
 
     @Autowired
     UserRepository userRepository;
@@ -48,10 +65,15 @@ public class ReRunAlgorithmSteps {
     private Team team;
     private final ContractorContext contractorContext;
     private String ownerEmail;
+    @Autowired
+    private ContractorRepository contractorRepository;
+    @Autowired
+    private TeamInvitationService teamInvitationService;
 
     public ReRunAlgorithmSteps(ContractorContext contractorContext) {
         this.contractorContext = contractorContext;
     }
+
 
     @Before
     public void setUp() {
@@ -68,6 +90,7 @@ public class ReRunAlgorithmSteps {
         team = new Team(renovation);
         teamsRepository.save(team);
     }
+
 
     @Given("A contractor has received an invitation for a role in a team")
     public void a_contractor_has_received_an_invitation_for_a_role_in_a_team() {
@@ -120,4 +143,29 @@ public class ReRunAlgorithmSteps {
 
         assertFalse(assigned, "Removed contractor was invited again.");
     }
+
+    @Given("That i have a team with a role that no contractor is eligible to fill")
+    public void that_i_have_a_team_with_a_role_that_is_eligible_to_fill() {
+        Role empty = new Role(Skill.PLUMBING);
+        team.addRole(empty);
+        teamsRepository.save(team);
+    }
+
+    @When("A contractor becomes eligible to fill the role")
+    public void a_contractor_becomes_eligible_to_fill_the_role() {
+        Contractor contractor = contractorContext.getContractor();
+        contractor.getLocation().setLongitude(172.63);
+        contractor.getLocation().setLatitude(43.53);
+        contractor.addSkill(Skill.PLUMBING);
+        contractorRepository.save(contractor);
+    }
+
+    @Then("An email invitation is sent to that contractor after no more than 10 minutes")
+    public void an_email_invitation_is_sent_to_that_contractor_after_no_more_than_10_minutes() {
+        teamInvitationService.rerunAlgorithm();
+        verify(teamsService).sendContractorEmails(
+                argThat(t -> t != null && t.getId() != null && t.getId().equals(team.getId()))
+        );
+    }
+
 }

@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -49,7 +51,10 @@ public class TeamInvitationService {
         logger.info("Rerunning matching algorithm on {} teams",teams.size());
         for (Team team : teams) {
             Location location = team.getRenovationRecord().getLocation();
-            teamsService.assignContractorsToTeam(team, location);
+            String response = teamsService.assignContractorsToTeam(team, location);
+            if (Objects.equals(response, "")) {
+                teamsService.sendContractorEmails(team);
+            }
         }
 
     }
