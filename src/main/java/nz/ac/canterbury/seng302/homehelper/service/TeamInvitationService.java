@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 @EnableScheduling
 public class TeamInvitationService {
-    private static final int RERUNNING_FREQUENCY_MINUTES = 1;
+    private static final int RERUNNING_FREQUENCY_MINUTES = 10;
     private final TeamsRepository teamsRepository;
     private final TeamsService teamsService;
     private static final Logger logger = LoggerFactory.getLogger(TeamInvitationService.class);
