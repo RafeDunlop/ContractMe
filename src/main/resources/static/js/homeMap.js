@@ -32,6 +32,7 @@ function debounce(func, wait) {
     };
 }
 
+
 const debouncedHandleMapChange = debounce(handleMapChange, 700)
 
 function handleMapChange() {
@@ -42,7 +43,8 @@ function handleMapChange() {
 for (const eventName of ["click", "moveend"]) {
     map.on(eventName, debouncedHandleMapChange)
     renovationData.forEach(renovation => {
-        L.marker([renovation.location.latitude, renovation.location.longitude], {icon: userRenovation}).addTo(map);
+        const icon = renovation.unownedPublic ? publicRenovation : userRenovation
+        L.marker([renovation.location.latitude, renovation.location.longitude], {icon}).addTo(map);
     })
 }
 
