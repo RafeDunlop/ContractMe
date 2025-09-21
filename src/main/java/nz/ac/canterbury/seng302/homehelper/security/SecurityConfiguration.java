@@ -67,7 +67,7 @@ public class SecurityConfiguration {
                         .contentSecurityPolicy(csp -> csp
                                 .policyDirectives(
                                         "default-src 'self'; " +
-                                                "img-src 'self' https://tile.openstreetmap.org; " +
+                                                "img-src 'self' https://tile.openstreetmap.org data:; " +
                                                 "script-src 'self' 'unsafe-inline'; " +
                                                 "style-src 'self' 'unsafe-inline'; " +
                                                 "font-src 'self';"
