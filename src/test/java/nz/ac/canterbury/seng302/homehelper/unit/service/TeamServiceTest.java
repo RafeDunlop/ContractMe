@@ -371,9 +371,14 @@ public class TeamServiceTest {
         verify(emailService, times(1)).sendRequestToContractor(
                 any(), any(), any(), any(), any(), any(), any());
     }
+
     @Test
     void deleteContractorRole_roleAssigned_deletesContractorFromRole() {
-        Team team = new Team(new RenovationRecord());
+        Location location = new Location();
+        location.setLatitude(-43);
+        location.setLongitude(43);
+        when(renovationRecord.getLocation()).thenReturn(location);
+        Team team = new Team(renovationRecord);
         Role role = new Role(Skill.PLUMBING);
         team.addRole(role);
         Contractor contractor = new Contractor("Alice", "Doe", "alice@doe.com", "encoded");

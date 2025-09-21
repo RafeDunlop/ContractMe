@@ -411,7 +411,7 @@ public class TeamsService {
                 role.setAccepted(false);
             }
         }
-        team = teamsRepository.save(team);
+        teamsRepository.save(team);
         runAlgorithmAgain(team, team.getRenovationRecord().getLocation());
     }
 
