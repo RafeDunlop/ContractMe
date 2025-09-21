@@ -7,7 +7,7 @@ Feature: As Kaia, I want the algorithm to look for a new contractor
     Given A contractor has received an invitation for a role in a team
     And Another eligible contractor exists for that role
     When The contractor rejects the invitation
-    Then the next closest eligible contractor receives an invitation to join that role
+    Then The next closest eligible contractor receives an invitation to join that role
 
   @authoriseContractor
   Scenario: AC4 - Contractor who rejects an invitation should not be re-invited

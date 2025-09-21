@@ -72,7 +72,6 @@ public class ReRunAlgorithmSteps {
         user.activate();
         userRepository.save(user);
 
-        RenovationRecord renovation = new RenovationRecord(user, "Test renovation", "", new ArrayList<>());
         RenovationRecord renovation = new RenovationRecord(owner, "Test renovation", "", new ArrayList<>());
         Location location = new Location("20 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Riccarton", 43.53, 172.63);
         renovation.setLocation(location);
@@ -86,13 +85,17 @@ public class ReRunAlgorithmSteps {
     public void Another_eligible_contractor_exists_for_that_role() {
         String email = "contractor" + System.nanoTime() + "@test.test";
         secondContractor = new Contractor("Bob", "Backup", email, "pw");
+
         secondContractor.addSkill(Skill.ELECTRICAL);
+        Location location = new Location("20 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Riccarton", 43.53, 172.63);
+        secondContractor.setLocation(location);
+        secondContractor.setAvailable(true);
 
         contractorRepository.save(secondContractor);
     }
 
-    @Then("the next closest eligible contractor receives an invitation to join that role")
-    public void the_next_closest_eligible_contractor_receives_an_invitation_to_join_that_role() {
+    @Then("The next closest eligible contractor receives an invitation to join that role")
+    public void The_next_closest_eligible_contractor_receives_an_invitation_to_join_that_role() {
         Team updatedTeam = teamsRepository.findById(team.getId()).orElseThrow();
         Role role = updatedTeam.getRoles().get(0);
 
@@ -136,7 +139,7 @@ public class ReRunAlgorithmSteps {
                 MockMvcRequestBuilders.delete("/renovations/team/delete")
                         .param("teamId", String.valueOf(team.getId()))
                         .param("contractorId", String.valueOf(contractorContext.getContractor().getId()))
-                        .with(user(ownerEmail).roles("USER"))   // <- use user(...)
+                        .with(user(ownerEmail).roles("USER"))
                         .with(csrf())
         ).andExpect(status().isNoContent());
     }

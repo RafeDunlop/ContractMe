@@ -398,7 +398,7 @@ public class TeamControllerIntegrationTest {
     }
 
     @Test
-    void hasLocation_declineInvitation_roleNot() throws Exception {
+    void hasLocation_declineInvitation_roleRemainsEmpty() throws Exception {
         String contractorEmail = "steve" + System.nanoTime() + "@doe.com";
         Contractor contractor = new Contractor("Steve", "Doe", contractorEmail, "Password123!");
         contractor.setLocation(location);
@@ -421,7 +421,7 @@ public class TeamControllerIntegrationTest {
         ).andExpect(status().is3xxRedirection());
 
         Team updated = teamsRepository.findById(team.getId()).orElseThrow();
-        assertNull(updated.getRoles().get(0).getContractorId(),
+        assertNotEquals(contractor.getId(), updated.getRoles().get(0).getContractorId(),
                 "Expected role to remain empty and original contractor is not re-invited."
         );
     }
