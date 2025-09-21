@@ -23,7 +23,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-
+import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -43,9 +43,20 @@ public class TeamServiceTest {
     private RenovationRecordRepository renovationRecordRepository;
 
 
+    private RenovationRecord renovationRecord;
+    private Team team;
+    private Location location;
+    private User owner;
+
     @BeforeEach
     void setUp() {
         teamsService = new TeamsService(teamsRepository, teamValidation, contractorRepository, emailService, renovationRecordRepository);
+
+        renovationRecord = mock(RenovationRecord.class);
+        owner = mock(User.class);
+        location = mock(Location.class);
+
+        team = new Team(renovationRecord);
     }
 
     @Test
@@ -321,6 +332,44 @@ public class TeamServiceTest {
         when(teamsRepository.findById(0L)).thenReturn(Optional.of(team));
         assertEquals(expectedMap, teamsService.getContractorsByTeamId(team.getId()));
 
+    }
+
+    @Test
+    void runAlgorithmAgain_noNewContractors_noEmailsSent() {
+        Role role = new Role(Skill.PLUMBING);
+        team.addRole(role);
+
+        teamsService.runAlgorithmAgain(team, location);
+
+        verify(emailService, never()).sendRequestToContractor(any(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void runAlgorithmAgain_existingTeamMember_findsNewContractor_sendsEmailOnce() {
+        Role role = new Role(Skill.ELECTRICAL);
+        team.addRole(role);
+
+        Role role2 = new Role(Skill.PLUMBING);
+        Contractor existingTeamMember = mock(Contractor.class);
+
+        team.addRole(role2);
+        team.getRoles().get(1).setContractor(existingTeamMember);
+
+        Contractor newContractor = mock(Contractor.class);
+        when(newContractor.getId()).thenReturn(2L);
+
+        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("ELECTRICAL"),
+                anyDouble(), isNull())).thenReturn(newContractor);
+        when(contractorRepository.findById(2L)).thenReturn(Optional.of(newContractor));
+
+        when(owner.getFirstName()).thenReturn("Bob");
+        when(renovationRecord.getUser()).thenReturn(owner);
+        when(renovationRecord.getName()).thenReturn("Test renovation");
+
+        teamsService.runAlgorithmAgain(team, location);
+
+        verify(emailService, times(1)).sendRequestToContractor(
+                any(), any(), any(), any(), any(), any(), any());
     }
     @Test
     void deleteContractorRole_roleAssigned_deletesContractorFromRole() {

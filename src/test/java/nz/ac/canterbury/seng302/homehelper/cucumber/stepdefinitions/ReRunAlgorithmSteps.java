@@ -35,6 +35,9 @@ import java.util.Locale;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -62,11 +65,13 @@ public class ReRunAlgorithmSteps {
     @Autowired
     TeamsRepository teamsRepository;
 
+    @Autowired
+    ContractorRepository contractorRepository;
+
     private Team team;
     private final ContractorContext contractorContext;
     private String ownerEmail;
-    @Autowired
-    private ContractorRepository contractorRepository;
+    private Contractor secondContractor;
     @Autowired
     private TeamInvitationService teamInvitationService;
 
@@ -77,10 +82,15 @@ public class ReRunAlgorithmSteps {
 
     @Before
     public void setUp() {
-        ownerEmail = "Test" + System.nanoTime() + "@test.test1";
+        String uniqueEmail = "Test" + System.nanoTime() + "@test.test";
+        ownerEmail = "Test" + System.nanoTime() + "@test.test";
         User owner = new User("Test", "test", ownerEmail, "test");
         owner.activate();
         userRepository.save(owner);
+
+        User user = new User("Test", "test", uniqueEmail, "test");
+        user.activate();
+        userRepository.save(user);
 
         RenovationRecord renovation = new RenovationRecord(owner, "Test renovation", "", new ArrayList<>());
         Location location = new Location("20 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Riccarton", 43.53, 172.63);
@@ -91,6 +101,28 @@ public class ReRunAlgorithmSteps {
         teamsRepository.save(team);
     }
 
+
+    @Given("Another eligible contractor exists for that role")
+    public void Another_eligible_contractor_exists_for_that_role() {
+        String email = "contractor" + System.nanoTime() + "@test.test";
+        secondContractor = new Contractor("Bob", "Backup", email, "pw");
+
+        secondContractor.addSkill(Skill.ELECTRICAL);
+        Location location = new Location("20 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Riccarton", 43.53, 172.63);
+        secondContractor.setLocation(location);
+        secondContractor.setAvailable(true);
+
+        contractorRepository.save(secondContractor);
+    }
+
+    @Then("The next closest eligible contractor receives an invitation to join that role")
+    public void The_next_closest_eligible_contractor_receives_an_invitation_to_join_that_role() {
+        Team updatedTeam = teamsRepository.findById(team.getId()).orElseThrow();
+        Role role = updatedTeam.getRoles().get(0);
+
+        assertNotEquals(contractorContext.getContractor().getId(), role.getContractorId(), "Rejected contractor was re-invited.");
+        assertEquals(secondContractor.getId(), role.getContractorId(), "Next eligible contractor was not invited.");
+    }
 
     @Given("A contractor has received an invitation for a role in a team")
     public void a_contractor_has_received_an_invitation_for_a_role_in_a_team() {
@@ -128,7 +160,7 @@ public class ReRunAlgorithmSteps {
                 MockMvcRequestBuilders.delete("/renovations/team/delete")
                         .param("teamId", String.valueOf(team.getId()))
                         .param("contractorId", String.valueOf(contractorContext.getContractor().getId()))
-                        .with(user(ownerEmail).roles("USER"))   // <- use user(...)
+                        .with(user(ownerEmail).roles("USER"))
                         .with(csrf())
         ).andExpect(status().isNoContent());
     }

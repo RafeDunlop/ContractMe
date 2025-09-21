@@ -39,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -79,6 +80,7 @@ public class TeamControllerIntegrationTest {
     LoginService loginService;
 
     private User defaultUser;
+    private Location location;
 
     @BeforeEach
     public void setup(TestInfo testInfo) {
@@ -90,7 +92,7 @@ public class TeamControllerIntegrationTest {
 
 
         if (testInfo.getDisplayName().contains("hasLocation")) {
-            Location location = new Location();
+            location = new Location();
             location.setAddress("nonNull");
             location.setLongitude(172.580907);
             location.setLatitude(-43.522345);
@@ -395,6 +397,34 @@ public class TeamControllerIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    void hasLocation_declineInvitation_roleRemainsEmpty() throws Exception {
+        String contractorEmail = "steve" + System.nanoTime() + "@doe.com";
+        Contractor contractor = new Contractor("Steve", "Doe", contractorEmail, "Password123!");
+        contractor.setLocation(location);
+        contractor.addSkill(Skill.PLUMBING);
+        contractor.activate();
+        contractor.setAvailable(true);
+        contractorRepository.save(contractor);
+
+        renovationRecord.setLocation(location);
+        renovationRecordRepository.save(renovationRecord);
+
+        Team team = new Team(renovationRecord);
+        team.addRole(new Role(Skill.PLUMBING));
+        team.getRoles().get(0).setContractor(contractor);
+        teamsRepository.save(team);
+
+        mockMvc.perform(post("/renovations/team/invitations/{teamId}/decline", team.getId())
+                        .with(user(contractorEmail).roles("USER"))
+                        .with(csrf())
+        ).andExpect(status().is3xxRedirection());
+
+        Team updated = teamsRepository.findById(team.getId()).orElseThrow();
+        assertNotEquals(contractor.getId(), updated.getRoles().get(0).getContractorId(),
+                "Expected role to remain empty and original contractor is not re-invited."
+        );
+    }
 }
 
 
