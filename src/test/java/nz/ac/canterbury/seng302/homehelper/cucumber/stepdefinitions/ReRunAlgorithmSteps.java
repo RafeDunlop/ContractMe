@@ -16,7 +16,6 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.service.EmailService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamInvitationService;
 
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
@@ -24,15 +23,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
-import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
