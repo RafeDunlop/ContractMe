@@ -1,10 +1,12 @@
 package nz.ac.canterbury.seng302.homehelper.integration.repository;
 
+import java.util.Set;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.*;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.util.Collections;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -21,6 +24,9 @@ class TeamRepositoryIntegrationTest {
 
     @Autowired
     TeamsRepository teamsRepository;
+
+    @Autowired
+    ContractorRepository contractorRepository;
 
     @Autowired
     UserRepository userRepository;
@@ -73,5 +79,33 @@ class TeamRepositoryIntegrationTest {
 
         boolean result = teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, regularUser.getId());
         assertThat(result).isFalse();
+    }
+
+    @Test
+    void returnsTeamsWithAtLeastOneUnassignedRole() {
+        User owner = userRepository.save(new User("Steve","Jobs","steve@test.com","Password123!"));
+        RenovationRecord renovationRecord = renovationRecordRepository.save( new RenovationRecord(owner, "Test Renovation", "one", Collections.emptyList()));
+        RenovationRecord SeconRenovationRecord = renovationRecordRepository.save( new RenovationRecord(owner, "Test 2 Renovation", "one", Collections.emptyList()));
+
+        Team team = new Team(renovationRecord);
+
+        Contractor alice = contractorRepository.save(new Contractor("Alice", "Builder", "alice@test.nz", "pw"));
+        contractorRepository.save(alice);
+        Role accepted = new Role(Skill.CARPENTRY);
+        accepted.setContractor(alice);
+        accepted.setAccepted(true);
+        team.addRole(accepted);
+
+        Team secondTeam = new Team(SeconRenovationRecord);
+        Role empty = new Role(Skill.PLUMBING);
+        secondTeam.addRole(empty);
+
+
+        teamsRepository.save(team);
+        teamsRepository.save(secondTeam);
+
+        Set<Team> result = teamsRepository.getIncompleteTeams();
+
+        assertThat(result).contains(secondTeam).doesNotContain(team);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TeamsRepository extends CrudRepository<Team, Long>{
 
@@ -29,6 +30,14 @@ public interface TeamsRepository extends CrudRepository<Team, Long>{
      */
     @Query("SELECT t FROM Team t JOIN t.roles r WHERE r.contractorId = :contractorId AND r.status = nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus.WAITING ORDER BY r.creationDate DESC")
     List<Team> findByRoleContractor(Long contractorId);
+
+    /**
+     * Retrieves all teams that have at least one role without an assigned contractor.
+     *
+     * @return a set of incomplete {@link Team} entities
+     */
+    @Query("SELECT DISTINCT t FROM Team t JOIN FETCH t.roles r WHERE r.contractorId IS NULL")
+    Set<Team> getIncompleteTeams();
 
     /**
      * Checks if a given user belongs to the team associated with a renovation record
