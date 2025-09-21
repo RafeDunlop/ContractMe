@@ -371,14 +371,19 @@ public class TeamServiceTest {
         verify(emailService, times(1)).sendRequestToContractor(
                 any(), any(), any(), any(), any(), any(), any());
     }
+
     @Test
     void deleteContractorRole_roleAssigned_deletesContractorFromRole() {
-        Team team = new Team(new RenovationRecord());
+        Location locationBeingDeleted = new Location();
+        locationBeingDeleted.setLatitude(-43);
+        locationBeingDeleted.setLongitude(43);
+        when(renovationRecord.getLocation()).thenReturn(locationBeingDeleted);
+        Team teamToDeleteFrom = new Team(renovationRecord);
         Role role = new Role(Skill.PLUMBING);
-        team.addRole(role);
+        teamToDeleteFrom.addRole(role);
         Contractor contractor = new Contractor("Alice", "Doe", "alice@doe.com", "encoded");
         role.setContractor(contractor);
-        teamsService.deleteContractorFromTeam(team,contractor);
+        teamsService.deleteContractorFromTeam(teamToDeleteFrom,contractor);
         assertNull(role.getContractorId());
         assertFalse(role.isAccepted());
     }

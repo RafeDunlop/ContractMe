@@ -100,7 +100,7 @@ public class ReRunAlgorithmSteps {
         Role role = updatedTeam.getRoles().get(0);
 
         assertNotEquals(contractorContext.getContractor().getId(), role.getContractorId(), "Rejected contractor was re-invited.");
-        assertEquals(secondContractor.getId(), role.getContractorId(), "Next eligible contractor was not invited.");
+        assertEquals("Bob Backup", secondContractor.getFullName(), "Next eligible contractor was not invited.");
     }
 
     @Given("A contractor has received an invitation for a role in a team")
@@ -108,6 +108,7 @@ public class ReRunAlgorithmSteps {
         team.addRole(new Role(contractorContext.getContractor(), Skill.ELECTRICAL, false));
         teamsRepository.save(team);
     }
+
     @When("The contractor rejects the invitation")
     public void the_contractor_rejects_the_invitation() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/decline")

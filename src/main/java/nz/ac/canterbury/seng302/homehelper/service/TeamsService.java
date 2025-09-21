@@ -412,6 +412,7 @@ public class TeamsService {
             }
         }
         teamsRepository.save(team);
+        runAlgorithmAgain(team, team.getRenovationRecord().getLocation());
     }
 
     /**
