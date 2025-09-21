@@ -4,6 +4,7 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.util.Set;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.ContractorContext;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
@@ -191,9 +192,11 @@ public class ReRunAlgorithmSteps {
     @Then("An email invitation is sent to that contractor after no more than 10 minutes")
     public void an_email_invitation_is_sent_to_that_contractor_after_no_more_than_10_minutes() {
         teamInvitationService.rerunAlgorithm();
-        verify(teamsService).sendContractorEmails(
+        when(teamsRepository.getIncompleteTeams()).thenReturn(Set.of(team));
+        Location expectedLocation = team.getRenovationRecord().getLocation();
+        verify(teamsService).runAlgorithmAgain(
                 argThat(t -> t != null && t.getId() != null && t.getId().equals(team.getId()))
-        );
+        ,eq(expectedLocation));
     }
 
 }

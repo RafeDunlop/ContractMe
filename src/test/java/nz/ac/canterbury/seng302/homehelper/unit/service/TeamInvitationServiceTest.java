@@ -89,8 +89,8 @@ public class TeamInvitationServiceTest {
 
         teamInvitationService.rerunAlgorithm();
 
-        verify(teamsService).assignContractorsToTeam(t1, loc1);
-        verify(teamsService).assignContractorsToTeam(t2, loc2);
+        verify(teamsService).runAlgorithmAgain(t1, loc1);
+        verify(teamsService).runAlgorithmAgain(t2, loc2);
         verifyNoMoreInteractions(teamsService);
     }
 
