@@ -351,6 +351,10 @@ public class TeamControllerIntegrationTest {
 
     @Test
     void deleteContractorFromRole_validUser_deletionSuccess() throws Exception {
+        Location location = new Location();
+        location.setLatitude(-43);
+        location.setLongitude(43);
+        renovationRecord.setLocation(location);
         Team team = new Team(renovationRecord);
 
         Contractor alice = contractorRepository.save(new Contractor("Alice", "Builder", "alice@test.nz", "pw"));
