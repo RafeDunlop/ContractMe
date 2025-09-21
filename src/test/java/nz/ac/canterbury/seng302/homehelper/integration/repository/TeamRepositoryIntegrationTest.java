@@ -93,7 +93,7 @@ class TeamRepositoryIntegrationTest {
         contractorRepository.save(alice);
         Role accepted = new Role(Skill.CARPENTRY);
         accepted.setContractor(alice);
-        accepted.setAccepted(true);
+        accepted.setStatus(RoleStatus.ACCEPTED);
         team.addRole(accepted);
 
         Team secondTeam = new Team(SeconRenovationRecord);
