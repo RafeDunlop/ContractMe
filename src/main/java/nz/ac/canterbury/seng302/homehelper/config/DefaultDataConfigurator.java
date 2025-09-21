@@ -96,7 +96,8 @@ public class DefaultDataConfigurator {
     void onApplicationReady() {
         setupDefaultUsers();
         setupDefaultRenovations();
-        setupDefaultRenovationsWithLocations();
+        setupDefaultPublicRenovationsWithLocationsFirstUser();
+        setupDefaultPublicRenovationsWithLocationsSecondUser();
         setupDefaultRenovationTasks();
         setupDefaultTags();
         setupDefaultTeamData();
@@ -214,13 +215,9 @@ public class DefaultDataConfigurator {
             renovationRecordService.addRenovationRecord(record);
         }
 
-
-
-
-
     }
 
-    private void setupDefaultRenovationsWithLocations() {
+    private void setupDefaultPublicRenovationsWithLocationsFirstUser() {
         List<String> renovationNames = new ArrayList<>(Arrays.asList("Remove Asbestos from Rec Centre", "Build new Rec Centre", "Build Statue Honouring Richard Lobb", "Clean the smell in 133",
                 "Fix new Brighton Pier", "Finish omnipresent Ilam roadworks", "Add grass touching patch to engineering department", "Build Grand Palace for Fabian",
                 "Fix waste disposal in Council Building", "Build New Campus"));
@@ -234,6 +231,7 @@ public class DefaultDataConfigurator {
             RenovationRecord renovationRecord = new RenovationRecord(default1, renovationNames.get(i), renovationDescriptions.get(i), defaultJERooms);
             Location location = new Location(addresses.get(i), "", "", "", "");
             renovationRecord.setLocation(location);
+            renovationRecord.setPublicity(true);
             renovationRecordService.addRenovationRecord(renovationRecord);
         }
 
@@ -258,7 +256,15 @@ public class DefaultDataConfigurator {
         renovationRecordService.addRenovationRecord(default1Renovation2);
     }
 
-
+    private void setupDefaultPublicRenovationsWithLocationsSecondUser() {
+        for (int i=1; i < 21; i++){
+            RenovationRecord newRecord = new RenovationRecord(default2, "Boring public renovation "+ i, "Boring description " + i,  defaultJERooms);
+            Location location = new Location ("11" + 10*i + " Memorial Ave", "", "", "Christchurch", "",  -43.51807 - i * 0.00044, 172.58924 - i*0.00075 );
+            newRecord.setLocation(location);
+            newRecord.setPublicity(true);
+            renovationRecordService.addRenovationRecord(newRecord);
+        }
+    }
 
     private void setupDefaultRenovationTasks() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
