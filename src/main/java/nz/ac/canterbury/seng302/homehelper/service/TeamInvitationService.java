@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 @EnableScheduling
 public class TeamInvitationService {
-    private static final int RERUNNING_FREQUENCY_MINUTES = 10;
+    private static final int RERUNNING_FREQUENCY_MINUTES = 1;
     private final TeamsRepository teamsRepository;
     private final TeamsService teamsService;
     private static final Logger logger = LoggerFactory.getLogger(TeamInvitationService.class);
@@ -46,15 +46,13 @@ public class TeamInvitationService {
      * logs the count, and assigns contractors based on each team's location.
      */
     @Scheduled(fixedRate = RERUNNING_FREQUENCY_MINUTES, timeUnit = TimeUnit.MINUTES)
+    @Transactional
     public void rerunAlgorithm() {
         Set<Team> teams = teamsRepository.getIncompleteTeams();
         logger.info("Rerunning matching algorithm on {} teams",teams.size());
         for (Team team : teams) {
             Location location = team.getRenovationRecord().getLocation();
-            String response = teamsService.assignContractorsToTeam(team, location);
-            if (Objects.equals(response, "")) {
-                teamsService.sendContractorEmails(team);
-            }
+            teamsService.runAlgorithmAgain(team, location);
         }
 
     }
