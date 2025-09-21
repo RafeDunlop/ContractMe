@@ -79,12 +79,11 @@ public class TeamControllerIntegrationTest {
     @Autowired
     LoginService loginService;
 
-    private User defaultUser;
     private Location location;
 
     @BeforeEach
     public void setup(TestInfo testInfo) {
-        defaultUser = new User("Jane", "Doe", "jane@doe.nz", "password");
+        User defaultUser = new User("Jane", "Doe", "jane@doe.nz", "password");
         defaultUser = userRepository.save(defaultUser);
         defaultUser.grantAuthority("ROLE_USER");
         renovationRecord = new RenovationRecord(defaultUser, "test renovation", "test description", List.of());
@@ -351,6 +350,10 @@ public class TeamControllerIntegrationTest {
 
     @Test
     void deleteContractorFromRole_validUser_deletionSuccess() throws Exception {
+        Location locationBeingDeletedFrom = new Location();
+        locationBeingDeletedFrom.setLatitude(-43);
+        locationBeingDeletedFrom.setLongitude(43);
+        renovationRecord.setLocation(locationBeingDeletedFrom);
         Team team = new Team(renovationRecord);
 
         Contractor alice = contractorRepository.save(new Contractor("Alice", "Builder", "alice@test.nz", "pw"));
