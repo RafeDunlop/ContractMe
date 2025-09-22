@@ -10,7 +10,6 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
-import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -60,9 +59,6 @@ class EditProfileControllerIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private LoginService loginService;
-
     @SpyBean
     private LocationService locationService;
 
@@ -71,13 +67,6 @@ class EditProfileControllerIntegrationTest {
         mockMvc = MockMvcBuilders.standaloneSetup(editProfileController).build();
     }
 
-    private static Stream<Arguments> streamInvalidLocationsWithCoords() {
-        return Stream.of(
-                Arguments.of("23a4s567g8h9uji0k", -43.535915D, 172.620323D),
-                Arguments.of("4tttttttttttnvtoimqr40r9qucm4", -43.548888D, 172.620444D),
-                Arguments.of("10000000 Fake Address Street", -43.565656D, 172.621555D)
-        );
-    }
 
     private static Stream<Arguments> streamValidContractorDetails() {
         return Stream.of(
@@ -404,41 +393,6 @@ class EditProfileControllerIntegrationTest {
         assertNull(savedUser.getLocation());
     }
 
-    @ParameterizedTest
-    @MethodSource("streamInvalidLocationsWithCoords")
-    void postForm_invalidLocationWithValidCoords_shouldRedirectWithErrors(String address, Double latitude, Double longitude) throws Exception {
-        User testUser = new User("Jane", "Doe", "jane@doe.com", "password");
-        userRepository.save(testUser);
-
-        mockMvc.perform(post("/user/edit")
-                .param("firstName", "Jane")
-                .param("lastName", "Doe")
-                .param("email", "jane@doe.com")
-                .param("address_line1", address)
-                .param("country", "")
-                .param("postcode", "")
-                .param("city", "")
-                .param("region", "")
-                .param("lat", latitude.toString())
-                .param("lon", longitude.toString()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/user/edit"))
-                .andExpect(flash().attributeExists("addressDTO"))
-                .andExpect(flash().attribute("addressDTO",
-                        Matchers.allOf(
-                                Matchers.hasProperty("address_line1", Matchers.is(address)),
-                                Matchers.hasProperty("country", Matchers.is("")),
-                                Matchers.hasProperty("postcode", Matchers.is("")),
-                                Matchers.hasProperty("city", Matchers.is("")),
-                                Matchers.hasProperty("region", Matchers.is("")),
-                                Matchers.hasProperty("lat", Matchers.is(latitude)),
-                                Matchers.hasProperty("lon", Matchers.is(longitude))
-                        )
-                ));
-
-        User savedUser = userRepository.findByEmailIgnoreCase("jane@doe.com").orElseThrow();
-        assertNull(savedUser.getLocation());
-    }
 
     @ParameterizedTest
     @MethodSource("streamValidContractorDetails")

@@ -78,7 +78,7 @@ public class LocationService {
      * @throws LocationNotFoundException if valid coordinates could not be found for the location
      */
     public Location locate(AddressDTO addressDTO) throws LocationNotFoundException {
-        if (isLocationProvided(addressDTO)) {
+        if (!hasCoords(addressDTO) && isLocationProvided(addressDTO)) {
             try {
                 injectCoordsViaGeocoding(addressDTO);
             } catch (IllegalArgumentException e) {
@@ -92,6 +92,17 @@ public class LocationService {
                 addressDTO.getLon()
         );
         return new Location(addressDTO);
+    }
+
+    /**
+     * Performs a simple values-based check to check whether a location has co-ordinates provided
+     * note: 0, 0 is null island (middle of sea). Nobody lives or works there
+     * @param address The DTO which contains fields for co-ordinates
+     * @return Whether the co-ordinates provided in the specified address are null-equivalent (returns false)
+     */
+    private boolean hasCoords(AddressDTO address) {
+        return !(address.getLon() == 0d ||
+                address.getLat() == 0d);
     }
 
     /**

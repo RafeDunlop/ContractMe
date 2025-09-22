@@ -62,18 +62,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/main", "/user/**", "/renovations/**", "/logout").hasRole("USER")
                         .anyRequest().authenticated())
 
-                .headers(headers -> headers
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
-                        .contentSecurityPolicy(csp -> csp
-                                .policyDirectives(
-                                        "default-src 'self'; " +
-                                                "img-src 'self' https://tile.openstreetmap.org data:; " +
-                                                "script-src 'self' 'unsafe-inline'; " +
-                                                "style-src 'self' 'unsafe-inline'; " +
-                                                "font-src 'self';"
-                                )
-                        )
-                )
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .csrf(csrf -> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2/**")))
 
                 // Define logging in, a POST "/login" endpoint now exists under the hood, after login redirect to main page.
