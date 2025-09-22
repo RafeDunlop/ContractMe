@@ -53,8 +53,7 @@ html, body {
 }
 
 .renovation-tab-bar {
-    margin-left: -16px !important;
-    margin-right: -16px !important;
+    margin-left: -4px !important;
     border: none !important;
     border-radius: 0;
 }

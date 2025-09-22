@@ -40,35 +40,55 @@
         <div id="content-container">
 
             <div id="renovation-name-header" class="renovation-name-header px-3 pt-3">
-                <div class="jumbotron d-flex justify-content-between align-items-center text-center">
-                    <form id="renovationForm" class="d-flex align-items-center" th:if="${isOwner}">
+
+                <div class="row align-items-center mb-4">
+                    <h1 th:text="${renovation.name}"
+                        class="text-truncate col"
+                        style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"
+                        title="[[${renovation.name}]]">
+                    </h1>
+                    <form id="renovationForm" class="col-auto mx-auto" th:if="${isOwner}">
                         <input type="checkbox" id="publicCheckbox" name="isPublic" th:checked="${renovation.isPublic()}" class="me-1">
                         <label for="publicCheckbox" class="mb-0">Make my renovation record public</label>
                     </form>
                 </div>
 
-                <h1 th:text="${renovation.name}"
-                    class="card-title text-truncate mb-4"
-                    style="max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"
-                    title="[[${renovation.name}]]">
-                </h1>
-                <ul class="nav nav-tabs renovation-tab-bar">
-                    <li class="nav-item">
-                        <button id="details-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'details'} ? ' active'">Details</button>
-                    </li>
-                    <li class="nav-item">
-                        <button id="tasks-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'tasks'} ? ' active'">Tasks</button>
-                    </li>
-                    <li class="nav-item">
-                        <button id="calendar-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'calendar'} ? ' active'">Calendar</button>
-                    </li>
-                </ul>
+                <div class="row align-items-center mb-4">
+                    <ul class="nav nav-tabs renovation-tab-bar col">
+                        <li class="nav-item">
+                            <button id="details-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'details'} ? ' active'">Details</button>
+                        </li>
+                        <li class="nav-item">
+                            <button id="tasks-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'tasks'} ? ' active'">Tasks</button>
+                        </li>
+                        <li class="nav-item">
+                            <button id="calendar-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'calendar'} ? ' active'">Calendar</button>
+                        </li>
+                    </ul>
+                    <div th:if="${isOwner}" class="col-auto mx-auto">
+                        <!-- Create button for location and no team -->
+                        <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" th:if="${hasLocation && !hasTeam}">Create Team</a>
+                        <span class="align-self-center" th:unless="${hasLocation}" th:text="|Add a location to create a team|"></span>
+                        <a th:href="@{/renovations/team/view(id=${teamId})}" class="btn btn-primary" th:if="${hasTeam}">View Team</a>
+
+
+                        <!-- Team exists, delete team -->
+                        <form id="delete-team-form"  th:if="${hasTeam}" th:action="@{/renovations/team/delete(id=${teamId})}" method="post" class="d-inline-block">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                            <button type="button" id="delete-team-button" class="btn btn-outline-danger ms-2" aria-label="Delete team">Delete Team</button>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <div id="details-content" class="renovation-content" th:style="${tabBarFocus != 'details'} ? 'display: none;'">
-                <div th:if="${renovation.description} != ''" class="card p-3 bg-light my-3">
+                <div th:if="${renovation.description} != ''" class="card p-3 bg-light mt-4 mb-3">
                     <h6 class="fw-bold">Description:</h6>
                     <p class="mb-0" th:text="${renovation.description}"></p>
+                </div>
+
+                <div th:if="${hasLocation}" class="mb-3">
+                    <div th:replace="~{fragments/addressDisplay.html :: addressDisplay (${renovation.getLocation()})}"></div>
                 </div>
 
                 <div th:if="!${renovation.rooms.isEmpty()}" class="mb-3">
@@ -82,7 +102,7 @@
 
                 <!-- Single Tag Add Form -->
                 <form th:action="@{/renovations/tags/add}" method="post" id="add-tag-form" class="mb-3" th:if="${isOwner}">
-                    <label for="tagName" class="fw-bold">Add Tags:</label>
+                    <label for="tagName" class="fw-bold h6">Add Tags:</label>
                     <input type="text" class="form-control" id="tagName" name="tagName" placeholder="Enter a tag"
                            data-cy="tag" maxlength="129" autocomplete="off" th:value="${submittedTag} ?: ''" required>
                     <ul id="autocomplete-list" class="list-group position-absolute" style="z-index: 1000;"></ul>
@@ -101,7 +121,7 @@
 
                 <!-- Display added tags -->
                 <div id="tagList" class="mb-3">
-                    <label class="fw-bold d-block mb-1">Current Tags:</label>
+                    <h6 class="fw-bold d-block mb-1">Current Tags:</h6>
                     <span th:each="tag : ${renovation.getSortedTags()}" class="tag-box badge bg-success d-inline-flex align-items-center me-2 mb-2">
                     <span class="tag-text-large text-truncate ms-1" th:text="${tag.getTagName()}"></span>
                     <button class="tag-delete-button-large btn-sm border-0 bg-transparent text-light ms-1"
@@ -114,41 +134,34 @@
                 </div>
 
                 <!-- Button section for details tab, has -->
-                <div class="mt-2 mb-2 d-flex justify-content-center">
+                <div class="mt-2 mb-4 d-flex">
                     <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
-                    <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-2" th:if="${previousUrl != null && !previousUrl.contains('/search')}">Back</a>
-                    <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-2" th:if="${previousUrl.contains('/search')}">Back to search results</a>
-
-                    <div th:if="${isOwner}">
-                        <!-- Create button for location and no team -->
-                        <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" th:if="${hasLocation && !hasTeam}">Create Team</a>
-                        <span class="text-secondary align-self-center" th:unless="${hasLocation}" th:text="|Add a location to ${renovation.name} to create a team|"></span>
-                        <a th:href="@{/renovations/team/view(id=${teamId})}" class="btn btn-primary" th:if="${hasTeam}">View Team</a>
-
-
-                        <!-- Team exists, delete team -->
-                        <form id="delete-team-form"  th:if="${hasTeam}" th:action="@{/renovations/team/delete(id=${teamId})}" method="post" class="d-inline-block">
-                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-                            <button type="button" id="delete-team-button" class="btn btn-outline-danger" aria-label="Delete team">Delete Team</button>
-                        </form>
-                    </div>
+                    <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-3" th:if="${previousUrl != null && !previousUrl.contains('/search')}">Back</a>
+                    <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-3" th:if="${previousUrl.contains('/search')}">Back to search results</a>
                 </div>
 
             </div>
 
             <div id="tasks-content" class="renovation-content"  th:style="${tabBarFocus != 'tasks'} ? 'display: none;'">
-                <div class="col-md-4 mb-3">
-                    <label for="status-filter" class="fw-bold">Show:</label>
-                    <select id="status-filter" name="status" class="form-select"
-                            th:attr="onchange=|fetchRenovation(${renovation.id})|">
-                        <option value="all" th:selected="${status == 'all'}">All</option>
-                        <option value="notStarted" th:selected="${status == 'notStarted'}">Not Started</option>
-                        <option value="inProgress" th:selected="${status == 'inProgress'}">In Progress</option>
-                        <option value="blocked" th:selected="${status == 'blocked'}">Blocked</option>
-                        <option value="completed" th:selected="${status == 'completed'}">Completed</option>
-                        <option value="cancelled" th:selected="${status == 'cancelled'}">Cancelled</option>
-                    </select>
+                <div class="col-md-12 mt-4 mb-3 d-flex align-items-end gap-4">
+                    <div>
+                        <label for="status-filter" class="fw-bold">Task State:</label>
+                        <select id="status-filter" name="status" class="form-select"
+                                th:attr="onchange=|fetchRenovation(${renovation.id})|">
+                            <option value="all" th:selected="${status == 'all'}">All</option>
+                            <option value="notStarted" th:selected="${status == 'notStarted'}">Not Started</option>
+                            <option value="inProgress" th:selected="${status == 'inProgress'}">In Progress</option>
+                            <option value="blocked" th:selected="${status == 'blocked'}">Blocked</option>
+                            <option value="completed" th:selected="${status == 'completed'}">Completed</option>
+                            <option value="cancelled" th:selected="${status == 'cancelled'}">Cancelled</option>
+                        </select>
+                    </div>
+                    <div>
+                        <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
+                    </div>
                 </div>
+                <!-- Add New Task Button -->
+
                 <div id="content-header">
                 </div>
 
@@ -166,17 +179,11 @@
                     <div class="alert alert-danger" id="errorMessage" style="margin-top: 20px; display: none;">
                         <p id="errorText"></p>
                     </div>
-
-                    <!-- Add New Task Button -->
-                    <div class="mt-2 mb-2 d-flex justify-content-center flex-wrap gap-2">
-                        <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
-                        <div th:if="${isOwner}"><div class="d-flex align-items-center mt-2" th:if="${hasTeam}"></div></div>
-                    </div>
                 </div>
             </div>
 
             <div id="calendar-content" class="renovation-content" th:style="${tabBarFocus != 'calendar'} ? 'display: none;'">
-                <div th:if="${isOwner}" style="margin-top: 120px;">
+                <div class="my-4" th:if="${isOwner}">
                     <div th:replace="~{fragments/calendar.html ::calendar (${date}, ${datesArray}, ${renovation.id})}"></div>
                 </div>
             </div>
