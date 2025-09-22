@@ -33,12 +33,12 @@ function debounce(func, wait) {
 }
 
 
-const debouncedHandleMapChange = debounce(handleMapChange, 700)
+const debouncedHandleMapChange = debounce(populateMap, 700)
 
-function handleMapChange() {
+/*function handleMapChange() {
     const bounds = map.getBounds();
 
-}
+}*/
 
 function populateMap() {
     renovationData.forEach(renovation => {
