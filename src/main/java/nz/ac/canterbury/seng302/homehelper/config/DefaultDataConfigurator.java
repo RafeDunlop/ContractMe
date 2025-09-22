@@ -235,6 +235,12 @@ public class DefaultDataConfigurator {
             renovationRecordService.addRenovationRecord(renovationRecord);
         }
 
+        RenovationRecord distantLocation1 = new RenovationRecord(default1, "Faraway place", "Escape from Jack Erskine", defaultJERooms);
+        Location farawayLocation = new Location("7 Peni Lane", "", "", "", "", -43.92163730909038D, 176.52615666195436D);
+        distantLocation1.setLocation(farawayLocation);
+        distantLocation1.setPublicity(true);
+        renovationRecordService.addRenovationRecord(distantLocation1);
+
         default1Renovation1 = new RenovationRecord(default1,
                 "Jack Erskine revamp",
                 "CSSE building => palace of slay",
