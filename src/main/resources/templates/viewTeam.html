@@ -12,6 +12,7 @@
 
 <body>
 
+<div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
 
     <div id="container" class="card container mt-5 p-4 shadow-sm">
@@ -66,7 +67,7 @@
                         <div>
                             <div th:if="${role.contractorId != null && isOwner && !role.getStatus().equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).UNFILLED)}" th:inline="javascript">
                                 <button type="button"
-                                        th:onclick="'deleteContractor(' + ${team.id} + ',' + ${role.contractorId} + ')'"
+                                        id="remove-contractor-button"
                                         class="btn btn-light btn-sm border border-danger text-danger">
                                     Remove Contractor
                                 </button>
@@ -84,8 +85,9 @@
 
 </body>
 
+<script type="module" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="module" th:src="@{/js/navbar.js}"></script>
-<script type="text/javascript" th:src="@{/js/deleteContractor.js}"></script>
+<script type="module" th:src="@{/js/deleteContractor.js}"></script>
 
 
 </html>

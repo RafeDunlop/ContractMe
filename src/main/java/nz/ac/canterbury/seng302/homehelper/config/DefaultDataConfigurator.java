@@ -387,9 +387,11 @@ public class DefaultDataConfigurator {
 
     private void setupDefaultTeamData() {
         Contractor defaulContractor = contractorRepository.findByEmailIgnoreCase(default2.getEmail()).orElseThrow();
+        Contractor acceptedContractor = contractorRepository.findByEmailIgnoreCase("seng302.team200.contractor1@gmail.com").orElseThrow();
 
         Team team = new Team(default1Renovation1);
         team.addRole(new Role(defaulContractor, Skill.CARPENTRY, RoleStatus.UNFILLED));
+        team.addRole(new Role(acceptedContractor, Skill.ANTIQUE_RESTORATION, RoleStatus.ACCEPTED));
         team = teamsRepository.save(team);
         renovationRecordRepository.save(default1Renovation1);
         logger.info("creating default team with id {}", team.getId());
