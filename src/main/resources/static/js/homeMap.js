@@ -25,7 +25,12 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 
-
+/**
+ * Delays all UI updates by the specified duration
+ * @param func the function that triggers the UI update
+ * @param wait the duration of delay
+ * @returns {(function(...[*]): void)|*}
+ */
 function debounce(func, wait) {
     let timeout;
     return function(...args) {
@@ -34,6 +39,10 @@ function debounce(func, wait) {
     };
 }
 
+/**
+ * Fetches data whenever the map is clicked on, resized or dragged
+ * @type {(function(...[*]): void)|*}
+ */
 const handleMapChange = debounce(() => {
     fetch(`map/renovations/${encodeURIComponent(rawCoordinates.join(","))}`, {method: "GET"})
         .then(response => response.json())
@@ -43,7 +52,10 @@ const handleMapChange = debounce(() => {
         })
 }, waitTime)
 
-
+/**
+ * Loads all renovations onto the map
+ * @rteurns void
+ */
 function populateMap() {
     renovationData.forEach(renovation => {
         const icon = renovation.unownedPublic ? publicRenovation : userRenovation
