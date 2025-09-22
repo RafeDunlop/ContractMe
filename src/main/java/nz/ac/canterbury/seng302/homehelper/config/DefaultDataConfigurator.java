@@ -356,7 +356,7 @@ public class DefaultDataConfigurator {
 
         Team team = new Team(default1Renovation1);
         team.addRole(new Role(defaulContractor, Skill.CARPENTRY, RoleStatus.UNFILLED));
-        team.addRole(new Role(acceptedContractor, Skill.ANTIQUE_RESTORATION, RoleStatus.FILLED));
+        team.addRole(new Role(acceptedContractor, Skill.ANTIQUE_RESTORATION, RoleStatus.ACCEPTED));
         team = teamsRepository.save(team);
         renovationRecordRepository.save(default1Renovation1);
         logger.info("creating default team with id {}", team.getId());
