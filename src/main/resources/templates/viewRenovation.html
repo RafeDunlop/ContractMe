@@ -137,19 +137,21 @@
                     <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-2" th:if="${previousUrl != null && !previousUrl.contains('/search')}">Back</a>
                     <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-2" th:if="${previousUrl.contains('/search')}">Back to search results</a>
 
-                    <div class="float-end align-items-end d-flex flex-row" th:if="${isOwner}">
-                        <!-- Team exists, delete team -->
-                        <div class="d-flex align-items-center" th:if="${hasTeam}">
-                            <div id="delete-team-div" class="d-inline ms-2">
-                                <button type="button" id="delete-team-button" class="btn btn-outline-danger"
-                                        th:attr="data-csrf=${_csrf.token}, data-id=${teamId}" aria-label="Delete team">Delete Team</button>
-                            </div>
-                        </div>
-
+                    <div class="float-end align-items-end d-flex flex-column">
                         <!-- Create button for location and no team -->
-                        <a id="create-team-button" th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" th:if="${hasLocation && !hasTeam}">Create Team</a>
-                        <p class="text-secondary flex-grow-0" th:unless="${hasLocation}" th:text="|Add a location to ${renovation.name} to create a team|"/>
-                        <a th:href="@{/renovations/team/view(id=${teamId})}" class="btn btn-primary ms-2" th:if="${hasTeam}">View Team</a>
+                        <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" id="create-team-button" th:if="${hasLocation && !hasTeam && isOwner}">Create Team</a>
+                        <p class="mt-2 text-secondary flex-grow-0" th:unless="${hasLocation}" th:text="|Add a location to ${renovation.name} to create a team|"/>
+                        <a th:href="@{/renovations/team/view(id=${teamId})}" class="btn btn-primary" th:if="${hasTeam && (isOwner || isContractorAssignedToTeam)}">View Team</a>
+
+
+                        <!-- Team exists, delete team -->
+                        <div class="d-flex align-items-center" th:if="${hasTeam && isOwner}">
+                                <div id="delete-team-div" class="d-inline ms-2">
+                                    <button type="button" id="delete-team-button" class="btn btn-outline-danger"
+                                            th:attr="data-csrf=${_csrf.token}, data-id=${teamId}" aria-label="Delete team">Delete Team</button>
+                                </div>
+
+                        </div>
                     </div>
                 </div>
             </div>

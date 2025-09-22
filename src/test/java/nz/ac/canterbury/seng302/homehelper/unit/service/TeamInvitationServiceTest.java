@@ -6,6 +6,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.service.TeamInvitationService;
@@ -46,7 +47,7 @@ public class TeamInvitationServiceTest {
 
     @Test
     void findAssignedRole_roleExists_returnsCorrectRole() {
-        Role matchingRole = new Role(contractor, Skill.ELECTRICAL, true);
+        Role matchingRole = new Role(contractor, Skill.ELECTRICAL,  RoleStatus.ACCEPTED);
         Mockito.when(team.getRoles()).thenReturn(List.of(matchingRole));
 
         Role result = teamInvitationService.findAssignedRole(team, contractor);
@@ -63,7 +64,7 @@ public class TeamInvitationServiceTest {
 
     @Test
     void findAssignedRole_contractorAssignedTwice_ThrowsException() {
-        Role testRole = new Role(contractor, Skill.ELECTRICAL, true);
+        Role testRole = new Role(contractor, Skill.ELECTRICAL,  RoleStatus.ACCEPTED);
         Mockito.when(team.getRoles()).thenReturn(List.of(testRole, testRole));
 
         IllegalStateException e = assertThrows(IllegalStateException.class, () -> teamInvitationService.findAssignedRole(team, contractor));

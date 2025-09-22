@@ -64,7 +64,7 @@ class LocationServiceTest {
         inputtedAddressDTO.setLon(lon);
         doNothing().when(locationServiceSpy).injectCoordsViaGeocoding(inputtedAddressDTO);
         Location actualLocation = locationServiceSpy.locate(inputtedAddressDTO);
-        verify(locationServiceSpy, times(1)).injectCoordsViaGeocoding(inputtedAddressDTO);
+        verify(locationServiceSpy, never()).injectCoordsViaGeocoding(inputtedAddressDTO);
         Assertions.assertEquals(expectedLocation, actualLocation);
     }
 

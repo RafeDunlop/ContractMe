@@ -15,7 +15,6 @@
 <div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
 
-
     <div id="container" class="card container mt-5 p-4 shadow-sm">
         <div id="content-header">
             <div class="jumbotron d-flex justify-content-between align-items-center text-center">
@@ -31,23 +30,28 @@
                 <div th:each="role : ${team.getRoles()}" class="col skill-card d-flex justify-content-center">
                     <input type="hidden" id="teamId" th:value="${team.id}">
                     <input type="hidden" id="contractorId" th:value="${role.contractorId}">
-                    <div class="skill-card-container card container border-5 border-black align-items-center d-flex flex-column position-relative"
+                    <div class="skill-card-container card container border-black border-5 align-items-center d-flex flex-column position-relative"
                          style="padding-top: 2vh; padding-bottom: 4vh; max-width: 14vw;max-height:500px; margin: 5vh 5% 4vh;">
 
                         <!-- Delete button -->
-                        <button type="button" class="delete-skill-btn btn btn-outline-danger custom-light-border ms-3">❌</button>
+                        <button th:if="${isOwner}" type="button" class="delete-skill-btn btn btn-outline-danger custom-light-border ms-3">❌</button>
 
 
                         <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 4vh;"></h5>
 
-                        <div class="border border-2 border-black p-2 mt-2 d-flex flex-column align-items-center" style="width: 100%;">
+                        <div  style="width: 100%;"
+                             th:styleappend="${(role.getContractorId() != null && role.getStatus().equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).ACCEPTED))
+            ? 'border-color: #8AC926 !important;'
+            : (role.getStatus().equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).WAITING)
+                ? 'border-color: black !important;'
+                : 'border-color: grey !important;')}" class="border border-2 p-2 mt-2 d-flex flex-column align-items-center">
                         <div th:if="${role.getContractorId() != null}" class="col-md-25  text-center" style="flex: 0 0 18%;">
                             <img th:src="@{'/profile_pictures/' + ${contractors.get(role.getContractorId()).getProfilePicture()}}"
                                  alt="Profile Picture"
                                  class="img-fluid rounded-circle"
-                                 style="max-width: 125px; max-height: 125px; object-fit: cover;">
+                                 style="width: 125%">
                         </div>
-                        <div th:if="${role.getContractorId() == null}" class="col-md-25  text-center" style="flex: 0 0 18%;">
+                        <div th:if="${role.getContractorId() == null}" class="col-md-25 text-center" style="flex: 0 0 18%;">
                             <img th:src="@{'icons/profile-icon.svg'}"
                                  alt="Profile Picture"
                                  class="img-fluid rounded-circle"
@@ -55,11 +59,13 @@
                         </div>
                         <div>
                             <h5 th:if="${role.getContractorId() != null}" th:text="${contractors.get(role.getContractorId()).getFullName()}"></h5>
-                            <h5 th:if="${role.getContractorId() != null && !role.isAccepted()}">Invite Sent!</h5>
+                            <h5 th:if="${role.getContractorId() != null && isOwner && (role.getStatus() == null || !role.getStatus().equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).ACCEPTED))}">
+                                Invite Sent!
+                            </h5>
                             <h5 th:if="${role.getContractorId() == null}">No Contractor Found</h5>
                         </div>
                         <div>
-                            <div th:if="${role.contractorId != null && role.accepted}" th:inline="javascript">
+                            <div th:if="${role.contractorId != null && isOwner && !role.getStatus().equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).UNFILLED)}" th:inline="javascript">
                                 <button type="button"
                                         id="remove-contractor-button"
                                         class="btn btn-light btn-sm border border-danger text-danger">

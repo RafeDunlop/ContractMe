@@ -3,10 +3,7 @@ package nz.ac.canterbury.seng302.homehelper.integration.repository;
 import java.util.Set;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
@@ -47,7 +44,7 @@ class TeamRepositoryIntegrationTest {
 
         RenovationRecord secondRecord = renovationRecordRepository.save( new RenovationRecord(owner, "Test Renovation 2", "two", Collections.emptyList()));
         Team secondTeam = new Team(secondRecord);
-        secondTeam.addRole(new Role(contractor, Skill.ELECTRICAL, true));
+        secondTeam.addRole(new Role(contractor, Skill.ELECTRICAL,  RoleStatus.ACCEPTED));
 
         teamsRepository.save(team);
         teamsRepository.save(secondTeam);
@@ -64,7 +61,7 @@ class TeamRepositoryIntegrationTest {
         Team team = new Team(renovationRecord);
 
         Contractor contractor = userRepository.save( new Contractor("Greg", "Smith", "greg@test.com", "Password123!"));
-        team.addRole(new Role(contractor, Skill.ELECTRICAL, accepted));
+        team.addRole(new Role(contractor, Skill.ELECTRICAL, accepted ? RoleStatus.ACCEPTED :  RoleStatus.WAITING));
 
         teamsRepository.save(team);
 
@@ -96,7 +93,7 @@ class TeamRepositoryIntegrationTest {
         contractorRepository.save(alice);
         Role accepted = new Role(Skill.CARPENTRY);
         accepted.setContractor(alice);
-        accepted.setAccepted(true);
+        accepted.setStatus(RoleStatus.ACCEPTED);
         team.addRole(accepted);
 
         Team secondTeam = new Team(SeconRenovationRecord);

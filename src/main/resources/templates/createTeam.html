@@ -52,6 +52,10 @@
             <ul><li th:each="msg : ${errors}" th:text="${msg}"></li></ul>
         </div>
 
+        <div>
+            <a th:href="@{/renovations/view(id=${renovationRecord.id})}" class="btn btn-outline-secondary float-start mt-5">Back</a>
+        </div>
+
         <input type="submit" id="form-submit" onclick="confirmTeamRequest(event)" class="btn btn-primary float-end mt-5" value="Submit" />
 
     </form>
