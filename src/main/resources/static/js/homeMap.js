@@ -7,6 +7,7 @@ const renovationResponse = await fetch(`map/renovations/${encodeURIComponent(raw
 let renovationData = await renovationResponse.json();
 const waitTime = 200;
 
+
 const userRenovation = L.icon({
     iconUrl: new URL("images/markers/user-renovation.png", document.baseURI),
     iconSize: [32, 32]
@@ -49,7 +50,7 @@ function populateMap() {
         L.marker([renovation.location.latitude, renovation.location.longitude], {icon}).addTo(map);
     })
 }
-
+populateMap();
 for (const eventName of ["click", "moveend", "zoomend"]) {
     map.on(eventName, handleMapChange)
 }
