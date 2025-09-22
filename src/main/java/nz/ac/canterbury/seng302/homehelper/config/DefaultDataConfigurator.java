@@ -64,7 +64,7 @@ public class DefaultDataConfigurator {
 
     private RenovationRecord default2Renovation1;
 
-    private static final int numGenericTasksToAdd = 101;
+    private static final int numGenericTasksToAdd = 151;
 
     private static final List<String> defaultJERooms = List.of("131", "133", "Fabian's office");
 

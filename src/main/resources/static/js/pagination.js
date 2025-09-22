@@ -40,7 +40,7 @@ let cachedCardSize = null;
 /**
  * This function updates the layout based on the window size and adjusts the number of tasks to be displayed on the page.
  */
-function updateLayout(viewMode = "cards", id = null) {
+function updateLayout(viewMode = "cards", id = null, refresh = false) {
     // Exit update layout if there is no cards to paginate
     if (document.getElementById("grid") == null) return;
 
@@ -57,7 +57,11 @@ function updateLayout(viewMode = "cards", id = null) {
     const containerWidth = viewMode === "cards" ?
         document.getElementById('grid').offsetWidth :
         document.getElementById('table');
-    const contentHeaderHeight = document.getElementById('content-header').offsetHeight;
+
+    let contentHeaderHeight = 0;
+    if (viewMode !== "cards") {
+        contentHeaderHeight = document.getElementById('renovation-name-header').offsetHeight;
+    }
     const footerHeight = 72;
     let columns = Math.max(1, Math.floor(containerWidth / (cardWidth + 15)));
 
@@ -77,7 +81,7 @@ function updateLayout(viewMode = "cards", id = null) {
     const input = document.getElementById('cardsPerPage');
     const oldValue = parseInt(input.value, 10);
 
-    if (oldValue !== newCardsPerPage && newCardsPerPage > 0) {
+    if ((oldValue !== newCardsPerPage && newCardsPerPage > 0) || refresh) {
         input.value = newCardsPerPage;
         fetchAppropriateRenovationData(viewMode, id, false);
     }

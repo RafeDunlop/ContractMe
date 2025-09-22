@@ -137,9 +137,11 @@ public class EditTaskController {
 
         try {
             editTaskService.updateTask(renovationTaskDTO,renovationTask);
-            return (dateToReturnTo.isEmpty()) ?
-                    String.format("redirect:/renovations/view?id=%s", renovationId) :
-                    String.format("redirect:/renovations/view?id=%s&dateEdited=%s#cellEdited", renovationId, dateToReturnTo);
+            if (dateToReturnTo.isEmpty()) {
+                return String.format("redirect:/renovations/view?id=%s&tabBarFocus=tasks", renovationId);
+            }
+            return String.format("redirect:/renovations/view?id=%s&dateEdited=%s#cellEdited&tabBarFocus=calendar", renovationId, dateToReturnTo);
+
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error {}", e.getMessage());
 
