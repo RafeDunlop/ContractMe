@@ -94,6 +94,8 @@ public class DefaultDataConfigurator {
     void onApplicationReady() {
         setupDefaultUsers();
         setupDefaultRenovations();
+        setupDefaultPublicRenovationsWithLocationsFirstUser();
+        setupDefaultPublicRenovationsWithLocationsSecondUser();
         setupDefaultRenovationTasks();
         setupDefaultTags();
         setupDefaultTeamData();
@@ -211,14 +213,39 @@ public class DefaultDataConfigurator {
             renovationRecordService.addRenovationRecord(record);
         }
 
+    }
+
+    private void setupDefaultPublicRenovationsWithLocationsFirstUser() {
+        List<String> renovationNames = new ArrayList<>(Arrays.asList("Build New Campus", "Build new Rec Centre", "Build Statue Honouring Richard Lobb", "Clean the smell in 133",
+                "Fix new Brighton Pier", "Finish omnipresent Ilam roadworks", "Add grass touching patch to engineering department", "Build Grand Palace for Fabian",
+                "Fix waste disposal in Council Building", "Remove Asbestos from Rec Centre"));
+        List<String> renovationDescriptions = new ArrayList<>(Arrays.asList("Why did we build a soviet brutalist campus we need a new one", "About time", "All hail", "No but seriously can someone fix this",
+                "Add aura point detector", "Pleeeeease hurry up", "Self explanatory really isn't it", "Versailles will be the size of this palace's garden shed",
+                "Waste accumulation issue", "I have no clue why we're even having this conversation"));
+        List<String> addresses = new ArrayList<>(Arrays.asList("22 Kirkwood Avenue", "19 Kirkwood Avenue", "5 Engineering Road", "Jack Erskine",
+                "2 Brighton Mall", "5 Ilam road", "69 Creyke Road", "26 School Road",
+                "53 Hereford Street", "31 Seafield Road"));
+        for (int i = 0; i < 10; i++) {
+            RenovationRecord renovationRecord = new RenovationRecord(default1, renovationNames.get(i), renovationDescriptions.get(i), defaultJERooms);
+            Location location = new Location(addresses.get(i), "", "", "", "", -43.53D + i*0.01, 172.58 + i*0.01);
+            renovationRecord.setLocation(location);
+            renovationRecord.setPublicity(true);
+            renovationRecordService.addRenovationRecord(renovationRecord);
+        }
+
+        RenovationRecord distantLocation1 = new RenovationRecord(default1, "Faraway place", "Escape from Jack Erskine", defaultJERooms);
+        Location farawayLocation = new Location("7 Peni Lane", "", "", "", "", -43.92163730909038D, 176.52615666195436D);
+        distantLocation1.setLocation(farawayLocation);
+        distantLocation1.setPublicity(true);
+        renovationRecordService.addRenovationRecord(distantLocation1);
+
         default1Renovation1 = new RenovationRecord(default1,
                 "Jack Erskine revamp",
                 "CSSE building => palace of slay",
                 defaultJERooms
         );
 
-
-        Location location = new Location("18 Kirkwood Avenue", NEW_ZEALAND, "8041", "Christchuch", "Upper Riccarton",-43.527887d,172.5846232);
+        Location location = new Location("19 Kirkwood Avenue", NEW_ZEALAND, "8041", "Christchuch", "Upper Riccarton",-43.527887d,172.5846232);
         default1Renovation1.setLocation(location);
         default1Renovation1 = renovationRecordService.addRenovationRecord(default1Renovation1);
 
@@ -233,7 +260,15 @@ public class DefaultDataConfigurator {
         renovationRecordService.addRenovationRecord(default1Renovation2);
     }
 
-
+    private void setupDefaultPublicRenovationsWithLocationsSecondUser() {
+        for (int i=1; i < 21; i++){
+            RenovationRecord newRecord = new RenovationRecord(default2, "Boring public renovation "+ i, "Boring description " + i,  defaultJERooms);
+            Location location = new Location ("11" + 10*i + " Memorial Ave", "", "", "Christchurch", "",  -43.51807 - i * 0.00044, 172.58924 - i*0.00075 );
+            newRecord.setLocation(location);
+            newRecord.setPublicity(true);
+            renovationRecordService.addRenovationRecord(newRecord);
+        }
+    }
 
     private void setupDefaultRenovationTasks() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");

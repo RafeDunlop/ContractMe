@@ -1,16 +1,12 @@
-const locationResponse = await fetch("location/localisation", {method: "GET"});
+const map = L.map('map').setView([-43.52460, 172.57710], 11);
+const bounds = map.getBounds();
+const southwest = bounds.getSouthWest();
+const northeast = bounds.getNorthEast();
+const rawCoordinates = [southwest.lat, southwest.lng, northeast.lat, northeast.lng]
+const renovationResponse = await fetch(`map/renovations/${encodeURIComponent(rawCoordinates.join(","))}`, {method: "GET"});
+let renovationData = await renovationResponse.json();
+const waitTime = 200;
 
-/* Latitude and longitude of Christchurch. */
-let latitude = -43.52460;
-let longitude =  172.57710;
-
-if (locationResponse.ok) {
-    const locationData = await locationResponse.json();
-    if (locationData.location) {
-        latitude = locationData.location.latitude;
-        longitude = locationData.location.longitude;
-    }
-}
 
 const userRenovation = L.icon({
     iconUrl: new URL("images/markers/user-renovation.png", document.baseURI),
@@ -22,13 +18,52 @@ const publicRenovation = L.icon({
     iconSize: [32, 32]
 })
 
-const map = L.map('map').setView([latitude, longitude], 11);
-
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     minZoom: 3,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
 }).addTo(map);
 
-L.marker([-43.52460, 172.57710], {icon: userRenovation}).addTo(map);
-L.marker([-43.53333, 172.63333], {icon: publicRenovation}).addTo(map);
+
+/**
+ * Delays all UI updates by the specified duration
+ * @param func the function that triggers the UI update
+ * @param wait the duration of delay
+ * @returns {(function(...[*]): void)|*}
+ */
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
+/**
+ * Fetches data whenever the map is clicked on, resized or dragged
+ * @type {(function(...[*]): void)|*}
+ */
+const handleMapChange = debounce(() => {
+    fetch(`map/renovations/${encodeURIComponent(rawCoordinates.join(","))}`, {method: "GET"})
+        .then(response => response.json())
+        .then(responseData => {
+            renovationData = responseData;
+            populateMap()
+        })
+}, waitTime)
+
+/**
+ * Loads all renovations onto the map
+ * @rteurns void
+ */
+function populateMap() {
+    renovationData.forEach(renovation => {
+        const icon = renovation.unownedPublic ? publicRenovation : userRenovation
+        L.marker([renovation.location.latitude, renovation.location.longitude], {icon}).addTo(map);
+    })
+}
+populateMap();
+for (const eventName of ["click", "moveend", "zoomend"]) {
+    map.on(eventName, handleMapChange)
+}
+
