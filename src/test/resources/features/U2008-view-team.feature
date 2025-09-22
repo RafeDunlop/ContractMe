@@ -26,7 +26,7 @@ Feature: 2008 - As Sarah, I want to see the contractors being assigned to my ren
     Then I see the contractor's name and profile picture
 
   @authoriseContractor
-  Scenario: Contractors can not view the team they are assigned to.
+  Scenario: Contractors can view the team they are assigned to but have not accepted.
     Given I am assigned to the team and have not accepted a role in the team
     When I click the View Team button
     Then I see the contractor's name and profile picture
