@@ -4,10 +4,7 @@ import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.controller.RequestInboxController;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
@@ -67,7 +64,7 @@ class RequestInboxControllerIntegrationTest {
     @WithMockUser("jane@doe.com")
     void requestInbox_userIsContractor_returnsRequestInboxTemplateWithTeams() throws Exception {
         Team team = new Team(renovationRecord);
-        Role role = new Role(contractor, Skill.HVAC, false);
+        Role role = new Role(contractor, Skill.HVAC,  RoleStatus.WAITING);
         team.addRole(role);
         when(teamsRepository.findByRoleContractor(1L)).thenReturn(List.of(team));
         when(userRepository.findByEmailIgnoreCase(contractor.getEmail())).thenReturn(Optional.of(contractor));

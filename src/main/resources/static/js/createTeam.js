@@ -20,7 +20,7 @@ function addSkill() {
         skillCol.className = "col skill-card d-flex justify-content-center";
 
         const skillCardContainer = document.createElement("div");
-        skillCardContainer.className = "skill-card-container card container border-5 border-black align-items-center";
+        skillCardContainer.className = "skill-card-container card container border-5 border-dark-subtle align-items-center";
         skillCardContainer.style.paddingTop = "6vh";
         skillCardContainer.style.paddingBottom = "4vh";
         skillCardContainer.style.maxWidth = "14vw";

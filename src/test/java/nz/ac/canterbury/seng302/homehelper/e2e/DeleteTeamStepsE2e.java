@@ -106,7 +106,7 @@ public class DeleteTeamStepsE2e {
 
     @Then("The team associated with the renovation I am viewing is deleted")
     public void theTeamAssociatedWithTheRenovationIAmViewingIsDeleted() {
-        i_still_see_the_button_for_that_renovation("Create Team"); // to await delete submission
+        RunPlaywrightTests.page.waitForSelector("#create-team-button");
         assertNull(teamsRepository.findByRenovationRecord(renovationRecord));
     }
 }

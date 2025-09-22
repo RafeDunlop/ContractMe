@@ -171,11 +171,32 @@ public class TeamController {
      */
     @GetMapping("/view")
     public String viewTeam(Model model, @RequestParam("id") Long id) {
-        Team team = teamsService.getTeamById(id);
-        Map<Long, Contractor> contractors = teamsService.getContractorsByTeamId(id);
-        model.addAttribute("team", team);
-        model.addAttribute("contractors", contractors);
-        return "viewTeam";
+        try {
+            User user = loginService.getUserByEmail();
+            Team team = teamsService.getTeamById(id);
+
+            Map<Long, Contractor> contractors = teamsService.getContractorsByTeamId(id);
+
+            if (team.getRenovationRecord() != null
+                    && team.getRenovationRecord().getUser() != null
+                    && (
+                    team.getRenovationRecord().getUser().getId().equals(user.getId())
+                            || contractors.containsKey(user.getId())
+            )
+            ) {
+                boolean isOwner = user == team.getRenovationRecord().getUser();
+                model.addAttribute("team", team);
+                model.addAttribute("contractors", contractors);
+                model.addAttribute("isOwner", isOwner);
+                return "viewTeam";
+            }
+
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to view team");
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team not found");
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
     }
 
     /**
