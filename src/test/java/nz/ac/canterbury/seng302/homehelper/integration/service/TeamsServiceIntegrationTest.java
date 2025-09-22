@@ -1,7 +1,9 @@
 package nz.ac.canterbury.seng302.homehelper.integration.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +35,7 @@ import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 
 
 @SpringBootTest
+@Transactional
 @ActiveProfiles("test")
 class TeamsServiceIntegrationTest {
     @Autowired
@@ -52,7 +55,6 @@ class TeamsServiceIntegrationTest {
     private Location location;
 
 
-    @Transactional
     @BeforeEach
     void setUp() {
         String uniqueEmail = "Test" + System.nanoTime() + "@test.test";
@@ -65,7 +67,6 @@ class TeamsServiceIntegrationTest {
         renovationRecordRepository.save(renovation);
     }
 
-    @Transactional
     @Test
     void validTeamAndLocation_assignContractorsToTeam_fillsTeam() {
         Team team = new Team(renovation);
@@ -99,7 +100,6 @@ class TeamsServiceIntegrationTest {
 
     }
 
-    @Transactional
     @Test
     void validTeamAndLocation_assignContractorsToTeam_fillsTeamAndSendsEmails() {
         TeamRequestDTO teamRequestDTO = new TeamRequestDTO();
@@ -123,8 +123,8 @@ class TeamsServiceIntegrationTest {
         teamsService.createNewTeam(renovation, teamRequestDTO);
 
         //If any skills are added in the future, change this threshold to match the number of skills present
-        Mockito.verify(emailService, times(2)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class),Mockito.anyLong());
+        verify(emailService, times(2)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), any(Locale.class),Mockito.anyLong());
 
     }
 
@@ -159,8 +159,8 @@ class TeamsServiceIntegrationTest {
 
         teamsService.createNewTeam(renovation, teamRequestDTO);
 
-        Mockito.verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class),Mockito.anyLong());
+        verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), any(Locale.class),Mockito.anyLong());
     }
 
     @Test
@@ -177,11 +177,10 @@ class TeamsServiceIntegrationTest {
 
         teamsService.createNewTeam(renovation, teamRequestDTO);
 
-        Mockito.verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class),Mockito.anyLong());
+        verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), any(Locale.class),Mockito.anyLong());
     }
 
-    @Transactional
     @Test
     void contractorOutsideDistanceLimit_shouldNotBeAssigned_cantFillTeam() {
         Team team = new Team(renovation);
@@ -206,7 +205,6 @@ class TeamsServiceIntegrationTest {
         assertNull(team.getRoles().get(0).getContractorId());
     }
 
-    @Transactional
     @Test
     void duplicateContractor_notAssignedToMultipleRoles_fillsTeam() {
         Team team = new Team(renovation);
@@ -239,7 +237,6 @@ class TeamsServiceIntegrationTest {
         assertEquals(contractor2.getId(), team.getRoles().get(1).getContractorId());
     }
 
-    @Transactional
     @Test
     void multipleSkillsOneContractor_contractorOnlyAssignedToOne_fillOne() {
         Team team = new Team(renovation);
@@ -272,7 +269,6 @@ class TeamsServiceIntegrationTest {
         assertEquals(0L, team.getRoles().get(1).getContractorId());
     }
 
-    @Transactional
     @Test
     void firstContractorGreedy_findsOptimalSolution_fillsTeam() {
         Team team = new Team(renovation);
@@ -306,7 +302,6 @@ class TeamsServiceIntegrationTest {
         assertEquals(contractor.getId(), team.getRoles().get(1).getContractorId());
     }
 
-    @Transactional
     @Test
     void firstContractorGreedy2_findsOptimalSolution_fillsTeam() {
         Team team = new Team(renovation);
@@ -342,7 +337,6 @@ class TeamsServiceIntegrationTest {
         assertEquals(contractor.getId(), team.getRoles().get(1).getContractorId());
     }
 
-    @Transactional
     @Test
     void oneContractorTwoRoles_noInfiniteLoop_fillsOne() {
         Team team = new Team(renovation);
@@ -368,7 +362,6 @@ class TeamsServiceIntegrationTest {
         assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
     }
 
-    @Transactional
     @Test
     void oneContractorTwoRoles2_noInfiniteLoop_fillsOne() {
         Team team = new Team(renovation);
@@ -393,7 +386,6 @@ class TeamsServiceIntegrationTest {
         assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
     }
 
-    @Transactional
     @Test
     void oneContractorTwoRoles3_noInfiniteLoop_fillsOne() {
         Team team = new Team(renovation);
@@ -418,7 +410,6 @@ class TeamsServiceIntegrationTest {
         assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
     }
 
-    @Transactional
     @Test
     void oneContractorTwoRoles4_noInfiniteLoop_fillsOne() {
         Team team = new Team(renovation);
@@ -443,7 +434,6 @@ class TeamsServiceIntegrationTest {
         assertEquals(contractor.getId(), team.getRoles().get(1).getContractorId());
     }
 
-    @Transactional
     @Test
     void twoContractorsThreeRoles_maximumBacktracing_fillsTwo() {
         Team team = new Team(renovation);
@@ -482,7 +472,6 @@ class TeamsServiceIntegrationTest {
         assertEquals(contractor2.getId(), team.getRoles().get(1).getContractorId());
     }
 
-    @Transactional
     @Test
     void threeContractorsFourRoles_maximumBacktracing_fillsThree() {
         Team team = new Team(renovation);
@@ -528,7 +517,6 @@ class TeamsServiceIntegrationTest {
         assertEquals(contractor3.getId(), team.getRoles().get(2).getContractorId());
     }
 
-    @Transactional
     @Test
     void fourContractorsFiveRoles_maximumBacktracing_fillsFour() {
         Team team = new Team(renovation);
@@ -601,7 +589,6 @@ class TeamsServiceIntegrationTest {
         assertEquals(contractor4.getId(), team.getRoles().get(3).getContractorId());
     }
 
-    @Transactional
     @Test
     void oneContractorsFiveRoles_maximumBacktracing_fillsOne() {
         Team team = new Team(renovation);
@@ -631,7 +618,6 @@ class TeamsServiceIntegrationTest {
         assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
     }
 
-    @Transactional
     @Test
     void contractorInBlacklist_shouldNotBeAssigned_cantFillTeam() {
         String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
@@ -654,7 +640,6 @@ class TeamsServiceIntegrationTest {
         assertNull(team.getRoles().get(0).getContractorId());
     }
 
-    @Transactional
     @Test
     void contractorInBlacklist_findNextClosest_fillsOne() {
         String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
@@ -687,7 +672,49 @@ class TeamsServiceIntegrationTest {
         assertEquals(contractor2.getId(), team.getRoles().get(0).getContractorId());
     }
 
-    @Transactional
+    @Test
+    void removeContractor_teamHasAnotherContractor_oneEmailSent() {
+        Team team = new Team(renovation);
+
+        String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
+        Contractor alice = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
+        alice.setLocation(location);
+        alice.addSkill(Skill.PLUMBING);
+        alice.activate();
+        alice.setAvailable(true);
+        alice = contractorRepository.save(alice);
+        Role role = new Role(Skill.PLUMBING);
+        role.setContractor(alice);
+        role.setAccepted(true);
+        team.addRole(role);
+
+        String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
+        Contractor bob = new Contractor("Bob", "Doe", bobUniqueEmail, "encoded");
+        bob.setLocation(location);
+        bob.addSkill(Skill.ANTIQUE_RESTORATION);
+        bob.activate();
+        bob.setAvailable(true);
+        bob = contractorRepository.save(bob);
+        role = new Role(Skill.ANTIQUE_RESTORATION);
+        role.setContractor(bob);
+        team.addRole(role);
+
+        String janeUniqueEmail = "chris" + System.nanoTime() + "@doe.com";
+        Contractor jane = new Contractor("Chris", "Doe", janeUniqueEmail, "encoded");
+        jane.setLocation(location);
+        jane.addSkill(Skill.ANTIQUE_RESTORATION);
+        jane.activate();
+        jane.setAvailable(true);
+        contractorRepository.save(jane);
+
+        team = teamsRepository.save(team);
+
+        teamsService.deleteContractorFromTeam(team, bob);
+        verify(emailService, times(1)).sendRequestToContractor(
+                any(), any(), any(), any(), any(), any(), any()
+        );
+    }
+
     @Test
     void deleteTeam_teamDeletedAndRenovationNotDeleted() {
         Team team = teamsRepository.save(new Team(renovation));

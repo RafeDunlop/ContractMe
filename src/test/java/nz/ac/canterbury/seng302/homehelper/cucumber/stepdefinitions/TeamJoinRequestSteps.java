@@ -127,6 +127,10 @@ public class TeamJoinRequestSteps {
 
         renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", Collections.emptyList());
         renovationRecord.setPublicity(false);
+
+        Location location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", 43.53, 172.63);
+        renovationRecord.setLocation(location);
+
         renovationRecord = renovationRecordRepository.save(renovationRecord);
 
         team = new Team(renovationRecord);

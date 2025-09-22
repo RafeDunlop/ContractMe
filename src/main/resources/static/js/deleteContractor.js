@@ -19,7 +19,7 @@ function deleteContractor() {
     const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const teamId = document.getElementById("teamId").value;
     const contractorId = document.getElementById("contractorId").value;
-  fetch(`/renovations/team/delete?teamId=${encodeURIComponent(teamId)}&contractorId=${encodeURIComponent(contractorId)}`, {
+  fetch(`renovations/team/delete?teamId=${encodeURIComponent(teamId)}&contractorId=${encodeURIComponent(contractorId)}`, {
     method: "DELETE",
     headers: {
       'X-CSRF-TOKEN': csrfToken
