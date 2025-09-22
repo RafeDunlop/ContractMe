@@ -5,14 +5,12 @@ import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
@@ -356,7 +354,7 @@ public class DefaultDataConfigurator {
         Contractor defaulContractor = contractorRepository.findByEmailIgnoreCase(default2.getEmail()).orElseThrow();
 
         Team team = new Team(default1Renovation1);
-        team.addRole(new Role(defaulContractor, Skill.CARPENTRY, false));
+        team.addRole(new Role(defaulContractor, Skill.CARPENTRY, RoleStatus.UNFILLED));
         team = teamsRepository.save(team);
         renovationRecordRepository.save(default1Renovation1);
         logger.info("creating default team with id {}", team.getId());

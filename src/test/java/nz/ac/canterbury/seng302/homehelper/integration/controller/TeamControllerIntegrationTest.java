@@ -5,10 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
@@ -36,11 +33,17 @@ import java.util.Locale;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
@@ -306,7 +309,7 @@ public class TeamControllerIntegrationTest {
         contractorRepository.save(alice);
         Role accepted = new Role(Skill.CARPENTRY);
         accepted.setContractor(alice);
-        accepted.setAccepted(true);
+        accepted.setStatus(RoleStatus.ACCEPTED);
         team.addRole(accepted);
 
         //Pending contractor
@@ -315,7 +318,7 @@ public class TeamControllerIntegrationTest {
         contractorRepository.save(bob);
         Role pending = new Role(Skill.ELECTRICAL);
         pending.setContractor(bob);
-        pending.setAccepted(false);
+        pending.setStatus(RoleStatus.WAITING);
         team.addRole(pending);
 
         //No contractor
@@ -361,7 +364,7 @@ public class TeamControllerIntegrationTest {
         contractorRepository.save(alice);
         Role accepted = new Role(Skill.CARPENTRY);
         accepted.setContractor(alice);
-        accepted.setAccepted(true);
+        accepted.setStatus(RoleStatus.ACCEPTED);
         team.addRole(accepted);
         teamsRepository.save(team);
 
@@ -389,7 +392,7 @@ public class TeamControllerIntegrationTest {
         contractorRepository.save(alice);
         Role accepted = new Role(Skill.CARPENTRY);
         accepted.setContractor(alice);
-        accepted.setAccepted(true);
+        accepted.setStatus(RoleStatus.ACCEPTED);
         team.addRole(accepted);
         teamsRepository.save(team);
 
