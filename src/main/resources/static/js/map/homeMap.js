@@ -6,6 +6,16 @@ const map = L.map('map').setView([-43.52460, 172.57710], 11);
 let renovationIconGroup = L.featureGroup().addTo(map);
 const togglePublicCheckbox = document.getElementById("include-public-renovations-checkbox");
 togglePublicCheckbox.addEventListener("click", toggleListener)
+togglePublicCheckbox.addEventListener("change",() => {
+    localStorage.setItem("toggleState",togglePublicCheckbox.checked)
+});
+
+
+const saved = localStorage.getItem("toggleState");
+
+if (saved !== null) {
+    togglePublicCheckbox.checked = saved === "true";
+}
 
 const userRenovation = L.icon({
     iconUrl: new URL("images/markers/user-renovation.png", document.baseURI),

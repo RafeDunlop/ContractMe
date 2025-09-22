@@ -1,8 +1,8 @@
-export function fetchRenovationMappings(bounds, includePublic) {
+export function fetchRenovationMappings(bounds, showPrivateOnly) {
 
-
+    const withPublic = !showPrivateOnly
     const params = new URLSearchParams();
-    params.set("withPublic", includePublic);
+    params.set("withPublic", withPublic.toString());
     params.set("minLat", bounds.minLat);
     params.set("minLon", bounds.minLon);
     params.set("maxLat", bounds.maxLat);
