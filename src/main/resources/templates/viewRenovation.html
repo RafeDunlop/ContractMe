@@ -136,6 +136,11 @@
                 </span>
                 </div>
 
+                <p class="text-muted mb-3" th:if="${renovation.getSortedTags().isEmpty()}">
+                    No tags have been added yet.
+                </p>
+
+
                 <!-- Button section for details tab, has -->
                 <div class="mt-2 mb-4 d-flex">
                     <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>

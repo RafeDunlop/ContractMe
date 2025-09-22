@@ -1,3 +1,10 @@
+/**
+ * File is responsible for switching tabs on the view renovation page.
+ * Keeps a map of tab button IDs to their corresponding content section IDs.
+ * When a tab button is clicked removes the "active" class from the currently active tab makes the clicked active
+ * Shows only the content section that matches the clicked tab.
+ */
+
 const contentMap = new Map([
     ["details-tab-item", "details-content"],
     ["tasks-tab-item", "tasks-content"],
