@@ -73,7 +73,7 @@ public class LoginStepsE2e {
 
     @When("I see the homepage")
     public void i_see_the_homepage() {
-        String expectedTitle = "Welcome to Home Helper";
+        String expectedTitle = "Welcome to Contractme";
         String homeTitle = RunPlaywrightTests.page.locator("#home-title").locator("h1").innerText();
         Assertions.assertEquals(expectedTitle, homeTitle);
     }
