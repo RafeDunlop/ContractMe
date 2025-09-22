@@ -4,7 +4,8 @@ const southwest = bounds.getSouthWest();
 const northeast = bounds.getNorthEast();
 const rawCoordinates = [southwest.lat, southwest.lng, northeast.lat, northeast.lng]
 const renovationResponse = await fetch(`map/renovations/${encodeURIComponent(rawCoordinates.join(","))}`, {method: "GET"});
-const renovationData = await renovationResponse.json();
+let renovationData = await renovationResponse.json();
+const waitTime = 200;
 
 const userRenovation = L.icon({
     iconUrl: new URL("images/markers/user-renovation.png", document.baseURI),
@@ -32,13 +33,15 @@ function debounce(func, wait) {
     };
 }
 
+const handleMapChange = debounce(() => {
+    fetch(`map/renovations/${encodeURIComponent(rawCoordinates.join(","))}`, {method: "GET"})
+        .then(response => response.json())
+        .then(responseData => {
+            renovationData = responseData;
+            populateMap()
+        })
+}, waitTime)
 
-const debouncedHandleMapChange = debounce(populateMap, 700)
-
-/*function handleMapChange() {
-    const bounds = map.getBounds();
-
-}*/
 
 function populateMap() {
     renovationData.forEach(renovation => {
@@ -47,8 +50,7 @@ function populateMap() {
     })
 }
 
-for (const eventName of ["click", "moveend"]) {
-    map.on(eventName, debouncedHandleMapChange)
-    populateMap();
+for (const eventName of ["click", "moveend", "zoomend"]) {
+    map.on(eventName, handleMapChange)
 }
 

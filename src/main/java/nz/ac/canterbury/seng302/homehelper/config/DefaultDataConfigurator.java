@@ -218,18 +218,18 @@ public class DefaultDataConfigurator {
     }
 
     private void setupDefaultPublicRenovationsWithLocationsFirstUser() {
-        List<String> renovationNames = new ArrayList<>(Arrays.asList("Remove Asbestos from Rec Centre", "Build new Rec Centre", "Build Statue Honouring Richard Lobb", "Clean the smell in 133",
+        List<String> renovationNames = new ArrayList<>(Arrays.asList("Build New Campus", "Build new Rec Centre", "Build Statue Honouring Richard Lobb", "Clean the smell in 133",
                 "Fix new Brighton Pier", "Finish omnipresent Ilam roadworks", "Add grass touching patch to engineering department", "Build Grand Palace for Fabian",
-                "Fix waste disposal in Council Building", "Build New Campus"));
-        List<String> renovationDescriptions = new ArrayList<>(Arrays.asList("I have no clue why we're even having this conversation", "About time", "All hail", "No but seriously can someone fix this",
+                "Fix waste disposal in Council Building", "Remove Asbestos from Rec Centre"));
+        List<String> renovationDescriptions = new ArrayList<>(Arrays.asList("Why did we build a soviet brutalist campus we need a new one", "About time", "All hail", "No but seriously can someone fix this",
                 "Add aura point detector", "Pleeeeease hurry up", "Self explanatory really isn't it", "Versailles will be the size of this palace's garden shed",
-                "Waste accumulation issue", "Why did we build a soviet brutalist campus we need a new one"));
+                "Waste accumulation issue", "I have no clue why we're even having this conversation"));
         List<String> addresses = new ArrayList<>(Arrays.asList("22 Kirkwood Avenue", "19 Kirkwood Avenue", "5 Engineering Road", "Jack Erskine",
                 "2 Brighton Mall", "5 Ilam road", "69 Creyke Road", "26 School Road",
                 "53 Hereford Street", "31 Seafield Road"));
         for (int i = 0; i < 10; i++) {
             RenovationRecord renovationRecord = new RenovationRecord(default1, renovationNames.get(i), renovationDescriptions.get(i), defaultJERooms);
-            Location location = new Location(addresses.get(i), "", "", "", "");
+            Location location = new Location(addresses.get(i), "", "", "", "", -43.53D + i*0.01, 172.58 + i*0.01);
             renovationRecord.setLocation(location);
             renovationRecord.setPublicity(true);
             renovationRecordService.addRenovationRecord(renovationRecord);
