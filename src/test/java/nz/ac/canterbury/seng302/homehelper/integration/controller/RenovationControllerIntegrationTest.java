@@ -2,27 +2,36 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
 import jakarta.transaction.Transactional;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.*;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -43,6 +52,8 @@ class RenovationControllerIntegrationTest {
 
     @Autowired
     private RenovationTaskRepository renovationTaskRepository;
+    @SpyBean
+    private LocationService locationService;
 
     private User currentUser;
     private User owner;
@@ -277,13 +288,15 @@ class RenovationControllerIntegrationTest {
     void getForm_renovationWithLocation_locationAdded() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         AddressDTO addressDTO = new AddressDTO();
-        addressDTO.setAddress_line1("164 Ingoldsby Street");
+        addressDTO.setAddress_line1("16 Ingoldsby Street");
         addressDTO.setCountry("New Zealand");
         addressDTO.setPostcode("8023");
         addressDTO.setCity("Christchurch");
-        addressDTO.setRegion("Beckenham");
+        addressDTO.setRegion("Sydenham");
         addressDTO.setLat(1D);
         addressDTO.setLon(1D);
+        Location location = new Location(addressDTO.getAddress_line1(), addressDTO.getCountry(), addressDTO.getPostcode(), addressDTO.getCity(), addressDTO.getRegion(), addressDTO.getLat(), addressDTO.getLon());
+        doReturn(location).when(locationService).locate(addressDTO);
 
         mockMvc.perform(post("/renovations/create")
                 .param("name", testRecord.getName())
@@ -318,14 +331,15 @@ class RenovationControllerIntegrationTest {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         renovationRecordRepository.save(testRecord);
 
-        String address = "33 Moorhouse Ave";
+        String address = "33 Moorhouse Avenue";
         String country = "New Zealand";
-        String postcode = "8043";
+        String postcode = "8011";
         String city = "Christchurch";
-        String region = "Sydenham";
+        String region = "Addington";
         Double lat = 1D;
         Double lon = 1D;
-
+        Location stubLocation = new Location(address, country, postcode, city, region, lat, lon);
+        doReturn(stubLocation).when(locationService).locate(any(AddressDTO.class));
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
                         .param("address_line1", address)
                         .param("country", country)
@@ -353,6 +367,7 @@ class RenovationControllerIntegrationTest {
     }
 
     @Test
+    @Transactional
     @WithMockUser(username = "jane@doe.com")
     void getForm_renovationWithoutLocation_locationNotAdded() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));

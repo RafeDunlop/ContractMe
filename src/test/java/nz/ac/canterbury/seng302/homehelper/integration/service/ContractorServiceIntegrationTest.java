@@ -22,6 +22,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
@@ -84,6 +86,7 @@ public class ContractorServiceIntegrationTest {
         addressDTO.setLon(1d);
 
         toTest = new ContractorService(contractorRepository, contractorValidation, locationService);
+        doNothing().when(locationService).injectCoordsViaGeocoding(any(AddressDTO.class));
     }
 
     @Test

@@ -117,6 +117,14 @@
             </div>
         </div>
 
+        <!-- General location error (i.e. no coords found) -->
+        <div class="alert alert-danger mt-2" id="gelocation-error"
+             th:attr="hidden=${geolocationError == null}">
+            <ul>
+                <li th:each="msg : ${geolocationError}" th:text="${msg}"></li>
+            </ul>
+        </div>
+
         <!--LATITUDE-->
         <input type="hidden" name="lat" id="lat" aria-label="latitude" th:value="*{addressDTO.lat}">
 

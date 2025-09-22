@@ -1,7 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
-import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
@@ -23,7 +23,6 @@ public class RegisterService {
     private final UserRepository userRepository;
     private final UserValidation userValidation;
     private final PasswordEncoder passwordEncoder;
-    private final LocationService locationService;
 
     /**
      * Constructs a {@code RegisterService} with the given dependencies.
@@ -32,11 +31,10 @@ public class RegisterService {
      * @param userValidation the utility used to validate user input fields
      */
     @Autowired
-    public RegisterService(UserRepository userRepository, UserValidation userValidation, LocationService locationService) {
+    public RegisterService(UserRepository userRepository, UserValidation userValidation) {
         this.userRepository = userRepository;
         this.userValidation = userValidation;
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        this.locationService = locationService;
     }
 
     /**
@@ -85,10 +83,10 @@ public class RegisterService {
      * Saves the user with its location to the database
      *
      * @param user       The user to attach location to
-     * @param addressDTO Data transfer object for user registration
+     * @param location Location object for user registration
      */
-    public void registerLocation(User user, AddressDTO addressDTO) {
-        user.setLocation(locationService.locate(addressDTO));
+    public void registerLocation(User user, Location location) {
+        user.setLocation(location);
         userRepository.save(user);
     }
 

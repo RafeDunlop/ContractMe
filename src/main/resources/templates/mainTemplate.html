@@ -6,19 +6,22 @@
     <title> ContractMe </title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}"/>
-
+    <link rel="stylesheet" th:href="@{/css/maps.css}"/>
+    <link rel="stylesheet" th:href="@{/webjars/leaflet/dist/leaflet.css}"/>
 </head>
 <body>
-<div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
-<div>
-    <div id="home-map"></div>
+    <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+    <div class="d-flex justify-content-center m-5">
+        <div id="map" class="home-map" style="z-index: 0;"></div>
+    </div>
     <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" id="include-public-renovations-checkbox" checked>
         <label class="form-check-label" id="include-public-renovations-label"
                for="include-public-renovations-checkbox">Show all renovations</label>
     </div>
-</div>
 </body>
 <script type="module" th:src="@{/js/navbar.js}"></script>
+<script th:src="@{/webjars/leaflet/dist/leaflet.js}"></script>
+<script type="module" th:src="@{/js/homeMap.js}"></script>
 <script type="module" th:src="@{/js/map/home.js}"></script>
 </html>

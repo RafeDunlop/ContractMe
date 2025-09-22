@@ -17,6 +17,7 @@ import java.util.List;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class DeleteTeamStepsE2e {
@@ -101,5 +102,11 @@ public class DeleteTeamStepsE2e {
     @Then("I remain on the renovation view page")
     public void i_remain_on_the_renovation_view_page() {
         assertEquals(RunPlaywrightTests.baseUrl + "/renovations/view?id=" + renovationRecord.getId(), RunPlaywrightTests.page.url());
+    }
+
+    @Then("The team associated with the renovation I am viewing is deleted")
+    public void theTeamAssociatedWithTheRenovationIAmViewingIsDeleted() {
+        RunPlaywrightTests.page.waitForSelector("#create-team-button");
+        assertNull(teamsRepository.findByRenovationRecord(renovationRecord));
     }
 }
