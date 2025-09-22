@@ -1,16 +1,19 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
 import jakarta.transaction.Transactional;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -22,6 +25,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -44,6 +49,9 @@ class EditRenovationControllerIntegrationTest {
 
     @Autowired
     private RenovationRecordRepository renovationRecordRepository;
+
+    @SpyBean
+    private LocationService locationService;
 
     private User currentUser;
     private User owner;
@@ -299,6 +307,12 @@ class EditRenovationControllerIntegrationTest {
     void editRenovation_invalidLocation_locationNotSaved() throws Exception {
         RenovationRecord testRecord = new RenovationRecord(owner, "RenovationOneTag", "Room A Renovation", List.of("Room A"));
         renovationRecordRepository.save(testRecord);
+        doAnswer(invocationOnMock -> {
+            AddressDTO mockAddressDTO = invocationOnMock.getArgument(0);
+            mockAddressDTO.setLat(1D);
+            mockAddressDTO.setLon(1D);
+            return null;
+        }).when(locationService).injectCoordsViaGeocoding(any(AddressDTO.class));
 
         mockMvc.perform(post("/renovations/edit?id=" + testRecord.getId())
                         .param("address_line1", "1 Cool Street")

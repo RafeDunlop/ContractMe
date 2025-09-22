@@ -5,10 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
@@ -76,12 +73,16 @@ public class TeamsService {
             team.addRole(role);
         }
 
-        Team newTeam = teamsRepository.save(team);
+        teamsRepository.save(team);
         renovationRecordRepository.save(teamRecord);
 
         Location renovationLocation = teamRecord.getLocation();
         String response = assignContractorsToTeam(team, renovationLocation);
         if (Objects.equals(response, "")) {
+            for (Role role : team.getRoles()) {
+                role.setStatus(RoleStatus.WAITING);
+            }
+            teamsRepository.save(team);
             sendContractorEmails(team);
         }
 
@@ -169,6 +170,14 @@ public class TeamsService {
      */
     public boolean checkViewRenovationAccess(RenovationRecord renovationRecord, User user) {
         return teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, user.getId());
+    }
+
+    /**
+     * Deletes the specified {@link Team}
+     * @param team The {@link Team} to delete
+     */
+    public void deleteTeam(Team team) {
+        teamsRepository.delete(team);
     }
 
 
@@ -292,6 +301,9 @@ public class TeamsService {
                 .filter(contractorId -> contractorId != null && contractorId != 0L)
                 .collect(Collectors.toSet());
 
+        Set<Long> blacklistIds = new HashSet<>(team.getBlacklistIds());
+        assignedIds.addAll(blacklistIds);
+
         Contractor candidate = findNearestContractor(roleToFill, location, assignedIds);
         if (candidate != null) {
             roleToFill.setContractor(candidate);
@@ -330,11 +342,12 @@ public class TeamsService {
      * @return true if all roles assigned, false if any remain unassigned.
      */
     private boolean greedyAssign(Team team, Location renovationLocation) {
-        Set<Long> assignedContractors = new HashSet<>();
+        Set<Long> assignedContractors = new HashSet<>(team.getBlacklistIds());
         boolean allAssigned = true;
 
         for (Role role : team.getRoles()) {
-            if (role.getContractorId() == null) {
+            Long id = role.getContractorId();
+            if (id == null || id == 0L) {
                 Contractor contractor = findNearestContractor(role, renovationLocation, assignedContractors);
                 if (contractor == null) {
                     allAssigned = false;
@@ -385,5 +398,72 @@ public class TeamsService {
         return (role.getContractorId() != null) ?
                 contractorRepository.findById(role.getContractorId()) :
                 Optional.empty();
+    }
+
+    /**
+     * Sets the contractor Id and isAccepted of the given role of the given team to null and false respectively.
+     * @param team the team the role is a part of
+     * @param contractor the contractor being removed from the team
+     */
+    public void deleteContractorFromTeam(Team team, Contractor contractor) {
+        for (Role role : team.getRoles()) {
+            if (role.getContractorId() != null && role.getContractorId().equals(contractor.getId())) {
+                role.removeContractor();
+                role.setStatus(RoleStatus.UNFILLED);
+            }
+        }
+        teamsRepository.save(team);
+        runAlgorithmAgain(team, team.getRenovationRecord().getLocation());
+    }
+
+    /**
+     * Runs the algorithm again, makes a set of current members before and after to check for new members.
+     * If new members are found they are notified by email.
+     * @param team The team to re-run the algorithm on.
+     * @param renovationLocation The location of the renovation record associated with the Team.
+     */
+    public void runAlgorithmAgain(Team team, Location renovationLocation) {
+        Set<Long> beforeIds = team.getRoles().stream()
+                .map(Role::getContractorId)
+                .filter(id -> id != null && id != 0L)
+                .collect(Collectors.toSet());
+
+        assignContractorsToTeam(team, renovationLocation);
+
+        Set<Long> newMemberIds = team.getRoles().stream()
+                .map(Role::getContractorId)
+                .filter(id -> id != null && id != 0L)
+                .collect(Collectors.toSet());
+        newMemberIds.removeAll(beforeIds);
+
+        if (!newMemberIds.isEmpty()) {
+            sendContractorEmailsTo(team, newMemberIds);
+        }
+    }
+
+    /**
+     * Sends contractors team invite emails, to specified contractors.
+     * @param team The team the contractors belong to.
+     * @param contractorIds The list of contractor Ids that need to be sent the invite email.
+     */
+    private void sendContractorEmailsTo(Team team, Set<Long> contractorIds) {
+        String ownerName = team.getRenovationRecord().getUser().getFirstName();
+
+        Map<Long, Role> roleByContractorId = new HashMap<>();
+
+        for (Role role : team.getRoles()) {
+            Long contractorId = role.getContractorId();
+            if (contractorId != null && contractorId != 0L) {
+                roleByContractorId.putIfAbsent(contractorId, role);
+            }
+        }
+
+        for (Long id : contractorIds) {
+            Contractor recipient = contractorRepository.findById(id).orElseThrow();
+            Role role = roleByContractorId.get(id);
+
+            emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
+                    team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
+        }
     }
 }

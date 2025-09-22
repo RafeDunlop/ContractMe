@@ -5,14 +5,12 @@ import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.UserRegisterDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.security.GenerationStrategy;
@@ -37,7 +35,7 @@ import java.util.Locale;
  * @author Rafe Dunlop
  */
 @Component
-@Profile("!test & !cucumber & !production")
+@Profile("!test & !cucumber & !production & !end2end")
 public class DefaultDataConfigurator {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultDataConfigurator.class);
@@ -134,13 +132,13 @@ public class DefaultDataConfigurator {
         user.setCountryCode("64");
         user.setPhoneNumber("33692888");
         AddressDTO address = new AddressDTO();
-        address.setAddress_line1("Ilam Road");
-        address.setCity("Christchurch");
-        address.setRegion("Ilam");
-        address.setCountry(NEW_ZEALAND);
+        address.setAddress_line1("90F Ilam Road");
+        address.setCity("");
+        address.setRegion("");
+        address.setCountry("");
         address.setPostcode("");
-        address.setLat(-43.522345);
-        address.setLon(172.580907);
+        address.setLat(0);
+        address.setLon(0);
         Contractor defaultContractor1 = contractorService.registerContractor(user, address);
         code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, defaultContractor1, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);
@@ -356,7 +354,7 @@ public class DefaultDataConfigurator {
         Contractor defaulContractor = contractorRepository.findByEmailIgnoreCase(default2.getEmail()).orElseThrow();
 
         Team team = new Team(default1Renovation1);
-        team.addRole(new Role(defaulContractor, Skill.CARPENTRY, false));
+        team.addRole(new Role(defaulContractor, Skill.CARPENTRY, RoleStatus.UNFILLED));
         team = teamsRepository.save(team);
         renovationRecordRepository.save(default1Renovation1);
         logger.info("creating default team with id {}", team.getId());

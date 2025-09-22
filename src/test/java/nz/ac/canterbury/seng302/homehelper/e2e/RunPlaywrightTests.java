@@ -8,8 +8,10 @@ import io.cucumber.java.BeforeAll;
 import io.cucumber.junit.platform.engine.Constants;
 import io.cucumber.spring.CucumberContextConfiguration;
 import nz.ac.canterbury.seng302.homehelper.HomeHelperApplication;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.junit.platform.suite.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -28,6 +30,9 @@ import org.springframework.test.context.ContextConfiguration;
 @ActiveProfiles("end2end")
 public class RunPlaywrightTests {
 
+    @SpyBean
+    public LocationService locationService;
+
     @LocalServerPort
     private int port;
     static Playwright playwright;
@@ -39,7 +44,7 @@ public class RunPlaywrightTests {
     @BeforeAll
     public static void openResources() {
         playwright = Playwright.create();
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
 
     }
 

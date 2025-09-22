@@ -115,6 +115,19 @@ Again, the URI for this repository can be found at [profanity-filter](https://gi
 The license for this project is found at [license](https://github.com/modernmt/profanity-filter/blob/main/LICENSE)
 The terms for the license under which this third party software has been used can be found at [Apache-2.0.](https://www.apache.org/licenses/LICENSE-2.0)
 
+### Leaflet
+- **Description:** A JavaScript library for interactive maps.
+- **Version:** 1.9.4
+- **Homepage:** https://leafletjs.com/
+- **License:** BSD 2-Clause "Simplified" License
+- **Copyright:** © 2010-2023, Vladimir Agafonkin; © 2010-2011, CloudMade
+
+### OpenStreetMap
+- **Description:** Map tiles and geodata.
+- **Homepage:** https://www.openstreetmap.org/
+- **License:** Open Database License (ODbL)
+- **Copyright:** © OpenStreetMap contributors
+
 ## Contributors
 
 - SENG302 teaching team

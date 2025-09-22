@@ -8,11 +8,17 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TeamsRepository extends CrudRepository<Team, Long>{
 
     boolean existsByRenovationRecordId(Long id);
 
+    /**
+     * Gets the {@link Team}Team associated with a given {@link RenovationRecord}
+     * @param renovationRecord The renovation whose Team should be retrieved
+     * @return The {@link Team} associated with the {@link RenovationRecord}
+     */
     Team findByRenovationRecord(RenovationRecord renovationRecord);
 
 
@@ -22,8 +28,16 @@ public interface TeamsRepository extends CrudRepository<Team, Long>{
      * @param contractorId the id of the contractor to match
      * @return the list of matching teams
      */
-    @Query("SELECT t FROM Team t JOIN FETCH t.roles r WHERE r.contractorId = :contractorId AND r.accepted = FALSE ORDER BY r.creationDate DESC")
+    @Query("SELECT t FROM Team t JOIN t.roles r WHERE r.contractorId = :contractorId AND r.status = nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus.WAITING ORDER BY r.creationDate DESC")
     List<Team> findByRoleContractor(Long contractorId);
+
+    /**
+     * Retrieves all teams that have at least one role without an assigned contractor.
+     *
+     * @return a set of incomplete {@link Team} entities
+     */
+    @Query("SELECT DISTINCT t FROM Team t JOIN FETCH t.roles r WHERE r.contractorId IS NULL")
+    Set<Team> getIncompleteTeams();
 
     /**
      * Checks if a given user belongs to the team associated with a renovation record
@@ -47,6 +61,5 @@ public interface TeamsRepository extends CrudRepository<Team, Long>{
     @Modifying
     @Query("DELETE FROM Team team WHERE team.renovationRecord = :renovationRecord")
     void deleteByRenovationRecord(RenovationRecord renovationRecord);
-
 
 }

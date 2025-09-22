@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Objects;
 
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,10 +24,6 @@ import io.cucumber.java.en.When;
 import nz.ac.canterbury.seng302.homehelper.cucumber.context.ContractorContext;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
@@ -72,7 +69,7 @@ public class ContractorRequestInboxSteps {
         RenovationRecord teamRenovationRecord = new RenovationRecord(renovationOwner, "Team Renovation", "Description", List.of());
         teamRenovationRecord = renovationRecordRepository.save(teamRenovationRecord);
 
-        Role role = new Role(contractorContext.getContractor(), Skill.HVAC, false);
+        Role role = new Role(contractorContext.getContractor(), Skill.HVAC, RoleStatus.WAITING);
         Team team = new Team(teamRenovationRecord);
         team.addRole(role);
         team = teamsRepository.save(team);

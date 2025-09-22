@@ -76,7 +76,6 @@ public class ViewRenovationController {
                                  Model model,
                                  HttpServletRequest request) {
         logger.info("GET /renovations/view");
-        logger.info("dateEdited: {}", dateEdited);
 
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) {
@@ -85,8 +84,9 @@ public class ViewRenovationController {
 
         User user = loginService.getUserByEmail();
         boolean isOwner = user.equals(renovationRecord.getUser());
+        boolean isContractorAssignedToTeam = teamsService.checkViewRenovationAccess(renovationRecord, user);
 
-        if (!isOwner && !renovationRecord.isPublic() && !teamsService.checkViewRenovationAccess(renovationRecord, user)) {
+        if (!isOwner && !renovationRecord.isPublic() && !isContractorAssignedToTeam) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_ACCESSIBLE);
         }
 
@@ -95,14 +95,12 @@ public class ViewRenovationController {
         String previousRenovationPage = (String) request.getSession().getAttribute("lastVisitedRenovationPage");
         String previousRenovationParameters = (String) request.getSession().getAttribute("lastVisitedRenovationParameters");
 
-
-
         injectDateElements(year, month, dateEdited, model, renovationRecord);
         model.addAttribute("dateEdited", dateEdited);
 
         Team team = teamsService.getTeamFromRenovation(renovationRecord);
 
-        if (isOwner && team != null) {
+        if ((isOwner || isContractorAssignedToTeam) && team != null) {
             model.addAttribute("teamId", team.getId());
         }
 
@@ -110,6 +108,7 @@ public class ViewRenovationController {
         model.addAttribute("hasLocation", locationService.hasLocation(renovationRecord));
         model.addAttribute("hasTeam",teamsService.teamExists(renovationRecord.getId()));
         model.addAttribute("isOwner", isOwner);
+        model.addAttribute("isContractorAssignedToTeam", isContractorAssignedToTeam);
         model.addAttribute("pageNumber", Math.max(pageNumber, 1));
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("icons", iconFileNames);
@@ -137,7 +136,6 @@ public class ViewRenovationController {
                                       @RequestParam(required = false) @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate dateEdited,
                                       Model model) {
 
-        logger.info("dateEdited: {}", dateEdited);
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         if (renovationRecord == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_FOUND);
