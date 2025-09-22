@@ -68,8 +68,9 @@ public class TeamsService {
      * @param teamRequestDTO the request DTO containing the info about the skills required
      * @return the response value of the matching algorithm
      */
-    public String createNewTeam(RenovationRecord teamRecord, TeamRequestDTO teamRequestDTO) {
+    public String createNewTeam(RenovationRecord teamRecord, TeamRequestDTO teamRequestDTO, boolean autoInvite) {
         Team team = new Team(teamRecord);
+        team.setAutomaticFilling(autoInvite);
 
         List<Role> roles = createRoles(teamRequestDTO.getSkills());
         for(Role role : roles) {

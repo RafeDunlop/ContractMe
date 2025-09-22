@@ -120,7 +120,7 @@ class TeamsServiceIntegrationTest {
         contractor2.setAvailable(true);
         contractorRepository.save(contractor2);
 
-        teamsService.createNewTeam(renovation, teamRequestDTO);
+        teamsService.createNewTeam(renovation, teamRequestDTO, true);
 
         //If any skills are added in the future, change this threshold to match the number of skills present
         verify(emailService, times(2)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
@@ -157,7 +157,7 @@ class TeamsServiceIntegrationTest {
         contractor1.activate();
         contractorRepository.save(contractor1);
 
-        teamsService.createNewTeam(renovation, teamRequestDTO);
+        teamsService.createNewTeam(renovation, teamRequestDTO, true);
 
         verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), any(Locale.class),Mockito.anyLong());
@@ -175,7 +175,7 @@ class TeamsServiceIntegrationTest {
         contractor1.activate();
         contractorRepository.save(contractor1);
 
-        teamsService.createNewTeam(renovation, teamRequestDTO);
+        teamsService.createNewTeam(renovation, teamRequestDTO, true);
 
         verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), any(Locale.class),Mockito.anyLong());

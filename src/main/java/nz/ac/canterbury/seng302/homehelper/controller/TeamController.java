@@ -74,7 +74,9 @@ public class TeamController {
      *                                 own the renovation, or an argument is missing or invalid
      */
     @GetMapping("/create")
-    public String createTeam(@RequestParam Long id, @ModelAttribute TeamRequestDTO teamRequestDTO, Model model) {
+    public String createTeam(@RequestParam Long id,
+                             @ModelAttribute TeamRequestDTO teamRequestDTO,
+                             Model model) {
         logger.info("GET /renovations/team/create");
         try {
             User loggedIn = loginService.getUserByEmail();
@@ -97,11 +99,13 @@ public class TeamController {
      * @param teamRequestDTO The DTO representing the creation request.
      * @param id             Of the renovation record to create a team for.
      * @param model          The model used to pass data back to the view in case of validation errors.
+     * @param invitesAreAutomatic Specifies whether ContractMe should automatically send role join invitations to eligible contractors
      * @return A redirect to the renovation view page if the team is successfully created, or the create team page with errors displaying.
      */
     @PostMapping("/create")
     public String submitTeamRequest(TeamRequestDTO teamRequestDTO,
                                     @RequestParam(name = "id") Long id,
+                                    @RequestParam(name="automatic", defaultValue="true") boolean invitesAreAutomatic,
                                     Model model, RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/team/create");
 
@@ -115,7 +119,7 @@ public class TeamController {
         }
 
         RenovationRecord teamRecord = renovationRecordService.getRecordById(id);
-        String response = teamsService.createNewTeam(teamRecord, teamRequestDTO);
+        String response = teamsService.createNewTeam(teamRecord, teamRequestDTO, invitesAreAutomatic);
 
         redirectAttributes.addFlashAttribute("response", response.isEmpty());
 
@@ -169,7 +173,6 @@ public class TeamController {
     public String viewTeam(Model model, @RequestParam("id") Long id) {
         Team team = teamsService.getTeamById(id);
         Map<Long, Contractor> contractors = teamsService.getContractorsByTeamId(id);
-        RenovationRecord renovationRecord = team.getRenovationRecord();
         model.addAttribute("team", team);
         model.addAttribute("contractors", contractors);
         return "viewTeam";
