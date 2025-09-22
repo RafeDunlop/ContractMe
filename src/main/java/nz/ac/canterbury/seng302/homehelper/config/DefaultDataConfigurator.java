@@ -139,8 +139,8 @@ public class DefaultDataConfigurator {
         address.setRegion("");
         address.setCountry("");
         address.setPostcode("");
-        address.setLat(0);
-        address.setLon(0);
+        address.setLat(-43.522345);
+        address.setLon(172.580907);
         Contractor defaultContractor1 = contractorService.registerContractor(user, address);
         code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, defaultContractor1, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);
