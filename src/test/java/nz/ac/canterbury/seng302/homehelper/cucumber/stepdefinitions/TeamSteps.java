@@ -261,16 +261,16 @@ public class TeamSteps {
         Contractor contractor = contractorRepository.findByEmailIgnoreCase(contractorEmail).orElseThrow();
         renovationRecord = renovationRepository.findExactMatch(renovationName, userContext.getUser()).orElseThrow();
         team = teamsRepository.findByRenovationRecord(renovationRecord);
-        team.getRoles().stream().filter(role -> Objects.equals(role.getContractorId(), contractor.getId())).findFirst().ifPresent(role -> role.setAccepted(true));
+        team.getRoles().stream().filter(role -> Objects.equals(role.getContractorId(), contractor.getId())).findFirst().ifPresent(role -> role.setStatus(RoleStatus.ACCEPTED));
         team = teamsRepository.save(team);
     }
 
     @Given("I am on the team details page for the {string} renovation")
     public void i_am_on_the_team_details_page_for_the_renovation(String renovationName) throws Exception {
         renovationRecord = renovationRepository.findExactMatch(renovationName, userContext.getUser()).orElseThrow();
-        long recordId = renovationRecord.getId();
+        long teamId = teamsRepository.findByRenovationRecord(renovationRecord).getId();
         mockMvc.perform(get("/renovations/team/view")
-                        .param("id", String.valueOf(recordId)))
+                        .param("id", String.valueOf(teamId)).with(user(userContext.getUser().getEmail()).roles("USER")))
                 .andExpect(status().isOk());
     }
 
