@@ -2,7 +2,8 @@ const map = L.map('renovation-map').setView([-43.52460, 172.57710], 11);
 const bounds = map.getBounds();
 const southwest = bounds.getSouthWest();
 const northeast = bounds.getNorthEast();
-const renovationResponse = await fetch("map/renovations/", {method: "GET"});
+const rawCoordinates = [southwest.lat, southwest.lng, northeast.lat, northeast.lng]
+const renovationResponse = await fetch(`map/renovations/${encodeURIComponent(rawCoordinates.join(","))}`, {method: "GET"});
 
 
 const userRenovation = L.icon({

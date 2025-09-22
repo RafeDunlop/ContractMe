@@ -9,6 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <link rel="stylesheet" th:href="@{/css/viewRenovationStyles.css}">
     <link rel="stylesheet" th:href="@{/css/tags.css}">
+    <link rel="stylesheet" th:href="@{/webjars/leaflet/dist/leaflet.css}"/>
 </head>
 <body>
 
@@ -205,7 +206,7 @@
             <!-- VIEW LOCATION PAGE -->
             <div id="view-location-content" class="renovation-content" th:style="${tabBarFocus != 'view-location'} ? 'display: none;'">
                 <div class="d-flex justify-content-center m-5">
-                    <div id="renovation-map" class="contractme-map"></div>
+                    <div id="renovation-map" class="renovation-map"></div>
                 </div>
             </div>
 
