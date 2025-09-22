@@ -44,10 +44,23 @@ function confirmTeamRequest(e) {
         document.querySelectorAll('.selected-skill-name')
     ).map(el => `• ${el.textContent}`).join('\n');
 
-    const promptText = `Do you want to create this team request?\n\nRoles:\n\n${skills}\n\n`;
+    let promptTitle = 'Do you want to create this team request?';
+    let promptBody = `Roles:\n\n${skills}\n\n`
 
-    confirmPrompt(promptText, "Confirm", "Cancel", false)
-        .then((ok) => { if (ok) form.submit(); });
+    confirmPrompt(promptTitle, "Confirm", "Cancel", false)
+        .then((ok) => {
+            if (ok) {
+                promptTitle = "Do you want ContractMe to automatically\ninvite contractors to your team?"
+                promptBody = "• ContractMe will automatically send an invitation to the contractor best suited for each role"
+                promptBody += " whenever there is an opening on your team\n"
+                promptBody += "• You can also activate this later on"
+                confirmPrompt(promptTitle, "Yes, send invitations automatically", "No, I will invite contractors manually", false, promptBody)
+                    .then(ok => {
+                        // add to form flag for manual selection
+                        form.submit()
+                    })
+            }
+        });
 }
 
 export function confirmLogout() {
@@ -73,18 +86,21 @@ export function confirmLogout() {
  * @param cancelText The text to display for the (right) button, which is the cancel button
  * @param confirmButtonIsDanger Whether the primary button should be a red danger button e.g. delete,
  * or a regular blue button
+ * @param bodyText Optional; the text to display as teh body of the modal
  * @returns {Promise<unknown>} a promise containing a boolean which returns when the user clicks cancel or delete
  */
-export function confirmPrompt(promptText, confirmText, cancelText, confirmButtonIsDanger) {
+export function confirmPrompt(promptText, confirmText, cancelText, confirmButtonIsDanger, bodyText = "") {
     const confirmButton = document.getElementById("confirmButton");
     const cancelButton = document.getElementById("cancelButton");
-    const promptTextField = document.getElementById("promptText");
+    const promptTextTitle = document.getElementById("promptTitle");
+    const promptTextBody = document.getElementById("promptText");
     const overlay = document.getElementById("overlay");
 
 
     overlay.style.display = 'block';
     confirmButton.className = (confirmButtonIsDanger) ? "btn btn-danger m-3 h-5" : "btn btn-primary m-3 h-5"
-    promptTextField.innerText = promptText;
+    promptTextTitle.innerText = promptText;
+    promptTextBody.innerText = "\n\n" + bodyText;
     confirmButton.innerText = confirmText;
     cancelButton.innerText = cancelText;
 
