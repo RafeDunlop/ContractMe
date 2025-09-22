@@ -57,7 +57,11 @@ function updateLayout(viewMode = "cards", id = null, refresh = false) {
     const containerWidth = viewMode === "cards" ?
         document.getElementById('grid').offsetWidth :
         document.getElementById('table');
-    const contentHeaderHeight = document.getElementById('renovation-name-header').offsetHeight;
+
+    let contentHeaderHeight = 0;
+    if (viewMode !== "cards") {
+        contentHeaderHeight = document.getElementById('renovation-name-header').offsetHeight;
+    }
     const footerHeight = 72;
     let columns = Math.max(1, Math.floor(containerWidth / (cardWidth + 15)));
 

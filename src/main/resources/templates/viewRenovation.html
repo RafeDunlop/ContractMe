@@ -112,6 +112,28 @@
                     </button>
                 </span>
                 </div>
+
+                <!-- Button section for details tab, has -->
+                <div class="mt-2 mb-2 d-flex justify-content-center">
+                    <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
+                    <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-2" th:if="${previousUrl != null && !previousUrl.contains('/search')}">Back</a>
+                    <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-2" th:if="${previousUrl.contains('/search')}">Back to search results</a>
+
+                    <div th:if="${isOwner}">
+                        <!-- Create button for location and no team -->
+                        <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" th:if="${hasLocation && !hasTeam}">Create Team</a>
+                        <span class="text-secondary align-self-center" th:unless="${hasLocation}" th:text="|Add a location to ${renovation.name} to create a team|"></span>
+                        <a th:href="@{/renovations/team/view(id=${teamId})}" class="btn btn-primary" th:if="${hasTeam}">View Team</a>
+
+
+                        <!-- Team exists, delete team -->
+                        <form id="delete-team-form"  th:if="${hasTeam}" th:action="@{/renovations/team/delete(id=${teamId})}" method="post" class="d-inline-block">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                            <button type="button" id="delete-team-button" class="btn btn-outline-danger" aria-label="Delete team">Delete Team</button>
+                        </form>
+                    </div>
+                </div>
+
             </div>
 
             <div id="tasks-content" class="renovation-content"  th:style="${tabBarFocus != 'tasks'} ? 'display: none;'">
@@ -145,29 +167,10 @@
                         <p id="errorText"></p>
                     </div>
 
-                    <!-- Buttons -->
-                    <div class="mt-2 mb-2">
-                        <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
-                        <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary ms-2" th:if="${isOwner}">Add New Task</a>
-                        <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-2" th:if="${previousUrl != null && !previousUrl.contains('/search')}">Back</a>
-                        <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-2" th:if="${previousUrl.contains('/search')}">Back to search results</a>
-
-                        <div class="float-end align-items-end d-flex flex-column" th:if="${isOwner}">
-                            <!-- Create button for location and no team -->
-                            <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" th:if="${hasLocation && !hasTeam}">Create Team</a>
-                            <p class="mt-2 text-secondary flex-grow-0" th:unless="${hasLocation}" th:text="|Add a location to ${renovation.name} to create a team|"/>
-                            <a th:href="@{/renovations/team/view(id=${teamId})}" class="btn btn-primary" th:if="${hasTeam}">View Team</a>
-
-
-                            <!-- Team exists, delete team -->
-                            <div class="d-flex align-items-center mt-2" th:if="${hasTeam}">
-                                <form id="delete-team-form" th:action="@{/renovations/team/delete(id=${teamId})}" method="post" class="d-inline ms-2">
-                                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-                                    <button type="button" id="delete-team-button" class="btn btn-outline-danger btn-sm" aria-label="Delete team">Delete Team</button>
-                                </form>
-                            </div>
-
-                        </div>
+                    <!-- Add New Task Button -->
+                    <div class="mt-2 mb-2 d-flex justify-content-center flex-wrap gap-2">
+                        <a th:href="@{/renovations/view/create(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Add New Task</a>
+                        <div th:if="${isOwner}"><div class="d-flex align-items-center mt-2" th:if="${hasTeam}"></div></div>
                     </div>
                 </div>
             </div>
