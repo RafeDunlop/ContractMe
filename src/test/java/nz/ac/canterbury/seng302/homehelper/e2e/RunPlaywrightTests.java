@@ -39,7 +39,7 @@ public class RunPlaywrightTests {
     @BeforeAll
     public static void openResources() {
         playwright = Playwright.create();
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
+        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
 
     }
 

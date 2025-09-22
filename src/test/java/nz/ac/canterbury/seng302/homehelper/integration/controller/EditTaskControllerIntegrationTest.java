@@ -103,7 +103,7 @@ public class EditTaskControllerIntegrationTest {
                         .param("renovationId", "1")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(view().name("redirect:/renovations/view?id=1"));
+                .andExpect(view().name("redirect:/renovations/view?id=1&tabBarFocus=tasks"));
 
         ArgumentCaptor<RenovationTask> taskCaptor = ArgumentCaptor.forClass(RenovationTask.class);
         Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(taskCaptor.capture());
@@ -128,7 +128,7 @@ public class EditTaskControllerIntegrationTest {
                         .param("dateToReturnTo", dateToReturnTo)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(view().name(String.format("redirect:/renovations/view?id=1&dateEdited=%s#cellEdited", dateToReturnTo)));
+                .andExpect(view().name(String.format("redirect:/renovations/view?id=1&dateEdited=%s#cellEdited&tabBarFocus=calendar", dateToReturnTo)));
 
         ArgumentCaptor<RenovationTask> taskCaptor = ArgumentCaptor.forClass(RenovationTask.class);
         Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(taskCaptor.capture());
@@ -248,7 +248,7 @@ public class EditTaskControllerIntegrationTest {
                         .param("roomList", "Room 1", "Room 2")
                         .param("taskId", "1")
                         .param("renovationId", "1")
-                        .param("dueDate", String.valueOf(LocalDate.now().minusDays(1).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))))
+                        .param("dueDate", LocalDate.now().minusDays(1).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(redirectedUrl("/editTask?taskId=1&renovationId=1"))
@@ -294,7 +294,7 @@ public class EditTaskControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "jane@doe.com", roles = {"USER"})
+    @WithMockUser(username = "jane@doe.com")
     public void testEditTask_editTaskIcon_taskIconChangedReturnsToRenovations() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/editTask/edit-icon/1")
                     .contentType(MediaType.APPLICATION_JSON)
