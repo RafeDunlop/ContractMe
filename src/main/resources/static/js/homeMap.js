@@ -40,11 +40,15 @@ function handleMapChange() {
 
 }
 
-for (const eventName of ["click", "moveend"]) {
-    map.on(eventName, debouncedHandleMapChange)
+function populateMap() {
     renovationData.forEach(renovation => {
         const icon = renovation.unownedPublic ? publicRenovation : userRenovation
         L.marker([renovation.location.latitude, renovation.location.longitude], {icon}).addTo(map);
     })
+}
+
+for (const eventName of ["click", "moveend"]) {
+    map.on(eventName, debouncedHandleMapChange)
+    populateMap();
 }
 
