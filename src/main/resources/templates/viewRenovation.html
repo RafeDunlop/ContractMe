@@ -69,12 +69,13 @@
                         <!-- Create button for location and no team -->
                         <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" id="create-team-button" th:if="${hasLocation && !hasTeam && isOwner}">Create Team</a>
                         <span class="align-self-center" th:unless="${hasLocation}" th:text="|Add a location to create a team|"></span>
+
                         <a th:href="@{/renovations/team/view(id=${teamId})}" class="btn btn-primary" th:if="${hasTeam && (isOwner || isContractorAssignedToTeam)}">View Team</a>
 
 
                         <!-- Team exists, delete team -->
-                        <div class="d-flex align-items-center" th:if="${hasTeam && isOwner}">
-                            <div id="delete-team-div" class="d-inline ms-2">
+                        <div class="d-inline-flex align-items-center ms-2" th:if="${hasTeam && isOwner}">
+                            <div id="delete-team-div" class="d-inline">
                                 <button type="button" id="delete-team-button" class="btn btn-outline-danger"
                                         th:attr="data-csrf=${_csrf.token}, data-id=${teamId}" aria-label="Delete team">Delete Team</button>
                             </div>
