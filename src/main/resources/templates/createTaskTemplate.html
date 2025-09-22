@@ -104,10 +104,10 @@
                 <button type="submit" class="btn btn-primary">Create</button>
                 <!-- CANCEL BUTTON -->
                 <a th:unless="${fromDate.isEmpty()}"
-                   th:href="@{/renovations/view#cellEdited(id=${renovation.id}, dateEdited=${fromDate})}"
+                   th:href="@{/renovations/view#cellEdited(id=${renovation.id}, dateEdited=${fromDate}, tabBarFocus='calendar')}"
                    class="btn btn-outline-secondary cancel-task-form ms-3">Cancel</a>
                 <a th:if="${fromDate.isEmpty()}"
-                   th:href="@{/renovations/view(id=${renovation.id})}"
+                   th:href="@{/renovations/view(id=${renovation.id}, tabBarFocus='tasks')}"
                    class="btn btn-outline-secondary cancel-task-form ms-3">Cancel</a>
             </div>
 
