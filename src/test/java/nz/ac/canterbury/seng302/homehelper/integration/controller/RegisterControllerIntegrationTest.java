@@ -4,14 +4,13 @@ import jakarta.annotation.PostConstruct;
 import nz.ac.canterbury.seng302.homehelper.controller.RegisterController;
 import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.entity.VerificationCode;
+import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.VerificationCodeRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EmailService;
-
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -20,7 +19,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -92,8 +90,8 @@ public class RegisterControllerIntegrationTest {
     private void createValidUser() {
         PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         expectedPassword = "Test123!";
-        expectedUser = Mockito.spy(new User("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode(expectedPassword)));
-        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(expectedUser);
+        expectedUser = spy(new User("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode(expectedPassword)));
+        when(userRepository.save(any(User.class))).thenReturn(expectedUser);
     }
 
     /**
@@ -114,11 +112,11 @@ public class RegisterControllerIntegrationTest {
     @Test
     public void testRegisterUser_validUser_success() throws Exception {
         PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        User expectedUser = Mockito.spy(new User("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
-        Mockito.when(expectedUser.getId()).thenReturn(1L);
-        Mockito.when(verificationCodeRepository.save(Mockito.any(VerificationCode.class))).thenAnswer((InvocationOnMock) -> null);
-        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(expectedUser);
-        Mockito.when(userRepository.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(expectedUser));
+        User newlyexpectedUser = spy(new User("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
+        when(newlyexpectedUser.getId()).thenReturn(1L);
+        when(verificationCodeRepository.save(any(VerificationCode.class))).thenAnswer(invocationOnMock -> null);
+        when(userRepository.save(any(User.class))).thenReturn(newlyexpectedUser);
+        when(userRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(newlyexpectedUser));
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
             .contentType(MediaType.APPLICATION_FORM_URLENCODED)
             .param("firstName", "Jane")
@@ -129,7 +127,7 @@ public class RegisterControllerIntegrationTest {
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
             .andExpect(view().name("redirect:/confirm-registration"));
-        verify(emailService, times(1)).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+        verify(emailService, times(1)).sendVerificationEmail(anyString(), anyString(), anyString(), any(Locale.class));
     }
 
     /**
@@ -156,7 +154,7 @@ public class RegisterControllerIntegrationTest {
                 .andExpect(flash().attribute("userRegisterDTO", Matchers.hasProperty("firstName", Matchers.equalTo("Jane"))))
                 .andExpect(flash().attribute("userRegisterDTO", Matchers.hasProperty("lastName", Matchers.equalTo("Doe"))))
                 .andExpect(flash().attribute("userRegisterDTO", Matchers.hasProperty("email", Matchers.equalTo("jane@doe.nz"))));
-        verify(emailService, Mockito.never()).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+        verify(emailService, never()).sendVerificationEmail(anyString(), anyString(), anyString(), any(Locale.class));
     }
 
     /**
@@ -173,7 +171,7 @@ public class RegisterControllerIntegrationTest {
         Locale testLocale = Locale.ENGLISH;
         VerificationCode verificationCode = new VerificationCode(mockUser, testCode, testLocale);
 
-        Mockito.when(verificationCodeRepository.findByCode(testCode)).thenReturn(Optional.of(verificationCode));
+        when(verificationCodeRepository.findByCode(testCode)).thenReturn(Optional.of(verificationCode));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/confirm-registration")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -194,7 +192,7 @@ public class RegisterControllerIntegrationTest {
         String testCode = "123456";
         String expectedError = "Signup code invalid";
 
-        Mockito.when(verificationCodeRepository.findByCode(testCode)).thenReturn(Optional.empty());
+        when(verificationCodeRepository.findByCode(testCode)).thenReturn(Optional.empty());
 
         mockMvc.perform(MockMvcRequestBuilders.post("/confirm-registration")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -207,19 +205,20 @@ public class RegisterControllerIntegrationTest {
         verify(verificationCodeRepository, times(1)).findByCode(testCode);
         verify(mockUser, never()).activate();
         verify(userRepository, never()).save(mockUser);
-        verify(verificationCodeRepository, never()).delete(Mockito.any(VerificationCode.class));
+        verify(verificationCodeRepository, never()).delete(any(VerificationCode.class));
     }
 
     @Test
     public void testRegisterContractor_validContractor_success() throws Exception {
         PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        Contractor expectedUser = Mockito.spy(new Contractor("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
-        expectedUser.setHourlyRate(27.80f);
-        expectedUser.setPhoneNumber("6412345678");
-        Mockito.when(expectedUser.getId()).thenReturn(1L);
-        Mockito.when(verificationCodeRepository.save(Mockito.any(VerificationCode.class))).thenAnswer((InvocationOnMock) -> null);
-        when(contractorRepository.save(Mockito.any(Contractor.class))).thenReturn(expectedUser);
-        Mockito.when(contractorRepository.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(expectedUser));
+        Contractor newlyExpectedUser = spy(new Contractor("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
+        newlyExpectedUser.setHourlyRate(27.80f);
+        newlyExpectedUser.setPhoneNumber("6412345678");
+        when(newlyExpectedUser.getId()).thenReturn(1L);
+        when(verificationCodeRepository.save(any(VerificationCode.class))).thenAnswer(invocationOnMock -> null);
+        when(contractorRepository.save(any(Contractor.class))).thenReturn(newlyExpectedUser);
+        when(contractorRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(newlyExpectedUser));
+        doReturn(new Location()).when(locationService).locate(any(AddressDTO.class));
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("firstName", "Jane")
@@ -242,19 +241,19 @@ public class RegisterControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(view().name("redirect:/confirm-registration"));
-        verify(emailService, times(1)).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+        verify(emailService, times(1)).sendVerificationEmail(anyString(), anyString(), anyString(), any(Locale.class));
     }
 
     @Test
     public void testRegisterContractor_skillsAreNull_rejectInputWithSkillError() throws Exception {
         PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        Contractor expectedUser = Mockito.spy(new Contractor("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
-        expectedUser.setHourlyRate(27.80f);
-        expectedUser.setPhoneNumber("6412345678");
-        Mockito.when(expectedUser.getId()).thenReturn(1L);
-        Mockito.when(verificationCodeRepository.save(Mockito.any(VerificationCode.class))).thenAnswer((InvocationOnMock) -> null);
-        when(contractorRepository.save(Mockito.any(Contractor.class))).thenReturn(expectedUser);
-        Mockito.when(contractorRepository.findByEmailIgnoreCase(Mockito.anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(expectedUser));
+        Contractor newlyExpectedUser = spy(new Contractor("Jane", "Doe", "jane@doe.nz", passwordEncoder.encode("Test123!")));
+        newlyExpectedUser.setHourlyRate(27.80f);
+        newlyExpectedUser.setPhoneNumber("6412345678");
+        when(newlyExpectedUser.getId()).thenReturn(1L);
+        when(verificationCodeRepository.save(any(VerificationCode.class))).thenAnswer(invocationOnMock -> null);
+        when(contractorRepository.save(any(Contractor.class))).thenReturn(newlyExpectedUser);
+        when(contractorRepository.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty()).thenReturn(Optional.of(newlyExpectedUser));
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("firstName", "Jane")
@@ -276,7 +275,7 @@ public class RegisterControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(view().name("redirect:/register"))
                 .andExpect(flash().attribute("skillsError", List.of("You must select one or more skills")));
-        verify(emailService, times(0)).sendVerificationEmail(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(Locale.class));
+        verify(emailService, times(0)).sendVerificationEmail(anyString(), anyString(), anyString(), any(Locale.class));
     }
 
     @ParameterizedTest
@@ -284,6 +283,8 @@ public class RegisterControllerIntegrationTest {
     public void submitRegistration_inputValidLocationsWithCoordinates_successfulRegistrationWithAutocompleteCoordinates(String address, String suburb, String city,
                                                                                                                         String postcode, String country, Double lat,
                                                                                                                         Double lon) throws Exception {
+        Location location = new Location(address, country, postcode, city, suburb, lat, lon);
+        doReturn(location).when(locationService).locate(any());
         createValidUser();
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -303,7 +304,7 @@ public class RegisterControllerIntegrationTest {
                 .andExpect(view().name("redirect:/confirm-registration"));
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        Mockito.verify(userRepository, Mockito.atLeastOnce()).save(userCaptor.capture());
+        verify(userRepository, atLeastOnce()).save(userCaptor.capture());
         User registeredUser = userCaptor.getValue();
         Location registeredUserLocation = registeredUser.getLocation();
 
@@ -323,12 +324,12 @@ public class RegisterControllerIntegrationTest {
         createValidUser();
 
         // Prevent call to API and instead add coordinates to DTO when injectCoordsViaGeocoding is called.
-        Mockito.doAnswer(invocationOnMock -> {
+        doAnswer(invocationOnMock -> {
             AddressDTO mockAddressDTO = invocationOnMock.getArgument(0);
             mockAddressDTO.setLat(1D);
             mockAddressDTO.setLon(1D);
             return null;
-        }).when(locationService).injectCoordsViaGeocoding(Mockito.any(AddressDTO.class));
+        }).when(locationService).injectCoordsViaGeocoding(any(AddressDTO.class));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -346,7 +347,7 @@ public class RegisterControllerIntegrationTest {
                 .andExpect(view().name("redirect:/confirm-registration"));
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        Mockito.verify(userRepository, Mockito.atLeastOnce()).save(userCaptor.capture());
+        verify(userRepository, atLeastOnce()).save(userCaptor.capture());
         User registeredUser = userCaptor.getValue();
         Location registeredUserLocation = registeredUser.getLocation();
 
@@ -360,20 +361,12 @@ public class RegisterControllerIntegrationTest {
     }
 
     @Test
-    public void submitRegistration_inputInvalidLocationsWithoutCoordinates_successfulRegistrationWithIpCoordinates() throws Exception {
+    void submitRegistration_inputInvalidLocationsWithoutCoordinates_receiveErrorMessage() throws Exception {
         createValidUser();
         Location expectedLocation = new Location("Fake Place", "Fake Country", "0000", "Fake City", "Fake Suburb");
 
         // Throw an exception to simulate the API failing to find coordinates for the inputted location.
-        Mockito.doThrow(IllegalArgumentException.class).when(locationService).injectCoordsViaGeocoding(Mockito.any(AddressDTO.class));
-
-        // Prevent call to API and instead add coordinates to DTO when injectCoordsViaIpGeolocation is called.
-        Mockito.doAnswer(invocationOnMock -> {
-            AddressDTO mockAddressDTO = invocationOnMock.getArgument(0);
-            mockAddressDTO.setLat(1D);
-            mockAddressDTO.setLon(1D);
-            return null;
-        }).when(locationService).injectCoordsViaIpGeolocation(Mockito.any(AddressDTO.class), Mockito.anyString());
+        doThrow(IllegalArgumentException.class).when(locationService).injectCoordsViaGeocoding(any(AddressDTO.class));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/register")
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -388,19 +381,11 @@ public class RegisterControllerIntegrationTest {
                         .param("postcode", expectedLocation.getPostcode())
                         .param("country", expectedLocation.getCountry()))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(view().name("redirect:/confirm-registration"));
+                .andExpect(view().name("redirect:/register"))
+                .andExpect(flash().attribute("geolocationError", List.of("The address could not be found")));
 
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        Mockito.verify(userRepository, Mockito.atLeastOnce()).save(userCaptor.capture());
-        User registeredUser = userCaptor.getValue();
-        Location registeredUserLocation = registeredUser.getLocation();
+        verify(userRepository, never()).save(any(User.class));
+        verify(locationService, never()).injectCoordsViaIpGeolocation(any(AddressDTO.class), anyString());
 
-        Assertions.assertEquals(expectedLocation.getAddress(), registeredUserLocation.getAddress());
-        Assertions.assertEquals(expectedLocation.getSuburb(), registeredUserLocation.getSuburb());
-        Assertions.assertEquals(expectedLocation.getCity(), registeredUserLocation.getCity());
-        Assertions.assertEquals(expectedLocation.getPostcode(), registeredUserLocation.getPostcode());
-        Assertions.assertEquals(expectedLocation.getCountry(), registeredUserLocation.getCountry());
-        Assertions.assertEquals(1D, registeredUserLocation.getLatitude());
-        Assertions.assertEquals(1D, registeredUserLocation.getLongitude());
     }
 }

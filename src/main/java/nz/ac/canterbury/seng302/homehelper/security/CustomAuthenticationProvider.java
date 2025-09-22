@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.security;
 
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             }
 
             HttpSession session = request.getSession();
+            session.setAttribute("isContractor", user instanceof Contractor contractor);
             session.setAttribute("profilePicture", user.getProfilePicture());
 
             return new UsernamePasswordAuthenticationToken(user.getEmail(), null, user.getAuthorities());

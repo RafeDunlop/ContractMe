@@ -39,6 +39,7 @@ out/
 ### VIm ###
 *.swp
 *.orig
+.vimspector.json
 
 ### Mac
 .DS_Store
@@ -49,3 +50,7 @@ env.properties
 
 ### Local Profile Picture Storage ###
 /profile_pictures/*
+
+### local test temp
+
+cucumber.html

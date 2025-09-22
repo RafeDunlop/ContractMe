@@ -9,7 +9,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.service.LoginService;
+import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -19,6 +19,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -37,6 +38,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -57,8 +59,8 @@ class EditProfileControllerIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private LoginService loginService;
+    @SpyBean
+    private LocationService locationService;
 
     @PostConstruct
     public void setUp() {
@@ -68,19 +70,19 @@ class EditProfileControllerIntegrationTest {
 
     private static Stream<Arguments> streamValidContractorDetails() {
         return Stream.of(
-                Arguments.of(27.08f, 64, "6412345678", Set.of(Skill.CARPENTRY)),
-                Arguments.of(0, 1, "11111 1111", Set.of(Skill.EARTHMOVING)),
-                Arguments.of(9999f, 99, "9 9 9 9 9 9 9 9", Set.of(Skill.SEPTIC_SYSTEMS, Skill.HVAC, Skill.MECHANICAL_ENGINEERING))
+                Arguments.of(27.08f, "64", "6412345678", Set.of(Skill.CARPENTRY)),
+                Arguments.of(0, "1", "11111 1111", Set.of(Skill.EARTHMOVING)),
+                Arguments.of(9999f, "99", "9 9 9 9 9 9 9 9", Set.of(Skill.SEPTIC_SYSTEMS, Skill.HVAC, Skill.MECHANICAL_ENGINEERING))
         );
     }
 
     private static Stream<Arguments> streamInvalidContractorDetails() {
         List<Object> errorsList = List.of(List.of("Invalid hourly rate"), List.of("Your phone number is invalid", "Invalid country code"), List.of("You must select one or more skills"));
         return Stream.of(
-                Arguments.of(-10f, 0, "999", null, errorsList),
-                Arguments.of(-999, 1000, "9999999999999999", null, errorsList),
-                Arguments.of(-99999, 10001, "9 9 9 9 9#$$%", null, errorsList),
-                Arguments.of(-99999, 10001, "99", null, errorsList)
+                Arguments.of(-10f, "0", "999", errorsList),
+                Arguments.of(-999, "1000", "9999999999999999", errorsList),
+                Arguments.of(-99999, "10001", "9 9 9 9 9#$$%", errorsList),
+                Arguments.of(-99999, "10001", "99", errorsList)
         );
     }
 
@@ -338,6 +340,8 @@ class EditProfileControllerIntegrationTest {
         addressDTO.setRegion("Beckenham");
         addressDTO.setLat(1D);
         addressDTO.setLon(1D);
+        Location expectedLocation = new Location(addressDTO);
+        doReturn(expectedLocation).when(locationService).locate(addressDTO);
 
         mockMvc.perform(post("/user/edit")
                         .param("firstName", "Jane")
@@ -389,18 +393,36 @@ class EditProfileControllerIntegrationTest {
         assertNull(savedUser.getLocation());
     }
 
+
     @ParameterizedTest
     @MethodSource("streamValidContractorDetails")
-    void testEditContractor_validUserDetails_exitEditor(float hourlyRate, int countryCode, String phoneNumber, Set<Skill> skills) throws Exception {
+    void testEditContractor_validUserDetails_exitEditor(float hourlyRate, String countryCode, String phoneNumber, Set<Skill> skills) throws Exception {
         Contractor current = new Contractor("Jane", "Doe", "jane@doe.com", "password");
         current.grantAuthority("ROLE_USER");
         current.setHourlyRate(27.80f);
         current.setPhoneNumber("6412345678");
         current.addSkill(Skill.CARPENTRY);
-        current.setLocation(
-                new Location("123 Linwood Ave", "New Zealand", "8045", "Christchurch", "Linwood"));
+        Location location = new Location("123 Linwood Ave", "New Zealand", "8045", "Christchurch", "Linwood");
+        current.setLocation(location);
         userRepository.save(current);
-
+        AddressDTO expectedAddressDTO = new AddressDTO();
+        expectedAddressDTO.setAddress_line1("123 Ilam Road");
+        expectedAddressDTO.setCountry("New Zealand");
+        expectedAddressDTO.setPostcode("8042");
+        expectedAddressDTO.setCity("Christchurch");
+        expectedAddressDTO.setRegion("Ilam");
+        expectedAddressDTO.setLat(1.0);
+        expectedAddressDTO.setLon(1.0);
+        Location expectedLocation = new Location(
+                expectedAddressDTO.getAddress_line1(),
+                expectedAddressDTO.getCountry(),
+                expectedAddressDTO.getPostcode(),
+                expectedAddressDTO.getCity(),
+                expectedAddressDTO.getRegion(),
+                expectedAddressDTO.getLat(),
+                expectedAddressDTO.getLon()
+        );
+        doReturn(expectedLocation).when(locationService).locate(expectedAddressDTO);
         mockMvc.perform(post("/user/edit")
                         .param("firstName", "John")
                         .param("lastName", "Doe")
@@ -414,7 +436,7 @@ class EditProfileControllerIntegrationTest {
                         .param("lat", "1.0")
                         .param("lon", "1.0")
                         .param("hourlyRate", Float.toString(hourlyRate))
-                        .param("countryCode", Integer.toString(countryCode))
+                        .param("countryCode", countryCode)
                         .param("phoneNumber", phoneNumber)
                         .param("skills", skills.stream().map(Skill::toString).toArray(String[]::new))
                 )
@@ -441,7 +463,7 @@ class EditProfileControllerIntegrationTest {
 
     @ParameterizedTest
     @MethodSource("streamInvalidContractorDetails")
-    void testEditContractor_invalidContractorDetails_stayOnEditProfilePage(float hourlyRate, int countryCode, String phoneNumber, Set<Skill> skills, List<Object> expectedErrors) throws Exception {
+    void testEditContractor_invalidContractorDetails_stayOnEditProfilePage(float hourlyRate, String countryCode, String phoneNumber, List<Object> expectedErrors) throws Exception {
         Contractor current = new Contractor("Jane", "Doe", "jane@doe.com", "password");
         current.grantAuthority("ROLE_USER");
         current.setHourlyRate(27.80f);
@@ -464,7 +486,7 @@ class EditProfileControllerIntegrationTest {
                 .param("lat", "1.0")
                 .param("lon", "1.0")
                 .param("hourlyRate", Float.toString(hourlyRate))
-                .param("countryCode", Integer.toString(countryCode))
+                .param("countryCode", countryCode)
                 .param("phoneNumber", phoneNumber)
                 .param("skills", (String) null)
                 )

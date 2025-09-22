@@ -1,11 +1,13 @@
 package nz.ac.canterbury.seng302.homehelper.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 /**
  * Represents a team entity, associated with a renovation record
@@ -16,14 +18,17 @@ import java.util.List;
 public class Team {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    @ManyToOne
+    @OneToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private RenovationRecord renovationRecord;
 
     @ElementCollection
-    @CollectionTable(name = "roles")
     private final List<Role> roles = new ArrayList<>();
+
+    @ElementCollection
+    private final List<Long> blacklistIds = new ArrayList<>();
 
     protected Team() {}
 
@@ -33,6 +38,10 @@ public class Team {
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public RenovationRecord getRenovationRecord() {
@@ -51,6 +60,9 @@ public class Team {
         roles.remove(role);
     }
 
+    public List<Long> getBlacklistIds() { return blacklistIds; }
+    public void addBlacklistId(Long userId) { blacklistIds.add(userId); }
+
     /**
      * Replaces the contractor for a specific role in the team.
      * @param existingRole   the role to update
@@ -59,7 +71,7 @@ public class Team {
     public void replaceRoleContractor(Role existingRole, Contractor newContractor) {
         int index = roles.indexOf(existingRole);
         if (index != -1) {
-            Role updatedRole = new Role(newContractor, existingRole.getSkill(), existingRole.isAccepted());
+            Role updatedRole = new Role(newContractor, existingRole.getSkill(), existingRole.getStatus());
             roles.set(index, updatedRole);
         }
     }

@@ -1,32 +1,33 @@
 package nz.ac.canterbury.seng302.homehelper.cucumber.stepdefinitions;
 
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
-import nz.ac.canterbury.seng302.homehelper.cucumber.context.ContractorContext;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Objects;
+
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-import java.util.Objects;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import nz.ac.canterbury.seng302.homehelper.cucumber.context.ContractorContext;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -68,7 +69,7 @@ public class ContractorRequestInboxSteps {
         RenovationRecord teamRenovationRecord = new RenovationRecord(renovationOwner, "Team Renovation", "Description", List.of());
         teamRenovationRecord = renovationRecordRepository.save(teamRenovationRecord);
 
-        Role role = new Role(contractorContext.getContractor(), Skill.HVAC, false);
+        Role role = new Role(contractorContext.getContractor(), Skill.HVAC, RoleStatus.WAITING);
         Team team = new Team(teamRenovationRecord);
         team.addRole(role);
         team = teamsRepository.save(team);
@@ -120,7 +121,7 @@ public class ContractorRequestInboxSteps {
 
         Role expectedRole = expectedTeam.getRoles().get(0);
         Role returnedRole = returnedTeam.getRoles().get(0);
-        assertEquals(expectedRole.getContractor(), returnedRole.getContractor());
+        assertEquals(expectedRole.getContractorId(), returnedRole.getContractorId());
         assertEquals(expectedRole.getSkill(), returnedRole.getSkill());
     }
 

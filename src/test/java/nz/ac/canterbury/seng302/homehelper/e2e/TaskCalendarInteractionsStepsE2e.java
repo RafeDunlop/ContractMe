@@ -25,7 +25,8 @@ public class TaskCalendarInteractionsStepsE2e {
     private final UserContext userContext;
     private RenovationTask renovationTask;
     private RenovationRecord renovationRecord;
-    private final LocalDate today = LocalDate.now();
+    private LocalDate today ;
+    private LocalDate clickedDate;
 
     @Autowired
     private RenovationRecordRepository renovationRecordRepository;
@@ -40,16 +41,19 @@ public class TaskCalendarInteractionsStepsE2e {
 
     @Before
     public void beforeEach() {
+        today = LocalDate.now();
+        clickedDate = null;
         User user = userContext.getUser();
         renovationRecord = new RenovationRecord(user, "Test Renovation", "desc", new ArrayList<>());
         renovationRecordRepository.save(renovationRecord);
     }
 
     @Given("I have a renovation with a task due tomorrow")
-    public void i_have_have_a_renovation_with_a_task_due_tomorrow() {
-
-
-        renovationTask = new RenovationTask("Task", "desc", new ArrayList<>(), today.plusDays(1), renovationRecord);
+    public void i_have_have_a_renovation_with_a_task_due() {
+        clickedDate = (today.getDayOfMonth() == today.lengthOfMonth())
+                ? today.minusDays(1)
+                : today.plusDays(1);
+        renovationTask = new RenovationTask("Task", "desc", new ArrayList<>(),clickedDate, renovationRecord);
         renovationTaskRepository.save(renovationTask);
         renovationRecord.setRenovationTasks(List.of(renovationTask));
     }
@@ -68,7 +72,10 @@ public class TaskCalendarInteractionsStepsE2e {
 
     @When("I double click an empty space on a day")
     public void i_double_click_an_empty_space_on_a_day() {
-        RunPlaywrightTests.page.locator("[data-cell-date='" + today.plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) + "']").dblclick();
+        clickedDate = (today.getDayOfMonth() == today.lengthOfMonth())
+                ? today.minusDays(1)
+                : today.plusDays(1);
+        RunPlaywrightTests.page.locator("[data-cell-date='" + clickedDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) + "']").dblclick();
     }
 
     @Then("I see the edit task page")
@@ -86,10 +93,13 @@ public class TaskCalendarInteractionsStepsE2e {
 
     @Then("I see the add task form")
     public void i_see_the_add_task_form() {
+        clickedDate = (today.getDayOfMonth() == today.lengthOfMonth())
+                ? today.minusDays(1)
+                : today.plusDays(1);
         String expectedUrl = String.format("%s/renovations/view/create?id=%d&fromDate=%s",
                 RunPlaywrightTests.baseUrl,
                 renovationRecord.getId(),
-                today.plusDays(1).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                clickedDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
         );
         String actualUrl = RunPlaywrightTests.page.url();
         assertEquals(expectedUrl, actualUrl);
@@ -97,8 +107,11 @@ public class TaskCalendarInteractionsStepsE2e {
 
     @And("the due date is set to the date I clicked")
     public void the_due_date_is_set_to_the_date_i_clicked() {
+        clickedDate = (today.getDayOfMonth() == today.lengthOfMonth())
+                ? today.minusDays(1)
+                : today.plusDays(1);
         String dueDate = RunPlaywrightTests.page.locator("#dueDate").inputValue();
-        assertEquals(today.plusDays(1).toString(), dueDate);
+        assertEquals(clickedDate.toString(), dueDate);
     }
 
     @Given("I am viewing the calendar for this month with a task due on day {int}")

@@ -1,10 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.integration.controller;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
@@ -66,7 +63,7 @@ public class TeamInvitationControllerIntegrationTest {
     @Test
     @WithMockUser(username = "Steve@doe.nz")
     void viewInvitation_contractorOnTeam_alreadyAccepted_returns404() throws Exception {
-        team.addRole(new Role(contractor, Skill.ELECTRICAL, true));
+        team.addRole(new Role(contractor, Skill.ELECTRICAL,  RoleStatus.ACCEPTED));
         team = teamsRepository.save(team);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/invitations/" + team.getId())
@@ -96,7 +93,7 @@ public class TeamInvitationControllerIntegrationTest {
     @Test
     @WithMockUser(username = "Steve@doe.nz")
     void acceptInvitation_alreadyAccepted_returns404() throws Exception {
-        team.addRole(new Role(contractor, Skill.ELECTRICAL, true));
+        team.addRole(new Role(contractor, Skill.ELECTRICAL,  RoleStatus.ACCEPTED));
         team = teamsRepository.save(team);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/accept")
@@ -108,7 +105,7 @@ public class TeamInvitationControllerIntegrationTest {
     @Test
     @WithMockUser(username = "Steve@doe.nz")
     void declineInvitation_alreadyAccepted_returns404n() throws Exception {
-        team.addRole(new Role(contractor, Skill.ELECTRICAL, true));
+        team.addRole(new Role(contractor, Skill.ELECTRICAL,  RoleStatus.ACCEPTED));
         team = teamsRepository.save(team);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/decline")
@@ -139,12 +136,12 @@ public class TeamInvitationControllerIntegrationTest {
     @Test
     @WithMockUser(username = "bob.doe@doe.nz")
     void viewInvitation_validTeam_returnsInfo() throws Exception {
-        Team team = new Team(renovationRecord);
+        Team team = teamsRepository.findByRenovationRecord(renovationRecord);
         Role role = new Role(Skill.CARPENTRY);
         Contractor contractor = new Contractor("Bob", "Doe", "bob.doe@doe.nz", "password");
+        contractor = userRepository.save(contractor);
         role.setContractor(contractor);
         team.addRole(role);
-        userRepository.save(contractor);
         team = teamsRepository.save(team);
         mockMvc.perform(get("/renovations/team/invitations/" + team.getId()))
                 .andExpect(status().isOk())

@@ -10,10 +10,7 @@ import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
@@ -25,7 +22,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -61,7 +57,6 @@ public class TeamJoinRequestSteps {
     private TeamsRepository teamsRepository;
 
     @Autowired
-    @SpyBean
     private TeamsService teamsService;
 
     @Autowired
@@ -129,6 +124,10 @@ public class TeamJoinRequestSteps {
 
         renovationRecord = new RenovationRecord(owner, "Test Renovation", "Test Desc", Collections.emptyList());
         renovationRecord.setPublicity(false);
+
+        Location location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", 43.53, 172.63);
+        renovationRecord.setLocation(location);
+
         renovationRecord = renovationRecordRepository.save(renovationRecord);
 
         team = new Team(renovationRecord);
@@ -144,13 +143,13 @@ public class TeamJoinRequestSteps {
 
     @Given("my request to join the renovation team is {string}")
     public void my_request_to_join_the_renovation_team_is(String requestStatus) throws Exception {
-        boolean accepted = switch (requestStatus.toLowerCase()) {
-            case "accepted" -> true;
-            case "pending"  -> false;
+        RoleStatus status = switch (requestStatus.toLowerCase()) {
+            case "accepted" -> RoleStatus.ACCEPTED;
+            case "pending"  -> RoleStatus.WAITING;
             default -> throw new Exception("Incorrect status: " + requestStatus);
         };
 
-        team.addRole(new Role(contractor, Skill.ELECTRICAL, accepted));
+        team.addRole(new Role(contractor, Skill.ELECTRICAL,  status));
         teamsRepository.save(team);
     }
 
@@ -198,8 +197,8 @@ public class TeamJoinRequestSteps {
         team = teamsRepository.findById(team.getId()).orElseThrow();
 
         boolean inTeam = team.getRoles().stream()
-                .anyMatch(r -> r.getContractor() != null
-                        && r.getContractor().equals(contractor));
+                .anyMatch(r -> r.getContractorId() != null
+                        && r.getContractorId().equals(contractor.getId()));
         assertTrue(inTeam);
     }
 
@@ -208,8 +207,8 @@ public class TeamJoinRequestSteps {
         team = teamsRepository.findById(team.getId()).orElseThrow();
 
         boolean inTeam = team.getRoles().stream()
-                .anyMatch(r -> r.getContractor() != null &&
-                        r.getContractor().getId().equals(contractor.getId()));
+                .anyMatch(r -> r.getContractorId() != null &&
+                        r.getContractorId().equals(contractor.getId()));
         assertFalse(inTeam);
     }
 

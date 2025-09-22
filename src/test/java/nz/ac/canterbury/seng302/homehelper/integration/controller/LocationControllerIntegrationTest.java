@@ -132,4 +132,6 @@ public class LocationControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].formatted").value("10 Downing Street, SW1A 2AA, London, United Kingdom"));
     }
+
+
 }

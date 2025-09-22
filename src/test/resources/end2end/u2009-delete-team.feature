@@ -1,0 +1,22 @@
+@loginUser
+Feature: As Sarah, I want to be able to remove a team from my renovation record so that I do not have teams that I no longer need.
+
+  Scenario: AC1 - Prompt appears before deleting a team
+    Given I am viewing the renovation view page for a renovation I own with a team
+    When I click on the button called "Delete Team"
+    Then I see the delete team confirmation prompt
+    And the prompt message asks me to confirm that I want to delete the team
+    And the prompt shows "Delete" and "Cancel" actions
+
+  Scenario: AC2 -   Deleting deletes the team
+    Given I am viewing the renovation view page for a renovation I own with a team
+    And I click on the button called "Delete Team"
+    When I choose "Delete" in the prompt
+    Then The team associated with the renovation I am viewing is deleted
+
+  Scenario: AC3 - Cancelling does not delete the team
+    Given I am viewing the renovation view page for a renovation I own with a team
+    And I click on the button called "Delete Team"
+    When I choose "Cancel" in the prompt
+    Then I still see the "Delete Team" button for that renovation
+    And I remain on the renovation view page

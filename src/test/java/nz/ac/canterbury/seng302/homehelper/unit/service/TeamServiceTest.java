@@ -3,10 +3,8 @@ package nz.ac.canterbury.seng302.homehelper.unit.service;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.service.EmailService;
@@ -18,10 +16,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-
+import java.util.*;
+import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -37,10 +36,24 @@ public class TeamServiceTest {
     private TeamValidation teamValidation;
     @Mock
     private EmailService emailService;
+    @Mock
+    private RenovationRecordRepository renovationRecordRepository;
+
+
+    private RenovationRecord renovationRecord;
+    private Team team;
+    private Location location;
+    private User owner;
 
     @BeforeEach
     void setUp() {
-        teamsService = new TeamsService(teamsRepository, teamValidation, contractorRepository, emailService);
+        teamsService = new TeamsService(teamsRepository, teamValidation, contractorRepository, emailService, renovationRecordRepository);
+
+        renovationRecord = mock(RenovationRecord.class);
+        owner = mock(User.class);
+        location = mock(Location.class);
+
+        team = new Team(renovationRecord);
     }
 
     @Test
@@ -109,8 +122,8 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor1, team.getRoles().get(0).getContractor());
-        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+        assertEquals(contractor1.getId(), team.getRoles().get(0).getContractorId());
+        assertEquals(contractor2.getId(), team.getRoles().get(1).getContractorId());
     }
 
     @Test
@@ -141,7 +154,7 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractor());
+        assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
     }
 
     @Test
@@ -157,7 +170,7 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("Unable to find available contractors to fill team", result);
-        assertNull(team.getRoles().get(0).getContractor());
+        assertNull(team.getRoles().get(0).getContractorId());
     }
 
     @Test
@@ -186,8 +199,8 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor1, team.getRoles().get(0).getContractor());
-        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+        assertEquals(contractor1.getId(), team.getRoles().get(0).getContractorId());
+        assertEquals(contractor2.getId(), team.getRoles().get(1).getContractorId());
     }
 
     @Test
@@ -203,7 +216,7 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("Unable to find available contractors to fill team", result);
-        assertNull(team.getRoles().get(0).getContractor());
+        assertNull(team.getRoles().get(0).getContractorId());
     }
 
     @Test
@@ -232,16 +245,17 @@ public class TeamServiceTest {
         String result = teamsService.assignContractorsToTeam(team, location);
 
         assertEquals("", result);
-        assertEquals(contractor, team.getRoles().get(0).getContractor());
-        assertEquals(contractor2, team.getRoles().get(1).getContractor());
+        assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
+        assertEquals(contractor2.getId(), team.getRoles().get(1).getContractorId());
     }
 
     @Test
     void getContractorTeamRequests_userIsContractor_callRepository() {
-        Contractor contractor = new Contractor("Jane", "Doe", "jane@doe.com", "password");
-        when(teamsRepository.findByRoleContractor(contractor)).thenReturn(List.of());
+        Contractor contractor = mock(Contractor.class);
+        when(contractor.getId()).thenReturn(1L);
+        when(teamsRepository.findByRoleContractor(1L)).thenReturn(List.of());
         teamsService.getContractorTeamRequests(contractor);
-        verify(teamsRepository).findByRoleContractor(contractor);
+        verify(teamsRepository).findByRoleContractor(1L);
     }
 
     @Test
@@ -255,7 +269,8 @@ public class TeamServiceTest {
     void getContractorRole_roleAssigned_returnsRole() {
         Team team = new Team(new RenovationRecord());
         Role role = new Role(Skill.PLUMBING);
-        Contractor contractor = new Contractor("Alice", "Doe", "alice@doe.com", "encoded");
+        Contractor contractor = Mockito.spy(new Contractor("Alice", "Doe", "alice@doe.com", "encoded"));
+        when(contractor.getId()).thenReturn(1L);
         role.setContractor(contractor);
         team.addRole(role);
         Role result = assertDoesNotThrow(() -> teamsService.getContractorRole(contractor, team));
@@ -292,4 +307,82 @@ public class TeamServiceTest {
         Contractor contractor = new Contractor("Bob", "Doe", "bob@doe.com", "encoded");
         assertThrows(ResponseStatusException.class, () -> teamsService.getContractorRole(contractor, team));
     }
+
+    @Test
+    void getContractorMap_allRolesFilled_returnsFullMap() {
+        Team team = new Team(new RenovationRecord());
+        team.setId(0L);
+        List<Skill> skills = Arrays.asList(Skill.PLUMBING, Skill.ELECTRICAL, Skill.ACOUSTIC_INSULATION, Skill.ARCHITECTURE, Skill.ASBESTOS_REMOVAL);
+        Map<Long, Contractor> expectedMap = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            Role role = new Role(skills.get(i));
+            Contractor contractor = new Contractor("Bob", "Contractor", "bob" + i + "contractor@gmail.com", "encoded");
+            ReflectionTestUtils.setField(contractor, "id", (long) i);
+            expectedMap.put((long) i, contractor);
+            role.setContractor(contractor);
+            team.addRole(role);
+
+            when(contractorRepository.findById((long) i)).thenReturn(Optional.of(contractor));
+
+        }
+
+        when(teamsRepository.findById(0L)).thenReturn(Optional.of(team));
+        assertEquals(expectedMap, teamsService.getContractorsByTeamId(team.getId()));
+
+    }
+
+    @Test
+    void runAlgorithmAgain_noNewContractors_noEmailsSent() {
+        Role role = new Role(Skill.PLUMBING);
+        team.addRole(role);
+
+        teamsService.runAlgorithmAgain(team, location);
+
+        verify(emailService, never()).sendRequestToContractor(any(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void runAlgorithmAgain_existingTeamMember_findsNewContractor_sendsEmailOnce() {
+        Role role = new Role(Skill.ELECTRICAL);
+        team.addRole(role);
+
+        Role role2 = new Role(Skill.PLUMBING);
+        Contractor existingTeamMember = mock(Contractor.class);
+
+        team.addRole(role2);
+        team.getRoles().get(1).setContractor(existingTeamMember);
+
+        Contractor newContractor = mock(Contractor.class);
+        when(newContractor.getId()).thenReturn(2L);
+
+        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("ELECTRICAL"),
+                anyDouble(), isNull())).thenReturn(newContractor);
+        when(contractorRepository.findById(2L)).thenReturn(Optional.of(newContractor));
+
+        when(owner.getFirstName()).thenReturn("Bob");
+        when(renovationRecord.getUser()).thenReturn(owner);
+        when(renovationRecord.getName()).thenReturn("Test renovation");
+
+        teamsService.runAlgorithmAgain(team, location);
+
+        verify(emailService, times(1)).sendRequestToContractor(
+                any(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void deleteContractorRole_roleAssigned_deletesContractorFromRole() {
+        Location locationBeingDeleted = new Location();
+        locationBeingDeleted.setLatitude(-43);
+        locationBeingDeleted.setLongitude(43);
+        when(renovationRecord.getLocation()).thenReturn(locationBeingDeleted);
+        Team teamToDeleteFrom = new Team(renovationRecord);
+        Role role = new Role(Skill.PLUMBING);
+        teamToDeleteFrom.addRole(role);
+        Contractor contractor = new Contractor("Alice", "Doe", "alice@doe.com", "encoded");
+        role.setContractor(contractor);
+        teamsService.deleteContractorFromTeam(teamToDeleteFrom,contractor);
+        assertNull(role.getContractorId());
+        assertNotSame(RoleStatus.ACCEPTED, role.getStatus());
+    }
+
 }

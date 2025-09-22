@@ -9,10 +9,8 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
-import nz.ac.canterbury.seng302.homehelper.service.LocationService;
-import nz.ac.canterbury.seng302.homehelper.service.LoginService;
-import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
-import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.service.*;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -41,6 +39,7 @@ public class RenovationRecordServiceTest {
     private static LocationService locationService;
     private static LoginService loginService;
     private static RenovationRecord mockRenovationRecord;
+    private static TeamsRepository teamRepository;
 
     @BeforeAll
     public static void setUpBeforeClass() {
@@ -62,7 +61,7 @@ public class RenovationRecordServiceTest {
         when(renovationRecordRepository.findExactMatch("name!", mockUser)).thenReturn(Optional.empty());
 
         toTest = new RenovationRecordService(renovationRecordRepository, renovationTaskRepository,
-                renovationRecordValidation, renovationTaskService, locationService);
+                renovationRecordValidation, renovationTaskService, locationService, teamRepository);
 
         mockRenovationRecord = mock(RenovationRecord.class);
         when(renovationTaskService.getTasksWithinDates(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(new HashMap<>());
@@ -91,15 +90,15 @@ public class RenovationRecordServiceTest {
         addressDTO.setCity("Christchurch");
         addressDTO.setRegion("Canterbury");
 
-        when(locationService.locate(addressDTO)).thenReturn(new Location(
+        Location inputLocation = new Location(
                 addressDTO.getAddress_line1(),
                 addressDTO.getCountry(),
                 addressDTO.getPostcode(),
                 addressDTO.getCity(),
                 addressDTO.getRegion()
-        ));
+        );
 
-        toTest.addRenovationLocation(renovationRecord, addressDTO);
+        toTest.addRenovationLocation(renovationRecord, inputLocation);
 
         ArgumentCaptor<RenovationRecord> captor = ArgumentCaptor.forClass(RenovationRecord.class);
         Mockito.verify(renovationRecordRepository, Mockito.times(2)).save(captor.capture());

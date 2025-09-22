@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.entity;
 
 import jakarta.persistence.Embeddable;
+import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 
 import java.util.Objects;
 
@@ -31,6 +32,11 @@ public class Location {
         this.suburb = suburb;
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    public Location(AddressDTO addressDTO) {
+        this(addressDTO.getAddress_line1(), addressDTO.getCountry(), addressDTO.getPostcode(), addressDTO.getCity(),
+                addressDTO.getRegion(), addressDTO.getLat(), addressDTO.getLon());
     }
 
     public Location() {}

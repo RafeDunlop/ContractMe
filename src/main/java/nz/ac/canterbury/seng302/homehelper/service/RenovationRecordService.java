@@ -1,7 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
 import jakarta.transaction.Transactional;
-import nz.ac.canterbury.seng302.homehelper.dto.AddressDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.CalendarCellDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationRecordDTO;
 import nz.ac.canterbury.seng302.homehelper.dto.TagDTO;
@@ -12,6 +11,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.Tag;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.util.MapUtil;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationRecordValidation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ public class RenovationRecordService {
     private final RenovationRecordValidation renovationRecordValidation;
 
     private final RenovationTaskService renovationTaskService;
-    private final LocationService locationService;
+    private final TeamsRepository teamsRepository;
 
     /**
      * Constructor for the RenovationRecordService class
@@ -44,12 +44,12 @@ public class RenovationRecordService {
      * @param renovationRecordRepository initializes with the repository for storing records
      */
     @Autowired
-    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation, RenovationTaskService renovationTaskService, LocationService locationService) {
+    public RenovationRecordService(RenovationRecordRepository renovationRecordRepository, RenovationTaskRepository renovationTaskRepository, RenovationRecordValidation renovationRecordValidation, RenovationTaskService renovationTaskService, LocationService locationService, TeamsRepository teamsRepository) {
         this.renovationRecordRepository = renovationRecordRepository;
         this.renovationTaskRepository = renovationTaskRepository;
         this.renovationRecordValidation = renovationRecordValidation;
         this.renovationTaskService = renovationTaskService;
-        this.locationService = locationService;
+        this.teamsRepository = teamsRepository;
     }
 
     /**
@@ -57,11 +57,10 @@ public class RenovationRecordService {
      * Saves the renovation with its location to the database
      *
      * @param renovation The renovation to attach location to
-     * @param addressDTO Data transfer object for user registration
+     * @param location Location object for user registration
      */
-    public void addRenovationLocation(RenovationRecord renovation, AddressDTO addressDTO) {
-        Location renovationLocation = locationService.locate(addressDTO);
-        renovation.setLocation(renovationLocation);
+    public void addRenovationLocation(RenovationRecord renovation, Location location) {
+        renovation.setLocation(location);
         renovationRecordRepository.save(renovation);
     }
 
@@ -260,7 +259,8 @@ public class RenovationRecordService {
     public void removeRenovationRecord(Long id) {
         Optional<RenovationRecord> recordToRemove = renovationRecordRepository.findById(id);
         if (recordToRemove.isPresent()) {
-            renovationTaskRepository.deleteTaskById(id);
+            teamsRepository.deleteByRenovationRecord(recordToRemove.get());
+            renovationTaskRepository.deleteTasksWithRenovationId(id);
             renovationRecordRepository.deleteById(id);
         }
     }
@@ -405,10 +405,13 @@ public class RenovationRecordService {
         return lastOfMonth.plusDays(offSet);
     }
 
-    public void updateRenovationLocation(RenovationRecord currentRenovation, AddressDTO addressDTO) {
-        Location currentLocation = currentRenovation.getLocation();
-        addressDTO = locationService.updateEditedLocation(currentLocation, addressDTO);
-        currentRenovation.setLocation(locationService.locate(addressDTO));
+    /**
+     * Update the location for the given renovation and persist changes to the database.
+     * @param currentRenovation the renovation object being edited
+     * @param location the new location object
+     */
+    public void updateRenovationLocation(RenovationRecord currentRenovation, Location location) {
+        currentRenovation.setLocation(location);
         addRenovationRecord(currentRenovation);
     }
 }

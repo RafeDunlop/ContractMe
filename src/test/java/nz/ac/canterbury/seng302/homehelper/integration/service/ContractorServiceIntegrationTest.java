@@ -22,6 +22,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
@@ -62,7 +64,7 @@ public class ContractorServiceIntegrationTest {
         List<Skill> userRegisterDtoSkills = List.of(Skill.ELECTRICAL);
         userRegisterDTO.setSkills(userRegisterDtoSkills);
         userRegisterDTO.setPhoneNumber("0800111111");
-        userRegisterDTO.setCountryCode(64);
+        userRegisterDTO.setCountryCode("64");
 
         invalidUserRegisterDTO = new UserRegisterDTO();
         invalidUserRegisterDTO.setFirstName("John");
@@ -84,6 +86,7 @@ public class ContractorServiceIntegrationTest {
         addressDTO.setLon(1d);
 
         toTest = new ContractorService(contractorRepository, contractorValidation, locationService);
+        doNothing().when(locationService).injectCoordsViaGeocoding(any(AddressDTO.class));
     }
 
     @Test

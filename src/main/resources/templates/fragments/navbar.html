@@ -4,13 +4,13 @@
     <meta charset="UTF-8"/>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link th:href="@{/css/styles.css}" rel="stylesheet">
-    <title>Home Helper navigation bar</title>
+    <title>Contractme navigation bar</title>
 </head>
 <body>
 <div th:fragment="nav-bar">
     <div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
     <div class="navbar custom-navbar" id="navbar">
-        <a class="navbar-brand custom-navbar-brand" id="navbar-home" th:href="@{/main}">Home</a>
+        <a class="navbar-brand custom-navbar-brand" id="navbar-home" th:href="@{/main}">Contractme</a>
         <ul id="navbar-links" style="justify-content: right;">
             <li id="my-renovations" style="line-height:37px;">
                 <a class="nav-link" th:href="@{/renovations}">My Renovations</a>
@@ -21,8 +21,8 @@
             <li id="browse-renovations" style="line-height:37px;">
                 <a class="nav-link" th:href="@{/renovations/search(visibility='public')}">Browse Renovations</a>
             </li>
-            <li id="view-requests" style="line-height:37px;">
-                <a class="nav-link" th:href="@{/view-requests}">View Requests</a>
+            <li id="view-requests" style="line-height:37px;" th:if="${session.isContractor}" >
+                <a class="nav-link" th:href="@{/view-requests}" >View Requests</a>
             </li>
             <li id="profile-image" onclick="toggleUserMenus()">
                 <div id="profile-container" style="padding-top:10px; padding-left:10px;">
