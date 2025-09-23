@@ -53,8 +53,9 @@ const handleMapChange = debounce(() => {
 }, waitTime)
 
 /**
- * Loads all renovations onto the map
- * @rteurns void
+ * Adds all renovations from `renovationData` to the Leaflet map.
+ * For each renovation, creates a marker with the correct icon, and attaches a popup card
+ * @returns {void}
  */
 function populateMap() {
     renovationData.forEach(renovation => {
@@ -114,7 +115,6 @@ function buildRenovationPopup(renovation) {
 
     const viewRenovationUrl = new URL('renovations/view', document.baseURI);
     viewRenovationUrl.searchParams.set('id', renovation.id);
-    viewRenovationUrl.searchParams.set('previousUrl', 'main');
 
     const viewButton = document.createElement('a');
     viewButton.className = 'btn btn-primary text-white';
