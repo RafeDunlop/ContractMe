@@ -1,18 +1,18 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
 
 import nz.ac.canterbury.seng302.homehelper.dto.CoordinateRectangle;
+import nz.ac.canterbury.seng302.homehelper.dto.MappedContractor;
 import nz.ac.canterbury.seng302.homehelper.dto.MappedRenovation;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/map")
@@ -45,19 +45,24 @@ public class MapController {
         return mapService.getRenovationsInBounds(coordinateRectangle, withPublic);
     }
 
+    /**
+     * Returns a collection of contractors to be plotted on to the team map. The user calling this endpoint has to be
+     * part of the team; otherwise an exception is returned.
+     * @param id ID of the team
+     * @return A collection of contractors to be plotted
+     */
     @GetMapping("/contractors")
-    public Collection<Contractor> getContractorByRenovationId(
+    public Collection<MappedContractor> getContractorByRenovationId(
             @RequestParam String id) {
         long teamId = Long.parseLong(id);
         User user = loginService.getUserByEmail();
         Team team = teamsService.getTeamById(teamId);
         RenovationRecord renovationRecord = team.getRenovationRecord();
-        Boolean isInTeam = teamsService.checkViewRenovationAccess(renovationRecord, user);
-//        if (isInTeam) {
-            Map<Long, Contractor> contractorMap = teamsService.getContractorsByTeamId(teamId);
-            return new ArrayList<>(contractorMap.values());
-//        } else {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-//        }
+        boolean isInTeam = teamsService.checkViewRenovationAccess(renovationRecord, user);
+        if (isInTeam) {
+            return teamsService.getMappedContractorsByTeamId(teamId);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 }
