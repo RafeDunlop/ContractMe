@@ -53,12 +53,12 @@ public class MapController {
         return mappedRenovationList;
     }
 
-    /*@GetMapping("/renovation")
-    public RenovationRecord getRenovation(
+    @GetMapping("/renovation")
+    public CoordinateRectangle getRenovation(
+        @RequestParam(name = "id") Long id) {
 
-    ) {
-
-    }*/
+        return mapService.getRectangleFromRenovation(id);
+    }
 
 
     /**

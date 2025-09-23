@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.CoordinateRectangle;
 import nz.ac.canterbury.seng302.homehelper.dto.MappedRenovation;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
@@ -25,12 +26,23 @@ public class MapService {
     }
 
 
-   public CoordinateRectangle createCoordinateRectangle(String rawCoordinates) {
-        Double [] coordinates = Arrays.stream(rawCoordinates.split(","))
-               .map(Double::parseDouble)
-               .toArray(Double[]::new);
-        return new CoordinateRectangle(coordinates[0], coordinates[1], coordinates[2], coordinates[3]);
-   }
+    public CoordinateRectangle getRectangleFromRenovation(Long renovationId) {
+        Optional<RenovationRecord> optionalRecord = renovationRecordRepository.findById(renovationId);
+        CoordinateRectangle coords = new CoordinateRectangle();
+
+        if (optionalRecord.isPresent()) {
+            RenovationRecord record = optionalRecord.get();
+            Location renovationLocation = record.getLocation();
+            double latitude = renovationLocation.getLatitude();
+            double longitude = renovationLocation.getLongitude();
+            coords.setMinLat(latitude - 1);
+            coords.setMaxLat(latitude + 1);
+            coords.setMinLon(longitude - 1);
+            coords.setMaxLon(longitude + 1);
+        }
+
+        return coords;
+    }
 
     /**
      * Gets the renovations within the specified range

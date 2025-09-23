@@ -38,7 +38,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
  * Gets The corners which represent the boundary shown; used to fetch renovations within the frame
  * @returns {{minLat: (HTMLElement|*), minLon: *, maxLat: (HTMLElement|*), maxLon: *}} The json object to be submitted
  */
-function getCoorinateRectangle() {
+function getCoordinateRectangle() {
     const bounds = map.getBounds();
     const southwest = bounds.getSouthWest();
     const northeast = bounds.getNorthEast();
@@ -55,7 +55,7 @@ function getCoorinateRectangle() {
  * the mappings
  */
 function toggleListener() {
-    fetchRenovationMappings(getCoorinateRectangle(), togglePublicCheckbox.checked)
+    fetchRenovationMappings(getCoordinateRectangle(), togglePublicCheckbox.checked)
         .then(response => response.json())
         .then(mappings => populateMap(mappings))
 }
@@ -65,7 +65,7 @@ function toggleListener() {
  * @type {(function(...[*]): void)|*}
  */
 const handleMapChange = debounce(() => {
-    fetchRenovationMappings(getCoorinateRectangle(), togglePublicCheckbox.checked)
+    fetchRenovationMappings(getCoordinateRectangle(), togglePublicCheckbox.checked)
         .then(response => response.json())
         .then(mappings =>
             populateMap(mappings)

@@ -111,6 +111,7 @@ public class ViewRenovationController {
         model.addAttribute("isContractorAssignedToTeam", isContractorAssignedToTeam);
         model.addAttribute("pageNumber", Math.max(pageNumber, 1));
         model.addAttribute("renovation", renovationRecord);
+        model.addAttribute("renovationId", renovationRecord.getId());
         model.addAttribute("icons", iconFileNames);
         model.addAttribute("dateFormatter", DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         model.addAttribute("tabBarFocus", tabBarFocus);
