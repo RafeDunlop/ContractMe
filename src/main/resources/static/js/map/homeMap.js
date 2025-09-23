@@ -10,11 +10,12 @@ togglePublicCheckbox.addEventListener("change",() => {
     localStorage.setItem("toggleState",togglePublicCheckbox.checked)
 });
 
-
 const saved = localStorage.getItem("toggleState");
 
 if (saved !== null) {
     togglePublicCheckbox.checked = saved === "true";
+} else {
+    togglePublicCheckbox.checked = true;
 }
 
 const userRenovation = L.icon({

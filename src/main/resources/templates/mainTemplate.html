@@ -7,16 +7,21 @@
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}"/>
     <link rel="stylesheet" th:href="@{/css/maps.css}"/>
+    <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
     <link rel="stylesheet" th:href="@{/webjars/leaflet/dist/leaflet.css}"/>
 </head>
 <body>
     <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
-    <div class="d-flex justify-content-center m-5">
+    <div class="d-flex flex-column justify-content-center m-5">
         <div id="map" class="home-map" style="z-index: 0;"></div>
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="include-public-renovations-checkbox" checked>
-            <label class="form-check-label" id="include-public-renovations-label"
-                   for="include-public-renovations-checkbox">Show only my renovations</label>
+        <div class="d-flex justify-content-start align-items-center pt-2">
+            <div>
+                <label class="switch">
+                    <input type="checkbox" id="include-public-renovations-checkbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="ms-2">Show only my renovations</div>
         </div>
     </div>
 </body>
