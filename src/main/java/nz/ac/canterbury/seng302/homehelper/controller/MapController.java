@@ -53,6 +53,14 @@ public class MapController {
         return mappedRenovationList;
     }
 
+    /*@GetMapping("/renovation")
+    public RenovationRecord getRenovation(
+
+    ) {
+
+    }*/
+
+
     /**
      * Returns a collection of contractors to be plotted on to the team map. The user calling this endpoint has to be
      * part of the team; otherwise an exception is returned.
