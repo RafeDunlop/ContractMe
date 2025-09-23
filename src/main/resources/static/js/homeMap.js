@@ -80,16 +80,21 @@ for (const eventName of ["click", "moveend", "zoomend"]) {
     map.on(eventName, handleMapChange)
 }
 
+/**
+ * Creates a bootstrap styled card, to display as a tooltip on the map.
+ * @param renovation The renovation corresponding to the tooltips, who's information is displayed.
+ * @returns {HTMLDivElement} The card element to display as tooltip.
+ */
 function buildRenovationPopup(renovation) {
     const tooltipCard = document.createElement('div');
-    tooltipCard.className = 'card border-0 shadow-sm';
+    tooltipCard.className = 'map-tooltip card border-0 shadow-sm';
 
     const cardBody = document.createElement('div');
-    cardBody.className = 'card-body p-2';
+    cardBody.className = 'card-body p-4';
     tooltipCard.appendChild(cardBody);
 
     const title = document.createElement('h6');
-    title.className = 'fw-bold mb-1';
+    title.className = 'fw-bold mb-0';
     title.textContent = renovation.name || '';
     cardBody.appendChild(title);
 
@@ -102,7 +107,7 @@ function buildRenovationPopup(renovation) {
 
     if (addressParts.length) {
         const address = document.createElement('p');
-        address.className = 'text-muted small mb-2';
+        address.className = 'text-muted address mb-3';
         address.textContent = addressParts.join(', ');
         cardBody.appendChild(address);
     }
@@ -112,7 +117,7 @@ function buildRenovationPopup(renovation) {
     viewRenovationUrl.searchParams.set('previousUrl', 'main');
 
     const viewButton = document.createElement('a');
-    viewButton.className = 'btn btn-primary';
+    viewButton.className = 'btn btn-primary text-white';
     viewButton.href = viewRenovationUrl.toString();
     viewButton.textContent = 'View Renovation';
     cardBody.appendChild(viewButton);

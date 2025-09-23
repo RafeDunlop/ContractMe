@@ -3,9 +3,16 @@
     width: 1500px;
 }
 
-.leaflet-popup-content-wrapper {
-    border-radius: 0.5rem;
+.map-tooltip .address {
+    font-size: 1.0rem;
 }
-.leaflet-popup-tip {
-    display: none;
+
+.map-tooltip .card-body {
+    padding: 1rem !important;
 }
+
+.leaflet-popup-content { margin: 0 !important; }
+
+
+
+
