@@ -43,3 +43,29 @@ html, body {
     gap: 24px;
     padding: 1rem 0;
 }
+
+.renovation-name-header {
+    margin-left: -12px !important;
+    margin-right: -12px !important;
+    background-color: #bbbbbb;
+    border-top-left-radius: var(--bs-border-radius);
+    border-top-right-radius: var(--bs-border-radius);
+}
+
+.renovation-tab-bar {
+    margin-left: -4px !important;
+    border: none !important;
+    border-radius: 0;
+}
+
+.renovation-tab-bar-options {
+    border: none !important;
+    border-top-left-radius: var(--bs-border-radius);
+    border-top-right-radius: var(--bs-border-radius);
+    color: black;
+    font-size: 20px;
+}
+
+.renovation-tab-bar-options:hover {
+    background-color: #999999;
+}

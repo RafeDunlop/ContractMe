@@ -80,7 +80,7 @@ public class CreateTaskControllerIntegrationTest {
                 .param("renovationId", "1")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-            .andExpect(view().name("redirect:/renovations/view?id=1"));
+            .andExpect(view().name("redirect:/renovations/view?id=1&tabBarFocus=tasks"));
         Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(Mockito.any(RenovationTask.class));
     }
 
@@ -97,7 +97,7 @@ public class CreateTaskControllerIntegrationTest {
                         .param("dateToReturnTo", dateToReturnTo)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(view().name(String.format("redirect:/renovations/view?id=1&dateEdited=%s#cellEdited", dateToReturnTo)));
+                .andExpect(view().name(String.format("redirect:/renovations/view?id=1&dateEdited=%s#cellEdited&tabBarFocus=calendar", dateToReturnTo)));
         Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(Mockito.any(RenovationTask.class));
     }
 
@@ -113,7 +113,7 @@ public class CreateTaskControllerIntegrationTest {
                         .param("renovationId", "1")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-                .andExpect(view().name("redirect:/renovations/view?id=1"));
+                .andExpect(view().name("redirect:/renovations/view?id=1&tabBarFocus=tasks"));
 
         ArgumentCaptor<RenovationTask> taskCaptor = ArgumentCaptor.forClass(RenovationTask.class);
         Mockito.verify(renovationTaskRepository, Mockito.times(1)).save(taskCaptor.capture());
