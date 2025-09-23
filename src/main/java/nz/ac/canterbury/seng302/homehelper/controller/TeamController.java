@@ -217,7 +217,5 @@ public class TeamController {
         }
         teamsService.deleteContractorFromTeam(team, contractor);
         return ResponseEntity.noContent().build();
-
-
     }
 }

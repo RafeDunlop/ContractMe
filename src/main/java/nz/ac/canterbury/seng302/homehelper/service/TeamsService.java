@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import nz.ac.canterbury.seng302.homehelper.dto.MappedContractor;
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
@@ -465,5 +466,29 @@ public class TeamsService {
             emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
                     team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
         }
+    }
+
+    /**
+     * Returns a list of contractors assigned to a team as MappedContractor objects so that only the contractor
+     * information needed for the map is returned.
+     * @param teamId The ID of the team
+     * @return A collection of contractors
+     */
+    public Collection<MappedContractor> getMappedContractorsByTeamId(Long teamId) {
+        Team team = getTeamById(teamId);
+        List<Role> roles = team.getRoles();
+        Map<Long, Contractor> contractors = getContractorsByTeamId(teamId);
+
+        return contractors.values().stream().map(contractor ->
+                new MappedContractor(
+                        contractor.getFullName(),
+                        contractor.getEmail(),
+                        contractor.getLocation(),
+                        contractor.getPhoneNumberFormatted(),
+                        roles.stream().filter(role -> Objects.equals(role.getContractorId(), contractor.getId()))
+                                .map(Role::getSkill).findFirst().orElse(null),
+                        contractor.getHourlyRate(),
+                        contractor.getProfilePicture()))
+                .toList();
     }
 }
