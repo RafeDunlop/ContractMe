@@ -745,4 +745,28 @@ class TeamsServiceIntegrationTest {
         List<MappedContractor> actualContractors = teamsService.getEligibleContractors(Skill.ARCHITECTURE, renovation.getLocation());
         assertEquals(expectedContractors, actualContractors);
     }
+
+    @Test
+    void findEligibleContractors_oneOutsideOneUnavailable_returnsCorrectList() {
+        Contractor contractor = new Contractor("Alice", "Builder", "alice@builder.com", "password");
+        contractor.setSkills(Set.of(Skill.ARCHITECTURE));
+        Location locationOutsideMaxDistance = new Location("", "", "", "", "", -42.03505105485703, 173.97414793244704);
+        contractor.setLocation(locationOutsideMaxDistance);
+        contractor.setAvailable(true);
+        contractor = contractorRepository.save(contractor);
+        Contractor unAvailable = new Contractor("Bob", "Builder", "bob@builder.com", "password");
+        unAvailable.setSkills(Set.of(Skill.ARCHITECTURE));
+        unAvailable.setAvailable(false);
+        unAvailable.setLocation(location);
+        unAvailable = contractorRepository.save(unAvailable);
+        Contractor contractor1 = new Contractor("Bob", "Builder", "bob2@builder.com", "password");
+        contractor1.setSkills(Set.of(Skill.ARCHITECTURE, Skill.RESOURCE_CONSENT_COMPLIANCE));
+        Location location1 = new Location("", "", "", "", "", -42.297332, 173.748173);
+        contractor1.setLocation(location1);
+        contractor1.setAvailable(true);
+        contractor1 = contractorRepository.save(contractor1);
+        List<MappedContractor> expectedContractors = List.of(new MappedContractor(contractor1, Skill.ARCHITECTURE));
+        List<MappedContractor> actualContractors = teamsService.getEligibleContractors(Skill.ARCHITECTURE, renovation.getLocation());
+        assertEquals(expectedContractors, actualContractors);
+    }
 }
