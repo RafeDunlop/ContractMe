@@ -54,7 +54,7 @@ const handleMapChange = debounce(() => {
 
 /**
  * Loads all renovations onto the map
- * @rteurns void
+ * @returns void
  */
 function populateMap() {
     renovationData.forEach(renovation => {
