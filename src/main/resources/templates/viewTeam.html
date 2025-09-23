@@ -11,6 +11,11 @@
 
 
 <body>
+<div id="overlay" th:class="shadow-overlay" onclick="hideMap()">
+    <div class="d-flex justify-content-center m-5">
+        <div id="map" class="home-map"></div>
+    </div>
+</div>
 
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
 
@@ -61,7 +66,13 @@
                             <h5 th:if="${role.getContractorId() != null && isOwner && (role.getStatus() == null || !role.getStatus().equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).ACCEPTED))}">
                                 Invite Sent!
                             </h5>
-                            <h5 th:if="${role.getContractorId() == null}">No Contractor Found</h5>
+                            <div th:if="${role.getContractorId() == null}">
+                                <h5 th:if="${team.hasAutomaticFilling()}">No Contractor Found</h5>
+                                <button type="button" class="btn btn-primary"
+                                        th:unless="${team.hasAutomaticFilling()}"
+                                        th:onclick="|selectContractorToInvite(event)|">Invite Contractor
+                                </button>
+                            </div>
                         </div>
                         <div>
                             <div th:if="${role.contractorId != null && isOwner && !role.getStatus().equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).UNFILLED)}" th:inline="javascript">
@@ -86,6 +97,7 @@
 
 <script type="module" th:src="@{/js/navbar.js}"></script>
 <script type="text/javascript" th:src="@{/js/deleteContractor.js}"></script>
-
-
+<script type="text/javascript" th:src="@{/js/contractorSelectionMap.js}"></script>
+<script type="module" th:src="@{/js/homeMap.js}"></script>
+<script th:src="@{/webjars/leaflet/dist/leaflet.js}"></script>
 </html>

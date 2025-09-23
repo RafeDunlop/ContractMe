@@ -27,13 +27,13 @@
 
         <!-- Backend error message for algorithm response-->
         <div class="alert alert-danger mt-2" role="alert" id="team-backend-error"
-             th:if="${response != null and response == false}">
+             th:if="${response != null and response == 'failure'}">
             <label>Unable to find any matching contractors for this team.</label>
         </div>
 
         <!-- Backend success message for algorithm response-->
         <div class="alert alert-success mt-2" role="alert" id="team-backend-success"
-             th:if="${response != null and response == true}">
+             th:if="${response != null and response == 'success' }">
             <label>Contractors assigned to team successfully.</label>
         </div>
 
