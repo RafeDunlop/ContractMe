@@ -2,3 +2,10 @@
     height: 700px;
     width: 1500px;
 }
+
+.leaflet-popup-content-wrapper {
+    border-radius: 0.5rem;
+}
+.leaflet-popup-tip {
+    display: none;
+}

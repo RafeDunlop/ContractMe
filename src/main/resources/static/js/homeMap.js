@@ -58,12 +58,64 @@ const handleMapChange = debounce(() => {
  */
 function populateMap() {
     renovationData.forEach(renovation => {
-        const icon = renovation.unownedPublic ? publicRenovation : userRenovation
-        L.marker([renovation.location.latitude, renovation.location.longitude], {icon}).addTo(map);
-    })
+        const icon = renovation.unownedPublic ? publicRenovation : userRenovation;
+        const marker = L.marker([renovation.location.latitude, renovation.location.longitude], { icon }).addTo(map);
+
+        marker.bindPopup(buildRenovationPopup(renovation), {
+            autoPan: true,
+            autoClose: true,
+            closeButton: false,
+            keepInView: true,
+            maxWidth: 320
+        });
+
+        marker.on('click', (e) => {
+            L.DomEvent.stop(e);
+            marker.openPopup();
+        });
+    });
 }
 populateMap();
 for (const eventName of ["click", "moveend", "zoomend"]) {
     map.on(eventName, handleMapChange)
 }
 
+function buildRenovationPopup(renovation) {
+    const tooltipCard = document.createElement('div');
+    tooltipCard.className = 'card border-0 shadow-sm';
+
+    const cardBody = document.createElement('div');
+    cardBody.className = 'card-body p-2';
+    tooltipCard.appendChild(cardBody);
+
+    const title = document.createElement('h6');
+    title.className = 'fw-bold mb-1';
+    title.textContent = renovation.name || '';
+    cardBody.appendChild(title);
+
+    const addressParts = [
+        renovation.location.address,
+        renovation.location.suburb,
+        renovation.location.city,
+        renovation.location.postcode
+    ].filter(Boolean);
+
+    if (addressParts.length) {
+        const address = document.createElement('p');
+        address.className = 'text-muted small mb-2';
+        address.textContent = addressParts.join(', ');
+        cardBody.appendChild(address);
+    }
+
+    const viewRenovationUrl = new URL('renovations/view', document.baseURI);
+    viewRenovationUrl.searchParams.set('id', renovation.id);
+    viewRenovationUrl.searchParams.set('previousUrl', 'main');
+
+    const viewButton = document.createElement('a');
+    viewButton.className = 'btn btn-primary';
+    viewButton.href = viewRenovationUrl.toString();
+    viewButton.textContent = 'View Renovation';
+    cardBody.appendChild(viewButton);
+
+    return tooltipCard;
+}
