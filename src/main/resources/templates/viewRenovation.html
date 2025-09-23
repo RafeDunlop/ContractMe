@@ -205,9 +205,9 @@
             </div>
 
             <!-- VIEW LOCATION PAGE -->
-            <div id="view-location-content" class="renovation-content" th:style="${tabBarFocus != 'view-location'} ? 'display: none;'">
+            <div id="view-location-content" class="renovation-content" th:style="${tabBarFocus != 'view-location'} ? 'display: none;'" style="justify-content: center;">
                 <div class="d-flex justify-content-center m-5">
-                    <div id="renovation-map" class="renovation-map"></div>
+                    <div id="renovation-map" class="contractme-map"></div>
                 </div>
             </div>
 
@@ -224,7 +224,9 @@
         </div>
     </div>
 
-<script th:inline="javascript">
+    <input type="hidden" id="renovationId" th:value="${renovationId}" />
+
+    <script th:inline="javascript">
     const allIcons = /*[[${icons}]]*/ [];
 </script>
 

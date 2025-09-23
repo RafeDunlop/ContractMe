@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.List;
 
 @RestController
-@RequestMapping("/map")
 public class MapController {
 
     private final MapService mapService;
@@ -43,7 +42,7 @@ public class MapController {
      * @param coordinateRectangle Contains the longitude and latitudes values which determine the bounding rectangle
      * @return a {@link Collection} of {@link MappedRenovation} DTO objects which contain the minimal requisite details
      */
-    @GetMapping("/renovations")
+    @GetMapping("/map/renovations")
     public Collection<MappedRenovation> getByLocationInBounds(
             @RequestParam(required = false, defaultValue = "true") boolean withPublic,
             @ModelAttribute CoordinateRectangle coordinateRectangle) {
@@ -53,13 +52,10 @@ public class MapController {
         return mappedRenovationList;
     }
 
-    @GetMapping("/renovation")
-    public CoordinateRectangle getRenovation(
-        @RequestParam(name = "id") Long id) {
-
+    @GetMapping("/renovations/view/map/renovation")
+    public CoordinateRectangle getMapBounds(@RequestParam(name = "id") Long id){
         return mapService.getRectangleFromRenovation(id);
     }
-
 
     /**
      * Returns a collection of contractors to be plotted on to the team map. The user calling this endpoint has to be

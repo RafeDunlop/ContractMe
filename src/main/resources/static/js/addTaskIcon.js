@@ -22,7 +22,7 @@ function getIconSelector(renovationTaskId) {
 
 /**
  * Toggles the modal corresponding to the specified renovation task to be visible
- * @param renovationTaskId The identifier of the renovation task whose icon selector is to be made visible
+ * @param taskId The identifier of the renovation task whose icon selector is to be made visible
  */
 function showIconSelector(taskId) {
     localStorage.setItem("selectedTaskId", taskId);

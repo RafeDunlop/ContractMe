@@ -1,11 +1,6 @@
-.home-map {
+.contractme-map {
     height: 700px;
     width: 1500px;
     z-index: 0;
 }
 
-.renovation-map {
-    height: 700px;
-    width: 1500px;
-    z-index: 0;
-}
