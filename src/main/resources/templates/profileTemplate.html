@@ -28,17 +28,22 @@
 
 
 		<!-- Use Bootstrap Grid for Layout -->
-		<div class="row align-items-center">
-			<!-- Profile Picture Column -->
-			<div class="col-md-25  text-center" style="flex: 0 0 18%; max-width: 22%;">
+		<div class="d-flex align-items-center mb-4">
+			<!-- Profile Picture -->
+			<div>
 				<img th:src="@{'/profile_pictures/' + ${profilePicture}}"
 					 alt="Profile Picture"
-					 class="img-fluid rounded-circle"
-					 style="width: 200px; height: 200px; object-fit: cover;">
+					 class="img-fluid rounded-circle me-3"
+					 style="width: clamp(60px, 12vw, 150px); height: clamp(60px, 12vw, 150px); object-fit: cover;">
 			</div>
-            <div class="col-md-5">
-				<h4 class="card-title mb-5 ms-2">User details for <span th:text="${firstName}">Name</span></h4>
-				<div class="card-body">
+
+			<!-- Name -->
+			<div>
+				<h4 class="card-title mb-0">User details for <span th:text="${firstName}">Name</span></h4>
+			</div>
+		</div>
+
+		<div class="card-body">
 					<table class="border border-0">
 						<tbody>
 							<tr>
