@@ -52,9 +52,9 @@ public class MapController {
         return mappedRenovationList;
     }
 
-    @GetMapping("/renovations/view/map/renovation")
-    public CoordinateRectangle getMapBounds(@RequestParam(name = "id") Long id){
-        return mapService.getRectangleFromRenovation(id);
+    @GetMapping("/renovations/view/map/coords-rectangle")
+    public List<Double> getMapBounds(@RequestParam(name = "id") Long id){
+        return mapService.getCoordsFromRenovation(id);
     }
 
     /**

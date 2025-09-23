@@ -1,9 +1,12 @@
-const map = L.map('renovation-map').setView([-43.52460, 172.57710], 11);
-const renovationId = document.getElementById("renovationId").value;
+const renovationId = document.getElementById("renovationId");
 
-const response = await fetch(`/renovations/view/map/renovation?id=` + renovationId.toString());
+const response = await fetch(`/renovations/view/map/coords-rectangle?id=` + renovationId.toString());
+
 const responseData = await response.json();
 console.log(responseData);
+
+const map = L.map('renovation-map').setView([responseData[0], responseData[1]], 11);
+
 
 document.getElementById("view-location-tab-item").addEventListener("click", () => {
     setTimeout(() => {

@@ -26,19 +26,22 @@ public class MapService {
     }
 
 
-    public CoordinateRectangle getRectangleFromRenovation(Long renovationId) {
+    /**
+     * Gets the coords from a renovation and puts them into a data structure for convenient
+     * @param renovationId
+     * @return
+     */
+    public List<Double> getCoordsFromRenovation(Long renovationId) {
         Optional<RenovationRecord> optionalRecord = renovationRecordRepository.findById(renovationId);
-        CoordinateRectangle coords = new CoordinateRectangle();
+        List<Double> coords = new ArrayList<>();
 
         if (optionalRecord.isPresent()) {
             RenovationRecord record = optionalRecord.get();
             Location renovationLocation = record.getLocation();
             double latitude = renovationLocation.getLatitude();
+            coords.add(latitude);
             double longitude = renovationLocation.getLongitude();
-            coords.setMinLat(latitude - 1);
-            coords.setMaxLat(latitude + 1);
-            coords.setMinLon(longitude - 1);
-            coords.setMaxLon(longitude + 1);
+            coords.add(longitude);
         }
 
         return coords;
