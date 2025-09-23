@@ -212,9 +212,10 @@ public class TeamControllerIntegrationTest {
        mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", "ANTIQUE_RESTORATION", "ARCHITECTURE", "ASBESTOS_REMOVAL")
-                        .with(csrf()))
+                       .param("invitesAutomatic", "true")
+                       .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("response", true))
+                .andExpect(flash().attribute("response", "success"))
                 .andReturn();
        //If any skills are added in the future, change this threshold to match the number of skills present
        Mockito.verify(emailService, atMost(3)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
@@ -227,9 +228,10 @@ public class TeamControllerIntegrationTest {
         mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", "ELECTRICAL", "RESOURCE_CONSENT_COMPLIANCE")
+                        .param("invitesAutomatic", "true")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(flash().attribute("response", false))
+                .andExpect(flash().attribute("response", "failure"))
                 .andReturn();
 
         Mockito.verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
@@ -326,6 +328,7 @@ public class TeamControllerIntegrationTest {
         team.addRole(empty);
 
         team = teamsRepository.save(team);
+        team.setAutomaticFilling(true);
 
         mockMvc.perform(get("/renovations/team/view")
                         .param("id", team.getId().toString()))

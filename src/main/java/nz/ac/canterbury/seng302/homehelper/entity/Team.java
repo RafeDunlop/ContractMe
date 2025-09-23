@@ -21,7 +21,7 @@ public class Team {
     private Long id;
 
     @Column(nullable = false)
-    private boolean automaticFilling;
+    private boolean automaticFilling = true;
 
     @OneToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
