@@ -1,7 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.repository.userRepositories;
 
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -57,15 +56,19 @@ public interface ContractorRepository extends UserBaseRepository<Contractor> {
             @Param("excludedIds") java.util.Set<Long> excludedIds
     );
 
-    @Query("SELECT c FROM Contractor c" +
-            " WHERE c.available = true" +
-            " AND :skill IN c.skills" +
-            " AND (6371 * acos(" +
-            " cos(radians(:lat)) * cos(radians(c.location.latitude)) *" +
-            " cos(radians(c.location.longitude) - radians(:lon)) +" +
-            " sin(radians(:lat)) * sin(radians(c.location.latitude))" +
-            " )) <= :maxDistance")
-    List<Contractor> findEligibleWithinBox(@Param("skill") Skill skill, @Param("lat") double lat,
-                                           @Param("lon") double lon, @Param("maxDistance") double maxDistance);
+    @Query(value = """
+                SELECT c.*
+                FROM user_details c
+                JOIN contractor_skills s ON c.user_id = s.contractor_id
+                WHERE s.skill = :requiredSkill
+                  AND c.available = true
+                  AND (6371 * acos(
+                    cos(radians(:lat)) * cos(radians(c.latitude)) *
+                    cos(radians(c.longitude) - radians(:lon)) +
+                    sin(radians(:lat)) * sin(radians(c.latitude))
+                )) <= :maxDistance
+            """, nativeQuery = true)
+    List<Contractor> findEligible(@Param("requiredSkill") String skill, @Param("lat") double lat,
+                                  @Param("lon") double lon, @Param("maxDistance") double maxDistance);
 
 }

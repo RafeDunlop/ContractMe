@@ -495,7 +495,7 @@ public class TeamsService {
      * @return the list of MappedContractors
      */
     public List<MappedContractor> getEligibleContractors(Skill skill, Location location) {
-        List<Contractor> contractors = contractorRepository.findEligibleWithinBox(skill, location.getLatitude(),
+        List<Contractor> contractors = contractorRepository.findEligible(skill.toString(), location.getLatitude(),
                 location.getLongitude(), CONTRACTOR_MAX_DISTANCE);
         return contractors.stream().map(contractor -> new MappedContractor(contractor, skill)).toList();
     }
