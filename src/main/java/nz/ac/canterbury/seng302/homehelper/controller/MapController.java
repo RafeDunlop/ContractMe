@@ -59,7 +59,7 @@ public class MapController {
         Team team = teamsService.getTeamById(teamId);
         RenovationRecord renovationRecord = team.getRenovationRecord();
         boolean isInTeam = teamsService.checkViewRenovationAccess(renovationRecord, user);
-        if (isInTeam) {
+        if (isInTeam || renovationRecord.getUser() == user) {
             return teamsService.getMappedContractorsByTeamId(teamId);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
