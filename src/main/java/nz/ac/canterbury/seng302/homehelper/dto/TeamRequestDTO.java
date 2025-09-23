@@ -10,6 +10,18 @@ import java.util.List;
 public class TeamRequestDTO {
     public TeamRequestDTO() {}
 
+    private List<String> skills;
+
+    private boolean invitesAutomatic;
+
+    public boolean isInvitesAutomatic() {
+        return invitesAutomatic;
+    }
+
+    public void setInvitesAutomatic(boolean invitesAutomatic) {
+        this.invitesAutomatic = invitesAutomatic;
+    }
+
     public List<String> getSkills() {
         return skills;
     }
@@ -17,6 +29,4 @@ public class TeamRequestDTO {
     public void setSkills(List<String> skills) {
         this.skills = skills;
     }
-
-    private List<String> skills;
 }

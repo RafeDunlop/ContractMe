@@ -56,7 +56,7 @@ function confirmTeamRequest(e) {
                 promptBody += "• You can also activate this later on"
                 confirmPrompt(promptTitle, "Yes, send invitations automatically", "No, I will invite contractors manually", false, promptBody)
                     .then(ok => {
-                        // add to form flag for manual selection
+                        document.getElementById("automatic-invite").value = (ok) ? "true" : "false"
                         form.submit()
                     })
             }

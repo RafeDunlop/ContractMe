@@ -99,16 +99,13 @@ public class TeamController {
      * @param teamRequestDTO The DTO representing the creation request.
      * @param id             Of the renovation record to create a team for.
      * @param model          The model used to pass data back to the view in case of validation errors.
-     * @param invitesAreAutomatic Specifies whether ContractMe should automatically send role join invitations to eligible contractors
      * @return A redirect to the renovation view page if the team is successfully created, or the create team page with errors displaying.
      */
     @PostMapping("/create")
     public String submitTeamRequest(TeamRequestDTO teamRequestDTO,
                                     @RequestParam(name = "id") Long id,
-                                    @RequestParam(name="automatic", defaultValue="true") boolean invitesAreAutomatic,
                                     Model model, RedirectAttributes redirectAttributes) {
         logger.info("POST /renovations/team/create");
-
         List<String> errors = teamsService.validateTeam(teamRequestDTO);
         if (!errors.isEmpty()) {
             model.addAttribute("errors", errors);
@@ -119,9 +116,10 @@ public class TeamController {
         }
 
         RenovationRecord teamRecord = renovationRecordService.getRecordById(id);
-        String response = teamsService.createNewTeam(teamRecord, teamRequestDTO, invitesAreAutomatic);
+        String response = teamsService.createNewTeam(teamRecord, teamRequestDTO, teamRequestDTO.isInvitesAutomatic());
 
-        redirectAttributes.addFlashAttribute("response", response.isEmpty());
+        String redirectString = response.isEmpty() ? "success" : (response.equals("manual") ? "manual" : "failure");
+        redirectAttributes.addFlashAttribute("response", redirectString);
 
         return "redirect:/renovations/view?id=" + id;
     }
@@ -221,7 +219,5 @@ public class TeamController {
         }
         teamsService.deleteContractorFromTeam(team, contractor);
         return ResponseEntity.noContent().build();
-
-
     }
 }
