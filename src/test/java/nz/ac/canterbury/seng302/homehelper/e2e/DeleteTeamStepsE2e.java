@@ -61,12 +61,9 @@ public class DeleteTeamStepsE2e {
     }
     @Then("the prompt message asks me to confirm that I want to delete the team")
     public void the_prompt_message_asks_me_to_confirm_that_i_want_to_delete_the_team() {
-        String confirmText = RunPlaywrightTests.page.locator("#promptText").innerText().toLowerCase();
-
-        org.junit.jupiter.api.Assertions.assertTrue(
-                confirmText.contains("delete") && confirmText.contains("team"),
-                () -> "Prompt text did not contain deleting the team. Actual text: " + confirmText
-        );
+        Locator title = RunPlaywrightTests.page.locator("#overlay #promptTitle");
+        assertThat(title).containsText("delete");
+        assertThat(title).containsText("team");
     }
 
     @Then("the prompt shows {string} and {string} actions")
