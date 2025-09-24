@@ -100,7 +100,7 @@ export function confirmPrompt(promptText, confirmText, cancelText, confirmButton
     overlay.style.display = 'block';
     confirmButton.className = (confirmButtonIsDanger) ? "btn btn-danger m-3 h-5" : "btn btn-primary m-3 h-5"
     promptTextTitle.innerText = promptText;
-    promptTextBody.innerText = "\n\n" + bodyText;
+    promptTextBody.innerText = "\n" + bodyText;
     confirmButton.innerText = confirmText;
     cancelButton.innerText = cancelText;
 
