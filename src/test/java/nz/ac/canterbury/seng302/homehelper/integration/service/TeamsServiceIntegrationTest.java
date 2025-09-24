@@ -100,6 +100,7 @@ class TeamsServiceIntegrationTest {
     @Test
     void validTeamAndLocation_assignContractorsToTeam_fillsTeamAndSendsEmails() {
         TeamRequestDTO teamRequestDTO = new TeamRequestDTO();
+        teamRequestDTO.setInvitesAutomatic(true);
         teamRequestDTO.setSkills(List.of(Skill.PLUMBING.toString(), Skill.ELECTRICAL.toString()));
         String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
         Contractor contractor1 = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
@@ -117,7 +118,7 @@ class TeamsServiceIntegrationTest {
         contractor2.setAvailable(true);
         contractorRepository.save(contractor2);
 
-        teamsService.createNewTeam(renovation, teamRequestDTO, true);
+        teamsService.createNewTeam(renovation, teamRequestDTO);
 
         //If any skills are added in the future, change this threshold to match the number of skills present
         verify(emailService, times(2)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
@@ -146,6 +147,7 @@ class TeamsServiceIntegrationTest {
     void teamWithNoRoles_assignContractorsToTeam_fillsTeamAndSendsNoEmails() {
         TeamRequestDTO teamRequestDTO = new TeamRequestDTO();
         teamRequestDTO.setSkills(List.of());
+        teamRequestDTO.setInvitesAutomatic(true);
 
         String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
         Contractor contractor1 = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
@@ -154,7 +156,9 @@ class TeamsServiceIntegrationTest {
         contractor1.activate();
         contractorRepository.save(contractor1);
 
-        teamsService.createNewTeam(renovation, teamRequestDTO, true);
+        teamsService.createNewTeam(renovation, teamRequestDTO);
+
+
 
         verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), any(Locale.class),Mockito.anyLong());
@@ -164,7 +168,7 @@ class TeamsServiceIntegrationTest {
     void teamWithRoles_rolesUnfilled_andSendsNoEmails() {
         TeamRequestDTO teamRequestDTO = new TeamRequestDTO();
         teamRequestDTO.setSkills(List.of(Skill.PLUMBING.toString(), Skill.ELECTRICAL.toString()));
-
+        teamRequestDTO.setInvitesAutomatic(true);
         String aliceUniqueEmail = "alice" + System.nanoTime() + "@doe.com";
         Contractor contractor1 = new Contractor("Alice", "Doe", aliceUniqueEmail, "encoded");
         contractor1.setLocation(location);
@@ -172,7 +176,7 @@ class TeamsServiceIntegrationTest {
         contractor1.activate();
         contractorRepository.save(contractor1);
 
-        teamsService.createNewTeam(renovation, teamRequestDTO, true);
+        teamsService.createNewTeam(renovation, teamRequestDTO);
 
         verify(emailService, Mockito.never()).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), any(Locale.class),Mockito.anyLong());

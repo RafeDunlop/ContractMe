@@ -174,6 +174,7 @@ public class TeamControllerIntegrationTest {
         mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", "DRYWALL_PLASTERING")
+                        .param("invitesAutomatic", "true")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()));
@@ -188,6 +189,7 @@ public class TeamControllerIntegrationTest {
         mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", "ELECTRICAL", "ELECTRICAL")
+                        .param("invitesAutomatic", "true")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()));
