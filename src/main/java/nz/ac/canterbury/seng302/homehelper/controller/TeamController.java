@@ -9,6 +9,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.LocationService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
@@ -43,6 +44,7 @@ public class TeamController {
     private final LocationService locationService;
     private final TeamsService teamsService;
     private final ContractorService contractorService;
+    private final TeamsRepository teamsRepository;
 
 
     /**
@@ -55,12 +57,13 @@ public class TeamController {
      */
     @Autowired
     public TeamController(RenovationRecordService renovationRecordService, LoginService loginService, LocationService locationService, TeamsService teamsService,
-                          ContractorService contractorService) {
+                          ContractorService contractorService, TeamsRepository teamsRepository) {
         this.renovationRecordService = renovationRecordService;
         this.loginService = loginService;
         this.locationService = locationService;
         this.teamsService = teamsService;
         this.contractorService = contractorService;
+        this.teamsRepository = teamsRepository;
     }
 
     /**
@@ -116,10 +119,21 @@ public class TeamController {
         }
 
         RenovationRecord teamRecord = renovationRecordService.getRecordById(id);
-        String response = teamsService.createNewTeam(teamRecord, teamRequestDTO, teamRequestDTO.isInvitesAutomatic());
+        String response = teamsService.createNewTeam(teamRecord, teamRequestDTO);
 
-        String redirectString = response.isEmpty() ? "success" : (response.equals("manual") ? "manual" : "failure");
+        String redirectString;
+        if (response.isEmpty()) {
+            redirectString = "success";
+        } else if (response.equals("manual")) {
+            redirectString = "manual";
+        } else {
+            redirectString = "failure";
+        }
         redirectAttributes.addFlashAttribute("response", redirectString);
+
+        if (redirectString.equals("manual")) {
+            return "redirect:/renovations/team/view?id=" + teamsRepository.findByRenovationRecord(teamRecord).getId();
+        }
 
         return "redirect:/renovations/view?id=" + id;
     }
