@@ -32,7 +32,7 @@ import java.util.List;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @WithMockUser(username = "johnny.maps@gmail.com")
-class MapControllerIntegrationTest {
+public class MapControllerIntegrationTest {
 
     private ObjectMapper mapper;
 
@@ -77,13 +77,13 @@ class MapControllerIntegrationTest {
     }
 
     private RenovationRecord registerRecord(User user, boolean publicity, double latitude, double longitude) {
-        RenovationRecord renovation = new RenovationRecord(
+        RenovationRecord record = new RenovationRecord(
                 user,
                 "name",
                 "description",
                 List.of()
         );
-        renovation.setLocation(new Location(
+        record.setLocation(new Location(
                 "street address",
                 "country",
                 "postcode",
@@ -92,14 +92,18 @@ class MapControllerIntegrationTest {
                 latitude,
                 longitude
         ));
-        renovation.setPublicity(publicity);
-        return renovationRecordRepository.save(renovation);
+        record.setPublicity(publicity);
+        return renovationRecordRepository.save(record);
     }
 
     @Test
     void getRenovationsInBounds_privateValidRectangle_getsPrivateMappings() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovations/0D,0D,40D,40D")
-                    .param("withPublic", "false"))
+        MvcResult result = mockMvc.perform(get("/map/renovations")
+                        .param("withPublic", "false")
+                        .param("minLat", Double.toString(0d))
+                        .param("minLon", Double.toString(0d))
+                        .param("maxLat", Double.toString(40d))
+                        .param("maxLon", Double.toString(40d)))
                 .andExpect(status().isOk())
                 .andReturn();
         List<MappedRenovation> resultCaptive = mapper.readValue(
@@ -111,7 +115,11 @@ class MapControllerIntegrationTest {
 
     @Test
     void getRenovationsInBounds_publicValidRectangleAndImplicitPublicityInclusion_getsAllMappings() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovations/0D,0D,40D,40D"))
+        MvcResult result = mockMvc.perform(get("/map/renovations")
+                        .param("minLat", Double.toString(0d))
+                        .param("minLon", Double.toString(0d))
+                        .param("maxLat", Double.toString(40d))
+                        .param("maxLon", Double.toString(40d)))
                 .andExpect(status().isOk())
                 .andReturn();
         List<MappedRenovation> resultCaptive = mapper.readValue(
@@ -124,8 +132,12 @@ class MapControllerIntegrationTest {
 
     @Test
     void getRenovationsInBounds_publicValidRectangleAndExplicitPublicity_getsAllMappings() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovations/0D,0D,40D,40D")
-                        .param("withPublic", "true"))
+        MvcResult result = mockMvc.perform(get("/map/renovations")
+                        .param("withPublic", "true")
+                        .param("minLat", Double.toString(0d))
+                        .param("minLon", Double.toString(0d))
+                        .param("maxLat", Double.toString(40d))
+                        .param("maxLon", Double.toString(40d)))
                 .andExpect(status().isOk())
                 .andReturn();
         List<MappedRenovation> resultCaptive = mapper.readValue(
@@ -138,7 +150,11 @@ class MapControllerIntegrationTest {
 
     @Test
     void getRenovationsInBounds_publicAndPointRectangle_getsOnlyExactMatch() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovations/0D,0D,0D,0D"))
+        MvcResult result = mockMvc.perform(get("/map/renovations")
+                        .param("minLat", Double.toString(0d))
+                        .param("minLon", Double.toString(0d))
+                        .param("maxLat", Double.toString(0d))
+                        .param("maxLon", Double.toString(0d)))
                 .andExpect(status().isOk())
                 .andReturn();
         List<MappedRenovation> resultCaptive = mapper.readValue(
@@ -149,7 +165,11 @@ class MapControllerIntegrationTest {
 
     @Test
     void getRenovationsInBounds_rectangleIllegal_noMatches() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovations/10D,10D,10D,10D"))
+        MvcResult result = mockMvc.perform(get("/map/renovations")
+                        .param("minLat", Double.toString(10d))
+                        .param("minLon", Double.toString(10d))
+                        .param("maxLat", Double.toString(0d))
+                        .param("maxLon", Double.toString(0d)))
                 .andExpect(status().isOk())
                 .andReturn();
         List<MappedRenovation> resultCaptive = mapper.readValue(
