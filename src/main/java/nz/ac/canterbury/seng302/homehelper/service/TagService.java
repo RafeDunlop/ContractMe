@@ -50,7 +50,7 @@ public class TagService {
      * @return {@code true} if the tag does not exist, {@code false} otherwise.
      */
     public boolean checkExists(String tagName) {
-        return tagRepository.findExactMatchTagByTagName(tagName).isEmpty();
+        return tagRepository.findExactMatchTagByTagName(tagName.toLowerCase().trim()).isEmpty();
     }
 
     /**
