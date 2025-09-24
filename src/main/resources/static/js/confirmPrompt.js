@@ -47,10 +47,10 @@ function confirmTeamRequest(e) {
     let promptTitle = 'Do you want to create this team request?';
     let promptBody = `Roles:\n\n${skills}\n\n`
 
-    confirmPrompt(promptTitle, "Confirm", "Cancel", false)
+    confirmPrompt(promptTitle, "Confirm", "Cancel", false,promptBody)
         .then((ok) => {
             if (ok) {
-                promptTitle = "Do you want ContractMe to automatically\ninvite contractors to your team?"
+                promptTitle = "Do you want ContractMe to automatically invite contractors to your team?"
                 promptBody = "• ContractMe will automatically send an invitation to the contractor best suited for each role"
                 promptBody += " whenever there is an opening on your team\n"
                 promptBody += "• You can also activate this later on"
