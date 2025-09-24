@@ -22,6 +22,10 @@ fetch(`location/localisation`)
     .then(response => response.json())
     .then(localisation => setup(localisation.location))
 
+/**
+ * Sets the initial map position, declares the tile server, map adjustment functions and initialises the toggle switch
+ * @param startingCoordinates Initial coordinate object containing <code>latitude</code> and <code>longitude</code> attributes
+ */
 function setup(startingCoordinates) {
     map.setView([startingCoordinates.latitude, startingCoordinates.longitude], defaultZoom);
 
