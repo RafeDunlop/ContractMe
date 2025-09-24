@@ -90,6 +90,7 @@
             <a th:href="@{/renovations/view(id=${team.getRenovationRecord().getId()})}" class="btn btn-outline-secondary ms-2">Back</a>
         </div>
     </div>
+
     <div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -108,11 +109,56 @@
       </div>
     </div>
 
+    <div class="modal fade" id="contractorDetailsMapModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <!-- TODO  remove mock data -->
+                <!-- Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Contractor Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row mb-2">
+                            <div class="col-4 fw-bold">Name:</div>
+                            <div class="col-8" id="contractor-name">John Doe</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4 fw-bold">Email:</div>
+                            <div class="col-8" id="contractor-email">john@example.com</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4 fw-bold">Phone:</div>
+                            <div class="col-8" id="contractor-phone">+64 21 123 4567</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4 fw-bold">Hourly Rate:</div>
+                            <div class="col-8" id="contractor-rate">$50 / hr</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4 fw-bold">Address:</div>
+                            <div class="col-8" id="contractor-address">123 Example Street, Christchurch</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-primary">Send Invitation</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 </body>
 
 <script type="text/javascript" th:src="@{/webjars/leaflet/dist/leaflet.js}"></script>
 <script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
-
 <script type="module" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="module" th:src="@{/js/navbar.js}"></script>
 <script type="module" th:src="@{/js/contractorSelectionMap.js}"></script>

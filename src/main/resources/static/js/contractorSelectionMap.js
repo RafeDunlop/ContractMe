@@ -47,5 +47,12 @@ export function selectContractorToInvite(event) {
 
 window.selectContractorToInvite = selectContractorToInvite;
 
-
-
+/**
+ * Opens the contractor details modal with data.
+ * @param {Object} contractor - The contractor object
+ */
+export function showContractorDetails(contractor) {
+  const modalEl = document.getElementById('contractorDetailsMapModal');
+  const modal = new bootstrap.Modal(modalEl);
+  modal.show();
+}
