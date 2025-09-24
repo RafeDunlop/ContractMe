@@ -34,7 +34,7 @@ function setup(startingCoordinates) {
         minZoom: 3,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(map);
-    handleMapChange()
+    updateMapContent()
     for (const eventName of ["click", "moveend", "zoomend"]) {
         map.on(eventName, handleMapChange)
     }
