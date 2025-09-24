@@ -14,7 +14,15 @@ if (locationResponse.ok) {
   }
 }
 
-
+/**
+ * Shows the "Select Contractor" modal and initializes or updates the Leaflet map inside it.
+ *
+ * Opens the Bootstrap modal with id "mapModal".
+ * On first open, creates a Leaflet map in "mapModalMap" centered on [latitude, longitude].
+ * On subsequent opens, resizes and recenters the existing map.
+ *
+ * @param {Event} event - Click event from the Invite Contractor button.
+ */
 export function selectContractorToInvite(event) {
   const modalEl = document.getElementById('mapModal');
   const modal = new bootstrap.Modal(modalEl);
