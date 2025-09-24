@@ -1,10 +1,11 @@
+import {computeLongitude} from "./mapCommons.js";
 const renovationId = document.getElementById("renovationId").value;
 console.log(renovationId);
 const response = await fetch(`/map/renovation?id=` + renovationId.toString());
 
 const { latitude: lat, longitude: lon } = await response.json();
 
-const map = L.map('renovation-map').setView([lat, lon], 14);
+const map = L.map('renovation-map').setView([lat, computeLongitude(lon)], 14);
 
 
 document.getElementById("view-location-tab-item").addEventListener("click", () => {
