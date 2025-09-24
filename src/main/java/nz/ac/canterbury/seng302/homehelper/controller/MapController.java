@@ -36,9 +36,9 @@ public class MapController {
     public Collection<MappedRenovation> getByLocationInBounds(
             @RequestParam(required = false, defaultValue = "true") boolean withPublic,
             @ModelAttribute CoordinateRectangle coordinateRectangle) {
-        logger.info("GET /map/renovations");
+        logger.trace("GET /map/renovations");
         List<MappedRenovation> mappedRenovationList = mapService.getRenovationsInBounds(coordinateRectangle, withPublic);
-        logger.info("mapped renovations returned: {}", mappedRenovationList.size());
+        logger.debug("mapped renovations returned: {}", mappedRenovationList.size());
         return mappedRenovationList;
     }
 }
