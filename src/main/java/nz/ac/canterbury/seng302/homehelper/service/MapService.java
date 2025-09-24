@@ -24,6 +24,14 @@ public class MapService {
         this.loginService = loginService;
     }
 
+
+   public CoordinateRectangle createCoordinateRectangle(String rawCoordinates) {
+        Double [] coordinates = Arrays.stream(rawCoordinates.split(","))
+               .map(Double::parseDouble)
+               .toArray(Double[]::new);
+        return new CoordinateRectangle(coordinates[0], coordinates[1], coordinates[2], coordinates[3]);
+   }
+
     /**
      * Gets the renovations within the specified range
      * @param coordinateRectangle DTO object which contains the bounding coordinates of the rectangle to get renovations for

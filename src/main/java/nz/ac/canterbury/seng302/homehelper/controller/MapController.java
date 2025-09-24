@@ -24,13 +24,14 @@ public class MapController {
      * Specify bounding coords via bounds.[min/max][Lat/Lon]
      * @param withPublic Whether to include public renovations not owned by the logged-in user within the range.
      *                   Default true
-     * @param coordinateRectangle Contains the longitude and latitudes values which determine the bounding rectangle
+     * @param rawCoordinates Contains the raw longitude and latitudes values which determine the bounding rectangle
      * @return a {@link Collection} of {@link MappedRenovation} DTO objects which contain the minimal requisite details
      */
-    @GetMapping("/renovations")
+    @GetMapping("/renovations/{rawCoordinates}")
     public Collection<MappedRenovation> getByLocationInBounds(
             @RequestParam(required = false, defaultValue = "true") boolean withPublic,
-            @ModelAttribute CoordinateRectangle coordinateRectangle) {
+            @PathVariable String rawCoordinates) {
+        CoordinateRectangle coordinateRectangle = mapService.createCoordinateRectangle(rawCoordinates);
         return mapService.getRenovationsInBounds(coordinateRectangle, withPublic);
     }
 }

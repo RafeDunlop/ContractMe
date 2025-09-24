@@ -18,16 +18,14 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 public class ViewRenovationController {
@@ -75,6 +73,7 @@ public class ViewRenovationController {
                                  @RequestParam(required = false) Integer year,
                                  @RequestParam(required = false) Integer month,
                                  @RequestParam(required = false) @DateTimeFormat(pattern="dd-MM-yyyy") LocalDate dateEdited,
+                                 @RequestParam(required = false, defaultValue = "details") String tabBarFocus,
                                  Model model,
                                  HttpServletRequest request) {
         logger.info("GET /renovations/view");
@@ -106,7 +105,13 @@ public class ViewRenovationController {
             model.addAttribute("teamId", team.getId());
         }
 
-        model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
+        if (Objects.equals(previousRenovationPage, "/main")) {
+            model.addAttribute("previousUrl", "/main");
+        } else {
+            model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
+
+        }
+
         model.addAttribute("hasLocation", locationService.hasLocation(renovationRecord));
         model.addAttribute("hasTeam",teamsService.teamExists(renovationRecord.getId()));
         model.addAttribute("isOwner", isOwner);
@@ -115,6 +120,7 @@ public class ViewRenovationController {
         model.addAttribute("renovation", renovationRecord);
         model.addAttribute("icons", iconFileNames);
         model.addAttribute("dateFormatter", DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        model.addAttribute("tabBarFocus", tabBarFocus);
 
         return "viewRenovation";
     }

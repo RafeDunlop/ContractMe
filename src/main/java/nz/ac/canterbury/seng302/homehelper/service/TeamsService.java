@@ -414,6 +414,7 @@ public class TeamsService {
                 role.setStatus(RoleStatus.UNFILLED);
             }
         }
+        team.addBlacklistId(contractor.getId());
         teamsRepository.save(team);
         runAlgorithmAgain(team, team.getRenovationRecord().getLocation());
     }

@@ -14,9 +14,11 @@
 
 <body>
 
+<div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
 
     <div id="container" class="card container mt-5 p-4 shadow-sm">
+        <input type="hidden" id="teamId" th:value="${team.id}">
         <div id="content-header">
             <div class="jumbotron d-flex justify-content-between align-items-center text-center">
                 <h1 id="header-title" class="text-black">View Team</h1>
@@ -29,8 +31,6 @@
         <div class="container text-center">
             <div class="row">
                 <div th:each="role : ${team.getRoles()}" class="col skill-card d-flex justify-content-center">
-                    <input type="hidden" id="teamId" th:value="${team.id}">
-                    <input type="hidden" id="contractorId" th:value="${role.contractorId}">
                     <div class="skill-card-container card container border-black border-5 align-items-center d-flex flex-column position-relative"
                          style="padding-top: 2vh; padding-bottom: 4vh; max-width: 14vw;max-height:500px; margin: 5vh 5% 4vh;">
 
@@ -74,7 +74,8 @@
                         <div>
                             <div th:if="${role.contractorId != null && isOwner && !role.getStatus().equals(T(nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus).UNFILLED)}" th:inline="javascript">
                                 <button type="button"
-                                        th:onclick="'deleteContractor(' + ${team.id} + ',' + ${role.contractorId} + ')'"
+                                        th:attr="data-contractor-id=${role.contractorId}"
+                                        id="remove-contractor-button"
                                         class="btn btn-light btn-sm border border-danger text-danger">
                                     Remove Contractor
                                 </button>
@@ -112,8 +113,11 @@
 <script type="text/javascript" th:src="@{/webjars/leaflet/dist/leaflet.js}"></script>
 <script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
 
+<script type="module" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="module" th:src="@{/js/navbar.js}"></script>
 <script type="text/javascript" th:src="@{/js/deleteContractor.js}"></script>
 <script type="module" th:src="@{/js/contractorSelectionMap.js}"></script>
+<script type="module" th:src="@{/js/deleteContractor.js}"></script>
+
 
 </html>
