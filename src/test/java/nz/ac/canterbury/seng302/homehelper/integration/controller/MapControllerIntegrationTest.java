@@ -177,4 +177,12 @@ public class MapControllerIntegrationTest {
         assertTrue(resultCaptive.isEmpty());
     }
 
+    @Test
+    void getRenovationCoords_validId_returnsValidCoordinates() throws Exception {
+        MvcResult result = mockMvc.perform(get("/map/renovation")
+                .param("id", String.valueOf(idFirst)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+    }
 }
