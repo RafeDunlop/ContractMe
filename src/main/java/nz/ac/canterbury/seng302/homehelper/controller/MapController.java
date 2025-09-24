@@ -56,8 +56,13 @@ public class MapController {
         return mappedRenovationList;
     }
 
+    /**
+     * Gets the latitude and longitude of a renovation from its id
+     * @param id the id of the renovation in question
+     * @return a map of the latitude and longitude
+     */
     @GetMapping("/renovation")
-    public Map<String, Double> getMapBounds(@RequestParam(name = "id") Long id){
+    public Map<String, Double> getRenovationCoords(@RequestParam(name = "id") Long id){
         User user = loginService.getUserByEmail();
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         boolean isInTeam = teamsService.checkViewRenovationAccess(renovationRecord, user);

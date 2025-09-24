@@ -1,4 +1,4 @@
-import {fetchRenovationMappings, debounce} from "./mapCommons.js";
+import {fetchRenovationMappings, debounce, computeLongitude} from "./mapCommons.js";
 
 const waitTime = 200;
 
@@ -42,12 +42,14 @@ function getCoordinateRectangle() {
     const bounds = map.getBounds();
     const southwest = bounds.getSouthWest();
     const northeast = bounds.getNorthEast();
+    console.log(computeLongitude(northeast.lng));
     return {
         minLat: southwest.lat,
-        minLon: southwest.lng,
+        minLon: computeLongitude(southwest.lng),
         maxLat: northeast.lat,
-        maxLon: northeast.lng
+        maxLon: computeLongitude(northeast.lng)
     }
+
 }
 
 /**

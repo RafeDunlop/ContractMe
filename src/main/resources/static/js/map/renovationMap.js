@@ -3,7 +3,6 @@ console.log(renovationId);
 const response = await fetch(`/map/renovation?id=` + renovationId.toString());
 
 const { latitude: lat, longitude: lon } = await response.json();
-console.log(lat,lon);
 
 const map = L.map('renovation-map').setView([lat, lon], 14);
 

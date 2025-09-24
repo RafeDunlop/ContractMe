@@ -176,4 +176,5 @@ public class MapControllerIntegrationTest {
                 result.getResponse().getContentAsString(), new TypeReference<>(){});
         assertTrue(resultCaptive.isEmpty());
     }
+
 }
