@@ -17,8 +17,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @RestController
+@RequestMapping("/map")
 public class MapController {
 
     private final MapService mapService;
@@ -26,12 +28,14 @@ public class MapController {
     private final LoginService loginService;
 
     private static final Logger logger = LoggerFactory.getLogger(MapController.class);
+    private final RenovationRecordService renovationRecordService;
 
     @Autowired
-    public MapController(MapService mapService, TeamsService teamsService, LoginService loginService) {
+    public MapController(MapService mapService, TeamsService teamsService, LoginService loginService, RenovationRecordService renovationRecordService) {
         this.mapService = mapService;
         this.teamsService = teamsService;
         this.loginService = loginService;
+        this.renovationRecordService = renovationRecordService;
     }
 
     /**
@@ -42,7 +46,7 @@ public class MapController {
      * @param coordinateRectangle Contains the longitude and latitudes values which determine the bounding rectangle
      * @return a {@link Collection} of {@link MappedRenovation} DTO objects which contain the minimal requisite details
      */
-    @GetMapping("/map/renovations")
+    @GetMapping("/renovations")
     public Collection<MappedRenovation> getByLocationInBounds(
             @RequestParam(required = false, defaultValue = "true") boolean withPublic,
             @ModelAttribute CoordinateRectangle coordinateRectangle) {
@@ -52,9 +56,16 @@ public class MapController {
         return mappedRenovationList;
     }
 
-    @GetMapping("/renovations/view/map/coords-rectangle")
-    public List<Double> getMapBounds(@RequestParam(name = "id") Long id){
-        return mapService.getCoordsFromRenovation(id);
+    @GetMapping("/renovation")
+    public Map<String, Double> getMapBounds(@RequestParam(name = "id") Long id){
+        User user = loginService.getUserByEmail();
+        RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
+        boolean isInTeam = teamsService.checkViewRenovationAccess(renovationRecord, user);
+        if (isInTeam || renovationRecord.getUser() == user) {
+             return mapService.getCoordsFromRenovation(id);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 
     /**

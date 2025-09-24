@@ -27,21 +27,21 @@ public class MapService {
 
 
     /**
-     * Gets the coords from a renovation and puts them into a data structure for convenient
-     * @param renovationId
-     * @return
+     * Gets the lat and lon from a renovation and puts them in a map for subsequent json formatting
+     * @param renovationId the id of the renovation being displayed
+     * @return the map of latitude, longitude and their values
      */
-    public List<Double> getCoordsFromRenovation(Long renovationId) {
+    public Map<String, Double> getCoordsFromRenovation(Long renovationId) {
         Optional<RenovationRecord> optionalRecord = renovationRecordRepository.findById(renovationId);
-        List<Double> coords = new ArrayList<>();
+        Map<String, Double> coords = new HashMap<>();
 
         if (optionalRecord.isPresent()) {
             RenovationRecord record = optionalRecord.get();
             Location renovationLocation = record.getLocation();
             double latitude = renovationLocation.getLatitude();
-            coords.add(latitude);
+            coords.put("latitude", latitude);
             double longitude = renovationLocation.getLongitude();
-            coords.add(longitude);
+            coords.put("longitude", longitude);
         }
 
         return coords;
