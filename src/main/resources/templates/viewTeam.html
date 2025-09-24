@@ -6,16 +6,13 @@
     <base th:href="@{/}"/>
     <title>View Team</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link th:href="@{/webjars/leaflet/dist/leaflet.css}" rel="stylesheet"/>
+
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 
 
 <body>
-<div id="overlay" th:class="shadow-overlay" onclick="hideMap()">
-    <div class="d-flex justify-content-center m-5">
-        <div id="map" class="home-map"></div>
-    </div>
-</div>
 
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
 
@@ -92,12 +89,31 @@
             <a th:href="@{/renovations/view(id=${team.getRenovationRecord().getId()})}" class="btn btn-outline-secondary ms-2">Back</a>
         </div>
     </div>
+    <div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Select contractor location</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-0">
+            <div id="mapModalMap" style="height:60vh; width:100%"></div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button class="btn btn-primary">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
 </body>
 
+<script type="text/javascript" th:src="@{/webjars/leaflet/dist/leaflet.js}"></script>
+<script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
 <script type="module" th:src="@{/js/navbar.js}"></script>
 <script type="text/javascript" th:src="@{/js/deleteContractor.js}"></script>
-<script type="text/javascript" th:src="@{/js/contractorSelectionMap.js}"></script>
-<script type="module" th:src="@{/js/homeMap.js}"></script>
-<script th:src="@{/webjars/leaflet/dist/leaflet.js}"></script>
+<script type="module" th:src="@{/js/contractorSelectionMap.js}"></script>
+
 </html>
