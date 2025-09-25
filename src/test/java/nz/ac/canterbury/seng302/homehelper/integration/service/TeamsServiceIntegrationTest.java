@@ -1,18 +1,17 @@
 package nz.ac.canterbury.seng302.homehelper.integration.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-
 import nz.ac.canterbury.seng302.homehelper.dto.MappedContractor;
+import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.*;
-import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.EmailService;
+import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -22,16 +21,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.Location;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.service.EmailService;
-import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 @SpringBootTest
@@ -45,8 +43,6 @@ class TeamsServiceIntegrationTest {
     @Autowired
     private TeamsService teamsService;
     @Autowired
-    private ContractorService contractorService;
-    @Autowired
     private RenovationRecordRepository renovationRecordRepository;
     @Autowired
     private UserRepository userRepository;
@@ -59,6 +55,9 @@ class TeamsServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        userRepository.deleteAll();
+        teamsRepository.deleteAll();
+        renovationRecordRepository.deleteAll();
         String uniqueEmail = "Test" + System.nanoTime() + "@test.test";
         User user = new User("Test", "test", uniqueEmail, "test");
         user.activate();
@@ -329,7 +328,7 @@ class TeamsServiceIntegrationTest {
 
         String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
         Contractor contractor2 = new Contractor("Bob", "Doe", bobUniqueEmail, "encoded");
-        Location contractor2Location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", 43.52, 172.63);
+        Location contractor2Location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", -43.52, 172.63);
         contractor2.setLocation(contractor2Location);
         contractor2.addSkill(Skill.PLUMBING);
         contractor2.activate();
@@ -658,7 +657,7 @@ class TeamsServiceIntegrationTest {
 
         String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
         Contractor contractor2 = new Contractor("Bob", "Doe", bobUniqueEmail, "encoded");
-        Location contractorLocation = new Location("143 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Hornby", 43.52, 172.70);
+        Location contractorLocation = new Location("143 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Hornby", -43.52, 172.70);
         contractor2.setLocation(contractorLocation);
         contractor2.addSkill(Skill.PLUMBING);
         contractor2.activate();
@@ -744,7 +743,7 @@ class TeamsServiceIntegrationTest {
         contractor2 = contractorRepository.save(contractor2);
         Team team = new Team(renovation);
         team.addRole(new Role(Skill.ARCHITECTURE));
-        team = teamsRepository.save(team);
+        teamsRepository.save(team);
         List<MappedContractor> expectedContractors = List.of(new MappedContractor(contractor1, Skill.ARCHITECTURE), new MappedContractor(contractor2, Skill.ARCHITECTURE));
         List<MappedContractor> actualContractors = teamsService.getEligibleContractors(Skill.ARCHITECTURE, renovation.getLocation());
         assertEquals(expectedContractors, actualContractors);
@@ -757,12 +756,12 @@ class TeamsServiceIntegrationTest {
         Location locationOutsideMaxDistance = new Location("", "", "", "", "", -42.03505105485703, 173.97414793244704);
         contractor.setLocation(locationOutsideMaxDistance);
         contractor.setAvailable(true);
-        contractor = contractorRepository.save(contractor);
+        contractorRepository.save(contractor);
         Contractor unAvailable = new Contractor("Bob", "Builder", "bob@builder.com", "password");
         unAvailable.setSkills(Set.of(Skill.ARCHITECTURE));
         unAvailable.setAvailable(false);
         unAvailable.setLocation(location);
-        unAvailable = contractorRepository.save(unAvailable);
+        contractorRepository.save(unAvailable);
         Contractor contractor1 = new Contractor("Bob", "Builder", "bob2@builder.com", "password");
         contractor1.setSkills(Set.of(Skill.ARCHITECTURE, Skill.RESOURCE_CONSENT_COMPLIANCE));
         Location location1 = new Location("", "", "", "", "", -42.297332, 173.748173);
