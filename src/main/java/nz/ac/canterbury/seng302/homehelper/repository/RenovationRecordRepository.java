@@ -249,10 +249,29 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
     Page<RenovationRecord> findByUser(@Param("user") User user, @Nullable Pageable pageable);
 
     /**
-     * Gets renovations within the rectangle represented by the specified pair of coordinates which are owned by the specified
+     * Gets renovations within the positive longitude of the rectangle represented by the specified pair of coordinates which are owned by the specified user
      * @param user The {@link User} whose renovations are retrieved
      * @param minLat Lower bound for latitude of renovations retrieved
      * @param minLon Lower bound for longitude of renovations retrieved
+     * @param maxLat Upper bound for latitude of renovations retrieved
+     * @return Renovations within the rectangle represented by the specified pair of coordinates which are owned by the specified
+     */
+    @Query("SELECT r FROM RenovationRecord r" +
+            " WHERE (r.user) = (:user)" +
+            " AND r.location IS NOT NULL" +
+            " AND (r.location.latitude) <= (:maxLat)" +
+            " AND (r.location.latitude) >= (:minLat)" +
+            " AND (r.location.longitude) >= (:minLon)" +
+            " AND (r.location.longitude) <= 180")
+    Collection<RenovationRecord> findOwnedWithinBoxPositive(@Param("user") User user,
+                                             @Param("minLat") Double minLat,
+                                             @Param("minLon") Double minLon,
+                                             @Param("maxLat") Double maxLat);
+
+    /**
+     * Gets renovations within the negative longitude of the rectangle represented by the specified pair of coordinates which are owned by the specified user
+     * @param user The {@link User} whose renovations are retrieved
+     * @param minLat Lower bound for latitude of renovations retrieved
      * @param maxLat Upper bound for latitude of renovations retrieved
      * @param maxLon Upper bound for longitude of renovations retrieved
      * @return Renovations within the rectangle represented by the specified pair of coordinates which are owned by the specified
@@ -263,17 +282,33 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
             " AND (r.location.latitude) <= (:maxLat)" +
             " AND (r.location.latitude) >= (:minLat)" +
             " AND (r.location.longitude) <= (:maxLon)" +
-            " AND (r.location.longitude) >= (:minLon)")
-    Collection<RenovationRecord> findOwnedWithinBox(@Param("user") User user,
-                                             @Param("minLat") Double minLat,
-                                             @Param("minLon") Double minLon,
-                                             @Param("maxLat") Double maxLat,
-                                             @Param("maxLon") Double maxLon);
+            " AND (r.location.longitude) > -180")
+    Collection<RenovationRecord> findOwnedWithinBoxNegative(@Param("user") User user,
+                                                    @Param("minLat") Double minLat,
+                                                    @Param("maxLat") Double maxLat,
+                                                    @Param("maxLon") Double maxLon);
 
     /**
-     * Gets renovations within the rectangle represented by the specified pair of coordinates with public publicity
+     * Gets renovations within the positive longitude range of the rectangle represented by the specified pair of coordinates with public publicity
      * @param minLat Lower bound for latitude of renovations retrieved
      * @param minLon Lower bound for longitude of renovations retrieved
+     * @param maxLat Upper bound for latitude of renovations retrieved
+     * @return Renovations within the rectangle represented by the specified pair of coordinates with public publicity
+     */
+    @Query("SELECT r FROM RenovationRecord r" +
+            " WHERE r.isPublic" +
+            " AND r.location IS NOT NULL" +
+            " AND (r.location.latitude) <= (:maxLat)" +
+            " AND (r.location.latitude) >= (:minLat)" +
+            " AND (r.location.longitude) >= (:minLon)" +
+            " AND (r.location.longitude) <= 180")
+    Collection<RenovationRecord> findPublicWithinBoxPositive(@Param("minLat") Double minLat,
+                                                     @Param("minLon") Double minLon,
+                                                     @Param("maxLat") Double maxLat);
+
+    /**
+     * Gets renovations within the positive longitude range of the rectangle represented by the specified pair of coordinates with public publicity
+     * @param minLat Lower bound for latitude of renovations retrieved
      * @param maxLat Upper bound for latitude of renovations retrieved
      * @param maxLon Upper bound for longitude of renovations retrieved
      * @return Renovations within the rectangle represented by the specified pair of coordinates with public publicity
@@ -284,11 +319,10 @@ public interface RenovationRecordRepository extends CrudRepository<RenovationRec
             " AND (r.location.latitude) <= (:maxLat)" +
             " AND (r.location.latitude) >= (:minLat)" +
             " AND (r.location.longitude) <= (:maxLon)" +
-            " AND (r.location.longitude) >= (:minLon)")
-    Collection<RenovationRecord> findPublicWithinBox(@Param("minLat") Double minLat,
-                                                     @Param("minLon") Double minLon,
-                                                     @Param("maxLat") Double maxLat,
-                                                     @Param("maxLon") Double maxLon);
+            "AND (r.location.longitude) > -180")
+    Collection<RenovationRecord> findPublicWithinBoxNegative(@Param("minLat") Double minLat,
+                                                             @Param("maxLat") Double maxLat,
+                                                             @Param("maxLon") Double maxLon);
 
     /**
      * Deletes a record from the renovations record table by its id. The id cannot be null/

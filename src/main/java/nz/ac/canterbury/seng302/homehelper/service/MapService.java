@@ -69,22 +69,35 @@ public class MapService {
     }
 
     private Stream<MappedRenovation> getOwned(User user, CoordinateRectangle coordinateRectangle) {
-        return renovationRecordRepository.findOwnedWithinBox(
+        Collection<MappedRenovation> owned = new ArrayList<>(renovationRecordRepository.findOwnedWithinBoxPositive(
                 user,
                 coordinateRectangle.getMinLat(),
                 coordinateRectangle.getMinLon(),
+                coordinateRectangle.getMaxLat()
+        ).stream().map(renovation -> defaultMappingFunction(renovation, false)).toList());
+        owned.addAll(renovationRecordRepository.findOwnedWithinBoxNegative(
+                user,
+                coordinateRectangle.getMinLat(),
                 coordinateRectangle.getMaxLat(),
                 coordinateRectangle.getMaxLon()
-        ).stream().map(renovation -> defaultMappingFunction(renovation, false));
+        ).stream().map(renovation -> defaultMappingFunction(renovation, false)).toList());
+
+        return owned.stream();
     }
 
     private Stream<MappedRenovation> getPublic(CoordinateRectangle coordinateRectangle) {
-        return renovationRecordRepository.findPublicWithinBox(
+        Collection<MappedRenovation> publicRecords = new ArrayList<>(renovationRecordRepository.findPublicWithinBoxPositive(
                         coordinateRectangle.getMinLat(),
                         coordinateRectangle.getMinLon(),
-                        coordinateRectangle.getMaxLat(),
-                        coordinateRectangle.getMaxLon()
-        ).stream().map(renovation -> defaultMappingFunction(renovation, true));
+                        coordinateRectangle.getMaxLat()
+        ).stream().map(renovation -> defaultMappingFunction(renovation, true)).toList());
+        publicRecords.addAll(renovationRecordRepository.findPublicWithinBoxNegative(
+                coordinateRectangle.getMinLat(),
+                coordinateRectangle.getMaxLat(),
+                coordinateRectangle.getMaxLon()
+        ).stream().map(renovation -> defaultMappingFunction(renovation, true)).toList());
+
+        return publicRecords.stream();
     }
 
     private MappedRenovation defaultMappingFunction(RenovationRecord renovation, boolean isPublic) {
