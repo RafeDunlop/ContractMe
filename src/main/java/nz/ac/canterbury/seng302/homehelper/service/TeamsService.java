@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 @Service
 public class TeamsService {
     private final Logger log = LoggerFactory.getLogger(TeamsService.class);
+    private static final double CONTRACTOR_MAX_DISTANCE = 200;
 
     private final TeamsRepository teamsRepository;
     private final TeamValidation teamValidation;
@@ -68,6 +69,7 @@ public class TeamsService {
      */
     public String createNewTeam(RenovationRecord teamRecord, TeamRequestDTO teamRequestDTO) {
         Team team = new Team(teamRecord);
+        team.setAutomaticFilling(teamRequestDTO.isInvitesAutomatic());
 
         List<Role> roles = createRoles(teamRequestDTO.getSkills());
         for(Role role : roles) {
@@ -76,6 +78,7 @@ public class TeamsService {
 
         teamsRepository.save(team);
         renovationRecordRepository.save(teamRecord);
+        if (!team.hasAutomaticFilling()) return "manual";
 
         Location renovationLocation = teamRecord.getLocation();
         String response = assignContractorsToTeam(team, renovationLocation);
@@ -413,6 +416,7 @@ public class TeamsService {
                 role.setStatus(RoleStatus.UNFILLED);
             }
         }
+        team.addBlacklistId(contractor.getId());
         teamsRepository.save(team);
         runAlgorithmAgain(team, team.getRenovationRecord().getLocation());
     }
@@ -424,6 +428,8 @@ public class TeamsService {
      * @param renovationLocation The location of the renovation record associated with the Team.
      */
     public void runAlgorithmAgain(Team team, Location renovationLocation) {
+        if (!team.hasAutomaticFilling()) return;
+
         Set<Long> beforeIds = team.getRoles().stream()
                 .map(Role::getContractorId)
                 .filter(id -> id != null && id != 0L)
@@ -466,6 +472,18 @@ public class TeamsService {
             emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
                     team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
         }
+    }
+
+    /**
+     * Returns a list of eligible contractors within the max distance away from location with the specified skill.
+     * @param skill the skill for the role we are searching for
+     * @param location the location the contractors need to be close enough to
+     * @return the list of MappedContractors
+     */
+    public List<MappedContractor> getEligibleContractors(Skill skill, Location location) {
+        List<Contractor> contractors = contractorRepository.findEligible(skill.toString(), location.getLatitude(),
+                location.getLongitude(), CONTRACTOR_MAX_DISTANCE);
+        return contractors.stream().map(contractor -> new MappedContractor(contractor, skill)).toList();
     }
 
     /**

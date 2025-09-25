@@ -20,6 +20,9 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private boolean automaticFilling = true;
+
     @OneToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
     private RenovationRecord renovationRecord;
@@ -61,7 +64,16 @@ public class Team {
     }
 
     public List<Long> getBlacklistIds() { return blacklistIds; }
+
     public void addBlacklistId(Long userId) { blacklistIds.add(userId); }
+
+    public boolean hasAutomaticFilling() {
+        return automaticFilling;
+    }
+
+    public void setAutomaticFilling(boolean automaticFilling) {
+        this.automaticFilling = automaticFilling;
+    }
 
     /**
      * Replaces the contractor for a specific role in the team.

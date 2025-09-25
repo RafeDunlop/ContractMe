@@ -382,7 +382,7 @@ public class TeamServiceTest {
         when(owner.getFirstName()).thenReturn("Bob");
         when(renovationRecord.getUser()).thenReturn(owner);
         when(renovationRecord.getName()).thenReturn("Test renovation");
-
+        team.setAutomaticFilling(true);
         teamsService.runAlgorithmAgain(team, location);
 
         verify(emailService, times(1)).sendRequestToContractor(

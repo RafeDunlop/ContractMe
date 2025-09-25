@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -140,6 +142,18 @@ class MapServiceTest {
         assertFalse(resultCaptive.get(0).isUnownedPublic());
         assertFalse(resultCaptive.get(1).isUnownedPublic());
         assertTrue(resultCaptive.get(2).isUnownedPublic());
+    }
+
+    @Test
+    void getRenovationCoordinates_validId_returnsCoordinates() {
+        Location location = new Location("20 Kirkwood Avenue", "New Zealand", "8041", "Christchuch", "Upper Riccarton",1,1);
+        RenovationRecord renovationRecord = new RenovationRecord(loggedIn, "Renovation One", "Some words", List.of("Room 1", "Room 2"));
+        renovationRecord.setLocation(location);
+        when(repository.findById(renovationRecord.getId()))
+                .thenReturn(Optional.of(renovationRecord));
+        Map<String, Double> coords = toTest.getCoordsFromRenovation(renovationRecord.getId());
+        assertEquals(1, coords.get("latitude"));
+        assertEquals(1, coords.get("longitude"));
     }
 
 }
