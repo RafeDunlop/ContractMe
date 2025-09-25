@@ -11,7 +11,6 @@ import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,10 +80,8 @@ public class MapController {
      */
     @GetMapping("/renovation")
     public Map<String, Double> getRenovationCoords(@RequestParam(name = "id") Long id){
-        User user = loginService.getUserByEmail();
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
-        boolean isInTeam = teamsService.checkViewRenovationAccess(renovationRecord, user);
-        if (renovationRecord != null  &&  (isInTeam || renovationRecord.getUser() == user)) {
+        if (renovationRecord != null) {
              return mapService.getCoordsFromRenovation(id);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

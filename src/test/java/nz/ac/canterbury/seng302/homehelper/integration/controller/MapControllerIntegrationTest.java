@@ -212,7 +212,7 @@ public class MapControllerIntegrationTest {
 
     @Test
     void getRenovationCoords_validId_returnsValidCoordinates() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovation")
+        mockMvc.perform(get("/map/renovation")
                 .param("id", String.valueOf(idFirst)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.latitude").value(0d))
@@ -224,7 +224,7 @@ public class MapControllerIntegrationTest {
     @Test
     void getRenovationCoords_invalidId_returnsNotFound() throws Exception {
         mockMvc.perform(get("/map/renovation")
-                .param("id", String.valueOf(999)))
+                .param("id", String.valueOf(99999)))
                 .andExpect(status().isNotFound());
     }
 
