@@ -62,7 +62,7 @@ public class MapController {
     /**
      * Returns a collection of eligible contractors for the given skill and team.
      * @param skill the skill the contractor must have to be eligible
-     * @param teamId the id of team the contractor would be assigned to
+     * @param teamId the id of the team the contractor would be assigned to
      * @return a collection of MappedContractors to be plotted
      */
     @GetMapping("/eligible")
