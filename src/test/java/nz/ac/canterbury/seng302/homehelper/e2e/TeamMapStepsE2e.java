@@ -1,6 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.e2e;
 
-import com.microsoft.playwright.Page;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
 import io.cucumber.java.en.Then;
