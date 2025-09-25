@@ -95,15 +95,13 @@ public class MapController {
      * @return A collection of contractors to be plotted
      */
     @GetMapping("/contractors")
-    public Collection<MappedContractor> getContractorByRenovationId(
-            @RequestParam String id) {
-        long teamId = Long.parseLong(id);
+    public Collection<MappedContractor> getContractorByRenovationId(@RequestParam Long id) {
         User user = loginService.getUserByEmail();
-        Team team = teamsService.getTeamById(teamId);
+        Team team = teamsService.getTeamById(id);
         RenovationRecord renovationRecord = team.getRenovationRecord();
         boolean isInTeam = teamsService.checkViewRenovationAccess(renovationRecord, user);
         if (isInTeam || renovationRecord.getUser() == user) {
-            return teamsService.getMappedContractorsByTeamId(teamId);
+            return teamsService.getMappedContractorsByTeamId(id);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
