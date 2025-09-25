@@ -53,11 +53,9 @@
         </div>
 
         <div>
-            <a th:href="@{/renovations/view(id=${renovationRecord.id})}" class="btn btn-outline-secondary float-start mt-5">Back</a>
+            <input type="submit" id="form-submit" onclick="confirmTeamRequest(event)" class="btn btn-primary mt-5 me-2" value="Submit" />
+            <a th:href="@{/renovations/view(id=${renovationRecord.id})}" class="btn btn-outline-secondary mt-5">Back</a>
         </div>
-
-        <input type="submit" id="form-submit" onclick="confirmTeamRequest(event)" class="btn btn-primary float-end mt-5" value="Submit" />
-
     </form>
 </div>
 </body>
