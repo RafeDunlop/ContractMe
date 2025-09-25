@@ -234,7 +234,7 @@ public class DefaultDataConfigurator {
         }
 
         RenovationRecord distantLocation1 = new RenovationRecord(default1, "Faraway place", "Escape from Jack Erskine", defaultJERooms);
-        Location farawayLocation = new Location("7 Peni Lane", "", "", "", "", -43.92163730909038D, 176.52615666195436D);
+        Location farawayLocation = new Location("7 Peni Lane", "", "", "", "", -43.92163730909038D, -176.52615666195436D);
         distantLocation1.setLocation(farawayLocation);
         distantLocation1.setPublicity(true);
         renovationRecordService.addRenovationRecord(distantLocation1);
@@ -263,7 +263,7 @@ public class DefaultDataConfigurator {
     private void setupDefaultPublicRenovationsWithLocationsSecondUser() {
         for (int i=1; i < 21; i++){
             RenovationRecord newRecord = new RenovationRecord(default2, "Boring public renovation "+ i, "Boring description " + i,  defaultJERooms);
-            Location location = new Location ("11" + 10*i + " Memorial Ave", "", "", "Christchurch", "",  -43.51807 - i * 0.00044, 172.58924 - i*0.00075 );
+            Location location = new Location ("11" + 10*i + " Memorial Ave", "", "", "Christchurch", "",  -43.51807 + i * 0.00044, 172.58924 - i*0.00075 );
             newRecord.setLocation(location);
             newRecord.setPublicity(true);
             renovationRecordService.addRenovationRecord(newRecord);

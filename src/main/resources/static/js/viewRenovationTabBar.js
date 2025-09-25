@@ -8,7 +8,9 @@
 const contentMap = new Map([
     ["details-tab-item", "details-content"],
     ["tasks-tab-item", "tasks-content"],
-    ["calendar-tab-item", "calendar-content"]
+    ["calendar-tab-item", "calendar-content"],
+    ["view-location-tab-item", "view-location-content"]
+
 ]);
 
 document.querySelectorAll('.nav-link').forEach(btn => {

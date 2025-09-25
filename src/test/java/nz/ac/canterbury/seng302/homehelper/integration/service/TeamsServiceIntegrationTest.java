@@ -1,15 +1,17 @@
 package nz.ac.canterbury.seng302.homehelper.integration.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
+import nz.ac.canterbury.seng302.homehelper.dto.MappedContractor;
+import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
+import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.*;
+import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import nz.ac.canterbury.seng302.homehelper.service.EmailService;
+import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -19,16 +21,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
-import nz.ac.canterbury.seng302.homehelper.entity.Location;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
-import nz.ac.canterbury.seng302.homehelper.entity.Team;
-import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
-import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
-import nz.ac.canterbury.seng302.homehelper.service.EmailService;
-import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 @SpringBootTest
@@ -54,12 +55,15 @@ class TeamsServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        userRepository.deleteAll();
+        teamsRepository.deleteAll();
+        renovationRecordRepository.deleteAll();
         String uniqueEmail = "Test" + System.nanoTime() + "@test.test";
         User user = new User("Test", "test", uniqueEmail, "test");
         user.activate();
         userRepository.save(user);
         renovation = new RenovationRecord(user, "Test renovation", "", new ArrayList<>());
-        location = new Location("20 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Riccarton", 43.53, 172.63);
+        location = new Location("20 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Riccarton", -43.528066, 172.584604);
         renovation.setLocation(location);
         renovationRecordRepository.save(renovation);
     }
@@ -267,7 +271,7 @@ class TeamsServiceIntegrationTest {
 
         assertEquals("Unable to find available contractors to fill team", result);
         assertEquals(contractor.getId(), team.getRoles().get(0).getContractorId());
-        assertEquals(null, team.getRoles().get(1).getContractorId());
+        assertNull(team.getRoles().get(1).getContractorId());
     }
 
     @Test
@@ -324,7 +328,7 @@ class TeamsServiceIntegrationTest {
 
         String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
         Contractor contractor2 = new Contractor("Bob", "Doe", bobUniqueEmail, "encoded");
-        Location contractor2Location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", 43.52, 172.63);
+        Location contractor2Location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", -43.52, 172.63);
         contractor2.setLocation(contractor2Location);
         contractor2.addSkill(Skill.PLUMBING);
         contractor2.activate();
@@ -653,7 +657,7 @@ class TeamsServiceIntegrationTest {
 
         String bobUniqueEmail = "bob" + System.nanoTime() + "@doe.com";
         Contractor contractor2 = new Contractor("Bob", "Doe", bobUniqueEmail, "encoded");
-        Location contractorLocation = new Location("143 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Hornby", 43.52, 172.70);
+        Location contractorLocation = new Location("143 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Hornby", -43.52, 172.70);
         contractor2.setLocation(contractorLocation);
         contractor2.addSkill(Skill.PLUMBING);
         contractor2.activate();
@@ -721,5 +725,51 @@ class TeamsServiceIntegrationTest {
         Team team = teamsRepository.save(new Team(renovation));
         assertDoesNotThrow(() -> teamsService.deleteTeam(team));
         assertNull(teamsRepository.findByRenovationRecord(renovation));
+    }
+
+    @Test
+    void findEligibleContractors_eligibleContractorsExist_returnsList() {
+        Contractor contractor1 = new Contractor("Bob", "Builder", "bob@builder.com", "password");
+        contractor1.setSkills(Set.of(Skill.ARCHITECTURE, Skill.RESOURCE_CONSENT_COMPLIANCE));
+        Location location1 = new Location("", "", "", "", "", -42.297332, 173.748173);
+        contractor1.setLocation(location1);
+        contractor1.setAvailable(true);
+        contractor1 = contractorRepository.save(contractor1);
+        Contractor contractor2 = new Contractor("Alice", "Builder", "alice@builder.com", "password");
+        contractor2.setSkills(Set.of(Skill.ARCHITECTURE, Skill.PLUMBING));
+        Location location2 = new Location("", "", "", "", "", -43.592, 172.381);
+        contractor2.setLocation(location2);
+        contractor2.setAvailable(true);
+        contractor2 = contractorRepository.save(contractor2);
+        Team team = new Team(renovation);
+        team.addRole(new Role(Skill.ARCHITECTURE));
+        teamsRepository.save(team);
+        List<MappedContractor> expectedContractors = List.of(new MappedContractor(contractor1, Skill.ARCHITECTURE), new MappedContractor(contractor2, Skill.ARCHITECTURE));
+        List<MappedContractor> actualContractors = teamsService.getEligibleContractors(Skill.ARCHITECTURE, renovation.getLocation());
+        assertEquals(expectedContractors, actualContractors);
+    }
+
+    @Test
+    void findEligibleContractors_oneOutsideOneUnavailable_returnsCorrectList() {
+        Contractor contractor = new Contractor("Alice", "Builder", "alice@builder.com", "password");
+        contractor.setSkills(Set.of(Skill.ARCHITECTURE));
+        Location locationOutsideMaxDistance = new Location("", "", "", "", "", -42.03505105485703, 173.97414793244704);
+        contractor.setLocation(locationOutsideMaxDistance);
+        contractor.setAvailable(true);
+        contractorRepository.save(contractor);
+        Contractor unAvailable = new Contractor("Bob", "Builder", "bob@builder.com", "password");
+        unAvailable.setSkills(Set.of(Skill.ARCHITECTURE));
+        unAvailable.setAvailable(false);
+        unAvailable.setLocation(location);
+        contractorRepository.save(unAvailable);
+        Contractor contractor1 = new Contractor("Bob", "Builder", "bob2@builder.com", "password");
+        contractor1.setSkills(Set.of(Skill.ARCHITECTURE, Skill.RESOURCE_CONSENT_COMPLIANCE));
+        Location location1 = new Location("", "", "", "", "", -42.297332, 173.748173);
+        contractor1.setLocation(location1);
+        contractor1.setAvailable(true);
+        contractor1 = contractorRepository.save(contractor1);
+        List<MappedContractor> expectedContractors = List.of(new MappedContractor(contractor1, Skill.ARCHITECTURE));
+        List<MappedContractor> actualContractors = teamsService.getEligibleContractors(Skill.ARCHITECTURE, renovation.getLocation());
+        assertEquals(expectedContractors, actualContractors);
     }
 }
