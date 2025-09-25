@@ -10,7 +10,13 @@
 <div th:fragment="addressDisplay (address)" id="address-display" class="p-2 d-flex">
     <img src="icons/address-pin.svg" alt="address-pin" width="30" />
     <div class="ps-3">
-        <div th:text="|${address.address}, ${address.suburb}, ${address.city} ${address.postcode}, ${address.country}|"></div>
+        <div>
+            <span th:text="${address.address}"></span>
+            <span th:if="${address.suburb != null && address.suburb != ''}" th:text="', ' + ${address.suburb}"></span>
+            <span th:if="${address.city != null && address.city != ''}" th:text="' ' + ${address.city}"></span>
+            <span th:if="${address.postcode != null && address.postcode != ''}" th:text="' ' + ${address.postcode}"></span>
+            <span th:if="${address.country != null && address.country != ''}" th:text="', ' + ${address.country}"></span>
+        </div>
     </div>
 </div>
 </body>
