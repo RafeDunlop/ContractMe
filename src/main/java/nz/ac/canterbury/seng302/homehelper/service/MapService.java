@@ -69,35 +69,22 @@ public class MapService {
     }
 
     private Stream<MappedRenovation> getOwned(User user, CoordinateRectangle coordinateRectangle) {
-        Collection<MappedRenovation> owned = new ArrayList<>(renovationRecordRepository.findOwnedWithinBoxPositive(
+        return renovationRecordRepository.findOwnedWithinBox(
                 user,
                 coordinateRectangle.getMinLat(),
                 coordinateRectangle.getMinLon(),
-                coordinateRectangle.getMaxLat()
-        ).stream().map(renovation -> defaultMappingFunction(renovation, false)).toList());
-        owned.addAll(renovationRecordRepository.findOwnedWithinBoxNegative(
-                user,
-                coordinateRectangle.getMinLat(),
                 coordinateRectangle.getMaxLat(),
                 coordinateRectangle.getMaxLon()
-        ).stream().map(renovation -> defaultMappingFunction(renovation, false)).toList());
-
-        return owned.stream();
+        ).stream().map(renovation -> defaultMappingFunction(renovation, false));
     }
 
     private Stream<MappedRenovation> getPublic(CoordinateRectangle coordinateRectangle) {
-        Collection<MappedRenovation> publicRecords = new ArrayList<>(renovationRecordRepository.findPublicWithinBoxPositive(
+        return renovationRecordRepository.findPublicWithinBox(
                         coordinateRectangle.getMinLat(),
                         coordinateRectangle.getMinLon(),
-                        coordinateRectangle.getMaxLat()
-        ).stream().map(renovation -> defaultMappingFunction(renovation, true)).toList());
-        publicRecords.addAll(renovationRecordRepository.findPublicWithinBoxNegative(
-                coordinateRectangle.getMinLat(),
-                coordinateRectangle.getMaxLat(),
-                coordinateRectangle.getMaxLon()
-        ).stream().map(renovation -> defaultMappingFunction(renovation, true)).toList());
-
-        return publicRecords.stream();
+                        coordinateRectangle.getMaxLat(),
+                        coordinateRectangle.getMaxLon()
+        ).stream().map(renovation -> defaultMappingFunction(renovation, true));
     }
 
     private MappedRenovation defaultMappingFunction(RenovationRecord renovation, boolean isPublic) {
