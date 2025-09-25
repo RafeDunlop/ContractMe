@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import nz.ac.canterbury.seng302.homehelper.dto.MappedContractor;
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @Service
 public class TeamsService {
     private final Logger log = LoggerFactory.getLogger(TeamsService.class);
+    private static final double CONTRACTOR_MAX_DISTANCE = 200;
 
     private final TeamsRepository teamsRepository;
     private final TeamValidation teamValidation;
@@ -377,7 +379,7 @@ public class TeamsService {
                 location.getLatitude(),
                 location.getLongitude(),
                 role.getSkill().toString(),
-                200,
+                CONTRACTOR_MAX_DISTANCE,
                 blacklist.isEmpty() ? null : blacklist
         );
     }
@@ -470,5 +472,17 @@ public class TeamsService {
             emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
                     team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
         }
+    }
+
+    /**
+     * Returns a list of eligible contractors within the max distance away from location with the specified skill.
+     * @param skill the skill for the role we are searching for
+     * @param location the location the contractors need to be close enough to
+     * @return the list of MappedContractors
+     */
+    public List<MappedContractor> getEligibleContractors(Skill skill, Location location) {
+        List<Contractor> contractors = contractorRepository.findEligible(skill.toString(), location.getLatitude(),
+                location.getLongitude(), CONTRACTOR_MAX_DISTANCE);
+        return contractors.stream().map(contractor -> new MappedContractor(contractor, skill)).toList();
     }
 }
