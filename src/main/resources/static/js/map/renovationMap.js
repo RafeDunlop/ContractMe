@@ -1,5 +1,3 @@
-import {computeLongitude} from "./mapCommons.js";
-
 /**
  * Checks whether a given latitude and longitude coordinate already exists as a marker.
  *
@@ -41,7 +39,7 @@ const { latitude: lat, longitude: lon } = await renovationResponse.json();
 
 let markerPositions = [[lat, lon]];
 
-const map = L.map('renovation-map').setView([lat, computeLongitude(lon)], 14);
+const map = L.map('renovation-map');
 
 document.getElementById("view-location-tab-item").addEventListener("click", () => {
     setTimeout(() => {
@@ -96,3 +94,15 @@ if (teamId !== null) {
         });
     })
 }
+
+document.getElementById("view-location-tab-item").addEventListener("click", () => {
+    setTimeout(() => {
+        map.invalidateSize();
+        if (markerPositions.length > 1) {
+            const bounds = L.latLngBounds(markerPositions);
+            map.fitBounds(bounds, {padding: [50, 50]});
+        } else {
+            map.setView([lat, lon], 14);
+        }
+    }, 100);
+});
