@@ -69,10 +69,10 @@ async function fetchEligibleContractors(skill) {
 function populateContractors(contractors, map) {
     if(contractors) {
         contractors.forEach(contractor => {
-            const contractorIcon = L.icon({
-                iconUrl: new URL(`profile_pictures/${contractor.profilePicture}`, document.baseURI),
-                iconSize: [32, 32]
-            });
+            const contractorIcon = L.divIcon({
+                className: "contractor-icon",
+                html: `<img src="profile_pictures/${contractor.profilePicture}" class="rounded-circle" width="32" height="32" alt="Contractor profile picture for ${contractor.fullName}">`,
+                iconSize: [32, 32] });
             L.marker([contractor.location.latitude, contractor.location.longitude],
                 {icon: contractorIcon}
             ).addTo(map);
