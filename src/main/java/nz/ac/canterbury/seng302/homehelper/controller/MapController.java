@@ -4,19 +4,14 @@ import nz.ac.canterbury.seng302.homehelper.dto.CoordinateRectangle;
 import nz.ac.canterbury.seng302.homehelper.dto.MappedContractor;
 import nz.ac.canterbury.seng302.homehelper.dto.MappedRenovation;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
-import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
-import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.MapService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,15 +21,13 @@ import java.util.List;
 public class MapController {
 
     private final MapService mapService;
-    private final LoginService loginService;
     private final TeamsService teamsService;
 
     private static final Logger logger = LoggerFactory.getLogger(MapController.class);
 
     @Autowired
-    public MapController(MapService mapService, LoginService loginService, TeamsService teamsService) {
+    public MapController(MapService mapService, TeamsService teamsService) {
         this.mapService = mapService;
-        this.loginService = loginService;
         this.teamsService = teamsService;
     }
 
@@ -54,27 +47,6 @@ public class MapController {
         List<MappedRenovation> mappedRenovationList = mapService.getRenovationsInBounds(coordinateRectangle, withPublic);
         logger.debug("mapped renovations returned: {}", mappedRenovationList.size());
         return mappedRenovationList;
-    }
-
-    /**
-     * Returns a collection of contractors to be plotted on to the team map. The user calling this endpoint has to be
-     * part of the team; otherwise an exception is returned.
-     * @param id ID of the team
-     * @return A collection of contractors to be plotted
-     */
-    @GetMapping("/contractors")
-    public Collection<MappedContractor> getContractorByRenovationId(
-            @RequestParam String id) {
-        long teamId = Long.parseLong(id);
-        User user = loginService.getUserByEmail();
-        Team team = teamsService.getTeamById(teamId);
-        RenovationRecord renovationRecord = team.getRenovationRecord();
-        boolean isInTeam = teamsService.checkViewRenovationAccess(renovationRecord, user);
-        if (isInTeam) {
-            return teamsService.getMappedContractorsByTeamId(teamId);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
     }
 
     /**

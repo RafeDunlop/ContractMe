@@ -475,25 +475,6 @@ public class TeamsService {
     }
 
     /**
-     * Returns a list of contractors assigned to a team as MappedContractor objects so that only the contractor
-     * information needed for the map is returned.
-     * @param teamId The ID of the team
-     * @return A collection of contractors
-     */
-    public Collection<MappedContractor> getMappedContractorsByTeamId(Long teamId) {
-        Team team = getTeamById(teamId);
-        List<Role> roles = team.getRoles();
-        Map<Long, Contractor> contractors = getContractorsByTeamId(teamId);
-
-        return contractors.values().stream().map(contractor ->
-                new MappedContractor(
-                        contractor,
-                        roles.stream().filter(role -> Objects.equals(role.getContractorId(), contractor.getId()))
-                                .map(Role::getSkill).findFirst().orElse(null)))
-                .toList();
-    }
-
-    /**
      * Returns a list of eligible contractors within the max distance away from location with the specified skill.
      * @param skill the skill for the role we are searching for
      * @param location the location the contractors need to be close enough to
