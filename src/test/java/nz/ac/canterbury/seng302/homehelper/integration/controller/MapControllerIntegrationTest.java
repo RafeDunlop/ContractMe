@@ -3,11 +3,18 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import nz.ac.canterbury.seng302.homehelper.dto.MappedContractor;
 import nz.ac.canterbury.seng302.homehelper.dto.MappedRenovation;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +34,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
 @SpringBootTest
 @Transactional
@@ -42,6 +51,7 @@ public class MapControllerIntegrationTest {
     private long idSecond;
 
     private long idThird;
+    private RenovationRecord recordFirst;
 
     @Autowired
     private UserRepository userRepository;
@@ -51,6 +61,10 @@ public class MapControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private ContractorRepository contractorRepository;
+    @Autowired
+    private TeamsRepository teamsRepository;
 
     @BeforeEach
     void beforeEach () {
@@ -70,7 +84,8 @@ public class MapControllerIntegrationTest {
         notLoggedIn = userRepository.save(notLoggedIn);
 
         renovationRecordRepository.deleteAll();
-        idFirst = registerRecord(loggedIn, false, 0d, 0d).getId();
+        recordFirst = registerRecord(loggedIn, false, 0d, 0d);
+        idFirst = recordFirst.getId();
         idSecond = registerRecord(loggedIn, false, 4.999d, 0d).getId();
         idThird = registerRecord(notLoggedIn, true, 2d, 2d).getId();
         registerRecord(notLoggedIn, false, 3d, 3d);
@@ -95,6 +110,22 @@ public class MapControllerIntegrationTest {
         ));
         renovation.setPublicity(publicity);
         return renovationRecordRepository.save(renovation);
+    }
+
+    private Contractor registerContractor(String email, boolean available, Set<Skill> skills, double latitude, double longitude) {
+        Contractor contractor = new Contractor("Bobby", "Tables", email, "password");
+        contractor.setAvailable(available);
+        contractor.setSkills(skills);
+        contractor.setLocation(new Location(
+                "street address",
+                "country",
+                "postcode",
+                "city",
+                "suburb",
+                latitude,
+                longitude
+        ));
+        return contractorRepository.save(contractor);
     }
 
     @Test
@@ -198,4 +229,34 @@ public class MapControllerIntegrationTest {
     }
 
 
+
+    @Test
+    void getEligibleContractors_contractorsInBounds_returnsCorrectList() throws Exception {
+        Contractor contractor = registerContractor("bob@contractor.nz", true, Set.of(Skill.ARCHITECTURE), 0.1d, 0.1d);
+        Contractor contractor2 = registerContractor("bob@othercontractor.nz", true, Set.of(Skill.ARCHITECTURE, Skill.RESOURCE_CONSENT_COMPLIANCE), 0.1d, -0.1d);
+        registerContractor("bob@unavailable.net", false, Set.of(Skill.ARCHITECTURE), 0.123d, 0.132d);
+        registerContractor("bob@farawayplace.com", true, Set.of(Skill.ARCHITECTURE), -15.03, 48.82);
+        registerContractor("bob@notarchitecture.co.nz", true, Set.of(Skill.ASBESTOS_REMOVAL), 0.1, 0.1);
+        Team team = new Team(recordFirst);
+        team.addRole(new Role(Skill.ARCHITECTURE));
+        team = teamsRepository.save(team);
+        List<MappedContractor> expectedContractors = Stream.of(contractor, contractor2).map(c -> new MappedContractor(c, Skill.ARCHITECTURE)).toList();
+        MvcResult result = mockMvc.perform(get("/map/eligible")
+                .param("skill", "ARCHITECTURE")
+                .param("teamId", String.valueOf(team.getId()))).andReturn();
+        List<MappedContractor> resultCaptive = mapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>(){});
+        assertEquals(expectedContractors, resultCaptive);
+    }
+
+    @Test
+    void getEligibleContractors_noContractors_returnsEmptyList() throws Exception {
+        Team team = new Team(recordFirst);
+        team.addRole(new Role(Skill.ARCHITECTURE));
+        team = teamsRepository.save(team);
+        MvcResult result = mockMvc.perform(get("/map/eligible")
+                .param("skill", "ARCHITECTURE")
+                .param("teamId", String.valueOf(team.getId()))).andReturn();
+        List<MappedContractor> actualContractors = mapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>(){});
+        assertEquals(0, actualContractors.size());
+    }
 }
