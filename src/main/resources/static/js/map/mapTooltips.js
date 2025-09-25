@@ -57,11 +57,11 @@ function buildContractorTooltip(contractor) {
     tooltipCard.className = 'map-tooltip card border-0 shadow-sm';
 
     const cardBody = document.createElement('div');
-    cardBody.className = 'card-body p-3';
+    cardBody.className = 'card-body p-3 pe-1';
     tooltipCard.appendChild(cardBody);
 
     const row = document.createElement('div');
-    row.className = 'd-flex align-items-center gap-3';
+    row.className = 'd-flex align-items-center gap-0';
     cardBody.appendChild(row);
 
     const pic = document.createElement('img');
@@ -75,7 +75,7 @@ function buildContractorTooltip(contractor) {
 
     const name = document.createElement('h6');
     name.className = 'fw-bold mb-0 text-truncate';
-    name.textContent = ((contractor.firstName || '') + ' ' + (contractor.lastName || ''));
+    name.textContent = contractor.fullName || '';
     row.appendChild(name);
 
     return tooltipCard;

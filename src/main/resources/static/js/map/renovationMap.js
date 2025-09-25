@@ -1,4 +1,3 @@
-import {computeLongitude} from "./mapCommons.js";
 import { buildRenovationTooltip, buildContractorTooltip } from "./mapTooltips.js";
 
 /**
@@ -66,10 +65,6 @@ const renovationMarker = L.marker([lat, lon], {
     zIndexOffset: 1000
 }).addTo(map);
 
-renovationMarker.on('mouseover', function () {
-    this.bringToFront();
-});
-
 const teamId = document.getElementById("teamId").value;
 if (teamId !== "") {
     const contractorResponse = await fetch(`/map/contractors?id=` + teamId.toString());
@@ -92,8 +87,17 @@ if (teamId !== "") {
             icon: contractorIcon
         }).addTo(map);
 
-        contractorMarker.on('mouseover', function () {
-            this.bringToFront();
+        contractorMarker.bindPopup(buildContractorTooltip(contractor), {
+            autoPan: true,
+            autoClose: true,
+            closeButton: false,
+            keepInView: true,
+            maxWidth: 320
+        });
+
+        contractorMarker.on('click', (e) => {
+            L.DomEvent.stop(e);
+            contractorMarker.openPopup();
         });
     })
 }
@@ -104,7 +108,6 @@ if (teamId !== "") {
  * Attaches a Bootstrap-styled popup card.
  */
 function addRenovationTooltip() {
-    const marker = L.marker([lat, computeLongitude(lon)], { icon: userRenovation }).addTo(map);
     const nameElement = document.querySelector("#renovation-name-header h1");
     const addressData = document.getElementById("renovation-address");
 
@@ -119,7 +122,7 @@ function addRenovationTooltip() {
     };
 
 
-    marker.bindPopup(
+    renovationMarker.bindPopup(
         buildRenovationTooltip(renovation, false),
         {
             autoPan: true,
@@ -130,13 +133,12 @@ function addRenovationTooltip() {
         }
     );
 
-    marker.on('click', (e) => {
+    renovationMarker.on('click', (e) => {
         L.DomEvent.stop(e);
-        marker.openPopup();
+        renovationMarker.openPopup();
     });
 }
 
-addRenovationTooltip()
 document.getElementById("view-location-tab-item").addEventListener("click", () => {
     setTimeout(() => {
         map.invalidateSize();
@@ -148,3 +150,5 @@ document.getElementById("view-location-tab-item").addEventListener("click", () =
         }
     }, 100);
 });
+
+addRenovationTooltip()
