@@ -2,3 +2,17 @@
     height: 700px;
     width: 1500px;
 }
+
+.map-tooltip .address {
+    font-size: 1.0rem;
+}
+
+.map-tooltip .card-body {
+    padding: 1rem !important;
+}
+
+.leaflet-popup-content { margin: 0 !important; }
+
+
+
+

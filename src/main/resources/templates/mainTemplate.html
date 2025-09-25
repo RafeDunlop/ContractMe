@@ -3,19 +3,29 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
     <base th:href="@{/}"/>
-    <title>Contractme</title>
+    <title> ContractMe </title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}"/>
     <link rel="stylesheet" th:href="@{/css/maps.css}"/>
+    <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
     <link rel="stylesheet" th:href="@{/webjars/leaflet/dist/leaflet.css}"/>
 </head>
 <body>
-<div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
-<div class="d-flex justify-content-center m-5">
-    <div id="map" class="home-map" style="z-index: 0;"></div>
-</div>
+    <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
+    <div class="d-flex flex-column justify-content-center m-5">
+        <div id="map" class="home-map" style="z-index: 0;"></div>
+        <div class="d-flex justify-content-start align-items-center pt-2">
+            <div>
+                <label class="switch">
+                    <input type="checkbox" id="include-public-renovations-checkbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="ms-2">Show only my renovations</div>
+        </div>
+    </div>
 </body>
 <script type="module" th:src="@{/js/navbar.js}"></script>
 <script th:src="@{/webjars/leaflet/dist/leaflet.js}"></script>
-<script type="module" th:src="@{/js/homeMap.js}"></script>
+<script type="module" th:src="@{/js/map/homeMap.js}"></script>
 </html>

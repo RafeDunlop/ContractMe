@@ -17,7 +17,7 @@
     <h4 class="card-title mb-4" th:text="|Create Team For ${renovationRecord.getName()}|"/>
 
     <form th:action="@{/renovations/team/create(id=${renovationRecord.id})}" method="post" id="create-team-form" th:object="${teamRequestDTO}" novalidate>
-
+        <input type="hidden" id="automatic-invite" value="true" name="invitesAutomatic" th:field="*{invitesAutomatic}"/>
         <div class="input-group mb-3">
             <select class="form-select" id="skills-select" type="text" aria-label="skills-select" autocomplete="off" onchange="addSkill()">
                 <option disabled selected hidden>Select Role</option>

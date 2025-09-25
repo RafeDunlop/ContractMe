@@ -9,12 +9,15 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.MapService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/map")
@@ -23,6 +26,8 @@ public class MapController {
     private final MapService mapService;
     private final LoginService loginService;
     private final TeamsService teamsService;
+
+    private static final Logger logger = LoggerFactory.getLogger(MapController.class);
 
     @Autowired
     public MapController(MapService mapService, LoginService loginService, TeamsService teamsService) {
@@ -36,15 +41,17 @@ public class MapController {
      * Specify bounding coords via bounds.[min/max][Lat/Lon]
      * @param withPublic Whether to include public renovations not owned by the logged-in user within the range.
      *                   Default true
-     * @param rawCoordinates Contains the raw longitude and latitudes values which determine the bounding rectangle
+     * @param coordinateRectangle Contains the longitude and latitudes values which determine the bounding rectangle
      * @return a {@link Collection} of {@link MappedRenovation} DTO objects which contain the minimal requisite details
      */
-    @GetMapping("/renovations/{rawCoordinates}")
+    @GetMapping("/renovations")
     public Collection<MappedRenovation> getByLocationInBounds(
             @RequestParam(required = false, defaultValue = "true") boolean withPublic,
-            @PathVariable String rawCoordinates) {
-        CoordinateRectangle coordinateRectangle = mapService.createCoordinateRectangle(rawCoordinates);
-        return mapService.getRenovationsInBounds(coordinateRectangle, withPublic);
+            @ModelAttribute CoordinateRectangle coordinateRectangle) {
+        logger.trace("GET /map/renovations");
+        List<MappedRenovation> mappedRenovationList = mapService.getRenovationsInBounds(coordinateRectangle, withPublic);
+        logger.debug("mapped renovations returned: {}", mappedRenovationList.size());
+        return mappedRenovationList;
     }
 
     /**

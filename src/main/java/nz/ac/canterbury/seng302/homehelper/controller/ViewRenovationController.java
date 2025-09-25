@@ -25,6 +25,7 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 public class ViewRenovationController {
@@ -104,7 +105,13 @@ public class ViewRenovationController {
             model.addAttribute("teamId", team.getId());
         }
 
-        model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
+        if (Objects.equals(previousRenovationPage, "/main")) {
+            model.addAttribute("previousUrl", "/main");
+        } else {
+            model.addAttribute("previousUrl", previousRenovationPage + previousRenovationParameters);
+
+        }
+
         model.addAttribute("hasLocation", locationService.hasLocation(renovationRecord));
         model.addAttribute("hasTeam",teamsService.teamExists(renovationRecord.getId()));
         model.addAttribute("isOwner", isOwner);

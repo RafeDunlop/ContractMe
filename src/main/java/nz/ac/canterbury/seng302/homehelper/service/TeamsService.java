@@ -69,6 +69,7 @@ public class TeamsService {
      */
     public String createNewTeam(RenovationRecord teamRecord, TeamRequestDTO teamRequestDTO) {
         Team team = new Team(teamRecord);
+        team.setAutomaticFilling(teamRequestDTO.isInvitesAutomatic());
 
         List<Role> roles = createRoles(teamRequestDTO.getSkills());
         for(Role role : roles) {
@@ -77,6 +78,7 @@ public class TeamsService {
 
         teamsRepository.save(team);
         renovationRecordRepository.save(teamRecord);
+        if (!team.hasAutomaticFilling()) return "manual";
 
         Location renovationLocation = teamRecord.getLocation();
         String response = assignContractorsToTeam(team, renovationLocation);
@@ -414,6 +416,7 @@ public class TeamsService {
                 role.setStatus(RoleStatus.UNFILLED);
             }
         }
+        team.addBlacklistId(contractor.getId());
         teamsRepository.save(team);
         runAlgorithmAgain(team, team.getRenovationRecord().getLocation());
     }
@@ -425,6 +428,8 @@ public class TeamsService {
      * @param renovationLocation The location of the renovation record associated with the Team.
      */
     public void runAlgorithmAgain(Team team, Location renovationLocation) {
+        if (!team.hasAutomaticFilling()) return;
+
         Set<Long> beforeIds = team.getRoles().stream()
                 .map(Role::getContractorId)
                 .filter(id -> id != null && id != 0L)
