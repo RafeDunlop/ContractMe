@@ -55,9 +55,8 @@ class MapControllerIntegrationTest {
     private long idSecond;
 
     private long idThird;
-    private RenovationRecord recordFirst;
 
-    private Contractor contractor;
+    private RenovationRecord recordFirst;
 
     @Autowired
     private UserRepository userRepository;
@@ -67,8 +66,10 @@ class MapControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private ContractorRepository contractorRepository;
+
     @Autowired
     private TeamsRepository teamsRepository;
 
@@ -89,7 +90,6 @@ class MapControllerIntegrationTest {
         );
         notLoggedIn = userRepository.save(notLoggedIn);
 
-        renovationRecordRepository.deleteAll();
         recordFirst = registerRecord(loggedIn, false, 0d, 0d);
         idFirst = recordFirst.getId();
         idSecond = registerRecord(loggedIn, false, 4.999d, 0d).getId();
@@ -139,13 +139,6 @@ class MapControllerIntegrationTest {
                 longitude
         ));
         return contractorRepository.save(contractor);
-    }
-
-    private void createContractors() {
-        contractor = new Contractor("Jane", "Doe", "jane@doe.com", "password");
-        contractor.setSkills(Set.of(Skill.ACOUSTIC_INSULATION));
-        contractor.setLocation(new Location("77 Ilam Rd", "New Zealand", "8041", "Christchurch", "Ilam"));
-        contractor = userRepository.save(contractor);
     }
 
     @Test
@@ -292,29 +285,36 @@ class MapControllerIntegrationTest {
     @Test
     @WithMockUser("jimmy.nomaps@gmail.com")
     void getContractorByRenovationId_userNotInTeam_returnException() throws Exception {
-        RenovationRecord renovationRecord = renovationRecordRepository.findById(idFirst).orElse(null);
-        Team team = teamsRepository.save(new Team(renovationRecord));
+        Team team = teamsRepository.save(new Team(recordFirst));
 
         mockMvc.perform(get("/map/contractors?id=" + team.getId()))
                 .andExpect(status().isNotFound());
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"johnny.maps@gmail.com", "jane@doe.com"})
+    @ValueSource(strings = {"johnny.maps@gmail.com", "bob@contractor.nz"})
     void getContractorByRenovationId_userIsInTeam_returnContractors(String userEmail) throws Exception {
-        createContractors();
-        RenovationRecord renovationRecord = renovationRecordRepository.findById(idFirst).orElse(null);
-        Team team = new Team(renovationRecord);
-        Role role = new Role(Skill.ANTIQUE_RESTORATION);
-        role.setContractor(contractor);
-        team.addRole(role);
+        Contractor contractor1 = registerContractor("bob@contractor.nz", true,
+                Set.of(Skill.ACOUSTIC_INSULATION, Skill.ANTIQUE_RESTORATION), 1d, 1d);
+        Contractor contractor2 = registerContractor("bob@othercontractor.nz", true,
+                Set.of(Skill.ACOUSTIC_INSULATION, Skill.ANTIQUE_RESTORATION), 1d, 1d);
+
+        Role role1 = new Role(Skill.ACOUSTIC_INSULATION);
+        role1.setContractor(contractor1);
+        Role role2 = new Role(Skill.ANTIQUE_RESTORATION);
+        role2.setContractor(contractor2);
+
+        Team team = new Team(recordFirst);
+        team.addRole(role1);
+        team.addRole(role2);
         team = teamsRepository.save(team);
 
         mockMvc.perform(get("/map/contractors?id=" + team.getId())
                         .with(user(userEmail)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].fullName").value(contractor.getFullName()))
-                .andExpect(jsonPath("$[0].email").value(contractor.getEmail()))
-                .andExpect(jsonPath("$[0].skill").value(role.getSkill().name()));
+                .andExpect(jsonPath("$[0].email").value(contractor1.getEmail()))
+                .andExpect(jsonPath("$[0].skill").value(role1.getSkill().name()))
+                .andExpect(jsonPath("$[1].email").value(contractor2.getEmail()))
+                .andExpect(jsonPath("$[1].skill").value(role2.getSkill().name()));
     }
 }
