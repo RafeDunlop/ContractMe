@@ -1,4 +1,4 @@
-import {fetchRenovationMappings, debounce, computeLongitude, getCoordinateRectangle} from "./mapCommons.js";
+import {fetchRenovationMappings, debounce} from "./mapCommons.js";
 
 const waitTime = 200;
 const defaultZoom = 11;
@@ -34,10 +34,6 @@ function setup(startingCoordinates) {
         minZoom: 3,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(map);
-    updateMapContent()
-    for (const eventName of ["click", "moveend", "zoomend"]) {
-        map.on(eventName, handleMapChange)
-    }
 
     togglePublicCheckbox.addEventListener("change", toggleListener)
     const saved = localStorage.getItem("toggleState");
@@ -46,6 +42,10 @@ function setup(startingCoordinates) {
     } else {
         togglePublicCheckbox.checked = true;
     }
+    for (const eventName of ["click", "moveend", "zoomend"]) {
+        map.on(eventName, handleMapChange)
+    }
+    updateMapContent()
 }
 
 /**
@@ -53,7 +53,7 @@ function setup(startingCoordinates) {
  * the mappings and saves the users preference for soft persistence
  */
 function toggleListener() {
-    fetchRenovationMappings(getCoordinateRectangle(map), togglePublicCheckbox.checked)
+    fetchRenovationMappings(map, togglePublicCheckbox.checked)
         .then(mappings => populateMap(mappings))
     localStorage.setItem("toggleState",togglePublicCheckbox.checked)
 }
@@ -69,7 +69,7 @@ const handleMapChange = debounce(updateMapContent, waitTime)
  * Immediately calls a fetch request for updated renovation data and updates the map data when this is retrieved
  */
 function updateMapContent() {
-    fetchRenovationMappings(getCoordinateRectangle(map), togglePublicCheckbox.checked)
+    fetchRenovationMappings(map, togglePublicCheckbox.checked)
         .then(responseData => populateMap(responseData))
 }
 

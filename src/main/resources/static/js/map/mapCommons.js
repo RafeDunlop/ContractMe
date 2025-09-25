@@ -2,11 +2,14 @@
  * Gets the up-to-date renovations within frame.
  * If the bounds cross the date boundary, two requests are sent partitioned at the date boundary
  * and the union of both requests is yielded
- * @param bounds The up-to-date renovations in frame
+ * @param map The map from which information about the current view screen is retrieved
  * @param showPrivateOnly Whether to include other users' public renovations
  * @returns {Promise<Response>} promise which resolves to a collection of mappings to be exclusively displayed
  */
-export async function fetchRenovationMappings(bounds, showPrivateOnly) {
+export async function fetchRenovationMappings(map, showPrivateOnly) {
+    let resultMappings;
+    const bounds = getCoordinateRectangle(map);
+    const centre = map.getCenter();
     if (bounds.minLon >= 0 && bounds.maxLon <= 0) {
         const westBounds = {
             minLat: bounds.minLat,
@@ -22,9 +25,43 @@ export async function fetchRenovationMappings(bounds, showPrivateOnly) {
         }
         const westMappings = await singleRequest(westBounds, showPrivateOnly).then(response => response.json())
         const eastMappings = await singleRequest(eastBounds, showPrivateOnly).then(response => response.json())
-        return westMappings.addAll(eastMappings)
+        if (westMappings)
+            resultMappings = westMappings.concat(eastMappings)
+        else resultMappings = eastMappings
+    } else {
+        resultMappings = await singleRequest(bounds, showPrivateOnly).then(response => response.json())
     }
-    return await singleRequest(bounds, showPrivateOnly).then(response => response.json())
+    return addPhases(resultMappings, centre);
+}
+
+/**
+ * Sets the longitude phase of the specified mappings to that visible on the map itself, including duplication
+ * for multiphase view (when the date lien is on screen)
+ * @param mappings The mappings whose phase should be set
+ * @param centre The coordinates of the centre of the visible screen; current phase is extracted from these
+ * @returns {*} The union of mappings in visible phases
+ */
+function addPhases(mappings, centre) {
+    const phase = Math.floor(centre.lng / 360);
+    const leftCopy = shiftPhase(mappings, phase - 1);
+    const middleCopy = shiftPhase(mappings, phase);
+    const rightCopy = shiftPhase(mappings, phase + 1);
+    if (leftCopy) return leftCopy.concat(middleCopy).concat(rightCopy);
+    return leftCopy;
+}
+
+/**
+ * returns a (deep) copy of the specified mappings phase shifted to the specified phase
+ * @param mappings The mappings to be shifted
+ * @param phaseShift The number of revolutions from 0 to shift
+ * @returns {any} The shifted mappings
+ */
+function shiftPhase(mappings, phaseShift) {
+    const shifted = JSON.parse(JSON.stringify(mappings));
+    if (shifted) shifted.forEach(toShift =>
+        toShift.location.longitude = toShift.location.longitude + phaseShift * 360
+    );
+    return shifted;
 }
 
 /**
@@ -32,15 +69,15 @@ export async function fetchRenovationMappings(bounds, showPrivateOnly) {
  * @param map The map from which to retrieve bounds
  * @returns {{minLat: (HTMLElement|*), minLon: *, maxLat: (HTMLElement|*), maxLon: *}} The json object to be submitted
  */
-export function getCoordinateRectangle(map) {
+function getCoordinateRectangle(map) {
     const bounds = map.getBounds();
     const southwest = bounds.getSouthWest();
     const northeast = bounds.getNorthEast();
     return {
         minLat: southwest.lat,
-        minLon: southwest.lng,
+        minLon: computeLongitude(southwest.lng),
         maxLat: northeast.lat,
-        maxLon: northeast.lng
+        maxLon: computeLongitude(northeast.lng)
     }
 }
 
