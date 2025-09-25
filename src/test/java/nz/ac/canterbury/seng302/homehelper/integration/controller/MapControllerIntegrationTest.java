@@ -19,6 +19,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org. springframework. test. web. servlet. request. MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.springframework.test.context.ActiveProfiles;
@@ -174,7 +175,18 @@ public class MapControllerIntegrationTest {
         MvcResult result = mockMvc.perform(get("/map/renovation")
                 .param("id", String.valueOf(idFirst)))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.latitude").value(0d))
+                .andExpect(jsonPath("$.longitude").value(0d))
                 .andReturn();
 
     }
+
+    @Test
+    void getRenovationCoords_invalidId_returnsNotFound() throws Exception {
+        mockMvc.perform(get("/map/renovation")
+                .param("id", String.valueOf(idFirst)))
+                .andExpect(status().isNotFound());
+    }
+
+
 }
