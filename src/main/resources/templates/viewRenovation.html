@@ -27,18 +27,6 @@
         <input type="hidden" id="recordId" th:value="${renovation.id}"/>
         <input type="hidden" id="icons" th:value="${icons}"/>
 
-        <!-- Backend error message for algorithm response-->
-        <div class="alert alert-danger mt-2" role="alert" id="team-backend-error"
-             th:if="${response != null and response == false}">
-            <label>Unable to find any matching contractors for this team.</label>
-        </div>
-
-        <!-- Backend success message for algorithm response-->
-        <div class="alert alert-success mt-2" role="alert" id="team-backend-success"
-             th:if="${response != null and response == true}">
-            <label>Contractors assigned to team successfully.</label>
-        </div>
-
         <div id="content-container">
 
             <div id="renovation-name-header" class="renovation-name-header px-3 pt-3">
@@ -63,19 +51,19 @@
                         <li class="nav-item">
                             <button id="tasks-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'tasks'} ? ' active'">Tasks</button>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" th:if="${isOwner}">
                             <button id="calendar-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'calendar'} ? ' active'">Calendar</button>
                         </li>
                         <li class="nav-item">
                             <button id="view-location-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'view-location'} ? ' active'">View Location</button>
                         </li>
                     </ul>
-                    <div th:if="${isOwner}" class="col-auto mx-auto">
+                    <div th:if="${isOwner || isContractorAssignedToTeam}" class="col-auto mx-auto">
                         <!-- Create button for location and no team -->
                         <a th:href="@{/renovations/team/create(id=${renovation.id})}" class="btn btn-primary" id="create-team-button" th:if="${hasLocation && !hasTeam && isOwner}">Create Team</a>
                         <span class="align-self-center" th:unless="${hasLocation}" th:text="|Add a location to create a team|"></span>
 
-                        <a th:href="@{/renovations/team/view(id=${teamId})}" class="btn btn-primary" th:if="${hasTeam && (isOwner || isContractorAssignedToTeam)}">View Team</a>
+                        <a th:href="@{/renovations/team/view(id=${teamId})}" class="btn btn-primary" th:if="${hasTeam}">View Team</a>
 
 
                         <!-- Team exists, delete team -->
@@ -91,6 +79,18 @@
 
             <!-- RENOVATION DETAILS PAGE-->
             <div id="details-content" class="renovation-content" th:style="${tabBarFocus != 'details'} ? 'display: none;'">
+                <!-- Backend error message for algorithm response-->
+                <div class="alert alert-danger mt-2" role="alert" id="team-backend-error"
+                     th:if="${response != null and response == 'failure'}">
+                  <label>Unable to find any matching contractors for this team.</label>
+                </div>
+
+                <!-- Backend success message for algorithm response-->
+                <div class="alert alert-success mt-2" role="alert" id="team-backend-success"
+                     th:if="${response != null and response == 'success' }">
+                  <label>Contractors assigned to team successfully.</label>
+                </div>
+
                 <div th:if="${renovation.description} != ''" class="card p-3 bg-light mt-4 mb-3">
                     <h6 class="fw-bold">Description:</h6>
                     <p class="mb-0" th:text="${renovation.description}"></p>
@@ -130,7 +130,7 @@
 
                 <!-- Display added tags -->
                 <div id="tagList" class="mb-3">
-                    <h6 class="fw-bold d-block mb-1">Current Tags:</h6>
+                    <h6 class="fw-bold d-block h6">Current Tags:</h6>
                     <span th:each="tag : ${renovation.getSortedTags()}" class="tag-box badge bg-success d-inline-flex align-items-center me-2 mb-2">
                     <span class="tag-text-large text-truncate ms-1" th:text="${tag.getTagName()}"></span>
                     <button class="tag-delete-button-large btn-sm border-0 bg-transparent text-light ms-1"
@@ -149,9 +149,9 @@
 
                 <!-- Button section for details tab, has -->
                 <div class="mt-2 mb-4 d-flex">
-                    <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary" th:if="${isOwner}">Edit</a>
-                    <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-3" th:if="${previousUrl != null && !previousUrl.contains('/search')}">Back</a>
-                    <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary ms-3" th:if="${previousUrl.contains('/search')}">Back to search results</a>
+                    <a th:href="@{/renovations/edit(id=${renovation.id})}" class="btn btn-primary me-3" th:if="${isOwner}">Edit</a>
+                    <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary me-3" th:if="${previousUrl != null && !previousUrl.contains('/search')}">Back</a>
+                    <a th:href="@{${previousUrl}}" class="btn btn-outline-secondary" th:if="${previousUrl.contains('/search')}">Back to search results</a>
                 </div>
 
             </div>
@@ -160,7 +160,7 @@
             <div id="tasks-content" class="renovation-content"  th:style="${tabBarFocus != 'tasks'} ? 'display: none;'">
                 <div class="col-md-12 mt-4 mb-3 d-flex align-items-end gap-4">
                     <div>
-                        <label for="status-filter" class="fw-bold">Task State:</label>
+                        <label for="status-filter" class="fw-bold h6">Task State:</label>
                         <select id="status-filter" name="status" class="form-select"
                                 th:attr="onchange=|fetchRenovation(${renovation.id})|">
                             <option value="all" th:selected="${status == 'all'}">All</option>

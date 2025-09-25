@@ -112,6 +112,7 @@ public class TeamJoinRequestSteps {
     @Then("The system will automatically send an email to the contractor who is closest to the renovation location")
     public void the_system_will_automatically_send_an_email_to_the_contractor_who_is_closest_to_the_renovation_location() {
         TeamRequestDTO teamRequestDTO = new TeamRequestDTO();
+        teamRequestDTO.setInvitesAutomatic(true);
         teamRequestDTO.setSkills(List.of(Skill.CARPENTRY.toString()));
         teamsService.createNewTeam(renovationRecord, teamRequestDTO);
         Mockito.verify(emailService, times(1)).sendRequestToContractor(Mockito.anyString(), Mockito.anyString(),

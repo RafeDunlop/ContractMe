@@ -120,6 +120,7 @@ public class TeamSteps {
         mvcResult = mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", skillName, skillName)
+                        .param("invitesAutomatic", "true")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()))
@@ -131,6 +132,7 @@ public class TeamSteps {
         result =  mockMvc.perform(post("/renovations/team/create?id=" + renovationRecord.getId())
                 .param("id", renovationRecord.getId().toString())
                 .param("skills", "GAS_FITTING", "CNC_MACHINING")
+                .param("invitesAutomatic", "true")
                 .with(csrf()));
     }
     @Then("My team request is successfully created")

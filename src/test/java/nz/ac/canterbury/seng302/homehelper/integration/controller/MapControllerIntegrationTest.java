@@ -77,13 +77,13 @@ public class MapControllerIntegrationTest {
     }
 
     private RenovationRecord registerRecord(User user, boolean publicity, double latitude, double longitude) {
-        RenovationRecord record = new RenovationRecord(
+        RenovationRecord renovation = new RenovationRecord(
                 user,
                 "name",
                 "description",
                 List.of()
         );
-        record.setLocation(new Location(
+        renovation.setLocation(new Location(
                 "street address",
                 "country",
                 "postcode",
@@ -92,18 +92,18 @@ public class MapControllerIntegrationTest {
                 latitude,
                 longitude
         ));
-        record.setPublicity(publicity);
-        return renovationRecordRepository.save(record);
+        renovation.setPublicity(publicity);
+        return renovationRecordRepository.save(renovation);
     }
 
     @Test
     void getRenovationsInBounds_privateValidRectangle_getsPrivateMappings() throws Exception {
         MvcResult result = mockMvc.perform(get("/map/renovations")
-                        .param("withPublic", "false")
                         .param("minLat", Double.toString(0d))
                         .param("minLon", Double.toString(0d))
                         .param("maxLat", Double.toString(40d))
-                        .param("maxLon", Double.toString(40d)))
+                        .param("maxLon", Double.toString(40d))
+                        .param("withPublic", "false"))
                 .andExpect(status().isOk())
                 .andReturn();
         List<MappedRenovation> resultCaptive = mapper.readValue(
@@ -115,11 +115,7 @@ public class MapControllerIntegrationTest {
 
     @Test
     void getRenovationsInBounds_publicValidRectangleAndImplicitPublicityInclusion_getsAllMappings() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovations")
-                        .param("minLat", Double.toString(0d))
-                        .param("minLon", Double.toString(0d))
-                        .param("maxLat", Double.toString(40d))
-                        .param("maxLon", Double.toString(40d)))
+        MvcResult result = mockMvc.perform(get("/map/renovations/0D,0D,40D,40D"))
                 .andExpect(status().isOk())
                 .andReturn();
         List<MappedRenovation> resultCaptive = mapper.readValue(
@@ -133,11 +129,11 @@ public class MapControllerIntegrationTest {
     @Test
     void getRenovationsInBounds_publicValidRectangleAndExplicitPublicity_getsAllMappings() throws Exception {
         MvcResult result = mockMvc.perform(get("/map/renovations")
-                        .param("withPublic", "true")
                         .param("minLat", Double.toString(0d))
                         .param("minLon", Double.toString(0d))
                         .param("maxLat", Double.toString(40d))
-                        .param("maxLon", Double.toString(40d)))
+                        .param("maxLon", Double.toString(40d))
+                        .param("withPublic", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         List<MappedRenovation> resultCaptive = mapper.readValue(
@@ -150,11 +146,7 @@ public class MapControllerIntegrationTest {
 
     @Test
     void getRenovationsInBounds_publicAndPointRectangle_getsOnlyExactMatch() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovations")
-                        .param("minLat", Double.toString(0d))
-                        .param("minLon", Double.toString(0d))
-                        .param("maxLat", Double.toString(0d))
-                        .param("maxLon", Double.toString(0d)))
+        MvcResult result = mockMvc.perform(get("/map/renovations/0D,0D,0D,0D"))
                 .andExpect(status().isOk())
                 .andReturn();
         List<MappedRenovation> resultCaptive = mapper.readValue(
@@ -168,8 +160,8 @@ public class MapControllerIntegrationTest {
         MvcResult result = mockMvc.perform(get("/map/renovations")
                         .param("minLat", Double.toString(10d))
                         .param("minLon", Double.toString(10d))
-                        .param("maxLat", Double.toString(0d))
-                        .param("maxLon", Double.toString(0d)))
+                        .param("maxLat", Double.toString(10d))
+                        .param("maxLon", Double.toString(10d)))
                 .andExpect(status().isOk())
                 .andReturn();
         List<MappedRenovation> resultCaptive = mapper.readValue(
