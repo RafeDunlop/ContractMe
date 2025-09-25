@@ -34,7 +34,7 @@ function getUniqueCoordinate(list, lat, lon) {
 }
 
 const renovationId = document.getElementById("renovationId").value;
-const renovationResponse = await fetch(`/map/renovation?id=` + renovationId.toString());
+const renovationResponse = await fetch(`map/renovation?id=` + renovationId.toString());
 const { latitude: lat, longitude: lon } = await renovationResponse.json();
 
 let markerPositions = [[lat, lon]];
@@ -69,7 +69,7 @@ renovationMarker.on('mouseover', function () {
 
 const teamId = document.getElementById("teamId").value;
 if (teamId !== "") {
-    const contractorResponse = await fetch(`/map/contractors?id=` + teamId.toString());
+    const contractorResponse = await fetch(`map/contractors?id=` + teamId.toString());
     const contractors = await contractorResponse.json();
 
     contractors.forEach(contractor => {
@@ -77,7 +77,7 @@ if (teamId !== "") {
         const uniqueCoordinate = getUniqueCoordinate(markerPositions, latitude, longitude);
         markerPositions.push(uniqueCoordinate);
         const contractorIcon = L.divIcon({
-            html: `<img src="/profile_pictures/${contractor.profilePicture}"
+            html: `<img src="profile_pictures/${contractor.profilePicture}"
                        alt="Profile Picture"
                        class="contractor-img"
                        style="width: clamp(32px, 0vw, 32px); height: clamp(32px, 0vw, 32px); object-fit: cover;"/>
