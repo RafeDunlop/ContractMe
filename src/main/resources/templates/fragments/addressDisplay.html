@@ -18,6 +18,13 @@
             <span th:if="${address.country != null && address.country != ''}" th:text="', ' + ${address.country}"></span>
         </div>
     </div>
+
+    <div id="renovation-address"
+         th:attr="data-address=${#strings.defaultString(address.address,'')},
+              data-suburb=${#strings.defaultString(address.suburb,'')},
+              data-city=${#strings.defaultString(address.city,'')},
+              data-postcode=${#strings.defaultString(address.postcode,'')}">
+    </div>
 </div>
 </body>
 </html>
