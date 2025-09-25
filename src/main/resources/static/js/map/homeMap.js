@@ -1,4 +1,6 @@
 import {fetchRenovationMappings, debounce} from "./mapCommons.js";
+import { buildRenovationTooltip } from "./mapTooltips.js";
+
 
 const waitTime = 200;
 const defaultZoom = 11;
@@ -89,7 +91,7 @@ function populateMap(renovationData) {
                 [renovation.location.latitude, renovation.location.longitude], {icon}
             ).addTo(renovationIconGroup);
 
-            marker.bindPopup(buildRenovationPopup(renovation), {
+            marker.bindPopup(buildRenovationTooltip(renovation, true), {
                 autoPan: true,
                 autoClose: true,
                 closeButton: false,
@@ -103,48 +105,4 @@ function populateMap(renovationData) {
             });
         });
     }
-}
-
-/**
- * Creates a bootstrap styled card, to display as a tooltip on the map.
- * @param renovation The renovation corresponding to the tooltips, whose information is displayed.
- * @returns {HTMLDivElement} The card element to display as tooltip.
- */
-function buildRenovationPopup(renovation) {
-    const tooltipCard = document.createElement('div');
-    tooltipCard.className = 'map-tooltip card border-0 shadow-sm';
-
-    const cardBody = document.createElement('div');
-    cardBody.className = 'card-body p-4';
-    tooltipCard.appendChild(cardBody);
-
-    const title = document.createElement('h6');
-    title.className = 'fw-bold mb-0';
-    title.textContent = renovation.name || '';
-    cardBody.appendChild(title);
-
-    const addressParts = [
-        renovation.location.address,
-        renovation.location.suburb,
-        renovation.location.city,
-        renovation.location.postcode
-    ].filter(Boolean);
-
-    if (addressParts.length) {
-        const address = document.createElement('p');
-        address.className = 'text-muted address mb-3';
-        address.textContent = addressParts.join(', ');
-        cardBody.appendChild(address);
-    }
-
-    const viewRenovationUrl = new URL('renovations/view', document.baseURI);
-    viewRenovationUrl.searchParams.set('id', renovation.id);
-
-    const viewButton = document.createElement('a');
-    viewButton.className = 'btn btn-primary text-white';
-    viewButton.href = viewRenovationUrl.toString();
-    viewButton.textContent = 'View Renovation';
-    cardBody.appendChild(viewButton);
-
-    return tooltipCard;
 }
