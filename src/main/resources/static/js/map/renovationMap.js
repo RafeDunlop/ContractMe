@@ -60,7 +60,11 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
 }).addTo(map);
 
-const renovationMarker = L.marker([lat, lon], { icon: userRenovation }).addTo(map);
+const renovationMarker = L.marker([lat, lon], {
+    icon: userRenovation,
+    zIndexOffset: 1000
+}).addTo(map);
+
 renovationMarker.on('mouseover', function () {
     this.bringToFront();
 });
