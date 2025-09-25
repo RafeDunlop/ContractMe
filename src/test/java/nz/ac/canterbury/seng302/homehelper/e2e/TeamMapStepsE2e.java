@@ -91,8 +91,7 @@ public class TeamMapStepsE2e {
         RunPlaywrightTests.page.waitForSelector("#view-location-tab-item");
         RunPlaywrightTests.page.click("#view-location-tab-item");
 
-        RunPlaywrightTests.page.waitForSelector("img[src*='user-renovation.png']",
-                new Page.WaitForSelectorOptions().setTimeout(5000));
+        RunPlaywrightTests.page.waitForSelector("img[src*='user-renovation.png']");
 
         boolean markerExists = RunPlaywrightTests.page.locator("img[src*='user-renovation.png']").isVisible();
         Assertions.assertTrue(markerExists);
@@ -102,8 +101,7 @@ public class TeamMapStepsE2e {
     public void the_contractors_are_shown_on_the_map() {
         String contractorIcon = contractor.getProfilePicture();
 
-        RunPlaywrightTests.page.waitForSelector("img.contractor-img[src*='" + contractorIcon + "']",
-                new Page.WaitForSelectorOptions().setTimeout(5000));
+        RunPlaywrightTests.page.waitForSelector("img.contractor-img[src*='" + contractorIcon + "']");
 
         boolean markerExists = RunPlaywrightTests.page.locator("img.contractor-img[src*='" + contractorIcon + "']").isVisible();
         Assertions.assertTrue(markerExists);
