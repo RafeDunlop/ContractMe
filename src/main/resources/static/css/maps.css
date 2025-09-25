@@ -1,6 +1,7 @@
-.home-map {
+.contractme-map {
     height: 700px;
     width: 1500px;
+    z-index: 0;
 }
 
 .map-tooltip .address {

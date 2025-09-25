@@ -67,6 +67,7 @@
                                 <h5 th:if="${team.hasAutomaticFilling()}">No Contractor Found</h5>
                                 <button type="button" class="btn btn-primary"
                                         th:unless="${team.hasAutomaticFilling()}"
+                                        th:attr="data-skill=${role.getSkill()}"
                                         th:onclick="|selectContractorToInvite(event)|">Invite Contractor
                                 </button>
                             </div>
@@ -161,7 +162,7 @@
 <script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
 <script type="module" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="module" th:src="@{/js/navbar.js}"></script>
-<script type="module" th:src="@{/js/contractorSelectionMap.js}"></script>
+<script type="module" th:src="@{/js/map/contractorSelectionMap.js}"></script>
 <script type="module" th:src="@{/js/deleteContractor.js}"></script>
 
 
