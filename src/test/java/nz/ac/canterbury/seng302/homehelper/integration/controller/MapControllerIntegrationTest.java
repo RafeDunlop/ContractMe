@@ -26,6 +26,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org. springframework. test. web. servlet. request. MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.springframework.test.context.ActiveProfiles;
@@ -41,7 +42,7 @@ import java.util.stream.Stream;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @WithMockUser(username = "johnny.maps@gmail.com")
-class MapControllerIntegrationTest {
+public class MapControllerIntegrationTest {
 
     private ObjectMapper mapper;
 
@@ -147,10 +148,10 @@ class MapControllerIntegrationTest {
     @Test
     void getRenovationsInBounds_publicValidRectangleAndImplicitPublicityInclusion_getsAllMappings() throws Exception {
         MvcResult result = mockMvc.perform(get("/map/renovations")
-                        .param("minLat", Double.toString(0d))
-                        .param("minLon", Double.toString(0d))
-                        .param("maxLat", Double.toString(40d))
-                        .param("maxLon", Double.toString(40d)))
+                .param("minLat", Double.toString(0d))
+                .param("minLon", Double.toString(0d))
+                .param("maxLat", Double.toString(40d))
+                .param("maxLon", Double.toString(40d)))
                 .andExpect(status().isOk())
                 .andReturn();
         List<MappedRenovation> resultCaptive = mapper.readValue(
@@ -185,7 +186,8 @@ class MapControllerIntegrationTest {
                         .param("minLat", Double.toString(0d))
                         .param("minLon", Double.toString(0d))
                         .param("maxLat", Double.toString(0d))
-                        .param("maxLon", Double.toString(0d)))
+                        .param("maxLon", Double.toString(0d))
+                        .param("withPublic", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         List<MappedRenovation> resultCaptive = mapper.readValue(
@@ -206,6 +208,35 @@ class MapControllerIntegrationTest {
         List<MappedRenovation> resultCaptive = mapper.readValue(
                 result.getResponse().getContentAsString(), new TypeReference<>(){});
         assertTrue(resultCaptive.isEmpty());
+    }
+
+    @Test
+    void getRenovationCoords_validId_returnsValidCoordinates() throws Exception {
+        mockMvc.perform(get("/map/renovation")
+                .param("id", String.valueOf(idFirst)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.latitude").value(0d))
+                .andExpect(jsonPath("$.longitude").value(0d))
+                .andReturn();
+
+    }
+
+    @Test
+    void getRenovationCoords_invalidId_returnsNotFound() throws Exception {
+        mockMvc.perform(get("/map/renovation")
+                .param("id", String.valueOf(99999)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getRenovationCoords_publicNotOwnedRenovation_returnsValidCoords() throws Exception {
+        mockMvc.perform(get("/map/renovation")
+                .param("id", String.valueOf(idThird)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.latitude").value(2d))
+                .andExpect(jsonPath("$.longitude").value(2d))
+                .andReturn();
+
     }
 
     @Test

@@ -379,7 +379,7 @@ public class TeamsService {
                 location.getLatitude(),
                 location.getLongitude(),
                 role.getSkill().toString(),
-                CONTRACTOR_MAX_DISTANCE,
+                200,
                 blacklist.isEmpty() ? null : blacklist
         );
     }
@@ -484,5 +484,29 @@ public class TeamsService {
         List<Contractor> contractors = contractorRepository.findEligible(skill.toString(), location.getLatitude(),
                 location.getLongitude(), CONTRACTOR_MAX_DISTANCE);
         return contractors.stream().map(contractor -> new MappedContractor(contractor, skill)).toList();
+    }
+
+    /**
+     * Returns a list of contractors assigned to a team as MappedContractor objects so that only the contractor
+     * information needed for the map is returned.
+     * @param teamId The ID of the team
+     * @return A collection of contractors
+     */
+    public Collection<MappedContractor> getMappedContractorsByTeamId(Long teamId) {
+        Team team = getTeamById(teamId);
+        List<Role> roles = team.getRoles();
+        Map<Long, Contractor> contractors = getContractorsByTeamId(teamId);
+
+        return contractors.values().stream().map(contractor ->
+                new MappedContractor(
+                        contractor.getFullName(),
+                        contractor.getEmail(),
+                        contractor.getLocation(),
+                        contractor.getPhoneNumberFormatted(),
+                        roles.stream().filter(role -> Objects.equals(role.getContractorId(), contractor.getId()))
+                                .map(Role::getSkill).findFirst().orElse(null),
+                        contractor.getHourlyRate(),
+                        contractor.getProfilePicture()))
+                .toList();
     }
 }
