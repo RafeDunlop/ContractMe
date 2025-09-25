@@ -68,7 +68,7 @@ renovationMarker.on('mouseover', function () {
 });
 
 const teamId = document.getElementById("teamId").value;
-if (teamId !== null) {
+if (teamId !== "") {
     const contractorResponse = await fetch(`/map/contractors?id=` + teamId.toString());
     const contractors = await contractorResponse.json();
 
