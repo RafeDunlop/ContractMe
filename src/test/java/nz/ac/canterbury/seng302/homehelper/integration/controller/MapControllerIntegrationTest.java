@@ -228,7 +228,16 @@ public class MapControllerIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void getRenovationCoords_publicNotOwnedRenovation_returnsValidCoords() throws Exception {
+        mockMvc.perform(get("/map/renovation")
+                .param("id", String.valueOf(idThird)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.latitude").value(2d))
+                .andExpect(jsonPath("$.longitude").value(2d))
+                .andReturn();
 
+    }
 
     @Test
     void getEligibleContractors_contractorsInBounds_returnsCorrectList() throws Exception {
