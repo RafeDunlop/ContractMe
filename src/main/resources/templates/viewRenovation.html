@@ -54,7 +54,7 @@
                         <li class="nav-item" th:if="${isOwner}">
                             <button id="calendar-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'calendar'} ? ' active'">Calendar</button>
                         </li>
-                        <li class="nav-item">
+                        <li th:if="${hasLocation}" class="nav-item">
                             <button id="view-location-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'view-location'} ? ' active'">View Location</button>
                         </li>
                     </ul>
@@ -266,5 +266,5 @@
 <script type="module" th:src="@{/js/deleteTeam.js}"></script>
 <script type="module" th:src="@{/js/viewRenovationTabBar.js}"></script>
 <script th:src="@{/webjars/leaflet/dist/leaflet.js}"></script>
-<script type="module" th:src="@{/js/map/renovationMap.js}"></script>
+<script th:if="${hasLocation}" type="module" th:src="@{/js/map/renovationMap.js}"></script>
 </html>
