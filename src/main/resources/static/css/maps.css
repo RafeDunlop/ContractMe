@@ -15,6 +15,23 @@
 
 .leaflet-popup-content { margin: 0 !important; }
 
+.contractor-icon-wrapper {
+    background: transparent;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
 
+.contractor-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
 
-
+.contractor-icon-wrapper:hover {
+    z-index: 1000 !important;
+}
