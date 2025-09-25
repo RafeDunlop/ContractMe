@@ -116,7 +116,11 @@ public class MapControllerIntegrationTest {
 
     @Test
     void getRenovationsInBounds_publicValidRectangleAndImplicitPublicityInclusion_getsAllMappings() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovations/0D,0D,40D,40D"))
+        MvcResult result = mockMvc.perform(get("/map/renovations")
+                .param("minLat", Double.toString(0d))
+                .param("minLon", Double.toString(0d))
+                .param("maxLat", Double.toString(40d))
+                .param("maxLon", Double.toString(40d)))
                 .andExpect(status().isOk())
                 .andReturn();
         List<MappedRenovation> resultCaptive = mapper.readValue(
@@ -147,7 +151,12 @@ public class MapControllerIntegrationTest {
 
     @Test
     void getRenovationsInBounds_publicAndPointRectangle_getsOnlyExactMatch() throws Exception {
-        MvcResult result = mockMvc.perform(get("/map/renovations/0D,0D,0D,0D"))
+        MvcResult result = mockMvc.perform(get("/map/renovations")
+                        .param("minLat", Double.toString(0d))
+                        .param("minLon", Double.toString(0d))
+                        .param("maxLat", Double.toString(0d))
+                        .param("maxLon", Double.toString(0d))
+                        .param("withPublic", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
         List<MappedRenovation> resultCaptive = mapper.readValue(
@@ -184,7 +193,7 @@ public class MapControllerIntegrationTest {
     @Test
     void getRenovationCoords_invalidId_returnsNotFound() throws Exception {
         mockMvc.perform(get("/map/renovation")
-                .param("id", String.valueOf(idFirst)))
+                .param("id", String.valueOf(999)))
                 .andExpect(status().isNotFound());
     }
 

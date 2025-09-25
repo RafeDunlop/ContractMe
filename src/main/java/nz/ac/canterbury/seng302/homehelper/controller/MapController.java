@@ -66,7 +66,7 @@ public class MapController {
         User user = loginService.getUserByEmail();
         RenovationRecord renovationRecord = renovationRecordService.getRecordById(id);
         boolean isInTeam = teamsService.checkViewRenovationAccess(renovationRecord, user);
-        if (isInTeam || renovationRecord.getUser() == user) {
+        if (renovationRecord != null  &&  (isInTeam || renovationRecord.getUser() == user)) {
              return mapService.getCoordsFromRenovation(id);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
