@@ -3,8 +3,10 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import nz.ac.canterbury.seng302.homehelper.dto.CoordinateRectangle;
 import nz.ac.canterbury.seng302.homehelper.dto.MappedContractor;
 import nz.ac.canterbury.seng302.homehelper.dto.MappedRenovation;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
 import nz.ac.canterbury.seng302.homehelper.service.MapService;
@@ -73,5 +75,13 @@ public class MapController {
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/eligible")
+    public Collection<MappedContractor> getEligibleContractors(@RequestParam Skill skill, @RequestParam String teamId) {
+        long id = Long.parseLong(teamId);
+        Team team = teamsService.getTeamById(id);
+        Location location = team.getRenovationRecord().getLocation();
+        return teamsService.getEligibleContractors(skill, location);
     }
 }
