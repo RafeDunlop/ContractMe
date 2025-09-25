@@ -1,12 +1,45 @@
-import {computeLongitude} from "./mapCommons.js";
+/**
+ * Checks whether a given latitude and longitude coordinate already exists as a marker.
+ *
+ * @param {Array<[number, number]>} list List of existing marker coordinates.
+ * @param {number} lat Latitude of the new coordinate.
+ * @param {number} lon Longitude of the new coordinate.
+ * @returns {boolean} {*} True if a coordinate within a small tolerance already exists in the list.
+ */
+function coordinateExists(list, lat, lon) {
+    const tolerance = 0.0001;
+    return list.some(([existingLat, existingLon]) => {
+        return Math.abs(existingLat - lat) < tolerance && Math.abs(existingLon - lon) < tolerance;
+    })
+}
+
+/**
+ * Returns a coordinate guaranteed to be unique within a list of marker coordinates.
+ * Slightly shifts the coordinate if a duplicate is found.
+ *
+ * @param {Array<[number, number]>} list List of existing marker coordinates.
+ * @param {number} lat Latitude of the new coordinate.
+ * @param {number} lon Longitude of the new coordinate.
+ * @returns {[number, number]} A unique coordinate which could be shifted to avoid complete overlap.
+ */
+function getUniqueCoordinate(list, lat, lon) {
+    let newLat = lat;
+    let newLon = lon;
+    const shift = 0.00005;
+    if (coordinateExists(list, newLat, newLon)) {
+        newLat += shift;
+        newLon += shift;
+    }
+    return [newLat, newLon];
+}
+
 const renovationId = document.getElementById("renovationId").value;
-console.log(renovationId);
-const response = await fetch(`/map/renovation?id=` + renovationId.toString());
+const renovationResponse = await fetch(`map/renovation?id=` + renovationId.toString());
+const { latitude: lat, longitude: lon } = await renovationResponse.json();
 
-const { latitude: lat, longitude: lon } = await response.json();
+let markerPositions = [[lat, lon]];
 
-const map = L.map('renovation-map').setView([lat, computeLongitude(lon)], 14);
-
+const map = L.map('renovation-map');
 
 document.getElementById("view-location-tab-item").addEventListener("click", () => {
     setTimeout(() => {
@@ -25,4 +58,51 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
 }).addTo(map);
 
-L.marker([lat, lon], { icon: userRenovation }).addTo(map);
+const renovationMarker = L.marker([lat, lon], {
+    icon: userRenovation,
+    zIndexOffset: 1000
+}).addTo(map);
+
+renovationMarker.on('mouseover', function () {
+    this.bringToFront();
+});
+
+const teamId = document.getElementById("teamId").value;
+if (teamId !== "") {
+    const contractorResponse = await fetch(`map/contractors?id=` + teamId.toString());
+    const contractors = await contractorResponse.json();
+
+    contractors.forEach(contractor => {
+        const { latitude, longitude } = contractor.location;
+        const uniqueCoordinate = getUniqueCoordinate(markerPositions, latitude, longitude);
+        markerPositions.push(uniqueCoordinate);
+        const contractorIcon = L.divIcon({
+            html: `<img src="profile_pictures/${contractor.profilePicture}"
+                       alt="Profile Picture"
+                       class="contractor-img"
+                       style="width: clamp(32px, 0vw, 32px); height: clamp(32px, 0vw, 32px); object-fit: cover;"/>
+            `,
+            className: 'contractor-icon-wrapper',
+            iconSize: [32, 32]
+        })
+        const contractorMarker = L.marker([uniqueCoordinate[0], uniqueCoordinate[1]], {
+            icon: contractorIcon
+        }).addTo(map);
+
+        contractorMarker.on('mouseover', function () {
+            this.bringToFront();
+        });
+    })
+}
+
+document.getElementById("view-location-tab-item").addEventListener("click", () => {
+    setTimeout(() => {
+        map.invalidateSize();
+        if (markerPositions.length > 1) {
+            const bounds = L.latLngBounds(markerPositions);
+            map.fitBounds(bounds, {padding: [50, 50]});
+        } else {
+            map.setView([lat, lon], 14);
+        }
+    }, 100);
+});

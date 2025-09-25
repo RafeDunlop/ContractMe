@@ -16,8 +16,11 @@ import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +28,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org. springframework. test. web. servlet. request. MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,7 +46,7 @@ import java.util.stream.Stream;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @WithMockUser(username = "johnny.maps@gmail.com")
-public class MapControllerIntegrationTest {
+class MapControllerIntegrationTest {
 
     private ObjectMapper mapper;
 
@@ -51,6 +55,7 @@ public class MapControllerIntegrationTest {
     private long idSecond;
 
     private long idThird;
+
     private RenovationRecord recordFirst;
 
     @Autowired
@@ -61,8 +66,10 @@ public class MapControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private ContractorRepository contractorRepository;
+
     @Autowired
     private TeamsRepository teamsRepository;
 
@@ -83,13 +90,19 @@ public class MapControllerIntegrationTest {
         );
         notLoggedIn = userRepository.save(notLoggedIn);
 
-        renovationRecordRepository.deleteAll();
         recordFirst = registerRecord(loggedIn, false, 0d, 0d);
         idFirst = recordFirst.getId();
         idSecond = registerRecord(loggedIn, false, 4.999d, 0d).getId();
         idThird = registerRecord(notLoggedIn, true, 2d, 2d).getId();
         registerRecord(notLoggedIn, false, 3d, 3d);
         mapper = new ObjectMapper();
+    }
+
+    @AfterEach
+    void tearDown() {
+        renovationRecordRepository.deleteAll();
+        userRepository.deleteAll();
+        teamsRepository.deleteAll();
     }
 
     private RenovationRecord registerRecord(User user, boolean publicity, double latitude, double longitude) {
@@ -267,5 +280,41 @@ public class MapControllerIntegrationTest {
                 .param("teamId", String.valueOf(team.getId()))).andReturn();
         List<MappedContractor> actualContractors = mapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>(){});
         assertEquals(0, actualContractors.size());
+    }
+
+    @Test
+    @WithMockUser("jimmy.nomaps@gmail.com")
+    void getContractorByRenovationId_userNotInTeam_returnException() throws Exception {
+        Team team = teamsRepository.save(new Team(recordFirst));
+
+        mockMvc.perform(get("/map/contractors?id=" + team.getId()))
+                .andExpect(status().isNotFound());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"johnny.maps@gmail.com", "bob@contractor.nz"})
+    void getContractorByRenovationId_userIsInTeam_returnContractors(String userEmail) throws Exception {
+        Contractor contractor1 = registerContractor("bob@contractor.nz", true,
+                Set.of(Skill.ACOUSTIC_INSULATION, Skill.ANTIQUE_RESTORATION), 1d, 1d);
+        Contractor contractor2 = registerContractor("bob@othercontractor.nz", true,
+                Set.of(Skill.ACOUSTIC_INSULATION, Skill.ANTIQUE_RESTORATION), 1d, 1d);
+
+        Role role1 = new Role(Skill.ACOUSTIC_INSULATION);
+        role1.setContractor(contractor1);
+        Role role2 = new Role(Skill.ANTIQUE_RESTORATION);
+        role2.setContractor(contractor2);
+
+        Team team = new Team(recordFirst);
+        team.addRole(role1);
+        team.addRole(role2);
+        team = teamsRepository.save(team);
+
+        mockMvc.perform(get("/map/contractors?id=" + team.getId())
+                        .with(user(userEmail)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].email").value(contractor1.getEmail()))
+                .andExpect(jsonPath("$[0].skill").value(role1.getSkill().name()))
+                .andExpect(jsonPath("$[1].email").value(contractor2.getEmail()))
+                .andExpect(jsonPath("$[1].skill").value(role2.getSkill().name()));
     }
 }

@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.unit.service;
 
+import nz.ac.canterbury.seng302.homehelper.dto.MappedContractor;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
@@ -21,6 +22,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -45,6 +49,12 @@ public class TeamServiceTest {
     private Location location;
     private User owner;
 
+    private Contractor contractor1;
+
+    private Contractor contractor2;
+
+    private Team team1;
+
     @BeforeEach
     void setUp() {
         teamsService = new TeamsService(teamsRepository, teamValidation, contractorRepository, emailService, renovationRecordRepository);
@@ -54,6 +64,16 @@ public class TeamServiceTest {
         location = mock(Location.class);
 
         team = new Team(renovationRecord);
+
+        contractor1 = spy(new Contractor("Alice", "Doe", "alice@doe.com", "encoded"));
+        contractor1.addSkill(Skill.PLUMBING);
+        contractor1.addSkill(Skill.ELECTRICAL);
+
+        contractor2 = spy(new Contractor("Bob", "Doe", "bob@doe.com", "encoded"));
+        contractor2.addSkill(Skill.PLUMBING);
+        contractor2.addSkill(Skill.ELECTRICAL);
+
+        team1 = new Team(new RenovationRecord());
     }
 
     @Test
@@ -385,4 +405,53 @@ public class TeamServiceTest {
         assertNotSame(RoleStatus.ACCEPTED, role.getStatus());
     }
 
+    @Test
+    void getMappedContractorsByTeamId_teamWithOneContractor_returnContractor() {
+        Role role1 = spy(new Role(Skill.PLUMBING));
+        role1.setContractor(contractor1);
+        team1.addRole(role1);
+
+        when(contractor1.getId()).thenReturn(1L);
+        when(role1.getContractorId()).thenReturn(1L);
+        when(teamsRepository.findById(1L)).thenReturn(Optional.of(team1));
+        when(contractorRepository.findById(1L)).thenReturn(Optional.of(contractor1));
+
+        Collection<MappedContractor> mappedContractors = teamsService.getMappedContractorsByTeamId(1L);
+
+        assertThat(mappedContractors)
+                .hasSize(1)
+                .extracting(MappedContractor::fullName, MappedContractor::skill)
+                .contains(
+                        tuple(contractor1.getFullName(), Skill.PLUMBING)
+                );
+    }
+
+    @Test
+    void getMappedContractorsByTeamId_teamWithContractorsWithMultipleSkills_returnContractorsWithCorrectSkills() {
+        Role role1 = spy(new Role(Skill.PLUMBING));
+        role1.setContractor(contractor1);
+        team1.addRole(role1);
+
+        Role role2 = spy(new Role(Skill.ELECTRICAL));
+        role2.setContractor(contractor2);
+        team1.addRole(role2);
+
+        when(contractor1.getId()).thenReturn(1L);
+        when(contractor2.getId()).thenReturn(2L);
+        when(role1.getContractorId()).thenReturn(1L);
+        when(role2.getContractorId()).thenReturn(2L);
+        when(teamsRepository.findById(1L)).thenReturn(Optional.of(team1));
+        when(contractorRepository.findById(1L)).thenReturn(Optional.of(contractor1));
+        when(contractorRepository.findById(2L)).thenReturn(Optional.of(contractor2));
+
+        Collection<MappedContractor> mappedContractors = teamsService.getMappedContractorsByTeamId(1L);
+
+        assertThat(mappedContractors)
+                .hasSize(2)
+                .extracting(MappedContractor::fullName, MappedContractor::skill)
+                .containsExactlyInAnyOrder(
+                        tuple(contractor1.getFullName(), Skill.PLUMBING),
+                        tuple(contractor2.getFullName(), Skill.ELECTRICAL)
+                );
+    }
 }
