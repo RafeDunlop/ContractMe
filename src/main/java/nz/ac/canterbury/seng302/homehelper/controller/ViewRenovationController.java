@@ -150,7 +150,8 @@ public class ViewRenovationController {
 
         User user = loginService.getUserByEmail();
         boolean isOwner = user.equals(renovationRecord.getUser());
-        if (!isOwner) {
+        boolean isAssigned = teamsService.checkViewRenovationAccess(renovationRecord, user);
+        if (!isOwner && !isAssigned) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, RENOVATION_NOT_ACCESSIBLE);
         }
 

@@ -774,4 +774,51 @@ class TeamsServiceIntegrationTest {
         List<MappedContractor> actualContractors = teamsService.getEligibleContractors(Skill.ARCHITECTURE, renovation.getLocation(), team);
         assertEquals(expectedContractors, actualContractors);
     }
+
+    @Test
+    void checkContractorAssigned_contractorAssigned_returnsTrue() {
+        Contractor contractor = new Contractor("Alice", "Builder", "alice@builder.com", "password");
+        contractor.setSkills(Set.of(Skill.ARCHITECTURE));
+        Location location = new Location("", "", "", "", "", -42.297332, 172.381);
+        contractor.setLocation(location);
+        contractor.setAvailable(true);
+        contractor = contractorRepository.save(contractor);
+        Team team = new Team(renovation);
+        Role role = new Role(Skill.ARCHITECTURE);
+        role.setContractor(contractor);
+        role.setStatus(RoleStatus.ACCEPTED);
+        team.addRole(role);
+        teamsRepository.save(team);
+        assertTrue(teamsService.isContractorAssigned(renovation, contractor));
+
+    }
+
+
+    @Test
+    void checkContractorAssigned_contractorUnassigned_returnsFalse() {
+        Contractor contractor = new Contractor("Alice", "Builder", "alice@builder.com", "password");
+        contractor.setSkills(Set.of(Skill.ARCHITECTURE));
+        Location location = new Location("", "", "", "", "", -42.297332, 172.381);
+        contractor.setLocation(location);
+        contractor.setAvailable(true);
+        contractor = contractorRepository.save(contractor);
+        Team team = new Team(renovation);
+        Role role = new Role(Skill.ARCHITECTURE);
+        role.setContractor(contractor);
+        role.setStatus(RoleStatus.WAITING);
+        team.addRole(role);
+        teamsRepository.save(team);
+        assertFalse(teamsService.isContractorAssigned(renovation, contractor));
+
+    }
+
+    @Test
+    void checkContractorAssigned_roleEmtpy_returnsFalse() {
+        Contractor contractor = new Contractor("Alice", "Builder", "alice@builder.com", "password");
+        Team team = new Team(renovation);
+        Role role = new Role(Skill.ARCHITECTURE);
+        team.addRole(role);
+        teamsRepository.save(team);
+        assertFalse(teamsService.isContractorAssigned(renovation, contractor));
+    }
 }
