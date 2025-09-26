@@ -100,9 +100,9 @@ public class TeamMapStepsE2e {
     public void the_contractors_are_shown_on_the_map() {
         String contractorIcon = contractor.getProfilePicture();
 
-        RunPlaywrightTests.page.waitForSelector("img.contractor-img[src*='" + contractorIcon + "']");
+        RunPlaywrightTests.page.waitForSelector("img.contractor-img[src='profile_pictures/" + contractorIcon + "']");
 
-        boolean markerExists = RunPlaywrightTests.page.locator("img.contractor-img[src*='" + contractorIcon + "']").isVisible();
+        boolean markerExists = RunPlaywrightTests.page.locator("img.contractor-img[src='profile_pictures/" + contractorIcon + "']").isVisible();
         Assertions.assertTrue(markerExists);
     }
 }
