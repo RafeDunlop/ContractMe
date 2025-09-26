@@ -2,7 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.integration.controller;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDate;
@@ -10,12 +10,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.annotation.PostConstruct;
 import nz.ac.canterbury.seng302.homehelper.controller.EditTaskController;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.Team;
+import nz.ac.canterbury.seng302.homehelper.entity.users.*;
+import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationRecordService;
 import nz.ac.canterbury.seng302.homehelper.service.RenovationTaskService;
 import nz.ac.canterbury.seng302.homehelper.validation.RenovationTaskValidation;
@@ -36,7 +40,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 
-import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -58,10 +61,14 @@ public class EditTaskControllerIntegrationTest {
     private UserRepository userRepository;
 
     @MockBean
+    private TeamsRepository teamsRepository;
+
+    @MockBean
     private RenovationTaskService renovationTaskService;
 
     @MockBean
     private RenovationRecordService renovationRecordService;
+    private RenovationRecord renovationRecord;
 
     private User user;
 
@@ -78,7 +85,7 @@ public class EditTaskControllerIntegrationTest {
         User notOwner = new User("Not", "Owner", "not.owner@doe.com", "Password");
         when(userRepository.findByEmailIgnoreCase("not.owner@doe.com")).thenReturn(Optional.of(notOwner));
 
-        RenovationRecord renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
+        renovationRecord = new RenovationRecord(user, "Renovation 1", "Description", List.of("Room 1", "Room 2"));
         when(renovationRecordService.getRecordById(1L)).thenReturn(renovationRecord);
 
         RenovationTask renovationTask = new RenovationTask("Task 1", "New Task", new ArrayList<>(), null, renovationRecord);
@@ -318,5 +325,26 @@ public class EditTaskControllerIntegrationTest {
                         .param("taskId", "1")
                         .param("renovationId", "1"))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    @WithMockUser(username = "contractor@doe.com")
+    public void testSetTaskStatus_isContractorAssigned_ok() throws Exception {
+        Contractor contractor = spy(new Contractor("Alice", "Builder", "contractor@doe.com", "password"));
+        doReturn(1L).when(contractor).getId();
+        contractor.setSkills(Set.of(Skill.ARCHITECTURE));
+        contractor.setAvailable(true);
+        when(userRepository.findByEmailIgnoreCase("contractor@doe.com")).thenReturn(Optional.of(contractor));
+        Team team = new Team(renovationRecord);
+        Role role = spy(new Role(Skill.ARCHITECTURE));
+        role.setContractor(contractor);
+        role.setStatus(RoleStatus.ACCEPTED);
+        team.addRole(role);
+        doReturn(1L).when(role).getContractorId();
+        when(teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, 1L)).thenReturn(true);
+        when(teamsRepository.findByRenovationRecord(renovationRecord)).thenReturn(team);
+        when(teamsRepository.findByRoleContractor(1L)).thenReturn(List.of(team));
+        mockMvc.perform(MockMvcRequestBuilders.patch("/task/1/state")
+                .param("state", "IN_PROGRESS")).andExpect(status().isOk());
     }
 }
