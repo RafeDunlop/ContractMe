@@ -112,8 +112,6 @@ export function debounce(func, wait) {
  * @returns {Promise<Response>} The fetch request whose response should be awaited
  */
 function singleRequest(bounds, showPrivateOnly) {
-    console.log("lower", normalizePhase(bounds.minLon))
-    console.log("upper", normalizePhase(bounds.maxLon))
     const withPublic = !showPrivateOnly
     const params = new URLSearchParams();
     params.set("withPublic", withPublic.toString());
