@@ -62,8 +62,12 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 const renovationMarker = L.marker([lat, lon], {
     icon: userRenovation,
-    zIndexOffset: 1000
+    zIndexOffset: 100
 }).addTo(map);
+
+renovationMarker.on('mouseover', function () {
+    this.bringToFront();
+});
 
 const teamId = document.getElementById("teamId").value;
 if (teamId !== "") {
@@ -99,6 +103,11 @@ if (teamId !== "") {
             L.DomEvent.stop(e);
             contractorMarker.openPopup();
         });
+
+        contractorMarker.on('mouseover', function () {
+            this.bringToFront();
+        });
+
     })
 }
 
