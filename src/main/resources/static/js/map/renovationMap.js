@@ -153,6 +153,22 @@ document.getElementById("view-location-tab-item").addEventListener("click", () =
         map.invalidateSize();
         if (markerPositions.length > 1) {
             const bounds = L.latLngBounds(markerPositions);
+            // ChatGPT was used to assist in creating some of the following code based on this stack overflow answer:
+            // https://stackoverflow.com/a/38051722 by IvanSanchez https://stackoverflow.com/users/4768502/ivansanchez CC-BY-SA 4.0
+            // Adds symmetric points around the renovation to ensure it is approximately in the centre and still includes
+            // all the contractor markers.
+            const ne = bounds.getNorthEast();
+            const sw = bounds.getSouthWest();
+            const neSymmetric = L.latLng(
+                ne.lat + (lat - ne.lat) * 2,
+                ne.lng + (lon - ne.lng) * 2
+            );
+            const swSymmetric = L.latLng(
+                sw.lat + (lat - sw.lat) * 2,
+                sw.lng + (lon - sw.lng) * 2
+            );
+            bounds.extend(neSymmetric);
+            bounds.extend(swSymmetric);
             map.fitBounds(bounds, {padding: [50, 50]});
         } else {
             map.setView([lat, lon], 14);
