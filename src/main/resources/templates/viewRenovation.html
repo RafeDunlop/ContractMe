@@ -48,7 +48,7 @@
                         <li class="nav-item">
                             <button id="details-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'details'} ? ' active'">Details</button>
                         </li>
-                        <li th:classappend="${!isOwner} ? ' hidden'" class="nav-item">
+                        <li th:if="${isOwner}" class="nav-item">
                             <button id="tasks-tab-item" class="nav-link renovation-tab-bar-options" th:classappend="${tabBarFocus == 'tasks'} ? ' active'">Tasks</button>
                         </li>
                         <li class="nav-item" th:if="${isOwner}">
