@@ -1,5 +1,6 @@
 package nz.ac.canterbury.seng302.homehelper.unit.service;
 
+import java.util.Collections;
 import java.util.Set;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -31,6 +33,7 @@ public class TeamInvitationServiceTest {
 
     private TeamInvitationService teamInvitationService;
     private TeamsRepository teamsRepository;
+    private ContractorRepository contractorRepository;
 
     Team team;
     @Mock
@@ -41,7 +44,7 @@ public class TeamInvitationServiceTest {
     void setUp() {
         teamsRepository = mock(TeamsRepository.class);
         teamsService = mock(TeamsService.class);
-        ContractorRepository contractorRepository = mock(ContractorRepository.class);
+        contractorRepository = mock(ContractorRepository.class);
         teamInvitationService = new TeamInvitationService(teamsRepository, teamsService, contractorRepository);
         contractor = Mockito.spy(new Contractor("Greg", "Smith", "greg@test.com", "Password123!"));
         when(contractor.getId()).thenReturn(1L);
@@ -98,5 +101,75 @@ public class TeamInvitationServiceTest {
         verifyNoMoreInteractions(teamsService);
     }
 
+    @Test
+    void inviteSpecificContractor_validInputs_invitesSuccessfully() {
+        long teamId = 1L;
+        long contractorId = 2L;
+        Skill skill = Skill.ELECTRICAL;
+
+        Team team = mock(Team.class);
+        Contractor contractor = mock(Contractor.class);
+        Role role = mock(Role.class);
+
+        when(teamsService.getTeamById(teamId)).thenReturn(team);
+        when(contractor.getId()).thenReturn(contractorId);
+        when(contractor.getSkills()).thenReturn(Collections.singleton(skill));
+
+        when(contractorRepository.findById(contractorId)).thenReturn(java.util.Optional.of(contractor));
+        when(team.getRoles()).thenReturn(List.of(role));
+        when(role.getSkill()).thenReturn(skill);
+        when(role.getStatus()).thenReturn(RoleStatus.UNFILLED);
+
+        teamInvitationService.inviteSpecificContractor(teamId, contractorId, skill);
+
+        verify(teamsService).getTeamById(teamId);
+        verify(contractorRepository).findById(contractorId);
+        verify(team).getRoles();
+        verify(role).getSkill();
+        verify(role).getStatus();
+
+        verify(teamsService).sendManualContractorEmailsTo(team, role, contractor);
+    }
+
+    @Test
+    void inviteSpecificContractor_contractorNotFound_throwsNotFound() {
+        long teamId = 1L;
+        long contractorId = 2L;
+        Skill skill = Skill.ELECTRICAL;
+
+        Team team = mock(Team.class);
+        Role role = mock(Role.class);
+
+        when(teamsService.getTeamById(teamId)).thenReturn(team);
+        when(team.getRoles()).thenReturn(List.of(role));
+        when(role.getSkill()).thenReturn(skill);
+        when(role.getStatus()).thenReturn(RoleStatus.UNFILLED);
+        when(contractorRepository.findById(contractorId)).thenReturn(java.util.Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> {
+            teamInvitationService.inviteSpecificContractor(teamId, contractorId, skill);
+        });
+    }
+
+    @Test
+    void inviteSpecificContractor_noMatchingRole_throwsNotFound() {
+        long teamId = 1L;
+        long contractorId = 2L;
+        Skill skill = Skill.ELECTRICAL;
+
+        Team team = mock(Team.class);
+        Contractor contractor = mock(Contractor.class);
+        Role role = mock(Role.class);
+
+        when(teamsService.getTeamById(teamId)).thenReturn(team);
+        when(contractorRepository.findById(contractorId)).thenReturn(java.util.Optional.of(contractor));
+        when(team.getRoles()).thenReturn(List.of(role));
+        when(role.getSkill()).thenReturn(Skill.PLUMBING);
+        when(role.getStatus()).thenReturn(RoleStatus.UNFILLED);
+
+        assertThrows(ResponseStatusException.class, () -> {
+            teamInvitationService.inviteSpecificContractor(teamId, contractorId, skill);
+        });
+    }
 
 }

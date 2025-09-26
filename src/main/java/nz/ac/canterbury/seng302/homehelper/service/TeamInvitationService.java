@@ -139,6 +139,12 @@ public class TeamInvitationService {
                 .toList();
     }
 
+    /**
+     * Invites a contractor to a team for a specific skill
+     * @param teamId the team id of the team the contractor is invited to
+     * @param contractorId the contractor id of the contractor being invited to the team
+     * @param skill the skill that the contractor is fulfilling in the team
+     */
     public void inviteSpecificContractor(long teamId, long contractorId, Skill skill) {
         Team team = teamsService.getTeamById(teamId);
         Role role = team.getRoles().stream().filter(r -> r.getSkill() == skill && r.getStatus() == RoleStatus.UNFILLED).findFirst().orElse(null);
@@ -152,6 +158,12 @@ public class TeamInvitationService {
         }
     }
 
+    /**
+     * add contractor to the role in the team
+     * @param team the team the contractor is being added to
+     * @param role the role the contractor is fulfilling
+     * @param contractor the contractor that is being added to the team
+     */
     private void addContractorToRole(Team team, Role role, Contractor contractor) {
         role.setContractor(contractor);
         team.addBlacklistId(contractor.getId());

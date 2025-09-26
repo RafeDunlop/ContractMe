@@ -521,6 +521,12 @@ public class TeamsService {
                 .toList();
     }
 
+    /**
+     * sends an email to the contractor regarding being added to the team
+     * @param team the team the contractor is being added to
+     * @param role the role in the team the contractor is fulfilling
+     * @param contractor the contractor that is being emailed
+     */
     public void sendManualContractorEmailsTo(Team team, Role role, Contractor contractor) {
         emailService.sendRequestToContractor(contractor.getEmail(), contractor.getFirstName(), contractor.getFirstName(),
                 team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
