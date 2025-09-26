@@ -7,6 +7,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.service.ContractorService;
 import nz.ac.canterbury.seng302.homehelper.service.LoginService;
@@ -18,12 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UrlPathHelper;
+
+import java.util.Objects;
 
 /**
  * Controller for handling contractor invitations to renovation teams
@@ -152,5 +152,26 @@ public class TeamInvitationController {
         teamsService.runAlgorithmAgain(team, location);
 
         return "redirect:/view-requests";
+    }
+
+    /**
+     * Manually invite a contractor from a map.
+     * @param teamId The id of the team
+     * @param contractorId The id of the contractor
+     * @param skill The skill needed for the role
+     */
+    @PostMapping("/invite")
+    @ResponseBody
+    public void inviteContractor(@RequestParam long teamId, @RequestParam long contractorId, @RequestParam Skill skill) {
+        logger.info("POST /invitations/invite?teamId={}&contractorId={}&skill={}", teamId, contractorId, skill);
+
+        Long userId = loginService.getUserByEmail().getId();
+        Team team = teamsService.getTeamById(teamId);
+
+        if (Objects.equals(team.getRenovationRecord().getUser().getId(), userId)) {
+            teamInvitationService.inviteSpecificContractor(teamId, contractorId, skill);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 }

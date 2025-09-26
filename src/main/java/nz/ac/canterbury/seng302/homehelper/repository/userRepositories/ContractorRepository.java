@@ -120,4 +120,31 @@ public interface ContractorRepository extends UserBaseRepository<Contractor> {
     List<Contractor> findEligible(@Param("requiredSkill") String skill, @Param("lat") double lat,
                                   @Param("lon") double lon, @Param("maxDistance") double maxDistance);
 
+    /**
+     * Finds all contractors with the given skill within max distance from the given latitude and longitude coordinates.
+     * This is used to find eligible contractors when selecting contractors via the map.
+     * @param skill the required skill to match against the contractors
+     * @param lat the latitude of the specified location, i.e. the renovation location
+     * @param lon the longitude of the specified location
+     * @param maxDistance the maximum distance contractors must be within (inclusive)
+     * @return the list of matching contractors
+     */
+    @Query(value = """
+                SELECT c.*
+                FROM user_details c
+                JOIN contractor_skills s ON c.user_id = s.contractor_id
+                WHERE s.skill = :requiredSkill
+                  AND c.available = true
+                  AND (c.user_id NOT IN (:excludedIds))
+                  AND (6371 * acos(
+                    cos(radians(:lat)) * cos(radians(c.latitude)) *
+                    cos(radians(c.longitude) - radians(:lon)) +
+                    sin(radians(:lat)) * sin(radians(c.latitude))
+                )) <= :maxDistance
+            """, nativeQuery = true)
+    List<Contractor> findEligibleExcluding(@Param("requiredSkill") String skill, @Param("lat") double lat,
+                                           @Param("lon") double lon, @Param("maxDistance") double maxDistance,
+                                           @Param("excludedIds") java.util.Set<Long> excludedIds);
+
+
 }

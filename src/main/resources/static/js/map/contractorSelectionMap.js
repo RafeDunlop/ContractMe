@@ -32,9 +32,9 @@ document.addEventListener('click', (e) => {
  */
 function selectContractorToInvite(event) {
     const modalEl = document.getElementById('mapModal');
-    const modal = new bootstrap.Modal(modalEl);
+    const mapModal = new bootstrap.Modal(modalEl);
     const skill = event.target.dataset.skill;
-    modal.show();
+    mapModal.show();
 
     modalEl.addEventListener('shown.bs.modal', () => {
         if (!mapInstance) {
@@ -44,7 +44,7 @@ function selectContractorToInvite(event) {
                 minZoom: 3,
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
             }).addTo(mapInstance);
-            fetchEligibleContractors(skill).then(contractors => populateContractors(contractors, mapInstance));
+            fetchEligibleContractors(skill).then(contractors => populateContractors(contractors, mapInstance, skill));
 
 
         } else {
@@ -72,8 +72,9 @@ async function fetchEligibleContractors(skill) {
  * Display the contractors as markers on the map.
  * @param contractors a json object containing all the contractors to display
  * @param map the leaflet map object
+ * @param {string} skill - The skill of the role
  */
-function populateContractors(contractors, map) {
+function populateContractors(contractors, map, skill) {
     if (contractors) {
         contractors.forEach(contractor => {
             const contractorIcon = L.divIcon({
@@ -90,7 +91,7 @@ function populateContractors(contractors, map) {
 
             marker.on('click', (e) => {
                 L.DomEvent.stop(e);
-                showContractorDetails(contractor);
+                showContractorDetails(contractor, skill);
             });
         });
     }
@@ -99,8 +100,9 @@ function populateContractors(contractors, map) {
 /**
  * Opens the contractor details modal with contractor data.
  * @param {Object} contractor - The contractor object
+ * @param {string} skill - The skill of the role
  */
-function showContractorDetails(contractor) {
+function showContractorDetails(contractor, skill) {
     document.getElementById("contractor-name").innerText = contractor.fullName;
     document.getElementById("contractor-email").innerText = contractor.email;
     document.getElementById("contractor-rate").innerText = `$${contractor.hourlyRate} / hr`;
@@ -126,8 +128,27 @@ function showContractorDetails(contractor) {
     profileImg.alt = `Profile picture of ${contractor.fullName}`;
 
     const modalEl = document.getElementById('contractorDetailsMapModal');
-    const modal = new bootstrap.Modal(modalEl);
-    modal.show();
+    const detailsModal = new bootstrap.Modal(modalEl);
+
+    const inviteButton = document.getElementById("invite-contractor-button");
+    const csrf = inviteButton.getAttribute("data-csrf");
+
+    inviteButton.addEventListener("click", () => {
+        const params = new URLSearchParams({
+            teamId: parseInt(new URLSearchParams(window.location.search).get("id")),
+            contractorId: parseInt(contractor.id),
+            skill: skill
+        });
+
+        fetch("renovations/team/invitations/invite?" + params.toString(), {
+            method: "POST",
+            headers: {
+                'X-CSRF-TOKEN': csrf
+            }
+        }).then(response => window.location.reload());
+    });
+
+    detailsModal.show();
 }
 
 window.selectContractorToInvite = selectContractorToInvite;
