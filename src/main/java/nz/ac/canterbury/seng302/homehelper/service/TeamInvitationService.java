@@ -5,14 +5,18 @@ import nz.ac.canterbury.seng302.homehelper.entity.Team;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Objects;
@@ -30,15 +34,17 @@ public class TeamInvitationService {
     private final TeamsRepository teamsRepository;
     private final TeamsService teamsService;
     private static final Logger logger = LoggerFactory.getLogger(TeamInvitationService.class);
+    private final ContractorRepository contractorRepository;
 
     /**
      * Creates a new instance with access to the teams repository.
      * @param teamsRepository team repository to persist changes
      */
     @Autowired
-    public TeamInvitationService(TeamsRepository teamsRepository, TeamsService teamsService) {
+    public TeamInvitationService(TeamsRepository teamsRepository, TeamsService teamsService, ContractorRepository contractorRepository) {
         this.teamsRepository = teamsRepository;
         this.teamsService = teamsService;
+        this.contractorRepository = contractorRepository;
     }
 
     /**
@@ -131,5 +137,36 @@ public class TeamInvitationService {
         return team.getRoles().stream()
                 .filter(r -> r.getContractorId() != null && Objects.equals(r.getContractorId(), contractor.getId()))
                 .toList();
+    }
+
+    /**
+     * Invites a contractor to a team for a specific skill
+     * @param teamId the team id of the team the contractor is invited to
+     * @param contractorId the contractor id of the contractor being invited to the team
+     * @param skill the skill that the contractor is fulfilling in the team
+     */
+    public void inviteSpecificContractor(long teamId, long contractorId, Skill skill) {
+        Team team = teamsService.getTeamById(teamId);
+        Role role = team.getRoles().stream().filter(r -> r.getSkill() == skill && r.getStatus() == RoleStatus.UNFILLED).findFirst().orElse(null);
+        Contractor contractor = contractorRepository.findById(contractorId).orElse(null);
+
+        if (role != null && contractor != null) {
+            addContractorToRole(team, role, contractor);
+            teamsService.sendManualContractorEmailsTo(team, role, contractor);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /**
+     * add contractor to the role in the team
+     * @param team the team the contractor is being added to
+     * @param role the role the contractor is fulfilling
+     * @param contractor the contractor that is being added to the team
+     */
+    private void addContractorToRole(Team team, Role role, Contractor contractor) {
+        role.setContractor(contractor);
+        team.addBlacklistId(contractor.getId());
+        teamsRepository.save(team);
     }
 }

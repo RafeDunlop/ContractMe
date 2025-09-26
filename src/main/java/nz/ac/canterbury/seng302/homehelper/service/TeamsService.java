@@ -507,9 +507,16 @@ public class TeamsService {
      * @param location the location the contractors need to be close enough to
      * @return the list of MappedContractors
      */
-    public List<MappedContractor> getEligibleContractors(Skill skill, Location location) {
-        List<Contractor> contractors = contractorRepository.findEligible(skill.toString(), location.getLatitude(),
-                location.getLongitude(), CONTRACTOR_MAX_DISTANCE);
+    public List<MappedContractor> getEligibleContractors(Skill skill, Location location, Team team) {
+        List<Contractor> contractors;
+        if (team.getBlacklistIds().isEmpty()) {
+            contractors = contractorRepository.findEligible(skill.toString(), location.getLatitude(),
+                    location.getLongitude(), CONTRACTOR_MAX_DISTANCE);
+        } else {
+            contractors = contractorRepository.findEligibleExcluding(skill.toString(), location.getLatitude(),
+                    location.getLongitude(), CONTRACTOR_MAX_DISTANCE, new HashSet<>(team.getBlacklistIds()));
+        }
+
         return contractors.stream().map(contractor -> new MappedContractor(contractor, skill)).toList();
     }
 
@@ -526,14 +533,20 @@ public class TeamsService {
 
         return contractors.values().stream().map(contractor ->
                 new MappedContractor(
-                        contractor.getFullName(),
-                        contractor.getEmail(),
-                        contractor.getLocation(),
-                        contractor.getPhoneNumberFormatted(),
+                        contractor,
                         roles.stream().filter(role -> Objects.equals(role.getContractorId(), contractor.getId()))
-                                .map(Role::getSkill).findFirst().orElse(null),
-                        contractor.getHourlyRate(),
-                        contractor.getProfilePicture()))
+                                .map(Role::getSkill).findFirst().orElse(null)))
                 .toList();
+    }
+
+    /**
+     * sends an email to the contractor regarding being added to the team
+     * @param team the team the contractor is being added to
+     * @param role the role in the team the contractor is fulfilling
+     * @param contractor the contractor that is being emailed
+     */
+    public void sendManualContractorEmailsTo(Team team, Role role, Contractor contractor) {
+        emailService.sendRequestToContractor(contractor.getEmail(), contractor.getFirstName(), contractor.getFirstName(),
+                team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
     }
 }

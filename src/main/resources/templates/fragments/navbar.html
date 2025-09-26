@@ -4,14 +4,18 @@
     <meta charset="UTF-8"/>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link th:href="@{/css/styles.css}" rel="stylesheet">
-
-    <title>Contractme navigation bar</title>
+    <title>ContractMe navigation bar</title>
 </head>
 <body>
 <div th:fragment="nav-bar">
     <div th:replace="~{fragments/confirmPrompt.html :: confirm-prompt}"></div>
     <div class="navbar custom-navbar" id="navbar">
-        <a class="navbar-brand custom-navbar-brand" id="navbar-home" th:href="@{/main}">Contractme</a>
+        <div>
+            <a class="navbar-brand custom-navbar-brand" id="navbar-home" th:href="@{/main}">
+                <img th:src="@{/images/icons/seng302_logo.svg}" alt="logo" height="65">
+                ContractMe
+            </a>
+        </div>
         <ul id="navbar-links" style="justify-content: right;">
             <li id="my-renovations" style="line-height:37px;">
                 <a class="nav-link" th:href="@{/renovations}">My Renovations</a>

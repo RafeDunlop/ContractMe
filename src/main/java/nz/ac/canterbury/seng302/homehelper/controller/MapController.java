@@ -70,7 +70,7 @@ public class MapController {
         long id = Long.parseLong(teamId);
         Team team = teamsService.getTeamById(id);
         Location location = team.getRenovationRecord().getLocation();
-        return teamsService.getEligibleContractors(skill, location);
+        return teamsService.getEligibleContractors(skill, location, team);
     }
 
     /**

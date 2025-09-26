@@ -41,7 +41,7 @@ const { latitude: lat, longitude: lon } = await renovationResponse.json();
 
 let markerPositions = [[lat, lon]];
 
-const map = L.map('renovation-map');
+const map = L.map('renovation-map',{worldCopyJump: true});
 
 document.getElementById("view-location-tab-item").addEventListener("click", () => {
     setTimeout(() => {
@@ -62,13 +62,13 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 const renovationMarker = L.marker([lat, lon], {
     icon: userRenovation,
-    zIndexOffset: 100
+    zIndexOffset: 100,
+    riseOnHover: true,
+    riseOffset: 250
 }).addTo(map);
 
-renovationMarker.on('mouseover', function () {
-    this.bringToFront();
-});
 
+//Loads contractors and displays them on map
 const teamId = document.getElementById("teamId").value;
 if (teamId !== "") {
     const contractorResponse = await fetch(`map/contractors?id=` + teamId.toString());
@@ -96,7 +96,9 @@ if (teamId !== "") {
             autoClose: true,
             closeButton: false,
             keepInView: true,
-            maxWidth: 320
+            maxWidth: 320,
+            riseOnHover: true,
+            riseOffset: 250
         });
 
         contractorMarker.on('click', (e) => {
@@ -104,9 +106,6 @@ if (teamId !== "") {
             contractorMarker.openPopup();
         });
 
-        contractorMarker.on('mouseover', function () {
-            this.bringToFront();
-        });
 
     })
 }
