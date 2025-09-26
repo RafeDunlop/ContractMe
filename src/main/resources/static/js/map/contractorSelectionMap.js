@@ -38,7 +38,7 @@ function selectContractorToInvite(event) {
 
     modalEl.addEventListener('shown.bs.modal', () => {
         if (!mapInstance) {
-            mapInstance = L.map('mapModalMap').setView([latitude, longitude], 11);
+            mapInstance = L.map('mapModalMap',{worldCopyJump: true}).setView([latitude, longitude], 11);
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 minZoom: 3,
