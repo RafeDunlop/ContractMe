@@ -745,7 +745,7 @@ class TeamsServiceIntegrationTest {
         team.addRole(new Role(Skill.ARCHITECTURE));
         teamsRepository.save(team);
         List<MappedContractor> expectedContractors = List.of(new MappedContractor(contractor1, Skill.ARCHITECTURE), new MappedContractor(contractor2, Skill.ARCHITECTURE));
-        List<MappedContractor> actualContractors = teamsService.getEligibleContractors(Skill.ARCHITECTURE, renovation.getLocation());
+        List<MappedContractor> actualContractors = teamsService.getEligibleContractors(Skill.ARCHITECTURE, renovation.getLocation(), team);
         assertEquals(expectedContractors, actualContractors);
     }
 
@@ -768,8 +768,10 @@ class TeamsServiceIntegrationTest {
         contractor1.setLocation(location1);
         contractor1.setAvailable(true);
         contractor1 = contractorRepository.save(contractor1);
+        Team team = new Team(renovation);
+        teamsRepository.save(team);
         List<MappedContractor> expectedContractors = List.of(new MappedContractor(contractor1, Skill.ARCHITECTURE));
-        List<MappedContractor> actualContractors = teamsService.getEligibleContractors(Skill.ARCHITECTURE, renovation.getLocation());
+        List<MappedContractor> actualContractors = teamsService.getEligibleContractors(Skill.ARCHITECTURE, renovation.getLocation(), team);
         assertEquals(expectedContractors, actualContractors);
     }
 }

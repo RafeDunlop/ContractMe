@@ -6,10 +6,10 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 
 import java.util.Objects;
 
-public record MappedContractor(String fullName, String email, Location location, String phoneNumberFormatted,
+public record MappedContractor(Long id, String fullName, String email, Location location, String phoneNumberFormatted,
                                Skill skill, Float hourlyRate, String profilePicture) {
     public MappedContractor(Contractor contractor, Skill skill) {
-        this(contractor.getFullName(), contractor.getEmail(), contractor.getLocation(),
+        this(contractor.getId(), contractor.getFullName(), contractor.getEmail(), contractor.getLocation(),
                 contractor.getPhoneNumberFormatted(), skill, contractor.getHourlyRate(), contractor.getProfilePicture());
     }
 

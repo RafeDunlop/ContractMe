@@ -9,6 +9,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
 import nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Skill;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
+import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.ContractorRepository;
 import nz.ac.canterbury.seng302.homehelper.service.TeamInvitationService;
 import nz.ac.canterbury.seng302.homehelper.service.TeamsService;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +31,7 @@ public class TeamInvitationServiceTest {
 
     private TeamInvitationService teamInvitationService;
     private TeamsRepository teamsRepository;
+
     Team team;
     @Mock
     private TeamsService teamsService;
@@ -39,7 +41,8 @@ public class TeamInvitationServiceTest {
     void setUp() {
         teamsRepository = mock(TeamsRepository.class);
         teamsService = mock(TeamsService.class);
-        teamInvitationService = new TeamInvitationService(teamsRepository,teamsService);
+        ContractorRepository contractorRepository = mock(ContractorRepository.class);
+        teamInvitationService = new TeamInvitationService(teamsRepository, teamsService, contractorRepository);
         contractor = Mockito.spy(new Contractor("Greg", "Smith", "greg@test.com", "Password123!"));
         when(contractor.getId()).thenReturn(1L);
         team = mock(Team.class);
