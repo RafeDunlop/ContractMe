@@ -9,6 +9,8 @@
     <link rel="stylesheet" th:href="@{/css/maps.css}"/>
     <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
     <link rel="stylesheet" th:href="@{/webjars/leaflet/dist/leaflet.css}"/>
+
+    <th:block th:replace="~{fragments/faviconHeader.html :: faviconHeader}"/>
 </head>
 <body>
     <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>

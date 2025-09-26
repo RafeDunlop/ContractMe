@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="English">
 <head>
+    <th:block th:replace="~{fragments/faviconHeader.html :: faviconHeader}"/>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
     <base th:href="@{/}"/>
     <title>Edit renovation</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
     <link rel="stylesheet" th:href="@{/css/toggleSwitchStyles.css}"/>
-
-
 </head>
 <body>
 <div th:replace="~{fragments/navbar.html :: nav-bar}"></div>
