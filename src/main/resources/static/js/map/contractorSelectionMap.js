@@ -104,15 +104,7 @@ function showContractorDetails(contractor) {
     document.getElementById("contractor-name").innerText = contractor.fullName;
     document.getElementById("contractor-email").innerText = contractor.email;
     document.getElementById("contractor-rate").innerText = `$${contractor.hourlyRate} / hr`;
-
-    // only display phone if contractor has a phone number
-    const phoneEl = document.getElementById("contractor-phone");
-    if (contractor.phoneNumber) {
-        phoneEl.innerText = contractor.phoneNumber;
-        phoneEl.parentElement.style.display = "";
-    } else {
-        phoneEl.parentElement.style.display = "none";
-    }
+    document.getElementById("contractor-phone").innerText = contractor.phoneNumberFormatted;
 
     // format location
     const location = contractor.location;
