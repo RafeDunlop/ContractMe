@@ -2,6 +2,7 @@ package nz.ac.canterbury.seng302.homehelper.service;
 
 import nz.ac.canterbury.seng302.homehelper.dto.CoordinateRectangle;
 import nz.ac.canterbury.seng302.homehelper.dto.MappedRenovation;
+import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
@@ -25,12 +26,26 @@ public class MapService {
     }
 
 
-   public CoordinateRectangle createCoordinateRectangle(String rawCoordinates) {
-        Double [] coordinates = Arrays.stream(rawCoordinates.split(","))
-               .map(Double::parseDouble)
-               .toArray(Double[]::new);
-        return new CoordinateRectangle(coordinates[0], coordinates[1], coordinates[2], coordinates[3]);
-   }
+    /**
+     * Gets the lat and lon from a renovation and puts them in a map for subsequent json formatting
+     * @param renovationId the id of the renovation being displayed
+     * @return the map of latitude, longitude and their values
+     */
+    public Map<String, Double> getCoordsFromRenovation(Long renovationId) {
+        Optional<RenovationRecord> optionalRecord = renovationRecordRepository.findById(renovationId);
+        Map<String, Double> coords = new HashMap<>();
+
+        if (optionalRecord.isPresent()) {
+            RenovationRecord record = optionalRecord.get();
+            Location renovationLocation = record.getLocation();
+            double latitude = renovationLocation.getLatitude();
+            coords.put("latitude", latitude);
+            double longitude = renovationLocation.getLongitude();
+            coords.put("longitude", longitude);
+        }
+
+        return coords;
+    }
 
     /**
      * Gets the renovations within the specified range

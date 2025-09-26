@@ -1,6 +1,7 @@
 package nz.ac.canterbury.seng302.homehelper.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import nz.ac.canterbury.seng302.homehelper.dto.MappedContractor;
 import nz.ac.canterbury.seng302.homehelper.dto.TeamRequestDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.Location;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @Service
 public class TeamsService {
     private final Logger log = LoggerFactory.getLogger(TeamsService.class);
+    private static final double CONTRACTOR_MAX_DISTANCE = 200;
 
     private final TeamsRepository teamsRepository;
     private final TeamValidation teamValidation;
@@ -67,6 +69,7 @@ public class TeamsService {
      */
     public String createNewTeam(RenovationRecord teamRecord, TeamRequestDTO teamRequestDTO) {
         Team team = new Team(teamRecord);
+        team.setAutomaticFilling(teamRequestDTO.isInvitesAutomatic());
 
         List<Role> roles = createRoles(teamRequestDTO.getSkills());
         for(Role role : roles) {
@@ -75,6 +78,7 @@ public class TeamsService {
 
         teamsRepository.save(team);
         renovationRecordRepository.save(teamRecord);
+        if (!team.hasAutomaticFilling()) return "manual";
 
         Location renovationLocation = teamRecord.getLocation();
         String response = assignContractorsToTeam(team, renovationLocation);
@@ -170,6 +174,24 @@ public class TeamsService {
      */
     public boolean checkViewRenovationAccess(RenovationRecord renovationRecord, User user) {
         return teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, user.getId());
+    }
+
+    /**
+     * Checks if the contractor has accepted the invitation for the team in the given renovation record. Used for access
+     * control when changing task states.
+     * @param renovationRecord the renovation record
+     * @param user the user
+     * @return true if the contractor is assigned, false otherwise
+     */
+    public boolean isContractorAssigned(RenovationRecord renovationRecord, User user) {
+        boolean isAssigned;
+        try {
+            Role role = getContractorRole(user, getTeamFromRenovation(renovationRecord));
+            isAssigned = role.getStatus().equals(RoleStatus.ACCEPTED);
+        } catch (ResponseStatusException e) {
+            isAssigned = false;
+        }
+        return isAssigned;
     }
 
     /**
@@ -371,13 +393,22 @@ public class TeamsService {
      * @return the nearest contractor that can fill the role
      */
     private Contractor findNearestContractor(Role role, Location location, Set<Long> blacklist) {
-        return contractorRepository.findNearestWithinDistanceExcluding(
-                location.getLatitude(),
-                location.getLongitude(),
-                role.getSkill().toString(),
-                200,
-                blacklist.isEmpty() ? null : blacklist
-        );
+        if (blacklist.isEmpty()) {
+            return contractorRepository.findNearestWithinDistance(
+                    location.getLatitude(),
+                    location.getLongitude(),
+                    role.getSkill().toString(),
+                    CONTRACTOR_MAX_DISTANCE
+            );
+        } else {
+            return contractorRepository.findNearestWithinDistanceExcluding(
+                    location.getLatitude(),
+                    location.getLongitude(),
+                    role.getSkill().toString(),
+                    CONTRACTOR_MAX_DISTANCE,
+                    blacklist
+            );
+        }
     }
 
     /**
@@ -412,6 +443,7 @@ public class TeamsService {
                 role.setStatus(RoleStatus.UNFILLED);
             }
         }
+        team.addBlacklistId(contractor.getId());
         teamsRepository.save(team);
         runAlgorithmAgain(team, team.getRenovationRecord().getLocation());
     }
@@ -423,6 +455,8 @@ public class TeamsService {
      * @param renovationLocation The location of the renovation record associated with the Team.
      */
     public void runAlgorithmAgain(Team team, Location renovationLocation) {
+        if (!team.hasAutomaticFilling()) return;
+
         Set<Long> beforeIds = team.getRoles().stream()
                 .map(Role::getContractorId)
                 .filter(id -> id != null && id != 0L)
@@ -465,5 +499,54 @@ public class TeamsService {
             emailService.sendRequestToContractor(recipient.getEmail(), recipient.getFirstName(), ownerName,
                     team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
         }
+    }
+
+    /**
+     * Returns a list of eligible contractors within the max distance away from location with the specified skill.
+     * @param skill the skill for the role we are searching for
+     * @param location the location the contractors need to be close enough to
+     * @return the list of MappedContractors
+     */
+    public List<MappedContractor> getEligibleContractors(Skill skill, Location location, Team team) {
+        List<Contractor> contractors;
+        if (team.getBlacklistIds().isEmpty()) {
+            contractors = contractorRepository.findEligible(skill.toString(), location.getLatitude(),
+                    location.getLongitude(), CONTRACTOR_MAX_DISTANCE);
+        } else {
+            contractors = contractorRepository.findEligibleExcluding(skill.toString(), location.getLatitude(),
+                    location.getLongitude(), CONTRACTOR_MAX_DISTANCE, new HashSet<>(team.getBlacklistIds()));
+        }
+
+        return contractors.stream().map(contractor -> new MappedContractor(contractor, skill)).toList();
+    }
+
+    /**
+     * Returns a list of contractors assigned to a team as MappedContractor objects so that only the contractor
+     * information needed for the map is returned.
+     * @param teamId The ID of the team
+     * @return A collection of contractors
+     */
+    public Collection<MappedContractor> getMappedContractorsByTeamId(Long teamId) {
+        Team team = getTeamById(teamId);
+        List<Role> roles = team.getRoles();
+        Map<Long, Contractor> contractors = getContractorsByTeamId(teamId);
+
+        return contractors.values().stream().map(contractor ->
+                new MappedContractor(
+                        contractor,
+                        roles.stream().filter(role -> Objects.equals(role.getContractorId(), contractor.getId()))
+                                .map(Role::getSkill).findFirst().orElse(null)))
+                .toList();
+    }
+
+    /**
+     * sends an email to the contractor regarding being added to the team
+     * @param team the team the contractor is being added to
+     * @param role the role in the team the contractor is fulfilling
+     * @param contractor the contractor that is being emailed
+     */
+    public void sendManualContractorEmailsTo(Team team, Role role, Contractor contractor) {
+        emailService.sendRequestToContractor(contractor.getEmail(), contractor.getFirstName(), contractor.getFirstName(),
+                team.getRenovationRecord().getName(), role.getSkill().getDisplayName(), java.util.Locale.getDefault(),team.getId());
     }
 }

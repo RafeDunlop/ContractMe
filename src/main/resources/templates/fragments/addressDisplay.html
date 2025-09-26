@@ -9,12 +9,21 @@
 <body>
 <div th:fragment="addressDisplay (address)" id="address-display" class="p-2 d-flex">
     <img src="icons/address-pin.svg" alt="address-pin" width="30" />
-    <div class="d-flex flex-column ps-3">
-        <div th:if="|${address.getAddress()} != ''|" th:text="|${address.getAddress()}|"></div>
-        <div th:if="|${address.getSuburb()} != ''|" th:text="|${address.getSuburb()}|"></div>
-        <div th:if="|${address.getCity()} != ''|" th:text="|${address.getCity()}|"></div>
-        <div th:if="|${address.getPostcode()} != ''|" th:text="|${address.getPostcode()}|"></div>
-        <div th:if="|${address.getCountry()} != ''|" th:text="|${address.getCountry()}|"></div>
+    <div class="ps-3">
+        <div>
+            <span th:text="${address.address}"></span>
+            <span th:if="${address.suburb != null && address.suburb != ''}" th:text="', ' + ${address.suburb}"></span>
+            <span th:if="${address.city != null && address.city != ''}" th:text="' ' + ${address.city}"></span>
+            <span th:if="${address.postcode != null && address.postcode != ''}" th:text="' ' + ${address.postcode}"></span>
+            <span th:if="${address.country != null && address.country != ''}" th:text="', ' + ${address.country}"></span>
+        </div>
+    </div>
+
+    <div id="renovation-address"
+         th:attr="data-address=${#strings.defaultString(address.address,'')},
+              data-suburb=${#strings.defaultString(address.suburb,'')},
+              data-city=${#strings.defaultString(address.city,'')},
+              data-postcode=${#strings.defaultString(address.postcode,'')}">
     </div>
 </div>
 </body>

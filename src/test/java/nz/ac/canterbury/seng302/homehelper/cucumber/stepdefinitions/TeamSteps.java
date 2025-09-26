@@ -22,12 +22,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -70,7 +75,7 @@ public class TeamSteps {
 
     @When("I click the create team button")
     public void i_click_the_create_team_button() throws Exception {
-        mvcResult =  mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/create")
+        mvcResult =  mockMvc.perform(get("/renovations/team/create")
                         .param("id", Long.toString(renovationRecord.getId()))
                 )
                 .andExpect(status().isOk())
@@ -86,7 +91,7 @@ public class TeamSteps {
 
     @When("I add zero skills")
     public void i_add_zero_skills() throws Exception {
-        mvcResult =  mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create?id=" + renovationRecord.getId())
+        mvcResult =  mockMvc.perform(post("/renovations/team/create?id=" + renovationRecord.getId())
                         .param("id", renovationRecord.getId().toString())
                         .with(csrf()))
                 .andExpect(status().isOk())
@@ -95,7 +100,7 @@ public class TeamSteps {
 
     @When("I submit with more then five skills")
     public void i_submit_with_more_then_five_skills() throws Exception {
-        mvcResult =  mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create?id=" + renovationRecord.getId())
+        mvcResult =  mockMvc.perform(post("/renovations/team/create?id=" + renovationRecord.getId())
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", "ELECTRICAL", "ELECTRICAL", "ELECTRICAL", "ELECTRICAL", "ELECTRICAL", "ELECTRICAL")
                         .with(csrf()))
@@ -112,9 +117,10 @@ public class TeamSteps {
 
     @Then("I can add the skill {string} twice to the same team")
     public void i_can_add_the_skill_twice_to_the_same_team(String skillName) throws Exception {
-        mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create")
+        mvcResult = mockMvc.perform(post("/renovations/team/create")
                         .param("id", renovationRecord.getId().toString())
                         .param("skills", skillName, skillName)
+                        .param("invitesAutomatic", "true")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/renovations/view?id=" + renovationRecord.getId()))
@@ -123,9 +129,10 @@ public class TeamSteps {
 
     @When("I add a valid amount of skills")
     public void i_add_a_valid_amount_of_skills() throws Exception {
-        result =  mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/create?id=" + renovationRecord.getId())
+        result =  mockMvc.perform(post("/renovations/team/create?id=" + renovationRecord.getId())
                 .param("id", renovationRecord.getId().toString())
                 .param("skills", "GAS_FITTING", "CNC_MACHINING")
+                .param("invitesAutomatic", "true")
                 .with(csrf()));
     }
     @Then("My team request is successfully created")
@@ -196,7 +203,7 @@ public class TeamSteps {
     @When("I click the View Team button")
     public void i_click_the_view_team_button() throws Exception {
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/renovations/team/view")
+                get("/renovations/team/view")
                         .param("id", team.getId().toString())
                         .with(csrf())
         ).andExpect(status().isOk()).andReturn();
@@ -219,6 +226,73 @@ public class TeamSteps {
         assertTrue(html.contains("Plumbing"));
     }
 
+    @Given("The {string} renovation has a team with contractor {string} assigned")
+    public void the_renovation_has_a_team_with_contractor_assigned(String name, String contractorEmail) {
+        renovationRecord = new RenovationRecord(userContext.getUser(), name, "Test description", List.of());
+        Location location = new Location("20 Kirkwood Avenue", "NZ", "8041", "Christchurch", "Riccarton", 43.53, 172.63);
+        renovationRecord.setLocation(location);
+        renovationRecord = renovationRepository.save(renovationRecord);
+        // Users are not cleared from the database because they are used in UserContext
+        Optional<User> existingUser = userRepository.findByEmailIgnoreCase(contractorEmail);
+        Contractor testContractor = new Contractor();
+        // Trying to make this step def reusable for future cucumber tests so that it will tolerate using an existing
+        // user and still create the expected state based on the step expression
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            if (user instanceof Contractor) {
+                testContractor = (Contractor) user;
+            } else {
+                fail("The email used in this step is not unique and is not a contractor");
+            }
+        } else {
+            testContractor = new Contractor("Bob", "Test", contractorEmail, "password");
+        }
+        testContractor.setSkills(Set.of(Skill.CARPENTRY));
+        testContractor.setLocation(location);
+        testContractor = contractorRepository.save(testContractor);
+        team = new Team(renovationRecord);
+        Role role = new Role(Skill.CARPENTRY);
+        role.setContractor(testContractor);
+        team.addRole(role);
+        team = teamsRepository.save(team);
+    }
+
+    @Transactional
+    @Given("Contractor {string} has accepted the role in the team for {string}")
+    public void contractor_has_accepted_the_role_in_the_team_for(String contractorEmail, String renovationName) {
+        Contractor contractor = contractorRepository.findByEmailIgnoreCase(contractorEmail).orElseThrow();
+        renovationRecord = renovationRepository.findExactMatch(renovationName, userContext.getUser()).orElseThrow();
+        team = teamsRepository.findByRenovationRecord(renovationRecord);
+        team.getRoles().stream().filter(role -> Objects.equals(role.getContractorId(), contractor.getId())).findFirst().ifPresent(role -> role.setStatus(RoleStatus.ACCEPTED));
+        team = teamsRepository.save(team);
+    }
+
+    @Given("I am on the team details page for the {string} renovation")
+    public void i_am_on_the_team_details_page_for_the_renovation(String renovationName) throws Exception {
+        renovationRecord = renovationRepository.findExactMatch(renovationName, userContext.getUser()).orElseThrow();
+        long teamId = teamsRepository.findByRenovationRecord(renovationRecord).getId();
+        mockMvc.perform(get("/renovations/team/view")
+                        .param("id", String.valueOf(teamId)).with(user(userContext.getUser().getEmail()).roles("USER")))
+                .andExpect(status().isOk());
+    }
+
+    @When("I confirm that I want to remove the contractor {string}")
+    public void i_confirm_that_i_want_to_remove_the_contractor(String contractorEmail) throws Exception {
+        Contractor contractor = contractorRepository.findByEmailIgnoreCase(contractorEmail).orElseThrow();
+        mockMvc.perform(delete("/renovations/team/delete")
+                .param("teamId", String.valueOf(team.getId()))
+                .param("contractorId", String.valueOf(contractor.getId()))
+                        .with(user(userContext.getUser().getEmail()).roles("USER"))
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+    }
+
+    @Then("The contractor {string} is removed from the team")
+    public void the_contractor_is_removed_from_the_team(String contractorEmail) {
+        Contractor contractor = contractorRepository.findByEmailIgnoreCase(contractorEmail).orElseThrow();
+        assertFalse(teamsRepository.checkIfUserBelongsToRecordTeam(renovationRecord, contractor.getId()),
+                "Contractor should not belong to the team");
+    }
     @Transactional
     @Given("I am assigned to the team and have accepted a role in the team")
     public void i_am_assigned_to_the_team_and_have_accepted_a_role_in_the_team() {
@@ -286,7 +360,7 @@ public class TeamSteps {
     @When("I visit the team page")
     public void i_visit_the_team_page() throws Exception {
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/renovations/team/view")
+                get("/renovations/team/view")
                         .param("id", team.getId().toString())
                         .with(csrf())
         ).andReturn();
@@ -315,7 +389,7 @@ public class TeamSteps {
     @When("I visit the renovation record")
     public void i_visit_the_renovation_record() throws Exception {
         mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get("/renovations/view")
+                get("/renovations/view")
                         .param("id", renovationRecord.getId().toString())
                         .with(csrf())
         ).andExpect(status().isOk()).andReturn();

@@ -6,6 +6,7 @@ import java.util.List;
 import jakarta.persistence.*;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Contractor;
 import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -19,6 +20,9 @@ public class Team {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    private boolean automaticFilling = true;
 
     @OneToOne
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -61,7 +65,16 @@ public class Team {
     }
 
     public List<Long> getBlacklistIds() { return blacklistIds; }
+
     public void addBlacklistId(Long userId) { blacklistIds.add(userId); }
+
+    public boolean hasAutomaticFilling() {
+        return automaticFilling;
+    }
+
+    public void setAutomaticFilling(boolean automaticFilling) {
+        this.automaticFilling = automaticFilling;
+    }
 
     /**
      * Replaces the contractor for a specific role in the team.
@@ -71,8 +84,9 @@ public class Team {
     public void replaceRoleContractor(Role existingRole, Contractor newContractor) {
         int index = roles.indexOf(existingRole);
         if (index != -1) {
-            Role updatedRole = new Role(newContractor, existingRole.getSkill(), existingRole.getStatus());
-            roles.set(index, updatedRole);
+            existingRole.setContractor(newContractor);
+            existingRole.setStatus(RoleStatus.WAITING);
+            roles.set(index, existingRole);
         }
     }
 }

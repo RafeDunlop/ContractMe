@@ -66,12 +66,16 @@ public class TaskCalendarInteractionsStepsE2e {
 
     @When("I double click on the task in the calendar")
     public void i_double_click_on_the_task_in_the_calendar() {
+        RunPlaywrightTests.page.locator("#calendar-tab-item").click();
+
         RunPlaywrightTests.page.locator("[data-task-id='" + renovationTask.getId() + "']").dblclick();
     }
 
 
     @When("I double click an empty space on a day")
     public void i_double_click_an_empty_space_on_a_day() {
+        RunPlaywrightTests.page.locator("#calendar-tab-item").click();
+
         clickedDate = (today.getDayOfMonth() == today.lengthOfMonth())
                 ? today.minusDays(1)
                 : today.plusDays(1);
@@ -125,6 +129,8 @@ public class TaskCalendarInteractionsStepsE2e {
 
     @And("I double click on day {int} to go to the {string} form")
     public void iClickOnDayDayOfMonthToGoToTheTaskFormForm(int dayOfMonth, String formName) {
+        RunPlaywrightTests.page.locator("#calendar-tab-item").click();
+
         LocalDate dayToClick = today.withDayOfMonth(dayOfMonth);
         switch (formName) {
             case "Create Task" -> RunPlaywrightTests.page.locator(

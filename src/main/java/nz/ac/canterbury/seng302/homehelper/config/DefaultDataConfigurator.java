@@ -64,7 +64,7 @@ public class DefaultDataConfigurator {
 
     private RenovationRecord default2Renovation1;
 
-    private static final int numGenericTasksToAdd = 101;
+    private static final int numGenericTasksToAdd = 151;
 
     private static final List<String> defaultJERooms = List.of("131", "133", "Fabian's office");
 
@@ -139,8 +139,8 @@ public class DefaultDataConfigurator {
         address.setRegion("");
         address.setCountry("");
         address.setPostcode("");
-        address.setLat(0);
-        address.setLon(0);
+        address.setLat(-43.522345);
+        address.setLon(172.580907);
         Contractor defaultContractor1 = contractorService.registerContractor(user, address);
         code = verificationCodeService.issueVerificationCode(GenerationStrategy.SIGNUP, defaultContractor1, Locale.ENGLISH);
         verificationCodeService.consumeSignupCode(code);
@@ -234,7 +234,7 @@ public class DefaultDataConfigurator {
         }
 
         RenovationRecord distantLocation1 = new RenovationRecord(default1, "Faraway place", "Escape from Jack Erskine", defaultJERooms);
-        Location farawayLocation = new Location("7 Peni Lane", "", "", "", "", -43.92163730909038D, 176.52615666195436D);
+        Location farawayLocation = new Location("7 Peni Lane", "", "", "", "", -43.92163730909038D, -176.52615666195436D);
         distantLocation1.setLocation(farawayLocation);
         distantLocation1.setPublicity(true);
         renovationRecordService.addRenovationRecord(distantLocation1);
@@ -263,7 +263,7 @@ public class DefaultDataConfigurator {
     private void setupDefaultPublicRenovationsWithLocationsSecondUser() {
         for (int i=1; i < 21; i++){
             RenovationRecord newRecord = new RenovationRecord(default2, "Boring public renovation "+ i, "Boring description " + i,  defaultJERooms);
-            Location location = new Location ("11" + 10*i + " Memorial Ave", "", "", "Christchurch", "",  -43.51807 - i * 0.00044, 172.58924 - i*0.00075 );
+            Location location = new Location ("11" + 10*i + " Memorial Ave", "", "", "Christchurch", "",  -43.51807 + i * 0.00044, 172.58924 - i*0.00075 );
             newRecord.setLocation(location);
             newRecord.setPublicity(true);
             renovationRecordService.addRenovationRecord(newRecord);
@@ -387,9 +387,11 @@ public class DefaultDataConfigurator {
 
     private void setupDefaultTeamData() {
         Contractor defaulContractor = contractorRepository.findByEmailIgnoreCase(default2.getEmail()).orElseThrow();
+        Contractor acceptedContractor = contractorRepository.findByEmailIgnoreCase("seng302.team200.contractor1@gmail.com").orElseThrow();
 
         Team team = new Team(default1Renovation1);
         team.addRole(new Role(defaulContractor, Skill.CARPENTRY, RoleStatus.UNFILLED));
+        team.addRole(new Role(acceptedContractor, Skill.ANTIQUE_RESTORATION, RoleStatus.ACCEPTED));
         team = teamsRepository.save(team);
         renovationRecordRepository.save(default1Renovation1);
         logger.info("creating default team with id {}", team.getId());

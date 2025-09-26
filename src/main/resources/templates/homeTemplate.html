@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
     <head>
+        <th:block th:replace="~{fragments/faviconHeader.html :: faviconHeader}"/>
         <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
         <base th:href="@{/}"/>
-        <title>Contractme Home</title>
+        <title>ContractMe Home</title>
         <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
     </head>
     <body>
         <div class="container">
-            <div id="home-title" class="jumbotron text-center m-5 p-5">
-                <h1 class="display-4">Welcome to Contractme</h1>
+            <div id="home-title" class="jumbotron text-center m-5">
+                <img th:src="@{/images/icons/seng302_logo_home.svg}" alt="logo" class="mx-auto" height="300">
+                <h1 class="display-4">Welcome to ContractMe</h1>
+            </div>
+            <div class="container-sm">
+                <p class="text-center lead">ContractMe is a free
+                    application that joins home owners, renovators or property managers with contractors possessing a
+                    huge variety of skills. We created ContractMe to make it easier to get work done on a property
+                    without the resources of a big company, and to support tradies owning their own small businesses.</p>
             </div>
             <div class="d-flex justify-content-center">
-
-                <a id="register-button" th:href="@{register}" class="btn btn-primary m-3 h-5">Register</a>
-                <a id="login-button" th:href="@{login}" class="btn btn-outline-secondary m-3 h-5">Sign in</a>
+                <a id="register-button" th:href="@{register}" class="btn btn-primary m-3 btn-lg">Register</a>
+                <a id="login-button" th:href="@{login}" class="btn btn-outline-secondary m-3 btn-lg">Sign in</a>
             </div>
         </div>
     </body>

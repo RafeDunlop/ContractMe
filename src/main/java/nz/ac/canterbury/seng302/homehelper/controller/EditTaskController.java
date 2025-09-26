@@ -1,4 +1,5 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
+
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
@@ -16,7 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Controller for the edit task page
@@ -30,6 +33,7 @@ public class EditTaskController {
     private final RenovationRecordService renovationRecordService;
     private final RenovationTaskRepository renovationTaskRepository;
     private final LoginService loginService;
+    private final TeamsService teamsService;
 
     /**
      * Constructs an {@code EditTaskController} with the specified services and repository.
@@ -44,12 +48,13 @@ public class EditTaskController {
     public EditTaskController(RenovationTaskService renovationTaskService, RenovationRecordService renovationRecordService,
                               EditTaskService editTaskService,
                               RenovationTaskRepository renovationTaskRepository,
-                              LoginService loginService) {
+                              LoginService loginService, TeamsService teamsService) {
         this.renovationTaskService = renovationTaskService;
         this.renovationRecordService = renovationRecordService;
         this.editTaskService = editTaskService;
         this.renovationTaskRepository = renovationTaskRepository;
         this.loginService = loginService;
+        this.teamsService = teamsService;
     }
 
     /**
@@ -137,9 +142,11 @@ public class EditTaskController {
 
         try {
             editTaskService.updateTask(renovationTaskDTO,renovationTask);
-            return (dateToReturnTo.isEmpty()) ?
-                    String.format("redirect:/renovations/view?id=%s", renovationId) :
-                    String.format("redirect:/renovations/view?id=%s&dateEdited=%s#cellEdited", renovationId, dateToReturnTo);
+            if (dateToReturnTo.isEmpty()) {
+                return String.format("redirect:/renovations/view?id=%s&tabBarFocus=tasks", renovationId);
+            }
+            return String.format("redirect:/renovations/view?id=%s&dateEdited=%s#cellEdited&tabBarFocus=calendar", renovationId, dateToReturnTo);
+
         } catch (IllegalArgumentException e) {
             logger.warn("Form submission error {}", e.getMessage());
 
@@ -187,7 +194,9 @@ public class EditTaskController {
 
         RenovationTask renovationTask = renovationTaskService.getTaskById(id);
         User user = loginService.getUserByEmail();
-        if (!renovationTask.getRenovationRecord().getUser().equals(user)) {
+        boolean canView = teamsService.checkViewRenovationAccess(renovationTask.getRenovationRecord(), user);
+        boolean isAssigned = teamsService.isContractorAssigned(renovationTask.getRenovationRecord(), user);
+        if (!renovationTask.getRenovationRecord().getUser().equals(user) && (!canView || !isAssigned)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Action not allowed.");
         }
 

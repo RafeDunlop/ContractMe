@@ -22,7 +22,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -144,9 +143,11 @@ public class CreateTaskController {
         }
 
         renovationTaskService.addRenovationTask(renovationTaskDTO, renovationRecord);
-        return (dateToReturnTo.isEmpty()) ?
-                String.format("redirect:/renovations/view?id=%s", renovationId) :
-                String.format("redirect:/renovations/view?id=%s&dateEdited=%s#cellEdited", renovationId, dateToReturnTo);
+
+        if (dateToReturnTo.isEmpty()) {
+            return String.format("redirect:/renovations/view?id=%s&tabBarFocus=tasks", renovationId);
+        }
+        return String.format("redirect:/renovations/view?id=%s&dateEdited=%s#cellEdited&tabBarFocus=calendar", renovationId, dateToReturnTo);
     }
 
 }
