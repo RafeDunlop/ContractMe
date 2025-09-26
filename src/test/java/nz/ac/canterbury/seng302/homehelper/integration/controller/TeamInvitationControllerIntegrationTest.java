@@ -5,6 +5,7 @@ import nz.ac.canterbury.seng302.homehelper.entity.users.*;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationRecordRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.TeamsRepository;
 import nz.ac.canterbury.seng302.homehelper.repository.userRepositories.UserRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +17,17 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Set;
+
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
-@WithMockUser(username = "jane@doe.nz")
+@WithMockUser(username = "Steve@doe.nz")
 @Transactional
 public class TeamInvitationControllerIntegrationTest {
 
@@ -53,6 +57,7 @@ public class TeamInvitationControllerIntegrationTest {
         renovationRecord = renovationRecordRepository.save(renovationRecord);
 
         contractor = new Contractor("Steve", "Jobs", "Steve@doe.nz", "password123!");
+        contractor.setSkills(Set.of(Skill.ACOUSTIC_INSULATION));
         contractor = userRepository.save(contractor);
         contractor.grantAuthority("ROLE_USER");
 
@@ -61,7 +66,6 @@ public class TeamInvitationControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "Steve@doe.nz")
     void viewInvitation_contractorOnTeam_alreadyAccepted_returns404() throws Exception {
         team.addRole(new Role(contractor, Skill.ELECTRICAL,  RoleStatus.ACCEPTED));
         team = teamsRepository.save(team);
@@ -73,7 +77,6 @@ public class TeamInvitationControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "Steve@doe.nz")
     void viewInvitation_contractorNotOnTeam_returns404() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/renovations/team/invitations/" + team.getId())
                         .param("id", Long.toString(renovationRecord.getId())))
@@ -81,7 +84,6 @@ public class TeamInvitationControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "Steve@doe.nz")
     void viewInvitation_teamNotFound_returns404() throws Exception {
         long nonexistentId = 999L;
 
@@ -91,42 +93,38 @@ public class TeamInvitationControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "Steve@doe.nz")
     void acceptInvitation_alreadyAccepted_returns404() throws Exception {
         team.addRole(new Role(contractor, Skill.ELECTRICAL,  RoleStatus.ACCEPTED));
         team = teamsRepository.save(team);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/accept")
+        mockMvc.perform(post("/renovations/team/invitations/" + team.getId() + "/accept")
                         .with(csrf()))
                 .andExpect(status().isNotFound())
                 .andExpect(status().reason("Unable to accept invitation, link is no longer valid."));
     }
 
     @Test
-    @WithMockUser(username = "Steve@doe.nz")
     void declineInvitation_alreadyAccepted_returns404n() throws Exception {
         team.addRole(new Role(contractor, Skill.ELECTRICAL,  RoleStatus.ACCEPTED));
         team = teamsRepository.save(team);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/decline")
+        mockMvc.perform(post("/renovations/team/invitations/" + team.getId() + "/decline")
                         .with(csrf()))
                 .andExpect(status().isNotFound())
                 .andExpect(status().reason("Unable to decline invitation, link is no longer valid."));
     }
 
     @Test
-    @WithMockUser(username = "Steve@doe.nz")
     void acceptInvitation_notApartOfTeam_returnNotFound() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/accept")
+        mockMvc.perform(post("/renovations/team/invitations/" + team.getId() + "/accept")
                         .with(csrf()))
                 .andExpect(status().isNotFound())
                 .andExpect(status().reason("Unable to accept invitation, link is no longer valid."));
     }
 
     @Test
-    @WithMockUser(username = "Steve@doe.nz")
     void declineInvitation_notApartOfTeam_returnNotFound() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/renovations/team/invitations/" + team.getId() + "/decline")
+        mockMvc.perform(post("/renovations/team/invitations/" + team.getId() + "/decline")
                         .with(csrf()))
                 .andExpect(status().isNotFound())
                 .andExpect(status().reason("Unable to decline invitation, link is no longer valid."));
@@ -136,21 +134,63 @@ public class TeamInvitationControllerIntegrationTest {
     @Test
     @WithMockUser(username = "bob.doe@doe.nz")
     void viewInvitation_validTeam_returnsInfo() throws Exception {
-        Team team = teamsRepository.findByRenovationRecord(renovationRecord);
-        Role role = new Role(Skill.CARPENTRY);
-        Contractor contractor = new Contractor("Bob", "Doe", "bob.doe@doe.nz", "password");
-        contractor = userRepository.save(contractor);
-        role.setContractor(contractor);
-        team.addRole(role);
-        team = teamsRepository.save(team);
-        mockMvc.perform(get("/renovations/team/invitations/" + team.getId()))
+        Team team1 = teamsRepository.findByRenovationRecord(renovationRecord);
+        Role role1 = new Role(Skill.CARPENTRY);
+        Contractor contractor1 = new Contractor("Bob", "Doe", "bob.doe@doe.nz", "password");
+        contractor1 = userRepository.save(contractor1);
+        role1.setContractor(contractor1);
+        team1.addRole(role1);
+        team1 = teamsRepository.save(team1);
+        mockMvc.perform(get("/renovations/team/invitations/" + team1.getId()))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("skill", "Carpentry"))
                 .andExpect(model().attribute("renovationName", "test renovation"))
                 .andExpect(model().attribute("ownerName", "Jane Doe"))
                 .andExpect(model().attribute("profilePicture", "default/default.jpg"))
-                .andExpect(model().attribute("teamId", team.getId()))
+                .andExpect(model().attribute("teamId", team1.getId()))
                 .andExpect(model().attribute("renovationId", renovationRecord.getId()))
                 .andExpect(view().name("joinTeamInbox"));
+    }
+
+    @Test
+    @WithMockUser("jane@doe.nz")
+    void inviteContractor_teamOwner() throws Exception {
+        Role role = new Role(Skill.ACOUSTIC_INSULATION);
+        team.addRole(role);
+        team = teamsRepository.save(team);
+
+        Long teamId = team.getId();
+        Long contractorId = contractor.getId();
+        Skill skill = role.getSkill();
+
+        mockMvc.perform(post("/renovations/team/invitations/invite")
+                        .param("teamId", teamId.toString())
+                        .param("contractorId", contractorId.toString())
+                        .param("skill", skill.toString())
+                        .with(csrf()))
+                .andExpect(status().isOk());
+
+        Team team = teamsRepository.findByRenovationRecord(renovationRecord);
+        List<Long> roleIds = team.getRoles().stream().map(Role::getContractorId).toList();
+
+        Assertions.assertTrue(roleIds.contains(contractorId));
+    }
+
+    @Test
+    void inviteContractor_userNotTeamOwner_returnNotFound() throws Exception {
+        Role role = new Role(Skill.ACOUSTIC_INSULATION);
+        team.addRole(role);
+        team = teamsRepository.save(team);
+
+        Long teamId = team.getId();
+        Long contractorId = contractor.getId();
+        Skill skill = role.getSkill();
+
+        mockMvc.perform(post("/renovations/team/invitations/invite")
+                        .param("teamId", teamId.toString())
+                        .param("contractorId", contractorId.toString())
+                        .param("skill", skill.toString())
+                        .with(csrf()))
+                .andExpect(status().isNotFound());
     }
 }

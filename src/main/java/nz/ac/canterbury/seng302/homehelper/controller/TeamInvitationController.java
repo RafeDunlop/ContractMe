@@ -154,6 +154,12 @@ public class TeamInvitationController {
         return "redirect:/view-requests";
     }
 
+    /**
+     * Manually invite a contractor from a map.
+     * @param teamId The id of the team
+     * @param contractorId The id of the contractor
+     * @param skill The skill needed for the role
+     */
     @PostMapping("/invite")
     @ResponseBody
     public void inviteContractor(@RequestParam long teamId, @RequestParam long contractorId, @RequestParam Skill skill) {
