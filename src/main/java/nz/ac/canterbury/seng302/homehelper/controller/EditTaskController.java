@@ -3,8 +3,6 @@ package nz.ac.canterbury.seng302.homehelper.controller;
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
-import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
-import nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.*;
@@ -197,13 +195,7 @@ public class EditTaskController {
         RenovationTask renovationTask = renovationTaskService.getTaskById(id);
         User user = loginService.getUserByEmail();
         boolean canView = teamsService.checkViewRenovationAccess(renovationTask.getRenovationRecord(), user);
-        boolean isAssigned;
-        try {
-            Role role = teamsService.getContractorRole(user, teamsService.getTeamFromRenovation(renovationTask.getRenovationRecord()));
-            isAssigned = role.getStatus().equals(RoleStatus.ACCEPTED);
-        } catch (ResponseStatusException e) {
-            isAssigned = false;
-        }
+        boolean isAssigned = teamsService.isContractorAssigned(renovationTask.getRenovationRecord(), user);
         if (!renovationTask.getRenovationRecord().getUser().equals(user) && (!canView || !isAssigned)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Action not allowed.");
         }

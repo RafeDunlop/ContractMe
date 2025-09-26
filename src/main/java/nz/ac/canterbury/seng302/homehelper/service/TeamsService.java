@@ -177,6 +177,24 @@ public class TeamsService {
     }
 
     /**
+     * Checks if the contractor has accepted the invitation for the team in the given renovation record. Used for access
+     * control when changing task states.
+     * @param renovationRecord the renovation record
+     * @param user the user
+     * @return true if the contractor is assigned, false otherwise
+     */
+    public boolean isContractorAssigned(RenovationRecord renovationRecord, User user) {
+        boolean isAssigned;
+        try {
+            Role role = getContractorRole(user, getTeamFromRenovation(renovationRecord));
+            isAssigned = role.getStatus().equals(RoleStatus.ACCEPTED);
+        } catch (ResponseStatusException e) {
+            isAssigned = false;
+        }
+        return isAssigned;
+    }
+
+    /**
      * Deletes the specified {@link Team}
      * @param team The {@link Team} to delete
      */
