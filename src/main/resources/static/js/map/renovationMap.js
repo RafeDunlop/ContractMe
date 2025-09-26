@@ -1,3 +1,5 @@
+import { buildRenovationTooltip, buildContractorTooltip } from "./mapTooltips.js";
+
 /**
  * Checks whether a given latitude and longitude coordinate already exists as a marker.
  *
@@ -63,10 +65,6 @@ const renovationMarker = L.marker([lat, lon], {
     zIndexOffset: 1000
 }).addTo(map);
 
-renovationMarker.on('mouseover', function () {
-    this.bringToFront();
-});
-
 const teamId = document.getElementById("teamId").value;
 if (teamId !== "") {
     const contractorResponse = await fetch(`map/contractors?id=` + teamId.toString());
@@ -89,10 +87,56 @@ if (teamId !== "") {
             icon: contractorIcon
         }).addTo(map);
 
-        contractorMarker.on('mouseover', function () {
-            this.bringToFront();
+        contractorMarker.bindPopup(buildContractorTooltip(contractor), {
+            autoPan: true,
+            autoClose: true,
+            closeButton: false,
+            keepInView: true,
+            maxWidth: 320
+        });
+
+        contractorMarker.on('click', (e) => {
+            L.DomEvent.stop(e);
+            contractorMarker.openPopup();
         });
     })
+}
+
+/**
+ * Adds a single renovation tool tip to the map.
+ * Uses the renovation name and address from the page DOM
+ * Attaches a Bootstrap-styled popup card.
+ */
+function addRenovationTooltip() {
+    const nameElement = document.querySelector("#renovation-name-header h1");
+    const addressData = document.getElementById("renovation-address");
+
+    const renovation = {
+        name: nameElement?.textContent?.trim() ?? "",
+        location: {
+            address: addressData?.dataset.address,
+            suburb: addressData?.dataset.suburb,
+            city: addressData?.dataset.city,
+            postcode: addressData?.dataset.postcode
+        }
+    };
+
+
+    renovationMarker.bindPopup(
+        buildRenovationTooltip(renovation, false),
+        {
+            autoPan: true,
+            autoClose: true,
+            closeButton: false,
+            keepInView: true,
+            maxWidth: 320
+        }
+    );
+
+    renovationMarker.on('click', (e) => {
+        L.DomEvent.stop(e);
+        renovationMarker.openPopup();
+    });
 }
 
 document.getElementById("view-location-tab-item").addEventListener("click", () => {
@@ -106,3 +150,5 @@ document.getElementById("view-location-tab-item").addEventListener("click", () =
         }
     }, 100);
 });
+
+addRenovationTooltip()
