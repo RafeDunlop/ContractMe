@@ -34,9 +34,6 @@
                     <div class="skill-card-container card container border-black border-5 align-items-center d-flex flex-column position-relative"
                          style="padding-top: 2vh; padding-bottom: 4vh; max-width: 14vw;max-height:500px; margin: 5vh 5% 4vh;">
 
-                        <!-- Delete button -->
-                        <button th:if="${isOwner}" type="button" class="delete-skill-btn btn btn-outline-danger custom-light-border ms-3">❌</button>
-
 
                         <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 4vh;"></h5>
 

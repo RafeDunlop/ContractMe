@@ -134,7 +134,7 @@ public class TeamServiceTest {
         contractor2.addSkill(Skill.ELECTRICAL);
         when(contractor2.getId()).thenReturn(2L);
 
-        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("PLUMBING"), anyDouble(), isNull()))
+        when(contractorRepository.findNearestWithinDistance(anyDouble(), anyDouble(), eq("PLUMBING"), anyDouble()))
                 .thenReturn(contractor1);
         when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("ELECTRICAL"), anyDouble(), argThat(set -> set.contains(1L))))
                 .thenReturn(contractor2);
@@ -168,7 +168,7 @@ public class TeamServiceTest {
         contractor.addSkill(Skill.PLUMBING);
         when(contractor.getId()).thenReturn(1L);
 
-        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("PLUMBING"), eq(200.0), isNull()))
+        when(contractorRepository.findNearestWithinDistance(anyDouble(), anyDouble(), eq("PLUMBING"), eq(200.0)))
                 .thenReturn(contractor);
 
         String result = teamsService.assignContractorsToTeam(team, location);
@@ -184,7 +184,7 @@ public class TeamServiceTest {
         team.addRole(role);
         Location location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", 43.53, 172.63);
 
-        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("PLUMBING"), eq(200.0), isNull()))
+        when(contractorRepository.findNearestWithinDistance(anyDouble(), anyDouble(), eq("PLUMBING"), eq(200.0)))
                 .thenReturn(null);
 
         String result = teamsService.assignContractorsToTeam(team, location);
@@ -211,7 +211,7 @@ public class TeamServiceTest {
         contractor2.addSkill(Skill.PLUMBING);
         when(contractor2.getId()).thenReturn(2L);
 
-        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("PLUMBING"), anyDouble(), isNull()))
+        when(contractorRepository.findNearestWithinDistance(anyDouble(), anyDouble(), eq("PLUMBING"), anyDouble()))
                 .thenReturn(contractor1);
         when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("PLUMBING"), anyDouble(), argThat(set -> set != null && set.contains(1L))))
                 .thenReturn(contractor2);
@@ -230,7 +230,7 @@ public class TeamServiceTest {
         team.addRole(role);
         Location location = new Location("Test", "NZ", "Christchurch", "suburb", "Riccarton", 43.53, 172.63);
 
-        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), anyString(), anyDouble(), isNull()))
+        when(contractorRepository.findNearestWithinDistance(anyDouble(), anyDouble(), anyString(), anyDouble()))
                 .thenReturn(null);
 
         String result = teamsService.assignContractorsToTeam(team, location);
@@ -257,7 +257,7 @@ public class TeamServiceTest {
         Contractor contractor2 = spy(new Contractor("Bob", "Doe", "bob@doe.com", "encoded"));
         when(contractor2.getId()).thenReturn(2L);
 
-        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("PLUMBING"), anyDouble(), isNull()))
+        when(contractorRepository.findNearestWithinDistance(anyDouble(), anyDouble(), eq("PLUMBING"), anyDouble()))
                 .thenReturn(contractor);
         when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("ELECTRICAL"), anyDouble(), argThat(set -> set.contains(1L))))
                 .thenReturn(contractor2);
@@ -375,8 +375,8 @@ public class TeamServiceTest {
         Contractor newContractor = mock(Contractor.class);
         when(newContractor.getId()).thenReturn(2L);
 
-        when(contractorRepository.findNearestWithinDistanceExcluding(anyDouble(), anyDouble(), eq("ELECTRICAL"),
-                anyDouble(), isNull())).thenReturn(newContractor);
+        when(contractorRepository.findNearestWithinDistance(anyDouble(), anyDouble(), eq("ELECTRICAL"),
+                anyDouble())).thenReturn(newContractor);
         when(contractorRepository.findById(2L)).thenReturn(Optional.of(newContractor));
 
         when(owner.getFirstName()).thenReturn("Bob");
