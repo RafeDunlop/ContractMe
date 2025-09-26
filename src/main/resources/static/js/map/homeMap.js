@@ -7,7 +7,7 @@ const defaultZoom = 11;
 
 const togglePublicCheckbox = document.getElementById("include-public-renovations-checkbox");
 
-const map = L.map('map')
+const map = L.map('map',{worldCopyJump: true})
 const renovationIconGroup = L.featureGroup().addTo(map);
 
 const userRenovation = L.icon({
