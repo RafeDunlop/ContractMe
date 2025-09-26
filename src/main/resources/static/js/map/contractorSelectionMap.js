@@ -138,14 +138,12 @@ function showContractorDetails(contractor, skill) {
             skill: skill
         });
 
-        fetch("/renovations/team/invitations/invite?" + params.toString(), {
+        fetch("renovations/team/invitations/invite?" + params.toString(), {
             method: "POST",
             headers: {
                 'X-CSRF-TOKEN': csrf
             }
-        });
-
-        window.location.reload();
+        }).then(response => window.location.reload());
     });
 
     detailsModal.show();
