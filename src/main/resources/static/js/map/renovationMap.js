@@ -68,7 +68,7 @@ const renovationMarker = L.marker([lat, lon], {
 }).addTo(map);
 
 
-
+//Loads contractors and displays them on map
 const teamId = document.getElementById("teamId").value;
 if (teamId !== "") {
     const contractorResponse = await fetch(`map/contractors?id=` + teamId.toString());
