@@ -34,9 +34,6 @@
                     <div class="skill-card-container card container border-black border-5 align-items-center d-flex flex-column position-relative"
                          style="padding-top: 2vh; padding-bottom: 4vh; max-width: 14vw;max-height:500px; margin: 5vh 5% 4vh;">
 
-                        <!-- Delete button -->
-                        <button th:if="${isOwner}" type="button" class="delete-skill-btn btn btn-outline-danger custom-light-border ms-3">❌</button>
-
 
                         <h5 th:text="${role.getSkill().getDisplayName()}" style="padding-top: 4vh;"></h5>
 
@@ -65,10 +62,10 @@
                             </h5>
                             <div th:if="${role.getContractorId() == null}">
                                 <h5 th:if="${team.hasAutomaticFilling()}">No Contractor Found</h5>
-                                <button type="button" class="btn btn-primary"
+                                <button type="button" class="btn btn-primary invite-contractor"
                                         th:unless="${team.hasAutomaticFilling()}"
-                                        th:attr="data-skill=${role.getSkill()}"
-                                        th:onclick="|selectContractorToInvite(event)|">Invite Contractor
+                                        th:attr="data-skill=${role.getSkill()}">
+                                    Invite Contractor
                                 </button>
                             </div>
                         </div>
@@ -91,6 +88,7 @@
             <a th:href="@{/renovations/view(id=${team.getRenovationRecord().getId()})}" class="btn btn-outline-secondary ms-2">Back</a>
         </div>
     </div>
+
     <div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -101,19 +99,60 @@
           <div class="modal-body p-0">
             <div id="mapModalMap" style="height:60vh; width:100%"></div>
           </div>
-          <div class="modal-footer">
+          <div class="modal-footer d-block">
+              <button class="btn btn-primary">Confirm</button>
             <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button class="btn btn-primary">Confirm</button>
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="modal fade" id="contractorDetailsMapModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="width: 80%; margin: auto">
+                <div class="modal-header">
+                    <img id="contractor-profile-picture"
+                         src="icons/profile-icon.svg"
+                         alt="Contractor Profile Picture"
+                         class="rounded-circle img-fluid"
+                         style="max-width: 60px; max-height: 60px; object-fit: cover; margin-right: 10px">
+                    <h5 id="contractor-name"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row mb-2">
+                            <div class="col-4 fw-bold">Email:</div>
+                            <div class="col-8" id="contractor-email"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4 fw-bold">Phone:</div>
+                            <div class="col-8" id="contractor-phone"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4 fw-bold">Hourly Rate:</div>
+                            <div class="col-8" id="contractor-rate"></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4 fw-bold">Address:</div>
+                            <div class="col-8" id="contractor-address"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer d-block">
+                    <button class="btn btn-primary">Send Invitation</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 
 </body>
 
 <script type="text/javascript" th:src="@{/webjars/leaflet/dist/leaflet.js}"></script>
 <script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
-
 <script type="module" th:src="@{/js/confirmPrompt.js}"></script>
 <script type="module" th:src="@{/js/navbar.js}"></script>
 <script type="module" th:src="@{/js/map/contractorSelectionMap.js}"></script>
