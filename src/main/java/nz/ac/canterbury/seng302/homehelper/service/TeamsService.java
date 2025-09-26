@@ -375,13 +375,22 @@ public class TeamsService {
      * @return the nearest contractor that can fill the role
      */
     private Contractor findNearestContractor(Role role, Location location, Set<Long> blacklist) {
-        return contractorRepository.findNearestWithinDistanceExcluding(
-                location.getLatitude(),
-                location.getLongitude(),
-                role.getSkill().toString(),
-                200,
-                blacklist.isEmpty() ? null : blacklist
-        );
+        if (blacklist.isEmpty()) {
+            return contractorRepository.findNearestWithinDistance(
+                    location.getLatitude(),
+                    location.getLongitude(),
+                    role.getSkill().toString(),
+                    CONTRACTOR_MAX_DISTANCE
+            );
+        } else {
+            return contractorRepository.findNearestWithinDistanceExcluding(
+                    location.getLatitude(),
+                    location.getLongitude(),
+                    role.getSkill().toString(),
+                    CONTRACTOR_MAX_DISTANCE,
+                    blacklist
+            );
+        }
     }
 
     /**

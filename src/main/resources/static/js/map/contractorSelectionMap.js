@@ -14,6 +14,13 @@ if (locationResponse.ok) {
     }
 }
 
+document.addEventListener('click', (e) => {
+    if (e.target.matches('.invite-contractor')) {
+        selectContractorToInvite(e);
+    }
+});
+
+
 /**
  * Shows the "Select Contractor" modal and initializes or updates the Leaflet map inside it.
  *
@@ -23,7 +30,7 @@ if (locationResponse.ok) {
  *
  * @param {Event} event - Click event from the Invite Contractor button.
  */
-export function selectContractorToInvite(event) {
+function selectContractorToInvite(event) {
     const modalEl = document.getElementById('mapModal');
     const modal = new bootstrap.Modal(modalEl);
     const skill = event.target.dataset.skill;
@@ -67,20 +74,60 @@ async function fetchEligibleContractors(skill) {
  * @param map the leaflet map object
  */
 function populateContractors(contractors, map) {
-    if(contractors) {
+    if (contractors) {
         contractors.forEach(contractor => {
             const contractorIcon = L.divIcon({
                 className: "contractor-icon",
-                html: `<img src="profile_pictures/${contractor.profilePicture}" class="rounded-circle" width="32" height="32" alt="Contractor profile picture for ${contractor.fullName}">`,
-                iconSize: [32, 32] });
-            L.marker([contractor.location.latitude, contractor.location.longitude],
-                {icon: contractorIcon}
-            ).addTo(map);
-        })
+                html: `<img src="profile_pictures/${contractor.profilePicture}" 
+                           class="rounded-circle" width="32" height="32" 
+                           alt="Contractor profile picture for ${contractor.fullName}">`,
+                iconSize: [32, 32]
+            });
+
+            const marker = L.marker([contractor.location.latitude, contractor.location.longitude], {
+                icon: contractorIcon
+            }).addTo(map);
+
+            marker.on('click', (e) => {
+                L.DomEvent.stop(e);
+                showContractorDetails(contractor);
+            });
+        });
     }
 }
 
+/**
+ * Opens the contractor details modal with contractor data.
+ * @param {Object} contractor - The contractor object
+ */
+function showContractorDetails(contractor) {
+    document.getElementById("contractor-name").innerText = contractor.fullName;
+    document.getElementById("contractor-email").innerText = contractor.email;
+    document.getElementById("contractor-rate").innerText = `$${contractor.hourlyRate} / hr`;
+    document.getElementById("contractor-phone").innerText = contractor.phoneNumberFormatted;
+
+    // format location
+    const location = contractor.location;
+    if (location) {
+        const parts = [
+            location.address,
+            location.suburb,
+            location.city ? `${location.city} ${location.postcode || ""}`.trim() : null,
+            location.country
+        ].filter(Boolean);
+
+        document.getElementById("contractor-address").innerHTML = parts.join(", ");
+    }
+
+    const profileImg = document.getElementById("contractor-profile-picture");
+    profileImg.src = contractor.profilePicture
+        ? `profile_pictures/${contractor.profilePicture}`
+        : "icons/profile-icon.svg";
+    profileImg.alt = `Profile picture of ${contractor.fullName}`;
+
+    const modalEl = document.getElementById('contractorDetailsMapModal');
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+}
+
 window.selectContractorToInvite = selectContractorToInvite;
-
-
-
