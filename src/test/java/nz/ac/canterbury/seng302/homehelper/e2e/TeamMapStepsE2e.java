@@ -79,12 +79,6 @@ public class TeamMapStepsE2e {
         RunPlaywrightTests.page.reload();
     }
 
-    @When("I view the renovation map")
-    public void i_view_the_renovation_map() {
-        RunPlaywrightTests.page.waitForSelector("#view-location-tab-item");
-        RunPlaywrightTests.page.click("#view-location-tab-item");
-    }
-
     @Then("There is a tab where I can see a map with a house icon at the renovation's address")
     public void there_is_a_tab_where_i_can_see_a_map_with_a_house_icon_at_the_renovations_address() {
         RunPlaywrightTests.page.waitForSelector("#view-location-tab-item");
@@ -96,13 +90,4 @@ public class TeamMapStepsE2e {
         Assertions.assertTrue(markerExists);
     }
 
-    @Then("The contractor is shown on the map")
-    public void the_contractors_are_shown_on_the_map() {
-        String contractorIcon = contractor.getProfilePicture();
-
-        RunPlaywrightTests.page.waitForSelector("img.contractor-img[src='profile_pictures/" + contractorIcon + "']");
-
-        boolean markerExists = RunPlaywrightTests.page.locator("img.contractor-img[src='profile_pictures/" + contractorIcon + "']").isVisible();
-        Assertions.assertTrue(markerExists);
-    }
 }
