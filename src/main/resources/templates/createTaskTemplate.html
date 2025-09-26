@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <th:block th:replace="~{fragments/faviconHeader.html :: faviconHeader}"/>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <base th:href="@{/}"/>
     <title>Create New Task</title>
     <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
-
-
     <link rel="stylesheet" th:href="@{/css/styles.css}" />
     <script type="module" th:src="@{/js/createTask.js}"></script>
 </head>
