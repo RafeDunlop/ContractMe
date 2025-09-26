@@ -9,17 +9,16 @@
 export async function fetchRenovationMappings(map, showPrivateOnly) {
     let resultMappings;
     const bounds = getCoordinateRectangle(map);
-    const centre = map.getCenter();
-    if (bounds.minLon >= 0 && bounds.maxLon <= 0) {
+    if (getPhase(bounds.minLon) !== getPhase(bounds.maxLon)) {
         const westBounds = {
             minLat: bounds.minLat,
             minLon: bounds.minLon,
             maxLat: bounds.maxLat,
-            maxLon: 180
+            maxLon: 180 + 360 * getPhase(bounds.minLon)
         }
         const eastBounds = {
             minLat: bounds.minLat,
-            minLon: -180,
+            minLon: -180 + 360 * getPhase(bounds.minLon),
             maxLat: bounds.maxLat,
             maxLon: bounds.maxLon
         }
@@ -31,23 +30,34 @@ export async function fetchRenovationMappings(map, showPrivateOnly) {
     } else {
         resultMappings = await singleRequest(bounds, showPrivateOnly).then(response => response.json())
     }
-    return addPhases(resultMappings, centre);
+    return addPhases(resultMappings, bounds);
 }
 
 /**
  * Sets the longitude phase of the specified mappings to that visible on the map itself, including duplication
  * for multiphase view (when the date lien is on screen)
  * @param mappings The mappings whose phase should be set
- * @param centre The coordinates of the centre of the visible screen; current phase is extracted from these
+ * @param bounds The coordinates of the visible screen; phase is extracted from these coordinates
  * @returns {*} The union of mappings in visible phases
  */
-function addPhases(mappings, centre) {
-    const phase = Math.floor(centre.lng / 360);
-    const leftCopy = shiftPhase(mappings, phase - 1);
-    const middleCopy = shiftPhase(mappings, phase);
-    const rightCopy = shiftPhase(mappings, phase + 1);
-    if (leftCopy) return leftCopy.concat(middleCopy).concat(rightCopy);
+function addPhases(mappings, bounds) {
+    const leftPhase = getPhase(bounds.minLon)
+    const rightPhase = getPhase(bounds.maxLon)
+    const leftCopy = shiftPhase(mappings, leftPhase);
+    if (leftPhase !== rightPhase) {
+        const rightCopy = shiftPhase(mappings, rightPhase);
+        return leftCopy.concat(rightCopy)
+    }
     return leftCopy;
+}
+
+/**
+ * Given a longitude value, gets the phase of that value
+ * @param longitude The longitude whose phase is gotten
+ */
+function getPhase(longitude) {
+    const adjusted = longitude + 179.99
+    return Math.floor(adjusted / 360)
 }
 
 /**
@@ -60,7 +70,7 @@ function shiftPhase(mappings, phaseShift) {
     const shifted = JSON.parse(JSON.stringify(mappings));
     if (shifted) shifted.forEach(toShift =>
         toShift.location.longitude = toShift.location.longitude + phaseShift * 360
-    );
+    )
     return shifted;
 }
 
@@ -75,9 +85,9 @@ function getCoordinateRectangle(map) {
     const northeast = bounds.getNorthEast();
     return {
         minLat: southwest.lat,
-        minLon: computeLongitude(southwest.lng),
+        minLon: southwest.lng,
         maxLat: northeast.lat,
-        maxLon: computeLongitude(northeast.lng)
+        maxLon: northeast.lng
     }
 }
 
@@ -96,33 +106,30 @@ export function debounce(func, wait) {
 }
 
 /**
- * Returns a single asynchronous fetch request for renovation data with teh corresponding parameters
+ * Returns a single asynchronous fetch request for renovation data with the corresponding parameters
  * @param bounds The coordinates within which to fetch renovations
  * @param showPrivateOnly Whether to disclude other users' public renovations
  * @returns {Promise<Response>} The fetch request whose response should be awaited
  */
 function singleRequest(bounds, showPrivateOnly) {
+    console.log("lower", normalizePhase(bounds.minLon))
+    console.log("upper", normalizePhase(bounds.maxLon))
     const withPublic = !showPrivateOnly
     const params = new URLSearchParams();
     params.set("withPublic", withPublic.toString());
     params.set("minLat", bounds.minLat);
-    params.set("minLon", computeLongitude(bounds.minLon).toString());
+    params.set("minLon", normalizePhase(bounds.minLon));
     params.set("maxLat", bounds.maxLat);
-    params.set("maxLon", computeLongitude(bounds.maxLon).toString());
+    params.set("maxLon", normalizePhase(bounds.maxLon));
     return fetch(`map/renovations?${params}`)
 }
 
-
 /**
- * Computes a valid longitude value (ie between -180 and 180)
- * @param longitude the original longitude value
- * @returns {number}
+ * Normalizes a longitude value to -180 to 180 range
+ * @param lonToShift The longitude to be shifted
+ * @returns {*} The normalized longitude
  */
-export function computeLongitude(longitude) {
-    let updatedLong = parseFloat(longitude) % 360
-    if (updatedLong > 180) {
-        updatedLong -= 360
-    }
-
-    return updatedLong
+function normalizePhase(lonToShift) {
+    const phase = getPhase(lonToShift);
+    return lonToShift - 360 * phase
 }
