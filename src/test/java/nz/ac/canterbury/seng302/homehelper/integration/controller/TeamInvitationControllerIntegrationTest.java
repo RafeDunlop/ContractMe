@@ -170,8 +170,8 @@ public class TeamInvitationControllerIntegrationTest {
                         .with(csrf()))
                 .andExpect(status().isOk());
 
-        Team team = teamsRepository.findByRenovationRecord(renovationRecord);
-        List<Long> roleIds = team.getRoles().stream().map(Role::getContractorId).toList();
+        Team currentTeam = teamsRepository.findByRenovationRecord(renovationRecord);
+        List<Long> roleIds = currentTeam.getRoles().stream().map(Role::getContractorId).toList();
 
         Assertions.assertTrue(roleIds.contains(contractorId));
     }

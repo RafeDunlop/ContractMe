@@ -107,8 +107,6 @@ public class TeamInvitationServiceTest {
         long contractorId = 2L;
         Skill skill = Skill.ELECTRICAL;
 
-        Team team = mock(Team.class);
-        Contractor contractor = mock(Contractor.class);
         Role role = mock(Role.class);
 
         when(teamsService.getTeamById(teamId)).thenReturn(team);
@@ -137,7 +135,6 @@ public class TeamInvitationServiceTest {
         long contractorId = 2L;
         Skill skill = Skill.ELECTRICAL;
 
-        Team team = mock(Team.class);
         Role role = mock(Role.class);
 
         when(teamsService.getTeamById(teamId)).thenReturn(team);
@@ -146,9 +143,7 @@ public class TeamInvitationServiceTest {
         when(role.getStatus()).thenReturn(RoleStatus.UNFILLED);
         when(contractorRepository.findById(contractorId)).thenReturn(java.util.Optional.empty());
 
-        assertThrows(ResponseStatusException.class, () -> {
-            teamInvitationService.inviteSpecificContractor(teamId, contractorId, skill);
-        });
+        assertThrows(ResponseStatusException.class, () -> teamInvitationService.inviteSpecificContractor(teamId, contractorId, skill));
     }
 
     @Test
@@ -157,8 +152,6 @@ public class TeamInvitationServiceTest {
         long contractorId = 2L;
         Skill skill = Skill.ELECTRICAL;
 
-        Team team = mock(Team.class);
-        Contractor contractor = mock(Contractor.class);
         Role role = mock(Role.class);
 
         when(teamsService.getTeamById(teamId)).thenReturn(team);
@@ -167,9 +160,7 @@ public class TeamInvitationServiceTest {
         when(role.getSkill()).thenReturn(Skill.PLUMBING);
         when(role.getStatus()).thenReturn(RoleStatus.UNFILLED);
 
-        assertThrows(ResponseStatusException.class, () -> {
-            teamInvitationService.inviteSpecificContractor(teamId, contractorId, skill);
-        });
+        assertThrows(ResponseStatusException.class, () -> teamInvitationService.inviteSpecificContractor(teamId, contractorId, skill));
     }
 
 }

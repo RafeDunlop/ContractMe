@@ -72,6 +72,7 @@ async function fetchEligibleContractors(skill) {
  * Display the contractors as markers on the map.
  * @param contractors a json object containing all the contractors to display
  * @param map the leaflet map object
+ * @param {string} skill - The skill of the role
  */
 function populateContractors(contractors, map, skill) {
     if (contractors) {
@@ -99,6 +100,7 @@ function populateContractors(contractors, map, skill) {
 /**
  * Opens the contractor details modal with contractor data.
  * @param {Object} contractor - The contractor object
+ * @param {string} skill - The skill of the role
  */
 function showContractorDetails(contractor, skill) {
     document.getElementById("contractor-name").innerText = contractor.fullName;
