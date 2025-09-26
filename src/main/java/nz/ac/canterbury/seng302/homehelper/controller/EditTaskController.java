@@ -1,7 +1,10 @@
 package nz.ac.canterbury.seng302.homehelper.controller;
+
 import nz.ac.canterbury.seng302.homehelper.dto.RenovationTaskDTO;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationRecord;
 import nz.ac.canterbury.seng302.homehelper.entity.RenovationTask;
+import nz.ac.canterbury.seng302.homehelper.entity.users.Role;
+import nz.ac.canterbury.seng302.homehelper.entity.users.RoleStatus;
 import nz.ac.canterbury.seng302.homehelper.entity.users.User;
 import nz.ac.canterbury.seng302.homehelper.repository.RenovationTaskRepository;
 import nz.ac.canterbury.seng302.homehelper.service.*;
@@ -16,7 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Controller for the edit task page
@@ -30,6 +35,7 @@ public class EditTaskController {
     private final RenovationRecordService renovationRecordService;
     private final RenovationTaskRepository renovationTaskRepository;
     private final LoginService loginService;
+    private final TeamsService teamsService;
 
     /**
      * Constructs an {@code EditTaskController} with the specified services and repository.
@@ -44,12 +50,13 @@ public class EditTaskController {
     public EditTaskController(RenovationTaskService renovationTaskService, RenovationRecordService renovationRecordService,
                               EditTaskService editTaskService,
                               RenovationTaskRepository renovationTaskRepository,
-                              LoginService loginService) {
+                              LoginService loginService, TeamsService teamsService) {
         this.renovationTaskService = renovationTaskService;
         this.renovationRecordService = renovationRecordService;
         this.editTaskService = editTaskService;
         this.renovationTaskRepository = renovationTaskRepository;
         this.loginService = loginService;
+        this.teamsService = teamsService;
     }
 
     /**
@@ -189,7 +196,15 @@ public class EditTaskController {
 
         RenovationTask renovationTask = renovationTaskService.getTaskById(id);
         User user = loginService.getUserByEmail();
-        if (!renovationTask.getRenovationRecord().getUser().equals(user)) {
+        boolean canView = teamsService.checkViewRenovationAccess(renovationTask.getRenovationRecord(), user);
+        boolean isAssigned;
+        try {
+            Role role = teamsService.getContractorRole(user, teamsService.getTeamFromRenovation(renovationTask.getRenovationRecord()));
+            isAssigned = role.getStatus().equals(RoleStatus.ACCEPTED);
+        } catch (ResponseStatusException e) {
+            isAssigned = false;
+        }
+        if (!renovationTask.getRenovationRecord().getUser().equals(user) && (!canView || !isAssigned)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Action not allowed.");
         }
 
