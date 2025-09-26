@@ -62,12 +62,12 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 const renovationMarker = L.marker([lat, lon], {
     icon: userRenovation,
-    zIndexOffset: 100,
-    riseOnHover: true,
-    riseOffset: 250
+    zIndexOffset: 100
 }).addTo(map);
 
-
+renovationMarker.on('mouseover', function () {
+    this.bringToFront();
+});
 
 const teamId = document.getElementById("teamId").value;
 if (teamId !== "") {
@@ -96,9 +96,7 @@ if (teamId !== "") {
             autoClose: true,
             closeButton: false,
             keepInView: true,
-            maxWidth: 320,
-            riseOnHover: true,
-            riseOffset: 250
+            maxWidth: 320
         });
 
         contractorMarker.on('click', (e) => {
@@ -106,6 +104,9 @@ if (teamId !== "") {
             contractorMarker.openPopup();
         });
 
+        contractorMarker.on('mouseover', function () {
+            this.bringToFront();
+        });
 
     })
 }
