@@ -41,7 +41,7 @@ const { latitude: lat, longitude: lon } = await renovationResponse.json();
 
 let markerPositions = [[lat, lon]];
 
-const map = L.map('renovation-map');
+const map = L.map('renovation-map',{worldCopyJump: true});
 
 document.getElementById("view-location-tab-item").addEventListener("click", () => {
     setTimeout(() => {
