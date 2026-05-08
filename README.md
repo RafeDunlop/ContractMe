@@ -5,8 +5,14 @@
 [![Reliability Rating](https://sonarqube.csse.canterbury.ac.nz/api/project_badges/measure?project=seng302-2025-team200&metric=reliability_rating&token=sqb_e5c224dbd13d4de93a0187f8d754ae5f34482591)](https://sonarqube.csse.canterbury.ac.nz/dashboard?id=seng302-2025-team200)
 [![Security Rating](https://sonarqube.csse.canterbury.ac.nz/api/project_badges/measure?project=seng302-2025-team200&metric=security_rating&token=sqb_e5c224dbd13d4de93a0187f8d754ae5f34482591)](https://sonarqube.csse.canterbury.ac.nz/dashboard?id=seng302-2025-team200)
 
+# ContractMe ![logo](src/main/resources/static/images/icons/seng302_logo.svg)
+
+This project is imported from University of Canterbury [eng-git](https://eng-git.canterbury.ac.nz/seng302-2025/team-200) This was completed as a full-year group project course, [SENG302](https://courseinfo.canterbury.ac.nz/GetCourseDetails.aspx?course=SENG302&occurrence=26W(C)&year=2026). in 2025. I tutored SENG302 in 2026.
+
+This application no longer has a deployed production environment. However, you can still deploy it locally following the instructions below (please note that you will need to set up environment variables for each injection in [application.properties](src/main/resources/application.properties) as specified below
+
 ## Description
-Welcome to Home Helper! Home Helper makes organising your renovations easy.
+Welcome to ContractMe! ContractMe makes organising your renovations easy.
 You will be able to create an account, create and manage your renovations,
 add tasks to keep track of what needs doing, and browse public renovations.
 
@@ -31,7 +37,7 @@ If required, contact a maintainer (see contributors below) to gain access
 to environment variables such as API keys, otherwise create your own API keys
 and an email account and create an `env.properties` file:
 
-```
+```.env
 # env.properties
 
 DB_PASSWORD=password
@@ -66,7 +72,7 @@ By default, the application will run on local port 8080 [http://localhost:8080](
 See our deployed production server [here](https://csse-seng302-team200.canterbury.ac.nz/prod/)
 or our deployed staging server [here](https://csse-seng302-team200.canterbury.ac.nz/test/).
 Note that the staging server is in development and should not be considered
-stable.
+stable. **NB. These are no longer deployed**
 
 Known issues are tracked [on GitLab](https://eng-git.canterbury.ac.nz/seng302-2025/team-200/-/issues).
 ## Default user accounts
@@ -140,9 +146,9 @@ The terms for the license under which this third party software has been used ca
 - Mason Ott
 
 ## License Notice
-The license for Home Helper can be found at [COPYING](./COPYING)
+The license for ContractMe can be found at [COPYING](./COPYING)
 
-Home Helper, a web application for managing renovations
+ContractMe, a web application for managing renovations
 Copyright (C) 2025 SENG302 Team 200
 
 This program is free software: you can redistribute it and/or modify
