@@ -5,10 +5,11 @@
 [![Reliability Rating](https://sonarqube.csse.canterbury.ac.nz/api/project_badges/measure?project=seng302-2025-team200&metric=reliability_rating&token=sqb_e5c224dbd13d4de93a0187f8d754ae5f34482591)](https://sonarqube.csse.canterbury.ac.nz/dashboard?id=seng302-2025-team200)
 [![Security Rating](https://sonarqube.csse.canterbury.ac.nz/api/project_badges/measure?project=seng302-2025-team200&metric=security_rating&token=sqb_e5c224dbd13d4de93a0187f8d754ae5f34482591)](https://sonarqube.csse.canterbury.ac.nz/dashboard?id=seng302-2025-team200)
 
-# ContractMe
-![logo](src/main/resources/static/images/icons/favicon-32x32.png)
+![logo-big](src/main/resources/static/images/icons/readme-logo/logo.svg)
 
-This project is imported from University of Canterbury [eng-git](https://eng-git.canterbury.ac.nz/seng302-2025/team-200) This was completed as a full-year group project course, [SENG302](https://courseinfo.canterbury.ac.nz/GetCourseDetails.aspx?course=SENG302&occurrence=26W(C)&year=2026). in 2025. I tutored SENG302 in 2026.
+# ![favicon](src/main/resources/static/images/icons/favicon-32x32.png) ContractMe
+
+This project is imported from University of Canterbury [eng-git](https://eng-git.canterbury.ac.nz/seng302-2025/team-200) It was completed in 2025 as part of a full-year group project course, [SENG302](https://courseinfo.canterbury.ac.nz/GetCourseDetails.aspx?course=SENG302&occurrence=26W(C)&year=2026) (which I tutored in 2026).
 
 This application no longer has a deployed production environment. However, you can still deploy it locally following the instructions below (please note that you will need to set up environment variables for each injection in [application.properties](src/main/resources/application.properties) as specified below
 
